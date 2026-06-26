@@ -85,4 +85,4 @@ Quando houver contexto suficiente para agir com segurança, prossiga.
 
 ## Regras
 
-**Acione uma skill sempre que houver pelo menos 1% de chance de ela ser útil para a tarefa ANTES de tentar resolver manualmente e ANTES de qualquer resposta ou outra ação.** Se uma skill não for adequada para uma situação, você pode ignorá-la, mas deve justificar a decisão.
+**Acione uma skill sempre que houver pelo menos 1% de chance de ela ser útil para a tarefa ANTES de tentar resolver manualmente e ANTES de qualquer resposta ou outra ação.** Se uma skill não for adequada para uma situação, você pode ignorá-la, mas deve justificar a decisão. Para a maioria dos casos, você poderá usar a skill `pelizzai-router` após entender o objetivo do usuário e o contexto da tarefa.
