@@ -72,7 +72,16 @@ description: Preferências globais de comunicação, engenharia e execução apl
 - Antes de concluir uma tarefa, valide concretamente o resultado com a melhor verificação disponível: testes, lint, typecheck, build, revisão de diff, execução local ou outro mecanismo compatível.
 - Não declare uma tarefa concluída sem informar validações executadas, limitações encontradas ou verificações que não puderam ser realizadas.
 
-## 8. Regras específicas de frontend
+## 8. Documentação
+
+- Mantenha o `README.md` da raiz do projeto ou workspace sempre consistente com o estado real do projeto: propósito, funcionalidades, instalação, configuração, uso, scripts e demais informações relevantes.
+- Ao alterar comportamento, dependências, configuração ou fluxos que o `README.md` descreve, atualize-o na mesma tarefa.
+- Nunca infle o `README.md` com conteúdo redundante, promocional, especulativo ou que não reflita o projeto.
+- Prefira reescrever o `README.md`, ou as seções afetadas, em vez de apenas acrescentar texto, para evitar duplicação, contradição e crescimento desnecessário.
+- Documente apenas o que existe e funciona; não descreva comportamento, comandos ou recursos inexistentes.
+- Aplique o mesmo critério às demais documentações relevantes do projeto quando forem afetadas pela mudança.
+
+## 9. Regras específicas de frontend
 
 - Preserve consistência com a arquitetura, design system, convenções de componentes e padrões de estado já adotados.
 - Quando houver build configurado, execute-o ao final de mudanças relevantes e corrija erros introduzidos pela alteração.
@@ -81,7 +90,7 @@ description: Preferências globais de comunicação, engenharia e execução apl
 - Em projetos com TailwindCSS, prefira classes utilitárias e evite CSS adicional sem necessidade concreta.
 - Evite manipulação manual de DOM, efeitos temporizados e estados implícitos quando houver alternativas idiomáticas no framework.
 
-## 9. Regras específicas de backend
+## 10. Regras específicas de backend
 
 - Valide entradas, tipos, contratos, autorização, tratamento de erro e efeitos colaterais.
 - Evite bloquear a thread ou o loop principal com operações de I/O, CPU ou integrações demoradas.
@@ -89,7 +98,7 @@ description: Preferências globais de comunicação, engenharia e execução apl
 - Garanta que operações críticas sejam idempotentes quando houver possibilidade de retry, duplicidade ou reprocessamento.
 - Atualize testes de rotas, serviços ou regras de negócio alteradas quando houver infraestrutura de testes disponível.
 
-## 10. Docker e infraestrutura
+## 11. Docker e infraestrutura
 
 - Use imagens enxutas, versões explícitas e builds reproduzíveis.
 - Prefira multi-stage builds quando fizer sentido.
@@ -98,7 +107,7 @@ description: Preferências globais de comunicação, engenharia e execução apl
 - Configure volumes, redes, permissões e usuários não-root conforme a necessidade do serviço.
 - Não introduza Docker, filas, cache, observabilidade ou infraestrutura adicional sem benefício proporcional à tarefa.
 
-## 11. Shell e portabilidade
+## 12. Shell e portabilidade
 
 - Blocos de shell nas skills são exemplos para POSIX/bash.
 - Em Windows/PowerShell, use equivalentes apropriados ou execute por Bash quando disponível, como Git Bash ou WSL.
