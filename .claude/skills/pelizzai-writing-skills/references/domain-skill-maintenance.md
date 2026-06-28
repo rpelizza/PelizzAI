@@ -52,14 +52,17 @@ Modelo **híbrido**: núcleo portável na skill + hook de reforço no Claude Cod
 
 ### Núcleo portável (ao fechar a tarefa)
 
-Vale em `.claude`, `.agents`, `.cursor` — é texto de skill, não depende de hook. Ao concluir uma tarefa que mexeu em código:
+Vale em `.claude`, `.agents`, `.cursor` — é texto de skill, não depende de hook. Para disparar de fato no encerramento, este bloco deve ser **referenciado/embutido pela skill de fechamento do harness** (ex.: `pelizzai-finish-task`); enquanto ela não existir, o reforço efetivo vem do hook (no Claude Code) e da próxima vez que `pelizzai-writing-skills` for acionada. Ao concluir uma tarefa que mexeu em código:
 
 ```bash
-# data da última revisão (primeira data YYYY-MM-DD do ledger)
-last_review=$(grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' pelizzai/data/review-domain-skills.md | head -1)
-# commits desde então
+# datas do ledger — parsing ANCORADO no rótulo (robusto à ordem das linhas; lê as DUAS datas)
+last_review=$(grep -oE 'last-review:[^0-9]*[0-9]{4}-[0-9]{2}-[0-9]{2}' pelizzai/data/review-domain-skills.md | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | head -1)
+last_full_scan=$(grep -oE 'last-full-scan:[^0-9]*[0-9]{4}-[0-9]{2}-[0-9]{2}' pelizzai/data/review-domain-skills.md | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | head -1)
+# commits desde a última revisão
 count=$(git rev-list --count --since="$last_review 00:00" HEAD 2>/dev/null || echo 0)
 ```
+
+> Comandos em sh/Bash; em frota sem POSIX (ex.: só PowerShell), use o equivalente — o hook `.ps1` já implementa a mesma leitura por rótulo.
 
 ```text
 - Se count >= 10 OU passaram-se > 10 dias desde last_review → proponha UMA vez:
@@ -91,7 +94,7 @@ Entrada no `settings.json` (instalada no bootstrap, com confirmação — opt-in
     "UserPromptSubmit": [
       {
         "hooks": [
-          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pelizzai-cadence.mjs\"" }
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-cadence.mjs\"" }
         ]
       }
     ]
@@ -99,7 +102,13 @@ Entrada no `settings.json` (instalada no bootstrap, com confirmação — opt-in
 }
 ```
 
-> Por que opt-in no bootstrap, e não ligado por padrão: um hook `UserPromptSubmit` ruidoso já "quebrou o fluxo" em harness anterior. Instale-o com confirmação, e prefira o núcleo portável como fonte de verdade — o hook é só reforço. Se a frota não tiver Node, gere uma variante equivalente em PowerShell.
+**Quem instala (opt-in):** no bootstrap, a `pelizzai-writing-skills` **propõe** a instalação; se o usuário aceitar, ela **mescla** a entrada em `.claude/settings.json` preservando hooks e permissões já existentes (fazer merge, **nunca** sobrescrever o arquivo). No Claude Code, a skill `update-config` pode realizar essa edição. Acrescente também `pelizzai/data/.cadence-state.json` ao `.gitignore` — é estado mutável (muda a cada interação) e não deve ser versionado.
+
+**Variante sem Node:** em frota sem Node, use o hook PowerShell `.claude/hooks/pelizzai-cadence.ps1` (requer pwsh 7+), com o command `pwsh -NoProfile -File "${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-cadence.ps1"`.
+
+**Pressuposto:** o hook localiza o ledger pelo `cwd` e assume `pelizzai/` na raiz do projeto (convenção do harness; em monorepo/workspace, o `pelizzai/` é root-level).
+
+> Por que opt-in, e não ligado por padrão: um hook `UserPromptSubmit` ruidoso já "quebrou o fluxo" em harness anterior. O **núcleo portável** (na skill) é a fonte de verdade; o hook é só reforço no Claude Code.
 
 ## Seeding e atualização do ledger
 

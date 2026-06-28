@@ -17,7 +17,9 @@
  * Instalação (opt-in, normalmente no bootstrap), em .claude/settings.json:
  *   { "hooks": { "UserPromptSubmit": [ { "hooks": [
  *       { "type": "command",
- *         "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pelizzai-cadence.mjs\"" } ] } ] } }
+ *         "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-cadence.mjs\"" } ] } ] } }
+ *
+ * Em frota sem Node, use a variante PowerShell pelizzai-cadence.ps1 (mesmo diretório).
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
@@ -83,7 +85,7 @@ function main() {
 
   // contador de interações
   const statePath = join(cwd, 'pelizzai', 'data', '.cadence-state.json');
-  let state = { count: 0, lastNudgeAt: 0 };
+  let state = { count: 0 };
   try {
     if (existsSync(statePath)) state = JSON.parse(readFileSync(statePath, 'utf8'));
   } catch {
@@ -97,8 +99,7 @@ function main() {
     /* sem persistência — segue */
   }
 
-  if (state.count % EVERY !== 0) return; // só checa a cada N interações
-  if (state.lastNudgeAt === state.count) return; // já avisou nesta janela
+  if (state.count % EVERY !== 0) return; // só checa (e nudga) a cada N interações
 
   // datas do ledger (primeiras YYYY-MM-DD encontradas após cada rótulo)
   let ledger = '';
@@ -135,13 +136,6 @@ function main() {
       `Considere acionar a skill pelizzai-writing-skills (modo manutenção) para revisar/atualizar ` +
       `as skills de domínio. Sugira ao usuário uma vez; não bloqueie o trabalho.`
   );
-
-  try {
-    state.lastNudgeAt = state.count;
-    writeFileSync(statePath, JSON.stringify(state));
-  } catch {
-    /* ok */
-  }
 }
 
 try {

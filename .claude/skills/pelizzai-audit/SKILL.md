@@ -115,6 +115,8 @@ Garanta que o bootstrap deixe dois artefatos (criados/atualizados via `pelizzai-
 - **`pelizzai/domain-skills.md`** — catálogo das skills de domínio: o que cada uma faz e quando usá-la.
 - **`pelizzai/data/review-domain-skills.md`** — ledger de manutenção: quando cada skill de domínio foi criada/atualizada e a referência de git correspondente.
 
+Ofereça também (opt-in) instalar o **hook de cadência** que lembra de revisar as skills de domínio (ver `pelizzai-writing-skills` → `references/domain-skill-maintenance.md`).
+
 A existência de `pelizzai/domain-skills.md` é o sinal de que o harness já foi inicializado neste projeto.
 
 ---

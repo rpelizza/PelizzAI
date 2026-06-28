@@ -31,7 +31,7 @@ Quatro perguntas-âncora:
 
 ### 2. Pesquisar
 
-Verifique os MCPs disponíveis. Se úteis (consultar doc, achar skills semelhantes, conferir boas práticas), pesquise em paralelo com subagentes (`pelizzai-subagents`/`pelizzai-team`) ou inline. **Prefira o MCP `context7`** para fundamentar na documentação real; sem ele, use a web. Traga contexto pronto para reduzir a carga do usuário.
+Verifique os MCPs disponíveis. Se úteis (consultar doc, achar skills semelhantes, conferir boas práticas), pesquise em paralelo com a `pelizzai-team` (que cobre também a delegação a um único subagente) ou inline. **Prefira o MCP `context7`** para fundamentar na documentação real; sem ele, use a web. Traga contexto pronto para reduzir a carga do usuário.
 
 ## Frontmatter
 
@@ -41,6 +41,8 @@ Apenas dois campos obrigatórios:
 - **description** — **o gatilho**. É o mecanismo principal de acionamento. Inclua **o que a skill faz E os contextos específicos de uso**. Toda informação de "quando usar" vai aqui, não no corpo.
 
 > Observação: o harness tende a **acionar de menos**. Torne as descrições "incisivas". Em vez de "Cria um dashboard de dados internos", escreva "Cria um dashboard de dados internos. Use sempre que o usuário mencionar dashboards, visualização de dados ou métricas, ou quiser exibir qualquer dado da empresa — mesmo sem pedir explicitamente um 'dashboard'."
+
+**Otimizar o acionamento (método verificável):** monte ~20 queries realistas — metade que **deve** acionar a skill (frasais variados, casual/formal, sem citar a skill pelo nome) e metade *near-miss* que **não** deve (compartilha palavras-chave, mas precisa de outra coisa). Meça a taxa de acionamento e prefira a descrição que melhor **generaliza**, evitando sobreajuste às queries de treino.
 
 (`compatibility` é opcional e raramente necessário.)
 
@@ -57,6 +59,8 @@ Padrões:
 - Mantenha o `SKILL.md` < 500 linhas. Aproximando-se do limite, adicione um nível hierárquico (mova profundidade para `references/`) com ponteiros claros sobre **quando** ler cada arquivo.
 - Faça referências explícitas aos arquivos a partir do `SKILL.md`.
 - Para arquivos de referência longos (>300 linhas), inclua um sumário no topo.
+
+Os números (~100 palavras de metadados, <500 linhas de corpo, 300 linhas para sumário) são **aproximados** — passe deles quando houver motivo. A meta é manter enxuto o que fica sempre no contexto, não cumprir uma cota.
 
 ## Anatomia
 
@@ -102,10 +106,18 @@ Skills com saída objetivamente verificável se beneficiam de casos de teste. Es
 {
   "skill_name": "nome-da-skill",
   "evals": [
-    { "id": 1, "prompt": "Tarefa do usuário", "expected_output": "Resultado esperado", "files": [] }
+    {
+      "id": 1,
+      "prompt": "Tarefa do usuário",
+      "expected_output": "Resultado esperado",
+      "expectations": ["A saída inclui X", "A skill usou o script Y"],
+      "files": []
+    }
   ]
 }
 ```
+
+O campo `expectations` (afirmações objetivamente verificáveis) é o que o **grader** checa — é o que torna a eval "verificável". Adicione-o ao redigir as asserções. Esquema completo de `evals.json`/`grading.json`: ver o skill-creator de origem (`references/schemas.md`); confirme o nome exato do campo na versão instalada.
 
 Procedimento (quando há subagentes disponíveis):
 
