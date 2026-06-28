@@ -1,6 +1,6 @@
 # Modelo de Prompt para Revisor de Documento de Especificação
 
-Use este modelo ao acionar um subagente revisor de documentos de especificação.
+Use este modelo ao acionar um subagente ou teammate revisor de documentos de especificação.
 
 **Objetivo:** Verificar se a especificação está completa, consistente e pronta para o planejamento da implementação.
 
