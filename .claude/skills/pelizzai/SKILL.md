@@ -23,6 +23,12 @@ O harness `PelizzAI` se sobrepõe ao comportamento padrão do sistema, mas **ins
 2. **Harness "PelizzAI"** — prevalecem sobre o comportamento padrão do sistema em caso de conflito
 3. **Prompt padrão do sistema** — prioridade mínima
 
+## Camada global de preferências
+
+Use `pelizzai-preferences` como camada global quando a tarefa envolver comunicação, engenharia, código, validação, segurança, documentação, portabilidade ou decisões de execução. Ela não substitui skills específicas; ela define o piso de comportamento. Regras do usuário, `CLAUDE.md`/`AGENTS.md`, skills de domínio e instruções de uma skill especializada continuam tendo prioridade.
+
+Não acione `pelizzai-preferences` para tarefas triviais que possam ser respondidas diretamente sem risco ou contexto de projeto. Para qualquer tarefa não trivial, considere-a junto do roteamento principal.
+
 ## Como acessar as skills
 
 **Nunca leia arquivos de skill manualmente usando ferramentas de arquivo** — utilize sempre o mecanismo de carregamento de skills da sua plataforma para garantir que a skill seja ativada corretamente.

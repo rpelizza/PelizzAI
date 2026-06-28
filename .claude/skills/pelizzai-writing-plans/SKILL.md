@@ -92,7 +92,7 @@ Após salvar o plano, **estresse-o com `pelizzai-interview-me` (OBRIGATÓRIO —
 
 ## Handoff para a execução
 
-Plano salvo e estressado → entregue à **`pelizzai-execution-plans`**, que **escolhe o modo de execução** (team → subagents → inline) e o registra em `pelizzai/data/state.md`. **Não decida o modo aqui** — isso pertence ao executor. O isolamento (branch/worktree) também é resolvido no momento da execução (`pelizzai-starting-branch`).
+Plano salvo e estressado → entregue à **`pelizzai-execution-plans`**, que **escolhe o modo de execução** (team → subagents → inline) e o registra em `pelizzai/data/state.md`. **Não decida o modo aqui** — isso pertence ao executor. O isolamento (sempre em branch) também é resolvido no momento da execução (`pelizzai-starting-branch`).
 
 Confirme: "Plano salvo em `pelizzai/plans/<arquivo>.md` e estressado. Vou executá-lo com a `pelizzai-execution-plans`."
 

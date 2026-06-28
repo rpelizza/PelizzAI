@@ -69,12 +69,12 @@ Ordem de preferência: **team → subagents → inline**. Escolha proporcional a
 | **inline** (último)  | —                  | Subagentes/time indisponíveis, ou plano **pequeno e muito sequencial**; o coordenador implementa tarefa a tarefa na própria sessão |
 
 ```text
-Regra de isolamento × paralelismo:
-- Execução em paralelo (team multi-frente ou subagentes concorrentes) sobre o MESMO repo exige
-  worktree, com frentes em paths disjuntos. O COORDENADOR cria os worktrees (git worktree add
-  <path> <branch>) antes de despachar e passa o caminho absoluto no briefing (ver pelizzai-team);
-  pelizzai-starting-branch cuida do worktree de isolamento quando materializada. Em branch simples,
-  execute uma frente/tarefa por vez.
+Isolamento e paralelismo (política do harness: só branches, sem worktrees):
+- A isolação é sempre uma branch (um working tree). NÃO usamos worktrees.
+- Sem worktrees, não há escrita paralela isolada no mesmo repo: a execução que ESCREVE roda em
+  uma branch por vez e o COORDENADOR integra as contribuições EM SÉRIE.
+- O paralelismo de team/subagents fica para o que NÃO escreve concorrentemente: investigação,
+  leitura, review e decomposição. Em subagents, despache um subagente por tarefa, um de cada vez.
 ```
 
 **Desempate team × subagents:** team = múltiplas frentes em paralelo (via teammates ou subagentes internos do `pelizzai-team`); subagents = um subagente isolado por tarefa, em série. Havendo paralelismo de frentes, prefira **team** mesmo que os membros só reportem.
@@ -135,7 +135,7 @@ O protocolo detalhado — briefing por colagem, TDD, review em dois estágios, s
 
 ## Modo Team (preferido)
 
-Use `pelizzai-team`. Cada **frente** do plano (conjunto coeso de tarefas, ex.: uma camada) vira um membro; o coordenador (lead) delega por briefing autossuficiente (com as skills de domínio coladas), monitora e sintetiza. Frentes que escrevem em paralelo exigem **worktrees** com paths disjuntos. O ciclo por tarefa acima vale dentro de cada frente.
+Use `pelizzai-team`. Cada **frente** do plano (conjunto coeso de tarefas, ex.: uma camada) vira um membro; o coordenador (lead) delega por briefing autossuficiente (com as skills de domínio coladas), monitora e sintetiza. Como o harness usa só branches (sem worktrees), as frentes não escrevem em paralelo de forma isolada: o coordenador integra as contribuições **em série** na branch; reserve o paralelismo para investigação, review e decomposição. O ciclo por tarefa acima vale dentro de cada frente.
 
 ## Modo Subagents
 
@@ -157,11 +157,11 @@ O cursor da tarefa ativa vive em `pelizzai/data/state.md` (template: [templates/
   commit da tarefa; em squash-final, acumula — nunca um commit órfão só do cursor (exceção única:
   o registro de phase: blocked do circuit breaker — ver references/task-cycle.md §5).
 - Retomada após compaction: confie no ledger + git, mas VALIDE contra a realidade — a branch
-  registrada bate com `git branch --show-current`? o worktree existe (`git worktree list`)?
+  registrada bate com `git branch --show-current`?
   Releia o arquivo apontado em `plan:` para reconstruir o texto das tarefas pendentes (o membro
   nunca lê o plano; quem cola é o coordenador). Em divergência que arrisque o trabalho, NÃO confie
   cego: reporte e recupere o estado com o usuário antes de prosseguir.
-- Em workspace, branch/worktree e os comandos de teste/lint/build são POR-PROJETO; use o campo `project:`.
+- Em workspace, a branch e os comandos de teste/lint/build são POR-PROJETO; use o campo `project:`.
 ```
 
 ---
@@ -177,7 +177,7 @@ O laço macro — implementar → testar → revisar → corrigir, repetido até
 ```text
 GATES (exigem confirmação do usuário):
 - Começar em branch protegida (main/master/develop/dev) — proibido, sem exceção.
-- Escolha de isolamento (branch vs worktree) e do modo de execução.
+- Escolha do modo de execução (team/subagents/inline).
 - Estratégia de commit (granular vs squash-final) e o squash em si.
 - Destino: push direto / push + PR / manter local / descartar.
 - Conclusão.
@@ -234,7 +234,7 @@ Ao terminar todas as tarefas:
 **Combina com:**
 
 - `pelizzai-writing-plans` — produz o plano que esta skill executa.
-- `pelizzai-starting-branch` — isolamento (branch/worktree) antes de qualquer código.
+- `pelizzai-starting-branch` — isolamento em branch antes de qualquer código.
 - `pelizzai-tdd` — disciplina por tarefa (test-first).
 - `pelizzai-team` / `pelizzai-subagents` — os dois modos paralelos; inline é o fallback.
 - `pelizzai-review` — review por tarefa (spec + qualidade) e review final.
@@ -247,7 +247,7 @@ Ao terminar todas as tarefas:
 
 ```text
 - pelizzai-starting-branch (vazia): rode `git branch --show-current`; se for main/master/develop/dev
-  OU vazio (HEAD destacado → fail-closed), PARE e crie uma branch/worktree antes de qualquer commit.
+  OU vazio (HEAD destacado → fail-closed), PARE e crie uma branch antes de qualquer commit.
 - pelizzai-review (vazia): execute o review em dois estágios (spec → qualidade com evidência fresca)
   e o review final da branch diretamente, pelo protocolo de references/task-cycle.md.
 - pelizzai-verification-before-completion / pelizzai-finish-task (vazias): rode você mesmo os comandos

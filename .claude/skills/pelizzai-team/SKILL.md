@@ -310,7 +310,7 @@ o orçamento de esforço de `pelizzai-reasoning`: mais rodadas só se reduzirem 
 ```
 
 - **Cross-check adversarial:** spawnar **verificadores céticos** cujo único trabalho é tentar **refutar** os achados/implementações. Como o verificador é stateless, **cole no prompt dele o artefato a refutar**. Mantenha um achado só se ele sobrevive.
-- **Evitar conflito de arquivos:** atribua **arquivos disjuntos** por membro. Para edição paralela real do mesmo repositório, o **coordenador cria os worktrees ANTES de spawnar** (`git worktree add <path> <branch>`) e passa o **caminho absoluto** de cada um no briefing do respectivo membro; ao final, integra os diffs. Subagentes não criam worktrees um do outro. A escrita paralela exige arquivos disjuntos **e**, para o mesmo repo, worktrees pré-criados.
+- **Evitar conflito de arquivos:** atribua **arquivos disjuntos** por membro. Como o harness trabalha **só com branches** (sem worktrees), não há escrita paralela isolada no mesmo repositório: o **coordenador integra as contribuições em série** na branch (despache uma frente de escrita por vez), reservando o paralelismo para investigação, leitura e review. Edições concorrentes ao mesmo working tree colidem — evite-as.
 - **Lista de tarefas:** é o **seu** roster (não há lista compartilhada nativa) — atualize-o a cada rodada.
 - **Síntese:** o coordenador integra os entregáveis e cruza as divergências com `pelizzai-reasoning` (`Evidence Synthesis`, com `Verification` auxiliar).
 

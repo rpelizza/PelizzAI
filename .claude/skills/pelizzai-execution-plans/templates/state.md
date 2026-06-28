@@ -12,7 +12,7 @@
 - track: <feature | bug | adjustment | refactor | infra | review>
 - phase: <brainstorm | plan | exec | review | done | blocked>
 - branch: <nome-da-branch>
-- isolation: <branch | worktree>
+- isolation: branch   # o harness trabalha só com branches (sem worktrees)
 - execution-mode: <team | subagents | inline>
 - commit-strategy: <granular | squash-final>
 - plan: <caminho do plano em execução, ex.: pelizzai/plans/AAAA-MM-DD-<topico>.md>
