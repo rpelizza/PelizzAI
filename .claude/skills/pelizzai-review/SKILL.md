@@ -65,6 +65,8 @@ Use o template **[references/spec-reviewer.md](references/spec-reviewer.md)** (s
 - Julgue a mudança também contra as SKILLS DE DOMÍNIO do projeto (pelizzai/domain-skills.md).
 ```
 
+Se o reviewer sinalizar **superfície sensível** (auth, input do usuário, query/SQL, segredos, upload, novas dependências), acione `pelizzai-oswap` (OWASP) antes de concluir — não deixe a segurança só como item de lista.
+
 ---
 
 ## Evidência fresca (bloco Verification, obrigatório)
@@ -114,6 +116,10 @@ Categorize pela severidade REAL — nem tudo é Critical; um nitpick não é Cri
 ## Review final da branch
 
 Ao concluir todas as tarefas, revise a **branch inteira** (range commitado `<BASE>..<HEAD>`), não só por tarefa, com o **modelo mais capaz** disponível. É a última rede antes da conclusão (`pelizzai-verification-before-completion` / `pelizzai-finish-task`).
+
+**Quem dispara o review final:** `pelizzai-execution-plans` (planos) e `pelizzai-debugging` (fix de bug); o track de ajuste (`pelizzai-quick-fix`) dispensa review formal por escopo trivial.
+
+**Review de mudança avulsa** (bug/quick-fix, fora de plano): use o **escopo B** (working tree não commitada: `git diff` + arquivos novos) e aplique o **Estágio 2** (qualidade) com o bloco `Verification` (evidência fresca), **sem** a maquinaria por-tarefa / review-final / circuit-breaker.
 
 ---
 

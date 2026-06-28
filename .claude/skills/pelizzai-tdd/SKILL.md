@@ -50,7 +50,7 @@ Antes de escrever qualquer código:
 
 - [ ] Confirme com o usuário quais alterações de interface são necessárias (use `pelizzai-interview-me` quando houver dúvida material)
 - [ ] Confirme com o usuário quais comportamentos devem ser testados (priorize-os)
-- [ ] Identifique oportunidades para criar módulos "profundos" (interface simples, implementação robusta) — use `pelizzai-reasoning` (Structured Decomposition) para mapear o vocabulário e a testabilidade; em design novo, isso vem da `pelizzai-brainstorming`
+- [ ] Identifique oportunidades para criar módulos "profundos" (interface simples, implementação robusta) — use o vocabulário da `pelizzai-codebase-design` e a `pelizzai-reasoning` (Structured Decomposition) para mapear o vocabulário e a testabilidade; em design novo, isso vem da `pelizzai-brainstorming`
 - [ ] Liste os comportamentos a serem testados (não os passos de implementação)
 - [ ] Obtenha a aprovação do usuário para o plano
 
@@ -129,6 +129,7 @@ flowchart LR
 - Diretamente, quando o usuário desenvolve test-first ou corrige um bug — escreva primeiro o teste de regressão que reproduz o bug.
 - Como **disciplina por tarefa** ao executar um plano: a `pelizzai-execution-plans` despacha um subagente por tarefa, e cada tarefa é implementada por este ciclo TDD.
 - Por **membros de `pelizzai-team` / `pelizzai-subagents`**: cada membro que escreve código implementa sua frente via TDD.
+- **Caminho leve:** para um único teste de regressão (`pelizzai-debugging` Fase 4) ou um teste mínimo de ajuste (`pelizzai-quick-fix`), pule a cerimônia de aprovação de plano do Planejamento — o comportamento-alvo já está fixado pela causa raiz / pelo critério do ajuste.
 
 **Raciocínio — `pelizzai-reasoning`:**
 
@@ -145,5 +146,3 @@ flowchart LR
 
 - Confirme interface e comportamentos com `pelizzai-interview-me`, ou no design aprovado da `pelizzai-brainstorming`, antes de escrever testes.
 - Antes de declarar pronto, passe pela `pelizzai-verification-before-completion` e pela `pelizzai-review`.
-
-> Algumas skills irmãs citadas (`pelizzai-execution-plans`, `pelizzai-subagents`, `pelizzai-review`, `pelizzai-verification-before-completion`) ainda estão sendo materializadas; referenciá-las pelo nome mantém o harness coeso conforme cada uma é construída.

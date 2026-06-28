@@ -64,7 +64,9 @@ Se você não completou a Fase 1, não pode propor correções. Use `pelizzai-re
    → encadeie pelizzai-review (revise o diff da working tree, trate Critical/Important) e então
      pelizzai-finish-task para consolidar e integrar — não deixe o bug corrigido parado na branch.
 4. Se o fix não funcionar: PARE. Conte os fixes tentados. < 3 → volte à Fase 1 com a info nova.
-   ≥ 3 → PARE e questione a arquitetura (não tente o fix nº 4 sem discutir).
+   ≥ 3 → PARE e questione a arquitetura: acione `pelizzai-interview-me` para estressar a hipótese/arquitetura
+   com o usuário; se revelar problema estrutural/de design, escale para `pelizzai-brainstorming` (track feature).
+   Não tente o fix nº 4 sem essa discussão.
 ```
 
 ---

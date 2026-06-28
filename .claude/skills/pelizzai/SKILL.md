@@ -118,7 +118,7 @@ flowchart TD
     MORE -- sim --> CY
     MORE -- nao --> RF[review final] --> VC[verification-before-completion] --> FIN[finish-task\nsquash? push/PR/local/descartar]
 
-    CLS -- bug --> DBG[debugging: 4 fases, causa raiz] --> SB2[starting-branch] --> TDD2[tdd: teste que falha + fix] --> RV2[review] --> VC2[verification] --> FIN
+    CLS -- bug --> DBG[debugging: 4 fases, causa raiz] --> SB2[starting-branch] --> TDD2[tdd: teste que falha + fix] --> VC2[verification] --> RV2[review] --> FIN
     CLS -- ajuste --> QF[quick-fix] --> SB3[starting-branch] --> TDD3[tdd minimo] --> VC3[verification] --> FIN
     CLS -- review --> RVR[review 2 estagios + final] -.oferta.-> OW[oswap: OWASP]
     CLS -- conceitual --> ANS[responder direto]
@@ -135,7 +135,8 @@ O `pelizzai-loop` envolve a execução (repete o ciclo até a Definition of Done
 | Ciclo de feature           | `pelizzai-brainstorming` → `pelizzai-writing-plans` → `pelizzai-execution-plans`         |
 | Execução por tarefa        | `pelizzai-tdd` · `pelizzai-team` · `pelizzai-subagents` · `pelizzai-loop`                |
 | Tracks dedicados           | `pelizzai-debugging` (bug) · `pelizzai-quick-fix` (ajuste)                               |
-| Isolamento e fechamento    | `pelizzai-starting-branch` · `pelizzai-finish-task`                                      |
+| Design e exploração        | `pelizzai-codebase-design` · `pelizzai-domain-modeling` · `pelizzai-prototype`           |
+| Isolamento e fechamento    | `pelizzai-starting-branch` · `pelizzai-finish-task` · `pelizzai-resolving-merge-conflicts` |
 | Qualidade e segurança      | `pelizzai-review` · `pelizzai-oswap` · `pelizzai-verification-before-completion`         |
 | Frontend                   | `pelizzai-frontend`                                                                      |
 | Autoria de skills          | `pelizzai-writing-skills`                                                                |

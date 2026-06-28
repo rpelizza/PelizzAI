@@ -179,7 +179,7 @@ Depois que uma skill está pronta, você pode **otimizar a `description`** para 
 **Combina com:**
 
 - `pelizzai-audit` — chama esta skill no bootstrap; aqui mora o motor de criação das skills de domínio.
-- `pelizzai-team` — redigir muitas skills candidatas em paralelo (cobre também a delegação a um único subagente; `pelizzai-subagents` é skill irmã ainda não materializada).
+- `pelizzai-team` — redigir muitas skills candidatas em paralelo; `pelizzai-subagents` para a delegação a um único subagente.
 - `pelizzai-reasoning` — raciocínio da autoria (Structured Decomposition) e da manutenção (Critique and Refine, Evidence Synthesis).
 - `pelizzai-interview-me` / `pelizzai-brainstorming` — ramo de projeto novo, antes de criar as primeiras skills.
 - `pelizzai-writing-clearly-and-concisely` — redigir o corpo das skills com clareza.

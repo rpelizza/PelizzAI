@@ -43,6 +43,8 @@ A `pelizzai-router` já preparou o contexto de um `ajuste`: `isolation: branch` 
 4. Feche — invoque pelizzai-finish-task (honra a commit-strategy registrada).
 ```
 
+> O track de ajuste **pula o code-review formal** por ser trivial (<~50 linhas, sem nova superfície/regra); a verificação mínima + `pelizzai-finish-task` cobrem o fechamento. Se a mudança crescer e exigir review, ela já deixou de ser ajuste — escale para feature.
+
 ---
 
 ## Red flags

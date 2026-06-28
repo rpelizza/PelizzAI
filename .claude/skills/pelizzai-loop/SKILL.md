@@ -22,3 +22,7 @@ Uma linguagem compartilhada, utilizada apenas quando o fluxo de trabalho a exige
 
 Uma especificação de fluxo de trabalho é considerada concluída quando um agente responsável pela implementação consegue construí-la sem precisar fazer uma única pergunta. Continue o detalhamento até esse ponto; nada está concluído enquanto restar alguma dúvida.
 Caso existam dúvidas durante o loop, o agente deve interromper a execução e solicitar esclarecimentos usando a skill `pelizzai-interview-me`. A execução do fluxo de trabalho só deve ser retomada quando todas as dúvidas forem resolvidas.
+
+## Integração na execução de planos
+
+No contexto de execução de planos, a `pelizzai-loop` contribui apenas com a **Definition of Done** e a regra de **parar em dúvida material → `pelizzai-interview-me`**; o laço macro de execução (implementar → testar → revisar → corrigir até a DoD) é conduzido pela `pelizzai-execution-plans`.

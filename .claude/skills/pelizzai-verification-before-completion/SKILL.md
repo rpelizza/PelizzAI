@@ -151,7 +151,7 @@ Alegar conclusão sem evidência quebra a confiança e gera retrabalho: função
 **Combina com:**
 
 - `pelizzai-execution-plans` — gate antes de declarar a tarefa/plano concluído (review final → verificação → `pelizzai-finish-task`).
-- `pelizzai-finish-task` — verifica os testes antes de consolidar e antes de qualquer push/PR. (Skill ainda em materialização; enquanto stub, a verificação de testes é responsabilidade SUA aqui — rode os comandos e conduza squash/destino à mão, ver `pelizzai-execution-plans` → Fallback.)
+- `pelizzai-finish-task` — verifica os testes antes de consolidar e antes de qualquer push/PR.
 - `pelizzai-review` — o bloco `Verification` do reviewer é esta mesma disciplina (evidência fresca; UNVERIFIED nunca ✅), aplicada por-tarefa e no review final na `pelizzai-review`; esta skill é o gate de conclusão da branch inteira.
 - `pelizzai-tdd` — o red-green produz o teste; a PROVA de regressão (reverter o fix → DEVE FALHAR → restaurar) é exigida aqui.
 - `pelizzai-frontend` — executa a verificação visual da UI rodando (navegador/screenshot, mobile e desktop) que esta skill exige para mudanças de interface.

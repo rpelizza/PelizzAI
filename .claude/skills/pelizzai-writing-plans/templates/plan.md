@@ -62,12 +62,7 @@ def funcao(entrada):
 Rode: `pytest testes/caminho/teste.py::test_nome -v`
 Esperado: PASS
 
-- [ ] **Passo 5: Commit**
-
-```bash
-git add testes/caminho/teste.py src/caminho/arquivo.py
-git commit -m "feat: adiciona comportamento especifico"
-```
+- [ ] **Passo 5: Pronto para review → consolidar** — NÃO commite no meio da tarefa: o commit é o gate do coordenador, após spec ✅ + qualidade ✅ (em modo inline, o próprio controlador consolida). Ver `pelizzai-execution-plans` → `references/task-cycle.md`.
 ````
 
 ## Lembre-se

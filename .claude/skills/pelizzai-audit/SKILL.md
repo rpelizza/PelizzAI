@@ -47,8 +47,7 @@ flowchart TD
     Inv --> Tri{Workspace ou projeto unico?}
     Tri --> New{Projeto novo ou existente?}
 
-    New -- Novo --> Int[pelizzai-interview-me\ncoletar intencao]
-    Int --> Bra[pelizzai-brainstorming\ndesenho aprovado]
+    New -- Novo --> Bra[brainstorming + interview-me\ndesign aprovado]
     Bra --> Wri
 
     New -- Existente / Workspace --> Scan[Repo-scan completo:\npadroes, stacks, frameworks, convencoes]
@@ -81,13 +80,15 @@ Levante, em frentes simultâneas:
 - Convenções: CLAUDE.md/AGENTS.md, linters, padrões de teste, estilo de commit.
 ```
 
+> O sinal canônico de **bootstrap concluído** é a existência de `pelizzai/domain-skills.md` — não a presença de skills de domínio avulsas. Skills de domínio sem catálogo devem ser inventariadas e então **catalogadas** pela `pelizzai-writing-skills`, não tratadas como bootstrap já feito.
+
 ## Fase 3 — Ramificação
 
 **Projeto NOVO:**
 
-1. `pelizzai-interview-me` — coletar a intenção do usuário (o que ele quer construir).
-2. `pelizzai-brainstorming` — transformar a intenção em um design aprovado.
-3. `pelizzai-writing-skills` — criar as skills de domínio iniciais e a documentação a partir do design.
+1. `pelizzai-brainstorming` — capturar a intenção e produzir um design enxuto aprovado (a brainstorming já usa `pelizzai-interview-me` internamente para estressar). **No bootstrap, o destino após o design é a `pelizzai-writing-skills`, não a `pelizzai-writing-plans`.**
+2. `pelizzai-writing-skills` — criar as skills de domínio iniciais e escrever `pelizzai/domain-skills.md` (marca o bootstrap concluído), a partir do design aprovado.
+3. Só então, se o usuário quiser implementar, segue-se o fluxo de feature normal (`pelizzai-writing-plans` → `pelizzai-execution-plans`).
 
 **Projeto EXISTENTE ou WORKSPACE:**
 
@@ -128,6 +129,8 @@ Toda a documentação e o estado do harness vivem em `pelizzai/`, na **raiz do r
 ```text
 pelizzai/                         na raiz do repositório ou workspace
 ├── domain-skills.md              catálogo das skills de domínio (marca o bootstrap concluído)
+├── context.md                    glossário do domínio (pelizzai-domain-modeling); multi-contexto: context/<nome>.md + context-map.md
+├── adr/                          decisões de arquitetura (ADRs numerados)
 ├── specs/                        designs aprovados (pelizzai-brainstorming): AAAA-MM-DD-<topico>-design.md
 ├── plans/                        planos de implementação (pelizzai-writing-plans)
 └── data/                         estado e ledgers do harness
@@ -135,6 +138,8 @@ pelizzai/                         na raiz do repositório ou workspace
     ├── review-domain-skills.md   ledger de manutenção das skills de domínio
     └── .cadence-state.json        contador do hook de cadência (vai para o .gitignore)
 ```
+
+> `context.md` e `adr/` são criados **sob demanda** por `pelizzai-domain-modeling` / `pelizzai-prototype`, não no bootstrap — sua ausência logo após o bootstrap é esperada.
 
 Em **workspace** (vários projetos na mesma pasta), o `pelizzai/` fica na raiz do workspace e cobre todos; cada skill registra a qual projeto um artefato pertence quando isso importar.
 

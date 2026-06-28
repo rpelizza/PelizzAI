@@ -72,6 +72,8 @@ digraph brainstorming {
 
 **O estado final consiste em invocar a skill pelizzai-writing-plans** NÃO invoque o design de frontend nem qualquer outra habilidade de implementação. A ÚNICA habilidade a ser invocada após o brainstorming é a elaboração de planos de redação.
 
+**Exceção — bootstrap:** quando a brainstorming é acionada pela `pelizzai-audit` no bootstrap de um projeto novo, o destino após o design aprovado é a `pelizzai-writing-skills` (semear as skills de domínio e `pelizzai/domain-skills.md`), não a `pelizzai-writing-plans`.
+
 ## O Processo
 
 **Compreendendo a ideia:**
@@ -102,6 +104,7 @@ digraph brainstorming {
 **Projetando para isolamento e clareza:**
 
 - Divida o sistema em unidades menores, cada uma com um propósito claro, que se comuniquem por meio de interfaces bem definidas e que possam ser compreendidas e testadas de forma independente.
+- Use o vocabulário de **módulos profundos** (`pelizzai-codebase-design`) para projetar interfaces e seams; afie o vocabulário do domínio com `pelizzai-domain-modeling`; e, quando a forma do estado ou da UI estiver incerta, valide com um protótipo descartável (`pelizzai-prototype`) antes de comprometer o design.
 - Para cada unidade, você deve ser capaz de responder: o que ela faz, como ela é utilizada e de que ela depende?
 - É possível entender o que uma unidade faz sem ler sua implementação interna? Você consegue alterar essa implementação sem quebrar os componentes que a utilizam? Se a resposta for não, as fronteiras da unidade precisam ser revistas.
 - Unidades menores e bem delimitadas também facilitam o seu trabalho: é mais fácil raciocinar sobre um código que você consegue compreender como um todo, e as alterações são mais seguras quando os arquivos têm um foco específico. Quando um arquivo se torna muito grande, isso geralmente indica que ele está acumulando responsabilidades demais.
@@ -144,6 +147,7 @@ Aguarde a resposta do usuário. Se ele solicitar alterações, faça-as e repita
 
 - Acione a skill `pelizzai-writing-plans` para criar um plano de implementação detalhado.
 - NÃO acione nenhuma outra habilidade. `pelizzai-writing-plans` é a próxima etapa.
+- **Exceção bootstrap:** se a brainstorming foi acionada pela `pelizzai-audit` no bootstrap (projeto novo), o destino é a `pelizzai-writing-skills` (criar as skills de domínio), não a writing-plans.
 
 ## Princípios-chave
 

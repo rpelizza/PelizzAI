@@ -2,14 +2,15 @@
 
 > Cursor da tarefa ativa. Vive em `pelizzai/data/state.md` (raiz do repositório ou workspace).
 > Lido pela `pelizzai-execution-plans` no início de cada tarefa e validado contra o git.
-> - Criado/atualizado por: `pelizzai-execution-plans` (durante a execução) e `pelizzai-finish-task` (no fechamento).
+> - Criado por: o primeiro entre `pelizzai-router` / `pelizzai-starting-branch` / `pelizzai-execution-plans` que precisar gravar.
+> - Atualizado por: `pelizzai-router` (decisões iniciais), `pelizzai-starting-branch` (branch/isolation), `pelizzai-execution-plans` (cursor/progresso) e `pelizzai-finish-task` (fechamento).
 > Sem tarefa ativa = `slug: <none>`. `phase: done` = tarefa anterior fechada (começa do zero).
 > `phase: blocked` = travada, aguardando decisão humana.
 
 ## Tarefa ativa
 
 - slug: <none>
-- track: <feature | bug | adjustment | refactor | infra | review>
+- track: <feature | bug | ajuste | refactor | infra | review>
 - phase: <brainstorm | plan | exec | review | done | blocked>
 - branch: <nome-da-branch>
 - isolation: branch   # o harness trabalha só com branches (sem worktrees)
@@ -26,6 +27,6 @@
 
 ## Histórico
 
-- <AAAA-MM-DD> — estado inicializado pela pelizzai-execution-plans
+- <AAAA-MM-DD> — estado inicializado (pelizzai-router / pelizzai-starting-branch / pelizzai-execution-plans)
 
 _Última atualização: <AAAA-MM-DD>_

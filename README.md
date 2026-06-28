@@ -47,7 +47,8 @@ Os fluxos detalhados, com todos os encadeamentos, estão na `pelizzai-router` e 
 | Ciclo de feature         | `pelizzai-brainstorming` → `pelizzai-writing-plans` → `pelizzai-execution-plans`              |
 | Execução por tarefa      | `pelizzai-tdd` · `pelizzai-team` · `pelizzai-subagents` · `pelizzai-loop`                     |
 | Tracks dedicados         | `pelizzai-debugging` (bug) · `pelizzai-quick-fix` (ajuste)                                    |
-| Isolamento e fechamento  | `pelizzai-starting-branch` · `pelizzai-finish-task`                                           |
+| Design e exploração      | `pelizzai-codebase-design` · `pelizzai-domain-modeling` · `pelizzai-prototype`                |
+| Isolamento e fechamento  | `pelizzai-starting-branch` · `pelizzai-finish-task` · `pelizzai-resolving-merge-conflicts`    |
 | Qualidade e segurança    | `pelizzai-review` · `pelizzai-oswap` · `pelizzai-verification-before-completion`              |
 | Frontend                 | `pelizzai-frontend`                                                                           |
 | Autoria de skills        | `pelizzai-writing-skills`                                                                     |
@@ -59,6 +60,8 @@ Na raiz do repositório ou do workspace:
 ```text
 pelizzai/
 ├── domain-skills.md            catálogo das skills de domínio (marca o bootstrap concluído)
+├── context.md                  glossário do domínio (pelizzai-domain-modeling); multi-contexto: context/<nome>.md + context-map.md
+├── adr/                        decisões de arquitetura (ADRs numerados)
 ├── specs/                      designs aprovados (pelizzai-brainstorming): AAAA-MM-DD-<topico>-design.md
 ├── plans/                      planos de implementação (pelizzai-writing-plans): AAAA-MM-DD-<feature>.md
 └── data/

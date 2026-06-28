@@ -162,7 +162,7 @@ flowchart TD
     BOOT -- Nao --> CLS{Classificar intencao}
 
     CLS -- feature --> BR[brainstorming] --> IV1[interview-me: estressa design] --> WP[writing-plans] --> IV2[interview-me: estressa plano] --> EXrt
-    CLS -- bug --> DBG[debugging 4 fases] --> SBb[starting-branch] --> TDDb[tdd: teste que falha + fix] --> RVb[review] --> VCb[verification] --> FINb[finish-task]
+    CLS -- bug --> DBG[debugging 4 fases] --> SBb[starting-branch] --> TDDb[tdd: teste que falha + fix] --> VCb[verification] --> RVb[review] --> FINb[finish-task]
     CLS -- ajuste --> QF[quick-fix] --> SBq[starting-branch] --> TDDq[tdd minimo] --> VCq[verification] --> FINq[finish-task]
     CLS -- review --> RVr[review 2 estagios + final]
     CLS -- conceitual --> ANS[responder direto]
@@ -179,7 +179,7 @@ flowchart TD
 
 ## O que o router registra em `pelizzai/data/state.md`
 
-`slug`, `track`, `phase` inicial, `isolation: branch`, `execution-mode` (Passo 0.7), `commit-strategy` (Passo 0.8), `audience` (Passo 0.5), `plan` (quando a writing-plans informa o caminho), `project` (em workspace), e uma linha datada no `## Histórico`. Sobrescreva o bloco da tarefa ativa por inteiro. O fechamento é da `pelizzai-finish-task`.
+Se `pelizzai/data/state.md` não existir, instancie-o a partir do template da `pelizzai-execution-plans` antes de gravar. Campos: `slug`, `track`, `phase` inicial, `isolation: branch`, `execution-mode` (Passo 0.7), `commit-strategy` (Passo 0.8), `audience` (Passo 0.5), `plan` (quando a writing-plans informa o caminho), `project` (em workspace), e uma linha datada no `## Histórico`. Sobrescreva o bloco da tarefa ativa por inteiro. O fechamento é da `pelizzai-finish-task`.
 
 ---
 

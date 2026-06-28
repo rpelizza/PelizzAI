@@ -314,7 +314,7 @@ o orçamento de esforço de `pelizzai-reasoning`: mais rodadas só se reduzirem 
 - **Lista de tarefas:** é o **seu** roster (não há lista compartilhada nativa) — atualize-o a cada rodada.
 - **Síntese:** o coordenador integra os entregáveis e cruza as divergências com `pelizzai-reasoning` (`Evidence Synthesis`, com `Verification` auxiliar).
 
-> Para delegar a **um único** subagente isolado (não um time), a skill irmã `pelizzai-subagents` é o lar canônico desse padrão. Ela ainda é um stub não materializado — enquanto não tiver conteúdo, **toda a mecânica de subagente único necessária ao time já está descrita acima**, então o fallback é autossuficiente e não depende dela.
+> Para delegar a **um único** subagente isolado (não um time), use a skill irmã `pelizzai-subagents` (o lar canônico desse padrão).
 
 ---
 
@@ -414,7 +414,7 @@ Aplique o **orçamento de esforço** de `pelizzai-reasoning`: a profundidade da 
 **Combina com:**
 
 - `pelizzai-reasoning` — raciocínio do coordenador (decomposição, plano, síntese, verificação) e de cada membro; é também onde mora a técnica `Verification` para fechamento.
-- `pelizzai-subagents` — delegação leve a **um** subagente isolado (sem time); skill irmã ainda não materializada (a mecânica essencial também está nesta skill).
+- `pelizzai-subagents` — delegação leve a **um** subagente isolado (sem time).
 - `pelizzai-router` — costuma rotear até aqui após entender o objetivo e o contexto.
 - `pelizzai-brainstorming` / `pelizzai-writing-plans` — de onde a tarefa do time normalmente chega.
 
