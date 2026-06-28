@@ -1,6 +1,6 @@
 ---
 name: pelizzai-interview-me
-description: Use essa skill para entrevistar para entender o objetivo do usuário, estressar um plano ou estressar uma idéia (brainstorming). Ela deve ser invocada quando o usuário não tiver um objetivo claro ou quando precisar de ajuda para definir um objetivo ou plano. A skill deve fazer perguntas abertas e direcionadas para entender o objetivo do usuário, o contexto da tarefa e as skills disponíveis. Ela deve ser capaz de identificar lacunas no conhecimento do usuário e sugerir recursos ou estratégias para preencher essas lacunas.
+description: Use essa skill para entrevistar para entender o objetivo do usuário, estressar um plano ou estressar uma ideia (brainstorming). Ela deve ser invocada quando o usuário não tiver um objetivo claro ou quando precisar de ajuda para definir um objetivo ou plano. A skill deve fazer perguntas abertas e direcionadas para entender o objetivo do usuário, o contexto da tarefa e as skills disponíveis. Ela deve ser capaz de identificar lacunas no conhecimento do usuário e sugerir recursos ou estratégias para preencher essas lacunas.
 ---
 
 # Pelizzai Interview Me
@@ -50,7 +50,7 @@ Ao finalizar, produza um resumo do **plano submetido a testes de estresse**: cad
 **Transferência pelo chamador (não pule diretamente para `writing-plans`):**
 
 - **Como etapa de projeto `brainstorming`** → NÃO invoque `writing-plans`. **Retorne o controle para `brainstorming`** para que a etapa conclua sua lista de verificação restante (Escrever documento de projeto → Autoavaliação da especificação → Revisão da especificação pelo usuário).
-- **Como etapa de planejamento `writing-plans`** → retorne para `writing-plans`, que prossegue para a execução respeitando o `execution-mode` registrado.
+- **Como etapa de planejamento `writing-plans`** → retorne para `writing-plans`, que salva/estressa o plano e faz o handoff para a execução (`pelizzai-execution-plans`); é a `pelizzai-execution-plans` que escolhe o modo (team > subagents > inline) — a `writing-plans` não decide nem assume modo.
 - **Independente** (usuário solicitou teste de estresse em um plano existente) → prossiga para `writing-plans` caso o plano avance para a implementação.
 - **Em qualquer modo**, se o plano se mostrar inviável, retorne para `brainstorming`.
 

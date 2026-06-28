@@ -243,12 +243,12 @@ Ao terminar todas as tarefas:
 - `pelizzai-verification-before-completion` / `pelizzai-finish-task` — conclusão com gates.
 - `pelizzai-audit` — padrão de diretório `pelizzai/` e catálogo de skills de domínio.
 
-**Fallback enquanto skills irmãs estão em materialização.** As skills já materializadas (`pelizzai-team`, `pelizzai-tdd`, `pelizzai-reasoning`, `pelizzai-loop`, `pelizzai-audit`, `pelizzai-interview-me`, `pelizzai-writing-skills`, `pelizzai-writing-plans`, `pelizzai-starting-branch`, `pelizzai-review`) devem ser usadas diretamente. Para as que ainda são stubs vazios, aplique o procedimento mínimo inline — sobretudo no que é fail-closed:
+**Fallback enquanto skills irmãs estão em materialização.** As skills já materializadas (`pelizzai-team`, `pelizzai-tdd`, `pelizzai-reasoning`, `pelizzai-loop`, `pelizzai-audit`, `pelizzai-interview-me`, `pelizzai-writing-skills`, `pelizzai-writing-plans`, `pelizzai-starting-branch`, `pelizzai-review`, `pelizzai-verification-before-completion`) devem ser usadas diretamente. Para as que ainda são stubs vazios, aplique o procedimento mínimo inline — sobretudo no que é fail-closed:
 
 ```text
-- pelizzai-verification-before-completion / pelizzai-finish-task (vazias): rode você mesmo os comandos
-  de teste (evidência fresca antes de afirmar "pronto") e pergunte squash e destino (push/PR/local/
-  descartar) manualmente — base nunca vazia, branch protegida fail-closed.
+- pelizzai-finish-task (vazia): rode você mesmo os comandos de teste (evidência fresca antes de
+  afirmar "pronto") e pergunte squash e destino (push/PR/local/descartar) manualmente — base nunca
+  vazia, branch protegida fail-closed.
 - pelizzai-subagents (vazia): a mecânica de subagente isolado está descrita acima e na pelizzai-team.
 ```
 

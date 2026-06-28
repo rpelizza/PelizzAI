@@ -13,13 +13,13 @@ Copie a estrutura abaixo para `pelizzai/plans/AAAA-MM-DD-<feature>.md`. Preencha
 > para executar este plano tarefa a tarefa (ela escolhe o modo: team / subagents / inline). Os
 > passos usam checkbox (`- [ ]`) para rastreamento.
 
-**Goal:** [uma frase descrevendo o que isto constrói]
+**Objetivo:** [uma frase descrevendo o que isto constrói]
 
 **Arquitetura:** [2-3 frases sobre a abordagem]
 
-**Tech Stack:** [tecnologias/bibliotecas principais]
+**Stack técnica:** [tecnologias/bibliotecas principais]
 
-**Skills de domínio aplicáveis:** [liste as do catálogo pelizzai/domain-skills.md que valem aqui]
+**Skills de domínio aplicáveis (catálogo):** [liste as de pelizzai/domain-skills.md que valem aqui; se nenhuma, escreva 'nenhuma']
 
 ---
 ```
@@ -35,7 +35,7 @@ Copie a estrutura abaixo para `pelizzai/plans/AAAA-MM-DD-<feature>.md`. Preencha
 - Modificar: `caminho/exato/existente.ext:123-145`
 - Testar: `testes/caminho/exato/teste.ext`
 
-**Skills de domínio a aplicar:** [nomeie as relevantes a esta tarefa]
+**Skills de domínio a aplicar nesta tarefa:** [nomeie as relevantes; ex.: `<projeto>-convencao-api`; se nenhuma, escreva 'nenhuma']
 
 - [ ] **Passo 1: Escreva o teste que falha**
 

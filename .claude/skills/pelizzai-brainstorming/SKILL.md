@@ -31,7 +31,7 @@ Você DEVE criar uma tarefa para cada um destes itens e concluí-los na ordem in
 4. **Propor 2 a 3 abordagens** — apresentando prós e contras (trade-offs) e sua recomendação
 5. **Apresentar o design** — em seções dimensionadas de acordo com a complexidade; obter a aprovação do usuário após cada seção
 6. **Realizar teste de estresse com `interview-me` (OBRIGATÓRIO)** — antes de redigir o documento, conduzir uma entrevista aprofundada que **exponha as lacunas do design** (casos não tratados, validações ausentes, falhas de segurança/autorização, estados indefinidos, contradições). Não é uma oferta opcional — consulte a nota na seção "Apresentação do design".
-7. **Redigir o documento de design** — salvar em `pelizzai/specs/YYYY-MM-DD-<tópico>-design.md` e fazer o commit
+7. **Redigir o documento de design** — salvar em `pelizzai/specs/AAAA-MM-DD-<tópico>-design.md` e fazer o commit
 8. **Autoavaliação da especificação** — verificação rápida (inline) de placeholders, contradições, ambiguidades e escopo (veja abaixo)
 9. **Revisão da especificação pelo usuário** — solicitar que o usuário revise o arquivo de especificação antes de prosseguir
 10. **Transição para a implementação** — acionar a skill `pelizzai-writing-plans` para criar o plano de implementação
@@ -116,7 +116,7 @@ digraph brainstorming {
 
 **Documentação:**
 
-- Salve o design validado (especificação) em `pelizzai/specs/YYYY-MM-DD-<topic>-design.md`
+- Salve o design validado (especificação) em `pelizzai/specs/AAAA-MM-DD-<topic>-design.md`
 - (Preferências do usuário quanto ao local da especificação prevalecem sobre esse padrão)
 - Use a skill `pelizzai-writing-clearly-and-concisely` para redigir a especificação de forma clara e concisa, evitando jargões e termos técnicos desnecessários.
 - Faça o _commit_ do documento de design no Git

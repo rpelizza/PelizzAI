@@ -50,15 +50,15 @@ Antes de definir as tarefas, mapeie quais arquivos serão criados ou modificados
 
 ## Fatias verticais (não horizontais)
 
-Cada tarefa é uma **fatia vertical**: um comportamento de ponta a ponta, testável e commitável de forma independente — não "todos os testes" seguidos de "toda a implementação". Esse é o ciclo do `pelizzai-tdd` (um teste → uma implementação → repetir). Tarefas independentes podem ser "pegáveis" por executores diferentes.
+Cada tarefa é uma **fatia vertical**: um comportamento de ponta a ponta, testável e commitável de forma independente — não "todos os testes" seguidos de "toda a implementação". Esse é o ciclo do `pelizzai-tdd` (um teste → uma implementação → repetir). Tarefas independentes podem ser assumidas por executores diferentes — embora, na política **só-branches** do harness, frentes independentes ainda sejam integradas **em série** pelo coordenador (ver `pelizzai-execution-plans`).
 
 ## Skills de domínio
 
-Se o projeto tem skills de domínio (catálogo `pelizzai/domain-skills.md`), o plano **deve** seguir suas convenções e **nomeá-las nas tarefas relevantes**, para que o executor (e qualquer subagente/teammate) as aplique em vez de padrões genéricos. Para bibliotecas/frameworks externos, ancore as tarefas na **API real e atual** — use o MCP `context7` (ou a web) quando não tiver certeza de assinaturas ou opções; não confie na memória.
+Se o projeto tem skills de domínio (catálogo `pelizzai/domain-skills.md`), o plano **deve** seguir suas convenções e **nomeá-las nas tarefas relevantes**, para que o executor (e qualquer subagente/teammate) as aplique em vez de padrões genéricos. Se `pelizzai/domain-skills.md` **não existir**, o harness não foi inicializado — rode `pelizzai-audit` (bootstrap) antes de escrever o plano. Para bibliotecas/frameworks externos, ancore as tarefas na **API real e atual** — use o MCP `context7` (ou a web) quando não tiver certeza de assinaturas ou opções; não confie na memória.
 
 ## Documento do plano
 
-Use o template em **[templates/plan.md](templates/plan.md)**. Todo plano começa com um cabeçalho (Goal / Arquitetura / Tech Stack + a sub-skill obrigatória de execução) e cada tarefa traz **Files** (criar/modificar/testar com caminhos exatos) e os passos de TDD com **código completo**, **comandos exatos** e **saída esperada**.
+Use o template em **[templates/plan.md](templates/plan.md)**. Todo plano começa com um cabeçalho (Objetivo / Arquitetura / Stack técnica + a sub-skill obrigatória de execução) e cada tarefa traz **Files** (criar/modificar/testar com caminhos exatos) e os passos de TDD com **código completo**, **comandos exatos** e **saída esperada**.
 
 ## Sem placeholders
 
@@ -86,6 +86,10 @@ Após escrever o plano completo, releia a spec com um olhar renovado e confira:
 
 Corrija inline. Se faltar tarefa para um requisito, adicione-a.
 
+## Revisão independente do plano (recomendada)
+
+Antes do estresse com `pelizzai-interview-me`, considere uma revisão **independente** do plano por um subagente (`pelizzai-subagents` / `pelizzai-team`) — a autoavaliação do próprio autor tem ponto cego conhecido. O reviewer confere: **completude** (todo requisito da spec virou tarefa?), **alinhamento** com a spec, **qualidade da decomposição** (fatias verticais coesas) e **executabilidade** (passos sem placeholders, código completo). Aplique os achados antes de seguir.
+
 ## Estresse obrigatório com `pelizzai-interview-me`
 
 Após salvar o plano, **estresse-o com `pelizzai-interview-me` (OBRIGATÓRIO — não é oferta)** antes de qualquer execução: uma entrevista que **exponha as lacunas e riscos do plano**. Anuncie: "Vou estressar este plano e expor as lacunas antes de executar." Se a entrevista desfizer o plano, volte ao `pelizzai-brainstorming`.
@@ -93,6 +97,8 @@ Após salvar o plano, **estresse-o com `pelizzai-interview-me` (OBRIGATÓRIO —
 ## Handoff para a execução
 
 Plano salvo e estressado → entregue à **`pelizzai-execution-plans`**, que **escolhe o modo de execução** (team → subagents → inline) e o registra em `pelizzai/data/state.md`. **Não decida o modo aqui** — isso pertence ao executor. O isolamento (sempre em branch) também é resolvido no momento da execução (`pelizzai-starting-branch`).
+
+Informe à `pelizzai-execution-plans` o **caminho exato do plano salvo** — ela o registra no campo `plan:` de `pelizzai/data/state.md` (a fonte das tarefas, relida após compaction) antes da Tarefa 1. A `pelizzai-writing-plans` não escreve o `state.md`.
 
 Confirme: "Plano salvo em `pelizzai/plans/<arquivo>.md` e estressado. Vou executá-lo com a `pelizzai-execution-plans`."
 
