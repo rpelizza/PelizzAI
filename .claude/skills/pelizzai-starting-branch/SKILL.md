@@ -1,6 +1,6 @@
 ---
 name: pelizzai-starting-branch
-description: Use ao iniciar qualquer tarefa que vá gerar commits, ANTES de qualquer mudança de código. Protege contra commits em branch protegida (main/master/develop/dev — fail-closed inclusive em HEAD destacado/rebase), cria uma branch nomeada por conventional commit a partir da base certa, e trata workspaces multi-projeto. Política do harness: trabalhamos SÓ com branches (sem worktrees). Registra a isolação em `pelizzai/data/state.md`. Acione também quando o usuário disser "criar a branch", "começar a tarefa", ou antes de `pelizzai-execution-plans`.
+description: Use ao iniciar qualquer tarefa que vá gerar commits, ANTES de qualquer mudança de código. Protege contra commits em branch protegida (main/master/develop/dev — fail-closed inclusive em HEAD destacado/rebase), cria uma branch nomeada por conventional commit a partir da base certa, e trata workspaces multi-projeto. Política do harness: trabalhamos SÓ com branches (sem worktrees). Registra o isolamento em `pelizzai/data/state.md`. Acione também quando o usuário disser "criar a branch", "começar a tarefa", ou antes de `pelizzai-execution-plans`.
 ---
 
 # PelizzAI Starting Branch
@@ -11,7 +11,7 @@ Antes de qualquer tarefa tocar no código, garantir que o trabalho aconteça em 
 
 **Anuncie ao iniciar:** "Usando a skill Pelizzai Starting Branch para preparar a branch desta tarefa."
 
-> **Política do harness:** trabalhamos **somente com branches** — sem `git worktree`. A isolação é sempre `branch` (troca no lugar). Não crie nem proponha worktrees.
+> **Política do harness:** trabalhamos **somente com branches** — sem `git worktree`. O isolamento é sempre `branch` (troca no lugar). Não crie nem proponha worktrees.
 
 ---
 
@@ -39,9 +39,9 @@ git remote -v
 git branch -r --list "origin/develop" "origin/dev" "origin/main" "origin/master"  # candidatas só no remoto (se houver remoto)
 ```
 
-Uma base conta como existente se estiver **local OU no remoto** — uma `develop`/`dev` só no remoto é base válida (branch a partir de `origin/develop`).
+Uma base conta como existente se estiver **local OU no remoto** — uma `develop`/`dev` só no remoto é base válida (branch a partir de `origin/develop`). Só caia no menu do Passo 2 quando **nem local nem remoto** tiverem candidata.
 
-- **Não é repositório git** (`git rev-parse` falha): se a tarefa vai gerar código, ofereça em linguagem simples iniciar o versionamento com `git init` antes de qualquer mudança. Sem repositório não há proteção de histórico nem branch.
+- **Não é repositório git** (`git rev-parse` falha): se a tarefa vai gerar código, ofereça em linguagem simples iniciar o versionamento com `git init` antes de qualquer mudança. Sem repositório não há proteção de histórico nem branch. Se o usuário recusar, prossiga ciente de que não haverá proteção de histórico nem branch.
 - `current` é protegida (`main`/`master`/`develop`/`dev`) ou vazia → **crie uma nova branch antes de qualquer mudança** (siga para o passo 2).
 - `current` já é uma feature branch → pergunte: "Continuar na branch `<current>` ou criar uma nova para esta tarefa?"
 
@@ -113,7 +113,7 @@ chore/upgrade-angular-19
 
 ### 6. Criar a branch
 
-Isolação = **branch** (sempre). Troca no lugar:
+Isolamento = **branch** (sempre). Troca no lugar:
 
 ```bash
 git fetch origin                      # só se houver remoto

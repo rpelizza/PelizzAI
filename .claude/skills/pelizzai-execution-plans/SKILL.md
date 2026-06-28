@@ -70,7 +70,7 @@ Ordem de preferência: **team → subagents → inline**. Escolha proporcional a
 
 ```text
 Isolamento e paralelismo (política do harness: só branches, sem worktrees):
-- A isolação é sempre uma branch (um working tree). NÃO usamos worktrees.
+- O isolamento é sempre uma branch (um working tree). NÃO usamos worktrees.
 - Sem worktrees, não há escrita paralela isolada no mesmo repo: a execução que ESCREVE roda em
   uma branch por vez e o COORDENADOR integra as contribuições EM SÉRIE.
 - O paralelismo de team/subagents fica para o que NÃO escreve concorrentemente: investigação,
@@ -243,18 +243,13 @@ Ao terminar todas as tarefas:
 - `pelizzai-verification-before-completion` / `pelizzai-finish-task` — conclusão com gates.
 - `pelizzai-audit` — padrão de diretório `pelizzai/` e catálogo de skills de domínio.
 
-**Fallback enquanto skills irmãs estão em materialização.** As skills já materializadas (`pelizzai-team`, `pelizzai-tdd`, `pelizzai-reasoning`, `pelizzai-loop`, `pelizzai-audit`, `pelizzai-interview-me`, `pelizzai-writing-skills`) devem ser usadas diretamente. Para as que ainda são stubs vazios, aplique o procedimento mínimo inline — sobretudo no que é fail-closed:
+**Fallback enquanto skills irmãs estão em materialização.** As skills já materializadas (`pelizzai-team`, `pelizzai-tdd`, `pelizzai-reasoning`, `pelizzai-loop`, `pelizzai-audit`, `pelizzai-interview-me`, `pelizzai-writing-skills`, `pelizzai-writing-plans`, `pelizzai-starting-branch`, `pelizzai-review`) devem ser usadas diretamente. Para as que ainda são stubs vazios, aplique o procedimento mínimo inline — sobretudo no que é fail-closed:
 
 ```text
-- pelizzai-starting-branch (vazia): rode `git branch --show-current`; se for main/master/develop/dev
-  OU vazio (HEAD destacado → fail-closed), PARE e crie uma branch antes de qualquer commit.
-- pelizzai-review (vazia): execute o review em dois estágios (spec → qualidade com evidência fresca)
-  e o review final da branch diretamente, pelo protocolo de references/task-cycle.md.
 - pelizzai-verification-before-completion / pelizzai-finish-task (vazias): rode você mesmo os comandos
   de teste (evidência fresca antes de afirmar "pronto") e pergunte squash e destino (push/PR/local/
   descartar) manualmente — base nunca vazia, branch protegida fail-closed.
-- pelizzai-writing-plans (vazia): se não houver plano, não improvise a execução; volte e estruture o
-  plano primeiro (PRD/issues servem como plano enquanto a skill não existe).
+- pelizzai-subagents (vazia): a mecânica de subagente isolado está descrita acima e na pelizzai-team.
 ```
 
 ---
