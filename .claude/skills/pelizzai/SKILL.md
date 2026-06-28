@@ -92,3 +92,50 @@ Quando houver contexto suficiente para agir com segurança, prossiga.
 ## Regras
 
 **Acione uma skill sempre que houver pelo menos 1% de chance de ela ser útil para a tarefa ANTES de tentar resolver manualmente e ANTES de qualquer resposta ou outra ação.** Se uma skill não for adequada para uma situação, você pode ignorá-la, mas deve justificar a decisão. Para a maioria dos casos, você poderá usar a skill `pelizzai-router` após entender o objetivo do usuário e o contexto da tarefa.
+
+# Mapa de fluxos do harness
+
+A entrada é sempre esta skill (`pelizzai`); depois de entender o objetivo, o `pelizzai-router` orquestra. Na primeira interação (ou ao digitar **"bootstrap"**), a `pelizzai-audit` mapeia o projeto e cria as skills de domínio antes de qualquer tarefa.
+
+```mermaid
+flowchart TD
+    U([Mensagem do usuario]) --> P[pelizzai: exigir skill antes de responder]
+    P --> G[Entender o objetivo do usuario]
+    G --> RT[pelizzai-router]
+    RT --> BOOT{1a interacao / bootstrap?\npelizzai/domain-skills.md existe?}
+    BOOT -- Nao --> AUD[pelizzai-audit: mapeia projeto/workspace,\nMCPs, git/host, cria skills de dominio + docs]
+    AUD --> CLS
+    BOOT -- Sim --> CLS{Classificar a intencao}
+    CLS --> TRACKS[Tracks: feature / bug / ajuste / refactor / infra / review / conceitual]
+```
+
+Fluxos por track (o detalhe e os encadeamentos estão na `pelizzai-router`):
+
+```mermaid
+flowchart TD
+    CLS{Intencao} -- feature/refactor/infra --> BR[brainstorming] --> IV1[interview-me\nestressa design] --> WP[writing-plans] --> IV2[interview-me\nestressa plano] --> SB[starting-branch] --> EXP[execution-plans\nteam / subagents / inline]
+    EXP --> CY[tdd por tarefa -> review -> consolidar] --> MORE{mais tarefas?}
+    MORE -- sim --> CY
+    MORE -- nao --> RF[review final] --> VC[verification-before-completion] --> FIN[finish-task\nsquash? push/PR/local/descartar]
+
+    CLS -- bug --> DBG[debugging: 4 fases, causa raiz] --> SB2[starting-branch] --> TDD2[tdd: teste que falha + fix] --> RV2[review] --> VC2[verification] --> FIN
+    CLS -- ajuste --> QF[quick-fix] --> SB3[starting-branch] --> TDD3[tdd minimo] --> VC3[verification] --> FIN
+    CLS -- review --> RVR[review 2 estagios + final] -.oferta.-> OW[oswap: OWASP]
+    CLS -- conceitual --> ANS[responder direto]
+```
+
+O `pelizzai-loop` envolve a execução (repete o ciclo até a Definition of Done; em dúvida, para e usa `pelizzai-interview-me`). A `pelizzai-preferences` é a camada global ao longo de tudo.
+
+# Catálogo de skills
+
+| Grupo                      | Skills                                                                                  |
+| -------------------------- | --------------------------------------------------------------------------------------- |
+| Entrada e orquestração     | `pelizzai` (esta) · `pelizzai-router` · `pelizzai-audit` (bootstrap) · `pelizzai-preferences` (camada global) |
+| Raciocínio e comunicação   | `pelizzai-reasoning` · `pelizzai-interview-me` · `pelizzai-writing-clearly-and-concisely` |
+| Ciclo de feature           | `pelizzai-brainstorming` → `pelizzai-writing-plans` → `pelizzai-execution-plans`         |
+| Execução por tarefa        | `pelizzai-tdd` · `pelizzai-team` · `pelizzai-subagents` · `pelizzai-loop`                |
+| Tracks dedicados           | `pelizzai-debugging` (bug) · `pelizzai-quick-fix` (ajuste)                               |
+| Isolamento e fechamento    | `pelizzai-starting-branch` · `pelizzai-finish-task`                                      |
+| Qualidade e segurança      | `pelizzai-review` · `pelizzai-oswap` · `pelizzai-verification-before-completion`         |
+| Frontend                   | `pelizzai-frontend`                                                                      |
+| Autoria de skills          | `pelizzai-writing-skills`                                                                |
