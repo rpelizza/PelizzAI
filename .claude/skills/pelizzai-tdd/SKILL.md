@@ -1,6 +1,6 @@
 ---
 name: pelizzai-tdd
-description: Desenvolvimento orientado a testes (TDD). Utilize para desenvolver funcionalidades ou corrigir bugs adotando a abordagem "test-first", mencionar o ciclo "red-green-refactor" ou desejar testes de integração.
+description: Desenvolvimento orientado a testes (TDD). Use para desenvolver funcionalidades ou corrigir bugs com a abordagem "test-first" (ciclo red-green-refactor, fatias verticais, testes de integração). É também a disciplina POR TAREFA do harness: acione ao implementar cada tarefa de um plano (via `pelizzai-execution-plans`) e quando um membro de `pelizzai-team`/`pelizzai-subagents` escreve código. Use sempre que o trabalho envolver escrever ou corrigir código com testes.
 ---
 
 # Desenvolvimento Orientado a Testes (TDD)
@@ -44,13 +44,13 @@ CERTO (vertical):
 
 ### 1. Planejamento
 
-Ao explorar a base de código e respeite as ADRs (Decisões de Arquitetura) da área em que você está trabalhando.
+Explore a base de código e respeite as ADRs (Architecture Decision Records — Decisões de Arquitetura) da área em que você está trabalhando.
 
 Antes de escrever qualquer código:
 
-- [ ] Confirme com o usuário quais alterações de interface são necessárias
+- [ ] Confirme com o usuário quais alterações de interface são necessárias (use `pelizzai-interview-me` quando houver dúvida material)
 - [ ] Confirme com o usuário quais comportamentos devem ser testados (priorize-os)
-- [ ] Identifique oportunidades para criar módulos "profundos" (interface simples, implementação robusta/complexa) — execute a habilidade `/codebase-design` para verificar o vocabulário e a testabilidade
+- [ ] Identifique oportunidades para criar módulos "profundos" (interface simples, implementação robusta) — use `pelizzai-reasoning` (Structured Decomposition) para mapear o vocabulário e a testabilidade; em design novo, isso vem da `pelizzai-brainstorming`
 - [ ] Liste os comportamentos a serem testados (não os passos de implementação)
 - [ ] Obtenha a aprovação do usuário para o plano
 
@@ -74,8 +74,8 @@ Este é o seu _tracer bullet_ (teste de integração inicial) — ele comprova q
 Para cada comportamento restante:
 
 ```
-RED:   Write next test → fails
-GREEN: Minimal code to pass → passes
+RED:   Escreva o próximo teste → falha
+GREEN: Código mínimo para passar → passa
 ```
 
 Regras:
@@ -106,3 +106,44 @@ Após todos os testes passarem, identifique [candidatos à refatoração](refact
 [ ] O código é o mínimo necessário para este teste
 [ ] Nenhuma funcionalidade especulativa foi adicionada
 ```
+
+## Ciclo de TDD (visão geral)
+
+```mermaid
+flowchart LR
+    P[Planejar: listar comportamentos] --> T[Tracer bullet: 1 teste ponta-a-ponta]
+    T --> R[RED: proximo teste -> falha]
+    R --> G[GREEN: codigo minimo -> passa]
+    G --> C{Mais comportamentos criticos?}
+    C -- Sim --> R
+    C -- Nao --> RF[Refatorar no verde]
+    RF --> D{Definition of Done?}
+    D -- Nao --> R
+    D -- Sim --> done([Tarefa pronta para review])
+```
+
+## Integração no harness
+
+**Quando o TDD entra:**
+
+- Diretamente, quando o usuário desenvolve test-first ou corrige um bug — escreva primeiro o teste de regressão que reproduz o bug.
+- Como **disciplina por tarefa** ao executar um plano: a `pelizzai-execution-plans` despacha um subagente por tarefa, e cada tarefa é implementada por este ciclo TDD.
+- Por **membros de `pelizzai-team` / `pelizzai-subagents`**: cada membro que escreve código implementa sua frente via TDD.
+
+**Raciocínio — `pelizzai-reasoning`:**
+
+- Planejamento: liste os comportamentos com *Structured Decomposition* (comportamentos, não passos de implementação).
+- Teste vermelho inesperado ou bug: *Root Cause Analysis* antes de mexer no código.
+- Estado verde: *Verification* confirma que o comportamento existe de fato — não basta "passou".
+
+**Loop até a entrega — `pelizzai-loop`:**
+
+- O ciclo RED→GREEN é um loop: repita teste→código por comportamento até a *Definition of Done* (comportamentos críticos testados e verdes, refatorado no verde).
+- No nível da tarefa/plano, o harness mantém o loop (implementar → testar → revisar → corrigir) até a tarefa ser entregue com êxito. Em dúvida material, **pare** e use `pelizzai-interview-me`.
+
+**Aprovação e conclusão:**
+
+- Confirme interface e comportamentos com `pelizzai-interview-me`, ou no design aprovado da `pelizzai-brainstorming`, antes de escrever testes.
+- Antes de declarar pronto, passe pela `pelizzai-verification-before-completion` e pela `pelizzai-review`.
+
+> Algumas skills irmãs citadas (`pelizzai-execution-plans`, `pelizzai-subagents`, `pelizzai-review`, `pelizzai-verification-before-completion`) ainda estão sendo materializadas; referenciá-las pelo nome mantém o harness coeso conforme cada uma é construída.
