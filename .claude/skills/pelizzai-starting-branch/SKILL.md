@@ -153,6 +153,18 @@ Pronto para começar a tarefa.
 
 ---
 
+## Erros comuns
+
+| Erro                                           | Correção                                |
+| ---------------------------------------------- | --------------------------------------- |
+| Criar a branch automaticamente sem perguntar   | Sempre confirmar o nome com o usuário   |
+| Usar `main` como base quando há `develop`      | Prioridade: develop > dev > main/master |
+| Branch única para monorepo com vários projetos | Uma branch por projeto afetado          |
+| Slug longo ou com caracteres especiais         | Máx 50 chars, ASCII, minúsculo, hífens  |
+| Esquecer de dar pull na base antes de criar    | Sempre `git pull --ff-only` primeiro    |
+
+---
+
 ## Sinais de alerta (red flags)
 
 **Nunca:**
@@ -163,6 +175,12 @@ Pronto para começar a tarefa.
 - Pular a detecção de multi-projeto em workspaces.
 - Assumir a base — sempre confirme.
 - Propor ou criar worktrees — o harness trabalha só com branches.
+
+**Sempre:**
+
+- Perguntar antes de criar `develop` se ela não existir.
+- Confirmar o conjunto de projetos afetados em monorepo/multi-repo.
+- Usar o tipo conventional como prefixo da branch.
 
 ---
 

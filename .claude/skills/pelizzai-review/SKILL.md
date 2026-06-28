@@ -146,6 +146,7 @@ Push back quando: quebra algo existente, reviewer sem contexto completo, viola Y
        ou conflita com decisão de arquitetura do usuário — com raciocínio técnico, não defensividade.
 Não consegue verificar? Diga: "Não consigo verificar isto sem [X] — investigo / pergunto / sigo?"
        (nunca implemente às cegas).
+Em PR no GitHub, responda no THREAD do comentário inline (não como comentário top-level do PR).
 ```
 
 ---
