@@ -342,7 +342,6 @@ Se o antecedente consistir em um grupo de palavras, o relativo vem ao fim do gru
 | ------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | Uma proposta de emenda à Lei de Diretrizes, que foi julgada de modos diversos. | Uma proposta, que foi julgada de modos diversos, de emenda à Lei de Diretrizes. |
 | —                                                                   | Uma proposta de emenda à tão debatida Lei de Diretrizes.            |
-| O neto de Pedro Álvares, que...                                      | O neto de Pedro Álvares, ele que...                                  |
 
 Um substantivo em aposto pode vir entre o antecedente e o relativo, porque em tal combinação não pode surgir ambiguidade real.
 
