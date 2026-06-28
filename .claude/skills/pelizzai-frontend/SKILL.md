@@ -1,52 +1,332 @@
 ---
 name: pelizzai-frontend
-description: Use essa skill para implementar a interface do usuário (UI) de um plano de execução. A UI é o ponto de contato do usuário com o plano, e deve ser clara, intuitiva e responsiva. Esta skill fornece diretrizes, padrões e exemplos para criar uma UI consistente e de alta qualidade.
+description: Use para qualquer trabalho de frontend/UI no PelizzAI: criar ou alterar páginas, componentes, fluxos, estados visuais, dashboards, formulários, landing pages, design systems, CSS, responsividade, acessibilidade, microinterações e QA visual. Acione especialmente quando a tarefa menciona "frontend", "UI", "tela", "componente", "layout", "estilizar", "melhorar visual", "responsivo", "Figma", "design", "evitar AI slop" ou quando uma tarefa de execução tocar a experiência do usuário.
 ---
 
-# Design de Frontend
+# PelizzAI Frontend
 
-Aborde este projeto como o líder de design de um pequeno estúdio conhecido por criar identidades visuais únicas para cada cliente — identidades que jamais seriam confundidas com as de outros. Este cliente já rejeitou propostas que pareciam baseadas em modelos genéricos e está pagando por uma perspectiva autêntica: faça escolhas deliberadas e com personalidade sobre paleta de cores, tipografia e layout que sejam específicas para este briefing, e assuma um risco estético real que você saiba justificar.
+## Objetivo
 
-## Fundamente o design no tema
+Entregar interfaces que pareçam projetadas por alguém que entendeu o produto, o usuário e a base de código. Evite "AI slop": UI bonita de longe, mas genérica, sem função clara, cheia de placeholders, gradientes automáticos, cards decorativos, dados falsos, estados incompletos, texto vago e responsividade quebrada.
 
-Se o briefing não definir claramente qual é o produto ou o tema, defina-o você mesmo antes de começar a projetar: identifique um tema concreto, o público-alvo e a função principal da página, e explicite essa escolha. Se você tiver informações sobre as preferências do usuário, o contexto do que está sendo construído ou projetos anteriores, utilize isso como referência. É no universo do próprio tema — com seus materiais, instrumentos, artefatos e linguagem característica — que nascem as escolhas originais. Trabalhe sempre com o conteúdo e o tema reais do briefing.
+Esta skill não é só estética. Ela é um gate de produto, implementação e verificação visual.
 
-## Princípios de design
+**Anuncie ao iniciar:** "Usando a skill PelizzAI Frontend para desenhar, implementar e verificar a experiência de UI."
 
-No design para a web, a seção de destaque inicial (o _hero_) funciona como uma tese. Comece com o elemento mais característico do universo do tema, na forma que fizer mais sentido: um título impactante, uma imagem, uma animação, uma demonstração em tempo real ou um elemento interativo. Seja intencional na escolha: aquele padrão de "número grande com legenda pequena, estatísticas de apoio e detalhes em degradê" é uma solução clichê; utilize-o apenas se for realmente a melhor opção.
+---
 
-A tipografia transmite a personalidade da página. Combine fontes de destaque (_display_) e de corpo de texto de forma deliberada — evitando recorrer às mesmas famílias tipográficas que você usaria em qualquer outro projeto — e estabeleça uma hierarquia tipográfica clara, com pesos, larguras e espaçamentos intencionais. Faça com que o tratamento tipográfico seja, por si só, uma parte memorável do design, e não apenas um meio neutro de apresentar o conteúdo.
+## Princípio central
 
-A estrutura transmite informação. Elementos estruturais — como numeração, títulos de apoio (_eyebrows_), divisores e rótulos — devem comunicar algo verdadeiro sobre o conteúdo, em vez de apenas decorá-lo. Muitos designs genéricos utilizam marcadores numéricos (01 / 02 / 03), mas isso só é adequado se o conteúdo realmente seguir uma sequência — como um processo real ou uma linha do tempo onde a ordem transmite informações essenciais ao leitor. Questione se escolhas como marcadores numéricos realmente fazem sentido antes de incorporá-las.
+> Uma boa interface nasce de evidência. Primeiro entenda o produto existente, depois escolha uma direção visual específica, implemente com os padrões reais do projeto e só declare pronto após ver a tela funcionando.
 
-Utilize o movimento de forma deliberada. Avalie onde — e se — a animação pode servir ao tema: uma sequência de carregamento da página, uma revelação acionada pela rolagem, microinterações ao passar o mouse ou uma atmosfera ambiente. Um momento bem orquestrado costuma causar mais impacto do que efeitos dispersos; escolha a abordagem que a direção do projeto exige. No entanto, às vezes menos é mais, e o excesso de animação pode dar a impressão de que o design foi gerado por IA.
+Frontend aceitável precisa passar por quatro provas:
 
-Alinhe a complexidade à visão do projeto. Abordagens maximalistas exigem uma execução elaborada; abordagens minimalistas exigem precisão no espaçamento, na tipografia e nos detalhes. A elegância reside na boa execução da visão escolhida.
+```text
+1. Produto: resolve o fluxo real do usuário, com conteúdo realista e estados completos.
+2. Sistema: respeita stack, componentes, tokens, rotas, dados e convenções existentes.
+3. Design: tem direção visual própria, coerente com o domínio, sem clichês automáticos de IA.
+4. Verificação: foi visto em navegador ou screenshot, em mobile e desktop, sem sobreposição ou quebra.
+```
 
-Dê atenção especial ao conteúdo textual. Muitas vezes, o _briefing_ de design não contém o conteúdo real, cabendo a você criar os textos. O texto pode fazer com que o design pareça tão genérico quanto um modelo pronto. Consulte a seção sobre redação abaixo para obter mais orientações.
+---
 
-## Processo: _brainstorming_, exploração, planejamento, crítica, construção, nova crítica
+## Fluxo obrigatório
 
-Para fins de calibração: atualmente, designs gerados por IA tendem a se concentrar em três estilos: (1) fundo em tom creme quente (próximo a #F4F1EA) com tipografia _display_ serifada de alto contraste e um detalhe em terracota; (2) fundo quase preto com um único detalhe em verde-ácido vibrante ou vermelhão; (3) layout estilo jornal _broadsheet_, com linhas divisórias finíssimas, bordas sem arredondamento e colunas densas, lembrando jornais impressos. Os três são válidos para certos _briefings_, mas funcionam mais como padrões automáticos do que como escolhas deliberadas, surgindo independentemente do tema. Quando o _briefing_ definir uma direção visual, siga-a à risca — as palavras do próprio _briefing_ sempre prevalecem, inclusive quando solicitam um desses estilos. Quando houver liberdade de escolha, não a desperdice optando por um desses padrões. Assim como ocorre com um designer humano contratado, muitas vezes é preciso encontrar um equilíbrio cuidadoso entre fazer o que você domina e aproveitar cada projeto como uma oportunidade para experimentar e aprender.
+### 1. Ler o contexto antes de desenhar
 
-Trabalhe em duas etapas. Primeiro, faça um _brainstorming_ e elabore um plano de design conciso com base no _briefing_ fornecido: crie um sistema compacto de _tokens_ abrangendo cores, tipografia, layout e assinatura visual. Cores: descreva a paleta indicando de 4 a 6 valores hexadecimais nomeados. Tipografia: defina fontes para pelo menos duas funções (uma fonte _display_ com personalidade, usada com moderação; uma fonte complementar para corpo de texto; e uma fonte utilitária para legendas ou dados, se necessário). Layout: crie um conceito de layout, utilizando descrições em frases curtas e _wireframes_ em ASCII para gerar e comparar ideias. Assinatura visual: defina o elemento único e marcante que caracterizará a página e que incorpore a essência do _briefing_ de forma adequada.
+Antes de escrever UI:
 
-Em seguida, antes de iniciar a construção, revise o plano comparando-o com o _briefing_: se alguma parte parecer um padrão genérico que você produziria para qualquer página semelhante (teste com um _prompt_ parecido para ver se chega a um resultado similar) — em vez de uma escolha feita especificamente para aquele _briefing_ —, revise essa parte e explique o que foi alterado e por quê. Somente após confirmar que seu plano de design possui um caráter único você deve começar a escrever o código, seguindo rigorosamente o plano revisado e baseando nele todas as decisões sobre cores e tipografia.
+```text
+[ ] Identifique stack, rotas, framework, biblioteca de componentes, CSS, ícones e testes.
+[ ] Leia telas/componentes vizinhos que resolvem problemas semelhantes.
+[ ] Encontre tokens existentes: cores, spacing, radius, fontes, sombras, breakpoints.
+[ ] Entenda de onde vêm os dados reais: API, store, props, loader, form state, mocks de teste.
+[ ] Procure estados já padronizados: loading, empty, error, disabled, selected, success.
+```
 
-Ao escrever o código, tenha cuidado com a estruturação da especificidade dos seletores CSS. É fácil criar classes CSS que anulam umas às outras (especialmente com um seletor baseado em tipo, como `.section`, e um seletor baseado em elemento, como `.cta`). Isso acontece com frequência ao lidar com espaçamentos (paddings/margins) entre seções.
+Se houver design system ou componentes locais, use-os. Só crie componente visual novo quando os existentes não resolverem o caso ou quando a tarefa pedir uma nova linguagem.
 
-Tente realizar grande parte desse planejamento e iteração mentalmente, apresentando ideias ao usuário apenas quando estiver mais confiante de que elas irão encantá-lo.
+Em app existente, a primeira obrigação é continuidade. Diferenciação visual não autoriza quebrar navegação, densidade, vocabulário ou padrões que o usuário já aprendeu.
 
-## Moderação e autocrítica
+### 2. Definir a direção visual em uma frase
 
-Reserve sua ousadia para um único ponto de destaque. Faça do elemento principal o ponto memorável, mantenha o restante sóbrio e disciplinado, e elimine qualquer decoração que não atenda ao objetivo do projeto. Às vezes, não correr riscos pode ser, em si, um risco! Estabeleça um padrão mínimo de qualidade sem precisar anunciá-lo: design responsivo (adaptado para dispositivos móveis), foco de teclado visível e respeito às preferências de redução de movimento. Critique seu próprio trabalho enquanto desenvolve, tirando capturas de tela se o ambiente permitir — uma imagem vale mais que mil tokens. Lembre-se do conselho de Chanel: antes de sair de casa, olhe-se no espelho e remova um acessório. Criadores humanos possuem memória e buscam sempre inovar; portanto, ter um espaço para anotar rapidamente o que você já testou pode ajudar em iterações futuras.
+Antes de codar, formule mentalmente uma tese específica:
 
-## Mais sobre redação no design
+```text
+"Esta tela deve parecer <qualidade visual> porque o usuário precisa <objetivo real> em um contexto de <domínio/pressão/ritmo>."
+```
 
-As palavras surgem em um design por um motivo: facilitar a compreensão e, consequentemente, o uso. Elas são matéria-prima do design, não mera decoração. Aplique ao texto a mesma intencionalidade que você dedicaria ao espaçamento e às cores. Antes de escrever, pergunte-se o que o design precisa comunicar e qual a melhor forma de expressar isso para ajudar o usuário a navegar pela experiência.
+Exemplos bons:
 
-Escreva sob a perspectiva do usuário final. Nomeie os elementos com base no que as pessoas controlam e reconhecem, e não na forma como o sistema foi construído. Uma pessoa gerencia notificações, não configurações de webhook. Descreva a função de um elemento de forma clara e direta, em vez de tentar "vendê-lo". Ser específico é sempre melhor do que tentar ser espirituoso.
+```text
+- "Painel operacional compacto e calmo, porque gestores voltam a ele muitas vezes por dia para decidir rápido."
+- "Editor editorial, arejado e tipográfico, porque o usuário precisa comparar versões longas sem fadiga."
+- "Fluxo financeiro austero, com contraste forte e feedback explícito, porque erro de entrada tem custo alto."
+```
 
-Use a voz ativa como padrão. Um controle deve indicar exatamente o que acontece quando é acionado: "Salvar alterações", em vez de "Enviar". Uma ação deve manter o mesmo nome ao longo de todo o fluxo; assim, um botão com o rótulo "Publicar" gera uma notificação (toast) dizendo "Publicado". O vocabulário de uma interface serve como sinalização para quem navega pelo produto. Coesão e consistência são fundamentais para que as pessoas aprendam a se orientar no sistema. Trate o erro e o estado de vazio como oportunidades para orientar o usuário, e não apenas como reflexos de um estado emocional. Explique o que deu errado e como resolver a situação, utilizando a voz da própria interface em vez de uma voz humana. Mensagens de erro não pedem desculpas e nunca são vagas sobre o ocorrido. Uma tela vazia é um convite à ação.
+Exemplos ruins:
 
-Mantenha um tom de voz coloquial e preciso: use verbos simples, letras maiúsculas apenas no início das frases, evite palavras desnecessárias e alinhe o tom à marca e ao público. Garanta que cada elemento desempenhe uma única função: um rótulo serve para identificar, um exemplo serve para demonstrar, e nenhum elemento deve exercer uma função dupla de forma implícita.
+```text
+- "Moderno e clean."
+- "Premium com gradiente."
+- "Dashboard bonito."
+```
+
+Quando a tarefa vier de `pelizzai-brainstorming` ou de uma especificação aprovada, a direção visual já aprovada prevalece. Não invente uma nova personalidade no meio da execução.
+
+### 3. Fazer um plano visual compacto
+
+Para mudanças pequenas, mantenha o plano na cabeça. Para mudanças médias/grandes, registre brevemente antes de implementar:
+
+```text
+- Estrutura: hierarquia da tela, áreas primárias/secundárias, navegação.
+- Componentes: quais reutilizar, quais criar, quais estados cobrir.
+- Conteúdo: títulos, rótulos, CTAs, mensagens de erro/vazio.
+- Tokens: cores, tipografia, spacing, radius, sombras, ícones.
+- Responsividade: como a tela muda em mobile, tablet e desktop.
+- Verificação: quais viewports e fluxos serão inspecionados no navegador.
+```
+
+Não apresente longas defesas estéticas ao usuário durante a execução. Use o plano para guiar decisões e só exponha quando houver trade-off material.
+
+---
+
+## Regras anti-slop
+
+### Proibições fortes
+
+Não entregue:
+
+```text
+- Hero marketing quando o pedido é uma ferramenta/app/tela operacional.
+- Cards dentro de cards, seções flutuantes decorativas ou excesso de containers sem função.
+- Paleta dominada por roxo/azul neon, creme/terracota, preto+verde ácido ou gradiente genérico sem justificativa do domínio.
+- Orbs, blobs, bokeh, glassmorphism ou brilho difuso como decoração padrão.
+- Números grandes com legendas pequenas se os números não forem o conteúdo principal real.
+- Placeholders como "Lorem ipsum", "Feature 1", "User Name", "Data here" ou dados inventados em tela final.
+- Texto de marketing para controles funcionais.
+- Layout que só funciona no viewport em que foi escrito.
+- Animações espalhadas para mascarar falta de hierarquia.
+- Botões que mudam tamanho por causa de loading, ícone, hover ou texto traduzido.
+- Ícones desenhados à mão quando já existe biblioteca de ícones no projeto.
+```
+
+Use dados fictícios apenas quando a tarefa for protótipo ou story/teste isolado. Mesmo assim, faça dados plausíveis para o domínio e deixe claro no código/teste que são fixtures.
+
+### Sinais de que você está caindo em AI slop
+
+Pare e revise se perceber:
+
+```text
+- A tela poderia servir para qualquer SaaS trocando o logo.
+- As cores não têm relação com o domínio, urgência ou hierarquia da tarefa.
+- O texto descreve a interface em vez de ajudar o usuário a agir.
+- Quase tudo tem a mesma importância visual.
+- Existem muitos efeitos, mas nenhum melhora compreensão, velocidade ou confiança.
+- O estado vazio não diz o que fazer.
+- O erro pede desculpas, mas não explica como resolver.
+- O mobile é só a versão desktop espremida.
+- O componente ignora teclado, foco, contraste ou redução de movimento.
+```
+
+---
+
+## Design de produto
+
+### Hierarquia e composição
+
+Comece pelo trabalho real do usuário:
+
+```text
+1. Qual decisão ou ação a pessoa precisa tomar?
+2. Qual informação ela precisa ver primeiro?
+3. O que é secundário, raro ou destrutivo?
+4. O que pode ficar escondido, colapsado ou fora da tela inicial?
+```
+
+Depois componha a UI:
+
+```text
+- Uma área primária clara por tela ou por painel.
+- Densidade compatível com uso: operacional = compacto e escaneável; editorial = mais respiro.
+- Alinhamento consistente; assimetria só quando comunica algo.
+- Espaçamento com escala, não valores aleatórios.
+- Divisores, labels, badges e numeração apenas quando carregam significado.
+```
+
+### Conteúdo e microcopy
+
+Escreva como produto, não como anúncio.
+
+```text
+- Botões usam verbos específicos: "Salvar alterações", "Convidar usuário", "Gerar relatório".
+- O mesmo conceito recebe o mesmo nome em toda a tela.
+- Títulos dizem o que a área contém, não slogans.
+- Erros dizem o que falhou e como corrigir.
+- Estados vazios oferecem a próxima ação possível.
+- Loading preserva layout e evita salto visual.
+```
+
+Não use texto visível para explicar a própria UI ("clique aqui para...", "este card mostra...") quando o componente pode ser autoexplicativo.
+
+### Controles
+
+Escolha controles pelo tipo de decisão:
+
+```text
+- Botão: comando explícito.
+- Toggle/checkbox: estado binário.
+- Segmented control/tabs: modos ou visões mutuamente exclusivos.
+- Select/menu: conjunto fechado de opções.
+- Slider/stepper/input numérico: valor ajustável.
+- Swatch: cor.
+- Ícone com tooltip: ação comum e compacta.
+```
+
+Use ícone + texto para ações importantes ou ambíguas. Use apenas ícone para ações reconhecíveis, com `aria-label` e tooltip quando a biblioteca oferecer.
+
+### Estados obrigatórios
+
+Para cada tela/componente interativo, cubra:
+
+```text
+[ ] Default
+[ ] Hover/focus/active
+[ ] Loading
+[ ] Empty
+[ ] Error
+[ ] Disabled
+[ ] Success/confirmation quando aplicável
+[ ] Mobile
+[ ] Conteúdo longo ou traduzido
+[ ] Permissões/sem acesso quando aplicável
+```
+
+Se algum estado não se aplica, saiba por quê. Não deixe buraco por esquecimento.
+
+---
+
+## Implementação
+
+### Seguir o projeto
+
+Prefira padrões locais:
+
+```text
+- Componentes, hooks, stores, loaders/actions e helpers existentes.
+- Tokens CSS/Tailwind/theme já definidos.
+- Biblioteca de ícones já instalada, especialmente lucide quando for o padrão.
+- Estratégia de formulários e validação existente.
+- Padrão de testes e stories existente.
+```
+
+Não adicione biblioteca visual, fonte remota, animação pesada ou dependência de design sem necessidade clara. Se precisar, justifique pelo ganho para o produto.
+
+### CSS e layout
+
+Construa layouts estáveis:
+
+```text
+- Defina dimensões previsíveis para toolbars, botões, grids, cards, tiles e painéis.
+- Use `minmax`, `clamp`, `aspect-ratio`, `min-height`, `max-width` e containers responsivos quando fizer sentido.
+- Evite texto que estoura o container; trate wrap, truncamento ou reflow.
+- Não use fonte escalada por viewport width.
+- Evite letter-spacing negativo.
+- Cards, quando existirem, devem ter raio discreto (8px ou menos), salvo design system contrário.
+- Não coloque card dentro de card.
+```
+
+Controle especificidade. Prefira classes/componentes claros a cascatas que brigam entre si.
+
+### Acessibilidade e interação
+
+Trate acessibilidade como parte da entrega:
+
+```text
+[ ] Foco visível e ordem de tabulação lógica.
+[ ] Elementos interativos com nome acessível.
+[ ] Contraste suficiente para texto, ícones e estados.
+[ ] Alvos clicáveis confortáveis em touch.
+[ ] `prefers-reduced-motion` respeitado.
+[ ] Erros de formulário associados aos campos.
+[ ] Sem dependência exclusiva de cor para comunicar estado.
+```
+
+Animação deve ajudar percepção de causa, mudança de estado ou orientação espacial. Se for só enfeite, remova.
+
+---
+
+## Verificação visual
+
+Nunca finalize UI apenas lendo código.
+
+Sempre que o projeto puder rodar em navegador:
+
+```text
+1. Inicie ou use o dev server existente.
+2. Abra a tela alterada.
+3. Verifique pelo menos um viewport desktop e um mobile.
+4. Interaja com os estados principais.
+5. Corrija sobreposição, quebra de texto, layout shift, console errors e estados ilegíveis.
+```
+
+Use screenshots quando disponíveis. Olhe para a imagem como revisor visual, não como autor orgulhoso:
+
+```text
+- O primeiro olhar entende o que fazer?
+- Há hierarquia clara?
+- Algum texto está cortado, colado ou competindo?
+- Algum elemento parece template genérico?
+- O mobile mantém prioridade e legibilidade?
+- Existe algo decorativo que deveria ser removido?
+```
+
+Se não for possível rodar a UI, declare isso no resultado final e compense com revisão estática: inspecione CSS, estrutura, estados e testes. Não finja verificação visual.
+
+---
+
+## Integração com o harness
+
+**Combina com:**
+
+```text
+- `pelizzai-brainstorming`: para definir especificação e direção visual antes de implementação criativa.
+- `pelizzai-execution-plans`: para executar tarefas de UI dentro de planos aprovados.
+- `pelizzai-tdd`: para comportamento de componentes, formulários, rotas e regressões.
+- `pelizzai-review`: para revisar aderência à spec e qualidade.
+- `pelizzai-verification-before-completion`: para evidência fresca antes de declarar pronto.
+- Skills de domínio do projeto: para padrões reais de produto, design system e stack.
+```
+
+Em tarefa de plano, aplique esta skill dentro do ciclo da tarefa. UI não está pronta só porque compila; precisa estar testada, navegável e visualmente verificada.
+
+---
+
+## Definition of Done
+
+Antes de dizer que terminou, confirme:
+
+```text
+[ ] A UI resolve o objetivo real do usuário descrito na tarefa/spec.
+[ ] Usa padrões/componentes/tokens existentes ou justifica desvios.
+[ ] Não contém placeholders, dados fake indevidos ou texto genérico.
+[ ] Cobre estados relevantes: loading, empty, error, disabled, success.
+[ ] É responsiva em mobile e desktop.
+[ ] Tem foco visível, nomes acessíveis e contraste adequado.
+[ ] Não tem decoração sem função nem clichês visuais automáticos.
+[ ] Foi verificada no navegador/screenshot quando possível.
+[ ] Testes/lint/build relevantes foram executados ou limitação foi declarada.
+```
+
+---
+
+## Instrução final para o agente
+
+```text
+Projete a interface a partir do produto real.
+Siga o sistema existente antes de inventar.
+Escolha uma direção visual específica, não uma estética genérica de IA.
+Implemente estados completos, responsivos e acessíveis.
+Veja a tela funcionando antes de declarar pronto.
+Remova qualquer elemento que só esteja ali para parecer bonito.
+```
