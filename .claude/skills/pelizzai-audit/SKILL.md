@@ -121,6 +121,25 @@ A existência de `pelizzai/domain-skills.md` é o sinal de que o harness já foi
 
 ---
 
+## Padrão de diretório `pelizzai/`
+
+Toda a documentação e o estado do harness vivem em `pelizzai/`, na **raiz do repositório ou do workspace**. Este é o padrão único que todas as skills consomem — nunca espalhe artefatos do harness por outras pastas.
+
+```text
+pelizzai/                         na raiz do repositório ou workspace
+├── domain-skills.md              catálogo das skills de domínio (marca o bootstrap concluído)
+├── specs/                        designs aprovados (pelizzai-brainstorming): AAAA-MM-DD-<topico>-design.md
+├── plans/                        planos de implementação (pelizzai-writing-plans)
+└── data/                         estado e ledgers do harness
+    ├── state.md                  cursor da tarefa ativa (pelizzai-execution-plans)
+    ├── review-domain-skills.md   ledger de manutenção das skills de domínio
+    └── .cadence-state.json        contador do hook de cadência (vai para o .gitignore)
+```
+
+Em **workspace** (vários projetos na mesma pasta), o `pelizzai/` fica na raiz do workspace e cobre todos; cada skill registra a qual projeto um artefato pertence quando isso importar.
+
+---
+
 ## Critério de conclusão
 
 ```text
