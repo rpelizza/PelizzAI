@@ -5,6 +5,8 @@ description: 'Você DEVE utilizar isso antes de qualquer trabalho criativo — c
 
 # Transformando ideias em projetos
 
+**Anuncie ao iniciar:** "Usando a skill PelizzAI Brainstorming para explorar a intenção, os requisitos e o design antes da implementação."
+
 Ajude a transformar ideias em projetos e especificações detalhadas e completas por meio de um diálogo colaborativo natural. Este processo é útil para qualquer trabalho criativo, incluindo a criação de funcionalidades, desenvolvimento de componentes, adição de recursos ou modificação de comportamentos.
 
 Comece entendendo o contexto atual do projeto, faça um repo scan completo e, em seguida, explore a intenção do usuário, os requisitos e o design antes da implementação. O objetivo é criar uma especificação detalhada que possa ser usada para orientar o desenvolvimento.
@@ -30,8 +32,8 @@ Você DEVE criar uma tarefa para cada um destes itens e concluí-los na ordem in
 3. **Fazer perguntas de esclarecimento** — uma de cada vez; entender o objetivo, as restrições e os critérios de sucesso
 4. **Propor 2 a 3 abordagens** — apresentando prós e contras (trade-offs) e sua recomendação
 5. **Apresentar o design** — em seções dimensionadas de acordo com a complexidade; obter a aprovação do usuário após cada seção
-6. **Realizar teste de estresse com `interview-me` (OBRIGATÓRIO)** — antes de redigir o documento, conduzir uma entrevista aprofundada que **exponha as lacunas do design** (casos não tratados, validações ausentes, falhas de segurança/autorização, estados indefinidos, contradições). Não é uma oferta opcional — consulte a nota na seção "Apresentação do design".
-7. **Redigir o documento de design** — salvar em `pelizzai/specs/AAAA-MM-DD-<tópico>-design.md` e fazer o commit
+6. **Realizar teste de estresse com `pelizzai-interview-me` (OBRIGATÓRIO)** — antes de redigir o documento, conduzir uma entrevista aprofundada que **exponha as lacunas do design** (casos não tratados, validações ausentes, falhas de segurança/autorização, estados indefinidos, contradições). Não é uma oferta opcional — consulte a nota na seção "Apresentação do design".
+7. **Redigir o documento de design** — salvar em `pelizzai/specs/AAAA-MM-DD-<tópico>-design.md`. **NÃO commite aqui**: neste ponto do track feature ainda não existe isolamento (a branch/worktree só nasce no gate de setup pós-plano), então um commit agora cairia na branch em que a sessão abriu — tipicamente `main`, violando o gate de branch protegida. A spec entra no primeiro commit da branch da tarefa, depois do gate.
 8. **Autoavaliação da especificação** — verificação rápida (inline) de placeholders, contradições, ambiguidades e escopo (veja abaixo)
 9. **Revisão da especificação pelo usuário** — solicitar que o usuário revise o arquivo de especificação antes de prosseguir
 10. **Transição para a implementação** — acionar a skill `pelizzai-writing-plans` para criar o plano de implementação
@@ -51,7 +53,7 @@ digraph brainstorming {
 	"Escrever documento de design" [shape=box];
 	"Autoavaliação da especificação\n(corrigir diretamente)" [shape=box];
 	"Usuário revisa a especificação?" [shape=diamond];
-	"Invocar habilidade de redação de planos" [shape=doublecircle];
+	"Invocar skill pelizzai-writing-plans" [shape=doublecircle];
 
 	"Explorar o contexto do projeto" -> "Questões visuais à frente?";
 	"Questões visuais à frente?" -> "Oferecer Acompanhamento Visual\n(mensagem própria, sem outro conteúdo)" [label="sim"];
@@ -122,7 +124,7 @@ digraph brainstorming {
 - Salve o design validado (especificação) em `pelizzai/specs/AAAA-MM-DD-<topic>-design.md`
 - (Preferências do usuário quanto ao local da especificação prevalecem sobre esse padrão)
 - Use a skill `pelizzai-writing-clearly-and-concisely` para redigir a especificação de forma clara e concisa, evitando jargões e termos técnicos desnecessários.
-- Faça o _commit_ do documento de design no Git
+- **Não commite a spec neste momento** — o isolamento (branch/worktree) ainda não existe; ela é commitada na branch da tarefa, após o gate de setup pós-plano (junto do plano, no primeiro commit da tarefa)
 
 **Autoavaliação da Especificação:**
 Após redigir o documento de especificação, analise-o com um olhar renovado:

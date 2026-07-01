@@ -9,7 +9,7 @@ description: Skill de code review do harness PelizzAI. Use após completar uma t
 
 Pegar problemas antes que eles se propaguem. O reviewer recebe **contexto fabricado** — descrição, requisitos/plano e o diff — **nunca o histórico da sua sessão**. Isso mantém o reviewer focado no produto, não no seu raciocínio, e preserva o seu contexto para continuar.
 
-**Anuncie ao iniciar:** "Usando a skill Pelizzai Review para revisar o código."
+**Anuncie ao iniciar:** "Usando a skill PelizzAI Review para revisar o código."
 
 ---
 
@@ -115,9 +115,9 @@ Categorize pela severidade REAL — nem tudo é Critical; um nitpick não é Cri
 
 ## Review final da branch
 
-Ao concluir todas as tarefas, revise a **branch inteira** (range commitado `<BASE>..<HEAD>`), não só por tarefa, com o **modelo mais capaz** disponível. É a última rede antes da conclusão (`pelizzai-verification-before-completion` / `pelizzai-finish-task`).
+Ao concluir todas as tarefas, revise a **branch inteira** (range commitado `<BASE>..<HEAD>` — em squash-final, o range dos commits wip), não só por tarefa, com o **modelo mais capaz** disponível e **effort máximo**. É o passo 1 da **validação final da entrega** do coordenador (`pelizzai-execution-plans` → "Validação final da entrega"): depois dele vêm a suíte completa rodada pelo próprio coordenador, o checklist requisito a requisito do plano, a `pelizzai-verification-before-completion` e a `pelizzai-finish-task`. Critical/Important abertos bloqueiam a conclusão.
 
-**Quem dispara o review final:** `pelizzai-execution-plans` (planos) e `pelizzai-debugging` (fix de bug); o track de ajuste (`pelizzai-quick-fix`) dispensa review formal por escopo trivial.
+**Quem dispara o review final:** `pelizzai-execution-plans` (fechamento de plano). O fix de bug (`pelizzai-debugging`) usa o **review de mudança avulsa** abaixo — no track de bug nada está commitado no momento do review (a consolidação é da `pelizzai-finish-task`), então não existe range para um review final. O track de ajuste (`pelizzai-quick-fix`) dispensa review formal por escopo trivial.
 
 **Review de mudança avulsa** (bug/quick-fix, fora de plano): use o **escopo B** (working tree não commitada: `git diff` + arquivos novos) e aplique o **Estágio 2** (qualidade) com o bloco `Verification` (evidência fresca), **sem** a maquinaria por-tarefa / review-final / circuit-breaker.
 

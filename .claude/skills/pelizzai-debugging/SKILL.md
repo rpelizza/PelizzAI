@@ -9,7 +9,7 @@ description: Use ao encontrar qualquer bug, falha de teste ou comportamento ines
 
 Fixes aleatórios desperdiçam tempo e criam novos bugs; patches rápidos mascaram o problema real.
 
-**Anuncie ao iniciar:** "Usando a skill Pelizzai Debugging para investigar a causa raiz antes de corrigir."
+**Anuncie ao iniciar:** "Usando a skill PelizzAI Debugging para investigar a causa raiz antes de corrigir."
 
 > **Princípio:** SEMPRE encontre a causa raiz antes de tentar corrigir. Correção de sintoma é falha.
 
@@ -24,6 +24,8 @@ Se você não completou a Fase 1, não pode propor correções. Use `pelizzai-re
 ---
 
 ## As quatro fases (complete cada uma antes da próxima)
+
+> As fases são um ciclo **OODA** (`pelizzai-loop`): Fase 1 = **Observar** (reproduzir, coletar evidência), Fase 2 = **Orientar** (comparar com o que funciona), Fase 3 = **Decidir** (uma hipótese testável), Fase 4 = **Agir** (teste que falha + fix na origem). Hipótese refutada → volte ao Observar com a informação nova.
 
 ### Fase 1 — Investigação da causa raiz
 
@@ -55,7 +57,7 @@ Se você não completou a Fase 1, não pode propor correções. Use `pelizzai-re
 
 ### Fase 4 — Implementação
 
-**Antes de tocar no código:** confirme que NÃO está em branch protegida — invoque `pelizzai-starting-branch` (branch) antes de escrever o teste ou o fix. (As Fases 1-3 são investigação e não tocam código de produção; o gate vale aqui.)
+**Antes de tocar no código:** confirme que NÃO está em branch protegida — invoque `pelizzai-starting-branch` (branch) antes de escrever o teste ou o fix. (As Fases 1-3 podem instrumentar e experimentar de forma **temporária e descartável** — logs de fronteira, a menor mudança de hipótese —, mas **reverta tudo antes da Fase 4**: nenhuma mudança que vá ser COMMITADA acontece antes do gate, e uma working tree suja quebra o `git pull --ff-only` da starting-branch. Stash/descarte a instrumentação antes de criar a branch.) Leia também `pelizzai/domain-skills.md` e aplique as skills de domínio da área afetada ao escrever o teste e o fix — o fix segue as convenções do projeto, não padrões genéricos.
 
 ```text
 1. Crie o teste que FALHA (reprodução mais simples possível) — via pelizzai-tdd. OBRIGATÓRIO antes de corrigir.
@@ -89,4 +91,4 @@ Racionalizações comuns ("é simples, não precisa de processo"; "emergência, 
 
 **Roteada por:** `pelizzai-router` (track `bug`), que já traz o contexto e a isolação decididos.
 
-**Usa:** `pelizzai-reasoning` (Root Cause Analysis), `pelizzai-starting-branch` (branch antes da Fase 4), `pelizzai-tdd` (teste que falha), `pelizzai-verification-before-completion` (confirmar o fix), `pelizzai-review` (revisar o fix), `pelizzai-finish-task` (fechar o ciclo). Para causa raiz em lib externa, fundamente no `context7`.
+**Usa:** `pelizzai-reasoning` (Root Cause Analysis; as fases seguem o OODA de `pelizzai-loop`), as **skills de domínio** do projeto (`pelizzai/domain-skills.md` — a área afetada), `pelizzai-starting-branch` (branch antes da Fase 4), `pelizzai-tdd` (teste que falha), `pelizzai-verification-before-completion` (confirmar o fix), `pelizzai-review` (revisar o fix), `pelizzai-finish-task` (fechar o ciclo). Para causa raiz em lib externa, fundamente no `context7`.

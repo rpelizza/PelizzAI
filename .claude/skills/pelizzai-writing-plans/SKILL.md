@@ -11,7 +11,7 @@ Escrever um plano de implementação **completo**, assumindo que quem vai execut
 
 Assuma um desenvolvedor competente que conhece quase nada do seu toolset, do domínio do problema e de bom design de testes.
 
-**Anuncie ao iniciar:** "Usando a skill Pelizzai Writing Plans para criar o plano de implementação."
+**Anuncie ao iniciar:** "Usando a skill PelizzAI Writing Plans para criar o plano de implementação."
 
 **Salve o plano em:** `pelizzai/plans/AAAA-MM-DD-<feature>.md` (padrão de diretório `pelizzai/`; preferências do usuário quanto ao local prevalecem).
 
@@ -50,7 +50,7 @@ Antes de definir as tarefas, mapeie quais arquivos serão criados ou modificados
 
 ## Fatias verticais (não horizontais)
 
-Cada tarefa é uma **fatia vertical**: um comportamento de ponta a ponta, testável e commitável de forma independente — não "todos os testes" seguidos de "toda a implementação". Esse é o ciclo do `pelizzai-tdd` (um teste → uma implementação → repetir). Tarefas independentes podem ser assumidas por executores diferentes — embora, na política **só-branches** do harness, frentes independentes ainda sejam integradas **em série** pelo coordenador (ver `pelizzai-execution-plans`).
+Cada tarefa é uma **fatia vertical**: um comportamento de ponta a ponta, testável e commitável de forma independente — não "todos os testes" seguidos de "toda a implementação". Esse é o ciclo do `pelizzai-tdd` (um teste → uma implementação → repetir). Tarefas independentes podem ser assumidas por executores diferentes — em paralelo real quando o usuário escolher `worktree` no gate de setup (caminhos disjuntos), ou integradas **em série** pelo coordenador quando escolher `branch` (ver `pelizzai-execution-plans`). Um plano com frentes independentes bem separadas é o que torna a recomendação de worktree + team honesta no gate.
 
 ## Skills de domínio
 
@@ -96,11 +96,11 @@ Após salvar o plano, **estresse-o com `pelizzai-interview-me` (OBRIGATÓRIO —
 
 ## Handoff para a execução
 
-Plano salvo e estressado → entregue à **`pelizzai-execution-plans`**, que **escolhe o modo de execução** (team → subagents → inline) e o registra em `pelizzai/data/state.md`. **Não decida o modo aqui** — isso pertence ao executor. O isolamento (sempre em branch) também é resolvido no momento da execução (`pelizzai-starting-branch`).
+Plano salvo e estressado → entregue à **`pelizzai-execution-plans`**, que conduz o **GATE DE SETUP PÓS-PLANO** com o usuário, nesta ordem: (1) isolamento — **worktree ou branch normal?**; (2) nome da branch/worktree sugerido e confirmado via `pelizzai-starting-branch` (`feat/`, `fix/`, `refactor/`, …); (3) modo de execução — **team / subagents / inline** (as três opções sempre visíveis); (4) estratégia de commit — **granular ou commit único final**. Tudo registrado em `pelizzai/data/state.md`. **Não decida nada disso aqui** — o plano apenas informa a recomendação (frentes paralelas → worktree + team).
 
 Informe à `pelizzai-execution-plans` o **caminho exato do plano salvo** — ela o registra no campo `plan:` de `pelizzai/data/state.md` (a fonte das tarefas, relida após compaction) antes da Tarefa 1. A `pelizzai-writing-plans` não escreve o `state.md`.
 
-Confirme: "Plano salvo em `pelizzai/plans/<arquivo>.md` e estressado. Vou executá-lo com a `pelizzai-execution-plans`."
+Confirme: "Plano salvo em `pelizzai/plans/<arquivo>.md` e estressado. Vou conduzir o gate de setup (worktree/branch, nome, modo de execução, commits) e executá-lo com a `pelizzai-execution-plans`."
 
 ---
 
@@ -111,7 +111,8 @@ Confirme: "Plano salvo em `pelizzai/plans/<arquivo>.md` e estressado. Vou execut
 - Fatias horizontais (todos os testes, depois toda a implementação) em vez de verticais.
 - Ignorar as skills de domínio do projeto, ou não nomeá-las nas tarefas.
 - Ancorar tarefas em API de memória em vez da doc real (context7).
-- Decidir o modo de execução aqui (é da pelizzai-execution-plans).
+- Decidir o modo de execução, o isolamento ou a estratégia de commit aqui (é do gate de setup
+  pós-plano, na pelizzai-execution-plans).
 - Pular o estresse obrigatório com pelizzai-interview-me.
 - Plano gigante para múltiplos subsistemas em vez de um plano por subsistema.
 ```

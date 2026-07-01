@@ -9,7 +9,7 @@ description: Use SEMPRE que estiver prestes a afirmar que algo está pronto, cor
 
 Afirmar que um trabalho está concluído sem verificar é desonestidade, não eficiência. Esta skill é o gate que exige **evidência fresca** antes de qualquer alegação de sucesso.
 
-**Anuncie ao iniciar:** "Usando a skill Pelizzai Verification Before Completion para confirmar com evidência antes de declarar pronto." (apenas quando acionada explicitamente; como gate embutido de outra skill, o gate roda implícito a cada alegação de sucesso, sem anúncio.)
+**Anuncie ao iniciar:** "Usando a skill PelizzAI Verification Before Completion para confirmar com evidência antes de declarar pronto." (apenas quando acionada explicitamente; como gate embutido de outra skill, o gate roda implícito a cada alegação de sucesso, sem anúncio.)
 
 ---
 

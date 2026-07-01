@@ -29,7 +29,7 @@ description: Preferências globais de comunicação, engenharia e execução apl
 - Antes de propor uma implementação relevante, identifique objetivo, restrições, impacto esperado e critérios de sucesso.
 - Use a skill `pelizzai-interview-me` apenas quando houver ambiguidade material que não possa ser resolvida pela conversa, pelo código ou pela documentação disponível.
 - Investigue causa raiz antes de aplicar correções. Não pare na primeira solução plausível quando houver risco de regressão, efeito colateral ou problema estrutural.
-- Para tecnologias, bibliotecas, APIs ou comportamentos potencialmente desatualizados, priorize documentação oficial. Use o MCP `context7`, quando disponível e aplicável, como fonte complementar de contexto técnico atualizado.
+- Para tecnologias, bibliotecas, APIs ou comportamentos potencialmente desatualizados, priorize documentação oficial. Use o MCP `context7` (`resolve-library-id` → `query-docs`), quando disponível, como fonte primária de documentação atualizada — antes de confiar na memória; sem ele, a web oficial.
 
 ## 4. Princípios de engenharia
 
@@ -44,6 +44,8 @@ description: Preferências globais de comunicação, engenharia e execução apl
 ## 5. Código e configuração
 
 - Escreva código legível, coeso, testável e alinhado às convenções da linguagem e do projeto.
+- **Docstrings são permitidas e bem-vindas.** Documente módulos, classes, funções e APIs públicas com docstrings no formato idiomático da linguagem (JSDoc/TSDoc, docstrings Python, XML docs C#, godoc, rustdoc, PHPDoc etc.): propósito, parâmetros, retorno e erros/exceções quando relevantes. Use inglês, salvo convenção contrária já estabelecida no projeto (mesma regra da seção 2).
+- Comentários inline são para o **porquê** que o código não expressa (restrições, trade-offs, workarounds com contexto) — não para narrar o que a linha faz. Não escreva comentários-placeholder ("TODO: melhorar depois") nem comentários redundantes. Para o texto, aplique a `pelizzai-writing-clearly-and-concisely`.
 - Não use valores de negócio, URLs, credenciais, IDs externos ou configurações de ambiente hardcoded quando eles puderem variar entre ambientes ou ao longo do tempo.
 - Constantes estáveis e locais são permitidas quando melhorarem clareza e não representarem configuração externa.
 - Nunca exponha segredos, tokens, senhas, chaves de API ou dados pessoais em código, logs, documentação ou respostas.

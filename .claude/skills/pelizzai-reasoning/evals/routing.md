@@ -20,6 +20,7 @@ O objetivo não é avaliar a qualidade completa da resposta final, do código ou
 | Técnica                  | Arquivo                                                                  |
 | ------------------------ | ------------------------------------------------------------------------ |
 | ReAct                    | [react.md](../techniques/react.md)                                       |
+| OODA                     | [ooda.md](../techniques/ooda.md)                                         |
 | Plan and Execute         | [plan-and-execute.md](../techniques/plan-and-execute.md)                 |
 | Structured Decomposition | [structured-decomposition.md](../techniques/structured-decomposition.md) |
 | Constraint Satisfaction  | [constraint-satisfaction.md](../techniques/constraint-satisfaction.md)   |
@@ -32,7 +33,7 @@ O objetivo não é avaliar a qualidade completa da resposta final, do código ou
 | Root Cause Analysis      | [root-cause-analysis.md](../techniques/root-cause-analysis.md)           |
 | Critique and Refine      | [critique-and-refine.md](../techniques/critique-and-refine.md)           |
 
-> Nota: [pelizzai-interview-me](../../pelizzai-interview-me/SKILL.md) é uma skill **irmã** (entrevista para esclarecer objetivo/premissas), não uma das 12 técnicas de raciocínio. Quando citada num roteamento, é a ação de "pedir esclarecimento", não uma técnica auxiliar contável.
+> Nota: [pelizzai-interview-me](../../pelizzai-interview-me/SKILL.md) é uma skill **irmã** (entrevista para esclarecer objetivo/premissas), não uma das técnicas de raciocínio do catálogo. Quando citada num roteamento, é a ação de "pedir esclarecimento", não uma técnica auxiliar contável.
 
 ## Protocolo e formato de resultado
 
@@ -808,6 +809,44 @@ Próxima ação:
 
 O agente age diretamente porque o contexto resolve. Fazer pergunta de esclarecimento aqui é falha grave (pergunta desnecessária quando o contexto ou uma fonte direta resolve), conforme "Falhas graves".
 
+### R-23 — Execução longa em loop até a entrega (OODA, não ReAct puro)
+
+```yaml
+id: R-23
+categoria: laço macro de execução
+prompt: 'Execute o plano aprovado em pelizzai/plans/2026-07-01-export-csv.md, tarefa por tarefa, até entregar tudo. Outras pessoas também estão commitando neste repositório.'
+contexto: |
+    Plano com 6 tarefas aprovado e estressado; gate de setup pós-plano concluído.
+    A base remota recebe commits de terceiros durante a execução.
+    Cada tarefa passa por TDD e review em dois estágios antes de consolidar.
+```
+
+#### Roteamento esperado
+
+```text
+Técnica principal:
+- OODA (macro-loop: re-observar git/testes/reviews a cada iteração antes de decidir a próxima tarefa).
+
+Técnicas auxiliares:
+- Plan and Execute (ordem e checkpoints das tarefas).
+- Verification (evidência fresca antes de consolidar cada tarefa e na DoD).
+
+Próxima ação:
+- Entrar no loop OODA: observar o delta da base, orientar contra o plano/DoD, decidir a próxima
+  tarefa, agir via TDD; repetir até a Definition of Done.
+```
+
+#### Técnicas a evitar
+
+```text
+- ReAct como principal (é o micro-ciclo dentro do Agir, não o laço macro de uma execução longa).
+- Tree of Thoughts (não há alternativas interdependentes a podar).
+```
+
+#### Critério de aprovação
+
+O agente distingue o macro-loop (OODA) do micro-ciclo (ReAct), re-observa a realidade entre tarefas (não confia no snapshot da iteração anterior) e declara a DoD como critério de parada. Tratar a execução inteira como um único ReAct linear, sem re-observação entre tarefas, é falha.
+
 ## Cenários de regressão de roteamento
 
 Estes cenários devem ser repetidos sempre que o [SKILL.md](../SKILL.md) ou qualquer técnica for alterada. Suíte negativa correlata: [regression.md](regression.md).
@@ -828,6 +867,7 @@ Estes cenários devem ser repetidos sempre que o [SKILL.md](../SKILL.md) ou qual
 | R-20 | Custo não autorizado      | Criar despesa recorrente sem aprovação |
 | R-21 | Excesso de auxiliares     | Estourar o teto de duas auxiliares     |
 | R-22 | Pergunta desnecessária    | Perguntar quando o contexto resolve    |
+| R-23 | Snapshot velho no loop    | Tratar execução longa como ReAct linear sem re-observar |
 
 O registro do resultado de cada eval segue o formato compacto do [README.md](README.md): ID, classificação, roteamento selecionado, próxima ação, resultado (passou/falhou/parcial), pontuação, justificativa e se há regressão identificada.
 

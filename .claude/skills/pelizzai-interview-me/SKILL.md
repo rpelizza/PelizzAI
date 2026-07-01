@@ -3,15 +3,15 @@ name: pelizzai-interview-me
 description: Use essa skill para entrevistar para entender o objetivo do usuário, estressar um plano ou estressar uma ideia (brainstorming). Ela deve ser invocada quando o usuário não tiver um objetivo claro ou quando precisar de ajuda para definir um objetivo ou plano. A skill deve fazer perguntas abertas e direcionadas para entender o objetivo do usuário, o contexto da tarefa e as skills disponíveis. Ela deve ser capaz de identificar lacunas no conhecimento do usuário e sugerir recursos ou estratégias para preencher essas lacunas.
 ---
 
-# Pelizzai Interview Me
+# PelizzAI Interview Me
 
 ## Visão geral
 
-A skill "Pelizzai Interview Me" é projetada para ajudar os usuários a esclarecer seus objetivos antes de um brainstorming, após um brainstorming para encontrar lacunas, estressar planos ou gerar ideias através de entrevistas estruturadas, feitas **uma de cada vez**, resolvendo cada ramificação antes de passar para a próxima até que haja um entendimento completo. Ela faz perguntas abertas e direcionadas para entender o contexto da tarefa, as habilidades disponíveis e identificar lacunas no conhecimento do usuário, sugerindo recursos ou estratégias para preenchê-las.
+A skill "PelizzAI Interview Me" é projetada para ajudar os usuários a esclarecer seus objetivos antes de um brainstorming, após um brainstorming para encontrar lacunas, estressar planos ou gerar ideias através de entrevistas estruturadas, feitas **uma de cada vez**, resolvendo cada ramificação antes de passar para a próxima até que haja um entendimento completo. Ela faz perguntas abertas e direcionadas para entender o contexto da tarefa, as habilidades disponíveis e identificar lacunas no conhecimento do usuário, sugerindo recursos ou estratégias para preenchê-las.
 
 **Princípio fundamental**: uma pergunta de cada vez, sempre acompanhada da sua recomendação; explore o código quando a resposta estiver nele; **exponha ativamente as lacunas do projeto**; pare quando não houver mais decisões pendentes.
 
-**Anuncie ao iniciar:** "Usando a skill Pelizzai Interview Me para ajudá-lo a esclarecer seus objetivos e gerar ideias."
+**Anuncie ao iniciar:** "Usando a skill PelizzAI Interview Me para ajudá-lo a esclarecer seus objetivos e gerar ideias."
 
 Para cada pergunta, ofereça 4 opções de resposta, sendo uma delas "Outro" para que o usuário possa fornecer uma resposta personalizada. As perguntas devem ser abertas e direcionadas, incentivando o usuário a refletir sobre seus objetivos e necessidades.
 
@@ -19,14 +19,14 @@ Para cada pergunta, ofereça 4 opções de resposta, sendo uma delas "Outro" par
 
 - **Por solicitação do usuário** ("me questione", "me entreviste", "teste a robustez deste plano") — encaminhado pelo `pelizzai-router`.
 
-- **Como uma etapa obrigatória no fluxo da funcionalidade** — Antes do `brainstorming` para esclarecer suas dúvidas, após o `brainstorming` para estressar plano e após o `writing-plans` para estressar o plano. Neste modo, não é opcional: conduza a entrevista até o fim e **liste as lacunas** antes do repasse. Você só pode encerrar mais cedo depois que as lacunas tiverem sido **realmente identificadas e resolvidas** — ou explicitamente aceitas pelo usuário; nunca pule essa etapa para "economizar tempo".
+- **Como uma etapa obrigatória no fluxo da funcionalidade** — Antes do `pelizzai-brainstorming` para esclarecer suas dúvidas, após o `pelizzai-brainstorming` para estressar o design e após a `pelizzai-writing-plans` para estressar o plano. Neste modo, não é opcional: conduza a entrevista até o fim e **liste as lacunas** antes do repasse. Você só pode encerrar mais cedo depois que as lacunas tiverem sido **realmente identificadas e resolvidas** — ou explicitamente aceitas pelo usuário; nunca pule essa etapa para "economizar tempo".
 
 ## Fronteira com o _brainstorming_
 
-- **`brainstorming`** — ainda não há um design; criar do zero (propósito, abordagens, design, aprovação).
-- **`interview-me`** — já existe um plano/design/ideia; submetê-lo a testes rigorosos, identificar lacunas, resolver decisões pendentes.
+- **`pelizzai-brainstorming`** — ainda não há um design; criar do zero (propósito, abordagens, design, aprovação).
+- **`pelizzai-interview-me`** — já existe um plano/design/ideia; submetê-lo a testes rigorosos, identificar lacunas, resolver decisões pendentes.
 
-Se, durante a entrevista, ficar claro que não existe um plano real, redirecione para o `brainstorming`.
+Se, durante a entrevista, ficar claro que não existe um plano real, redirecione para o `pelizzai-brainstorming`.
 
 ## Processo
 
@@ -47,12 +47,12 @@ Pare quando: todos os ramos da árvore estiverem resolvidos; não houver nenhuma
 
 Ao finalizar, produza um resumo do **plano submetido a testes de estresse**: cada decisão, a escolha feita e a justificativa, e — **obrigatório** — uma lista explícita e numerada das **lacunas/riscos revelados** e como cada um foi resolvido ou conscientemente aceito pelo usuário. Um resumo sem a seção de lacunas está incompleto (um projeto real sempre apresenta falhas que vale a pena identificar).
 
-**Transferência pelo chamador (não pule diretamente para `writing-plans`):**
+**Transferência pelo chamador (não pule diretamente para `pelizzai-writing-plans`):**
 
-- **Como etapa de projeto `brainstorming`** → NÃO invoque `writing-plans`. **Retorne o controle para `brainstorming`** para que a etapa conclua sua lista de verificação restante (Escrever documento de projeto → Autoavaliação da especificação → Revisão da especificação pelo usuário).
-- **Como etapa de planejamento `writing-plans`** → retorne para `writing-plans`, que salva/estressa o plano e faz o handoff para a execução (`pelizzai-execution-plans`); é a `pelizzai-execution-plans` que escolhe o modo (team > subagents > inline) — a `writing-plans` não decide nem assume modo.
-- **Independente** (usuário solicitou teste de estresse em um plano existente) → prossiga para `writing-plans` caso o plano avance para a implementação.
-- **Em qualquer modo**, se o plano se mostrar inviável, retorne para `brainstorming`.
+- **Como etapa de projeto `pelizzai-brainstorming`** → NÃO invoque `pelizzai-writing-plans`. **Retorne o controle para `pelizzai-brainstorming`** para que a etapa conclua sua lista de verificação restante (Escrever documento de projeto → Autoavaliação da especificação → Revisão da especificação pelo usuário).
+- **Como etapa de planejamento `pelizzai-writing-plans`** → retorne para `pelizzai-writing-plans`, que salva/estressa o plano e faz o handoff para a execução (`pelizzai-execution-plans`); é a `pelizzai-execution-plans` que escolhe o modo (team > subagents > inline) — a `pelizzai-writing-plans` não decide nem assume modo.
+- **Independente** (usuário solicitou teste de estresse em um plano existente) → prossiga para `pelizzai-writing-plans` caso o plano avance para a implementação.
+- **Em qualquer modo**, se o plano se mostrar inviável, retorne para `pelizzai-brainstorming`.
 
 ## Sinais de Alerta (Red Flags)
 
@@ -67,4 +67,4 @@ Ao finalizar, produza um resumo do **plano submetido a testes de estresse**: cad
 
 ## Integração
 
-**Combina com:** `brainstorming` (criar do zero) e `writing-plans` (transformar o plano testado sob pressão em um plano de implementação).
+**Combina com:** `pelizzai-brainstorming` (criar do zero) e `pelizzai-writing-plans` (transformar o plano testado sob pressão em um plano de implementação).

@@ -7,7 +7,7 @@ description: Construir um protótipo descartável para amadurecer um design — 
 
 Um protótipo é **código descartável que responde a uma pergunta**. A pergunta decide o formato.
 
-**Anuncie ao iniciar:** "Usando a skill Pelizzai Prototype para um protótipo descartável que responde a uma pergunta de design."
+**Anuncie ao iniciar:** "Usando a skill PelizzAI Prototype para um protótipo descartável que responde a uma pergunta de design."
 
 ## Escolha o ramo
 

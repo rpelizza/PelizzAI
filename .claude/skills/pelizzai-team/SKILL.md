@@ -16,10 +16,10 @@ Esta skill funciona em **dois modos** e escolhe o adequado automaticamente:
 
 O protocolo de coordenação e delegação é **o mesmo nos dois modos**; muda apenas a mecânica de execução.
 
-**Anuncie ao iniciar:** "Usando a skill Pelizzai Team para coordenar um time de agentes."
+**Anuncie ao iniciar:** "Usando a skill PelizzAI Team para coordenar um time de agentes."
 
 <MEMBRO-DO-TIME-STOP>
-Se você foi designado como **membro** de um time (teammate ou subagente executando uma subtarefa), **não acione esta skill** para criar um sub-time. Não há times aninhados. Execute sua subtarefa, acione `pelizzai-reasoning` para raciocinar sobre ela e devolva o entregável no formato combinado no seu briefing.
+Se você foi designado como **membro** de um time (teammate ou subagente executando uma subtarefa), **não acione esta skill** para criar um sub-time. Não há times aninhados. Execute sua subtarefa, acione `pelizzai-reasoning` para raciocinar sobre ela, **aplique as skills de domínio coladas no seu briefing** (elas prevalecem sobre padrões genéricos) e a camada global `pelizzai-preferences`, e devolva o entregável no formato combinado no seu briefing. **Não commite** — a consolidação (commit) é do coordenador, após os reviews; deixe o trabalho na working tree.
 
 Um membro **produz artefatos** (spec, relatório, diff) como **entregável para o coordenador** — não conduz por conta própria fluxos que exijam aprovação do usuário (`pelizzai-brainstorming`, `pelizzai-writing-plans`). Esses fluxos pertencem ao coordenador / à sessão principal.
 </MEMBRO-DO-TIME-STOP>
@@ -149,6 +149,8 @@ Se você não consegue responder a esses cinco itens para um membro, **a decompo
 
 Os cinco itens do HARD-GATE têm lar permanente: cada um corresponde a um campo do briefing e a uma coluna do roster (ver mapeamento abaixo). Se a célula do roster está vazia, a decomposição daquele membro ainda não está pronta.
 
+**Regra de escrita — vale para os DOIS modos (teammates e subagents):** o que a escrita concorrente pode fazer depende do isolamento registrado em `pelizzai/data/state.md`. Com `isolation: branch`, **uma frente de escrita por vez** — o coordenador integra em série; teammates implementadores na mesma working tree escrevendo ao mesmo tempo colidem. Com `isolation: worktree`, frentes escrevem em paralelo **dentro do worktree único da tarefa**, desde que toquem **caminhos disjuntos** (nunca um worktree por membro); review, commit e cursor continuam serializados pelo coordenador. Membros **não commitam** em nenhum modo.
+
 **Responsabilidades do coordenador:**
 
 - Decompor a tarefa em papéis com fronteiras claras (frentes/arquivos **disjuntos** para evitar conflito).
@@ -235,13 +237,19 @@ Briefing de [nome do membro] — papel: [papel]
 - Frentes/arquivos próprios: [conjunto disjunto; quem mais NÃO toca aqui]
 - Contexto necessário: [caminhos, contratos, decisões já tomadas, links de spec,
   convenções do projeto — tudo, porque o membro não viu esta conversa]
+- Skills de domínio relevantes: [coladas do catálogo pelizzai/domain-skills.md, ou os
+  pontos-chave; "nenhuma" se não houver — o membro as aplica em vez de padrões genéricos]
+- Camada global: aplique `pelizzai-preferences` e raciocine via `pelizzai-reasoning`; em
+  conflito, as SKILLS DE DOMÍNIO coladas acima e as regras do projeto PREVALECEM sobre elas
 - Dependências: [o que precisa de outro membro; o que já pode começar]  (HARD-GATE 3)
-- Raciocínio: acione `pelizzai-reasoning`; técnica principal sugerida: [ver catálogo de papéis]
+- Raciocínio: técnica principal sugerida de `pelizzai-reasoning`: [ver catálogo de papéis]
 - Contrato de entrega: [formato EXATO do retorno — ex.: lista de achados com
   severidade e arquivo:linha; diff + saída dos testes; relatório com seções X/Y/Z]  (HARD-GATE 4)
 - Critério de sucesso: [como o próprio membro sabe que terminou corretamente]
 - Verificação: [como e por quem o resultado será conferido — ex.: cross-check por
   outro membro; rodada de refutação; reprodução de teste pelo QA]      (HARD-GATE 5)
+- Commit (papéis de escrita): NÃO commite; deixe o trabalho na working tree —
+  o coordenador consolida após os reviews
 - Restrições/proibições: [não tocar em X; não rodar Y; não publicar; só leitura]
 ```
 
@@ -310,7 +318,7 @@ o orçamento de esforço de `pelizzai-reasoning`: mais rodadas só se reduzirem 
 ```
 
 - **Cross-check adversarial:** spawnar **verificadores céticos** cujo único trabalho é tentar **refutar** os achados/implementações. Como o verificador é stateless, **cole no prompt dele o artefato a refutar**. Mantenha um achado só se ele sobrevive.
-- **Evitar conflito de arquivos:** atribua **arquivos disjuntos** por membro. Como o harness trabalha **só com branches** (sem worktrees), não há escrita paralela isolada no mesmo repositório: o **coordenador integra as contribuições em série** na branch (despache uma frente de escrita por vez), reservando o paralelismo para investigação, leitura e review. Edições concorrentes ao mesmo working tree colidem — evite-as.
+- **Evitar conflito de arquivos:** atribua **arquivos disjuntos** por membro. O que a escrita paralela pode fazer depende do **isolamento escolhido no gate** (`pelizzai/data/state.md`): com `isolation: branch`, não há escrita paralela isolada — o **coordenador integra as contribuições em série** (despache uma frente de escrita por vez), reservando o paralelismo para investigação, leitura e review. Com `isolation: worktree`, as frentes podem escrever **em paralelo dentro do worktree único da tarefa**, desde que toquem **caminhos disjuntos** (nunca um worktree por agente); review, commit e cursor continuam serializados pelo coordenador.
 - **Lista de tarefas:** é o **seu** roster (não há lista compartilhada nativa) — atualize-o a cada rodada.
 - **Síntese:** o coordenador integra os entregáveis e cruza as divergências com `pelizzai-reasoning` (`Evidence Synthesis`, com `Verification` auxiliar).
 
@@ -343,6 +351,7 @@ Resultados de membros **não** são verdade até serem cruzados.
 - **Cross-check:** confronte entregáveis que se sobrepõem; achados em conflito disparam uma rodada de refutação (Modo Subagents) ou um debate via `SendMessage` (Modo Teammates).
 - **Verificação adversarial:** prefira que **outro** membro (ou um verificador dedicado) tente derrubar uma conclusão, em vez de o próprio autor confirmá-la.
 - **Self-Consistency:** quando vários membros chegam ao mesmo resultado por caminhos independentes, a convergência aumenta a confiança — mas não substitui teste/fonte real.
+- **Gate de evidência:** antes de aceitar um entregável de **implementação**, aplique `pelizzai-verification-before-completion` — confira o **diff do git** e rode os comandos de teste você mesmo (ou exija a saída + exit code colados); o relatório do membro nunca é evidência.
 - **Síntese:** cruze os entregáveis com `Evidence Synthesis` e produza **uma** entrega, deixando claro o que é consenso, o que foi divergência resolvida e o que permanece em aberto.
 - **Impasse:** se o confronto **não** converge, o coordenador **não** força um consenso artificial: decide pelo critério dominante da tarefa (acionando `Decision Making`) e, quando a escolha pertence ao usuário ou o impacto é alto, **escala** apresentando as posições e seus trade-offs.
 
@@ -414,8 +423,10 @@ Aplique o **orçamento de esforço** de `pelizzai-reasoning`: a profundidade da 
 **Combina com:**
 
 - `pelizzai-reasoning` — raciocínio do coordenador (decomposição, plano, síntese, verificação) e de cada membro; é também onde mora a técnica `Verification` para fechamento.
+- `pelizzai-preferences` — camada global instruída no briefing de cada membro (skills de domínio prevalecem).
 - `pelizzai-subagents` — delegação leve a **um** subagente isolado (sem time).
-- `pelizzai-router` — costuma rotear até aqui após entender o objetivo e o contexto.
+- `pelizzai-router` / `pelizzai-execution-plans` — de onde o modo `team` chega (gate de setup); a execution-plans define o ciclo por tarefa que cada frente segue.
+- `pelizzai-verification-before-completion` — gate de evidência antes de aceitar entregável de implementação.
 - `pelizzai-brainstorming` / `pelizzai-writing-plans` — de onde a tarefa do time normalmente chega.
 
 ---

@@ -7,7 +7,7 @@ description: Construir e afiar o modelo de domínio do projeto ativamente — fi
 
 Construa e afie o modelo de domínio enquanto projeta — a disciplina **ativa**: desafiar termos, inventar cenários de borda, e escrever o glossário e as decisões no momento em que se cristalizam.
 
-**Anuncie ao iniciar (quando acionada explicitamente):** "Usando a skill Pelizzai Domain Modeling para afiar o modelo de domínio."
+**Anuncie ao iniciar (quando acionada explicitamente):** "Usando a skill PelizzAI Domain Modeling para afiar o modelo de domínio."
 
 ## Onde mora o modelo
 

@@ -14,7 +14,7 @@ Esta skill é o **motor de autoria e manutenção de skills** do harness PelizzA
 | **Autoria**    | O usuário quer uma skill nova; ou a `pelizzai-audit` pede skills de domínio no bootstrap | Uma ou várias skills bem escritas, fundamentadas e catalogadas   |
 | **Manutenção** | A stack muda de versão; padrões se repetem no git; a cadência vence    | Skills de domínio atualizadas (com diff e confirmação) e registradas |
 
-**Anuncie ao iniciar:** "Usando a skill Pelizzai Writing Skills para criar/manter skills."
+**Anuncie ao iniciar:** "Usando a skill PelizzAI Writing Skills para criar/manter skills."
 
 <MEMBRO-DO-TIME-STOP>
 Se você é um **membro** de um time (subagente/teammate) encarregado de redigir **uma** skill de domínio, escreva apenas a sua e devolva o rascunho ao coordenador — não orquestre o bootstrap inteiro nem mexa no catálogo/ledger. Acione `pelizzai-reasoning` para a sua subtarefa.
@@ -75,7 +75,12 @@ Acionado na primeira interação / "bootstrap", depois que a `pelizzai-audit` ma
 2. Liste as skills de domínio CANDIDATAS — o máximo de skills úteis que os padrões justificam
    (uma por fluxo/responsabilidade recorrente: build/deploy, geração de código, testes, migrações,
    integrações, convenções de UI, etc.). Não invente skills sem padrão real por trás.
-3. Redija em PARALELO com a `pelizzai-team` (que cobre também a delegação a um único subagente) —
+2.5. GATE: apresente a lista de candidatas ao usuário (nome + o que cada uma cobriria) e
+   AGUARDE a confirmação antes de redigir — criar skills grava arquivos no repositório dele,
+   e a pelizzai-audit proíbe impor mudanças sem confirmação. O usuário pode cortar, somar ou
+   ajustar candidatas; o passo 7 continua sendo o aceite final do conteúdo redigido.
+3. Redija em PARALELO as candidatas confirmadas com a `pelizzai-team`; com uma única candidata
+   (ou quando um time for desnecessário), delegue via `pelizzai-subagents` —
    uma skill candidata por membro, cada um fundamentando a sua via context7. Escala com o nº de candidatas.
    Os membros que REDIGEM skills precisam de capacidade de ESCRITA (general-purpose ou subagent com
    ferramentas de escrita) e de acesso ao context7 — agentes read-only (Explore/Plan) servem só para a
@@ -89,7 +94,7 @@ Acionado na primeira interação / "bootstrap", depois que a `pelizzai-audit` ma
 7. Apresente ao usuário a lista de skills criadas (catálogo) para revisão. Nada é definitivo sem o aval dele.
 ```
 
-> Em projeto **novo** (sem código), não há padrões a extrair: o ramo correto é `pelizzai-interview-me` → `pelizzai-brainstorming` antes de voltar aqui para criar as primeiras skills a partir do design aprovado.
+> Em projeto **novo** (sem código), não há padrões a extrair: o ramo correto é `pelizzai-brainstorming` (que já estressa o design com `pelizzai-interview-me` internamente) antes de voltar aqui para criar as primeiras skills a partir do design aprovado.
 
 ---
 
@@ -166,7 +171,8 @@ Depois que uma skill está pronta, você pode **otimizar a `description`** para 
 1. Identifique o modo: Autoria (nova skill) ou Manutenção (atualizar existentes).
 2. AUTORIA: capture a intenção → pesquise (context7) → escreva o SKILL.md (regras Anthropic)
    → (opcional) evals → registre no catálogo e no ledger.
-3. BOOTSTRAP: liste candidatas → redija em paralelo (time/subagentes) → catalogue → semeie o ledger.
+3. BOOTSTRAP: liste candidatas → CONFIRME a lista com o usuário (gate 2.5) → redija em paralelo
+   (time/subagentes) → catalogue → semeie o ledger → aceite final do usuário (passo 7).
 4. MANUTENÇÃO: detecte o eixo (versão/histórico) → leia a skill atual → mude só o necessário →
    mostre o diff → confirme → aplique → registre no ledger.
 5. CADÊNCIA: ao fechar a tarefa, cheque o ledger e proponha revisão se o limiar foi cruzado.

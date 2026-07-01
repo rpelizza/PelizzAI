@@ -5,7 +5,7 @@ description: Use quando houver um conflito de merge/rebase do git em andamento p
 
 # PelizzAI Resolving Merge Conflicts
 
-**Anuncie ao iniciar:** "Usando a skill Pelizzai Resolving Merge Conflicts para resolver os conflitos."
+**Anuncie ao iniciar:** "Usando a skill PelizzAI Resolving Merge Conflicts para resolver os conflitos."
 
 ## Processo
 

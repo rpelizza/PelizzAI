@@ -17,7 +17,7 @@ Mapear o contexto de trabalho para que o PelizzAI atue com precisão: identifica
 
 O mapeamento é **insumo**, não fim: ele existe para habilitar as próximas tarefas, não para produzir um relatório por si só.
 
-**Anuncie ao iniciar:** "Usando a skill Pelizzai Audit para mapear seu contexto e preparar o harness."
+**Anuncie ao iniciar:** "Usando a skill PelizzAI Audit para mapear seu contexto e preparar o harness."
 
 ---
 
@@ -97,7 +97,18 @@ Levante, em frentes simultâneas:
 
 > A criação, a nomenclatura, o catálogo e o ledger das skills de domínio são responsabilidade da `pelizzai-writing-skills`. O `pelizzai-audit` **orquestra** e garante que essa etapa aconteça.
 
-## Fase 4 — Recomendações ao usuário
+## Fase 4 — Documentação do harness
+
+Garanta que o bootstrap deixe dois artefatos (criados/atualizados via `pelizzai-writing-skills`):
+
+- **`pelizzai/domain-skills.md`** — catálogo das skills de domínio: o que cada uma faz e quando usá-la.
+- **`pelizzai/data/review-domain-skills.md`** — ledger de manutenção: quando cada skill de domínio foi criada/atualizada e a referência de git correspondente.
+
+Ofereça também (opt-in) instalar o **hook de cadência** que lembra de revisar as skills de domínio (ver `pelizzai-writing-skills` → `references/domain-skill-maintenance.md`).
+
+A existência de `pelizzai/domain-skills.md` é o sinal de que o harness já foi inicializado neste projeto.
+
+## Fase 5 — Recomendações ao usuário
 
 Recomende (sem impor; aguarde confirmação para qualquer ação que altere o ambiente):
 
@@ -108,17 +119,6 @@ Recomende (sem impor; aguarde confirmação para qualquer ação que altere o am
 - context7 ausente → sugerir a instalação. É um MCP essencial para o PelizzAI fundamentar
   skills e respostas na documentação real, em vez de adivinhar.
 ```
-
-## Fase 5 — Documentação do harness
-
-Garanta que o bootstrap deixe dois artefatos (criados/atualizados via `pelizzai-writing-skills`):
-
-- **`pelizzai/domain-skills.md`** — catálogo das skills de domínio: o que cada uma faz e quando usá-la.
-- **`pelizzai/data/review-domain-skills.md`** — ledger de manutenção: quando cada skill de domínio foi criada/atualizada e a referência de git correspondente.
-
-Ofereça também (opt-in) instalar o **hook de cadência** que lembra de revisar as skills de domínio (ver `pelizzai-writing-skills` → `references/domain-skill-maintenance.md`).
-
-A existência de `pelizzai/domain-skills.md` é o sinal de que o harness já foi inicializado neste projeto.
 
 ---
 

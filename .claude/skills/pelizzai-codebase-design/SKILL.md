@@ -7,7 +7,7 @@ description: Vocabulário compartilhado para projetar módulos profundos. Use qu
 
 Projete **módulos profundos**: muito comportamento atrás de uma interface pequena, num seam limpo, testável pela própria interface. Use esta linguagem e estes princípios sempre que houver código sendo desenhado ou reestruturado. O objetivo é alavancagem para quem chama, localidade para quem mantém e testabilidade para todos.
 
-**Anuncie ao iniciar (quando acionada explicitamente):** "Usando a skill Pelizzai Codebase Design para projetar módulos profundos."
+**Anuncie ao iniciar (quando acionada explicitamente):** "Usando a skill PelizzAI Codebase Design para projetar módulos profundos."
 
 ## Glossário
 

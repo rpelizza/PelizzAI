@@ -52,7 +52,7 @@ Modelo **híbrido**: núcleo portável na skill + hook de reforço no Claude Cod
 
 ### Núcleo portável (ao fechar a tarefa)
 
-Vale em `.claude`, `.agents`, `.cursor` — é texto de skill, não depende de hook. Para disparar de fato no encerramento, este bloco deve ser **referenciado/embutido pela skill de fechamento do harness** (ex.: `pelizzai-finish-task`); enquanto ela não existir, o reforço efetivo vem do hook (no Claude Code) e da próxima vez que `pelizzai-writing-skills` for acionada. Ao concluir uma tarefa que mexeu em código:
+Vale em `.claude`, `.agents`, `.cursor` — é texto de skill, não depende de hook. Este bloco **é embutido pela `pelizzai-finish-task` (Passo 5 — nudge de revisão de skills)**, que dispara no encerramento de cada tarefa; o hook (no Claude Code) é apenas reforço a cada 10 interações. Ao concluir uma tarefa que mexeu em código:
 
 ```bash
 # datas do ledger — parsing ANCORADO no rótulo (robusto à ordem das linhas; lê as DUAS datas)

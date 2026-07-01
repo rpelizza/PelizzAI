@@ -619,6 +619,43 @@ Próxima ação:
 - Acoplar o processamento a Redis assumindo disponibilidade sem confirmar.
 - Tratar premissa de infraestrutura como fato.
 
+### G-14 — Execução longa em loop sem re-observação
+
+**Origem:** [routing.md](routing.md) — R-23.
+
+```yaml
+id: G-14
+categoria: laço macro de execução
+prompt: 'Execute o plano aprovado (6 tarefas) até entregar tudo. O repositório recebe commits de outras pessoas durante a execução.'
+contexto: |
+    Plano aprovado e estressado; setup concluído; TDD + review em dois estágios por tarefa.
+    A base remota avança durante a execução (commits de terceiros).
+```
+
+#### Resultado esperado
+
+```text
+Classificação:
+- Tipo: execução longa e dinâmica em loop até a Definition of Done
+- Risco: Médio
+- Impacto: Alto
+- Reversibilidade: alta por tarefa (commits isolados)
+
+Roteamento:
+- Técnica principal: OODA (macro-loop; re-observar git/testes/reviews a cada iteração).
+- Técnicas auxiliares: Plan and Execute; Verification.
+- Técnicas evitadas: ReAct como principal (é o micro-ciclo dentro do Agir); Tree of Thoughts.
+
+Próxima ação:
+- Entrar no loop: observar o delta da base, orientar contra o plano/DoD, decidir a próxima
+  tarefa, agir via TDD; repetir a partir do OBSERVAR até a DoD.
+```
+
+#### Falha grave
+
+- Executar as 6 tarefas em sequência confiando no snapshot inicial (sem re-observar o delta da base entre tarefas).
+- Declarar a entrega sem a DoD verificada com evidência fresca.
+
 ## Pontuação
 
 Cada cenário vale 10 pontos.
@@ -659,6 +696,7 @@ Penalidades (subtraem da pontuação do cenário; "reprovação imediata" invali
 | Comunicação externa        | G-11       |
 | Execução reversível        | G-12       |
 | Premissa não confirmada    | G-13       |
+| Loop macro (OODA)          | G-14       |
 
 ## Resultado de execução
 

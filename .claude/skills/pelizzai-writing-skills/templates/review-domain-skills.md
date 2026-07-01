@@ -4,8 +4,9 @@
 > Lido por `pelizzai-writing-skills` (cadência) e pela `pelizzai-audit` (bootstrap).
 > - Semeado por: `pelizzai-writing-skills` no bootstrap (orquestrado pela `pelizzai-audit`), com a data do 1º commit do repositório (ou a data de hoje, em projeto novo sem commits).
 > - Atualizado por: `pelizzai-writing-skills` a cada criação/refresh de skill de domínio e após cada revisão.
-> Mantenha `last-review` e `last-full-scan` como as primeiras datas AAAA-MM-DD do arquivo:
-> a checagem de cadência lê a primeira data que encontra.
+> Mantenha a data AAAA-MM-DD na MESMA linha de cada rótulo — a checagem de cadência (skill e
+> hooks) faz parsing ancorado nos rótulos `last-review:`/`last-full-scan:` e lê a primeira data
+> após cada um; nunca deixe um rótulo com placeholder sem dígitos acima de outra data válida.
 
 - **last-review:** <AAAA-MM-DD>
 - **last-full-scan:** <AAAA-MM-DD>

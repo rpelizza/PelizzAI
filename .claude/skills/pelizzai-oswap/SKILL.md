@@ -9,7 +9,7 @@ description: Use para revisar a SEGURANÇA de uma mudança (diff) antes de integ
 
 Revisão de segurança focada no **diff** (não no código inteiro), guiada pelo **OWASP Top 10**. Objetivo: pegar vulnerabilidades **introduzidas pela mudança** antes de integrar.
 
-**Anuncie ao iniciar:** "Usando a skill Pelizzai OWASP para checar a segurança desta mudança (OWASP Top 10)."
+**Anuncie ao iniciar:** "Usando a skill PelizzAI OWASP para checar a segurança desta mudança (OWASP Top 10)."
 
 > **Princípio:** revise o que mudou, no contexto de quem chama. Um achado sem caminho de exploração plausível é ruído; um achado com caminho de exploração é prioridade.
 

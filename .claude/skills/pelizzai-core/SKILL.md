@@ -1,5 +1,5 @@
 ---
-name: pelizzai
+name: pelizzai-core
 description: Use essa skill em qualquer conversa - estabeleça como procurar e usar SKILLS, exigindo a invocação de SKILLS antes de QUALQUER resposta, inclusive perguntas de esclarecimento.
 ---
 
@@ -22,6 +22,14 @@ O harness `PelizzAI` se sobrepõe ao comportamento padrão do sistema, mas **ins
 1. **Instruções explícitas do usuário** (CLAUDE.md, GEMINI.md, AGENTS.md, solicitações diretas) — prioridade máxima
 2. **Harness "PelizzAI"** — prevalecem sobre o comportamento padrão do sistema em caso de conflito
 3. **Prompt padrão do sistema** — prioridade mínima
+
+## Anúncio de skills (regra global)
+
+Ao acionar qualquer skill do harness, **anuncie** em uma linha o que vai fazer, usando **sempre a grafia exata da marca: "PelizzAI"** (P, A e I maiúsculos — nunca "Pelizzai", "pelizzAI" ou "PELIZZAI" em prosa). Padrão:
+
+> "Usando a skill PelizzAI \<Nome\> para \<objetivo\>."
+
+Os identificadores de skill (`pelizzai-core`, `pelizzai-router`, …), caminhos de arquivo e o diretório `pelizzai/` do projeto alvo permanecem em minúsculas — a regra vale para a marca em texto corrido.
 
 ## Camada global de preferências
 
@@ -95,48 +103,50 @@ Quando houver contexto suficiente para agir com segurança, prossiga.
 
 # Mapa de fluxos do harness
 
-A entrada é sempre esta skill (`pelizzai`); depois de entender o objetivo, o `pelizzai-router` orquestra. Na primeira interação (ou ao digitar **"bootstrap"**), a `pelizzai-audit` mapeia o projeto e cria as skills de domínio antes de qualquer tarefa.
+A entrada é sempre esta skill (`pelizzai-core`); depois de entender o objetivo, o `pelizzai-router` orquestra. Na primeira interação (ou ao digitar **"bootstrap"**), a `pelizzai-audit` mapeia o projeto e cria as skills de domínio antes de qualquer tarefa.
 
 ```mermaid
 flowchart TD
-    U([Mensagem do usuario]) --> P[pelizzai: exigir skill antes de responder]
+    U([Mensagem do usuario]) --> P[pelizzai-core: exigir skill antes de responder]
     P --> G[Entender o objetivo do usuario]
     G --> RT[pelizzai-router]
-    RT --> BOOT{1a interacao / bootstrap?\npelizzai/domain-skills.md existe?}
-    BOOT -- Nao --> AUD[pelizzai-audit: mapeia projeto/workspace,\nMCPs, git/host, cria skills de dominio + docs]
+    RT --> BOOT{Harness inicializado?\npelizzai/domain-skills.md existe?}
+    BOOT -- "Nao / 1a interacao / 'bootstrap'" --> AUD[pelizzai-audit: mapeia projeto/workspace,\nMCPs, git/host, cria skills de dominio + docs]
     AUD --> CLS
     BOOT -- Sim --> CLS{Classificar a intencao}
-    CLS --> TRACKS[Tracks: feature / bug / ajuste / refactor / infra / review / conceitual]
+    CLS --> TRACKS[Tracks: feature / bug / ajuste / refactor / infra / review / conflito / conceitual]
 ```
 
 Fluxos por track (o detalhe e os encadeamentos estão na `pelizzai-router`):
 
 ```mermaid
 flowchart TD
-    CLS{Intencao} -- feature/refactor/infra --> BR[brainstorming] --> IV1[interview-me\nestressa design] --> WP[writing-plans] --> IV2[interview-me\nestressa plano] --> SB[starting-branch] --> EXP[execution-plans\nteam / subagents / inline]
-    EXP --> CY[tdd por tarefa -> review -> consolidar] --> MORE{mais tarefas?}
+    CLS{Intencao} -- feature/refactor/infra --> BR[brainstorming] --> IV1[interview-me\nestressa design] --> WP[writing-plans] --> IV2[interview-me\nestressa plano] --> GATE[GATE DE SETUP POS-PLANO\nconduzido pela execution-plans:\n1. worktree ou branch?\n2. nome tipo/slug + criacao via starting-branch\n3. modo: team / subagents / inline\n4. commit: granular / squash-final]
+    GATE --> EXP[execution-plans\nloop OODA por tarefa]
+    EXP --> CY[tdd por tarefa -> review 2 estagios -> consolidar] --> MORE{mais tarefas?}
     MORE -- sim --> CY
-    MORE -- nao --> RF[review final] --> VC[verification-before-completion] --> FIN[finish-task\nsquash? push/PR/local/descartar]
+    MORE -- nao --> VAL[validacao final da entrega\nreview final + suite completa + checklist do plano] --> VC[verification-before-completion] --> FIN[finish-task\nhonra a commit-strategy; destino: push/PR/local/descartar]
 
-    CLS -- bug --> DBG[debugging: 4 fases, causa raiz] --> SB2[starting-branch] --> TDD2[tdd: teste que falha + fix] --> VC2[verification] --> RV2[review] --> FIN
-    CLS -- ajuste --> QF[quick-fix] --> SB3[starting-branch] --> TDD3[tdd minimo] --> VC3[verification] --> FIN
-    CLS -- review --> RVR[review 2 estagios + final] -.oferta.-> OW[oswap: OWASP]
+    CLS -- bug --> DBG[debugging: 4 fases OODA, causa raiz] --> SB2[starting-branch] --> TDD2[tdd: teste que falha + fix] --> VC2[verification] --> RV2[review] --> FIN
+    CLS -- ajuste --> QF[quick-fix] --> SB3[starting-branch: branch com alerta] --> TDD3[verificacao minima\nteste so se houver comportamento] --> VC3[verification] --> FIN
+    CLS -- review --> RVR[review: 2 estagios por tarefa de plano;\navulso = estagio de qualidade c/ evidencia] -.oferta.-> OW[oswap: OWASP]
+    CLS -- conflito --> MC[resolving-merge-conflicts]
     CLS -- conceitual --> ANS[responder direto]
 ```
 
-O `pelizzai-loop` envolve a execução (repete o ciclo até a Definition of Done; em dúvida, para e usa `pelizzai-interview-me`). A `pelizzai-preferences` é a camada global ao longo de tudo.
+O `pelizzai-loop` dá a lente do laço: o ciclo **OODA** (Observar → Orientar → Decidir → Agir) repetido até a Definition of Done; em dúvida material, pare e use `pelizzai-interview-me`. A `pelizzai-preferences` é a camada global ao longo de tudo. Para bibliotecas, frameworks e APIs externas, fundamente no MCP `context7` — não na memória.
 
 # Catálogo de skills
 
 | Grupo                      | Skills                                                                                  |
 | -------------------------- | --------------------------------------------------------------------------------------- |
-| Entrada e orquestração     | `pelizzai` (esta) · `pelizzai-router` · `pelizzai-audit` (bootstrap) · `pelizzai-preferences` (camada global) |
-| Raciocínio e comunicação   | `pelizzai-reasoning` · `pelizzai-interview-me` · `pelizzai-writing-clearly-and-concisely` |
+| Entrada e orquestração     | `pelizzai-core` (esta) · `pelizzai-router` · `pelizzai-audit` (bootstrap) · `pelizzai-preferences` (camada global) |
+| Raciocínio e comunicação   | `pelizzai-reasoning` (técnicas + OODA) · `pelizzai-interview-me` · `pelizzai-writing-clearly-and-concisely` |
 | Ciclo de feature           | `pelizzai-brainstorming` → `pelizzai-writing-plans` → `pelizzai-execution-plans`         |
-| Execução por tarefa        | `pelizzai-tdd` · `pelizzai-team` · `pelizzai-subagents` · `pelizzai-loop`                |
+| Execução por tarefa        | `pelizzai-tdd` · `pelizzai-team` · `pelizzai-subagents` · `pelizzai-loop` (OODA + DoD)   |
 | Tracks dedicados           | `pelizzai-debugging` (bug) · `pelizzai-quick-fix` (ajuste)                               |
 | Design e exploração        | `pelizzai-codebase-design` · `pelizzai-domain-modeling` · `pelizzai-prototype`           |
-| Isolamento e fechamento    | `pelizzai-starting-branch` · `pelizzai-finish-task` · `pelizzai-resolving-merge-conflicts` |
+| Isolamento e fechamento    | `pelizzai-starting-branch` (branch/worktree) · `pelizzai-finish-task` · `pelizzai-resolving-merge-conflicts` |
 | Qualidade e segurança      | `pelizzai-review` · `pelizzai-oswap` · `pelizzai-verification-before-completion`         |
 | Frontend                   | `pelizzai-frontend`                                                                      |
 | Autoria de skills          | `pelizzai-writing-skills`                                                                |

@@ -101,6 +101,7 @@ ReAct é um mecanismo de execução e controle. Ele deve trabalhar junto com out
 
 | Técnica                                       | Função principal                        | Relação com ReAct                                     |
 | --------------------------------------------- | --------------------------------------- | ----------------------------------------------------- |
+| [OODA](ooda.md)                               | Macro-loop da execução inteira até a DoD | ReAct é o micro-ciclo dentro da fase Agir do OODA     |
 | [Plan and Execute](plan-and-execute.md)       | Quebrar objetivo em etapas              | ReAct executa e ajusta o plano                        |
 | [Evidence Synthesis](evidence-synthesis.md)   | Recuperar contexto e evidência          | ReAct decide quando buscar e como usar o resultado    |
 | [Verification](verification.md)               | Validar comportamento                   | ReAct interpreta o resultado e decide o próximo passo |
@@ -108,6 +109,7 @@ ReAct é um mecanismo de execução e controle. Ele deve trabalhar junto com out
 
 ### Técnicas relacionadas
 
+- [OODA](ooda.md) — para execução longa/dinâmica, o macro-loop é o OODA; ReAct vive dentro do Agir
 - [Plan and Execute](plan-and-execute.md)
 - [Evidence Synthesis](evidence-synthesis.md)
 - [Verification](verification.md)

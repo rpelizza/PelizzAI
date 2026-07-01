@@ -92,7 +92,7 @@ Critério de conclusão:
 
 Não faça perguntas por reflexo. Primeiro use contexto disponível, arquivos, documentação, código e ferramentas adequadas.
 
-Use a skill `pelizza-interview-me` somente quando houver ambiguidade material que não possa ser resolvida com evidência disponível.
+Use a skill `pelizzai-interview-me` somente quando houver ambiguidade material que não possa ser resolvida com evidência disponível.
 
 ---
 
@@ -117,6 +117,7 @@ Leia a técnica correspondente antes de aplicá-la.
 | Técnica                  | Quando usar                                                                      | Arquivo                                                               |
 | ------------------------ | -------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
 | ReAct                    | Executar ações, usar ferramentas, observar resultados e ajustar próximo passo    | [react.md](techniques/react.md)                                       |
+| OODA                     | Loop macro Observar→Orientar→Decidir→Agir: situações dinâmicas, execução longa, re-observar a realidade a cada iteração | [ooda.md](techniques/ooda.md)                                         |
 | Plan and Execute         | Tarefas multi-etapa, dependências, checkpoints e replanejamento                  | [plan-and-execute.md](techniques/plan-and-execute.md)                 |
 | Structured Decomposition | Dividir problema complexo em partes, responsabilidades, contratos e dependências | [structured-decomposition.md](techniques/structured-decomposition.md) |
 | Constraint Satisfaction  | Garantir requisitos, proibições, compatibilidade e limites                       | [constraint-satisfaction.md](techniques/constraint-satisfaction.md)   |
@@ -129,7 +130,7 @@ Leia a técnica correspondente antes de aplicá-la.
 | Root Cause Analysis      | Investigar bugs, incidentes, sintomas, causas e prevenção de recorrência         | [root-cause-analysis.md](techniques/root-cause-analysis.md)           |
 | Critique and Refine      | Melhorar artefato após feedback, falha, inconsistência ou requisito não atendido | [critique-and-refine.md](techniques/critique-and-refine.md)           |
 
-> A skill `pelizzai-interview-me` é uma **skill irmã**, não uma das 12 técnicas: acione-a para resolver ambiguidade material por entrevista, conforme a Triagem inicial e a matriz.
+> A skill `pelizzai-interview-me` é uma **skill irmã**, não uma das técnicas do catálogo: acione-a para resolver ambiguidade material por entrevista, conforme a Triagem inicial e a matriz.
 
 ---
 
@@ -138,6 +139,7 @@ Leia a técnica correspondente antes de aplicá-la.
 | Situação                                                     | Técnica principal        | Técnicas auxiliares possíveis                                 |
 | ------------------------------------------------------------ | ------------------------ | ------------------------------------------------------------- |
 | Tarefa simples com ação clara                                | Nenhuma ou ReAct leve    | Verification                                                  |
+| Execução longa/dinâmica em loop até a entrega (plano, ambiente que muda) | OODA        | Plan and Execute, Verification                                |
 | Feature com múltiplas partes                                 | Plan and Execute         | Structured Decomposition, Verification                        |
 | Código existente com partes/contratos desconhecidos          | Structured Decomposition | Plan and Execute, Verification                                |
 | Refatoração preservando comportamento                        | Structured Decomposition | Verification de regressão, Constraint Satisfaction            |
@@ -158,6 +160,7 @@ Leia a técnica correspondente antes de aplicá-la.
 
 Use estas distinções quando duas técnicas parecerem candidatas à principal:
 
+- **OODA vs ReAct:** [ReAct](techniques/react.md) é o **micro-ciclo** de uma ação (pensar → agir com ferramenta → observar o resultado imediato). [OODA](techniques/ooda.md) é o **macro-loop** de uma execução inteira: re-**Observar** a realidade externa (git, testes, reviews, o que mudou no mundo), re-**Orientar** contra o objetivo/plano/DoD, **Decidir** a próxima iteração e **Agir** — repetindo até a Definition of Done. Um loop OODA contém muitos ciclos ReAct dentro da fase Agir.
 - **Tree of Thoughts vs Decision Making:** [Decision Making](techniques/decision-making.md) é a técnica padrão para escolher entre alternativas por trade-offs. Use [Tree of Thoughts](techniques/tree-of-thoughts.md) apenas quando os caminhos são **interdependentes** e exigem **poda e backtracking** — não para comparação linear de opções. As duas raramente atuam juntas.
 - **Structured Decomposition vs Plan and Execute:** decomponha com [Structured Decomposition](techniques/structured-decomposition.md) quando **partes, responsabilidades ou contratos ainda são desconhecidos**; passe a [Plan and Execute](techniques/plan-and-execute.md) quando as partes já são conhecidas e o que falta é ordená-las e executá-las.
 - **Self-Consistency é auxiliar:** [Self-Consistency](techniques/self-consistency.md) cruza tentativas independentes como apoio à [Verification](techniques/verification.md); não substitui o cálculo, a fonte ou o teste real.
@@ -174,11 +177,11 @@ Cada seta é uma **transição de fase**: a técnica seguinte assume quando a an
 ```text
 Structured Decomposition
 → Plan and Execute
-→ ReAct
+→ [loop OODA: ReAct dentro de Agir]
 → Verification
 ```
 
-Use Constraint Satisfaction quando houver requisitos rígidos, compatibilidade, segurança ou proibições.
+Use Constraint Satisfaction quando houver requisitos rígidos, compatibilidade, segurança ou proibições. O loop OODA é a lente do laço de execução (`pelizzai-loop` / `pelizzai-execution-plans`): re-observe a realidade a cada tarefa antes de decidir a próxima.
 
 ### Pesquisa ou recomendação técnica
 
@@ -283,7 +286,9 @@ Código e comportamento:
 - Código-fonte, testes, logs, contratos e execução controlada.
 
 Tecnologia:
-- Documentação oficial, changelog, repositório oficial e prova de conceito.
+- Documentação oficial via MCP `context7` quando disponível (`resolve-library-id` → `query-docs`);
+  sem ele, changelog, repositório oficial e web. Prova de conceito quando a doc não bastar.
+  Nunca responda de memória sobre API/versão de lib externa quando o context7 puder confirmar.
 
 Fatos atuais:
 - Fonte primária ou oficial atual.

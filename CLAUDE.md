@@ -1,8 +1,14 @@
 # CLAUDE.md
 
-Diretrizes comportamentais para reduzir erros comuns de codificação cometidos por LLMs. Combine com instruções específicas do projeto conforme necessário.
+## Harness PelizzAI (entrada obrigatória)
 
-**Trade-off:** Estas diretrizes priorizam cautela em vez de velocidade. Para tarefas triviais, use bom senso.
+Este repositório é o harness **PelizzAI**. A entrada de toda tarefa é a skill `pelizzai-core` (que exige acionar uma skill aplicável antes de qualquer resposta) e o `pelizzai-router` (que classifica o track e roteia). As diretrizes abaixo **complementam** as skills: em processo (planos, branches, reviews, fechamento), as skills do harness prevalecem. Ao anunciar uma skill, use sempre a grafia exata da marca: **"PelizzAI"**.
+
+## Diretrizes comportamentais
+
+Diretrizes para reduzir erros comuns de codificação cometidos por LLMs. Combine com instruções específicas do projeto conforme necessário.
+
+**Trade-off:** Estas diretrizes priorizam cautela em vez de velocidade. Para tarefas triviais, use bom senso — mas o "bom senso" não anula a regra do 1% da `pelizzai-core`: se uma skill se aplica (mesmo a um ajuste trivial, ex.: `pelizzai-quick-fix`), acione-a; a proporcionalidade vive DENTRO das skills, não em pulá-las.
 
 ## 1. Pense Antes de Codificar
 
@@ -55,13 +61,15 @@ Transforme tarefas em objetivos verificáveis:
 - "Corrigir o bug" → "Escrever um teste que o reproduza e depois fazê-lo passar"
 - "Refatorar X" → "Garantir que os testes passem antes e depois"
 
-Para tarefas com várias etapas, apresente um plano breve:
+Para micro-planos de resposta (poucos passos, dentro de uma mesma mensagem), apresente um plano breve:
 
 ```
 1. [Etapa] → verificar: [checagem]
 2. [Etapa] → verificar: [checagem]
 3. [Etapa] → verificar: [checagem]
 ```
+
+Tarefas multi-etapa de verdade seguem o fluxo formal do harness: o plano nasce na `pelizzai-writing-plans`, vive em `pelizzai/plans/` e é estressado com `pelizzai-interview-me` antes da execução — este formato breve não o substitui.
 
 Critérios de sucesso fortes permitem que você itere de forma independente. Critérios fracos ("fazer funcionar") exigem esclarecimentos constantes.
 

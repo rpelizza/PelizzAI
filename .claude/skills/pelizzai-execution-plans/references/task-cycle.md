@@ -12,7 +12,11 @@ O briefing de cada tarefa inclui:
 - Texto completo da tarefa (colado do plano, com valores exatos a usar verbatim).
 - Skills de domínio relevantes (coladas, ou seus pontos-chave) — o membro não herda o seu contexto.
 - Convenções e contratos necessários (caminhos, interfaces, decisões já tomadas).
-- Instrução de raciocínio (pelizzai-reasoning) e de TDD (pelizzai-tdd).
+- Camada global: aplique `pelizzai-preferences` (idioma, segredos, .env, qualidade de produção) e
+  raciocine via `pelizzai-reasoning`; em conflito, as SKILLS DE DOMÍNIO coladas neste briefing e as
+  regras do projeto PREVALECEM sobre preferences/reasoning.
+- Instrução de TDD (pelizzai-tdd). Para APIs de libs/frameworks externos, fundamente no MCP
+  `context7` (resolve-library-id → query-docs) — não na memória.
 - O formato de retorno esperado e o status (ver abaixo).
 ```
 
@@ -36,9 +40,12 @@ Nesta ordem, com `pelizzai-review`:
 
 ```text
 (a) Conformidade com a spec: o código faz exatamente o que a tarefa pede? Nada a mais, nada a menos?
+    O revisor é ADVERSARIAL por instrução: NÃO confia no relatório do implementador ("terminou
+    rápido demais; o relatório pode estar incompleto ou otimista") — compara implementação real
+    vs requisitos LINHA A LINHA, procurando faltas, extras (escopo além do pedido) e mal-entendidos.
 (b) Qualidade do código: legibilidade, design, reuso, segurança — COM evidência de teste FRESCA:
-    o revisor rodou de fato os comandos de teste/lint/build do projeto e colou a saída verde.
-    "Testes passam" inferido NÃO conta como aprovado.
+    o revisor rodou de fato os comandos de teste/lint/build do projeto e colou a saída + exit code.
+    "Testes passam" inferido NÃO conta como aprovado; check que não rodou = UNVERIFIED, nunca ✅.
 ```
 
 Aprovação exige **os dois** verdicts: spec ✅ **e** qualidade ✅. Itens "⚠️ não verificável" exigem avaliação do coordenador contra o plano antes de marcar concluído.
@@ -52,7 +59,7 @@ O membro reporta um destes status:
 | `DONE`               | Trabalho completo                             | Segue para o review                                            |
 | `DONE_WITH_CONCERNS` | Completo, mas com ressalvas                   | Leia as ressalvas antes de prosseguir                          |
 | `NEEDS_CONTEXT`      | Falta informação                              | Forneça o contexto e re-despache                               |
-| `BLOCKED`            | Não consegue concluir                         | Avalie: dar contexto, usar modelo mais capaz, quebrar a tarefa, ou escalar ao humano |
+| `BLOCKED`            | Não consegue concluir                         | Avalie, nesta ordem: dar mais contexto → quebrar a tarefa → escalar ao humano (o modelo já é o topo — ver §8) |
 
 Nunca ignore uma escalação nem re-despache sem mudar nada.
 
@@ -73,8 +80,8 @@ Nunca ignore uma escalação nem re-despache sem mudar nada.
   EM ORDEM, os fixes tentados e o padrão: issues independentes / mesma issue recorrente /
   conflito estrutural); commite SÓ o cursor (chore: registra BLOCKED em <tarefa>); escale ao
   humano com uma mensagem ACIONÁVEL (o que foi feito + cada motivo + fixes + padrão + opções:
-  esclarecer a spec via pelizzai-writing-plans / subir o modelo / quebrar a tarefa / revisar o
-  plano); deixe a working tree INTACTA (nunca git reset --hard). Se o humano mandar continuar,
+  esclarecer a spec via pelizzai-writing-plans / quebrar a tarefa / revisar o plano);
+  deixe a working tree INTACTA (nunca git reset --hard). Se o humano mandar continuar,
   re-despache reaproveitando o WIP — não recomece do zero.
 ```
 
@@ -83,14 +90,18 @@ Nunca ignore uma escalação nem re-despache sem mudar nada.
 ```text
 - O membro NÃO commita. O trabalho fica na working tree até os DOIS reviews passarem.
 - Só após spec ✅ e qualidade ✅ (com fixes aplicados) o COORDENADOR consolida.
-- Granular: o toque do cursor (state.md) entra no MESMO commit da tarefa.
-- Squash-final: acumula; nunca um commit órfão só do cursor.
+- Granular: um commit DEFINITIVO por tarefa (mensagem conventional); o toque do cursor (state.md)
+  entra no MESMO commit da tarefa. Esse histórico é mantido no fechamento — sem squash.
+- Squash-final: um commit de TRABALHO por tarefa (`wip(<slug>): <tarefa>`) — nunca acumule a
+  working tree inteira sem commit até o fim (um crash perderia tudo). No fechamento, a
+  pelizzai-finish-task consolida os wip num único commit final (autorização já dada na escolha
+  da estratégia). O cursor entra no wip da tarefa; nunca um commit órfão só do cursor.
 ```
 
 ## 7. Avançar o cursor
 
-Após consolidar, atualize `pelizzai/data/state.md`: na seção `## Progresso`, atualize `delivered`, ajuste `next` e `pending`, mantenha `phase: exec`. Ao concluir o plano, a `pelizzai-finish-task` fecha o cursor (`phase: done`).
+Ao consolidar, **ANTES do commit da tarefa**: atualize `pelizzai/data/state.md` (na seção `## Progresso`, atualize `delivered`, ajuste `next` e `pending`, mantenha `phase: exec`) e **inclua-o no stage** — assim o commit definitivo (granular) ou o wip (squash-final) já carrega o cursor, cumprindo o §6 sem commit órfão. Ao concluir o plano, a `pelizzai-finish-task` fecha o cursor (`phase: done`).
 
 ## 8. Seleção de modelo por papel
 
-Use o modelo adequado ao papel: tarefas mecânicas e bem-especificadas pedem modelos rápidos; integração pede modelos padrão; arquitetura e o **review final da branch** pedem o modelo mais capaz disponível. Especifique o modelo explicitamente para não herdar o default da sessão.
+Política do harness: membros, revisores e o coordenador usam o **modelo mais capaz disponível, com effort/reasoning no nível máximo** — nunca rebaixe modelo nem effort para economizar. Arquitetura, os reviews e a **validação final da entrega** são inegociavelmente o topo. Especifique o modelo e o effort explicitamente para não herdar um default menor da sessão. Como já se parte do topo, "subir o modelo" não é um degrau de escalada — os degraus do BLOCKED são: dar mais contexto → quebrar a tarefa → escalar ao humano.

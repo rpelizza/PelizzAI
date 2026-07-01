@@ -5,6 +5,8 @@ description: Desenvolvimento orientado a testes (TDD). Use para desenvolver func
 
 # Desenvolvimento Orientado a Testes (TDD)
 
+**Anuncie ao iniciar:** "Usando a skill PelizzAI TDD para implementar test-first (red → green → refatorar)."
+
 ## Filosofia
 
 **Princípio fundamental**: Testes devem verificar o comportamento por meio de interfaces públicas, não de detalhes de implementação. O código pode mudar completamente; os testes não deveriam.
@@ -48,6 +50,8 @@ Explore a base de código e respeite as ADRs (Architecture Decision Records — 
 
 Antes de escrever qualquer código:
 
+- [ ] Leia `pelizzai/domain-skills.md` e carregue as skills de domínio relevantes ao comportamento em teste — os padrões do projeto prevalecem sobre padrões genéricos (se você é um membro despachado, elas já vêm coladas no seu briefing)
+- [ ] Para comportamento de lib/framework externo, confirme a API real e atual via MCP `context7` (`resolve-library-id` → `query-docs`) antes de escrever o teste — não confie na memória
 - [ ] Confirme com o usuário quais alterações de interface são necessárias (use `pelizzai-interview-me` quando houver dúvida material)
 - [ ] Confirme com o usuário quais comportamentos devem ser testados (priorize-os)
 - [ ] Identifique oportunidades para criar módulos "profundos" (interface simples, implementação robusta) — use o vocabulário da `pelizzai-codebase-design` e a `pelizzai-reasoning` (Structured Decomposition) para mapear o vocabulário e a testabilidade; em design novo, isso vem da `pelizzai-brainstorming`
@@ -137,12 +141,12 @@ flowchart LR
 - Teste vermelho inesperado ou bug: *Root Cause Analysis* antes de mexer no código.
 - Estado verde: *Verification* confirma que o comportamento existe de fato — não basta "passou".
 
-**Loop até a entrega — `pelizzai-loop`:**
+**Loop até a entrega — `pelizzai-loop` (OODA):**
 
 - O ciclo RED→GREEN é um loop: repita teste→código por comportamento até a *Definition of Done* (comportamentos críticos testados e verdes, refatorado no verde).
-- No nível da tarefa/plano, o harness mantém o loop (implementar → testar → revisar → corrigir) até a tarefa ser entregue com êxito. Em dúvida material, **pare** e use `pelizzai-interview-me`.
+- No nível da tarefa/plano, o harness mantém o loop **OODA** (observar a evidência fresca → orientar contra o plano → decidir → agir) até a tarefa ser entregue com êxito. Em dúvida material, **pare** e use `pelizzai-interview-me`.
 
 **Aprovação e conclusão:**
 
 - Confirme interface e comportamentos com `pelizzai-interview-me`, ou no design aprovado da `pelizzai-brainstorming`, antes de escrever testes.
-- Antes de declarar pronto, passe pela `pelizzai-verification-before-completion` e pela `pelizzai-review`.
+- Antes de declarar pronto, passe pela `pelizzai-verification-before-completion` e pela `pelizzai-review` (exceção: o track **ajuste** dispensa o review formal por escopo trivial — ver `pelizzai-quick-fix`; a verificação vale sempre).

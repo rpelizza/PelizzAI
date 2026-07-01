@@ -5,14 +5,16 @@
 > **Foco atual:** Claude Code, com a implementação versionada em `.claude/`.
 >
 > **Direção futura:** portar o mesmo harness para outras superfícies, como `.agents`,
-> `.cursor` e outras IDEs. A intenção é preservar os contratos de fluxo e trocar apenas
-> os adaptadores de execução de cada ambiente.
+> `.cursor` e outras IDEs. As skills já carregam instruções de ativação para Codex,
+> Copilot CLI e Gemini CLI (portabilidade parcial embutida no conteúdo); falta a
+> distribuição/estrutura de diretórios oficial para essas superfícies. A intenção é
+> preservar os contratos de fluxo e trocar apenas os adaptadores de execução.
 
 PelizzAI é um harness de agentes baseado em **skills Markdown**, em português do Brasil,
 para conduzir tarefas de software com disciplina de produção: entender o objetivo,
-mapear o projeto, escolher o fluxo certo, isolar em branch, executar com TDD,
-revisar com evidência, verificar antes de afirmar conclusão e fechar a entrega de forma
-deliberada.
+mapear o projeto, escolher o fluxo certo, isolar em branch ou worktree, executar com TDD,
+revisar com evidência, validar a entrega como um líder técnico, verificar antes de afirmar
+conclusão e fechar a entrega de forma deliberada.
 
 O harness não é um framework de runtime. Ele é um **sistema operacional de trabalho para
 agentes**: as skills definem quando agir, como decompor, quando delegar, como revisar,
@@ -22,12 +24,13 @@ quais artefatos persistir e onde exigir decisão humana.
 
 O PelizzAI tem quatro camadas:
 
-1. **Entrada e roteamento:** `pelizzai` força o uso de skills; `pelizzai-router`
+1. **Entrada e roteamento:** `pelizzai-core` força o uso de skills; `pelizzai-router`
    entende a tarefa e escolhe o track.
-2. **Ciclo de vida:** bootstrap, brainstorming, plano, execução, debugging, ajuste,
-   review e fechamento.
+2. **Ciclo de vida:** bootstrap, brainstorming, plano, gate de setup pós-plano, execução,
+   debugging, ajuste, review, validação final e fechamento.
 3. **Execução com agentes:** coordenador, teammates nativos do Claude Code quando
-   disponíveis, subagents como fallback e execução inline como último recurso.
+   disponíveis, subagents como fallback e execução inline como último recurso — todos
+   recebendo skills de domínio, `pelizzai-preferences` e `pelizzai-reasoning` no briefing.
 4. **Estado do projeto alvo:** diretório `pelizzai/`, skills de domínio, specs,
    planos, ADRs, cursor de tarefa e ledger de manutenção.
 
@@ -61,10 +64,10 @@ PelizzAI/
     │   ├── pelizzai-cadence.mjs       hook opt-in de cadencia para Claude Code
     │   └── pelizzai-cadence.ps1       variante PowerShell do hook
     └── skills/
-        ├── pelizzai/                  skill raiz
+        ├── pelizzai-core/             skill raiz (entrada obrigatória)
         ├── pelizzai-router/           roteador do ciclo de vida
         ├── pelizzai-audit/            bootstrap e repo-scan
-        ├── pelizzai-execution-plans/  executor de planos
+        ├── pelizzai-execution-plans/  executor de planos + gate de setup pós-plano
         └── pelizzai-*/                demais skills de processo
 ```
 
@@ -74,28 +77,36 @@ que devem sobreviver às versões futuras para outras IDEs.
 ## Princípios
 
 - **Skills-first:** a inteligência vive nas skills, não em código oculto.
+- **Marca "PelizzAI":** todo anúncio de skill usa a grafia exata "PelizzAI" (regra global
+  na `pelizzai-core`); identificadores (`pelizzai-*`) e o diretório `pelizzai/` ficam em minúsculas.
 - **Claude Code primeiro, portável depois:** o projeto atual é Claude Code; a arquitetura
   evita amarrar a lógica do harness a um único runtime.
-- **Branches-only:** o isolamento é sempre branch; o harness não usa `git worktree`.
+- **Isolamento escolhido pelo usuário:** `branch` (troca no lugar) ou `worktree` (working
+  tree isolado, habilita escrita paralela em caminhos disjuntos). Nos tracks com plano, a
+  escolha acontece no **gate de setup pós-plano**; num ajuste pontual, branch com alerta.
 - **Proporcionalidade:** use o menor fluxo seguro; ajuste trivial não vira ritual pesado.
 - **Evidência antes de afirmação:** nada de "pronto", "passa" ou "corrigido" sem comando
   rodado, saída lida e evidência fresca.
-- **Gates humanos nas bordas:** branch, modo de execução, estratégia de commit, squash,
-  push, PR e descarte são decisões explícitas.
-- **Autonomia entre tarefas:** uma vez aprovado o plano, o agente executa tarefa por tarefa
-  sem pedir permissão a cada passo, parando apenas quando houver bloqueio real.
+- **Gates humanos nas bordas:** setup pós-plano (isolamento, nome, modo de execução,
+  estratégia de commit), push, PR e descarte são decisões explícitas — e honradas até o
+  fim (granular não vira squash; tarefa nova não herda decisões da anterior).
+- **Autonomia entre tarefas:** uma vez aprovado o plano e feito o setup, o agente executa
+  tarefa por tarefa sem pedir permissão a cada passo, parando apenas por bloqueio real.
+- **Loop OODA:** o laço de execução re-observa a realidade (git, testes, reviews) a cada
+  iteração antes de decidir a próxima ação (`pelizzai-loop`, `pelizzai-reasoning`).
 - **Domínio explícito:** cada projeto alvo ganha skills de domínio próprias, catalogadas e
-  mantidas com base no código real e em documentação atual.
+  mantidas com base no código real e em documentação atual (MCP `context7` como fonte
+  primária de docs de libs/frameworks; a web como fallback).
 
 ## Fluxo global
 
-Toda tarefa que toca o projeto passa pela raiz `pelizzai`, pelo roteador e por um track.
+Toda tarefa que toca o projeto passa pela raiz `pelizzai-core`, pelo roteador e por um track.
 Na primeira interação com um projeto alvo, ou quando o usuário digita `bootstrap`, o
 roteador manda primeiro para o bootstrap.
 
 ```mermaid
 flowchart TD
-    U["Mensagem do usuario"] --> ROOT["pelizzai<br/>entender objetivo + exigir skill aplicavel"]
+    U["Mensagem do usuario"] --> ROOT["pelizzai-core<br/>entender objetivo + exigir skill aplicavel"]
     ROOT --> PREF["pelizzai-preferences<br/>camada global quando relevante"]
     ROOT --> RT["pelizzai-router"]
 
@@ -109,12 +120,14 @@ flowchart TD
     CLS --> BUG["bug / falha / comportamento inesperado"]
     CLS --> QUICK["ajuste pequeno"]
     CLS --> REVIEW["review"]
+    CLS --> CONFLICT["conflito de merge/rebase"]
     CLS --> QUESTION["pergunta conceitual"]
 
-    FEATURE --> LIFE["brainstorming -> plano -> execucao -> review -> verificacao -> fechamento"]
+    FEATURE --> LIFE["brainstorming -> plano -> gate de setup pos-plano -> execucao<br/>-> validacao final -> verificacao -> fechamento"]
     BUG --> DEBUG["debugging -> teste que falha -> fix -> review -> fechamento"]
     QUICK --> QF["branch -> mudanca minima -> verificacao -> fechamento"]
-    REVIEW --> RV["review em dois estagios<br/>+ OWASP quando fizer sentido"]
+    REVIEW --> RV["2 estagios por tarefa de plano;<br/>avulso = estagio de qualidade c/ evidencia<br/>+ OWASP quando fizer sentido"]
+    CONFLICT --> MC["resolving-merge-conflicts"]
     QUESTION --> ANSWER["resposta direta proporcional"]
 ```
 
@@ -135,7 +148,7 @@ flowchart TD
     IDEA --> WSK1["pelizzai-writing-skills<br/>criar skills iniciais de dominio"]
 
     KIND -- "existente / workspace" --> SCAN["Repo-scan completo<br/>padroes reais do codigo"]
-    SCAN --> WSK2["pelizzai-writing-skills<br/>skills de dominio fundamentadas"]
+    SCAN --> WSK2["pelizzai-writing-skills<br/>skills de dominio fundamentadas via context7"]
 
     WSK1 --> ART["Criar pelizzai/domain-skills.md<br/>e pelizzai/data/review-domain-skills.md"]
     WSK2 --> ART
@@ -150,8 +163,8 @@ existência de skills avulsas.
 
 ### Feature, refactor estrutural e infra estrutural
 
-Features e mudanças estruturais passam por design, plano e execução. O design e o plano
-são estressados com `pelizzai-interview-me` antes de virar implementação.
+Features e mudanças estruturais passam por design, plano, gate de setup e execução. O design
+e o plano são estressados com `pelizzai-interview-me` antes de virar implementação.
 
 ```mermaid
 flowchart TD
@@ -160,28 +173,28 @@ flowchart TD
     IV1 --> SPEC["pelizzai/specs/AAAA-MM-DD-topico-design.md"]
     SPEC --> WP["pelizzai-writing-plans<br/>tarefas verticais, TDD, comandos, sem placeholders"]
     WP --> IV2["pelizzai-interview-me<br/>estressar lacunas do plano"]
-    IV2 --> PLAN["pelizzai/plans/AAAA-MM-DD-feature.md"]
-    PLAN --> SB["pelizzai-starting-branch<br/>branch segura"]
-    SB --> EXP["pelizzai-execution-plans<br/>team / subagents / inline"]
-    EXP --> FINALRV["review final da branch"]
-    FINALRV --> VERIFY["pelizzai-verification-before-completion"]
-    VERIFY --> FIN["pelizzai-finish-task<br/>squash? push? PR? local?"]
+    IV2 --> GATE["GATE DE SETUP POS-PLANO<br/>1. worktree ou branch?<br/>2. nome tipo/slug (starting-branch)<br/>3. modo: team / subagents / inline<br/>4. commit: granular / squash-final"]
+    GATE --> EXP["pelizzai-execution-plans<br/>loop OODA por tarefa"]
+    EXP --> VAL["validacao final da entrega<br/>review final + suite completa + checklist do plano"]
+    VAL --> VERIFY["pelizzai-verification-before-completion"]
+    VERIFY --> FIN["pelizzai-finish-task<br/>honra a commit-strategy; destino? worktree?"]
 ```
 
 ### Bug
 
 Debugging é inline por padrão. O harness proíbe correção por palpite: primeiro reproduz,
-investiga causa raiz, compara padrões, testa hipótese e só então implementa.
+investiga causa raiz, compara padrões, testa hipótese e só então implementa. As quatro
+fases são um ciclo OODA (observar → orientar → decidir → agir).
 
 ```mermaid
 flowchart TD
-    BUG["Erro, falha de teste<br/>ou comportamento inesperado"] --> RCA["Fase 1<br/>investigar causa raiz"]
-    RCA --> PAT["Fase 2<br/>comparar com padroes que funcionam"]
-    PAT --> HYP["Fase 3<br/>formular e testar uma hipotese"]
+    BUG["Erro, falha de teste<br/>ou comportamento inesperado"] --> RCA["Fase 1 (Observar)<br/>investigar causa raiz"]
+    RCA --> PAT["Fase 2 (Orientar)<br/>comparar com padroes que funcionam"]
+    PAT --> HYP["Fase 3 (Decidir)<br/>formular e testar uma hipotese"]
     HYP --> OK{"Hipotese explica a causa?"}
     OK -- "nao" --> RCA
     OK -- "sim" --> SB["pelizzai-starting-branch"]
-    SB --> RED["pelizzai-tdd<br/>teste de regressao falhando"]
+    SB --> RED["Fase 4 (Agir): pelizzai-tdd<br/>teste de regressao falhando + skills de dominio"]
     RED --> FIX["corrigir a origem<br/>uma mudanca por vez"]
     FIX --> VERIFY["verificacao fresca"]
     VERIFY --> REVIEW["pelizzai-review"]
@@ -193,58 +206,85 @@ precisa ser reavaliada.
 
 ### Ajuste pequeno
 
-O track `ajuste` pula design e plano, mas não pula branch, verificação nem fechamento.
-Ele só vale quando a mudança é pequena, local, sem nova superfície pública e sem regra de
-negócio nova.
+O track `ajuste` pula design e plano, mas não pula branch, skills de domínio, verificação
+nem fechamento. Ele só vale quando a mudança é pequena, local, sem nova superfície pública
+e sem regra de negócio nova. Num ajuste não se oferece worktree — branch com alerta.
 
 ```mermaid
 flowchart TD
     SMALL["Mudanca pontual"] --> FIT{"Cabe em quick-fix?<br/>~1 arquivo, menos de 50 linhas,<br/>sem API/regra nova"}
     FIT -- "nao" --> FEATURE["Escalar para feature<br/>brainstorming + plano"]
-    FIT -- "sim" --> SB["pelizzai-starting-branch"]
-    SB --> CHANGE["Mudanca minima<br/>teste minimo se houver comportamento"]
+    FIT -- "sim" --> SB["pelizzai-starting-branch<br/>branch com alerta"]
+    SB --> DOM["conferir skills de dominio<br/>da area afetada"]
+    DOM --> CHANGE["Mudanca minima<br/>teste minimo se houver comportamento"]
     CHANGE --> VERIFY["pelizzai-verification-before-completion"]
     VERIFY --> FIN["pelizzai-finish-task"]
 ```
 
+## Gate de setup pós-plano
+
+Com o plano salvo e estressado, a `pelizzai-execution-plans` conduz **quatro perguntas, em
+ordem**, antes da Tarefa 1 (registradas em `pelizzai/data/state.md`; tarefa nova nunca herda
+as respostas da anterior):
+
+| # | Pergunta                       | Opções                                                        |
+| - | ------------------------------ | ------------------------------------------------------------- |
+| 1 | Isolamento                     | `branch` (troca no lugar) · `worktree` (cópia isolada; habilita escrita paralela em caminhos disjuntos) |
+| 2 | Nome da branch/worktree        | `pelizzai-starting-branch` sugere `<tipo>/<slug>` a partir do track (`feat/`, `fix/`, `refactor/`, …) e confirma |
+| 3 | Modo de execução               | `team` (preferido; time coordenado) · `subagents` (um por tarefa) · `inline` — **as três opções sempre visíveis** |
+| 4 | Estratégia de commit           | `granular` (commits definitivos mantidos — sem squash no fim) · `squash-final` (commits wip + consolidação final já autorizada) |
+
+Para `bug` e `ajuste` (sem plano), o router resolve as mesmas decisões no início, com
+defaults confirmados brevemente (bug) ou alerta (ajuste).
+
 ## Loop de execução por tarefa
 
 `pelizzai-execution-plans` é o motor de execução de planos aprovados. Ele mantém o cursor
-em `pelizzai/data/state.md`, lê o plano, cola a tarefa e as skills de domínio no briefing
-de cada executor, e só consolida quando spec e qualidade passam.
+em `pelizzai/data/state.md`, lê o plano, cola a tarefa, as skills de domínio e a camada
+global (`pelizzai-preferences` + `pelizzai-reasoning`, com as skills de domínio prevalecendo)
+no briefing de cada executor, e só consolida quando spec e qualidade passam. O laço macro
+é um ciclo OODA até a Definition of Done.
 
 ```mermaid
 flowchart TD
-    PLAN["Plano aprovado"] --> LOAD["Carregar domain-skills.md<br/>e state.md"]
+    PLAN["Plano aprovado + setup feito"] --> LOAD["Carregar domain-skills.md<br/>e state.md"]
     LOAD --> PRE["Pre-voo<br/>contradicoes e riscos"]
-    PRE --> MODE{"Modo de execucao"}
-    MODE --> TEAM["team"]
-    MODE --> SUB["subagents"]
-    MODE --> INLINE["inline"]
+    PRE --> TASK["Selecionar proxima tarefa<br/>(OODA: observar delta antes)"]
 
-    TEAM --> TASK["Selecionar proxima tarefa"]
-    SUB --> TASK
-    INLINE --> TASK
-
-    TASK --> BRIEF["Briefing autossuficiente<br/>tarefa completa + skills de dominio"]
+    TASK --> BRIEF["Briefing autossuficiente<br/>tarefa + skills de dominio + camada global"]
     BRIEF --> TDD["pelizzai-tdd<br/>RED -> GREEN -> refatorar no verde"]
-    TDD --> SPEC_RV["Review estagio 1<br/>conformidade com a spec"]
+    TDD --> SPEC_RV["Review estagio 1<br/>conformidade com a spec (adversarial)"]
     SPEC_RV --> SPEC_OK{"Spec ok?"}
-    SPEC_OK -- "nao" --> FIX1["corrigir e re-revisar<br/>circuit breaker 3 ciclos"]
+    SPEC_OK -- "nao" --> FIX1["re-despachar fix e RE-REVISAR<br/>circuit breaker 3 ciclos"]
     FIX1 --> SPEC_RV
 
-    SPEC_OK -- "sim" --> CODE_RV["Review estagio 2<br/>qualidade + testes rodados"]
+    SPEC_OK -- "sim" --> CODE_RV["Review estagio 2<br/>qualidade + testes RODADOS (UNVERIFIED nunca e OK)"]
     CODE_RV --> CODE_OK{"Qualidade ok?"}
-    CODE_OK -- "nao" --> FIX2["corrigir e re-revisar<br/>circuit breaker 3 ciclos"]
+    CODE_OK -- "nao" --> FIX2["re-despachar fix e RE-REVISAR<br/>circuit breaker 3 ciclos"]
     FIX2 --> CODE_RV
 
-    CODE_OK -- "sim" --> COMMIT["Coordenador consolida<br/>commit + avancar state.md"]
+    CODE_OK -- "sim" --> COMMIT["Coordenador consolida<br/>(granular: commit definitivo; squash-final: wip)<br/>+ avancar state.md"]
     COMMIT --> MORE{"Mais tarefas?"}
     MORE -- "sim" --> TASK
-    MORE -- "nao" --> FINAL["review final -> verificacao -> finish-task"]
+    MORE -- "nao" --> FINAL["validacao final da entrega -> verificacao -> finish-task"]
 ```
 
 O membro implementador não commita. O commit é gate do coordenador após os dois reviews.
+Fixes de review voltam ao implementador (nunca corrigidos à mão pelo coordenador) e são
+sempre re-revisados no mesmo estágio.
+
+## Validação final da entrega (coordenador/líder)
+
+Nenhum plano é declarado entregue sem o coordenador validar a entrega inteira, nesta ordem:
+
+```text
+1. Review final da branch inteira (pelizzai-review, modelo mais capaz, effort máximo).
+2. Suíte completa (testes + lint + build) rodada pelo próprio coordenador, com saída e
+   exit code — nunca reaproveitando runs por tarefa nem confiando em relatório de membro.
+3. Checklist do plano, requisito a requisito — conformidade é binária.
+4. pelizzai-verification-before-completion (evidência fresca antes de qualquer alegação).
+5. pelizzai-finish-task (fechamento).
+```
 
 ## Time de agentes
 
@@ -266,11 +306,11 @@ flowchart TD
 
     TEAMMODE --> ROSTER["Roster vivo<br/>papel, frente, dependencias, entregavel, verificacao"]
     SUBMODE --> ROSTER
-    ROSTER --> BRIEFS["Briefings autossuficientes"]
+    ROSTER --> BRIEFS["Briefings autossuficientes<br/>skills de dominio + camada global"]
     BRIEFS --> PAR["Leitura, pesquisa, review<br/>em paralelo"]
-    BRIEFS --> SERIAL["Escrita integrada em serie<br/>branches-only, sem worktree"]
-    PAR --> SYN["Verificacao adversarial<br/>cross-check, refutacao, sintese"]
-    SERIAL --> SYN
+    BRIEFS --> WRITE["Escrita: em serie (branch)<br/>ou paralela em paths disjuntos (worktree)"]
+    PAR --> SYN["Verificacao adversarial + evidencia<br/>cross-check, refutacao, sintese"]
+    WRITE --> SYN
     SYN --> DONE["Entrega unica do coordenador"]
 ```
 
@@ -278,7 +318,7 @@ Papéis típicos:
 
 | Papel | Função |
 | --- | --- |
-| Coordenador | Decompõe, cria roster, delega, verifica, integra e decide conclusão. |
+| Coordenador | Decompõe, cria roster, delega, verifica, integra, valida a entrega e decide conclusão. |
 | Investigador | Mapeia código, logs, docs ou hipótese específica. |
 | Implementador | Escreve uma frente delimitada, via TDD, sem commitar. |
 | Revisor | Audita spec, qualidade, segurança, performance, testes ou acessibilidade. |
@@ -286,9 +326,11 @@ Papéis típicos:
 | Verificador / QA | Reproduz comportamento, roda checks e valida evidência. |
 | Documentador | Consolida decisões, specs, planos ou relatórios. |
 
-Limite importante: como o harness é **branches-only**, não existe escrita paralela isolada
-no mesmo working tree. O paralelismo seguro por padrão é leitura, análise e review; escrita
-é integrada em série pelo coordenador.
+Limite importante: a escrita paralela depende do isolamento escolhido. Com `branch`, não
+existe escrita paralela isolada no mesmo working tree — o coordenador integra em série.
+Com `worktree`, as frentes escrevem em paralelo **dentro do worktree único da tarefa**,
+desde que toquem caminhos disjuntos (nunca um worktree por agente). Review, commit e
+cursor continuam serializados pelo coordenador.
 
 ## Estado e artefatos no projeto alvo
 
@@ -311,17 +353,18 @@ pelizzai/
 ```
 
 `state.md` é o cursor retomável. Ele registra `slug`, `track`, `phase`, `branch`,
-`isolation`, `execution-mode`, `commit-strategy`, `plan`, `project`, progresso e histórico.
+`isolation`, `worktree-path`, `execution-mode`, `commit-strategy`, `audience`, `plan`,
+`project`, progresso e histórico.
 
 ```mermaid
 flowchart LR
-    RT["router"] --> ST["state.md<br/>decisoes iniciais"]
+    RT["router"] --> ST["state.md<br/>decisoes iniciais / pending"]
+    EXP["execution-plans<br/>gate de setup + cursor"] --> ST
     SB["starting-branch"] --> ST
-    EXP["execution-plans"] --> ST
     FIN["finish-task"] --> ST
 
-    ST --> RESUME["Retomada apos compaction<br/>validar branch contra git"]
-    RESUME --> NEXT["continuar tarefa<br/>ou iniciar nova se phase done"]
+    ST --> RESUME["Retomada apos compaction<br/>validar branch/worktree contra git"]
+    RESUME --> NEXT["continuar tarefa<br/>ou iniciar nova se phase done<br/>(sem herdar decisoes)"]
 ```
 
 Estados principais:
@@ -332,19 +375,22 @@ Estados principais:
 | `track` | `feature`, `bug`, `ajuste`, `refactor`, `infra` ou `review`. |
 | `phase` | `brainstorm`, `plan`, `exec`, `review`, `done` ou `blocked`. |
 | `branch` | Branch de trabalho validada contra o git ao retomar. |
-| `execution-mode` | `team`, `subagents` ou `inline`. |
-| `commit-strategy` | `granular` ou `squash-final`. |
+| `isolation` | `pending`, `branch` ou `worktree` — escolhido pelo usuário no gate. |
+| `worktree-path` | Caminho do worktree, quando `isolation: worktree`. |
+| `execution-mode` | `pending`, `team`, `subagents` ou `inline`. |
+| `commit-strategy` | `pending`, `granular` ou `squash-final` — honrada até o fim. |
+| `audience` | `technical` ou `layperson` — modula a linguagem dos gates. |
 | `plan` | Caminho do plano em execução, quando houver. |
 
 ## Gates de branch, verificação e fechamento
 
-O harness protege o histórico e a confiança do usuário com três gates fortes.
+O harness protege o histórico e a confiança do usuário com gates fortes.
 
 ```mermaid
 flowchart TD
-    CODE["Antes de escrever codigo"] --> BRANCH{"Branch protegida?<br/>main/master/develop/dev<br/>ou HEAD vazio"}
-    BRANCH -- "sim" --> NEWBR["criar branch com pelizzai-starting-branch"]
-    BRANCH -- "nao" --> WORK["trabalhar na feature branch"]
+    CODE["Antes de escrever codigo"] --> BRANCH{"Branch protegida?<br/>main/master/develop/dev<br/>ou HEAD vazio (fail-closed)"}
+    BRANCH -- "sim" --> NEWBR["criar isolamento com pelizzai-starting-branch"]
+    BRANCH -- "nao" --> WORK["trabalhar na feature branch/worktree"]
 
     WORK --> CLAIM["Antes de afirmar pronto"]
     CLAIM --> VERIFY["rodar comando completo<br/>ler saida + exit code"]
@@ -352,20 +398,28 @@ flowchart TD
     PASS -- "nao" --> REAL["reportar estado real<br/>nao concluir"]
     PASS -- "sim" --> FINISH["pelizzai-finish-task"]
 
-    FINISH --> TESTS["verificar testes"]
+    FINISH --> GUARD["gate de branch protegida<br/>(de novo, fail-closed)"]
+    GUARD --> TESTS["verificar testes<br/>(falhou? parar, sem menu)"]
     TESTS --> CURSOR["fechar cursor em state.md"]
     CURSOR --> STRATEGY{"commit-strategy"}
-    STRATEGY -- "granular" --> SQUASH{"squash ou manter historico?"}
-    STRATEGY -- "squash-final" --> ONE["commit final unico"]
-    SQUASH --> DEST{"destino?"}
-    ONE --> DEST
-    DEST --> PUSH["push direto"]
+    STRATEGY -- "granular" --> KEEP["historico mantido<br/>(sem re-perguntar squash)"]
+    STRATEGY -- "squash-final" --> ONE["consolidar wips num commit unico<br/>(mensagem aprovada)"]
+    KEEP --> OFFERS["ofertas opt-in:<br/>pelizzai-oswap (superficie sensivel)<br/>pelizzai-frontend (diff de UI)"]
+    ONE --> OFFERS
+    OFFERS --> TREE["gate da working tree<br/>nada sem commit antes do push"]
+    TREE --> DEST{"destino?"}
+    DEST --> PUSH["push direto<br/>(so com base comprovadamente nao-protegida)"]
     DEST --> PR["push + PR"]
     DEST --> LOCAL["manter local"]
     DEST --> DISCARD["descartar com confirmacao textual"]
+    PUSH --> WT["worktree? oferecer remocao"]
+    PR --> WT
+    LOCAL --> WT
 ```
 
-Nada dá push, abre PR, faz squash ou descarta branch sem confirmação explícita.
+Nada dá push, abre PR ou descarta branch sem confirmação explícita. A estratégia de commit
+escolhida no setup é honrada — `granular` mantém o histórico (squash só a pedido explícito);
+`squash-final` consolida os commits wip num único commit final já autorizado.
 
 ## Manutenção das skills de domínio
 
@@ -374,10 +428,13 @@ skills usando dois eixos: mudança de versão da stack e padrões repetidos no h
 
 ```mermaid
 flowchart TD
-    CLOSE["Tarefa fechada"] --> LED["Ler review-domain-skills.md"]
-    LED --> TH{"10+ commits<br/>ou >10 dias<br/>ou full scan vencido?"}
+    CLOSE["Tarefa fechada<br/>(finish-task Passo 5)"] --> LED["Ler review-domain-skills.md"]
+    LED --> TH{"revisao: 10+ commits ou >10 dias<br/>OU full-scan: >10 dias?"}
     TH -- "nao" --> NOOP["nao interromper"]
     TH -- "sim" --> NUDGE["sugerir manutencao uma vez<br/>nunca bloquear"]
+
+    HOOK["Hook de cadencia — reforco<br/>(a cada 10 interacoes)"] --> SCAN{"revisao vencida<br/>OU full-scan >10 dias?"}
+    SCAN -- "sim" --> NUDGE
 
     NUDGE --> MODE{"Eixo"}
     MODE --> VERSION["version-driven<br/>stack/dependencia mudou"]
@@ -390,25 +447,27 @@ flowchart TD
     OK -- "sim" --> SAVE["atualizar skill<br/>catalogo + ledger"]
 ```
 
-No Claude Code há um reforço opcional: `.claude/hooks/pelizzai-cadence.mjs` ou
-`.claude/hooks/pelizzai-cadence.ps1`. O hook roda em `UserPromptSubmit`, conta interações
-e a cada 10 prompts verifica se o ledger indica revisão vencida. Ele sempre sai com código 0,
-engole erros e nunca bloqueia o usuário.
+O nudge pós-tarefa (finish-task Passo 5) checa os dois gatilhos do ledger: commits/dias desde
+`last-review` E >10 dias desde `last-full-scan` (repo-scan completo) — é o núcleo portável da
+cadência, definido em `pelizzai-writing-skills`. No Claude Code há esse reforço opcional:
+`.claude/hooks/pelizzai-cadence.mjs` ou `.ps1`. O hook roda em `UserPromptSubmit`, conta
+interações e a cada 10 prompts verifica se o ledger indica revisão vencida. Ele sempre sai
+com código 0, engole erros e nunca bloqueia o usuário.
 
 ## Catálogo de skills do harness
 
 | Grupo | Skills | Responsabilidade |
 | --- | --- | --- |
-| Entrada e orquestração | `pelizzai`, `pelizzai-router`, `pelizzai-audit`, `pelizzai-preferences` | Entrada obrigatória, roteamento, bootstrap e piso global de comportamento. |
-| Raciocínio e conversa | `pelizzai-reasoning`, `pelizzai-interview-me`, `pelizzai-writing-clearly-and-concisely` | Técnicas proporcionais de raciocínio, entrevistas para resolver ambiguidade e escrita clara. |
-| Feature | `pelizzai-brainstorming`, `pelizzai-writing-plans`, `pelizzai-execution-plans` | Design aprovado, plano executável e execução tarefa por tarefa. |
-| Execução | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop` | TDD, delegação, times, DoD e repetição até conclusão. |
+| Entrada e orquestração | `pelizzai-core`, `pelizzai-router`, `pelizzai-audit`, `pelizzai-preferences` | Entrada obrigatória, roteamento, bootstrap e piso global de comportamento. |
+| Raciocínio e conversa | `pelizzai-reasoning` (13 técnicas, incl. OODA), `pelizzai-interview-me`, `pelizzai-writing-clearly-and-concisely` | Técnicas proporcionais de raciocínio, entrevistas para resolver ambiguidade e escrita clara. |
+| Feature | `pelizzai-brainstorming`, `pelizzai-writing-plans`, `pelizzai-execution-plans` | Design aprovado, plano executável, gate de setup pós-plano e execução tarefa por tarefa. |
+| Execução | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop` | TDD, delegação, times, e o loop OODA até a Definition of Done. |
 | Tracks leves/dedicados | `pelizzai-debugging`, `pelizzai-quick-fix` | Bug com causa raiz e ajuste pontual sem perder disciplina. |
 | Design e exploração | `pelizzai-codebase-design`, `pelizzai-domain-modeling`, `pelizzai-prototype` | Módulos profundos, modelo de domínio, ADRs e protótipos descartáveis. |
-| Isolamento e integração | `pelizzai-starting-branch`, `pelizzai-finish-task`, `pelizzai-resolving-merge-conflicts` | Branch segura, fechamento, squash/push/PR e conflitos. |
-| Qualidade e segurança | `pelizzai-review`, `pelizzai-oswap`, `pelizzai-verification-before-completion` | Review em dois estágios, OWASP no diff e evidência antes de conclusão. |
+| Isolamento e integração | `pelizzai-starting-branch`, `pelizzai-finish-task`, `pelizzai-resolving-merge-conflicts` | Branch/worktree seguros, fechamento honrando a commit-strategy, push/PR e conflitos. |
+| Qualidade e segurança | `pelizzai-review`, `pelizzai-oswap`, `pelizzai-verification-before-completion` | Review em dois estágios + review final, OWASP no diff e evidência antes de conclusão. |
 | Frontend | `pelizzai-frontend` | Produto, design, implementação e QA visual para UI. |
-| Skills | `pelizzai-writing-skills` | Autoria e manutenção de skills de domínio. |
+| Skills | `pelizzai-writing-skills` | Autoria e manutenção de skills de domínio (fundamentadas no context7). |
 
 ## Como começar em um projeto alvo
 
@@ -430,7 +489,7 @@ estrutura `.claude`.
 
 | Parte | Situação atual |
 | --- | --- |
-| Skills | Implementadas em `.claude/skills/*/SKILL.md`. |
+| Skills | Implementadas em `.claude/skills/*/SKILL.md` (com instruções de ativação também para Codex/Copilot CLI/Gemini CLI embutidas na `pelizzai-core`). |
 | Hooks | `.claude/hooks/pelizzai-cadence.mjs` e `.ps1`, via `UserPromptSubmit`. |
 | Agent Teams | Suportado pela skill `pelizzai-team` quando o Claude Code estiver com o recurso habilitado. |
 | Subagents | Descritos como ferramenta `Agent`/`Task` do ambiente. |
@@ -448,19 +507,21 @@ O que deve permanecer igual:
 - nomes e responsabilidades das skills;
 - diretório `pelizzai/` no projeto alvo;
 - schema operacional do `state.md`;
-- política branches-only;
-- loop TDD -> review -> verificação -> fechamento;
+- o gate de setup pós-plano (isolamento, nome, modo, commit) e a honra às decisões;
+- loop OODA: TDD -> review em 2 estágios -> validação final -> verificação -> fechamento;
 - manutenção das skills de domínio por catálogo e ledger.
 
 ## Limites conhecidos
 
-- As versões para `.agents`, `.cursor` e outras IDEs ainda não estão materializadas neste repo.
+- As versões para `.agents`, `.cursor` e outras IDEs ainda não estão materializadas neste repo
+  (as skills já trazem instruções de ativação multi-CLI, mas sem distribuição oficial).
 - O hook de cadência é específico do Claude Code e é opt-in.
 - Agent Teams é experimental no Claude Code; sem ele, o harness degrada para subagents.
 - No Windows, teammates devem usar visualização `in-process`; `split-panes` exige tmux/iTerm2.
-- Como não há `worktree`, escrita paralela no mesmo repo não é isolada.
-- `context7` é tratado como MCP preferencial para fundamentar skills e APIs atuais, mas a
-  instalação/configuração depende do ambiente do usuário.
+- Escrita paralela exige `isolation: worktree` com caminhos disjuntos; em `branch`, a
+  integração de escrita é em série pelo coordenador.
+- `context7` é o MCP preferencial para fundamentar skills e APIs atuais, mas a
+  instalação/configuração depende do ambiente do usuário (a `pelizzai-audit` recomenda no bootstrap).
 
 ## Evoluindo o harness
 

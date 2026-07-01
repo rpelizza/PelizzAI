@@ -1,17 +1,17 @@
 ---
 name: pelizzai-finish-task
-description: Use quando uma tarefa ou feature está implementada e os testes passam, ANTES de dar push ou abrir PR. Consolida os commits (squash opcional) e escolhe entre push, Pull Request, manter local ou descartar — sempre perguntando, nunca automático. Fecha o cursor da tarefa em `pelizzai/data/state.md` (phase: done). Acione ao final dos tracks de feature, bug e ajuste (chamada por `pelizzai-execution-plans`, `pelizzai-debugging` e `pelizzai-quick-fix`), ou quando o usuário disser "fechar a tarefa", "abrir PR", "fazer push".
+description: Use quando uma tarefa ou feature está implementada e os testes passam, ANTES de dar push ou abrir PR. Consolida os commits HONRANDO a commit-strategy escolhida no gate de setup (granular = histórico mantido, SEM re-perguntar squash; squash-final = consolida os wip num commit único já autorizado) e escolhe entre push, Pull Request, manter local ou descartar — sempre perguntando o destino, nunca automático. Fecha o cursor da tarefa em `pelizzai/data/state.md` (phase: done) e, se o isolamento foi worktree, oferece removê-lo. Acione ao final dos tracks de feature, bug e ajuste (chamada por `pelizzai-execution-plans`, `pelizzai-debugging` e `pelizzai-quick-fix`), ou quando o usuário disser "fechar a tarefa", "abrir PR", "fazer push".
 ---
 
 # PelizzAI Finish Task
 
 ## Objetivo
 
-Depois da implementação, consolidar o trabalho e escolher o caminho de integração **de forma deliberada** — sem squash automático, sem push automático, sem PR automático.
+Depois da implementação, consolidar o trabalho e escolher o caminho de integração **de forma deliberada** — sem push automático, sem PR automático, e **honrando a estratégia de commit que o usuário já escolheu** no gate de setup (não re-decidir no fim o que foi decidido no início).
 
-**Anuncie ao iniciar:** "Usando a skill Pelizzai Finish Task para fechar esta entrega."
+**Anuncie ao iniciar:** "Usando a skill PelizzAI Finish Task para fechar esta entrega."
 
-> **Princípio:** verificar testes → fechar o cursor → consolidar honrando a estratégia de commit → perguntar squash → perguntar destino → executar.
+> **Princípio:** verificar testes → fechar o cursor → consolidar honrando a estratégia de commit (granular mantém o histórico; squash-final consolida os wip) → perguntar destino → executar → (worktree? oferecer remoção).
 
 ---
 
@@ -19,7 +19,7 @@ Depois da implementação, consolidar o trabalho e escolher o caminho de integra
 
 ### 0. Gate de branch protegida
 
-Antes de qualquer `git add`/commit, rode `git branch --show-current`. Se for `main`, `master`, `develop`, `dev` — **ou vazio** (HEAD destacado → fail-closed) → **PARE**, não consolide aqui. Volte à `pelizzai-starting-branch` para mover o trabalho a uma feature branch. Neste abort, **não** feche o cursor (não marque `phase: done`); registre o bloqueio em `pelizzai/data/state.md` → `## Progresso` → `pending`. Se já houver trabalho **commitado** na protegida: crie a feature branch a partir do HEAD atual (`git checkout -b <branch>`) e então limpe a protegida (`git checkout <protegida> && git fetch && git reset --hard origin/<protegida>`), levando os commits para a feature branch.
+Antes de qualquer `git add`/commit, rode `git branch --show-current`. Se for `main`, `master`, `develop`, `dev` — **ou vazio** (HEAD destacado → fail-closed) → **PARE**, não consolide aqui. Volte à `pelizzai-starting-branch` para mover o trabalho a uma feature branch. Neste abort, **não** feche o cursor (não marque `phase: done`); registre o bloqueio em `pelizzai/data/state.md` → `## Progresso` → `pending`. Se já houver trabalho **commitado** na protegida: crie a feature branch a partir do HEAD atual (`git checkout -b <branch>`) e então limpe a protegida — **com duas guardas fail-closed antes do reset destrutivo**: (1) `git status --porcelain` precisa estar VAZIO (mudanças não commitadas seriam destruídas em silêncio — commite-as na feature branch ou pare e pergunte); (2) `git rev-parse --verify origin/<protegida>` precisa existir (sem remoto, não há para onde resetar — pare e pergunte). Só com as duas guardas verdes: `git checkout <protegida> && git fetch && git reset --hard origin/<protegida>`, levando os commits para a feature branch.
 
 ### 1. Verificar os testes
 
@@ -30,7 +30,13 @@ Rode os comandos de teste do projeto (use `pelizzai-verification-before-completi
 Transição terminal da tarefa. Atualize `pelizzai/data/state.md` com suas ferramentas de arquivo:
 
 ```text
-1. Arquive em ## Histórico: linha datada do que foi entregue (ex.: "- AAAA-MM-DD — <slug>: concluída (push/PR/local)").
+1. Arquive em ## Histórico: linha datada do que foi entregue (ex.: "- AAAA-MM-DD — <slug>: concluída").
+   NÃO registre o destino aqui — ele só é decidido no Passo 4. Complemente a linha com
+   "(push/PR/local)" DEPOIS da escolha do Passo 4 e ANTES de executá-la: em granular, um commit
+   curto do state.md; em squash-final, emende o commit único ainda não publicado
+   (`git add pelizzai/data/state.md` + `git commit --amend --no-edit` — seguro porque nada foi
+   pushado; NUNCA emende commit já publicado). O gate da working tree do Passo 4 garante que
+   nada fica de fora antes do push.
 2. Limpe a identidade da tarefa ativa: slug: <none> e phase: done. NÃO apague commit-strategy
    (o Passo 2 a lê para honrar o squash) nem os demais campos de execução.
 3. Resete ## Progresso para placeholders (ou um próximo passo real — nunca o que você acabou de fechar).
@@ -39,14 +45,14 @@ Transição terminal da tarefa. Atualize `pelizzai/data/state.md` com suas ferra
 
 Mantenha esse cursor só no `state.md` — não escreva progresso no `CLAUDE.md` nem no `README.md`. Se `pelizzai/data/state.md` não existir, instancie-o a partir do template da `pelizzai-execution-plans`. O update do cursor **tem que entrar no commit de fechamento** (Passo 2). **Por quê:** a `pelizzai-router` lê o `state.md` a cada nova tarefa; se a tarefa fechada continuar "ativa", a próxima sessão retoma algo já concluído.
 
-### 2. Consolidar (honrar a estratégia de commit)
+### 2. Consolidar (honrar a estratégia de commit — sem re-perguntar)
 
-Leia `commit-strategy` no `state.md`. **Fallback** (campo ausente/ilegível): assuma `granular` e **CONFIRME com o usuário antes de qualquer `git reset --soft`**.
+Leia `commit-strategy` no `state.md`. **Fallback** (campo ausente/ilegível/`<pending>`): **pergunte agora** (menu do gate: granular / squash-final) e registre — nunca assuma para uma operação destrutiva.
 
-- **`squash-final`:** a execução NÃO commitou por tarefa — spec, plano e código estão acumulados **sem commit** na working tree. Faça `git add -A` e crie o **commit final único** agora (mensagem pelo template do 3a). Pule o Passo 3.
-- **`granular`:** o trabalho já está em commits por tarefa. **Commite o fechamento do cursor como commit próprio** (`git add pelizzai/data/state.md` + `git commit -m "chore: fecha tarefa no cursor (state.md)"`).
+- **`granular`:** o trabalho de plano já está em **commits definitivos por tarefa** — o histórico é **mantido como está**; **não pergunte squash** (o usuário já decidiu granular no setup; só faça squash se ele pedir explicitamente agora). **Se houver trabalho ainda sem commit na working tree** (caso normal dos tracks bug e ajuste, cujo fix fica na working tree até aqui), commite-o PRIMEIRO como commit definitivo (`<tipo>(<escopo>): <descrição>`). Então **commite o fechamento do cursor como commit próprio** (`git add pelizzai/data/state.md` + `git commit -m "chore: fecha tarefa no cursor (state.md)"`). Siga para o Passo 3.
+- **`squash-final`:** a execução deixou **commits de trabalho** (`wip(<slug>): …`) por tarefa. A consolidação num commit único **já foi autorizada** na escolha da estratégia: determine a base (abaixo), rascunhe a mensagem final pelo template do 2a, **apresente a mensagem para aprovação** e aplique `git reset --soft "$base"`, depois **sempre** `git add pelizzai/data/state.md` (o fechamento do cursor do Passo 1.5 está SEMPRE não-commitado neste ponto — sem este stage ele fica fora do commit final) e `git add -A` para qualquer trabalho residual da working tree, e só então `git commit`. Depois siga para o Passo 3c.
 
-Depois, determine a base e liste os commits desde a divergência:
+Para o squash-final, determine a base e liste os commits desde a divergência:
 
 ```bash
 base=$(git merge-base HEAD origin/develop 2>/dev/null || git merge-base HEAD origin/dev 2>/dev/null \
@@ -59,24 +65,9 @@ git log --oneline "$base"..HEAD
 
 > **NUNCA** rode `reset --soft`/`checkout` com `base` vazia (é destrutivo). Em PowerShell, determine `base` passo a passo e aborte se vazia.
 
-### 3. (só granular) Perguntar: squash ou manter histórico?
+### 2a. Template da mensagem do commit final (squash-final)
 
-Apresente exatamente:
-
-```text
-Você fez N commits nesta branch.
-
-1. Consolidar em um único commit (squash)
-2. Manter o histórico granular como está
-
-Qual opção?
-```
-
-Aguarde a escolha; **nunca** faça squash automático.
-
-### 3a. Se squash
-
-Rascunhe a mensagem pelo template, apresente para aprovação e só então aplique. Mensagem em **português do Brasil**.
+Mensagem em **português do Brasil**; apresente para aprovação antes de aplicar:
 
 ```text
 Commit summary: máx 50 chars · <tipo>(<escopo>): <descrição curta> · tempo presente, impessoal, sem pontuação final.
@@ -84,11 +75,11 @@ Tipos: feat, fix, docs, style, refactor, test, chore, perf, build, ci.
 Corpo: o QUE mudou e POR QUÊ, em voz passiva/impessoal. BREAKING CHANGE: <só se aplicável>.
 ```
 
-Após aprovação e **com `base` não-vazia**: `git reset --soft "$base"` + `git commit`.
+Aplique **somente com `base` não-vazia**, na sequência completa do Passo 2: `git reset --soft "$base"` → `git add pelizzai/data/state.md` (sempre) → `git add -A` (trabalho residual) → `git commit`.
 
-### 3b. Se manter histórico
+### 3. Confirmação do granular (squash-final pula este passo)
 
-Mantenha os commits por tarefa. Confirme que o fechamento do cursor (Passo 2 granular) já está commitado (`git status --short pelizzai/data/state.md` deve estar limpo). Pule para o Passo 4.
+No granular, confirme que o fechamento do cursor (Passo 2) já está commitado (`git status --short pelizzai/data/state.md` deve estar limpo). **Não ofereça squash** — a decisão de histórico já foi tomada no gate de setup; um pedido explícito do usuário agora é a única exceção (aí use o template do 2a). Siga para o Passo 3c.
 
 ### 3c. Security review (oferta — não bloqueia)
 
@@ -126,28 +117,37 @@ Qual opção?
 - **4a. Push direto:** só se a base **não** for protegida. **Fail-closed:** só empurre direto se a API responder explicitamente que a base não é protegida (HTTP 404 em `.../protection`); qualquer outro resultado (protegida, auth, 403, rede) → ofereça PR (opção 2).
 - **4b. Push + PR:** `git push -u origin <branch>` + `gh pr create --base <base> --title ... --body ...` (Resumo + Como testar). Se `gh` não autenticado, peça `gh auth login` e pare.
 - **4c. Manter local:** reporte branch e HEAD; nada mais.
-- **4d. Descartar:** exija o usuário digitar **'descartar'**; só então `git checkout <base>` + `git branch -D <branch>`.
+- **4d. Descartar:** exija o usuário digitar **'descartar'**; se estiver DENTRO do worktree, primeiro volte ao repositório principal (`cd <repo-raiz>` — de dentro do worktree o `git worktree remove` falha e o `git checkout <base>` colide com a branch do próprio worktree); então, se worktree: `git worktree remove <caminho> --force`; e só então `git checkout <base>` + `git branch -D <branch>` — tudo a partir do repositório principal.
+
+### 4.5. Worktree (se `isolation: worktree` no state.md)
+
+Após integrar (4a/4b) ou manter local com o trabalho seguro, **ofereça** remover o worktree: "O worktree `<caminho>` ainda existe. Quer que eu o remova (`git worktree remove`)?" Remova só com confirmação e **a partir do repositório principal** (saia do worktree primeiro — `git worktree remove` falha de dentro dele); se houver mudanças não commitadas nele, **pare e reporte** em vez de forçar. Limpe também o `worktree-path` no `state.md`.
 
 ### 5. Nudge de revisão de skills (leve, nunca bloqueia)
 
-A tarefa foi integrada. Verifique no ledger `pelizzai/data/review-domain-skills.md` se acumulou histórico suficiente para sugerir uma revisão das skills de domínio (conta commits desde `last-review`; **≥10 commits ou >10 dias** → sugira uma vez acionar a `pelizzai-writing-skills` em modo manutenção). Abaixo do limiar: não diga nada. Detalhe em `pelizzai-writing-skills` → `references/domain-skill-maintenance.md`. (Núcleo portável da cadência — sem hooks aqui.)
+A tarefa foi integrada. Verifique no ledger `pelizzai/data/review-domain-skills.md` os **dois** gatilhos: (a) revisão — commits desde `last-review` **≥10 ou >10 dias**; (b) repo-scan completo — **>10 dias** desde `last-full-scan`. Qualquer um vencido → sugira **uma vez** acionar a `pelizzai-writing-skills` em modo manutenção (mencionando qual gatilho venceu). Abaixo dos limiares: não diga nada. Detalhe em `pelizzai-writing-skills` → `references/domain-skill-maintenance.md`. (Núcleo portável da cadência — o hook do Claude Code é só reforço.)
 
 ---
 
 ## Multi-projeto
 
-Se a tarefa afetou múltiplos projetos (ver `pelizzai-starting-branch`), rode o fluxo completo por projeto. Pergunte uma vez se a escolha de squash/destino vale para todos ou se decide por projeto.
+Se a tarefa afetou múltiplos projetos (ver `pelizzai-starting-branch`), repita **por projeto** os passos 0–1 e 2–4.5 (verificação, consolidação, destino, worktree). O **Passo 1.5 roda UMA única vez**, ao final do último projeto — o cursor do workspace é um só; fechá-lo N vezes duplicaria linhas no Histórico e re-tocaria um cursor já `done`. Se útil, arquive uma linha por projeto nessa única passada. Pergunte uma vez se a escolha de destino vale para todos ou se decide por projeto.
 
 ---
 
 ## Red flags
 
 ```text
-Nunca: push/PR sem confirmação explícita; squash automático; force-push sem pedido; descartar sem
-       texto 'descartar'; prosseguir com teste falhando; pushar com working tree suja.
+Nunca: push/PR sem confirmação explícita; RE-PERGUNTAR squash quando a estratégia é granular
+       (a decisão do gate de setup é honrada — squash só a pedido explícito); squash sem a
+       estratégia squash-final registrada ou pedido do usuário; force-push sem pedido; descartar
+       sem texto 'descartar'; remover worktree sem confirmação (ou com mudanças não commitadas);
+       prosseguir com teste falhando; pushar com working tree suja.
 Sempre: fechar o cursor (Passo 1.5: phase: done, slug: <none>, arquivar no Histórico) e fazer isso
-        entrar no commit de fechamento; mostrar a lista de commits antes do squash; mostrar os menus
-        verbatim; detectar base protegida antes do push direto; permitir decisão por projeto.
+        entrar no commit de fechamento; no squash-final, mostrar a lista de commits e a mensagem
+        final para aprovação antes do reset --soft; mostrar os menus verbatim; detectar base
+        protegida antes do push direto; permitir decisão por projeto; oferecer a remoção do
+        worktree no fechamento.
 ```
 
 ---
