@@ -18,7 +18,7 @@ Um caminho enxuto para mudanças triviais. Evita o custo de design + plano quand
 É `quick-fix` quando a mudança:
 
 ```text
-- toca ~1 arquivo (no máximo alguns, fortemente relacionados);
+- toca ~1 arquivo (um par arquivo+teste conta como um; mais que isso → escale para feature);
 - tem menos de ~50 linhas;
 - NÃO cria nova superfície pública (rota, comando, endpoint, API, nova config);
 - NÃO muda comportamento/regra de negócio;

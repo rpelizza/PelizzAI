@@ -1,6 +1,6 @@
 ---
 name: pelizzai-resolving-merge-conflicts
-description: Use quando houver um conflito de merge/rebase do git em andamento para resolver. Entende a intenção de cada lado, resolve cada hunk preservando os dois intuitos quando possível, roda os checks do projeto (typecheck → testes → format) e conclui o merge/rebase. Nunca usa `--abort` — sempre resolve. Acione quando o usuário disser "resolver conflito", "deu merge conflict", "conflito de rebase".
+description: Use quando houver um conflito de merge/rebase do git em andamento para resolver. Entende a intenção de cada lado, resolve cada hunk preservando os dois intuitos quando possível, roda os checks do projeto (typecheck → testes → format) e conclui o merge/rebase. Nunca usa `--abort` por conta própria para fugir do conflito — resolve; se a intenção original não puder ser preservada com segurança, PARA e escala ao usuário (que pode decidir abortar e recomeçar com mais contexto). Acione quando o usuário disser "resolver conflito", "deu merge conflict", "conflito de rebase".
 ---
 
 # PelizzAI Resolving Merge Conflicts
@@ -18,7 +18,10 @@ description: Use quando houver um conflito de merge/rebase do git em andamento p
 
 3. Resolva cada hunk. Preserve OS DOIS intuitos quando possível. Onde forem incompatíveis, escolha o que
    bate com o objetivo declarado do merge e anote o trade-off. NÃO invente comportamento novo.
-   Sempre resolva; nunca `--abort`.
+   Sempre tente resolver. Se a intenção original NÃO puder ser preservada com segurança (lados
+   fundamentalmente incompatíveis, contexto insuficiente), NÃO invente e NÃO force: PARE e escale
+   ao usuário com as opções — incluindo abortar (`--abort`) e recomeçar com mais contexto.
+   O abort é decisão do usuário, nunca sua saída autônoma para fugir do conflito.
 
 4. Descubra os checks automatizados do projeto e rode-os — tipicamente typecheck → testes → format.
    Conserte o que o merge quebrou (use pelizzai-verification-before-completion: evidência fresca).
@@ -30,8 +33,9 @@ description: Use quando houver um conflito de merge/rebase do git em andamento p
 ## Red flags
 
 ```text
-Nunca: dar `git merge --abort`/`git rebase --abort` para fugir do conflito; inventar comportamento que
-       não estava em nenhum dos lados; resolver sem entender a intenção original; concluir sem rodar os checks.
+Nunca: dar `git merge --abort`/`git rebase --abort` por conta própria para fugir do conflito (abortar é
+       decisão do usuário, após você escalar com as opções); inventar comportamento que não estava em
+       nenhum dos lados; resolver sem entender a intenção original; concluir sem rodar os checks.
 ```
 
 ## Integração

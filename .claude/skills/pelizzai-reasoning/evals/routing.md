@@ -359,7 +359,8 @@ Técnica principal:
 Técnicas auxiliares:
 - ReAct.
 - Evidence Synthesis.
-- Verification, se o limite de técnicas auxiliares permitir pela criticidade.
+- Verification (3ª auxiliar — permitida porque incidente em produção é alto impacto;
+  fora de alto impacto o teto é de duas).
 
 Próxima ação:
 - Delimitar impacto, preservar evidências, criar hipóteses concorrentes
@@ -394,7 +395,8 @@ Técnica principal:
 Técnicas auxiliares:
 - Assumption Tracking.
 - Decision Making.
-- Verification, devido ao alto impacto.
+- Verification (3ª auxiliar — permitida por ser ação destrutiva de alto impacto;
+  fora de alto impacto o teto é de duas).
 
 Próxima ação:
 - Não executar diretamente.
@@ -554,7 +556,8 @@ Técnica principal:
 Técnicas auxiliares:
 - Constraint Satisfaction.
 - Tree of Thoughts.
-- Evidence Synthesis, se houver dados ou documentação de infraestrutura relevante.
+- Evidence Synthesis (3ª auxiliar OPCIONAL — só se houver dados/documentação de
+  infraestrutura relevante; permitida porque decisão arquitetural é alto impacto).
 
 Próxima ação:
 - Definir critérios, eliminar opções incompatíveis

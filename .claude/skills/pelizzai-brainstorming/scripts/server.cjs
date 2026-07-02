@@ -39,6 +39,11 @@ function encodeFrame(opcode, payload) {
 	return Buffer.concat([header, payload]);
 }
 
+// Cap decoded frames: a client could otherwise declare a payload of up to 2^64
+// bytes and force Buffer.alloc to exhaust memory. 1MB is far above any real
+// brainstorm event (small JSON messages).
+const MAX_PAYLOAD_BYTES = 1024 * 1024;
+
 function decodeFrame(buffer) {
 	if (buffer.length < 2) return null;
 
@@ -59,6 +64,8 @@ function decodeFrame(buffer) {
 		payloadLen = Number(buffer.readBigUInt64BE(2));
 		offset = 10;
 	}
+
+	if (payloadLen > MAX_PAYLOAD_BYTES) throw new Error('Payload too large');
 
 	const maskOffset = offset;
 	const dataOffset = offset + 4;
@@ -83,6 +90,28 @@ const SESSION_DIR = process.env.BRAINSTORM_DIR || '/tmp/brainstorm';
 const CONTENT_DIR = path.join(SESSION_DIR, 'content');
 const STATE_DIR = path.join(SESSION_DIR, 'state');
 let ownerPid = process.env.BRAINSTORM_OWNER_PID ? Number(process.env.BRAINSTORM_OWNER_PID) : null;
+
+// Session key promised by visual-companion.md: every HTTP request and WS
+// handshake must present it (query string on first load, cookie afterwards),
+// so a stray tab or another machine on the network can't read screens or
+// inject events when binding beyond loopback.
+const SESSION_KEY = crypto.randomBytes(16).toString('hex');
+const KEY_COOKIE = 'brainstorm_key';
+
+function timingSafeEqualStr(a, b) {
+	const ba = Buffer.from(String(a));
+	const bb = Buffer.from(String(b));
+	return ba.length === bb.length && crypto.timingSafeEqual(ba, bb);
+}
+
+function hasValidKey(req) {
+	// Base is irrelevant: only pathname/query of req.url are used.
+	const url = new URL(req.url, 'http://placeholder');
+	const queryKey = url.searchParams.get('key');
+	if (queryKey && timingSafeEqualStr(queryKey, SESSION_KEY)) return true;
+	const match = /(?:^|;\s*)brainstorm_key=([^;]+)/.exec(req.headers.cookie || '');
+	return Boolean(match && timingSafeEqualStr(match[1], SESSION_KEY));
+}
 
 const MIME_TYPES = {
 	'.html': 'text/html',
@@ -138,7 +167,14 @@ function getNewestScreen() {
 
 function handleRequest(req, res) {
 	touchActivity();
-	if (req.method === 'GET' && req.url === '/') {
+	if (!hasValidKey(req)) {
+		res.writeHead(403);
+		res.end('Forbidden');
+		return;
+	}
+	// req.url carries the ?key=... query on first load — route by pathname.
+	const pathname = new URL(req.url, 'http://placeholder').pathname;
+	if (req.method === 'GET' && pathname === '/') {
 		const screenFile = getNewestScreen();
 		let html = screenFile
 			? ((raw) => (isFullDocument(raw) ? raw : wrapInFrame(raw)))(fs.readFileSync(screenFile, 'utf-8'))
@@ -150,10 +186,15 @@ function handleRequest(req, res) {
 			html += helperInjection;
 		}
 
-		res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+		res.writeHead(200, {
+			'Content-Type': 'text/html; charset=utf-8',
+			// Persist the key so reloads, /files/* and the WS handshake work
+			// without the query string (as documented in visual-companion.md).
+			'Set-Cookie': KEY_COOKIE + '=' + SESSION_KEY + '; HttpOnly; SameSite=Strict; Path=/',
+		});
 		res.end(html);
-	} else if (req.method === 'GET' && req.url.startsWith('/files/')) {
-		const fileName = req.url.slice(7);
+	} else if (req.method === 'GET' && pathname.startsWith('/files/')) {
+		const fileName = pathname.slice(7);
 		const filePath = path.join(CONTENT_DIR, path.basename(fileName));
 		if (!fs.existsSync(filePath)) {
 			res.writeHead(404);
@@ -175,6 +216,12 @@ function handleRequest(req, res) {
 const clients = new Set();
 
 function handleUpgrade(req, socket) {
+	// Same gate as HTTP: the page load set the session cookie (SameSite=Strict,
+	// same-origin), so a legitimate browser WS handshake always carries it.
+	if (!hasValidKey(req)) {
+		socket.destroy();
+		return;
+	}
 	const key = req.headers['sec-websocket-key'];
 	if (!key) {
 		socket.destroy();
@@ -368,7 +415,7 @@ function startServer() {
 			port: Number(PORT),
 			host: HOST,
 			url_host: URL_HOST,
-			url: 'http://' + URL_HOST + ':' + PORT,
+			url: 'http://' + URL_HOST + ':' + PORT + '/?key=' + SESSION_KEY,
 			screen_dir: CONTENT_DIR,
 			state_dir: STATE_DIR,
 		});

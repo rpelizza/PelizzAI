@@ -4,7 +4,7 @@
 # Usage: stop-server.ps1 <session_dir>
 #
 # Kills the server process. Only deletes the session directory if it's
-# under the temp dir (ephemeral). Persistent directories (.dumont/) are
+# under the temp dir (ephemeral). Persistent directories (.pelizzai/) are
 # kept so mockups can be reviewed later.
 param([string]$SessionDir = '')
 

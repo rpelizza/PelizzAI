@@ -255,21 +255,21 @@ Perguntas:
 | Divergência crítica    | Não é seguro concluir sem nova evidência                      |
 | Falsa convergência     | Todas as tentativas dependem da mesma fonte, hipótese ou erro |
 
-## Convergência, risco e estado final
+## Convergência, risco e estado de triagem
 
-O resultado da agregação, combinado ao nível de risco/impacto (Baixo/Médio/Alto/Crítico; ver "orçamento de esforço" na skill [pelizzai-reasoning](../SKILL.md)), determina o estado final e o handoff:
+Self-Consistency é **auxiliar**: ela produz um estado **intermediário de triagem**, nunca o veredito final — o status FINAL de qualquer conclusão pertence à [Verification](verification.md) (e usa o vocabulário canônico dela). O resultado da agregação, combinado ao nível de risco/impacto — Baixo/Médio/Alto/Crítico, ver "orçamento de esforço" na skill [pelizzai-reasoning](../SKILL.md) — determina a triagem e o handoff:
 
-| Convergência       | Risco        | Validação externa   | Estado final | Handoff                                                                                                  |
-| ------------------ | ------------ | ------------------- | ------------ | -------------------------------------------------------------------------------------------------------- |
-| Forte              | Baixo/Médio  | dispensável         | Confirmado   | concluir                                                                                                 |
-| Forte              | Alto/Crítico | obtida e compatível | Confirmado   | [Verification](verification.md) antes de concluir                                                        |
-| Forte              | Alto/Crítico | ausente             | Provável     | abrir handoff para [Verification](verification.md)                                                       |
-| Parcial            | qualquer     | —                   | Provável     | decidir detalhes em aberto; validar com [Verification](verification.md)                                  |
-| Explicável         | qualquer     | —                   | Inconclusivo | validar a premissa que separa os resultados; ver [Evidence Synthesis](evidence-synthesis.md)             |
-| Crítica            | Alto/Crítico | —                   | Bloqueado    | não concluir; escalar para [Verification](verification.md) e [Evidence Synthesis](evidence-synthesis.md) |
-| Falsa convergência | qualquer     | —                   | Bloqueado    | refazer com métodos/fontes independentes; ver [Evidence Synthesis](evidence-synthesis.md)                |
+| Convergência       | Risco        | Validação externa   | Triagem (intermediária) | Handoff                                                                                                  |
+| ------------------ | ------------ | ------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------- |
+| Forte              | Baixo/Médio  | —                   | Forte candidata         | [Verification](verification.md) proporcional (leve) e concluir                                          |
+| Forte              | Alto/Crítico | obtida e compatível | Forte candidata         | [Verification](verification.md) completa antes de concluir                                               |
+| Forte              | Alto/Crítico | ausente             | Sob suspeita            | obrigatório: obter validação via [Verification](verification.md)                                         |
+| Parcial            | qualquer     | —                   | Sob suspeita            | decidir detalhes em aberto; validar com [Verification](verification.md)                                  |
+| Explicável         | qualquer     | —                   | Inconclusiva            | validar a premissa que separa os resultados; ver [Evidence Synthesis](evidence-synthesis.md)             |
+| Crítica            | Alto/Crítico | —                   | Bloqueada               | não concluir; escalar para [Verification](verification.md) e [Evidence Synthesis](evidence-synthesis.md) |
+| Falsa convergência | qualquer     | —                   | Bloqueada               | refazer com métodos/fontes independentes; ver [Evidence Synthesis](evidence-synthesis.md)                |
 
-Regra de parada: pare quando o estado for Confirmado com validação proporcional ao risco, ou quando novas tentativas não agregarem informação. Em Bloqueado, interrompa a agregação e faça o handoff explícito.
+Regra de parada: pare a agregação quando a triagem estabilizar (novas tentativas não agregam informação) e faça o handoff da linha correspondente — nenhuma linha conclui sem passar pela Verification proporcional ao risco. Em Bloqueada, interrompa a agregação e faça o handoff explícito.
 
 ## Falsa convergência
 

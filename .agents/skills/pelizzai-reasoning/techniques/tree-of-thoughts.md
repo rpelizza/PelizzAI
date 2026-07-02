@@ -256,7 +256,7 @@ flowchart TD
     F -- Sim --> H[Aprofundar]
 ```
 
-Pode um caminho quando:
+Poda um caminho quando:
 
 ```text
 - Viola requisito obrigatório.
@@ -269,7 +269,7 @@ Pode um caminho quando:
 - É dominado por outra alternativa em todos os critérios relevantes.
 ```
 
-Não pode um caminho apenas por parecer menos familiar ou menos elegante.
+A poda nunca acontece só porque um caminho parece menos familiar ou menos elegante.
 
 ## Estratégias de exploração
 

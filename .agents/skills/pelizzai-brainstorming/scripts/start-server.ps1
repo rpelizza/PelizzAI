@@ -7,7 +7,7 @@
 # Each session gets its own directory to avoid conflicts.
 #
 # Options:
-#   -ProjectDir <path>  Store session files under <path>/.dumont/brainstorm/
+#   -ProjectDir <path>  Store session files under <path>/.pelizzai/brainstorm/
 #                       instead of the temp dir. Files persist after server stops.
 #   -BindHost <host>    Host/interface to bind (default: 127.0.0.1).
 #                       Use 0.0.0.0 in remote/containerized environments.
@@ -32,7 +32,7 @@ if (-not $UrlHost) {
 # Unique session directory
 $sessionId = "$PID-$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())"
 $sessionDir = if ($ProjectDir) {
-    Join-Path $ProjectDir ".dumont/brainstorm/$sessionId"
+    Join-Path $ProjectDir ".pelizzai/brainstorm/$sessionId"
 } else {
     Join-Path ([System.IO.Path]::GetTempPath()) "brainstorm-$sessionId"
 }

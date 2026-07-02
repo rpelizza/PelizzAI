@@ -126,7 +126,7 @@ Nesta situação perigosa, ainda há uma chance de escapar.
 
 Mas um escritor pode errar ao tornar suas frases uniformemente compactas e periódicas demais, e um período solto ocasional impede que o estilo se torne formal demais e dá certo alívio ao leitor. Por isso, períodos soltos do tipo citado em primeiro lugar são comuns em uma escrita fácil, sem afetação. Ainda assim, o escritor deve tomar cuidado para não construir frases demais segundo esse padrão (veja a Regra 14).
 
-Frases de duas partes em que a segunda parte é introduzida por *pois* (no sentido de *porque*), *ou* ou *nem* também exigem uma vírgula antes da conjunção.
+Frases de duas partes em que a segunda parte é introduzida por *pois* (no sentido de *porque*), por *ou* ou por *nem* também exigem uma vírgula antes da conjunção.
 
 Se a segunda parte for introduzida por um advérbio, exige-se ponto e vírgula, não vírgula (veja a Regra 5).
 

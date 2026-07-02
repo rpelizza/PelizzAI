@@ -39,7 +39,7 @@ Não acione `pelizzai-preferences` para tarefas triviais que possam ser respondi
 
 ## Como acessar as skills
 
-**Nunca leia arquivos de skill manualmente usando ferramentas de arquivo** — utilize sempre o mecanismo de carregamento de skills da sua plataforma para garantir que a skill seja ativada corretamente.
+**Quando a sua plataforma tem carregamento nativo de skills, use-o sempre** — não leia os arquivos manualmente, para garantir que a skill seja ativada corretamente:
 
 **No Claude Code**: Use a ferramenta `Skill`. Ao invocar uma skill, o conteúdo dela é carregado e apresentado a você — siga-o diretamente.
 
@@ -49,7 +49,7 @@ Não acione `pelizzai-preferences` para tarefas triviais que possam ser respondi
 
 **No Gemini CLI**: As habilidades são ativadas por meio da ferramenta `activate_skill`. O Gemini carrega os metadados das skills no início da sessão e ativa o conteúdo completo sob demanda.
 
-**Em outros ambientes**: Consulte a documentação da sua plataforma para saber como ativar e usar skills.
+**Em plataformas SEM carregamento nativo** (você chegou aqui via `AGENTS.md`, `GEMINI.md` ou uma regra de IDE): leia o arquivo `SKILL.md` da skill diretamente (`.agents/skills/<nome>/SKILL.md`, espelho de `.claude/skills/`) e siga-o — a leitura manual é o mecanismo correto nesses ambientes, nunca uma desculpa para pular a skill. Consulte a documentação da sua plataforma se houver um mecanismo próprio.
 
 ## Entender o objetivo do usuário
 

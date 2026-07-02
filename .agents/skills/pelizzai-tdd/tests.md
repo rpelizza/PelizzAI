@@ -29,9 +29,9 @@ Características:
 ```typescript
 // RUIM: Testa detalhes de implementação
 test('checkout chama paymentService.process', async () => {
-	const mockPayment = jest.mock(paymentService);
-	await checkout(cart, payment);
-	expect(mockPayment.process).toHaveBeenCalledWith(cart.total);
+	const processSpy = jest.spyOn(paymentService, 'process');
+	await checkout(cart);
+	expect(processSpy).toHaveBeenCalledWith(cart.total);
 });
 ```
 

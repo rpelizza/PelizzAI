@@ -80,7 +80,7 @@ Levante, em frentes simultâneas:
 - Convenções: CLAUDE.md/AGENTS.md, linters, padrões de teste, estilo de commit.
 ```
 
-> O sinal canônico de **bootstrap concluído** é a existência de `pelizzai/domain-skills.md` — não a presença de skills de domínio avulsas. Skills de domínio sem catálogo devem ser inventariadas e então **catalogadas** pela `pelizzai-writing-skills`, não tratadas como bootstrap já feito.
+> O sinal canônico de **bootstrap concluído** é a existência de `pelizzai/domain-skills.md` — não a presença de skills de domínio avulsas. Skills de domínio sem catálogo devem ser inventariadas e então **catalogadas** pela `pelizzai-writing-skills`, não tratadas como bootstrap já feito. **Auto-reparo do estado parcial:** se o catálogo existir mas o ledger `pelizzai/data/review-domain-skills.md` estiver ausente, NÃO refaça o bootstrap — semeie apenas o ledger via `pelizzai-writing-skills` (sem ele, a cadência de manutenção fica silenciosamente morta).
 
 ## Fase 3 — Ramificação
 
