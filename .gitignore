@@ -1,0 +1,10 @@
+# Estado de runtime do harness no projeto ALVO (criado pelas skills ao trabalhar num
+# projeto consumidor). No repo-fonte do PelizzAI ele nao deve existir.
+pelizzai/data/.cadence-state.json
+
+# Logs de debug de editores/agentes
+.cursor/debug-*.log
+
+# Lixo de SO
+Thumbs.db
+.DS_Store

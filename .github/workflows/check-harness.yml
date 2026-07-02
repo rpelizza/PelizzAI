@@ -1,0 +1,26 @@
+name: check-harness
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    # windows-latest de proposito: o sync-harness.ps1 usa separadores '\' e gera
+    # AGENTS.md/GEMINI.md com CRLF casando com o working tree sob autocrlf=true
+    # (default da imagem Windows). Em ubuntu a comparacao byte a byte do -Check falharia.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validar harness (espelho .agents, AGENTS.md, GEMINI.md, refs, manifesto)
+        run: pwsh scripts/sync-harness.ps1 -Check

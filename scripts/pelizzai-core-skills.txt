@@ -1,0 +1,32 @@
+# skills core do PelizzAI — GERADO por `scripts/sync-harness.ps1 -UpdateManifest`.
+# Sao as skills que acompanham o harness. O pelizzai-router usa esta lista para
+# distinguir skills de core das skills de dominio/stack do proprio projeto
+# (dominio presente = diretorios de skill - esta lista de core).
+# Regenere APENAS no repo-fonte do PelizzAI (-UpdateManifest) quando o core mudar.
+pelizzai-audit
+pelizzai-brainstorming
+pelizzai-codebase-design
+pelizzai-core
+pelizzai-debugging
+pelizzai-domain-modeling
+pelizzai-execution-plans
+pelizzai-finish-task
+pelizzai-frontend
+pelizzai-interview-me
+pelizzai-loop
+pelizzai-oswap
+pelizzai-preferences
+pelizzai-prototype
+pelizzai-quick-fix
+pelizzai-reasoning
+pelizzai-resolving-merge-conflicts
+pelizzai-review
+pelizzai-router
+pelizzai-starting-branch
+pelizzai-subagents
+pelizzai-tdd
+pelizzai-team
+pelizzai-verification-before-completion
+pelizzai-writing-clearly-and-concisely
+pelizzai-writing-plans
+pelizzai-writing-skills
