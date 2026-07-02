@@ -2,13 +2,13 @@
 
 > **Status:** projeto em desenvolvimento.
 >
-> **Foco atual:** Claude Code, com a implementação versionada em `.claude/`.
+> **Fonte de verdade:** `.claude/skills/` (as skills) e `CLAUDE.md` (as diretrizes).
 >
-> **Direção futura:** portar o mesmo harness para outras superfícies, como `.agents`,
-> `.cursor` e outras IDEs. As skills já carregam instruções de ativação para Codex,
-> Copilot CLI e Gemini CLI (portabilidade parcial embutida no conteúdo); falta a
-> distribuição/estrutura de diretórios oficial para essas superfícies. A intenção é
-> preservar os contratos de fluxo e trocar apenas os adaptadores de execução.
+> **Distribuição multi-IDE:** o formato SKILL.md é um padrão aberto lido nativamente por
+> Claude Code, OpenAI Codex, Gemini CLI, Cursor, GitHub Copilot e outras ferramentas. O
+> `scripts/sync-harness.ps1` gera, a partir da fonte, o espelho interoperável `.agents/skills/`
+> e os adaptadores de entrada `AGENTS.md` e `GEMINI.md`; o Cursor tem o adaptador
+> `.cursor/rules/pelizzai.mdc`. Um CI (`-Check`) impede que os gerados saiam de sincronia.
 
 PelizzAI é um harness de agentes baseado em **skills Markdown**, em português do Brasil,
 para conduzir tarefas de software com disciplina de produção: entender o objetivo,
@@ -36,15 +36,20 @@ O PelizzAI tem quatro camadas:
 
 ```mermaid
 flowchart TB
-    subgraph IDE["Superficies de uso"]
-        CC["Claude Code atual<br/>.claude/skills + .claude/hooks"]
-        FUT["Futuro<br/>.agents / .cursor / outras IDEs"]
+    SRC["FONTE DE VERDADE<br/>.claude/skills + CLAUDE.md"]
+    SRC -->|"scripts/sync-harness.ps1"| GEN
+
+    subgraph GEN["Gerados (nao editar a mao)"]
+        AG[".agents/skills<br/>(Codex, Gemini, Warp, padrao)"]
+        AGMD["AGENTS.md (Codex, Copilot)"]
+        GMMD["GEMINI.md (Gemini CLI)"]
+        CUR[".cursor/rules/pelizzai.mdc (Cursor)"]
     end
 
-    CC --> CORE["Core PelizzAI<br/>skills Markdown"]
-    FUT -. adaptadores futuros .-> CORE
+    SRC --> CORE["Core PelizzAI<br/>skills Markdown"]
+    GEN --> CORE
 
-    CORE --> AGENT["Agente executor"]
+    CORE --> AGENT["Agente executor (qualquer IDE)"]
     AGENT --> TARGET["Repositorio ou workspace alvo"]
 
     TARGET --> STATE["pelizzai/data/state.md<br/>cursor retomavel"]
@@ -57,9 +62,20 @@ flowchart TB
 
 ```text
 PelizzAI/
-├── CLAUDE.md                         diretrizes comportamentais gerais para Claude Code
+├── CLAUDE.md                         FONTE: diretrizes + ponte para o harness
 ├── README.md                         este mapa do harness
-└── .claude/
+├── AGENTS.md                         GERADO: CLAUDE.md + seção do harness (Codex, Copilot, …)
+├── GEMINI.md                         GERADO: cópia de AGENTS.md (Gemini CLI)
+├── scripts/
+│   ├── sync-harness.ps1              gera os alvos; -Check (anti-drift); -UpdateManifest
+│   └── pelizzai-core-skills.txt      GERADO: manifesto das skills de core
+├── .github/workflows/
+│   └── check-harness.yml             CI: roda sync-harness.ps1 -Check
+├── .cursor/rules/
+│   └── pelizzai.mdc                  adaptador de entrada do Cursor (alwaysApply)
+├── .agents/
+│   └── skills/                       GERADO: espelho 1:1 de .claude/skills (padrão interoperável)
+└── .claude/                          FONTE
     ├── hooks/
     │   ├── pelizzai-cadence.mjs       hook opt-in de cadencia para Claude Code
     │   └── pelizzai-cadence.ps1       variante PowerShell do hook
@@ -70,6 +86,10 @@ PelizzAI/
         ├── pelizzai-execution-plans/  executor de planos + gate de setup pós-plano
         └── pelizzai-*/                demais skills de processo
 ```
+
+Os alvos **gerados** (`.agents/skills/`, `AGENTS.md`, `GEMINI.md`, `scripts/pelizzai-core-skills.txt`)
+são versionados mas **nunca editados à mão** — edite a fonte e rode `pwsh scripts/sync-harness.ps1`.
+O CI falha se algum sair de sincronia.
 
 Hoje, a distribuição prática está em `.claude`. O README descreve também os invariantes
 que devem sobreviver às versões futuras para outras IDEs.
@@ -471,50 +491,59 @@ com código 0, engole erros e nunca bloqueia o usuário.
 
 ## Como começar em um projeto alvo
 
-Enquanto o projeto está focado em Claude Code:
+Copie para o projeto ou workspace alvo os diretórios/arquivos do harness conforme a(s) IDE(s)
+que você usa (todos gerados a partir da mesma fonte, então são coerentes entre si):
 
-1. Disponibilize a pasta `.claude/` do PelizzAI no projeto ou workspace alvo, conforme o
-   modo de distribuição que você estiver usando.
-2. Abra o projeto no Claude Code.
-3. Peça `bootstrap`.
-4. Revise as skills de domínio criadas, o catálogo `pelizzai/domain-skills.md` e o ledger
+| IDE / ferramenta         | O que copiar para o projeto alvo                                  |
+| ------------------------ | ---------------------------------------------------------------- |
+| Claude Code              | `.claude/` (skills + hooks)                                       |
+| Codex, Warp, genéricos   | `.agents/skills/` + `AGENTS.md`                                   |
+| Gemini CLI               | `.agents/skills/` + `GEMINI.md` (ou `AGENTS.md`)                  |
+| Cursor                   | `.agents/skills/` + `.cursor/rules/pelizzai.mdc`                  |
+| GitHub Copilot           | `AGENTS.md` (entrada); `.agents/skills/` para carregamento nativo |
+
+Uso global (vale em qualquer projeto da máquina, sem copiar por projeto): coloque as skills em
+`~/.claude/skills/` (Claude Code) ou `~/.agents/skills/` (caminho interoperável das demais).
+
+Depois:
+
+1. Abra o projeto na sua IDE.
+2. Peça `bootstrap`.
+3. Revise as skills de domínio criadas, o catálogo `pelizzai/domain-skills.md` e o ledger
    `pelizzai/data/review-domain-skills.md`.
-5. Opte ou não pelo hook de cadência do Claude Code.
-6. Depois do bootstrap, peça a tarefa normalmente; o router escolhe o fluxo.
+4. (Claude Code) Opte ou não pelo hook de cadência.
+5. Depois do bootstrap, peça a tarefa normalmente; o router escolhe o fluxo.
 
-Não há instalador versionado neste repositório ainda. A forma atual de uso é a própria
-estrutura `.claude`.
+**Ao evoluir o harness** (editar `.claude/skills/` ou `CLAUDE.md`), rode
+`pwsh scripts/sync-harness.ps1` para regenerar os alvos, e recopie-os para os projetos alvo.
+Para instalar globalmente sem copiar por projeto, aponte `~/.agents/skills/` para este repositório
+(link simbólico) ou faça um pull periódico.
 
-## O que é Claude-specific hoje
+## O que é específico por ferramenta hoje
 
 | Parte | Situação atual |
 | --- | --- |
-| Skills | Implementadas em `.claude/skills/*/SKILL.md` (com instruções de ativação também para Codex/Copilot CLI/Gemini CLI embutidas na `pelizzai-core`). |
-| Hooks | `.claude/hooks/pelizzai-cadence.mjs` e `.ps1`, via `UserPromptSubmit`. |
-| Agent Teams | Suportado pela skill `pelizzai-team` quando o Claude Code estiver com o recurso habilitado. |
-| Subagents | Descritos como ferramenta `Agent`/`Task` do ambiente. |
-| Configuração | Hook opt-in via `.claude/settings.json`. |
+| Skills (conteúdo) | **Portáveis** — SKILL.md é padrão aberto. Fonte em `.claude/skills/`, espelho gerado em `.agents/skills/` (com instruções de ativação por plataforma embutidas na `pelizzai-core`). |
+| Entrada sempre-carregada | `CLAUDE.md` (Claude Code) · `AGENTS.md` (Codex, Copilot) · `GEMINI.md` (Gemini CLI) · `.cursor/rules/pelizzai.mdc` (Cursor) — todos gerados da mesma fonte. |
+| Hooks | `.claude/hooks/pelizzai-cadence.*` são **Claude Code-only**; o núcleo da cadência é portável (finish-task Passo 5) e vale nas demais IDEs sem o hook. |
+| Agent Teams | Suportado pela `pelizzai-team` quando o Claude Code tem o recurso habilitado; fora disso, degrada para subagents. |
+| Subagents | Ferramenta `Agent`/`Task` do ambiente; cada plataforma tem o seu mecanismo. |
 
-Para outras IDEs, a expectativa é portar:
-
-- o carregamento das skills;
-- a mecânica de subagentes/teammates;
-- a instalação de hooks ou lembretes;
-- os nomes de arquivos de instrução do ambiente.
-
-O que deve permanecer igual:
+O que **permanece igual** em qualquer IDE:
 
 - nomes e responsabilidades das skills;
-- diretório `pelizzai/` no projeto alvo;
-- schema operacional do `state.md`;
+- diretório `pelizzai/` no projeto alvo e o schema operacional do `state.md`;
 - o gate de setup pós-plano (isolamento, nome, modo, commit) e a honra às decisões;
 - loop OODA: TDD -> review em 2 estágios -> validação final -> verificação -> fechamento;
 - manutenção das skills de domínio por catálogo e ledger.
 
 ## Limites conhecidos
 
-- As versões para `.agents`, `.cursor` e outras IDEs ainda não estão materializadas neste repo
-  (as skills já trazem instruções de ativação multi-CLI, mas sem distribuição oficial).
+- O carregamento **nativo** de skills por diretório específico varia por ferramenta: `.agents/skills/`
+  cobre Codex, Gemini CLI (alias) e Warp; ferramentas que só leem o próprio diretório (ex.: alguns
+  fluxos do Copilot em `.github/skills/`) recebem a entrada via `AGENTS.md` e podem receber o espelho
+  nativo adicionando o diretório ao array de alvos do `sync-harness.ps1`.
+- O `sync-harness.ps1` exige **PowerShell 7+** (encoding UTF-8); o CI roda em `windows-latest`.
 - O hook de cadência é específico do Claude Code e é opt-in.
 - Agent Teams é experimental no Claude Code; sem ele, o harness degrada para subagents.
 - No Windows, teammates devem usar visualização `in-process`; `split-panes` exige tmux/iTerm2.

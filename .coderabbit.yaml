@@ -1,0 +1,13 @@
+# Configuração do CodeRabbit para o repo-fonte do harness PelizzAI.
+# Os alvos GERADOS pelo scripts/sync-harness.ps1 (.agents/, AGENTS.md, GEMINI.md,
+# manifesto) são cópias 1:1 da fonte .claude/ — revisá-los duplica cada achado.
+# Revise só a fonte; a CI (check-harness) garante que os espelhos estão em sincronia.
+language: pt-BR
+reviews:
+  profile: assertive
+  request_changes_workflow: false
+  path_filters:
+    - "!.agents/**"
+    - "!AGENTS.md"
+    - "!GEMINI.md"
+    - "!scripts/pelizzai-core-skills.txt"
