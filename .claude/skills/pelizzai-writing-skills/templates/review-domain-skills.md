@@ -2,7 +2,7 @@
 
 > Marca o ritmo da revisão das skills de domínio para não depender de memória humana.
 > Lido por `pelizzai-writing-skills` (cadência) e pela `pelizzai-audit` (bootstrap).
-> - Semeado por: `pelizzai-writing-skills` no bootstrap (orquestrado pela `pelizzai-audit`), com a data do 1º commit do repositório (ou a data de hoje, em projeto novo sem commits).
+> - Semeado por: `pelizzai-writing-skills` no bootstrap (orquestrado pela `pelizzai-audit`), com a **data do bootstrap** (o bootstrap é a 1ª revisão; semear com o 1º commit dispararia um nudge espúrio na primeira tarefa).
 > - Atualizado por: `pelizzai-writing-skills` a cada criação/refresh de skill de domínio e após cada revisão.
 > Mantenha a data AAAA-MM-DD na MESMA linha de cada rótulo — a checagem de cadência (skill e
 > hooks) faz parsing ancorado nos rótulos `last-review:`/`last-full-scan:` e lê a primeira data
@@ -19,4 +19,4 @@
 
 ## Log
 
-- <AAAA-MM-DD> — ledger inicializado pela `pelizzai-writing-skills` no bootstrap (orquestração: `pelizzai-audit`; baseline = 1º commit do repositório)
+- <AAAA-MM-DD> — ledger inicializado pela `pelizzai-writing-skills` no bootstrap (orquestração: `pelizzai-audit`; baseline = data do bootstrap, pois as skills nascem do repo-scan do HEAD atual)

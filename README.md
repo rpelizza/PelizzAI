@@ -448,12 +448,12 @@ skills usando dois eixos: mudança de versão da stack e padrões repetidos no h
 
 ```mermaid
 flowchart TD
-    CLOSE["Tarefa fechada<br/>(finish-task Passo 5)"] --> LED["Ler review-domain-skills.md"]
-    LED --> TH{"revisao: 10+ commits ou >10 dias<br/>OU full-scan: >10 dias?"}
+    CLOSE["Tarefa fechada — disparo primario<br/>(finish-task Passo 5)"] --> LED["Ler review-domain-skills.md"]
+    LED --> TH{"revisao: 30+ commits ou >14 dias<br/>OU full-scan: >21 dias?"}
     TH -- "nao" --> NOOP["nao interromper"]
     TH -- "sim" --> NUDGE["sugerir manutencao uma vez<br/>nunca bloquear"]
 
-    HOOK["Hook de cadencia — reforco<br/>(a cada 10 interacoes)"] --> SCAN{"revisao vencida<br/>OU full-scan >10 dias?"}
+    HOOK["Hook de cadencia — rede de seguranca<br/>(a cada 20 interacoes; snooze 7 dias)"] --> SCAN{"revisao vencida<br/>OU full-scan >21 dias?"}
     SCAN -- "sim" --> NUDGE
 
     NUDGE --> MODE{"Eixo"}
@@ -467,12 +467,15 @@ flowchart TD
     OK -- "sim" --> SAVE["atualizar skill<br/>catalogo + ledger"]
 ```
 
-O nudge pós-tarefa (finish-task Passo 5) checa os dois gatilhos do ledger: commits/dias desde
-`last-review` E >10 dias desde `last-full-scan` (repo-scan completo) — é o núcleo portável da
-cadência, definido em `pelizzai-writing-skills`. No Claude Code há esse reforço opcional:
-`.claude/hooks/pelizzai-cadence.mjs` ou `.ps1`. O hook roda em `UserPromptSubmit`, conta
-interações e a cada 10 prompts verifica se o ledger indica revisão vencida. Ele sempre sai
-com código 0, engole erros e nunca bloqueia o usuário.
+O nudge pós-tarefa (finish-task Passo 5) é o **disparo primário** e checa os dois gatilhos do
+ledger: ≥30 commits **ou** >14 dias desde `last-review` (o eixo de dias é a âncora de ~sprint;
+commits só antecipam num burst real), e >21 dias desde `last-full-scan` — é o núcleo portável da
+cadência, definido em `pelizzai-writing-skills`. Os limiares são calibrados para times ativos
+(o antigo 10/10 disparava cedo demais — 10 commits acontecem numa manhã). No Claude Code há a
+rede de segurança opcional `.claude/hooks/pelizzai-cadence.mjs`/`.ps1`: roda em `UserPromptSubmit`,
+conta interações e a cada 20 verifica o ledger, com supressão de 7 dias após avisar. Sempre sai
+com código 0, engole erros e nunca bloqueia o usuário. O ledger é semeado com a data do bootstrap
+(não a do 1º commit), para não disparar um nudge espúrio já na primeira tarefa de um repo maduro.
 
 ## Catálogo de skills do harness
 

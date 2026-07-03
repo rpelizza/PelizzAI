@@ -125,7 +125,7 @@ Após integrar (4a/4b) ou manter local com o trabalho seguro, **ofereça** remov
 
 ### 5. Nudge de revisão de skills (leve, nunca bloqueia)
 
-A tarefa foi integrada. Verifique no ledger `pelizzai/data/review-domain-skills.md` os **dois** gatilhos: (a) revisão — commits desde `last-review` **≥10 ou >10 dias**; (b) repo-scan completo — **>10 dias** desde `last-full-scan`. Qualquer um vencido → sugira **uma vez** acionar a `pelizzai-writing-skills` em modo manutenção (mencionando qual gatilho venceu). Abaixo dos limiares: não diga nada. Detalhe em `pelizzai-writing-skills` → `references/domain-skill-maintenance.md`. (Núcleo portável da cadência — o hook do Claude Code é só reforço.)
+Este é o **disparo primário** da cadência (o hook do Claude Code é só rede de segurança). Verifique no ledger `pelizzai/data/review-domain-skills.md` os **dois** gatilhos: (a) revisão — commits desde `last-review` **≥30 ou >14 dias** (o eixo de dias é a âncora de ~sprint; os commits só antecipam num burst real); (b) repo-scan completo — **>21 dias** desde `last-full-scan`. Qualquer um vencido → sugira **uma vez** acionar a `pelizzai-writing-skills` em modo manutenção (mencionando qual gatilho venceu). Abaixo dos limiares: não diga nada. Se o usuário adiar, não repita na mesma sessão. Detalhe em `pelizzai-writing-skills` → `references/domain-skill-maintenance.md`.
 
 ---
 

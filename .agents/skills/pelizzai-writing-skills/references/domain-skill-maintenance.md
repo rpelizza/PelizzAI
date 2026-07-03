@@ -52,7 +52,7 @@ Modelo **híbrido**: núcleo portável na skill + hook de reforço no Claude Cod
 
 ### Núcleo portável (ao fechar a tarefa)
 
-Vale em `.claude`, `.agents`, `.cursor` — é texto de skill, não depende de hook. Este bloco **é embutido pela `pelizzai-finish-task` (Passo 5 — nudge de revisão de skills)**, que dispara no encerramento de cada tarefa; o hook (no Claude Code) é apenas reforço a cada 10 interações. Ao concluir uma tarefa que mexeu em código:
+Vale em `.claude`, `.agents`, `.cursor` — é texto de skill, não depende de hook. Este bloco **é embutido pela `pelizzai-finish-task` (Passo 5 — nudge de revisão de skills)**, que dispara no encerramento de cada tarefa — o **disparo primário**, num marco natural que não interrompe o fluxo. O hook (no Claude Code) é apenas rede de segurança, a cada 20 interações. Ao concluir uma tarefa que mexeu em código:
 
 ```bash
 # datas do ledger — parsing ANCORADO no rótulo (robusto à ordem das linhas; lê as DUAS datas)
@@ -65,26 +65,35 @@ count=$(git rev-list --count --since="$last_review 00:00" HEAD 2>/dev/null || ec
 > Comandos em sh/Bash; em frota sem POSIX (ex.: só PowerShell), use o equivalente — o hook `.ps1` já implementa a mesma leitura por rótulo.
 
 ```text
-- Se count >= 10 OU passaram-se > 10 dias desde last_review → proponha UMA vez:
+- Limiar de revisão: count >= 30 commits OU passaram-se > 14 dias desde last_review.
+  O eixo de DIAS é a âncora (cadência de ~sprint, previsível); os commits só ANTECIPAM
+  o nudge quando há um burst real de trabalho. Números calibrados para times ativos —
+  em time, 10 commits acontecem numa manhã, por isso o antigo 10/10 disparava cedo demais.
+- Cruzou o limiar → proponha UMA vez:
   "Acumulamos <count> commits / <dias> dias desde a última revisão de skills de domínio.
    Posso rodar a manutenção (pelizzai-writing-skills) agora? Seguir agora ou deixar para depois?"
 - Abaixo do limiar → não diga nada e finalize.
-- "Avisa uma vez, nunca bloqueia." Se o usuário adiar, não repita na mesma sessão.
+- "Avisa uma vez, nunca bloqueia." Se o usuário adiar, não repita na mesma sessão nem
+  nos próximos ~7 dias (o hook persiste essa janela de supressão; ver abaixo).
 ```
 
-Repo-scan completo: se passaram > 10 dias desde `last-full-scan`, proponha um re-scan amplo (reusando a `pelizzai-audit`) e atualize as skills impactadas.
+Repo-scan completo: se passaram > 21 dias desde `last-full-scan`, proponha um re-scan amplo (reusando a `pelizzai-audit`) e atualize as skills impactadas.
 
-### Hook de reforço (a cada 10 interações — só Claude Code)
+### Hook de reforço (a cada 20 interações — só Claude Code)
 
-O hook `.claude/hooks/pelizzai-cadence.mjs` é um `UserPromptSubmit` que conta interações e, a cada 10, checa o delta do git; se o limiar for cruzado, injeta um lembrete curto. Características de segurança:
+O hook `.claude/hooks/pelizzai-cadence.mjs` é um `UserPromptSubmit` que conta interações e, a cada 20, checa o delta do git; se o limiar for cruzado, injeta um lembrete curto. Os limiares são os mesmos do núcleo portável (30 commits / 14 dias de revisão / 21 dias de full-scan). Características de segurança:
 
 ```text
 - No-op silencioso se não houver ledger (harness ainda não inicializado neste projeto).
-- Só faz a checagem cara (git) a cada 10ª interação; nas demais, só incrementa o contador.
+- Só faz a checagem cara (git) a cada 20ª interação; nas demais, só incrementa o contador.
 - SEMPRE termina com exit 0 (nunca bloqueia o prompt do usuário).
 - Engole qualquer erro (git ausente, etc.) sem ruído.
-- Emite no máximo um lembrete por janela de 10 interações.
+- Supressão: após emitir um lembrete, silencia por 7 dias (grava `snoozeUntil` no
+  .cadence-state.json) — não repete a cada janela enquanto o limiar continua cruzado.
+- O estado é retrocompatível: um `.cadence-state.json` antigo (só `{count}`) continua válido.
 ```
+
+> **Amostragem ≠ frequência do nudge.** `EVERY=20` decide de quanto em quanto o hook OLHA; quem decide se o nudge APARECE são os limiares (30 commits / 14 dias) + a supressão de 7 dias. Não suba `EVERY` a valores altos (ex.: 100): isso cega o hook em sessões curtas, sem reduzir a frequência real do aviso (que já é governada pelos limiares e pelo snooze).
 
 Entrada no `settings.json` (instalada no bootstrap, com confirmação — opt-in):
 
@@ -113,8 +122,12 @@ Entrada no `settings.json` (instalada no bootstrap, com confirmação — opt-in
 ## Seeding e atualização do ledger
 
 ```text
-- Semeie `last-review` e `last-full-scan` com a data do 1º commit do repo
-  (git log --reverse --format=%cd --date=short | head -1). Evita o bug "count=0 para sempre".
+- Semeie `last-review` e `last-full-scan` com a DATA DO BOOTSTRAP (hoje) — NÃO com a do 1º commit.
+  O bootstrap acabou de criar as skills de domínio a partir do repo-scan do HEAD atual: elas são
+  a "primeira revisão", então a última revisão é agora. Semear com o 1º commit de um repo maduro
+  faz `daysReview`/`commits` já nascerem estourados → um nudge espúrio na primeira tarefa, sobre
+  skills recém-criadas. `count=0` no dia do bootstrap é o correto (sobe conforme novos commits).
+  (Em repo novo sem commits, a data de hoje já era o valor usado — agora vale para os dois casos.)
 - A cada criação/refresh de skill de domínio, atualize a linha da skill no ledger
   (data, último commit/ref, eixo) e o `## Log`.
 - Após uma revisão de manutenção, atualize `last-review` para a data da revisão.

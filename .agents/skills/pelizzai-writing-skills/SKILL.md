@@ -1,6 +1,6 @@
 ---
 name: pelizzai-writing-skills
-description: Use essa skill para criar, editar ou otimizar uma skill **a pedido do usuário**, e como motor do **sistema autônomo de manutenção das skills de DOMÍNIO** de um projeto. Acione-a (a) no bootstrap, chamada pela `pelizzai-audit`, para gerar o máximo de skills de domínio a partir do repo-scan, fundamentadas no MCP `context7` e nas regras de skills da Anthropic; (b) na manutenção das skills de domínio — stack que muda de versão, padrões que se repetem no git, ou cadência vencida (≥10 commits, >10 dias, ou repo-scan a cada 10 dias); e (c) quando o usuário disser "criar skill", "transforme isso numa skill", "otimizar a descrição" ou "atualizar as skills de domínio". A manutenção autônoma atua SOMENTE sobre skills de domínio — as skills do harness (`pelizzai-*`) só são criadas ou editadas a pedido explícito do usuário, NUNCA pelo sistema autônomo. E NUNCA sobrescreve uma skill às cegas: mostra o diff, preserva customizações e pede confirmação por skill.
+description: Use essa skill para criar, editar ou otimizar uma skill **a pedido do usuário**, e como motor do **sistema autônomo de manutenção das skills de DOMÍNIO** de um projeto. Acione-a (a) no bootstrap, chamada pela `pelizzai-audit`, para gerar o máximo de skills de domínio a partir do repo-scan, fundamentadas no MCP `context7` e nas regras de skills da Anthropic; (b) na manutenção das skills de domínio — stack que muda de versão, padrões que se repetem no git, ou cadência vencida (≥30 commits, >14 dias, ou repo-scan a cada 21 dias); e (c) quando o usuário disser "criar skill", "transforme isso numa skill", "otimizar a descrição" ou "atualizar as skills de domínio". A manutenção autônoma atua SOMENTE sobre skills de domínio — as skills do harness (`pelizzai-*`) só são criadas ou editadas a pedido explícito do usuário, NUNCA pelo sistema autônomo. E NUNCA sobrescreve uma skill às cegas: mostra o diff, preserva customizações e pede confirmação por skill.
 ---
 
 # PelizzAI Writing Skills
@@ -120,16 +120,18 @@ Atualização é sempre **propor → confirmar → aplicar → registrar**. Não
 A auto-manutenção combina lógica **portável na skill** (núcleo) com um **hook de reforço** no Claude Code. Mecânica detalhada em **[references/domain-skill-maintenance.md](references/domain-skill-maintenance.md)**.
 
 ```text
-- Ao FECHAR uma tarefa (núcleo, portável — vale em .claude/.agents/.cursor):
+- Ao FECHAR uma tarefa (núcleo, portável — vale em .claude/.agents/.cursor; DISPARO PRIMÁRIO):
   leia o ledger, conte commits desde `last-review` (git rev-list --since) e os dias decorridos.
-  Se >= 10 commits OU > 10 dias → proponha a revisão UMA vez ("avisa uma vez, nunca bloqueia").
-- Repo-scan completo: se > 10 dias desde `last-full-scan` → proponha um re-scan e atualização ampla.
-- A cada 10 interações (hook de reforço, só Claude Code): o hook checa o delta do git e injeta um
-  lembrete curto quando o limiar é cruzado. Ver `references/domain-skill-maintenance.md` e o
-  script `.claude/hooks/pelizzai-cadence.mjs`. O hook é opt-in: instalado no bootstrap com confirmação.
+  Se >= 30 commits OU > 14 dias → proponha a revisão UMA vez ("avisa uma vez, nunca bloqueia").
+  O eixo de DIAS é a âncora (cadência de ~sprint); os commits só antecipam num burst real.
+- Repo-scan completo: se > 21 dias desde `last-full-scan` → proponha um re-scan e atualização ampla.
+- A cada 20 interações (hook de reforço, só Claude Code): rede de segurança que checa o delta do
+  git e injeta um lembrete quando o limiar é cruzado, com supressão de 7 dias após avisar. Ver
+  `references/domain-skill-maintenance.md` e o script `.claude/hooks/pelizzai-cadence.mjs`. Opt-in:
+  instalado no bootstrap com confirmação.
 ```
 
-Os limiares (10/10/10) são o padrão; ajuste-os ao ritmo do projeto. Nada na cadência **bloqueia** o trabalho do usuário — apenas sugere.
+Os limiares (30 commits / 14 dias de revisão / 21 dias de full-scan / 20 interações / 7 dias de supressão) são calibrados para times ativos; ajuste-os ao ritmo do projeto. Nada na cadência **bloqueia** o trabalho do usuário — apenas sugere.
 
 ---
 

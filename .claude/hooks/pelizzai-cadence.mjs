@@ -3,16 +3,26 @@
  * PelizzAI — hook de cadência (UserPromptSubmit).
  *
  * Reforço da auto-manutenção de skills de domínio. NÃO é a fonte de verdade:
- * o núcleo da cadência vive na skill `pelizzai-writing-skills` (portável entre IDEs).
- * Este hook só existe no Claude Code e serve para contar interações e, a cada N,
- * lembrar de revisar as skills quando o limiar de commits/dias for cruzado.
+ * o núcleo da cadência vive na skill `pelizzai-writing-skills` (portável entre IDEs)
+ * e dispara no fechamento de tarefa (`pelizzai-finish-task` Passo 5). Este hook só
+ * existe no Claude Code e serve de rede de segurança: conta interações e, a cada N,
+ * lembra de revisar as skills quando o limiar de commits/dias for cruzado.
+ *
+ * Cadência (calibrada para times ativos — ver pelizzai-writing-skills →
+ * references/domain-skill-maintenance.md):
+ *  - Amostragem: checa a cada 20 interações (não a cada mensagem).
+ *  - Revisão devida: >= 30 commits OU > 14 dias desde last-review (o eixo de DIAS é a
+ *    âncora — cadência de sprint; os commits só ANTECIPAM num burst real de trabalho).
+ *  - Repo-scan completo: > 21 dias desde last-full-scan.
+ *  - Supressão: depois de avisar, silencia por 7 dias (evita repetir a cada janela
+ *    enquanto o usuário não roda a manutenção). "Avisa uma vez, nunca bloqueia."
  *
  * Garantias de segurança:
  *  - No-op silencioso se o harness ainda não foi inicializado (sem ledger).
  *  - A checagem cara (git) só roda a cada N interações; nas demais, só incrementa o contador.
  *  - SEMPRE termina com exit 0 — nunca bloqueia o prompt do usuário.
  *  - Engole qualquer erro (git ausente, FS, etc.) sem ruído.
- *  - No máximo um lembrete por janela de N interações.
+ *  - No máximo um lembrete por janela de supressão.
  *
  * Instalação (opt-in, normalmente no bootstrap), em .claude/settings.json:
  *   { "hooks": { "UserPromptSubmit": [ { "hooks": [
@@ -26,9 +36,12 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
-const EVERY = 10;            // checa a cada N interações
-const COMMIT_THRESHOLD = 10; // >= N commits desde a última revisão
-const DAY_THRESHOLD = 10;    // > N dias desde a última revisão / último full-scan
+const EVERY = 20;                 // checa a cada N interações (amostragem, não frequência do nudge)
+const COMMIT_THRESHOLD = 30;      // >= N commits desde a última revisão (antecipa em burst real)
+const DAY_THRESHOLD_REVIEW = 14;  // > N dias desde a última revisão (âncora de sprint)
+const DAY_THRESHOLD_SCAN = 21;    // > N dias desde o último full-scan
+const SNOOZE_DAYS = 7;            // após avisar, silencia por N dias
+const MS_PER_DAY = 86400000;
 
 function readStdin() {
   try {
@@ -54,7 +67,7 @@ function safeGit(cwd, args) {
 function daysBetween(iso, now) {
   const then = Date.parse(iso + 'T00:00:00');
   if (Number.isNaN(then)) return 0;
-  return Math.floor((now - then) / 86400000);
+  return Math.floor((now - then) / MS_PER_DAY);
 }
 
 function emit(context) {
@@ -83,23 +96,29 @@ function main() {
   const ledgerPath = join(cwd, 'pelizzai', 'data', 'review-domain-skills.md');
   if (!existsSync(ledgerPath)) return; // harness não inicializado neste projeto
 
-  // contador de interações
+  // estado: contador de interações + janela de supressão (retrocompatível com { count })
   const statePath = join(cwd, 'pelizzai', 'data', '.cadence-state.json');
-  let state = { count: 0 };
+  let state = { count: 0, snoozeUntil: 0 };
   try {
-    if (existsSync(statePath)) state = JSON.parse(readFileSync(statePath, 'utf8'));
+    if (existsSync(statePath)) state = { ...state, ...JSON.parse(readFileSync(statePath, 'utf8')) };
   } catch {
     /* reinicia o estado */
   }
   state.count = (state.count || 0) + 1;
-  try {
-    mkdirSync(dirname(statePath), { recursive: true });
-    writeFileSync(statePath, JSON.stringify(state));
-  } catch {
-    /* sem persistência — segue */
-  }
+  const persist = () => {
+    try {
+      mkdirSync(dirname(statePath), { recursive: true });
+      writeFileSync(statePath, JSON.stringify(state));
+    } catch {
+      /* sem persistência — segue */
+    }
+  };
+  persist();
 
   if (state.count % EVERY !== 0) return; // só checa (e nudga) a cada N interações
+
+  const now = Date.now();
+  if (state.snoozeUntil && now < state.snoozeUntil) return; // silenciado após aviso recente
 
   // datas do ledger (primeiras YYYY-MM-DD encontradas após cada rótulo)
   let ledger = '';
@@ -112,7 +131,6 @@ function main() {
   const lastScan = (ledger.match(/last-full-scan:\D*(\d{4}-\d{2}-\d{2})/) || [])[1];
   if (!lastReview) return;
 
-  const now = Date.now();
   const commits = parseInt(
     safeGit(cwd, ['rev-list', '--count', `--since=${lastReview} 00:00`, 'HEAD']) || '0',
     10
@@ -120,8 +138,8 @@ function main() {
   const daysReview = daysBetween(lastReview, now);
   const daysScan = lastScan ? daysBetween(lastScan, now) : 0;
 
-  const reviewDue = commits >= COMMIT_THRESHOLD || daysReview > DAY_THRESHOLD;
-  const scanDue = lastScan && daysScan > DAY_THRESHOLD;
+  const reviewDue = commits >= COMMIT_THRESHOLD || daysReview > DAY_THRESHOLD_REVIEW;
+  const scanDue = lastScan && daysScan > DAY_THRESHOLD_SCAN;
   if (!reviewDue && !scanDue) return;
 
   const parts = [];
@@ -136,6 +154,10 @@ function main() {
       `Considere acionar a skill pelizzai-writing-skills (modo manutenção) para revisar/atualizar ` +
       `as skills de domínio. Sugira ao usuário uma vez; não bloqueie o trabalho.`
   );
+
+  // silencia os próximos SNOOZE_DAYS dias para não repetir a cada janela
+  state.snoozeUntil = now + SNOOZE_DAYS * MS_PER_DAY;
+  persist();
 }
 
 try {
