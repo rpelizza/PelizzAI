@@ -87,8 +87,9 @@ Acionado na primeira interação / "bootstrap", depois que a `pelizzai-audit` ma
    pesquisa/leitura de fundamentação, não para gravar a skill.
 4. Para cada skill: siga as regras de autoria; valide o frontmatter; registre no catálogo e no ledger
    (incluindo a origem: repo-scan ou interview).
-5. Semeie o ledger (`last-review`/`last-full-scan`) com a data do 1º commit do repo; em projeto NOVO
-   sem commits, use a data de hoje. Escreva o catálogo `pelizzai/domain-skills.md` — sua existência
+5. Semeie o ledger (`last-review`/`last-full-scan`) com a **data do bootstrap (hoje)** — as skills
+   nascem do repo-scan do HEAD atual, então o bootstrap É a primeira revisão; semear com o 1º commit
+   de um repo maduro dispara um nudge espúrio já na primeira tarefa. Escreva o catálogo `pelizzai/domain-skills.md` — sua existência
    marca o bootstrap como concluído. Ver Templates.
 6. Ofereça instalar o hook de cadência (opt-in; ver `references/domain-skill-maintenance.md`).
 7. Apresente ao usuário a lista de skills criadas (catálogo) para revisão. Nada é definitivo sem o aval dele.
@@ -142,7 +143,7 @@ Dois artefatos por projeto, criados/atualizados por esta skill:
 - **`pelizzai/domain-skills.md`** — catálogo: o que cada skill de domínio faz e quando usar. Template: [templates/domain-skills.md](templates/domain-skills.md).
 - **`pelizzai/data/review-domain-skills.md`** — ledger: por skill, data de criação, última atualização, último commit/ref revisado, o eixo da mudança e a origem (repo-scan/interview); + `last-review` e `last-full-scan` globais. Template: [templates/review-domain-skills.md](templates/review-domain-skills.md).
 
-Semeie o ledger com a **data do 1º commit** (`git log --reverse --format=%cd --date=short | head -1`; em frota sem POSIX, use o equivalente e pegue a 1ª linha) para o contador funcionar desde a primeira tarefa. Em projeto novo sem commits, semeie com a data de hoje.
+Semeie o ledger com a **data do bootstrap (hoje)**, tanto em repo novo quanto existente — o bootstrap acabou de criar as skills a partir do HEAD atual, então "última revisão = agora". Semear com o 1º commit de um repo maduro faz `daysReview`/`commits` nascerem estourados e dispara um nudge espúrio na primeira tarefa. `count=0` no dia do bootstrap é o correto (sobe conforme novos commits chegam). Ver `references/domain-skill-maintenance.md` → "Seeding".
 
 ---
 
