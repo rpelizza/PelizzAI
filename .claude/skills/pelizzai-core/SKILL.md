@@ -156,7 +156,7 @@ O `pelizzai-loop` dá a lente do laço: o ciclo **OODA** (Observar → Orientar 
 | Ciclo de feature           | `pelizzai-brainstorming` → `pelizzai-writing-plans` → `pelizzai-execution-plans`         |
 | Execução por tarefa        | `pelizzai-tdd` · `pelizzai-team` · `pelizzai-subagents` · `pelizzai-loop` (OODA + DoD)   |
 | Tracks dedicados           | `pelizzai-debugging` (bug) · `pelizzai-quick-fix` (ajuste)                               |
-| Design e exploração        | `pelizzai-codebase-design` · `pelizzai-domain-modeling` · `pelizzai-prototype`           |
+| Design e exploração        | `pelizzai-codebase-design` · `pelizzai-domain-modeling` · `pelizzai-prototype` · `pelizzai-improving-architecture` |
 | Isolamento e fechamento    | `pelizzai-starting-branch` (branch/worktree) · `pelizzai-finish-task` · `pelizzai-resolving-merge-conflicts` |
 | Qualidade e segurança      | `pelizzai-review` · `pelizzai-oswap` · `pelizzai-verification-before-completion`         |
 | Frontend                   | `pelizzai-frontend`                                                                      |

@@ -70,6 +70,6 @@ Quando a forma da interface é incerta e o impacto é alto, **projete-a de vári
 
 ## Integração
 
-**Usada por:** `pelizzai-tdd` (planejamento — módulos profundos e testabilidade), `pelizzai-brainstorming` (isolamento e clareza), `pelizzai-writing-plans` (estrutura de arquivos).
+**Usada por:** `pelizzai-tdd` (planejamento — módulos profundos e testabilidade), `pelizzai-brainstorming` (isolamento e clareza), `pelizzai-writing-plans` (estrutura de arquivos), `pelizzai-improving-architecture` (o teste da deleção e este vocabulário guiam a revisão proativa; um seam ausente flagrado pela `pelizzai-debugging` no teste de regressão é achado arquitetural que entra lá como candidato).
 
 **Combina com:** `pelizzai-reasoning` (Structured Decomposition, Decision Making), `pelizzai-domain-modeling` (o vocabulário do domínio que nomeia esses módulos).

@@ -131,6 +131,7 @@ pelizzai/                         na raiz do repositório ou workspace
 ├── domain-skills.md              catálogo das skills de domínio (marca o bootstrap concluído)
 ├── context.md                    glossário do domínio (pelizzai-domain-modeling); multi-contexto: context/<nome>.md + context-map.md
 ├── adr/                          decisões de arquitetura (ADRs numerados)
+├── out-of-scope/                 rejeições duráveis, um arquivo por conceito (pelizzai-domain-modeling)
 ├── specs/                        designs aprovados (pelizzai-brainstorming): AAAA-MM-DD-<topico>-design.md
 ├── plans/                        planos de implementação (pelizzai-writing-plans)
 └── data/                         estado e ledgers do harness
@@ -139,7 +140,7 @@ pelizzai/                         na raiz do repositório ou workspace
     └── .cadence-state.json        contador do hook de cadência (vai para o .gitignore)
 ```
 
-> `context.md` e `adr/` são criados **sob demanda** por `pelizzai-domain-modeling` / `pelizzai-prototype`, não no bootstrap — sua ausência logo após o bootstrap é esperada.
+> `context.md`, `adr/` e `out-of-scope/` são criados **sob demanda** por `pelizzai-domain-modeling` / `pelizzai-prototype`, não no bootstrap — sua ausência logo após o bootstrap é esperada.
 
 Em **workspace** (vários projetos na mesma pasta), o `pelizzai/` fica na raiz do workspace e cobre todos; cada skill registra a qual projeto um artefato pertence quando isso importar.
 

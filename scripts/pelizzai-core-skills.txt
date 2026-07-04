@@ -12,6 +12,7 @@ pelizzai-domain-modeling
 pelizzai-execution-plans
 pelizzai-finish-task
 pelizzai-frontend
+pelizzai-improving-architecture
 pelizzai-interview-me
 pelizzai-loop
 pelizzai-oswap

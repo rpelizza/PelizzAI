@@ -86,6 +86,8 @@ Leitura leve do projeto antes de decidir (ferramentas de arquivo e Git, não she
    ANTES de seguir. A audit cuida do bootstrap; o router cuida do ciclo de cada tarefa.
    Exceção: pergunta puramente conceitual NÃO dispara o bootstrap — responda direto; a audit só
    entra quando a resposta exigir tocar ou entender ESTE projeto.
+4. Sugestão/pedido que soa recorrente → confira pelizzai/out-of-scope/ (match por conceito, não por
+   keyword) antes de re-litigar; havendo rejeição registrada, traga a razão à tona em vez de reabrir.
 ```
 
 ### Passo 0.1 — Classificar a intenção (um track)

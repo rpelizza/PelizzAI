@@ -90,6 +90,7 @@ digraph brainstorming {
 
 **Explorando abordagens:**
 
+- Antes de propor, cheque `pelizzai/out-of-scope/` (rejeições registradas; match por conceito, não por keyword) — se o design contradisser uma rejeição registrada, traga isso à tona explicitamente em vez de re-litigar em silêncio.
 - Proponha de 2 a 3 abordagens diferentes, apresentando os prós e contras de cada uma
 - Apresente as opções de forma conversacional, incluindo sua recomendação e a justificativa
 - Comece pela opção recomendada e explique o motivo

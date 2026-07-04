@@ -364,6 +364,7 @@ pelizzai/
 ├── context/                      glossarios por contexto, em workspaces maiores
 ├── context-map.md                mapa entre contextos, quando existir
 ├── adr/                          decisoes de arquitetura
+├── out-of-scope/                 rejeicoes duraveis, um arquivo por conceito
 ├── specs/                        designs aprovados
 ├── plans/                        planos de implementacao
 └── data/
@@ -486,7 +487,7 @@ com código 0, engole erros e nunca bloqueia o usuário. O ledger é semeado com
 | Feature | `pelizzai-brainstorming`, `pelizzai-writing-plans`, `pelizzai-execution-plans` | Design aprovado, plano executável, gate de setup pós-plano e execução tarefa por tarefa. |
 | Execução | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop` | TDD, delegação, times, e o loop OODA até a Definition of Done. |
 | Tracks leves/dedicados | `pelizzai-debugging`, `pelizzai-quick-fix` | Bug com causa raiz e ajuste pontual sem perder disciplina. |
-| Design e exploração | `pelizzai-codebase-design`, `pelizzai-domain-modeling`, `pelizzai-prototype` | Módulos profundos, modelo de domínio, ADRs e protótipos descartáveis. |
+| Design e exploração | `pelizzai-codebase-design`, `pelizzai-domain-modeling`, `pelizzai-prototype`, `pelizzai-improving-architecture` | Módulos profundos, modelo de domínio, ADRs, out-of-scope, protótipos descartáveis e revisão proativa de arquitetura. |
 | Isolamento e integração | `pelizzai-starting-branch`, `pelizzai-finish-task`, `pelizzai-resolving-merge-conflicts` | Branch/worktree seguros, fechamento honrando a commit-strategy, push/PR e conflitos. |
 | Qualidade e segurança | `pelizzai-review`, `pelizzai-oswap`, `pelizzai-verification-before-completion` | Review em dois estágios + review final, OWASP no diff e evidência antes de conclusão. |
 | Frontend | `pelizzai-frontend` | Produto, design, implementação e QA visual para UI. |
