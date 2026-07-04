@@ -2,6 +2,9 @@
 # projeto consumidor). No repo-fonte do PelizzAI ele nao deve existir.
 pelizzai/data/.cadence-state.json
 
+# Artefatos efemeros de despacho (task-brief / review-package) no projeto ALVO
+pelizzai/data/handoffs/
+
 # Logs de debug de editores/agentes
 .cursor/debug-*.log
 

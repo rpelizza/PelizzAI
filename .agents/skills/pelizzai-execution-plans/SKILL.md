@@ -183,7 +183,9 @@ O protocolo detalhado — briefing por colagem, TDD, review em dois estágios, s
 
 ```text
 1. Briefing: COLE o texto completo da tarefa + as skills de domínio relevantes no prompt
-   (o membro nunca lê o arquivo do plano). Instrua a camada global (pelizzai-preferences +
+   (o membro nunca lê o arquivo do plano; com scripts/task-brief.* no projeto, o brief e o
+   relatório viajam por ARQUIVO em pelizzai/data/handoffs/ — ver task-cycle.md §1, incluindo
+   o review-package com BASE capturado antes do despacho). Instrua a camada global (pelizzai-preferences +
    pelizzai-reasoning) com a prioridade certa: skills de DOMÍNIO > preferences/reasoning.
    Responda perguntas ANTES de o trabalho começar.
 2. Implementar via pelizzai-tdd (Iron Law: teste que falha primeiro). O membro NÃO commita.
@@ -253,7 +255,8 @@ O cursor da tarefa ativa vive em `pelizzai/data/state.md` (template: [templates/
   divergência falso-positiva)?
   Releia o arquivo apontado em `plan:` para reconstruir o texto das tarefas pendentes (o membro
   nunca lê o plano; quem cola é o coordenador). Em divergência que arrisque o trabalho, NÃO confie
-  cego: reporte e recupere o estado com o usuário antes de prosseguir.
+  cego: acione a `pelizzai-recovery` (ponto de retorno → menu → reconciliar e commitar o cursor)
+  antes de prosseguir.
 - Em workspace, a branch e os comandos de teste/lint/build são POR-PROJETO; use o campo `project:`.
 ```
 
@@ -294,7 +297,8 @@ Ao terminar todas as tarefas, o **coordenador/líder valida a entrega inteira** 
    re-despache o fix (a um implementador novo com briefing do achado; em inline, corrija) e
    RE-REVISE — com o MESMO circuit breaker do task-cycle §5 aplicado ao review final
    (3 ciclos → phase: blocked e escalar ao humano; nunca loop infinito de fix→re-review).
-2. SUÍTE COMPLETA rodada pelo próprio coordenador: testes + lint + build do projeto, do zero,
+2. SUÍTE COMPLETA rodada pelo próprio coordenador: testes + lint + build do projeto (os
+   comandos do perfil pelizzai/profile.md, quando existir — nunca chutados), do zero,
    com saída e exit code colados — não reaproveite runs por tarefa nem confie em relatório
    de membro ("subagente disse que passou" não é evidência; o diff do git e a suíte são).
 3. CHECKLIST DO PLANO, requisito a requisito: releia o plano/spec e aponte, para cada requisito,

@@ -43,7 +43,7 @@ A janela de contexto é um recurso da tarefa — administre-a de forma deliberad
 
 - **Zona segura: ~120k tokens.** Acima disso a qualidade degrada; planeje as fronteiras antes de chegar lá.
 - Fases criativas (design → plano) acontecem numa **janela contínua**; a execução usa **contexto fresco por tarefa**.
-- **Handoff bifurca; compact continua**: para mudar de rumo, despache com briefing novo; para continuar o mesmo trabalho, compacte — e **nunca no meio de uma fase** (feche a fase primeiro).
+- **Handoff bifurca; compact continua**: para mudar de rumo, despache com briefing novo (o procedimento mora na `pelizzai-handoff`); para continuar o mesmo trabalho, compacte — e **nunca no meio de uma fase** (feche a fase primeiro).
 - Após compaction, confie no `pelizzai/data/state.md` e no `git log`, não na sua memória.
 
 O detalhe operacional (bordas de fase, retomada) mora na `pelizzai-execution-plans`.
@@ -154,10 +154,10 @@ O `pelizzai-loop` dá a lente do laço: o ciclo **OODA** (Observar → Orientar 
 | Entrada e orquestração     | `pelizzai-core` (esta) · `pelizzai-router` · `pelizzai-audit` (bootstrap) · `pelizzai-preferences` (camada global) |
 | Raciocínio e comunicação   | `pelizzai-reasoning` (técnicas + OODA) · `pelizzai-interview-me` · `pelizzai-writing-clearly-and-concisely` |
 | Ciclo de feature           | `pelizzai-brainstorming` → `pelizzai-writing-plans` → `pelizzai-execution-plans`         |
-| Execução por tarefa        | `pelizzai-tdd` · `pelizzai-team` · `pelizzai-subagents` · `pelizzai-loop` (OODA + DoD)   |
+| Execução por tarefa        | `pelizzai-tdd` · `pelizzai-team` · `pelizzai-subagents` · `pelizzai-loop` (OODA + DoD) · `pelizzai-handoff` (bifurcar para sessão nova) |
 | Tracks dedicados           | `pelizzai-debugging` (bug) · `pelizzai-quick-fix` (ajuste)                               |
 | Design e exploração        | `pelizzai-codebase-design` · `pelizzai-domain-modeling` · `pelizzai-prototype` · `pelizzai-improving-architecture` |
-| Isolamento e fechamento    | `pelizzai-starting-branch` (branch/worktree) · `pelizzai-finish-task` · `pelizzai-resolving-merge-conflicts` |
+| Isolamento e fechamento    | `pelizzai-starting-branch` (branch/worktree) · `pelizzai-finish-task` · `pelizzai-resolving-merge-conflicts` · `pelizzai-recovery` (estado divergente) · `pelizzai-documenting-features` (doc humana da feature) |
 | Qualidade e segurança      | `pelizzai-review` · `pelizzai-oswap` · `pelizzai-verification-before-completion`         |
 | Frontend                   | `pelizzai-frontend`                                                                      |
 | Autoria de skills          | `pelizzai-writing-skills`                                                                |

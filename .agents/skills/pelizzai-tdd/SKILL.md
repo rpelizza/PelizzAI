@@ -52,6 +52,7 @@ Antes de escrever qualquer código:
 
 - [ ] Leia `pelizzai/domain-skills.md` e carregue as skills de domínio relevantes ao comportamento em teste — os padrões do projeto prevalecem sobre padrões genéricos (se você é um membro despachado, elas já vêm coladas no seu briefing)
 - [ ] Para comportamento de lib/framework externo, confirme a API real e atual via MCP `context7` (`resolve-library-id` → `query-docs`) antes de escrever o teste — não confie na memória
+- [ ] O comando de teste vem do perfil de execução `pelizzai/profile.md` — nunca chute (`npm test` num projeto pnpm é o anti-padrão); sem profile, leia o manifest real do projeto
 - [ ] Confirme com o usuário quais alterações de interface são necessárias (use `pelizzai-interview-me` quando houver dúvida material)
 - [ ] Acorde os **seams** antes dos testes: **nenhum teste é escrito num seam não confirmado**. Em fluxo de feature, os seams já vêm da spec (`pelizzai-brainstorming`, seção Testing Decisions) — confirme-os; fora dele, acorde-os aqui (vocabulário de seam: `pelizzai-codebase-design`)
 - [ ] Confirme com o usuário quais comportamentos devem ser testados (priorize-os)

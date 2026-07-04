@@ -75,7 +75,9 @@ Leitura leve do projeto antes de decidir (ferramentas de arquivo e Git, não she
        `git worktree list` (caminho + branch numa chamada) ou rode `git branch --show-current`
        DENTRO do worktree-path registrado — no working tree principal ele devolve OUTRA branch
        e geraria divergência falso-positiva.
-       Em divergência que arrisque o trabalho, reporte e confirme antes de prosseguir.
+       Em divergência que arrisque o trabalho — ou após crash/worktree órfão — acione a
+       `pelizzai-recovery` (ponto de retorno → menu ao usuário → reconciliar e commitar o
+       cursor) antes de prosseguir.
    - slug: <none> ou phase: done → tarefa anterior FECHADA; classifique o pedido novo do zero e
      SOBRESCREVA o bloco da tarefa ativa com os placeholders <…> — uma tarefa nova NUNCA herda
      isolation/execution-mode/commit-strategy da anterior (essas decisões pertencem à tarefa
@@ -235,6 +237,6 @@ Sempre: na 1a interação, rotear para pelizzai-audit (bootstrap — exceto perg
 
 **Chamada por:** `pelizzai-core` (raiz), no início de toda tarefa que toca código/projeto.
 
-**Decide/roteia para:** `pelizzai-audit` (bootstrap), `pelizzai-starting-branch` (executa o isolamento decidido), `pelizzai-brainstorming` / `pelizzai-debugging` / `pelizzai-quick-fix` / `pelizzai-review` / `pelizzai-resolving-merge-conflicts` (head skills), `pelizzai-execution-plans` (conduz o gate de setup pós-plano e honra as decisões registradas).
+**Decide/roteia para:** `pelizzai-audit` (bootstrap), `pelizzai-starting-branch` (executa o isolamento decidido), `pelizzai-brainstorming` / `pelizzai-debugging` / `pelizzai-quick-fix` / `pelizzai-review` / `pelizzai-resolving-merge-conflicts` (head skills), `pelizzai-recovery` (divergência state.md×git na retomada), `pelizzai-execution-plans` (conduz o gate de setup pós-plano e honra as decisões registradas).
 
 **Camada global:** `pelizzai-preferences`. **Combina com:** `pelizzai-loop` (lente OODA do ciclo), `pelizzai-finish-task` (fecha o ciclo e atualiza o state.md que o router criou).

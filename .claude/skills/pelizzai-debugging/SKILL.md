@@ -53,6 +53,8 @@ Esta fase É a skill; o resto é mecânico. Antes de qualquer teoria, construa o
 3. Minimize o loop: corte UM elemento por vez (fixture, flag, passo) re-rodando o loop após
    cada corte. Pronto quando todo elemento restante é load-bearing — remover qualquer um faz
    o bug sumir ou o loop quebrar.
+4. Monte o loop com os comandos canônicos do projeto — o perfil `pelizzai/profile.md` tem os
+   comandos exatos de test/build/lint; não os chute.
 ```
 
 ### Fase 2 — Orientar: análise de padrão

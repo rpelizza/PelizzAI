@@ -226,7 +226,7 @@ Dê a cada lente/hipótese um membro distinto — um único agente tende a ancor
 
 ## Protocolo de delegação por membro
 
-Para cada membro, entregue um **briefing autossuficiente**. Os membros **não herdam o histórico da sua conversa** (nem teammates nem subagentes) — o briefing precisa conter tudo o que o membro precisa para agir sozinho.
+Para cada membro, entregue um **briefing autossuficiente**. Os membros **não herdam o histórico da sua conversa** (nem teammates nem subagentes) — o briefing precisa conter tudo o que o membro precisa para agir sozinho. Em execução de plano com `scripts/task-brief.*` no projeto, o briefing da tarefa viaja por **arquivo** (`pelizzai/data/handoffs/`) — ver `pelizzai-execution-plans` → `references/task-cycle.md` §1.
 
 ```text
 Briefing de [nome do membro] — papel: [papel]

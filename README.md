@@ -68,6 +68,8 @@ PelizzAI/
 ├── GEMINI.md                         GERADO: cópia de AGENTS.md (Gemini CLI)
 ├── scripts/
 │   ├── sync-harness.ps1              gera os alvos; -Check (anti-drift); -UpdateManifest
+│   ├── task-brief.ps1|.sh            handoff por arquivo: extrai o brief da Tarefa N do plano
+│   ├── review-package.ps1|.sh        handoff por arquivo: empacota commits + diff para o review
 │   └── pelizzai-core-skills.txt      GERADO: manifesto das skills de core
 ├── .github/workflows/
 │   └── check-harness.yml             CI: roda sync-harness.ps1 -Check
@@ -77,8 +79,9 @@ PelizzAI/
 │   └── skills/                       GERADO: espelho 1:1 de .claude/skills (padrão interoperável)
 └── .claude/                          FONTE
     ├── hooks/
-    │   ├── pelizzai-cadence.mjs       hook opt-in de cadencia para Claude Code
-    │   └── pelizzai-cadence.ps1       variante PowerShell do hook
+    │   ├── pelizzai-cadence.mjs|.ps1        hook opt-in de cadencia (UserPromptSubmit)
+    │   ├── pelizzai-guardrails.mjs|.ps1     hook opt-in de guarda git (PreToolUse: bloqueia git destrutivo)
+    │   └── pelizzai-session-start.mjs|.ps1  hook opt-in de SessionStart (regra do 1% + tarefa ativa)
     └── skills/
         ├── pelizzai-core/             skill raiz (entrada obrigatória)
         ├── pelizzai-router/           roteador do ciclo de vida
@@ -360,6 +363,7 @@ Esse diretório é a memória operacional do harness dentro daquele projeto.
 ```text
 pelizzai/
 ├── domain-skills.md              catalogo de skills de dominio; marca bootstrap concluido
+├── profile.md                    perfil de execucao: comandos test/build/lint, package manager, stack baseline
 ├── context.md                    glossario de dominio, criado sob demanda
 ├── context/                      glossarios por contexto, em workspaces maiores
 ├── context-map.md                mapa entre contextos, quando existir
@@ -370,6 +374,7 @@ pelizzai/
 └── data/
     ├── state.md                  cursor da tarefa ativa
     ├── review-domain-skills.md   ledger de manutencao de skills de dominio
+    ├── handoffs/                 briefs, relatorios e pacotes de review efemeros; fica no .gitignore
     └── .cadence-state.json       contador local do hook; deve ficar no .gitignore
 ```
 
@@ -425,7 +430,7 @@ flowchart TD
     CURSOR --> STRATEGY{"commit-strategy"}
     STRATEGY -- "granular" --> KEEP["historico mantido<br/>(sem re-perguntar squash)"]
     STRATEGY -- "squash-final" --> ONE["consolidar wips num commit unico<br/>(mensagem aprovada)"]
-    KEEP --> OFFERS["ofertas opt-in:<br/>pelizzai-oswap (superficie sensivel)<br/>pelizzai-frontend (diff de UI)"]
+    KEEP --> OFFERS["ofertas opt-in:<br/>pelizzai-oswap (superficie sensivel)<br/>pelizzai-frontend (diff de UI)<br/>pelizzai-documenting-features (feature nova)"]
     ONE --> OFFERS
     OFFERS --> TREE["gate da working tree<br/>nada sem commit antes do push"]
     TREE --> DEST{"destino?"}
@@ -478,6 +483,30 @@ conta interações e a cada 20 verifica o ledger, com supressão de 7 dias após
 com código 0, engole erros e nunca bloqueia o usuário. O ledger é semeado com a data do bootstrap
 (não a do 1º commit), para não disparar um nudge espúrio já na primeira tarefa de um repo maduro.
 
+## Hooks opt-in e scripts de apoio
+
+Além do hook de cadência, o harness traz mais dois hooks opt-in do Claude Code (sempre em par
+`.mjs` Node + `.ps1` PowerShell 7+, recomendados pela `pelizzai-audit` no bootstrap, com
+instruções de instalação no cabeçalho de cada arquivo):
+
+- **`pelizzai-guardrails`** (`PreToolUse`, matcher `Bash`): bloqueia, antes de rodarem,
+  comandos git destrutivos — `push --force`/`-f` (exceto `--force-with-lease`), `reset --hard`,
+  `clean -f`, `branch -D`, `checkout .` e `restore .` sem `--staged` — com exit 2 e o caminho
+  seguro no stderr. É o enforcement executável dos gates fail-closed que, sem ele, dependem só
+  da obediência do modelo. Erros do próprio hook: exit 0 (fail-open — rede de segurança, não
+  gate primário).
+- **`pelizzai-session-start`** (`SessionStart`, matcher `startup|clear|compact`): re-injeta um
+  lembrete curto da regra do 1% (`pelizzai-core`) e avisa se há tarefa ativa no `state.md` a
+  retomar via `pelizzai-router`. No Claude Code o CLAUDE.md já é re-injetado — o valor está no
+  `clear` e em plataformas que não re-injetam. Sempre sai 0 e engole erros.
+
+Os scripts `scripts/task-brief.ps1|.sh` e `scripts/review-package.ps1|.sh` implementam o
+**handoff por arquivo** da execução de planos: o brief da tarefa (Tarefa N + Global Constraints)
+e o pacote de review (commits + `diff --stat` + `diff -U10`, com BASE capturado **antes** do
+despacho — nunca `HEAD~1`) são gravados em `pelizzai/data/handoffs/` (gitignored) em vez de
+colados no contexto do coordenador (ganho medido na fonte: ~2× mais rápido, ~50% menos tokens).
+Ver `pelizzai-execution-plans` → `references/task-cycle.md` §1.
+
 ## Catálogo de skills do harness
 
 | Grupo | Skills | Responsabilidade |
@@ -485,10 +514,10 @@ com código 0, engole erros e nunca bloqueia o usuário. O ledger é semeado com
 | Entrada e orquestração | `pelizzai-core`, `pelizzai-router`, `pelizzai-audit`, `pelizzai-preferences` | Entrada obrigatória, roteamento, bootstrap e piso global de comportamento. |
 | Raciocínio e conversa | `pelizzai-reasoning` (13 técnicas, incl. OODA), `pelizzai-interview-me`, `pelizzai-writing-clearly-and-concisely` | Técnicas proporcionais de raciocínio, entrevistas para resolver ambiguidade e escrita clara. |
 | Feature | `pelizzai-brainstorming`, `pelizzai-writing-plans`, `pelizzai-execution-plans` | Design aprovado, plano executável, gate de setup pós-plano e execução tarefa por tarefa. |
-| Execução | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop` | TDD, delegação, times, e o loop OODA até a Definition of Done. |
+| Execução | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop`, `pelizzai-handoff` | TDD, delegação, times, o loop OODA até a Definition of Done e o handoff que bifurca o trabalho para uma sessão nova. |
 | Tracks leves/dedicados | `pelizzai-debugging`, `pelizzai-quick-fix` | Bug com causa raiz e ajuste pontual sem perder disciplina. |
 | Design e exploração | `pelizzai-codebase-design`, `pelizzai-domain-modeling`, `pelizzai-prototype`, `pelizzai-improving-architecture` | Módulos profundos, modelo de domínio, ADRs, out-of-scope, protótipos descartáveis e revisão proativa de arquitetura. |
-| Isolamento e integração | `pelizzai-starting-branch`, `pelizzai-finish-task`, `pelizzai-resolving-merge-conflicts` | Branch/worktree seguros, fechamento honrando a commit-strategy, push/PR e conflitos. |
+| Isolamento e integração | `pelizzai-starting-branch`, `pelizzai-finish-task`, `pelizzai-resolving-merge-conflicts`, `pelizzai-recovery`, `pelizzai-documenting-features` | Branch/worktree seguros, fechamento honrando a commit-strategy, push/PR, conflitos, recuperação segura de estado divergente e doc humana da feature no fechamento. |
 | Qualidade e segurança | `pelizzai-review`, `pelizzai-oswap`, `pelizzai-verification-before-completion` | Review em dois estágios + review final, OWASP no diff e evidência antes de conclusão. |
 | Frontend | `pelizzai-frontend` | Produto, design, implementação e QA visual para UI. |
 | Skills | `pelizzai-writing-skills` | Autoria e manutenção de skills de domínio (fundamentadas no context7). |
@@ -529,7 +558,7 @@ Para instalar globalmente sem copiar por projeto, aponte `~/.agents/skills/` par
 | --- | --- |
 | Skills (conteúdo) | **Portáveis** — SKILL.md é padrão aberto. Fonte em `.claude/skills/`, espelho gerado em `.agents/skills/` (com instruções de ativação por plataforma embutidas na `pelizzai-core`). |
 | Entrada sempre-carregada | `CLAUDE.md` (Claude Code) · `AGENTS.md` (Codex, Copilot) · `GEMINI.md` (Gemini CLI) · `.cursor/rules/pelizzai.mdc` (Cursor) — todos gerados da mesma fonte. |
-| Hooks | `.claude/hooks/pelizzai-cadence.*` são **Claude Code-only**; o núcleo da cadência é portável (finish-task Passo 5) e vale nas demais IDEs sem o hook. |
+| Hooks | `.claude/hooks/pelizzai-{cadence,guardrails,session-start}.*` são **Claude Code-only** e opt-in; o núcleo da cadência é portável (finish-task Passo 5) e os gates das skills valem nas demais IDEs sem os hooks. |
 | Agent Teams | Suportado pela `pelizzai-team` quando o Claude Code tem o recurso habilitado; fora disso, degrada para subagents. |
 | Subagents | Ferramenta `Agent`/`Task` do ambiente; cada plataforma tem o seu mecanismo. |
 
@@ -548,7 +577,7 @@ O que **permanece igual** em qualquer IDE:
   fluxos do Copilot em `.github/skills/`) recebem a entrada via `AGENTS.md` e podem receber o espelho
   nativo adicionando o diretório ao array de alvos do `sync-harness.ps1`.
 - O `sync-harness.ps1` exige **PowerShell 7+** (encoding UTF-8); o CI roda em `windows-latest`.
-- O hook de cadência é específico do Claude Code e é opt-in.
+- Os hooks (cadência, guarda git, SessionStart) são específicos do Claude Code e opt-in.
 - Agent Teams é experimental no Claude Code; sem ele, o harness degrada para subagents.
 - No Windows, teammates devem usar visualização `in-process`; `split-panes` exige tmux/iTerm2.
 - Escrita paralela exige `isolation: worktree` com caminhos disjuntos; em `branch`, a

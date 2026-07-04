@@ -99,12 +99,17 @@ Levante, em frentes simultâneas:
 
 ## Fase 4 — Documentação do harness
 
-Garanta que o bootstrap deixe dois artefatos (criados/atualizados via `pelizzai-writing-skills`):
+Garanta que o bootstrap deixe três artefatos (os dois primeiros criados/atualizados via `pelizzai-writing-skills`; o perfil, por esta skill):
 
 - **`pelizzai/domain-skills.md`** — catálogo das skills de domínio: o que cada uma faz e quando usá-la.
 - **`pelizzai/data/review-domain-skills.md`** — ledger de manutenção: quando cada skill de domínio foi criada/atualizada e a referência de git correspondente.
+- **`pelizzai/profile.md`** — perfil de execução (template: [templates/profile.md](templates/profile.md)): comandos de test/build/lint/format/dev, package manager e stack baseline. Detecte lendo os scripts **REAIS** do projeto (`package.json` → `scripts`, Makefile/Justfile, pyproject, etc. — nunca chute `npm test`); honre o package manager do **LOCKFILE** (instalar com npm num projeto pnpm corrompe o lock); quando a detecção for inconclusiva, **confirme com o usuário** antes de gravar. O stack baseline (stack + versões-chave dos manifests, com data) ancora o eixo version-driven da `pelizzai-writing-skills`.
 
-Ofereça também (opt-in) instalar o **hook de cadência** que lembra de revisar as skills de domínio (ver `pelizzai-writing-skills` → `references/domain-skill-maintenance.md`).
+Ofereça também instalar os **hooks opt-in do Claude Code** (um a um, com confirmação — nunca imponha):
+
+- **Hook de cadência** (`pelizzai-cadence.mjs`/`.ps1`, UserPromptSubmit): lembra de revisar as skills de domínio (ver `pelizzai-writing-skills` → `references/domain-skill-maintenance.md`).
+- **Hook de guarda git** (`pelizzai-guardrails.mjs`/`.ps1`, PreToolUse com matcher `Bash`): bloqueia, antes de rodarem, `push --force` (exceto `--force-with-lease`), `reset --hard`, `clean -f`, `branch -D`, `checkout .` e `restore .` — enforcement executável dos gates fail-closed que, sem ele, dependem só da obediência do modelo. Instruções de instalação e teste no cabeçalho do próprio hook.
+- **Hook de SessionStart** (`pelizzai-session-start.mjs`/`.ps1`, matcher `startup|clear|compact`): re-injeta o lembrete da `pelizzai-core` (regra do 1%) e o aviso de tarefa ativa no `state.md` — valor maior no `clear` e em plataformas que não re-injetam a entrada sempre-carregada.
 
 A existência de `pelizzai/domain-skills.md` é o sinal de que o harness já foi inicializado neste projeto.
 
@@ -129,6 +134,7 @@ Toda a documentação e o estado do harness vivem em `pelizzai/`, na **raiz do r
 ```text
 pelizzai/                         na raiz do repositório ou workspace
 ├── domain-skills.md              catálogo das skills de domínio (marca o bootstrap concluído)
+├── profile.md                    perfil de execução: comandos test/build/lint, package manager, stack baseline (pelizzai-audit)
 ├── context.md                    glossário do domínio (pelizzai-domain-modeling); multi-contexto: context/<nome>.md + context-map.md
 ├── adr/                          decisões de arquitetura (ADRs numerados)
 ├── out-of-scope/                 rejeições duráveis, um arquivo por conceito (pelizzai-domain-modeling)
@@ -137,6 +143,7 @@ pelizzai/                         na raiz do repositório ou workspace
 └── data/                         estado e ledgers do harness
     ├── state.md                  cursor da tarefa ativa (pelizzai-execution-plans)
     ├── review-domain-skills.md   ledger de manutenção das skills de domínio
+    ├── handoffs/                 briefs, relatórios e pacotes de review efêmeros (vai para o .gitignore)
     └── .cadence-state.json        contador do hook de cadência (vai para o .gitignore)
 ```
 

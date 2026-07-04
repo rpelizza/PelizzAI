@@ -132,7 +132,7 @@ Mantém as skills de **domínio** vivas conforme o projeto evolui. Detalhe compl
 
 > **Escopo (inegociável):** a manutenção autônoma — os dois eixos e a cadência — atua **somente** sobre skills de domínio. As skills do harness (`pelizzai-*`) **nunca** são alteradas pelo sistema autônomo; só são criadas ou editadas a pedido explícito do usuário.
 
-- **Version-driven (refresh):** a stack mudou de versão maior ou ganhou dependência significativa → reler a doc da versão atual (context7) e **atualizar** a skill afetada.
+- **Version-driven (refresh):** a stack mudou de versão maior ou ganhou dependência significativa → reler a doc da versão atual (context7) e **atualizar** a skill afetada. O drift é detectado comparando os manifests atuais com o **Stack baseline** de `pelizzai/profile.md` (gravado pela `pelizzai-audit` no bootstrap).
 - **Rework-driven (histórico):** o mesmo ajuste foi feito à mão várias vezes no git → o padrão vira uma regra na skill.
 
 <HARD-GATE>

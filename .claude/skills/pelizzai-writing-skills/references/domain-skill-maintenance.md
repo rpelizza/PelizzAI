@@ -14,7 +14,7 @@ Os dois são **opt-in**: o harness detecta, **propõe**, o usuário decide. Nunc
 ### Version-driven (refresh)
 
 ```text
-1. Detecte o drift: compare as versões registradas no ledger/skill com as versões atuais (manifests, lockfiles).
+1. Detecte o drift: compare as versões atuais (manifests, lockfiles) com as registradas no ledger/skill e com o **Stack baseline** de `pelizzai/profile.md` (gravado no bootstrap pela `pelizzai-audit`).
 2. Releia a doc da versão atual via context7.
 3. Atualize a skill afetada em modo refresh (ver "Refresh nunca sobrescreve às cegas").
 4. Registre no ledger (eixo = version-driven, novo commit/ref, data).

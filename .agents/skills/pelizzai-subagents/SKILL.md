@@ -34,7 +34,7 @@ Se você é o subagente despachado, execute apenas a sua tarefa: acione `pelizza
 
 ## Briefing autossuficiente
 
-O subagente **não herda o seu contexto** — cole no prompt tudo o que ele precisa:
+O subagente **não herda o seu contexto** — cole no prompt tudo o que ele precisa (em execução de plano com `scripts/task-brief.*` no projeto, o briefing da tarefa viaja por **arquivo** em `pelizzai/data/handoffs/` — ver `pelizzai-execution-plans` → `references/task-cycle.md` §1):
 
 ```text
 - Objetivo: o resultado único e claro esperado.

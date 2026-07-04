@@ -2,14 +2,18 @@
 
 O protocolo que cada tarefa segue na execução de um plano, válido nos três modos (team, subagents, inline). Inspirado no subagent-driven-development (review em dois estágios) e validado em campo no harness anterior.
 
-## 1. Briefing por colagem (não por arquivo)
+## 1. Briefing autossuficiente (por arquivo quando os scripts existem; senão por colagem)
 
-O coordenador extrai o **texto completo** da tarefa do plano e o **cola** no prompt do membro. O membro (teammate/subagente) **nunca lê o arquivo do plano** — isso evita poluição de contexto e mantém o foco.
+O membro (teammate/subagente) **nunca lê o arquivo do plano** — isso evita poluição de contexto e mantém o foco. Quem entrega o contexto é o coordenador, por um destes dois canais:
+
+- **Por ARQUIVO (preferido, quando `scripts/task-brief.*` existe no projeto):** rode `task-brief <plano> <N>` — ele extrai a Tarefa N + o bloco Global Constraints do cabeçalho para `pelizzai/data/handoffs/task-<N>-brief.md`, e o briefing do membro aponta para ESSE arquivo (mais os itens do bloco abaixo). O relatório do membro é gravado em `pelizzai/data/handoffs/task-<N>-report.md`, espelhando o brief, e a resposta no chat fica em **≤15 linhas**. O review recebe o diff via `review-package <BASE> <HEAD>` — com o BASE capturado (`git rev-parse HEAD`) **antes** do despacho do implementador, nunca `HEAD~1`. Racional: tudo que entra por colagem fica residente no contexto do coordenador para sempre (ganho medido na fonte: ~2× mais rápido, ~50% menos tokens). O princípio "contexto construído, nunca herdado" se mantém — o arquivo É o contexto construído.
+- **Por colagem (fallback, sem os scripts):** o coordenador extrai o **texto completo** da tarefa do plano e o **cola** no prompt do membro.
 
 O briefing de cada tarefa inclui:
 
 ```text
-- Texto completo da tarefa (colado do plano, com valores exatos a usar verbatim).
+- Texto completo da tarefa (do brief em arquivo, ou colado do plano, com valores exatos a usar
+  verbatim) — incluindo as Global Constraints do cabeçalho do plano.
 - Skills de domínio relevantes (coladas, ou seus pontos-chave) — o membro não herda o seu contexto.
 - Convenções e contratos necessários (caminhos, interfaces, decisões já tomadas).
 - Camada global: aplique `pelizzai-preferences` (idioma, segredos, .env, qualidade de produção) e
