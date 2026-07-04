@@ -1,6 +1,6 @@
 ---
 name: pelizzai-router
-description: Invocada logo após entender o objetivo e o contexto da tarefa, antes de qualquer outra skill de processo. É o orquestrador do ciclo de vida: entende o projeto, lê/cria o estado em `pelizzai/data/state.md`, classifica a intenção (feature, bug, ajuste, refactor, infra, review, conflito de merge), prepara as decisões de execução (isolamento branch/worktree, modo team/subagents/inline e estratégia de commit — para tracks com plano, essas perguntas acontecem no GATE DE SETUP PÓS-PLANO da `pelizzai-execution-plans`) e roteia para a head skill certa, aplicando `pelizzai-preferences` como camada global. Na primeira interação ou se o harness não estiver inicializado (sem `pelizzai/domain-skills.md`), roteia para `pelizzai-audit` (bootstrap). Nunca pula direto para implementar.
+description: Invocada logo após entender o objetivo e o contexto da tarefa, antes de qualquer outra skill de processo. É o orquestrador do ciclo de vida: classifica a intenção (feature, bug, ajuste, refactor, infra, review, conflito de merge) e roteia para a head skill certa, aplicando `pelizzai-preferences` como camada global. Na primeira interação ou se o harness não estiver inicializado (sem `pelizzai/domain-skills.md`), roteia para `pelizzai-audit` (bootstrap). Nunca pula direto para implementar.
 ---
 
 <SUBAGENT-STOP>

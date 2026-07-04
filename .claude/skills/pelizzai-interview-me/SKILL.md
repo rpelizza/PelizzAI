@@ -1,6 +1,6 @@
 ---
 name: pelizzai-interview-me
-description: Use essa skill para entrevistar para entender o objetivo do usuário, estressar um plano ou estressar uma ideia (brainstorming). Ela deve ser invocada quando o usuário não tiver um objetivo claro ou quando precisar de ajuda para definir um objetivo ou plano. A skill deve fazer perguntas abertas e direcionadas para entender o objetivo do usuário, o contexto da tarefa e as skills disponíveis. Ela deve ser capaz de identificar lacunas no conhecimento do usuário e sugerir recursos ou estratégias para preencher essas lacunas.
+description: Use essa skill para entrevistar o usuário — entender o objetivo, estressar um plano ou estressar uma ideia (brainstorming). Invoque-a quando o usuário não tiver um objetivo claro, quando ele precisar de ajuda para definir um objetivo ou plano, quando um pedido for ambíguo ou comportar múltiplas interpretações, ou quando um design/plano precisar ser estressado antes de virar implementação.
 ---
 
 # PelizzAI Interview Me

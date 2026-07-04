@@ -1,6 +1,6 @@
 ---
 name: pelizzai-starting-branch
-description: Use ao iniciar qualquer tarefa que vá gerar commits, ANTES de qualquer mudança de código. Protege contra commits em branch protegida (main/master/develop/dev — fail-closed inclusive em HEAD destacado/rebase), pergunta o ISOLAMENTO quando ainda não decidido (branch normal ou git worktree), sugere e confirma o nome por conventional commit (feat/, fix/, refactor/, …) a partir da base certa, cria a branch OU o worktree, e trata workspaces multi-projeto. Registra o isolamento em `pelizzai/data/state.md`. Acione também quando o usuário disser "criar a branch", "criar o worktree", "começar a tarefa", ou dentro do gate de setup pós-plano da `pelizzai-execution-plans`.
+description: Use ao iniciar qualquer tarefa que vá gerar commits, ANTES de qualquer mudança de código. Cria o isolamento seguro da tarefa (branch normal ou git worktree) e protege contra commits em branch protegida (main/master/develop/dev — fail-closed inclusive em HEAD destacado/rebase), também em workspaces multi-projeto. Acione também quando o usuário disser "criar a branch", "criar o worktree", "começar a tarefa", ou dentro do gate de setup pós-plano da `pelizzai-execution-plans`.
 ---
 
 # PelizzAI Starting Branch

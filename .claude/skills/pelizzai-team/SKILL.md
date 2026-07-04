@@ -1,6 +1,6 @@
 ---
 name: pelizzai-team
-description: Use essa skill quando o usuário pedir para trabalhar com um "time" de agentes, ou quando a tarefa se beneficiar de paralelismo real — papéis independentes, hipóteses concorrentes, revisão multi-perspectiva, pesquisa ampla ou trabalho cross-layer. Detecta se o "Agent Teams" nativo do Claude Code está habilitado: se sim, coordena teammates reais que conversam entre si; se não, monta um time equivalente com subagents, sempre com um coordenador que decompõe, delega por papel com briefing explícito, verifica e sintetiza. NÃO use para tarefas sequenciais, triviais, com muitas dependências passo a passo ou que editem os mesmos arquivos — prefira sessão única ou um único subagente (`pelizzai-subagents`).
+description: Use essa skill quando o usuário pedir para trabalhar com um "time" de agentes, ou quando a tarefa se beneficiar de paralelismo real — papéis independentes, hipóteses concorrentes, revisão multi-perspectiva, pesquisa ampla ou trabalho cross-layer. Cobre os dois modos de time — o "Agent Teams" nativo do Claude Code (teammates que conversam entre si) e o equivalente com subagents quando o nativo não está habilitado. NÃO use para tarefas sequenciais, triviais, com muitas dependências passo a passo ou que editem os mesmos arquivos — prefira sessão única ou um único subagente (`pelizzai-subagents`).
 ---
 
 # PelizzAI Team

@@ -1,6 +1,6 @@
 ---
 name: pelizzai-quick-fix
-description: Use para ajustes pequenos e triviais (texto, label, cor, constante, correção óbvia) — no máximo ~1 arquivo, menos de ~50 linhas, sem nova superfície pública e sem nova regra de negócio. É o head skill do track de **ajuste** (roteado pela `pelizzai-router`): pula brainstorming e writing-plans, mas mantém branch isolada, teste mínimo e fechamento limpo. Acione quando o usuário pedir uma mudança pontual e óbvia. Se for algo QUEBRADO, use `pelizzai-debugging`; se crescer, escale para `pelizzai-brainstorming`.
+description: Use para ajustes pequenos e triviais (texto, label, cor, constante, correção óbvia) — no máximo ~1 arquivo, menos de ~50 linhas, sem nova superfície pública e sem nova regra de negócio. É o head skill do track de **ajuste** (roteado pela `pelizzai-router`): pula design e plano, sem perder a disciplina do harness. Acione quando o usuário pedir uma mudança pontual e óbvia. Se for algo QUEBRADO, use `pelizzai-debugging`; se crescer, escale para `pelizzai-brainstorming`.
 ---
 
 # PelizzAI Quick Fix

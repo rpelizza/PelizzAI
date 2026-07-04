@@ -1,6 +1,6 @@
 ---
 name: pelizzai-review
-description: Skill de code review do harness PelizzAI. Use após completar uma tarefa, ao implementar uma feature relevante, ou antes de mergear. Faz review em DOIS estágios — conformidade com a spec, depois qualidade do código com EVIDÊNCIA fresca de teste (rodada, não inferida) — por tarefa, e o review final da branch inteira. Despacha um reviewer (subagente) com contexto fabricado, NUNCA o histórico da sessão. Também orienta como RECEBER feedback de review com rigor técnico (sem concordância performática). Acione quando o usuário disser "revisar o código", "code review", "está pronto para mergear?". Para segurança/OWASP, use `pelizzai-oswap`.
+description: Skill de code review do harness PelizzAI. Use após completar uma tarefa de um plano, ao implementar uma feature relevante, antes de mergear, ou quando o usuário pedir um review avulso de código/branch/PR. Também orienta como RECEBER feedback de review com rigor técnico (sem concordância performática). Acione quando o usuário disser "revisar o código", "code review", "está pronto para mergear?". Para segurança/OWASP, use `pelizzai-oswap`.
 ---
 
 # PelizzAI Review

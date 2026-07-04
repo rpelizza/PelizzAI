@@ -1,6 +1,6 @@
 ---
 name: pelizzai-finish-task
-description: Use quando uma tarefa ou feature está implementada e os testes passam, ANTES de dar push ou abrir PR. Consolida os commits HONRANDO a commit-strategy escolhida no gate de setup (granular = histórico mantido, SEM re-perguntar squash; squash-final = consolida os wip num commit único já autorizado) e escolhe entre push, Pull Request, manter local ou descartar — sempre perguntando o destino, nunca automático. Fecha o cursor da tarefa em `pelizzai/data/state.md` (phase: done) e, se o isolamento foi worktree, oferece removê-lo. Acione ao final dos tracks de feature, bug e ajuste (chamada por `pelizzai-execution-plans`, `pelizzai-debugging` e `pelizzai-quick-fix`), ou quando o usuário disser "fechar a tarefa", "abrir PR", "fazer push".
+description: Use quando uma tarefa ou feature está implementada e os testes passam, ANTES de dar push ou abrir PR. É o fechamento deliberado de toda entrega — HONRA a commit-strategy escolhida no gate de setup, e nada de push, PR ou descarte acontece automático: o destino é sempre decisão explícita do usuário. Acione ao final dos tracks de feature, bug e ajuste (chamada por `pelizzai-execution-plans`, `pelizzai-debugging` e `pelizzai-quick-fix`), ou quando o usuário disser "fechar a tarefa", "abrir PR", "fazer push".
 ---
 
 # PelizzAI Finish Task

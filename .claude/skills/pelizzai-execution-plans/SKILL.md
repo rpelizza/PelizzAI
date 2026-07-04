@@ -1,6 +1,6 @@
 ---
 name: pelizzai-execution-plans
-description: Use para EXECUTAR um plano de implementação já aprovado (de `pelizzai-writing-plans`, um PRD ou issues). Conduz o GATE DE SETUP PÓS-PLANO (4 perguntas, em ordem: isolamento branch/worktree → nome via `pelizzai-starting-branch` → modo de execução team/subagents/inline → estratégia de commit) e então executa tarefa por tarefa, cada uma implementada via TDD (`pelizzai-tdd`) e validada por review em dois estágios, em loop OODA até a entrega, fechando com a VALIDAÇÃO FINAL DA ENTREGA pelo coordenador/líder. Lê e aplica as **skills de domínio** do projeto em cada tarefa. Mantém o estado em `pelizzai/data/state.md` (retomável após compaction). Acione quando houver um plano pronto e for hora de implementar, ou quando o usuário disser "executar o plano", "implementar as tarefas", "tocar o plano". NUNCA comece em main/master sem consentimento.
+description: Use para EXECUTAR um plano de implementação já aprovado (de `pelizzai-writing-plans`, um PRD ou issues). É a dona do GATE DE SETUP PÓS-PLANO e do loop de execução tarefa por tarefa até a validação final da entrega; mantém o estado em `pelizzai/data/state.md` (retomável após compaction). Acione quando houver um plano pronto e for hora de implementar, ou quando o usuário disser "executar o plano", "implementar as tarefas", "tocar o plano". NUNCA comece em main/master sem consentimento.
 ---
 
 # PelizzAI Execution Plans

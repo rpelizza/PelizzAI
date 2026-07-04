@@ -1,6 +1,6 @@
 ---
 name: pelizzai-reasoning
-description: Orquestra técnicas de raciocínio para tarefas que exigem planejamento, investigação, validação, decisão ou uso de ferramentas. Selecione apenas as técnicas necessárias, carregue-as progressivamente e execute com esforço proporcional ao risco, à incerteza e ao impacto.
+description: Orquestra técnicas de raciocínio para tarefas que exigem planejamento, investigação, validação, decisão ou uso de ferramentas. Use sempre que a tarefa pedir raciocínio estruturado — decompor um problema, sintetizar evidência, criticar uma solução, decidir sob incerteza — e sempre que o esforço precisar ser proporcional ao risco, à incerteza e ao impacto.
 ---
 
 # PelizzAI Reasoning

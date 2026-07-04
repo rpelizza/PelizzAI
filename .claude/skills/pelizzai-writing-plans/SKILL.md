@@ -1,6 +1,6 @@
 ---
 name: pelizzai-writing-plans
-description: Use quando houver uma spec, um design aprovado (`pelizzai-brainstorming`), um PRD ou requisitos para uma tarefa multi-etapa — ANTES de tocar no código. Cria um plano de implementação completo, decomposto em tarefas bite-sized com passos de TDD (`pelizzai-tdd`), em fatias verticais e SEM placeholders, salvo em `pelizzai/plans/`. Segue e nomeia as skills de domínio do projeto. Estressa o plano com `pelizzai-interview-me` (obrigatório) e entrega à `pelizzai-execution-plans`. Acione após o brainstorming, ou quando o usuário disser "criar o plano", "plano de implementação", "quebrar em tarefas".
+description: Use quando houver uma spec, um design aprovado (`pelizzai-brainstorming`), um PRD ou requisitos para uma tarefa multi-etapa — ANTES de tocar no código. É a skill que transforma o design aprovado num plano de implementação executável, salvo em `pelizzai/plans/`. Acione após o brainstorming, ou quando o usuário disser "criar o plano", "plano de implementação", "quebrar em tarefas".
 ---
 
 # PelizzAI Writing Plans

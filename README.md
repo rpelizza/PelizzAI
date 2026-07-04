@@ -566,6 +566,14 @@ Ao alterar uma skill:
 2. Mantenha `SKILL.md` enxuto; mova profundidade para `references/`, `templates/` ou `scripts/`.
 3. Atualize este README quando a alteração mudar fluxos, gates, diretórios ou expectativas.
 4. Se a skill tiver comportamento verificável, acrescente ou rode evals quando existirem.
+5. Mudança **comportamental** (qualquer edição que altere o que o agente faz) exige baseline
+   e pressure test antes/depois — cenários versionados como `test-pressure-<n>.md` no
+   diretório da skill. Ver a Lei de Ferro (TDD de skills) na `pelizzai-writing-skills`.
+
+**Teste de aceitação da integração (binário):** numa sessão LIMPA, o pedido
+"Vamos fazer um app de lista de tarefas" TEM que disparar `pelizzai-brainstorming` sozinho.
+Se não disparou, a integração não existe — conserte o acionamento (descriptions, entrada
+sempre-carregada) antes de qualquer outra mudança. Rode este teste a cada release do harness.
 
 O objetivo do PelizzAI é simples de dizer e difícil de executar: fazer agentes trabalharem
 como uma equipe técnica disciplinada, com memória de projeto, evidência real e bons pontos

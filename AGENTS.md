@@ -77,7 +77,16 @@ Critérios de sucesso fortes permitem que você itere de forma independente. Cri
 
 ---
 
-**Estas diretrizes estão funcionando se:** houver menos alterações desnecessárias nos diffs, menos reescritas por excesso de complexidade e perguntas de esclarecimento vierem antes da implementação, em vez de depois dos erros.
+## O harness está funcionando se…
+
+Sinais observáveis de que estas diretrizes e as skills estão cumprindo o papel:
+
+- os diffs estão menores e sem mudanças não relacionadas ao pedido;
+- há menos reescritas causadas por excesso de complexidade;
+- as perguntas de esclarecimento vêm ANTES da implementação, não depois do erro;
+- o histórico tem menos "fix do fix" (commits corrigindo o commit imediatamente anterior).
+
+Sinais na direção contrária são gatilho para revisar as skills — não para abandoná-las.
 
 ---
 

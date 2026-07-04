@@ -1,6 +1,6 @@
 ---
 name: pelizzai-debugging
-description: Use ao encontrar qualquer bug, falha de teste ou comportamento inesperado, ANTES de propor correções. Exige investigar a causa raiz antes de qualquer fix — correção de sintoma é falha. Conduz uma investigação disciplinada em quatro fases (causa raiz → padrão → hipótese → implementação), escreve um teste que falha reproduzindo o bug, corrige a raiz e fecha o ciclo com review e `pelizzai-finish-task`. É o head skill do track de **bug** (roteado pela `pelizzai-router`). Roda inline. Acione quando o usuário disser "não funciona", "tá com bug", "deu erro", "comportamento estranho".
+description: Use ao encontrar qualquer bug, falha de teste ou comportamento inesperado, ANTES de propor correções. Exige investigar a causa raiz antes de qualquer fix — correção de sintoma é falha. É o head skill do track de **bug** (roteado pela `pelizzai-router`). Roda inline. Acione quando o usuário disser "não funciona", "tá com bug", "deu erro", "comportamento estranho", ou quando um teste quebrar durante qualquer outra tarefa.
 ---
 
 # PelizzAI Debugging
