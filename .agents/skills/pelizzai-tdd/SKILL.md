@@ -52,13 +52,15 @@ Antes de escrever qualquer código:
 
 - [ ] Leia `pelizzai/domain-skills.md` e carregue as skills de domínio relevantes ao comportamento em teste — os padrões do projeto prevalecem sobre padrões genéricos (se você é um membro despachado, elas já vêm coladas no seu briefing)
 - [ ] Para comportamento de lib/framework externo, confirme a API real e atual via MCP `context7` (`resolve-library-id` → `query-docs`) antes de escrever o teste — não confie na memória
+- [ ] O comando de teste vem do perfil de execução `pelizzai/profile.md` — nunca chute (`npm test` num projeto pnpm é o anti-padrão); sem profile, leia o manifest real do projeto
 - [ ] Confirme com o usuário quais alterações de interface são necessárias (use `pelizzai-interview-me` quando houver dúvida material)
+- [ ] Acorde os **seams** antes dos testes: **nenhum teste é escrito num seam não confirmado**. Em fluxo de feature, os seams já vêm da spec (`pelizzai-brainstorming`, seção Testing Decisions) — confirme-os; fora dele, acorde-os aqui (vocabulário de seam: `pelizzai-codebase-design`)
 - [ ] Confirme com o usuário quais comportamentos devem ser testados (priorize-os)
 - [ ] Identifique oportunidades para criar módulos "profundos" (interface simples, implementação robusta) — use o vocabulário da `pelizzai-codebase-design` e a `pelizzai-reasoning` (Structured Decomposition) para mapear o vocabulário e a testabilidade; em design novo, isso vem da `pelizzai-brainstorming`
 - [ ] Liste os comportamentos a serem testados (não os passos de implementação)
 - [ ] Obtenha a aprovação do usuário para o plano
 
-Pergunte: "Como deve ser a interface pública? Quais comportamentos são mais importantes de testar?"
+Pergunte (a pergunta canônica do planejamento): "Qual é a interface pública, e em quais seams vamos testar? Quais comportamentos são mais importantes?"
 
 **Não é possível testar tudo.** Confirme com o usuário exatamente quais comportamentos são mais relevantes. Concentre os esforços de teste em caminhos críticos e lógicas complexas, e não em todos os casos de borda (_edge cases_) possíveis.
 

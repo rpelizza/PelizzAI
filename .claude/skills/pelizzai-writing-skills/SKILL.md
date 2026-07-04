@@ -1,6 +1,6 @@
 ---
 name: pelizzai-writing-skills
-description: Use essa skill para criar, editar ou otimizar uma skill **a pedido do usuário**, e como motor do **sistema autônomo de manutenção das skills de DOMÍNIO** de um projeto. Acione-a (a) no bootstrap, chamada pela `pelizzai-audit`, para gerar o máximo de skills de domínio a partir do repo-scan, fundamentadas no MCP `context7` e nas regras de skills da Anthropic; (b) na manutenção das skills de domínio — stack que muda de versão, padrões que se repetem no git, ou cadência vencida (≥30 commits, >14 dias, ou repo-scan a cada 21 dias); e (c) quando o usuário disser "criar skill", "transforme isso numa skill", "otimizar a descrição" ou "atualizar as skills de domínio". A manutenção autônoma atua SOMENTE sobre skills de domínio — as skills do harness (`pelizzai-*`) só são criadas ou editadas a pedido explícito do usuário, NUNCA pelo sistema autônomo. E NUNCA sobrescreve uma skill às cegas: mostra o diff, preserva customizações e pede confirmação por skill.
+description: Use essa skill para criar, editar ou otimizar uma skill **a pedido do usuário**, e como motor do **sistema autônomo de manutenção das skills de DOMÍNIO** de um projeto. Acione-a (a) no bootstrap, chamada pela `pelizzai-audit`, para gerar o máximo de skills de domínio a partir do repo-scan, fundamentadas no MCP `context7` e nas regras de skills da Anthropic; (b) na manutenção das skills de domínio — stack que muda de versão, padrões que se repetem no git, ou cadência vencida (≥30 commits, >14 dias, ou repo-scan a cada 21 dias); e (c) quando o usuário disser "criar skill", "transforme isso numa skill", "otimizar a descrição" ou "atualizar as skills de domínio". A manutenção autônoma atua SOMENTE sobre skills de domínio — as skills do harness (`pelizzai-*`) só são criadas ou editadas a pedido explícito do usuário, NUNCA pelo sistema autônomo. E NUNCA sobrescreve uma skill às cegas.
 ---
 
 # PelizzAI Writing Skills
@@ -42,10 +42,37 @@ Se você é um **membro** de um time (subagente/teammate) encarregado de redigir
 
 Detalhe completo em **[references/skill-authoring.md](references/skill-authoring.md)** — leia antes de redigir uma skill. Em resumo:
 
-- **Frontmatter:** só `name` e `description`. A `description` é o gatilho — inclua **o que a skill faz E quando usá-la**, e seja "incisivo" (o harness tende a acionar de menos). Toda a informação de "quando usar" vai na `description`, não no corpo.
+- **Frontmatter:** só `name` e `description`. A `description` é o gatilho — inclua **o que a skill faz E quando usá-la**, e seja "incisivo" (o harness tende a acionar de menos). Toda a informação de "quando usar" vai na `description`, não no corpo. A `description` **nunca resume o workflow** — só condições de disparo: um resumo do processo faz o agente seguir a description e PULAR o corpo.
 - **Divulgação progressiva (3 níveis):** metadados (sempre no contexto) → corpo do `SKILL.md` (ideal <500 linhas) → recursos agrupados sob demanda (`scripts/`, `references/`, `assets/`). Se o corpo passar de ~500 linhas, mova profundidade para `references/` com ponteiros claros.
 - **Estilo:** imperativo nas instruções; explique o porquê (teoria da mente); **generalize** — escreva para muitos contextos, não para os casos de teste; comece com rascunho e melhore com um olhar renovado.
 - **Evals:** skills com saída **verificável** (transformar arquivo, extrair dados, gerar código, fluxo fixo) se beneficiam de casos de teste em `evals/`; skills subjetivas (estilo, arte) geralmente não. Ver `references/skill-authoring.md`.
+
+---
+
+## Lei de Ferro: TDD de skills
+
+Escrever skills **é** TDD aplicado a documentação de processo. Detalhe, dados e técnicas em **[references/skill-authoring.md](references/skill-authoring.md)** (seções "TDD de skills" a "Micro-teste de wording").
+
+```text
+- NENHUMA skill nova — e NENHUMA edição COMPORTAMENTAL de skill existente — sem baseline
+  falho observado: rode o cenário SEM a skill e capture as racionalizações verbatim (RED);
+  escreva a skill MÍNIMA contra ESSAS falhas (GREEN); feche os loopholes sob pressão (REFACTOR).
+- Escopo total: vale para skills de domínio E para as do harness (`pelizzai-*`). Edição
+  puramente editorial (typo, formatação, link) não é comportamental e dispensa baseline.
+- Pressure tests versionados: os cenários viram `test-pressure-<n>.md` no diretório da skill
+  (docs de referência, SEM frontmatter) e são o critério de regressão — toda mudança
+  comportamental re-roda os cenários antes e depois.
+- Violação com a skill carregada → meta-testing: pergunte AO AGENTE como a skill deveria
+  ter sido escrita (3 diagnósticos no reference).
+- A forma da guidance casa com a falha: proibição + tabela de racionalizações para disciplina;
+  receita POSITIVA para forma de output; slot REQUIRED para omissão; condicional sobre
+  predicado observável. Sem nuance clauses; sem cláusulas de isenção.
+- Persuasão calibrada: Authority, Commitment, Scarcity e Social Proof são legítimos;
+  Liking e Reciprocity são PROIBIDOS (geram sycophancy).
+- Wording barato antes de eval caro: micro-teste com 5+ amostras fresh-context por variante
+  contra CONTROLE sem guidance; variância alta = wording não vinculante; sem batching
+  entre skills.
+```
 
 ---
 
@@ -105,7 +132,7 @@ Mantém as skills de **domínio** vivas conforme o projeto evolui. Detalhe compl
 
 > **Escopo (inegociável):** a manutenção autônoma — os dois eixos e a cadência — atua **somente** sobre skills de domínio. As skills do harness (`pelizzai-*`) **nunca** são alteradas pelo sistema autônomo; só são criadas ou editadas a pedido explícito do usuário.
 
-- **Version-driven (refresh):** a stack mudou de versão maior ou ganhou dependência significativa → reler a doc da versão atual (context7) e **atualizar** a skill afetada.
+- **Version-driven (refresh):** a stack mudou de versão maior ou ganhou dependência significativa → reler a doc da versão atual (context7) e **atualizar** a skill afetada. O drift é detectado comparando os manifests atuais com o **Stack baseline** de `pelizzai/profile.md` (gravado pela `pelizzai-audit` no bootstrap).
 - **Rework-driven (histórico):** o mesmo ajuste foi feito à mão várias vezes no git → o padrão vira uma regra na skill.
 
 <HARD-GATE>
@@ -149,7 +176,7 @@ Semeie o ledger com a **data do bootstrap (hoje)**, tanto em repo novo quanto ex
 
 ## Otimização da descrição
 
-Depois que uma skill está pronta, você pode **otimizar a `description`** para melhorar o acionamento (combater o sub-acionamento). Ver `references/skill-authoring.md` (seção "Descrição"). Regra de ouro: a `description` deve dizer o que a skill faz **e** listar os contextos/frases que devem acioná-la.
+Depois que uma skill está pronta, você pode **otimizar a `description`** para melhorar o acionamento (combater o sub-acionamento). Ver `references/skill-authoring.md` (seções "Frontmatter" e "Leading words"). Regra de ouro: a `description` diz o que a skill faz **e** lista os contextos/frases que devem acioná-la — e **nunca resume os passos do workflow** (o agente segue o resumo e pula o corpo). **Front-load a leading word** da skill — a palavra-âncora que já carrega o comportamento no pretraining (*seam*, *red*, *tracer bullet*).
 
 ---
 
@@ -164,6 +191,12 @@ Depois que uma skill está pronta, você pode **otimizar a `description`** para 
 - Inventar skills de domínio sem um padrão real do projeto por trás.
 - Deixar a cadência bloquear o trabalho, ou repetir o nudge mais de uma vez.
 - Esquecer de atualizar o catálogo e o ledger após criar/alterar uma skill.
+- Criar skill nova ou fazer edição comportamental sem baseline falho observado (RED antes de GREEN).
+- Resumir o workflow na description (o agente segue o resumo e pula o corpo).
+- Nuance clauses ("não faça X a menos que importe") e cláusulas de isenção que tentam "escopar" a regra.
+- Persuadir por Liking ou Reciprocity (geram sycophancy) — os princípios legítimos são
+  Authority, Commitment, Scarcity e Social Proof.
+- Testar wording de várias skills em lote em vez de fechar uma antes de passar à próxima.
 ```
 
 ---
@@ -172,12 +205,14 @@ Depois que uma skill está pronta, você pode **otimizar a `description`** para 
 
 ```text
 1. Identifique o modo: Autoria (nova skill) ou Manutenção (atualizar existentes).
-2. AUTORIA: capture a intenção → pesquise (context7) → escreva o SKILL.md (regras Anthropic)
-   → (opcional) evals → registre no catálogo e no ledger.
+2. AUTORIA: capture a intenção → pesquise (context7) → baseline SEM a skill (RED) → escreva o
+   SKILL.md mínimo contra as falhas observadas (GREEN, regras Anthropic) → feche loopholes e
+   versione os pressure tests (REFACTOR) → (opcional) evals → registre no catálogo e no ledger.
 3. BOOTSTRAP: liste candidatas → CONFIRME a lista com o usuário (gate 2.5) → redija em paralelo
    (time/subagentes) → catalogue → semeie o ledger → aceite final do usuário (passo 7).
 4. MANUTENÇÃO: detecte o eixo (versão/histórico) → leia a skill atual → mude só o necessário →
-   mostre o diff → confirme → aplique → registre no ledger.
+   mostre o diff → confirme → aplique (mudança comportamental re-roda os `test-pressure-*.md`
+   antes e depois) → registre no ledger.
 5. CADÊNCIA: ao fechar a tarefa, cheque o ledger e proponha revisão se o limiar foi cruzado.
 ```
 

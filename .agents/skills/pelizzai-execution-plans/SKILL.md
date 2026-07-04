@@ -1,6 +1,6 @@
 ---
 name: pelizzai-execution-plans
-description: Use para EXECUTAR um plano de implementação já aprovado (de `pelizzai-writing-plans`, um PRD ou issues). Conduz o GATE DE SETUP PÓS-PLANO (4 perguntas, em ordem: isolamento branch/worktree → nome via `pelizzai-starting-branch` → modo de execução team/subagents/inline → estratégia de commit) e então executa tarefa por tarefa, cada uma implementada via TDD (`pelizzai-tdd`) e validada por review em dois estágios, em loop OODA até a entrega, fechando com a VALIDAÇÃO FINAL DA ENTREGA pelo coordenador/líder. Lê e aplica as **skills de domínio** do projeto em cada tarefa. Mantém o estado em `pelizzai/data/state.md` (retomável após compaction). Acione quando houver um plano pronto e for hora de implementar, ou quando o usuário disser "executar o plano", "implementar as tarefas", "tocar o plano". NUNCA comece em main/master sem consentimento.
+description: Use para EXECUTAR um plano de implementação já aprovado (de `pelizzai-writing-plans`, um PRD ou issues). É a dona do GATE DE SETUP PÓS-PLANO e do loop de execução tarefa por tarefa até a validação final da entrega; mantém o estado em `pelizzai/data/state.md` (retomável após compaction). Acione quando houver um plano pronto e for hora de implementar, ou quando o usuário disser "executar o plano", "implementar as tarefas", "tocar o plano". NUNCA comece em main/master sem consentimento.
 ---
 
 # PelizzAI Execution Plans
@@ -25,7 +25,7 @@ Se você é um **membro** (teammate/subagente) encarregado de **uma tarefa**, im
 
 ## Gate de setup pós-plano (OBRIGATÓRIO antes da Tarefa 1)
 
-Com o plano salvo e estressado, conduza as **quatro perguntas, nesta ordem** (é aqui que elas acontecem — o router registrou `<pending>` nos tracks com plano). Cada resposta é registrada em `pelizzai/data/state.md`. Se algum campo já estiver decidido **para esta tarefa** (retomada real), honre — não re-pergunte.
+Com o plano salvo e estressado, conduza as **quatro perguntas, nesta ordem** (é aqui que elas acontecem — o router registrou `<pending>` nos tracks com plano). Cada resposta é registrada em `pelizzai/data/state.md`. Se algum campo já estiver decidido **para esta tarefa** (retomada real), honre — não re-pergunte. Os menus abaixo são os **canônicos** do harness: as demais skills (`pelizzai-router`, `pelizzai-starting-branch`, `pelizzai-writing-plans`) os referenciam em vez de duplicá-los.
 
 **1. Isolamento — pergunte e aguarde:**
 
@@ -179,11 +179,13 @@ Antes da Tarefa 1, leia o plano **uma vez** procurando contradições internas o
 
 ## Ciclo por tarefa
 
-O protocolo detalhado — briefing por colagem, TDD, review em dois estágios, status, circuit breaker e commit como gate — está em **[references/task-cycle.md](references/task-cycle.md)**. Resumo:
+O protocolo detalhado — briefing autossuficiente (por arquivo via `scripts/task-brief` quando disponível; senão por colagem), TDD, review em dois estágios, status, circuit breaker e commit como gate — está em **[references/task-cycle.md](references/task-cycle.md)**. Resumo:
 
 ```text
 1. Briefing: COLE o texto completo da tarefa + as skills de domínio relevantes no prompt
-   (o membro nunca lê o arquivo do plano). Instrua a camada global (pelizzai-preferences +
+   (o membro nunca lê o arquivo do plano; com scripts/task-brief.* no projeto, o brief e o
+   relatório viajam por ARQUIVO em pelizzai/data/handoffs/ — ver task-cycle.md §1, incluindo
+   o review-package com BASE capturado antes do despacho). Instrua a camada global (pelizzai-preferences +
    pelizzai-reasoning) com a prioridade certa: skills de DOMÍNIO > preferences/reasoning.
    Responda perguntas ANTES de o trabalho começar.
 2. Implementar via pelizzai-tdd (Iron Law: teste que falha primeiro). O membro NÃO commita.
@@ -216,6 +218,23 @@ Sem subagentes/time, ou plano pequeno e sequencial: o coordenador implementa tar
 
 ---
 
+## Higiene de contexto
+
+A regra geral (zona segura, fases, "handoff bifurca; compact continua") mora na `pelizzai-core`. Na execução de planos, aplique-a assim:
+
+```text
+- Zona segura: ~120k tokens. Acima disso a qualidade degrada — planeje as fronteiras de fase
+  ANTES de chegar lá, não quando a janela já está cheia.
+- Design → plano nascem numa janela ininterrupta; cada tarefa executa em contexto fresco
+  (briefing colado — é o que os modos team/subagents já garantem).
+- NUNCA compacte no meio de uma fase ou tarefa: feche a fase (review ✅ + cursor + commit)
+  e compacte na borda.
+- Handoff bifurca; compact continua: para mudar de rumo ou abrir outra frente, despache com
+  briefing novo; para continuar o MESMO trabalho com a janela cheia, compacte na borda de fase.
+```
+
+---
+
 ## Estado e retomada — `pelizzai/data/state.md`
 
 O cursor da tarefa ativa vive em `pelizzai/data/state.md` (template: [templates/state.md](templates/state.md)). Campos: identidade da tarefa (`slug`, `track`, `phase`), `branch`, `isolation`, `worktree-path`, `execution-mode`, `commit-strategy`, `audience`, `plan` (caminho do plano em execução), `project` (projeto-alvo, em workspace), progresso (`delivered`/`next`/`pending`) e o `## Histórico`. Se o arquivo não existir, instancie-o a partir do template antes da Tarefa 1.
@@ -228,14 +247,16 @@ O cursor da tarefa ativa vive em `pelizzai/data/state.md` (template: [templates/
   nunca um commit órfão só do cursor (exceções: o registro de phase: blocked do circuit
   breaker — ver references/task-cycle.md §5 — e o commit de fechamento do cursor da
   pelizzai-finish-task no modo granular).
-- Retomada após compaction: confie no ledger + git, mas VALIDE contra a realidade — com
+- Retomada após compaction: confie no state.md e no git log, NÃO na sua memória (a falha mais
+  cara desse cenário é re-despachar tarefas já concluídas) — e VALIDE contra a realidade: com
   isolation: branch, a branch registrada bate com `git branch --show-current`? Com
   isolation: worktree, valide pela saída de `git worktree list` (caminho + branch) ou rode
   o comando DENTRO do worktree-path (no working tree principal ele devolve outra branch —
   divergência falso-positiva)?
   Releia o arquivo apontado em `plan:` para reconstruir o texto das tarefas pendentes (o membro
   nunca lê o plano; quem cola é o coordenador). Em divergência que arrisque o trabalho, NÃO confie
-  cego: reporte e recupere o estado com o usuário antes de prosseguir.
+  cego: acione a `pelizzai-recovery` (ponto de retorno → menu → reconciliar e commitar o cursor)
+  antes de prosseguir.
 - Em workspace, a branch e os comandos de teste/lint/build são POR-PROJETO; use o campo `project:`.
 ```
 
@@ -276,7 +297,8 @@ Ao terminar todas as tarefas, o **coordenador/líder valida a entrega inteira** 
    re-despache o fix (a um implementador novo com briefing do achado; em inline, corrija) e
    RE-REVISE — com o MESMO circuit breaker do task-cycle §5 aplicado ao review final
    (3 ciclos → phase: blocked e escalar ao humano; nunca loop infinito de fix→re-review).
-2. SUÍTE COMPLETA rodada pelo próprio coordenador: testes + lint + build do projeto, do zero,
+2. SUÍTE COMPLETA rodada pelo próprio coordenador: testes + lint + build do projeto (os
+   comandos do perfil pelizzai/profile.md, quando existir — nunca chutados), do zero,
    com saída e exit code colados — não reaproveite runs por tarefa nem confie em relatório
    de membro ("subagente disse que passou" não é evidência; o diff do git e a suíte são).
 3. CHECKLIST DO PLANO, requisito a requisito: releia o plano/spec e aponte, para cada requisito,

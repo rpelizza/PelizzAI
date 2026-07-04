@@ -45,6 +45,29 @@ Qualidade do código:
 - Segue a estrutura de arquivos do plano? Esta mudança criou/inchou arquivos demais?
   (foque no que ESTA mudança contribuiu, não no tamanho pré-existente).
 
+Timing e proporcionalidade:
+- Código overengineered não é "obviamente errado" — segue best practices; o problema é o TIMING.
+  A pergunta não é "é um bom padrão?", é "é o momento deste padrão?".
+- Tratamento de erro para cenário impossível? Se ~200 linhas podiam ser ~50, aponte a reescrita.
+- Teste do sênior: "um engenheiro sênior diria que está complicado demais?" — se sim, é achado.
+
+Smells (baseline de Fowler — o que é → como corrigir):
+- Mysterious Name: nome que não revela o propósito → renomeie para expor a intenção.
+- Duplicated Code: a mesma lógica em 2+ lugares → extraia para um lugar só.
+- Long Function: função que faz coisas demais → extraia funções com nomes de intenção.
+- Long Parameter List: parâmetros demais → agrupe-os num objeto/estrutura coesa.
+- Global Data: estado global mutável acessível de qualquer lugar → encapsule atrás de acesso controlado.
+- Mutable Data: dado mutado de longe ou por muitos → restrinja o escopo da mutação ou torne imutável.
+- Divergent Change: um módulo que muda por motivos não relacionados → separe por responsabilidade.
+- Shotgun Surgery: uma mudança pequena que toca muitos módulos → mova o que muda junto para perto.
+- Feature Envy: função mais interessada nos dados de outro módulo → mova-a para perto dos dados.
+- Data Clumps: os mesmos campos viajando sempre juntos → agrupe-os num tipo próprio.
+- Primitive Obsession: primitivos onde caberia um tipo do domínio → introduza o tipo.
+- Speculative Generality: flexibilidade "para o futuro" sem uso real → remova até precisar.
+
+Válvulas dos smells: o REPO prevalece (padrão documentado do projeto suprime o smell); smell é
+judgement call, nunca violação dura; pule o que o tooling do projeto já enforça (lint/formatter).
+
 Arquitetura:
 - Decisões de projeto sólidas? Escalabilidade/performance razoáveis? Integra-se de forma limpa?
 - Preocupações de segurança? (para OWASP a fundo, ver pelizzai-oswap)

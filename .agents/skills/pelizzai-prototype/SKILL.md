@@ -36,7 +36,7 @@ Os dois ramos produzem artefatos bem diferentes — errar o ramo desperdiça o p
 
 ## Quando terminar
 
-A **resposta** é a única coisa que vale guardar de um protótipo. Capture-a em algo durável **dentro de `pelizzai/`** — um ADR em `pelizzai/adr/` (via `pelizzai-domain-modeling`) ou na mensagem de commit — junto com a pergunta que ela responde. Depois, apague ou absorva o protótipo (o código descartável em si pode ter um `NOTES.md` ao lado até ser deletado).
+A **resposta** é a única coisa que vale guardar de um protótipo. Se ela passa no critério triplo da `pelizzai-domain-modeling` (difícil de reverter + surpreendente + trade-off real), **registre-a automaticamente como ADR** em `pelizzai/adr/` (anúncio de 1 linha, sem esperar aprovação); senão, capture-a na mensagem de commit — sempre junto com a pergunta que ela responde. Depois, apague ou absorva o protótipo (o código descartável em si pode ter um `NOTES.md` ao lado até ser deletado).
 
 ## Integração
 

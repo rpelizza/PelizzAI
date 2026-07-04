@@ -48,7 +48,8 @@ $geminiMd     = Join-Path $root 'GEMINI.md'
 $coreManifest = Join-Path $root 'scripts\pelizzai-core-skills.txt'
 
 # Tokens `pelizzai-*` que NAO sao skills (nao devem contar como referencia quebrada).
-$refIgnore = @('pelizzai-cadence', 'pelizzai-core-skills')
+# pelizzai-cadence, pelizzai-guardrails e pelizzai-session-start sao HOOKS (.claude/hooks/).
+$refIgnore = @('pelizzai-cadence', 'pelizzai-core-skills', 'pelizzai-guardrails', 'pelizzai-session-start')
 
 function Build-AgentsMd {
     $skills = (Get-ChildItem $srcSkills -Directory | Sort-Object Name).Name

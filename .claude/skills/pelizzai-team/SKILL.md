@@ -1,6 +1,6 @@
 ---
 name: pelizzai-team
-description: Use essa skill quando o usuário pedir para trabalhar com um "time" de agentes, ou quando a tarefa se beneficiar de paralelismo real — papéis independentes, hipóteses concorrentes, revisão multi-perspectiva, pesquisa ampla ou trabalho cross-layer. Detecta se o "Agent Teams" nativo do Claude Code está habilitado: se sim, coordena teammates reais que conversam entre si; se não, monta um time equivalente com subagents, sempre com um coordenador que decompõe, delega por papel com briefing explícito, verifica e sintetiza. NÃO use para tarefas sequenciais, triviais, com muitas dependências passo a passo ou que editem os mesmos arquivos — prefira sessão única ou um único subagente (`pelizzai-subagents`).
+description: Use essa skill quando o usuário pedir para trabalhar com um "time" de agentes, ou quando a tarefa se beneficiar de paralelismo real — papéis independentes, hipóteses concorrentes, revisão multi-perspectiva, pesquisa ampla ou trabalho cross-layer. Cobre os dois modos de time — o "Agent Teams" nativo do Claude Code (teammates que conversam entre si) e o equivalente com subagents quando o nativo não está habilitado. NÃO use para tarefas sequenciais, triviais, com muitas dependências passo a passo ou que editem os mesmos arquivos — prefira sessão única ou um único subagente (`pelizzai-subagents`).
 ---
 
 # PelizzAI Team
@@ -56,6 +56,8 @@ Times multiplicam o custo de tokens e adicionam custo de coordenação. Use o **
 | Auditorias de cobertura ampla (varrer muitos arquivos por critérios distintos) | O ganho de paralelismo não cobre o custo de tokens e coordenação     |
 
 Na coluna da direita, prefira **sessão única** (tarefa sequencial/trivial) ou **um único subagente** via `pelizzai-subagents` (trabalho isolado que só precisa reportar de volta).
+
+**Ponte com o track de bug (`pelizzai-debugging`):** o fix de um bug roda sempre **inline** — nunca paralelize a correção. O que um time pode assumir é a **investigação** (Fases 1–3), com hipóteses concorrentes em papéis **read-only**, e apenas quando ≥3 fixes já falharam ou as hipóteses são independentes entre si; o time investiga e reporta, e a Fase 4 (teste que falha + fix) volta para a sessão principal.
 
 ---
 
@@ -224,7 +226,7 @@ Dê a cada lente/hipótese um membro distinto — um único agente tende a ancor
 
 ## Protocolo de delegação por membro
 
-Para cada membro, entregue um **briefing autossuficiente**. Os membros **não herdam o histórico da sua conversa** (nem teammates nem subagentes) — o briefing precisa conter tudo o que o membro precisa para agir sozinho.
+Para cada membro, entregue um **briefing autossuficiente**. Os membros **não herdam o histórico da sua conversa** (nem teammates nem subagentes) — o briefing precisa conter tudo o que o membro precisa para agir sozinho. Em execução de plano com `scripts/task-brief.*` no projeto, o briefing da tarefa viaja por **arquivo** (`pelizzai/data/handoffs/`) — ver `pelizzai-execution-plans` → `references/task-cycle.md` §1.
 
 ```text
 Briefing de [nome do membro] — papel: [papel]
@@ -250,6 +252,8 @@ Briefing de [nome do membro] — papel: [papel]
   outro membro; rodada de refutação; reprodução de teste pelo QA]      (HARD-GATE 5)
 - Commit (papéis de escrita): NÃO commite; deixe o trabalho na working tree —
   o coordenador consolida após os reviews
+- Salvo-conduto: é sempre OK parar e dizer "isso é difícil demais para mim" — trabalho ruim é
+  pior que trabalho nenhum; você não será penalizado por escalar (reporte BLOCKED)
 - Restrições/proibições: [não tocar em X; não rodar Y; não publicar; só leitura]
 ```
 

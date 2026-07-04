@@ -23,6 +23,9 @@ e arquivos novos via `git status`). Leia esse código e confira:
 
 - Faltando: implementou tudo o que foi pedido? Pulou/esqueceu algum requisito? Alegou algo que não fez?
 - Extra/desnecessário: construiu o que não foi pedido? Super-engenharia? "Nice to haves" fora da spec?
+- Scope creep (categoria de achado de primeira classe): há comportamento no diff que não foi pedido?
+- Traceabilidade por linha (critério mecânico): toda linha alterada rastreia diretamente a um
+  requisito do pedido? Linha sem rastro é um achado, não um detalhe.
 - Mal-entendidos: interpretou diferente do pretendido? Resolveu o problema errado? Certo, mas do jeito errado?
 
 Verifique LENDO O CÓDIGO, não confiando no relatório.

@@ -1,6 +1,6 @@
 ---
 name: pelizzai-interview-me
-description: Use essa skill para entrevistar para entender o objetivo do usuário, estressar um plano ou estressar uma ideia (brainstorming). Ela deve ser invocada quando o usuário não tiver um objetivo claro ou quando precisar de ajuda para definir um objetivo ou plano. A skill deve fazer perguntas abertas e direcionadas para entender o objetivo do usuário, o contexto da tarefa e as skills disponíveis. Ela deve ser capaz de identificar lacunas no conhecimento do usuário e sugerir recursos ou estratégias para preencher essas lacunas.
+description: Use essa skill para entrevistar o usuário — entender o objetivo, estressar um plano ou estressar uma ideia (brainstorming). Invoque-a quando o usuário não tiver um objetivo claro, quando ele precisar de ajuda para definir um objetivo ou plano, quando um pedido for ambíguo ou comportar múltiplas interpretações, ou quando um design/plano precisar ser estressado antes de virar implementação.
 ---
 
 # PelizzAI Interview Me
@@ -38,6 +38,7 @@ Se, durante a entrevista, ficar claro que não existe um plano real, redirecione
 6. **Registre as decisões** à medida que forem tomadas (faça um breve resumo ao concluir cada ramo).
 7. **Dê preferência a perguntas de múltipla escolha** sempre que possível — são mais fáceis de responder do que perguntas abertas.
 8. **Exponha as lacunas explicitamente** — investigue ativamente o que o projeto NÃO contempla: erros ou edge cases não tratados, validações ausentes, falhas de segurança ou autorização, estados indefinidos, premissas de escalabilidade/desempenho, caminhos não testados e contradições. Aponte essas questões claramente; não deixe uma lacuna passar despercebida apenas porque o usuário não a mencionou.
+9. **Interpretações múltiplas com preço**: quando um pedido ou decisão comportar 2-3 leituras materialmente diferentes, apresente cada uma com o esforço estimado e o dado medido do estado atual (arquivos afetados, cobertura, o que der para medir) — e deixe o usuário escolher. Nunca escolha uma leitura em silêncio.
 
 ## Critério de encerramento
 

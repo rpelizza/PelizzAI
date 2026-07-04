@@ -90,6 +90,7 @@ digraph brainstorming {
 
 **Explorando abordagens:**
 
+- Antes de propor, cheque `pelizzai/out-of-scope/` (rejeições registradas; match por conceito, não por keyword) — se o design contradisser uma rejeição registrada, traga isso à tona explicitamente em vez de re-litigar em silêncio.
 - Proponha de 2 a 3 abordagens diferentes, apresentando os prós e contras de cada uma
 - Apresente as opções de forma conversacional, incluindo sua recomendação e a justificativa
 - Comece pela opção recomendada e explique o motivo
@@ -99,7 +100,7 @@ digraph brainstorming {
 - Assim que você acreditar que entendeu o que está construindo, apresente o projeto.
 - Adeque cada seção à sua complexidade: algumas frases se for simples, até 200-300 palavras se for complexa.
 - Após cada seção, pergunte se tudo parece correto até o momento.
-- Aborde: arquitetura, componentes, fluxo de dados, tratamento de erros e testes.
+- Aborde: arquitetura, componentes, fluxo de dados, tratamento de erros e testes — incluindo os **seams de teste**: onde os testes vão se acoplar ao sistema (quanto menos seams, melhor; o ideal é um), confirmados com o usuário antes de fechar o design. Vocabulário de seams: `pelizzai-codebase-design`.
 - Esteja preparado para voltar atrás e esclarecer qualquer dúvida.
 - **Antes de finalizar, teste o projeto sob estresse com a habilidade `pelizzai-interview-me` (OBRIGATÓRIO — não é opcional).** Anuncie na linguagem do usuário: "Vou te entrevistar para estressar este design e expor os pontos fracos antes de seguir." Realize uma entrevista detalhada que exponha ativamente as lacunas (casos não tratados, validação ausente, falhas de segurança/autorização, estados indefinidos, contradições). Você só pode finalizar após as lacunas terem sido identificadas e cada uma delas for resolvida ou explicitamente aceita pelo usuário — nunca pule esta etapa. Isso é crítico para evitar desperdício de trabalho e garantir que o design seja robusto.
 
@@ -123,6 +124,8 @@ digraph brainstorming {
 
 - Salve o design validado (especificação) em `pelizzai/specs/AAAA-MM-DD-<topic>-design.md`
 - (Preferências do usuário quanto ao local da especificação prevalecem sobre esse padrão)
+- Inclua na spec uma seção **Testing Decisions**: os seams de teste escolhidos (e por quê) e o prior art de testes do codebase — como esta base já testa coisas parecidas. É desta seção que a `pelizzai-tdd` confirma os seams no planejamento.
+- Ao salvar a spec, **registre automaticamente como ADR** (via `pelizzai-domain-modeling`) cada decisão de design que passe no critério triplo (difícil de reverter + surpreendente sem contexto + trade-off real), anunciando em 1 linha — o registro não espera aprovação.
 - Use a skill `pelizzai-writing-clearly-and-concisely` para redigir a especificação de forma clara e concisa, evitando jargões e termos técnicos desnecessários.
 - **Não commite a spec neste momento** — o isolamento (branch/worktree) ainda não existe; ela é commitada na branch da tarefa, após o gate de setup pós-plano (junto do plano, no primeiro commit da tarefa)
 

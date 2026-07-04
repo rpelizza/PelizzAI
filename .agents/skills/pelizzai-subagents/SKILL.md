@@ -1,6 +1,6 @@
 ---
 name: pelizzai-subagents
-description: Use para delegar uma tarefa focada e independente a UM subagente isolado (ou alguns subagentes independentes que só reportam de volta) — pesquisa, varredura/mapeamento do código, análise, ou uma implementação contida. O subagente tem contexto próprio, recebe um briefing autossuficiente, aplica as skills de domínio e devolve o resultado ao coordenador; subagentes não conversam entre si. Para um TIME de papéis que precisam dialogar/coordenar, use `pelizzai-team`. Acione quando o usuário disser "delega isso", "manda um subagente", ou quando a execução for em modo subagents.
+description: Use para delegar uma tarefa focada e independente a UM subagente isolado (ou alguns subagentes independentes que só reportam de volta) — pesquisa, varredura/mapeamento do código, análise, ou uma implementação contida. Subagentes não conversam entre si; para um TIME de papéis que precisam dialogar/coordenar, use `pelizzai-team`. Acione quando o usuário disser "delega isso", "manda um subagente", ou quando a execução for em modo subagents.
 ---
 
 # PelizzAI Subagents
@@ -34,7 +34,7 @@ Se você é o subagente despachado, execute apenas a sua tarefa: acione `pelizza
 
 ## Briefing autossuficiente
 
-O subagente **não herda o seu contexto** — cole no prompt tudo o que ele precisa:
+O subagente **não herda o seu contexto** — cole no prompt tudo o que ele precisa (em execução de plano com `scripts/task-brief.*` no projeto, o briefing da tarefa viaja por **arquivo** em `pelizzai/data/handoffs/` — ver `pelizzai-execution-plans` → `references/task-cycle.md` §1):
 
 ```text
 - Objetivo: o resultado único e claro esperado.
@@ -46,6 +46,8 @@ O subagente **não herda o seu contexto** — cole no prompt tudo o que ele prec
 - Raciocínio: técnica principal sugerida de `pelizzai-reasoning` conforme a tarefa. Para APIs de
   libs externas, fundamente no MCP `context7` — não na memória.
 - Contrato de entrega: o formato EXATO do retorno (lista de achados arquivo:linha; diff; relatório X/Y/Z).
+- Salvo-conduto (no texto do briefing): é sempre OK parar e dizer "isso é difícil demais para mim" —
+  trabalho ruim é pior que trabalho nenhum; o subagente não será penalizado por escalar.
 - Restrições: o que não tocar; só leitura, quando aplicável.
 ```
 

@@ -40,17 +40,17 @@ scripts/start-server.sh --project-dir /path/to/project --open
 
 # Retorna: {"type":"server-started","port":52341,
 #           "url":"http://localhost:52341/?key=ab12…",
-#           "screen_dir":"/path/to/project/.pelizzai/brainstorm/12345-1706000000/content",
-#           "state_dir":"/path/to/project/.pelizzai/brainstorm/12345-1706000000/state"}
+#           "screen_dir":"/path/to/project/pelizzai/data/mockups/12345-1706000000/content",
+#           "state_dir":"/path/to/project/pelizzai/data/mockups/12345-1706000000/state"}
 ```
 
 Salve `screen_dir` e `state_dir` da resposta. Com `--open`, o navegador se abre sozinho quando você envia a primeira tela — você não precisa pedir ao usuário para abri-lo, mas ainda assim compartilhe a URL como fallback (ambientes headless/remotos podem não abrir automaticamente).
 
 **A URL contém uma chave de sessão (`?key=…`).** O servidor rejeita qualquer requisição sem ela, então sempre dê ao usuário a URL **completa** do campo `url` — nunca remova a query string e nunca entregue apenas `http://host:port`. A chave controla o acesso HTTP e WebSocket, de modo que uma aba perdida do navegador ou outra máquina na rede não consiga ler as telas nem injetar eventos. Depois do primeiro carregamento, o navegador lembra a chave por meio de um cookie, então recarregamentos e assets de `/files/*` funcionam sem repeti-la.
 
-**Encontrando informações de conexão:** O servidor grava seu JSON de inicialização em `$STATE_DIR/server-info`. Se você iniciou o servidor em segundo plano e não capturou stdout, leia esse arquivo para obter a URL e a porta. Ao usar `--project-dir`, verifique `<project>/.pelizzai/brainstorm/` para encontrar o diretório da sessão.
+**Encontrando informações de conexão:** O servidor grava seu JSON de inicialização em `$STATE_DIR/server-info`. Se você iniciou o servidor em segundo plano e não capturou stdout, leia esse arquivo para obter a URL e a porta. Ao usar `--project-dir`, verifique `<project>/pelizzai/data/mockups/` para encontrar o diretório da sessão.
 
-**Observação:** Passe a raiz do projeto como `--project-dir` para que os mockups persistam em `.pelizzai/brainstorm/` e sobrevivam a reinicializações do servidor. Sem isso, os arquivos vão para `/tmp` e são limpos. Lembre o usuário de adicionar `.pelizzai/` ao `.gitignore` se ainda não estiver lá.
+**Observação:** Passe a raiz do projeto como `--project-dir` para que os mockups persistam em `pelizzai/data/mockups/` e sobrevivam a reinicializações do servidor (o `.gitignore` do harness já cobre esse diretório). Sem isso, os arquivos vão para `/tmp` e são limpos. TUDO que o harness gera vive dentro de `pelizzai/` — prefira sempre `--project-dir`.
 
 **Iniciando o servidor por plataforma:**
 
@@ -300,7 +300,7 @@ Se `$STATE_DIR/events` não existir, o usuário não interagiu com o navegador �
 scripts/stop-server.sh $SESSION_DIR
 ```
 
-Se a sessão usou `--project-dir`, os arquivos de mockup persistem em `.pelizzai/brainstorm/` para referência posterior. Apenas sessões em `/tmp` são excluídas ao parar.
+Se a sessão usou `--project-dir`, os arquivos de mockup persistem em `pelizzai/data/mockups/` para referência posterior. Apenas sessões em `/tmp` são excluídas ao parar.
 
 ## Referência
 

@@ -8,6 +8,8 @@
 > `phase: blocked` = travada, aguardando decisão humana.
 > Tarefa NOVA nunca herda as decisões da anterior: ao abrir uma tarefa, sobrescreva
 > isolation/execution-mode/commit-strategy com os placeholders para os gates perguntarem de novo.
+> Após compaction, confie NESTE arquivo e no `git log` — não na sua memória (a memória
+> pós-compaction re-despacha tarefas já concluídas).
 
 ## Tarefa ativa
 

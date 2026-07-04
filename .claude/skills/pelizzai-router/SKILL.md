@@ -1,6 +1,6 @@
 ---
 name: pelizzai-router
-description: Invocada logo após entender o objetivo e o contexto da tarefa, antes de qualquer outra skill de processo. É o orquestrador do ciclo de vida: entende o projeto, lê/cria o estado em `pelizzai/data/state.md`, classifica a intenção (feature, bug, ajuste, refactor, infra, review, conflito de merge), prepara as decisões de execução (isolamento branch/worktree, modo team/subagents/inline e estratégia de commit — para tracks com plano, essas perguntas acontecem no GATE DE SETUP PÓS-PLANO da `pelizzai-execution-plans`) e roteia para a head skill certa, aplicando `pelizzai-preferences` como camada global. Na primeira interação ou se o harness não estiver inicializado (sem `pelizzai/domain-skills.md`), roteia para `pelizzai-audit` (bootstrap). Nunca pula direto para implementar.
+description: Invocada logo após entender o objetivo e o contexto da tarefa, antes de qualquer outra skill de processo. É o orquestrador do ciclo de vida: classifica a intenção (feature, bug, ajuste, refactor, infra, review, conflito de merge) e roteia para a head skill certa, aplicando `pelizzai-preferences` como camada global. Na primeira interação ou se o harness não estiver inicializado (sem `pelizzai/domain-skills.md`), roteia para `pelizzai-audit` (bootstrap). Nunca pula direto para implementar.
 ---
 
 <SUBAGENT-STOP>
@@ -42,7 +42,9 @@ Em paralelo ao track, aplique a `pelizzai-preferences` como **camada global** (i
 
 ```mermaid
 flowchart TD
-    A[Pedido do usuario] --> B[Passo 0: entender projeto + estado]
+    A[Pedido do usuario] --> CONC{Pergunta puramente\nconceitual?}
+    CONC -- Sim --> ANS[Responder direto\nsem bootstrap]
+    CONC -- Nao --> B[Passo 0: entender projeto + estado]
     B --> C{Harness inicializado?\npelizzai/domain-skills.md existe?}
     C -- Nao / 1a interacao / 'bootstrap' --> AUD[pelizzai-audit: bootstrap]
     AUD --> D
@@ -75,7 +77,9 @@ Leitura leve do projeto antes de decidir (ferramentas de arquivo e Git, não she
        `git worktree list` (caminho + branch numa chamada) ou rode `git branch --show-current`
        DENTRO do worktree-path registrado — no working tree principal ele devolve OUTRA branch
        e geraria divergência falso-positiva.
-       Em divergência que arrisque o trabalho, reporte e confirme antes de prosseguir.
+       Em divergência que arrisque o trabalho — ou após crash/worktree órfão — acione a
+       `pelizzai-recovery` (ponto de retorno → menu ao usuário → reconciliar e commitar o
+       cursor) antes de prosseguir.
    - slug: <none> ou phase: done → tarefa anterior FECHADA; classifique o pedido novo do zero e
      SOBRESCREVA o bloco da tarefa ativa com os placeholders <…> — uma tarefa nova NUNCA herda
      isolation/execution-mode/commit-strategy da anterior (essas decisões pertencem à tarefa
@@ -84,6 +88,10 @@ Leitura leve do projeto antes de decidir (ferramentas de arquivo e Git, não she
 3. Harness inicializado? Se NÃO existir pelizzai/domain-skills.md (ou for a 1a interação, ou o usuário
    digitou "bootstrap") → roteie para pelizzai-audit (mapeia o projeto, cria skills de domínio e docs)
    ANTES de seguir. A audit cuida do bootstrap; o router cuida do ciclo de cada tarefa.
+   Exceção: pergunta puramente conceitual NÃO dispara o bootstrap — responda direto; a audit só
+   entra quando a resposta exigir tocar ou entender ESTE projeto.
+4. Sugestão/pedido que soa recorrente → confira pelizzai/out-of-scope/ (match por conceito, não por
+   keyword) antes de re-litigar; havendo rejeição registrada, traga a razão à tona em vez de reabrir.
 ```
 
 ### Passo 0.1 — Classificar a intenção (um track)
@@ -100,7 +108,7 @@ Leitura leve do projeto antes de decidir (ferramentas de arquivo e Git, não she
 | Estressar um plano/design EXISTENTE; "me questiona"                   | —           | `pelizzai-interview-me`                                    |
 | Pergunta conceitual, sem mudar código                                 | —           | responda direto (não entre no fluxo pesado)               |
 
-Quando ambíguo, pergunte em linguagem simples (uma pergunta). Em `refactor`/`infra` pequeno que vai pelo caminho leve, **registre `track: ajuste`** para os gates do ajuste valerem.
+Quando ambíguo, pergunte em linguagem simples (uma pergunta). Se o pedido comportar **2-3 leituras materialmente diferentes**, apresente-as com o esforço estimado de cada uma (e o dado medido do estado atual, quando houver) e deixe o usuário escolher — não escolha em silêncio. Em `refactor`/`infra` pequeno que vai pelo caminho leve, **registre `track: ajuste`** para os gates do ajuste valerem.
 
 ### Passo 0.5 — Adaptar ao usuário (audience)
 
@@ -139,49 +147,13 @@ Releia só o que mudou e importa para esta tarefa. Para um `bug`, um commit rece
   execution-mode: inline (confirme brevemente) | commit-strategy: pergunte (menu do 0.8).
 ```
 
-Para referência, os menus canônicos (usados aqui para bug/ajuste e pelo gate pós-plano para os demais):
+Os **menus canônicos** das três decisões moram na `pelizzai-execution-plans` (Gate de setup pós-plano) — use-os de lá ao perguntar aqui (bug/ajuste). Em resumo:
 
-**0.6 — Isolamento.** Pergunte e aguarde:
+**0.6 — Isolamento:** `branch` (troca no lugar; recomendado para a maioria) ou `worktree` (cópia isolada em outra pasta; recomende quando há partes independentes que rodariam em paralelo). Registre `isolation`. Quem **cria** a branch/worktree é a `pelizzai-starting-branch` (que também sugere o nome `<tipo>/<slug>`).
 
-```text
-Como você prefere trabalhar nesta tarefa?
+**0.7 — Modo de execução:** `team` / `subagents` / `inline` — **sempre com as TRÊS opções visíveis**, preferência **team > subagents > inline**, proporcional ao trabalho. Nota: escrita paralela real requer `isolation: worktree` com caminhos disjuntos; em `branch`, o coordenador integra as escritas em série — diga isso ao recomendar. Registre `execution-mode`.
 
-1. Branch — troca no lugar, no working tree atual (recomendado para a maioria)
-2. Worktree — uma cópia isolada do projeto em outra pasta; vale a pena quando partes
-   independentes (ex.: backend e frontend) podem ser construídas em paralelo
-
-Qual opção?
-```
-
-Recomende `worktree` quando a tarefa tem partes independentes que rodariam em paralelo; caso contrário, `branch`. Registre `isolation`. Quem **cria** a branch/worktree é a `pelizzai-starting-branch` (que também sugere o nome `<tipo>/<slug>`).
-
-**0.7 — Modo de execução.** Pergunte e aguarde — **sempre com as TRÊS opções visíveis**:
-
-```text
-Como você quer que eu execute?
-
-1. team — um time de agentes coordenados, papéis em paralelo (pelizzai-team)
-   [recomendado quando há múltiplas frentes/perspectivas]
-2. subagents — um subagente isolado por tarefa, que reporta de volta (pelizzai-subagents)
-3. inline — eu mesmo, aqui no chat, tarefa a tarefa
-
-Qual opção?
-```
-
-Ordem de preferência **team > subagents > inline**, proporcional ao trabalho. Nota: escrita paralela real (frentes escrevendo ao mesmo tempo) requer `isolation: worktree` com caminhos disjuntos; em `branch`, o coordenador integra as escritas em série — diga isso ao recomendar. Registre `execution-mode`.
-
-**0.8 — Estratégia de commit.** **Pergunte** (apresente as 2 opções e **aguarde a resposta**) e registre `commit-strategy`:
-
-```text
-Como você quer os commits desta tarefa?
-
-1. granular — um commit definitivo por tarefa/passo concluído (histórico detalhado, mantido no fim)
-2. squash-final — commits de trabalho durante a execução e UM commit único consolidado no fechamento
-
-Qual opção?
-```
-
-A escolha é **honrada até o fim**: `granular` NÃO ganha squash no fechamento (a `pelizzai-finish-task` não re-pergunta); `squash-final` já autoriza a consolidação final em um commit único.
+**0.8 — Estratégia de commit:** `granular` (um commit definitivo por tarefa/passo, mantido no fim) ou `squash-final` (commits de trabalho e UM commit consolidado no fechamento) — **pergunte e aguarde a resposta**; registre `commit-strategy`. A escolha é **honrada até o fim**: `granular` NÃO ganha squash no fechamento (a `pelizzai-finish-task` não re-pergunta); `squash-final` já autoriza a consolidação final.
 
 ### Passo 1 — Rotear para a head skill (com os encadeamentos)
 
@@ -204,7 +176,8 @@ review  → pelizzai-review (2 estágios por tarefa de plano; pedido avulso = es
           com evidência fresca)
 conflito de merge/rebase → pelizzai-resolving-merge-conflicts
 plano/design existente p/ estressar → pelizzai-interview-me (depois writing-plans, ou volta ao brainstorming)
-pergunta conceitual → responda direto (na 1a interação, rode a pelizzai-audit antes do briefing)
+pergunta conceitual → responda direto (não dispara bootstrap; a pelizzai-audit só entra quando
+          a resposta exigir tocar ou entender o projeto)
 ```
 
 ---
@@ -252,7 +225,8 @@ Nunca: pular o Passo 0 e implementar sem entender o projeto; criar a branch/work
        oferecer worktree/paralelismo num ajuste pontual; reaproveitar em silêncio as decisões da
        tarefa anterior (tarefa nova = perguntas de novo); registrar commit-strategy sem perguntar;
        forçar o fluxo pesado de feature num ajuste trivial; despejar jargão num usuário não-técnico.
-Sempre: na 1a interação, rotear para pelizzai-audit (bootstrap); para tracks que mudam código, fazer o
+Sempre: na 1a interação, rotear para pelizzai-audit (bootstrap — exceto pergunta puramente
+        conceitual, que se responde direto); para tracks que mudam código, fazer o
         Passo 0.55; nos tracks com plano, deixar isolamento/modo/commit para o gate pós-plano
         (registrando <pending>); apresentar o menu do modo de execução SEMPRE com as três opções
         (team, subagents, inline); passar o contexto entendido à head skill; aplicar
@@ -265,6 +239,6 @@ Sempre: na 1a interação, rotear para pelizzai-audit (bootstrap); para tracks q
 
 **Chamada por:** `pelizzai-core` (raiz), no início de toda tarefa que toca código/projeto.
 
-**Decide/roteia para:** `pelizzai-audit` (bootstrap), `pelizzai-starting-branch` (executa o isolamento decidido), `pelizzai-brainstorming` / `pelizzai-debugging` / `pelizzai-quick-fix` / `pelizzai-review` / `pelizzai-resolving-merge-conflicts` (head skills), `pelizzai-execution-plans` (conduz o gate de setup pós-plano e honra as decisões registradas).
+**Decide/roteia para:** `pelizzai-audit` (bootstrap), `pelizzai-starting-branch` (executa o isolamento decidido), `pelizzai-brainstorming` / `pelizzai-debugging` / `pelizzai-quick-fix` / `pelizzai-review` / `pelizzai-resolving-merge-conflicts` (head skills), `pelizzai-recovery` (divergência state.md×git na retomada), `pelizzai-execution-plans` (conduz o gate de setup pós-plano e honra as decisões registradas).
 
 **Camada global:** `pelizzai-preferences`. **Combina com:** `pelizzai-loop` (lente OODA do ciclo), `pelizzai-finish-task` (fecha o ciclo e atualiza o state.md que o router criou).

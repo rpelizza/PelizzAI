@@ -1,6 +1,6 @@
 ---
 name: pelizzai-resolving-merge-conflicts
-description: Use quando houver um conflito de merge/rebase do git em andamento para resolver. Entende a intenção de cada lado, resolve cada hunk preservando os dois intuitos quando possível, roda os checks do projeto (typecheck → testes → format) e conclui o merge/rebase. Nunca usa `--abort` por conta própria para fugir do conflito — resolve; se a intenção original não puder ser preservada com segurança, PARA e escala ao usuário (que pode decidir abortar e recomeçar com mais contexto). Acione quando o usuário disser "resolver conflito", "deu merge conflict", "conflito de rebase".
+description: Use quando houver um conflito de merge/rebase do git em andamento para resolver — o objetivo é preservar a intenção dos DOIS lados. Nunca usa `--abort` por conta própria para fugir do conflito; se a intenção original não puder ser preservada com segurança, PARA e escala ao usuário. Acione quando o usuário disser "resolver conflito", "deu merge conflict", "conflito de rebase".
 ---
 
 # PelizzAI Resolving Merge Conflicts

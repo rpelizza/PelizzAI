@@ -2,6 +2,13 @@
 # projeto consumidor). No repo-fonte do PelizzAI ele nao deve existir.
 pelizzai/data/.cadence-state.json
 
+# Artefatos efemeros gerados pelo harness no projeto ALVO (tudo vive DENTRO de pelizzai/):
+# despacho (task-brief / review-package / pelizzai-handoff), mockups do visual companion
+# e relatorios HTML da pelizzai-improving-architecture.
+pelizzai/data/handoffs/
+pelizzai/data/mockups/
+pelizzai/data/reports/
+
 # Logs de debug de editores/agentes
 .cursor/debug-*.log
 

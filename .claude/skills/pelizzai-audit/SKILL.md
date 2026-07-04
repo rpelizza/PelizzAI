@@ -1,6 +1,6 @@
 ---
 name: pelizzai-audit
-description: Use essa skill no PRIMEIRO contato do usuário com o harness PelizzAI ou quando ele digitar "bootstrap". Ela faz o mapeamento completo do contexto — projeto único ou workspace, novo ou existente, stacks/frameworks/linguagens, MCPs instalados, skills de domínio, git/GitHub/GitLab — e orquestra a criação das skills de domínio (via `pelizzai-writing-skills`) e da documentação do harness (catálogo e ledger). Acione-a também sempre que o harness ainda não tiver sido inicializado neste projeto (sem `pelizzai/domain-skills.md`), ou quando o usuário pedir para "remapear", "reescanear" ou "reinicializar" o PelizzAI.
+description: Bootstrap do harness. Use essa skill no PRIMEIRO contato do usuário com o harness PelizzAI ou quando ele digitar "bootstrap" — é ela que inicializa o PelizzAI num projeto ou workspace, novo ou existente. Acione-a também sempre que o harness ainda não tiver sido inicializado neste projeto (sem `pelizzai/domain-skills.md`), ou quando o usuário pedir para "remapear", "reescanear" ou "reinicializar" o PelizzAI. Pergunta puramente conceitual não a dispara.
 ---
 
 # PelizzAI Audit
@@ -99,12 +99,17 @@ Levante, em frentes simultâneas:
 
 ## Fase 4 — Documentação do harness
 
-Garanta que o bootstrap deixe dois artefatos (criados/atualizados via `pelizzai-writing-skills`):
+Garanta que o bootstrap deixe três artefatos (os dois primeiros criados/atualizados via `pelizzai-writing-skills`; o perfil, por esta skill):
 
 - **`pelizzai/domain-skills.md`** — catálogo das skills de domínio: o que cada uma faz e quando usá-la.
 - **`pelizzai/data/review-domain-skills.md`** — ledger de manutenção: quando cada skill de domínio foi criada/atualizada e a referência de git correspondente.
+- **`pelizzai/profile.md`** — perfil de execução (template: [templates/profile.md](templates/profile.md)): comandos de test/build/lint/format/dev, package manager e stack baseline. Detecte lendo os scripts **REAIS** do projeto (`package.json` → `scripts`, Makefile/Justfile, pyproject, etc. — nunca chute `npm test`); honre o package manager do **LOCKFILE** (instalar com npm num projeto pnpm corrompe o lock); quando a detecção for inconclusiva, **confirme com o usuário** antes de gravar. O stack baseline (stack + versões-chave dos manifests, com data) ancora o eixo version-driven da `pelizzai-writing-skills`.
 
-Ofereça também (opt-in) instalar o **hook de cadência** que lembra de revisar as skills de domínio (ver `pelizzai-writing-skills` → `references/domain-skill-maintenance.md`).
+Ofereça também instalar os **hooks opt-in do Claude Code** (um a um, com confirmação — nunca imponha):
+
+- **Hook de cadência** (`pelizzai-cadence.mjs`/`.ps1`, UserPromptSubmit): lembra de revisar as skills de domínio (ver `pelizzai-writing-skills` → `references/domain-skill-maintenance.md`).
+- **Hook de guarda git** (`pelizzai-guardrails.mjs`/`.ps1`, PreToolUse com matcher `Bash`): bloqueia, antes de rodarem, `push --force` (exceto `--force-with-lease`), `reset --hard`, `clean -f`, `branch -D`, `checkout .` e `restore .` — enforcement executável dos gates fail-closed que, sem ele, dependem só da obediência do modelo. Instruções de instalação e teste no cabeçalho do próprio hook.
+- **Hook de SessionStart** (`pelizzai-session-start.mjs`/`.ps1`, matcher `startup|clear|compact`): re-injeta o lembrete da `pelizzai-core` (regra do 1%) e o aviso de tarefa ativa no `state.md` — valor maior no `clear` e em plataformas que não re-injetam a entrada sempre-carregada.
 
 A existência de `pelizzai/domain-skills.md` é o sinal de que o harness já foi inicializado neste projeto.
 
@@ -126,20 +131,28 @@ Recomende (sem impor; aguarde confirmação para qualquer ação que altere o am
 
 Toda a documentação e o estado do harness vivem em `pelizzai/`, na **raiz do repositório ou do workspace**. Este é o padrão único que todas as skills consomem — nunca espalhe artefatos do harness por outras pastas.
 
+Regra única de leitura: a **raiz** de `pelizzai/` guarda conhecimento versionado; `data/` guarda o estado e os efêmeros. **Tudo que o harness gera fica dentro de `pelizzai/`** — nunca em `.pelizzai/`, no temp do SO nem espalhado por outras pastas.
+
 ```text
 pelizzai/                         na raiz do repositório ou workspace
+│  ── CONHECIMENTO (versionado) ──
 ├── domain-skills.md              catálogo das skills de domínio (marca o bootstrap concluído)
+├── profile.md                    perfil de execução: comandos test/build/lint, package manager, stack baseline (pelizzai-audit)
 ├── context.md                    glossário do domínio (pelizzai-domain-modeling); multi-contexto: context/<nome>.md + context-map.md
-├── adr/                          decisões de arquitetura (ADRs numerados)
+├── adr/                          decisões de arquitetura (ADRs numerados, registrados automaticamente)
+├── out-of-scope/                 rejeições duráveis, um arquivo por conceito (pelizzai-domain-modeling)
 ├── specs/                        designs aprovados (pelizzai-brainstorming): AAAA-MM-DD-<topico>-design.md
 ├── plans/                        planos de implementação (pelizzai-writing-plans)
-└── data/                         estado e ledgers do harness
-    ├── state.md                  cursor da tarefa ativa (pelizzai-execution-plans)
-    ├── review-domain-skills.md   ledger de manutenção das skills de domínio
-    └── .cadence-state.json        contador do hook de cadência (vai para o .gitignore)
+└── data/                         ── ESTADO E EFÊMEROS ──
+    ├── state.md                  cursor da tarefa ativa (pelizzai-execution-plans) — versionado
+    ├── review-domain-skills.md   ledger de manutenção das skills de domínio — versionado
+    ├── .cadence-state.json       contador do hook de cadência                 — gitignored
+    ├── handoffs/                 briefs, relatórios, pacotes de review e handoffs (task-brief / review-package / pelizzai-handoff) — gitignored
+    ├── mockups/                  telas do visual companion (pelizzai-brainstorming)                                                — gitignored
+    └── reports/                  relatórios HTML de arquitetura (pelizzai-improving-architecture)                                   — gitignored
 ```
 
-> `context.md` e `adr/` são criados **sob demanda** por `pelizzai-domain-modeling` / `pelizzai-prototype`, não no bootstrap — sua ausência logo após o bootstrap é esperada.
+> `context.md`, `adr/`, `out-of-scope/` e os subdiretórios de `data/` são criados **sob demanda** pelas skills que os usam, não no bootstrap — sua ausência logo após o bootstrap é esperada.
 
 Em **workspace** (vários projetos na mesma pasta), o `pelizzai/` fica na raiz do workspace e cobre todos; cada skill registra a qual projeto um artefato pertence quando isso importar.
 

@@ -1,6 +1,6 @@
 ---
 name: pelizzai-loop
-description: Use essa skill para trabalhar em LOOP até que o objetivo ou a tarefa seja concluída com sucesso — ela define a lente OODA (Observar → Orientar → Decidir → Agir) do laço de execução do harness, a Definition of Done (DoD) que encerra o loop e a regra de parada em dúvida material (parar → `pelizzai-interview-me`). Acione quando a execução for iterativa (plano tarefa a tarefa, fix→re-review, investigação em rodadas) ou quando o usuário disser "continua até terminar", "repete até passar", "trabalha em loop".
+description: Use essa skill para trabalhar em LOOP até que o objetivo ou a tarefa seja concluída com sucesso — ela define a lente OODA (Observar → Orientar → Decidir → Agir) do laço de execução do harness, a Definition of Done (DoD) que encerra o loop e a regra de parada em dúvida material. Acione quando a execução for iterativa (plano tarefa a tarefa, fix→re-review, investigação em rodadas) ou quando o usuário disser "continua até terminar", "repete até passar", "trabalha em loop".
 ---
 
 # PelizzAI Loop

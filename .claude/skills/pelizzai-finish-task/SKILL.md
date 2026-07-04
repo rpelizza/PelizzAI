@@ -1,6 +1,6 @@
 ---
 name: pelizzai-finish-task
-description: Use quando uma tarefa ou feature está implementada e os testes passam, ANTES de dar push ou abrir PR. Consolida os commits HONRANDO a commit-strategy escolhida no gate de setup (granular = histórico mantido, SEM re-perguntar squash; squash-final = consolida os wip num commit único já autorizado) e escolhe entre push, Pull Request, manter local ou descartar — sempre perguntando o destino, nunca automático. Fecha o cursor da tarefa em `pelizzai/data/state.md` (phase: done) e, se o isolamento foi worktree, oferece removê-lo. Acione ao final dos tracks de feature, bug e ajuste (chamada por `pelizzai-execution-plans`, `pelizzai-debugging` e `pelizzai-quick-fix`), ou quando o usuário disser "fechar a tarefa", "abrir PR", "fazer push".
+description: Use quando uma tarefa ou feature está implementada e os testes passam, ANTES de dar push ou abrir PR. É o fechamento deliberado de toda entrega — HONRA a commit-strategy escolhida no gate de setup, e nada de push, PR ou descarte acontece automático: o destino é sempre decisão explícita do usuário. Acione ao final dos tracks de feature, bug e ajuste (chamada por `pelizzai-execution-plans`, `pelizzai-debugging` e `pelizzai-quick-fix`), ou quando o usuário disser "fechar a tarefa", "abrir PR", "fazer push".
 ---
 
 # PelizzAI Finish Task
@@ -23,7 +23,7 @@ Antes de qualquer `git add`/commit, rode `git branch --show-current`. Se for `ma
 
 ### 1. Verificar os testes
 
-Rode os comandos de teste do projeto (use `pelizzai-verification-before-completion` — evidência fresca). Se algum falhar, **pare e reporte** — não apresente opções. Não feche o cursor; registre o teste que falha em `pending`.
+Rode os comandos de teste do projeto — os do perfil de execução `pelizzai/profile.md`, quando existir; nunca chute (use `pelizzai-verification-before-completion` — evidência fresca). Se algum falhar, **pare e reporte** — não apresente opções. Não feche o cursor; registre o teste que falha em `pending`.
 
 ### 1.5. Fechar a tarefa no cursor (OBRIGATÓRIO)
 
@@ -97,6 +97,14 @@ Se o diff toca **frontend** (componentes, páginas, rotas, estilos), ofereça um
 
 Se a validação **reprovar** (layout quebrado, estado faltando), corrija e commite como `fix(ui): …` separado, antes do push (o gate da working tree do Passo 4 impede push sujo).
 
+### 3e. Documentação da feature (oferta — não bloqueia)
+
+Se a entrega foi uma **FEATURE** (nova superfície estável: rota, comando, API, tela), ofereça uma vez:
+
+> Esta entrega criou <feature>. Quer que eu escreva a doc humana de uso (`pelizzai-documenting-features`) antes de integrar?
+
+Se aceito, invoque `pelizzai-documenting-features`; a doc entra em **commit próprio** `docs(<feature>): …` antes do push — nada fica dangling (o gate da working tree do Passo 4 confere).
+
 ### 4. Perguntar: destino
 
 Apresente exatamente:
@@ -156,4 +164,4 @@ Sempre: fechar o cursor (Passo 1.5: phase: done, slug: <none>, arquivar no Hist�
 
 **Chamada por:** `pelizzai-execution-plans` (após todas as tarefas), `pelizzai-debugging` (fecha o track de bug após o fix verificado), `pelizzai-quick-fix` (fecha o track de ajuste).
 
-**Combina com:** `pelizzai-starting-branch` (abre a branch que esta skill fecha), `pelizzai-verification-before-completion` (verifica os testes), `pelizzai-oswap` (segurança), `pelizzai-frontend` (UI), `pelizzai-resolving-merge-conflicts` (se o push/integração gerar conflito), `pelizzai-writing-skills` (cadência de revisão de skills).
+**Combina com:** `pelizzai-starting-branch` (abre a branch que esta skill fecha), `pelizzai-verification-before-completion` (verifica os testes), `pelizzai-oswap` (segurança), `pelizzai-frontend` (UI), `pelizzai-documenting-features` (doc humana quando a entrega é feature), `pelizzai-resolving-merge-conflicts` (se o push/integração gerar conflito), `pelizzai-writing-skills` (cadência de revisão de skills).

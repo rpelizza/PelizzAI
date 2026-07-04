@@ -68,6 +68,8 @@ PelizzAI/
 ├── GEMINI.md                         GERADO: cópia de AGENTS.md (Gemini CLI)
 ├── scripts/
 │   ├── sync-harness.ps1              gera os alvos; -Check (anti-drift); -UpdateManifest
+│   ├── task-brief.ps1|.sh            handoff por arquivo: extrai o brief da Tarefa N do plano
+│   ├── review-package.ps1|.sh        handoff por arquivo: empacota commits + diff para o review
 │   └── pelizzai-core-skills.txt      GERADO: manifesto das skills de core
 ├── .github/workflows/
 │   └── check-harness.yml             CI: roda sync-harness.ps1 -Check
@@ -77,8 +79,9 @@ PelizzAI/
 │   └── skills/                       GERADO: espelho 1:1 de .claude/skills (padrão interoperável)
 └── .claude/                          FONTE
     ├── hooks/
-    │   ├── pelizzai-cadence.mjs       hook opt-in de cadencia para Claude Code
-    │   └── pelizzai-cadence.ps1       variante PowerShell do hook
+    │   ├── pelizzai-cadence.mjs|.ps1        hook opt-in de cadencia (UserPromptSubmit)
+    │   ├── pelizzai-guardrails.mjs|.ps1     hook opt-in de guarda git (PreToolUse: bloqueia git destrutivo)
+    │   └── pelizzai-session-start.mjs|.ps1  hook opt-in de SessionStart (regra do 1% + tarefa ativa)
     └── skills/
         ├── pelizzai-core/             skill raiz (entrada obrigatória)
         ├── pelizzai-router/           roteador do ciclo de vida
@@ -117,6 +120,10 @@ que devem sobreviver às versões futuras para outras IDEs.
 - **Domínio explícito:** cada projeto alvo ganha skills de domínio próprias, catalogadas e
   mantidas com base no código real e em documentação atual (MCP `context7` como fonte
   primária de docs de libs/frameworks; a web como fallback).
+- **Memória de decisões automática:** decisões que são difíceis de reverter, surpreendentes sem
+  contexto e resultado de um trade-off real viram **ADR** (`pelizzai/adr/`) sem pedir aprovação —
+  registradas na hora, com anúncio de uma linha. O que foi deliberadamente rejeitado vira uma
+  entrada durável em `pelizzai/out-of-scope/`, para não ser re-litigado depois.
 
 ## Fluxo global
 
@@ -143,7 +150,7 @@ flowchart TD
     CLS --> CONFLICT["conflito de merge/rebase"]
     CLS --> QUESTION["pergunta conceitual"]
 
-    FEATURE --> LIFE["brainstorming -> plano -> gate de setup pos-plano -> execucao<br/>-> validacao final -> verificacao -> fechamento"]
+    FEATURE --> LIFE["brainstorming (+ ADR automatico) -> plano -> gate de setup pos-plano<br/>-> execucao -> validacao final -> verificacao -> fechamento"]
     BUG --> DEBUG["debugging -> teste que falha -> fix -> review -> fechamento"]
     QUICK --> QF["branch -> mudanca minima -> verificacao -> fechamento"]
     REVIEW --> RV["2 estagios por tarefa de plano;<br/>avulso = estagio de qualidade c/ evidencia<br/>+ OWASP quando fizer sentido"]
@@ -202,27 +209,33 @@ flowchart TD
 
 ### Bug
 
-Debugging é inline por padrão. O harness proíbe correção por palpite: primeiro reproduz,
-investiga causa raiz, compara padrões, testa hipótese e só então implementa. As quatro
-fases são um ciclo OODA (observar → orientar → decidir → agir).
+Debugging é inline por padrão. O harness proíbe correção por palpite. A Fase 1 é a skill:
+**construir o loop de feedback primeiro** — um comando nomeado, já executado, que reproduz o
+sintoma exato (red-capable), determinístico, rápido e executável pelo agente. Sem esse comando,
+não há Fase 2. Depois vêm comparação de padrões, 3–5 hipóteses ranqueadas e falsificáveis, e só
+então o fix. As quatro fases são um ciclo OODA (observar → orientar → decidir → agir).
 
 ```mermaid
 flowchart TD
-    BUG["Erro, falha de teste<br/>ou comportamento inesperado"] --> RCA["Fase 1 (Observar)<br/>investigar causa raiz"]
+    BUG["Erro, falha de teste<br/>ou comportamento inesperado"] --> RCA["Fase 1 (Observar)<br/>construir o loop de feedback (red-capable)"]
     RCA --> PAT["Fase 2 (Orientar)<br/>comparar com padroes que funcionam"]
-    PAT --> HYP["Fase 3 (Decidir)<br/>formular e testar uma hipotese"]
-    HYP --> OK{"Hipotese explica a causa?"}
+    PAT --> HYP["Fase 3 (Decidir)<br/>3-5 hipoteses ranqueadas e falsificaveis"]
+    HYP --> OK{"Hipotese confirmada pelo loop?"}
     OK -- "nao" --> RCA
     OK -- "sim" --> SB["pelizzai-starting-branch"]
-    SB --> RED["Fase 4 (Agir): pelizzai-tdd<br/>teste de regressao falhando + skills de dominio"]
+    SB --> RED["Fase 4 (Agir): pelizzai-tdd<br/>teste de regressao falhando no seam certo + skills de dominio"]
     RED --> FIX["corrigir a origem<br/>uma mudanca por vez"]
     FIX --> VERIFY["verificacao fresca"]
-    VERIFY --> REVIEW["pelizzai-review"]
+    VERIFY --> POST["post-mortem<br/>(hipotese vencedora no commit; grep do prefixo [DEBUG-x])"]
+    POST --> REVIEW["pelizzai-review"]
     REVIEW --> FIN["pelizzai-finish-task"]
 ```
 
-Após três tentativas de fix sem sucesso, o fluxo para e escala: a hipótese ou a arquitetura
-precisa ser reavaliada.
+Instrumentação de debug carrega um prefixo único da sessão (`[DEBUG-x]`) para o cleanup virar um
+grep. Se não existe seam correto para o teste de regressão, isso é um achado arquitetural
+(`pelizzai-improving-architecture`). Após três tentativas de fix sem sucesso, o fluxo para e
+escala: a hipótese ou a arquitetura precisa ser reavaliada — e a investigação (fases 1–3) pode
+usar um time read-only de hipóteses concorrentes, mas o fix é sempre inline.
 
 ### Ajuste pequeno
 
@@ -357,19 +370,32 @@ cursor continuam serializados pelo coordenador.
 Ao inicializar um projeto ou workspace, o PelizzAI cria artefatos em `pelizzai/` na raiz.
 Esse diretório é a memória operacional do harness dentro daquele projeto.
 
+Regra única: a **raiz** de `pelizzai/` guarda conhecimento versionado; `data/` guarda o estado e
+os efêmeros. **Tudo que o harness gera AO TRABALHAR num projeto** (estado, specs, planos, ADRs,
+mockups, relatórios, handoffs) **fica dentro de `pelizzai/`** — nunca em `.pelizzai/`, no temp do
+SO, nem espalhado por outras pastas. (Isto é sobre os artefatos de execução no projeto alvo; os
+adaptadores de distribuição do próprio harness — `AGENTS.md`, `GEMINI.md`, `.agents/skills/`,
+`.cursor/rules/`, `scripts/pelizzai-core-skills.txt` — são gerados pelo `sync-harness.ps1` e vivem
+na raiz do repositório do harness, por definição.)
+
 ```text
-pelizzai/
+pelizzai/                         -- CONHECIMENTO (versionado) --
 ├── domain-skills.md              catalogo de skills de dominio; marca bootstrap concluido
+├── profile.md                    perfil de execucao: comandos test/build/lint, package manager, stack baseline
 ├── context.md                    glossario de dominio, criado sob demanda
 ├── context/                      glossarios por contexto, em workspaces maiores
 ├── context-map.md                mapa entre contextos, quando existir
-├── adr/                          decisoes de arquitetura
+├── adr/                          decisoes de arquitetura (registradas automaticamente pelo criterio triplo)
+├── out-of-scope/                 rejeicoes duraveis, um arquivo por conceito
 ├── specs/                        designs aprovados
 ├── plans/                        planos de implementacao
-└── data/
-    ├── state.md                  cursor da tarefa ativa
-    ├── review-domain-skills.md   ledger de manutencao de skills de dominio
-    └── .cadence-state.json       contador local do hook; deve ficar no .gitignore
+└── data/                         -- ESTADO E EFEMEROS --
+    ├── state.md                  cursor da tarefa ativa                       (versionado)
+    ├── review-domain-skills.md   ledger de manutencao de skills de dominio    (versionado)
+    ├── .cadence-state.json       contador local do hook de cadencia           (gitignored)
+    ├── handoffs/                 briefs, pacotes de review e handoffs (task-brief/review-package/handoff)  (gitignored)
+    ├── mockups/                  telas do visual companion (pelizzai-brainstorming)                        (gitignored)
+    └── reports/                  relatorios HTML de arquitetura (pelizzai-improving-architecture)          (gitignored)
 ```
 
 `state.md` é o cursor retomável. Ele registra `slug`, `track`, `phase`, `branch`,
@@ -384,8 +410,14 @@ flowchart LR
     FIN["finish-task"] --> ST
 
     ST --> RESUME["Retomada apos compaction<br/>validar branch/worktree contra git"]
-    RESUME --> NEXT["continuar tarefa<br/>ou iniciar nova se phase done<br/>(sem herdar decisoes)"]
+    RESUME --> DIV{"state.md bate com o git?"}
+    DIV -- "sim" --> NEXT["continuar tarefa<br/>ou iniciar nova se phase done<br/>(sem herdar decisoes)"]
+    DIV -- "nao" --> REC["pelizzai-recovery<br/>ponto de retorno + menu + reconciliar cursor"]
+    REC --> NEXT
 ```
+
+> Após compaction, a fonte de verdade é o `state.md` + o `git log`, nunca a memória da sessão —
+> re-despachar tarefas já concluídas é a falha mais cara desse cenário.
 
 Estados principais:
 
@@ -424,7 +456,7 @@ flowchart TD
     CURSOR --> STRATEGY{"commit-strategy"}
     STRATEGY -- "granular" --> KEEP["historico mantido<br/>(sem re-perguntar squash)"]
     STRATEGY -- "squash-final" --> ONE["consolidar wips num commit unico<br/>(mensagem aprovada)"]
-    KEEP --> OFFERS["ofertas opt-in:<br/>pelizzai-oswap (superficie sensivel)<br/>pelizzai-frontend (diff de UI)"]
+    KEEP --> OFFERS["ofertas opt-in:<br/>pelizzai-oswap (superficie sensivel)<br/>pelizzai-frontend (diff de UI)<br/>pelizzai-documenting-features (feature nova)"]
     ONE --> OFFERS
     OFFERS --> TREE["gate da working tree<br/>nada sem commit antes do push"]
     TREE --> DEST{"destino?"}
@@ -477,6 +509,30 @@ conta interações e a cada 20 verifica o ledger, com supressão de 7 dias após
 com código 0, engole erros e nunca bloqueia o usuário. O ledger é semeado com a data do bootstrap
 (não a do 1º commit), para não disparar um nudge espúrio já na primeira tarefa de um repo maduro.
 
+## Hooks opt-in e scripts de apoio
+
+Além do hook de cadência, o harness traz mais dois hooks opt-in do Claude Code (sempre em par
+`.mjs` Node + `.ps1` PowerShell 7+, recomendados pela `pelizzai-audit` no bootstrap, com
+instruções de instalação no cabeçalho de cada arquivo):
+
+- **`pelizzai-guardrails`** (`PreToolUse`, matcher `Bash`): bloqueia, antes de rodarem,
+  comandos git destrutivos — `push --force`/`-f` (exceto `--force-with-lease`), `reset --hard`,
+  `clean -f`, `branch -D`, `checkout .` e `restore .` sem `--staged` — com exit 2 e o caminho
+  seguro no stderr. É o enforcement executável dos gates fail-closed que, sem ele, dependem só
+  da obediência do modelo. Erros do próprio hook: exit 0 (fail-open — rede de segurança, não
+  gate primário).
+- **`pelizzai-session-start`** (`SessionStart`, matcher `startup|clear|compact`): re-injeta um
+  lembrete curto da regra do 1% (`pelizzai-core`) e avisa se há tarefa ativa no `state.md` a
+  retomar via `pelizzai-router`. No Claude Code o CLAUDE.md já é re-injetado — o valor está no
+  `clear` e em plataformas que não re-injetam. Sempre sai 0 e engole erros.
+
+Os scripts `scripts/task-brief.ps1|.sh` e `scripts/review-package.ps1|.sh` implementam o
+**handoff por arquivo** da execução de planos: o brief da tarefa (Tarefa N + Global Constraints)
+e o pacote de review (commits + `diff --stat` + `diff -U10`, com BASE capturado **antes** do
+despacho — nunca `HEAD~1`) são gravados em `pelizzai/data/handoffs/` (gitignored) em vez de
+colados no contexto do coordenador (ganho medido na fonte: ~2× mais rápido, ~50% menos tokens).
+Ver `pelizzai-execution-plans` → `references/task-cycle.md` §1.
+
 ## Catálogo de skills do harness
 
 | Grupo | Skills | Responsabilidade |
@@ -484,10 +540,10 @@ com código 0, engole erros e nunca bloqueia o usuário. O ledger é semeado com
 | Entrada e orquestração | `pelizzai-core`, `pelizzai-router`, `pelizzai-audit`, `pelizzai-preferences` | Entrada obrigatória, roteamento, bootstrap e piso global de comportamento. |
 | Raciocínio e conversa | `pelizzai-reasoning` (13 técnicas, incl. OODA), `pelizzai-interview-me`, `pelizzai-writing-clearly-and-concisely` | Técnicas proporcionais de raciocínio, entrevistas para resolver ambiguidade e escrita clara. |
 | Feature | `pelizzai-brainstorming`, `pelizzai-writing-plans`, `pelizzai-execution-plans` | Design aprovado, plano executável, gate de setup pós-plano e execução tarefa por tarefa. |
-| Execução | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop` | TDD, delegação, times, e o loop OODA até a Definition of Done. |
+| Execução | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop`, `pelizzai-handoff` | TDD, delegação, times, o loop OODA até a Definition of Done e o handoff que bifurca o trabalho para uma sessão nova. |
 | Tracks leves/dedicados | `pelizzai-debugging`, `pelizzai-quick-fix` | Bug com causa raiz e ajuste pontual sem perder disciplina. |
-| Design e exploração | `pelizzai-codebase-design`, `pelizzai-domain-modeling`, `pelizzai-prototype` | Módulos profundos, modelo de domínio, ADRs e protótipos descartáveis. |
-| Isolamento e integração | `pelizzai-starting-branch`, `pelizzai-finish-task`, `pelizzai-resolving-merge-conflicts` | Branch/worktree seguros, fechamento honrando a commit-strategy, push/PR e conflitos. |
+| Design e exploração | `pelizzai-codebase-design`, `pelizzai-domain-modeling`, `pelizzai-prototype`, `pelizzai-improving-architecture` | Módulos profundos, modelo de domínio, ADRs, out-of-scope, protótipos descartáveis e revisão proativa de arquitetura. |
+| Isolamento e integração | `pelizzai-starting-branch`, `pelizzai-finish-task`, `pelizzai-resolving-merge-conflicts`, `pelizzai-recovery`, `pelizzai-documenting-features` | Branch/worktree seguros, fechamento honrando a commit-strategy, push/PR, conflitos, recuperação segura de estado divergente e doc humana da feature no fechamento. |
 | Qualidade e segurança | `pelizzai-review`, `pelizzai-oswap`, `pelizzai-verification-before-completion` | Review em dois estágios + review final, OWASP no diff e evidência antes de conclusão. |
 | Frontend | `pelizzai-frontend` | Produto, design, implementação e QA visual para UI. |
 | Skills | `pelizzai-writing-skills` | Autoria e manutenção de skills de domínio (fundamentadas no context7). |
@@ -528,7 +584,7 @@ Para instalar globalmente sem copiar por projeto, aponte `~/.agents/skills/` par
 | --- | --- |
 | Skills (conteúdo) | **Portáveis** — SKILL.md é padrão aberto. Fonte em `.claude/skills/`, espelho gerado em `.agents/skills/` (com instruções de ativação por plataforma embutidas na `pelizzai-core`). |
 | Entrada sempre-carregada | `CLAUDE.md` (Claude Code) · `AGENTS.md` (Codex, Copilot) · `GEMINI.md` (Gemini CLI) · `.cursor/rules/pelizzai.mdc` (Cursor) — todos gerados da mesma fonte. |
-| Hooks | `.claude/hooks/pelizzai-cadence.*` são **Claude Code-only**; o núcleo da cadência é portável (finish-task Passo 5) e vale nas demais IDEs sem o hook. |
+| Hooks | `.claude/hooks/pelizzai-{cadence,guardrails,session-start}.*` são **Claude Code-only** e opt-in; o núcleo da cadência é portável (finish-task Passo 5) e os gates das skills valem nas demais IDEs sem os hooks. |
 | Agent Teams | Suportado pela `pelizzai-team` quando o Claude Code tem o recurso habilitado; fora disso, degrada para subagents. |
 | Subagents | Ferramenta `Agent`/`Task` do ambiente; cada plataforma tem o seu mecanismo. |
 
@@ -547,7 +603,7 @@ O que **permanece igual** em qualquer IDE:
   fluxos do Copilot em `.github/skills/`) recebem a entrada via `AGENTS.md` e podem receber o espelho
   nativo adicionando o diretório ao array de alvos do `sync-harness.ps1`.
 - O `sync-harness.ps1` exige **PowerShell 7+** (encoding UTF-8); o CI roda em `windows-latest`.
-- O hook de cadência é específico do Claude Code e é opt-in.
+- Os hooks (cadência, guarda git, SessionStart) são específicos do Claude Code e opt-in.
 - Agent Teams é experimental no Claude Code; sem ele, o harness degrada para subagents.
 - No Windows, teammates devem usar visualização `in-process`; `split-panes` exige tmux/iTerm2.
 - Escrita paralela exige `isolation: worktree` com caminhos disjuntos; em `branch`, a
@@ -566,6 +622,17 @@ Ao alterar uma skill:
 2. Mantenha `SKILL.md` enxuto; mova profundidade para `references/`, `templates/` ou `scripts/`.
 3. Atualize este README quando a alteração mudar fluxos, gates, diretórios ou expectativas.
 4. Se a skill tiver comportamento verificável, acrescente ou rode evals quando existirem.
+5. Mudança **comportamental** (qualquer edição que altere o que o agente faz) exige baseline
+   e pressure test antes/depois — cenários versionados como `test-pressure-<n>.md` no
+   diretório da skill. Ver a Lei de Ferro (TDD de skills) na `pelizzai-writing-skills`.
+
+**Teste de aceitação da integração (binário):** num projeto **já inicializado** (com
+`pelizzai/domain-skills.md`), numa sessão LIMPA, o pedido "Vamos fazer um app de lista de tarefas"
+TEM que disparar o fluxo do harness — `pelizzai-brainstorming` — sozinho, em vez de o agente sair
+codando direto. (Numa sessão realmente limpa de um projeto ainda **não** inicializado, o roteamento
+passa antes por `pelizzai-audit`/bootstrap, que então encaminha ao brainstorming.) Se o fluxo não
+disparou, a integração não existe — conserte o acionamento (descriptions, entrada sempre-carregada)
+antes de qualquer outra mudança. Rode este teste a cada release do harness.
 
 O objetivo do PelizzAI é simples de dizer e difícil de executar: fazer agentes trabalharem
 como uma equipe técnica disciplinada, com memória de projeto, evidência real e bons pontos

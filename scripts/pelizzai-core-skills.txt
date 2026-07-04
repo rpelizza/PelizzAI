@@ -8,10 +8,13 @@ pelizzai-brainstorming
 pelizzai-codebase-design
 pelizzai-core
 pelizzai-debugging
+pelizzai-documenting-features
 pelizzai-domain-modeling
 pelizzai-execution-plans
 pelizzai-finish-task
 pelizzai-frontend
+pelizzai-handoff
+pelizzai-improving-architecture
 pelizzai-interview-me
 pelizzai-loop
 pelizzai-oswap
@@ -19,6 +22,7 @@ pelizzai-preferences
 pelizzai-prototype
 pelizzai-quick-fix
 pelizzai-reasoning
+pelizzai-recovery
 pelizzai-resolving-merge-conflicts
 pelizzai-review
 pelizzai-router

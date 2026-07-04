@@ -77,7 +77,16 @@ Critérios de sucesso fortes permitem que você itere de forma independente. Cri
 
 ---
 
-**Estas diretrizes estão funcionando se:** houver menos alterações desnecessárias nos diffs, menos reescritas por excesso de complexidade e perguntas de esclarecimento vierem antes da implementação, em vez de depois dos erros.
+## O harness está funcionando se…
+
+Sinais observáveis de que estas diretrizes e as skills estão cumprindo o papel:
+
+- os diffs estão menores e sem mudanças não relacionadas ao pedido;
+- há menos reescritas causadas por excesso de complexidade;
+- as perguntas de esclarecimento vêm ANTES da implementação, não depois do erro;
+- o histórico tem menos "fix do fix" (commits corrigindo o commit imediatamente anterior).
+
+Sinais na direção contrária são gatilho para revisar as skills — não para abandoná-las.
 
 ---
 
@@ -93,4 +102,4 @@ Este projeto usa o harness de skills **PelizzAI**. As skills (instrucoes de proc
 
 **Fundamentacao:** para bibliotecas, frameworks e APIs externas, use o MCP `context7` — nao a memoria.
 
-Skills disponiveis (27): pelizzai-audit, pelizzai-brainstorming, pelizzai-codebase-design, pelizzai-core, pelizzai-debugging, pelizzai-domain-modeling, pelizzai-execution-plans, pelizzai-finish-task, pelizzai-frontend, pelizzai-interview-me, pelizzai-loop, pelizzai-oswap, pelizzai-preferences, pelizzai-prototype, pelizzai-quick-fix, pelizzai-reasoning, pelizzai-resolving-merge-conflicts, pelizzai-review, pelizzai-router, pelizzai-starting-branch, pelizzai-subagents, pelizzai-tdd, pelizzai-team, pelizzai-verification-before-completion, pelizzai-writing-clearly-and-concisely, pelizzai-writing-plans, pelizzai-writing-skills.
+Skills disponiveis (31): pelizzai-audit, pelizzai-brainstorming, pelizzai-codebase-design, pelizzai-core, pelizzai-debugging, pelizzai-documenting-features, pelizzai-domain-modeling, pelizzai-execution-plans, pelizzai-finish-task, pelizzai-frontend, pelizzai-handoff, pelizzai-improving-architecture, pelizzai-interview-me, pelizzai-loop, pelizzai-oswap, pelizzai-preferences, pelizzai-prototype, pelizzai-quick-fix, pelizzai-reasoning, pelizzai-recovery, pelizzai-resolving-merge-conflicts, pelizzai-review, pelizzai-router, pelizzai-starting-branch, pelizzai-subagents, pelizzai-tdd, pelizzai-team, pelizzai-verification-before-completion, pelizzai-writing-clearly-and-concisely, pelizzai-writing-plans, pelizzai-writing-skills.
