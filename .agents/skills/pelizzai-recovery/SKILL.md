@@ -38,7 +38,7 @@ Compare com `pelizzai/data/state.md` (slug/phase/branch/isolation/worktree-path)
 
 ### 3. Ponto de retorno ANTES de qualquer operação destrutiva
 
-Com working tree suja: `git stash push -u -m "recovery/<slug>/<data>"` (stash **nomeado**) ou um commit WIP na branch atual. **Nunca prossiga sem ele** — o ponto de retorno é o que torna qualquer caminho abaixo reversível.
+Com working tree suja: `git stash push -u -m "recovery/<slug>/<data>"` (stash **nomeado**). **Não** faça commit WIP direto — a recovery pode estar rodando em branch protegida ou HEAD vazio, e o commit direto violaria o gate de `pelizzai-starting-branch`; se precisar mesmo de um WIP commit, crie antes uma branch segura via `pelizzai-starting-branch`. **Nunca prossiga sem o ponto de retorno** — é o que torna qualquer caminho abaixo reversível.
 
 ### 4. MENU de recuperações — o usuário decide
 

@@ -42,7 +42,9 @@ Em paralelo ao track, aplique a `pelizzai-preferences` como **camada global** (i
 
 ```mermaid
 flowchart TD
-    A[Pedido do usuario] --> B[Passo 0: entender projeto + estado]
+    A[Pedido do usuario] --> CONC{Pergunta puramente\nconceitual?}
+    CONC -- Sim --> ANS[Responder direto\nsem bootstrap]
+    CONC -- Nao --> B[Passo 0: entender projeto + estado]
     B --> C{Harness inicializado?\npelizzai/domain-skills.md existe?}
     C -- Nao / 1a interacao / 'bootstrap' --> AUD[pelizzai-audit: bootstrap]
     AUD --> D

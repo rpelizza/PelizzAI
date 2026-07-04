@@ -39,9 +39,10 @@ const RULES = [
   {
     name: 'git push --force / -f',
     // --force-with-lease NÃO casa com "--force(\s|$)" — a exceção é automática.
+    // Flags curtas podem vir agrupadas (git push -uf origin main) — casar o f dentro do bundle.
     test: (s) =>
       /\bgit\b.*\bpush\b/.test(s) &&
-      (/(^|\s)--force(\s|$)/.test(s) || /(^|\s)-f(\s|$)/.test(s)),
+      (/(^|\s)--force(\s|$)/.test(s) || /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s)),
     why: 'push forçado reescreve o histórico remoto e pode apagar commits de outras pessoas.',
     safe: 'use --force-with-lease (só sobrescreve se o remoto estiver onde você espera) — e somente com pedido explícito do usuário.',
   },
@@ -61,25 +62,26 @@ const RULES = [
   },
   {
     name: 'git branch -D',
-    test: (s) => /\bgit\b.*\bbranch\b/.test(s) && /(^|\s)-D(\s|$)/.test(s),
+    // -D case-sensitive (-d é seguro); pode vir agrupada (git branch -qD nome).
+    test: (s) => /\bgit\b.*\bbranch\b/.test(s) && /(^|\s)-[a-zA-Z]*D[a-zA-Z]*(\s|$)/.test(s),
     why: 'força a remoção de uma branch NÃO mesclada — os commits dela podem se perder.',
     safe: 'use -d (só remove branch já mesclada) ou confirme o descarte com o usuário (a pelizzai-finish-task exige o texto "descartar").',
   },
   {
     name: 'git checkout . / checkout [<ref>] -- .',
-    // Cobre "checkout .", "checkout -- ." e "checkout <ref> -- ." (todas descartam a working tree).
+    // Cobre "checkout .", "checkout -- .", "checkout <ref> -- ." e a forma "./" (todas descartam a working tree).
     test: (s) =>
-      /\bgit\b.*\bcheckout\b(\s+--)?\s+\.(\s|$)/.test(s) ||
-      /\bgit\b.*\bcheckout\b\s+\S+\s+--\s+\.(\s|$)/.test(s),
+      /\bgit\b.*\bcheckout\b(\s+--)?\s+\.\/?(\s|$)/.test(s) ||
+      /\bgit\b.*\bcheckout\b\s+\S+\s+--\s+\.\/?(\s|$)/.test(s),
     why: 'sobrescreve TODAS as mudanças não commitadas da working tree.',
     safe: 'crie um ponto de retorno primeiro (git stash push -u -m "<motivo>") ou restaure só arquivos específicos.',
   },
   {
     name: 'git restore . (working tree)',
-    // Sem --staged/-S (ou com --worktree/-W explícito), restore descarta a working tree.
+    // Sem --staged/-S (ou com --worktree/-W explícito), restore descarta a working tree. "./" == ".".
     test: (s) =>
       /\bgit\b.*\brestore\b/.test(s) &&
-      /(^|\s)\.(\s|$)/.test(s) &&
+      /(^|\s)\.\/?(\s|$)/.test(s) &&
       (!(/--staged\b/.test(s) || /(^|\s)-S(\s|$)/.test(s)) ||
         /--worktree\b/.test(s) ||
         /(^|\s)-W(\s|$)/.test(s)),

@@ -27,7 +27,7 @@ Como construir o comando de reprodução que a Fase 1 (Observar) da `pelizzai-de
 
 7. **Property/fuzz com ~1000 inputs** — quando o input exato que quebra é desconhecido: gere ~1000 inputs (aleatórios com seed logada, ou property-based) e assere a invariante violada. O primeiro input que falhar vira a fixture da tática 3.
 
-8. **Bisection harness (`git bisect run`)** — quando o bug é uma REGRESSÃO e você tem um comando red-capable de qualquer tática acima: `git bisect run <comando>` encontra o commit culpado sozinho. O commit achado alimenta a Fase 2 (o diff é a lista de suspeitos).
+8. **Bisection harness (`git bisect run`)** — quando o bug é uma REGRESSÃO e você tem um comando red-capable de qualquer tática acima: `git bisect run <comando>` encontra o commit culpado sozinho. O `<comando>` precisa ser **idempotente e sem efeitos colaterais persistentes** — o bisect o roda dezenas de vezes em commits diferentes; um comando que muta estado (grava no banco, altera arquivos versionados, publica algo) corrompe a busca e gera falsos culpados. O commit achado alimenta a Fase 2 (o diff é a lista de suspeitos).
 
 9. **Differential loop** — rode a versão que funcionava e a que quebra (versão velha vs nova, lib A vs B, prod vs local) com o MESMO input e faça diff da saída. O ponto onde as saídas divergem localiza a quebra sem entender o sistema inteiro.
 

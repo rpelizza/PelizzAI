@@ -42,7 +42,8 @@ try {
   $rules = @(
     @{ Name = 'git push --force / -f'
        # --force-with-lease NAO casa com "--force(\s|$)" - a excecao e automatica.
-       Test = { param($s) ($s -cmatch '\bgit\b.*\bpush\b') -and (($s -cmatch '(^|\s)--force(\s|$)') -or ($s -cmatch '(^|\s)-f(\s|$)')) }
+       # Flags curtas podem vir agrupadas (git push -uf origin main) - casar o f dentro do bundle.
+       Test = { param($s) ($s -cmatch '\bgit\b.*\bpush\b') -and (($s -cmatch '(^|\s)--force(\s|$)') -or ($s -cmatch '(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)')) }
        Why  = 'push forcado reescreve o historico remoto e pode apagar commits de outras pessoas.'
        Safe = 'use --force-with-lease (so sobrescreve se o remoto estiver onde voce espera) - e somente com pedido explicito do usuario.' },
     @{ Name = 'git reset --hard'
@@ -54,17 +55,18 @@ try {
        Why  = 'apaga arquivos nao rastreados de forma irreversivel (nao ha stash nem reflog para eles).'
        Safe = 'liste antes com git clean -n e confirme com o usuario o que sera apagado.' },
     @{ Name = 'git branch -D'
-       Test = { param($s) ($s -cmatch '\bgit\b.*\bbranch\b') -and ($s -cmatch '(^|\s)-D(\s|$)') }
+       # -D case-sensitive (-d e seguro); pode vir agrupada (git branch -qD nome).
+       Test = { param($s) ($s -cmatch '\bgit\b.*\bbranch\b') -and ($s -cmatch '(^|\s)-[a-zA-Z]*D[a-zA-Z]*(\s|$)') }
        Why  = 'forca a remocao de uma branch NAO mesclada - os commits dela podem se perder.'
        Safe = 'use -d (so remove branch ja mesclada) ou confirme o descarte com o usuario (a pelizzai-finish-task exige o texto "descartar").' },
     @{ Name = 'git checkout . / checkout [<ref>] -- .'
-       # Cobre "checkout .", "checkout -- ." e "checkout <ref> -- ." (todas descartam a working tree).
-       Test = { param($s) ($s -cmatch '\bgit\b.*\bcheckout\b(\s+--)?\s+\.(\s|$)') -or ($s -cmatch '\bgit\b.*\bcheckout\b\s+\S+\s+--\s+\.(\s|$)') }
+       # Cobre "checkout .", "checkout -- .", "checkout <ref> -- ." e a forma "./" (todas descartam a working tree).
+       Test = { param($s) ($s -cmatch '\bgit\b.*\bcheckout\b(\s+--)?\s+\.\/?(\s|$)') -or ($s -cmatch '\bgit\b.*\bcheckout\b\s+\S+\s+--\s+\.\/?(\s|$)') }
        Why  = 'sobrescreve TODAS as mudancas nao commitadas da working tree.'
        Safe = 'crie um ponto de retorno primeiro (git stash push -u -m "<motivo>") ou restaure so arquivos especificos.' },
     @{ Name = 'git restore . (working tree)'
-       # Sem --staged/-S (ou com --worktree/-W explicito), restore descarta a working tree.
-       Test = { param($s) ($s -cmatch '\bgit\b.*\brestore\b') -and ($s -cmatch '(^|\s)\.(\s|$)') -and ((-not (($s -cmatch '--staged\b') -or ($s -cmatch '(^|\s)-S(\s|$)'))) -or ($s -cmatch '--worktree\b') -or ($s -cmatch '(^|\s)-W(\s|$)')) }
+       # Sem --staged/-S (ou com --worktree/-W explicito), restore descarta a working tree. "./" == ".".
+       Test = { param($s) ($s -cmatch '\bgit\b.*\brestore\b') -and ($s -cmatch '(^|\s)\.\/?(\s|$)') -and ((-not (($s -cmatch '--staged\b') -or ($s -cmatch '(^|\s)-S(\s|$)'))) -or ($s -cmatch '--worktree\b') -or ($s -cmatch '(^|\s)-W(\s|$)')) }
        Why  = 'sem --staged, restore descarta as mudancas da working tree sem volta.'
        Safe = 'git restore --staged . apenas tira do stage (seguro); para descartar de verdade, crie um ponto de retorno (stash) e confirme com o usuario.' }
   )

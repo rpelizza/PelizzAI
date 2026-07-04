@@ -371,8 +371,12 @@ Ao inicializar um projeto ou workspace, o PelizzAI cria artefatos em `pelizzai/`
 Esse diretório é a memória operacional do harness dentro daquele projeto.
 
 Regra única: a **raiz** de `pelizzai/` guarda conhecimento versionado; `data/` guarda o estado e
-os efêmeros. **Tudo que o harness gera fica dentro de `pelizzai/`** — nunca em `.pelizzai/`, no
-temp do SO, nem espalhado por outras pastas.
+os efêmeros. **Tudo que o harness gera AO TRABALHAR num projeto** (estado, specs, planos, ADRs,
+mockups, relatórios, handoffs) **fica dentro de `pelizzai/`** — nunca em `.pelizzai/`, no temp do
+SO, nem espalhado por outras pastas. (Isto é sobre os artefatos de execução no projeto alvo; os
+adaptadores de distribuição do próprio harness — `AGENTS.md`, `GEMINI.md`, `.agents/skills/`,
+`.cursor/rules/`, `scripts/pelizzai-core-skills.txt` — são gerados pelo `sync-harness.ps1` e vivem
+na raiz do repositório do harness, por definição.)
 
 ```text
 pelizzai/                         -- CONHECIMENTO (versionado) --
@@ -622,10 +626,13 @@ Ao alterar uma skill:
    e pressure test antes/depois — cenários versionados como `test-pressure-<n>.md` no
    diretório da skill. Ver a Lei de Ferro (TDD de skills) na `pelizzai-writing-skills`.
 
-**Teste de aceitação da integração (binário):** numa sessão LIMPA, o pedido
-"Vamos fazer um app de lista de tarefas" TEM que disparar `pelizzai-brainstorming` sozinho.
-Se não disparou, a integração não existe — conserte o acionamento (descriptions, entrada
-sempre-carregada) antes de qualquer outra mudança. Rode este teste a cada release do harness.
+**Teste de aceitação da integração (binário):** num projeto **já inicializado** (com
+`pelizzai/domain-skills.md`), numa sessão LIMPA, o pedido "Vamos fazer um app de lista de tarefas"
+TEM que disparar o fluxo do harness — `pelizzai-brainstorming` — sozinho, em vez de o agente sair
+codando direto. (Numa sessão realmente limpa de um projeto ainda **não** inicializado, o roteamento
+passa antes por `pelizzai-audit`/bootstrap, que então encaminha ao brainstorming.) Se o fluxo não
+disparou, a integração não existe — conserte o acionamento (descriptions, entrada sempre-carregada)
+antes de qualquer outra mudança. Rode este teste a cada release do harness.
 
 O objetivo do PelizzAI é simples de dizer e difícil de executar: fazer agentes trabalharem
 como uma equipe técnica disciplinada, com memória de projeto, evidência real e bons pontos

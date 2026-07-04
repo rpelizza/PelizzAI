@@ -120,7 +120,9 @@ A entrada é sempre esta skill (`pelizzai-core`); depois de entender o objetivo,
 flowchart TD
     U([Mensagem do usuario]) --> P[pelizzai-core: exigir skill antes de responder]
     P --> G[Entender o objetivo do usuario]
-    G --> RT[pelizzai-router]
+    G --> CONC{Pergunta puramente\nconceitual?}
+    CONC -- Sim --> ANSC[Responder direto\nsem bootstrap]
+    CONC -- Nao --> RT[pelizzai-router]
     RT --> BOOT{Harness inicializado?\npelizzai/domain-skills.md existe?}
     BOOT -- "Nao / 1a interacao / 'bootstrap'" --> AUD[pelizzai-audit: mapeia projeto/workspace,\nMCPs, git/host, cria skills de dominio + docs]
     AUD --> CLS

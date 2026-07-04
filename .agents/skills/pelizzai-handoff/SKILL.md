@@ -23,7 +23,7 @@ Bifurcar o trabalho para uma sessão nova sem herdar uma janela poluída: um doc
 ## Processo
 
 1. **Feche a borda:** nunca faça handoff no meio de uma fase (review ✅ + cursor + commit primeiro).
-2. **Grave o doc em `pelizzai/data/handoffs/handoff-<AAAA-MM-DD>-<slug>.md`** (gitignored — efêmero, mas descobrível: TUDO que o harness gera vive dentro de `pelizzai/`).
+2. **Grave o doc em `pelizzai/data/handoffs/handoff-<AAAA-MM-DD>-<HHMMSS>-<slug>.md`** (gitignored — efêmero, mas descobrível: TUDO que o harness gera vive dentro de `pelizzai/`). O `<HHMMSS>` evita que dois handoffs do mesmo slug no mesmo dia se sobrescrevam.
 3. **Conteúdo, nesta ordem:**
    - Objetivo da próxima sessão (aceite-o como argumento do pedido de handoff).
    - Estado atual: o que foi feito e o que foi decidido (fatos, não narrativa).
