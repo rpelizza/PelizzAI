@@ -37,6 +37,17 @@ Use `pelizzai-preferences` como camada global quando a tarefa envolver comunica�
 
 Não acione `pelizzai-preferences` para tarefas triviais que possam ser respondidas diretamente sem risco ou contexto de projeto. Para qualquer tarefa não trivial, considere-a junto do roteamento principal.
 
+## Higiene de contexto
+
+A janela de contexto é um recurso da tarefa — administre-a de forma deliberada:
+
+- **Zona segura: ~120k tokens.** Acima disso a qualidade degrada; planeje as fronteiras antes de chegar lá.
+- Fases criativas (design → plano) acontecem numa **janela contínua**; a execução usa **contexto fresco por tarefa**.
+- **Handoff bifurca; compact continua**: para mudar de rumo, despache com briefing novo; para continuar o mesmo trabalho, compacte — e **nunca no meio de uma fase** (feche a fase primeiro).
+- Após compaction, confie no `pelizzai/data/state.md` e no `git log`, não na sua memória.
+
+O detalhe operacional (bordas de fase, retomada) mora na `pelizzai-execution-plans`.
+
 ## Como acessar as skills
 
 **Quando a sua plataforma tem carregamento nativo de skills, use-o sempre** — não leia os arquivos manualmente, para garantir que a skill seja ativada corretamente:
@@ -103,7 +114,7 @@ Quando houver contexto suficiente para agir com segurança, prossiga.
 
 # Mapa de fluxos do harness
 
-A entrada é sempre esta skill (`pelizzai-core`); depois de entender o objetivo, o `pelizzai-router` orquestra. Na primeira interação (ou ao digitar **"bootstrap"**), a `pelizzai-audit` mapeia o projeto e cria as skills de domínio antes de qualquer tarefa.
+A entrada é sempre esta skill (`pelizzai-core`); depois de entender o objetivo, o `pelizzai-router` orquestra. Na primeira interação (ou ao digitar **"bootstrap"**), a `pelizzai-audit` mapeia o projeto e cria as skills de domínio antes de qualquer tarefa. Pergunta **puramente conceitual** não dispara o bootstrap — a `pelizzai-audit` só entra quando a resposta exigir tocar ou entender o projeto.
 
 ```mermaid
 flowchart TD

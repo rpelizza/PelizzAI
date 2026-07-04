@@ -25,7 +25,7 @@ Se você é um **membro** (teammate/subagente) encarregado de **uma tarefa**, im
 
 ## Gate de setup pós-plano (OBRIGATÓRIO antes da Tarefa 1)
 
-Com o plano salvo e estressado, conduza as **quatro perguntas, nesta ordem** (é aqui que elas acontecem — o router registrou `<pending>` nos tracks com plano). Cada resposta é registrada em `pelizzai/data/state.md`. Se algum campo já estiver decidido **para esta tarefa** (retomada real), honre — não re-pergunte.
+Com o plano salvo e estressado, conduza as **quatro perguntas, nesta ordem** (é aqui que elas acontecem — o router registrou `<pending>` nos tracks com plano). Cada resposta é registrada em `pelizzai/data/state.md`. Se algum campo já estiver decidido **para esta tarefa** (retomada real), honre — não re-pergunte. Os menus abaixo são os **canônicos** do harness: as demais skills (`pelizzai-router`, `pelizzai-starting-branch`, `pelizzai-writing-plans`) os referenciam em vez de duplicá-los.
 
 **1. Isolamento — pergunte e aguarde:**
 
@@ -216,6 +216,23 @@ Sem subagentes/time, ou plano pequeno e sequencial: o coordenador implementa tar
 
 ---
 
+## Higiene de contexto
+
+A regra geral (zona segura, fases, "handoff bifurca; compact continua") mora na `pelizzai-core`. Na execução de planos, aplique-a assim:
+
+```text
+- Zona segura: ~120k tokens. Acima disso a qualidade degrada — planeje as fronteiras de fase
+  ANTES de chegar lá, não quando a janela já está cheia.
+- Design → plano nascem numa janela ininterrupta; cada tarefa executa em contexto fresco
+  (briefing colado — é o que os modos team/subagents já garantem).
+- NUNCA compacte no meio de uma fase ou tarefa: feche a fase (review ✅ + cursor + commit)
+  e compacte na borda.
+- Handoff bifurca; compact continua: para mudar de rumo ou abrir outra frente, despache com
+  briefing novo; para continuar o MESMO trabalho com a janela cheia, compacte na borda de fase.
+```
+
+---
+
 ## Estado e retomada — `pelizzai/data/state.md`
 
 O cursor da tarefa ativa vive em `pelizzai/data/state.md` (template: [templates/state.md](templates/state.md)). Campos: identidade da tarefa (`slug`, `track`, `phase`), `branch`, `isolation`, `worktree-path`, `execution-mode`, `commit-strategy`, `audience`, `plan` (caminho do plano em execução), `project` (projeto-alvo, em workspace), progresso (`delivered`/`next`/`pending`) e o `## Histórico`. Se o arquivo não existir, instancie-o a partir do template antes da Tarefa 1.
@@ -228,7 +245,8 @@ O cursor da tarefa ativa vive em `pelizzai/data/state.md` (template: [templates/
   nunca um commit órfão só do cursor (exceções: o registro de phase: blocked do circuit
   breaker — ver references/task-cycle.md §5 — e o commit de fechamento do cursor da
   pelizzai-finish-task no modo granular).
-- Retomada após compaction: confie no ledger + git, mas VALIDE contra a realidade — com
+- Retomada após compaction: confie no state.md e no git log, NÃO na sua memória (a falha mais
+  cara desse cenário é re-despachar tarefas já concluídas) — e VALIDE contra a realidade: com
   isolation: branch, a branch registrada bate com `git branch --show-current`? Com
   isolation: worktree, valide pela saída de `git worktree list` (caminho + branch) ou rode
   o comando DENTRO do worktree-path (no working tree principal ele devolve outra branch —

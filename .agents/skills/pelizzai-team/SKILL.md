@@ -57,6 +57,8 @@ Times multiplicam o custo de tokens e adicionam custo de coordenação. Use o **
 
 Na coluna da direita, prefira **sessão única** (tarefa sequencial/trivial) ou **um único subagente** via `pelizzai-subagents` (trabalho isolado que só precisa reportar de volta).
 
+**Ponte com o track de bug (`pelizzai-debugging`):** o fix de um bug roda sempre **inline** — nunca paralelize a correção. O que um time pode assumir é a **investigação** (Fases 1–3), com hipóteses concorrentes em papéis **read-only**, e apenas quando ≥3 fixes já falharam ou as hipóteses são independentes entre si; o time investiga e reporta, e a Fase 4 (teste que falha + fix) volta para a sessão principal.
+
 ---
 
 ## Os dois modos de execução
@@ -250,6 +252,8 @@ Briefing de [nome do membro] — papel: [papel]
   outro membro; rodada de refutação; reprodução de teste pelo QA]      (HARD-GATE 5)
 - Commit (papéis de escrita): NÃO commite; deixe o trabalho na working tree —
   o coordenador consolida após os reviews
+- Salvo-conduto: é sempre OK parar e dizer "isso é difícil demais para mim" — trabalho ruim é
+  pior que trabalho nenhum; você não será penalizado por escalar (reporte BLOCKED)
 - Restrições/proibições: [não tocar em X; não rodar Y; não publicar; só leitura]
 ```
 

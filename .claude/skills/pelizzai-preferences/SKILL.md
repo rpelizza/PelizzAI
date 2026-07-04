@@ -40,6 +40,10 @@ description: Preferências globais de comunicação, engenharia e execução apl
 - Preserve compatibilidade com o comportamento existente, salvo quando a mudança for explícita e intencional.
 - Evite complexidade acidental, código morto, duplicação desnecessária e dependências sem justificativa.
 - Prefira APIs explícitas, contratos tipados, tratamento de erros previsível e nomes claros.
+- **Órfãos (regra assimétrica):** remova imports, variáveis e funções que **a sua mudança** tornou órfãos; não remova código morto **pré-existente** sem pedido explícito.
+- **Mencione, não delete:** código morto ou problema não relacionado à tarefa vira observação no relatório — nunca edição.
+- **Mimetismo de estilo:** siga o estilo existente do arquivo até o nível de aspas e formatação, mesmo que você fizesse diferente — fidelidade estilística é requisito de correção do diff, não preferência.
+- **Anti-overengineering:** nada de tratamento de erro para cenários impossíveis. Pergunte-se: "um engenheiro sênior diria que está complicado demais?" — se sim, simplifique. Se escreveu ~200 linhas que podiam ser ~50, reescreva agora.
 
 ## 5. Código e configuração
 

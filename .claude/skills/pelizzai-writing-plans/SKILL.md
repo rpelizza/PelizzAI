@@ -52,13 +52,17 @@ Antes de definir as tarefas, mapeie quais arquivos serão criados ou modificados
 
 Cada tarefa é uma **fatia vertical**: um comportamento de ponta a ponta, testável e commitável de forma independente — não "todos os testes" seguidos de "toda a implementação". Esse é o ciclo do `pelizzai-tdd` (um teste → uma implementação → repetir). Tarefas independentes podem ser assumidas por executores diferentes — em paralelo real quando o usuário escolher `worktree` no gate de setup (caminhos disjuntos), ou integradas **em série** pelo coordenador quando escolher `branch` (ver `pelizzai-execution-plans`). Um plano com frentes independentes bem separadas é o que torna a recomendação de worktree + team honesta no gate.
 
+## Right-sizing das tarefas (pelo custo do gate)
+
+A tarefa é a **menor unidade que vale o gate de um reviewer fresco**: divida apenas onde um reviewer poderia **rejeitar uma tarefa aprovando a vizinha** — se duas "tarefas" só podem ser aprovadas ou rejeitadas juntas, são uma. Corolário: um **plano de 1 tarefa é legítimo** para uma feature pequena e óbvia — o fluxo inteiro (spec → plano → gate → execução → review), na escala mínima.
+
 ## Skills de domínio
 
 Se o projeto tem skills de domínio (catálogo `pelizzai/domain-skills.md`), o plano **deve** seguir suas convenções e **nomeá-las nas tarefas relevantes**, para que o executor (e qualquer subagente/teammate) as aplique em vez de padrões genéricos. Se `pelizzai/domain-skills.md` **não existir**, o harness não foi inicializado — rode `pelizzai-audit` (bootstrap) antes de escrever o plano. Para bibliotecas/frameworks externos, ancore as tarefas na **API real e atual** — use o MCP `context7` (ou a web) quando não tiver certeza de assinaturas ou opções; não confie na memória.
 
 ## Documento do plano
 
-Use o template em **[templates/plan.md](templates/plan.md)**. Todo plano começa com um cabeçalho (Objetivo / Arquitetura / Stack técnica + a sub-skill obrigatória de execução) e cada tarefa traz **Files** (criar/modificar/testar com caminhos exatos) e os passos de TDD com **código completo**, **comandos exatos** e **saída esperada**.
+Use o template em **[templates/plan.md](templates/plan.md)**. Todo plano começa com um cabeçalho (Objetivo / Arquitetura / Stack técnica / **Global Constraints** — requisitos projeto-wide copiados **verbatim** da spec, que toda tarefa herda e o coordenador cola no briefing de cada membro — + a sub-skill obrigatória de execução) e cada tarefa traz **Files** (criar/modificar/testar com caminhos exatos), o bloco **Interfaces** (Consome/Produz com assinaturas exatas) e os passos de TDD com **código completo**, **comandos exatos** e **`→ verifique:` em todo passo**.
 
 ## Sem placeholders
 
@@ -96,7 +100,7 @@ Após salvar o plano, **estresse-o com `pelizzai-interview-me` (OBRIGATÓRIO —
 
 ## Handoff para a execução
 
-Plano salvo e estressado → entregue à **`pelizzai-execution-plans`**, que conduz o **GATE DE SETUP PÓS-PLANO** com o usuário, nesta ordem: (1) isolamento — **worktree ou branch normal?**; (2) nome da branch/worktree sugerido e confirmado via `pelizzai-starting-branch` (`feat/`, `fix/`, `refactor/`, …); (3) modo de execução — **team / subagents / inline** (as três opções sempre visíveis); (4) estratégia de commit — **granular ou commit único final**. Tudo registrado em `pelizzai/data/state.md`. **Não decida nada disso aqui** — o plano apenas informa a recomendação (frentes paralelas → worktree + team).
+Plano salvo e estressado → entregue à **`pelizzai-execution-plans`**, que conduz o **GATE DE SETUP PÓS-PLANO** com o usuário (os menus canônicos moram lá), nesta ordem: (1) isolamento — **worktree ou branch normal?**; (2) nome da branch/worktree sugerido e confirmado via `pelizzai-starting-branch` (`feat/`, `fix/`, `refactor/`, …); (3) modo de execução — **team / subagents / inline** (as três opções sempre visíveis); (4) estratégia de commit — **granular ou commit único final**. Tudo registrado em `pelizzai/data/state.md`. **Não decida nada disso aqui** — o plano apenas informa a recomendação (frentes paralelas → worktree + team).
 
 Informe à `pelizzai-execution-plans` o **caminho exato do plano salvo** — ela o registra no campo `plan:` de `pelizzai/data/state.md` (a fonte das tarefas, relida após compaction) antes da Tarefa 1. A `pelizzai-writing-plans` não escreve o `state.md`.
 

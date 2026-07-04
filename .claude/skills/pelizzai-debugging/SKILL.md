@@ -19,7 +19,7 @@ Fixes aleatórios desperdiçam tempo e criam novos bugs; patches rápidos mascar
 NENHUM FIX SEM INVESTIGAÇÃO DA CAUSA RAIZ PRIMEIRO.
 ```
 
-Se você não completou a Fase 1, não pode propor correções. Use `pelizzai-reasoning` (*Root Cause Analysis*) para conduzir a investigação. Debugging roda **inline** — não despache subagentes/paralelo para um fix de bug.
+Se você não completou a Fase 1, não pode propor correções. Use `pelizzai-reasoning` (*Root Cause Analysis*) para conduzir a investigação. O **fix** roda **inline** — nunca paralelize a correção de um bug. Exceção restrita à **investigação** (Fases 1–3): quando ≥3 fixes já falharam ou há hipóteses independentes entre si, um time **read-only** de hipóteses concorrentes (`pelizzai-team`) pode investigar e reportar — a Fase 4 volta sempre para a sessão principal, inline.
 
 ---
 
@@ -91,4 +91,4 @@ Racionalizações comuns ("é simples, não precisa de processo"; "emergência, 
 
 **Roteada por:** `pelizzai-router` (track `bug`), que já traz o contexto e a isolação decididos.
 
-**Usa:** `pelizzai-reasoning` (Root Cause Analysis; as fases seguem o OODA de `pelizzai-loop`), as **skills de domínio** do projeto (`pelizzai/domain-skills.md` — a área afetada), `pelizzai-starting-branch` (branch antes da Fase 4), `pelizzai-tdd` (teste que falha), `pelizzai-verification-before-completion` (confirmar o fix), `pelizzai-review` (revisar o fix), `pelizzai-finish-task` (fechar o ciclo). Para causa raiz em lib externa, fundamente no `context7`.
+**Usa:** `pelizzai-reasoning` (Root Cause Analysis; as fases seguem o OODA de `pelizzai-loop`), as **skills de domínio** do projeto (`pelizzai/domain-skills.md` — a área afetada), `pelizzai-team` (investigação com hipóteses concorrentes, read-only, só quando ≥3 fixes falharam ou hipóteses independentes — nunca o fix), `pelizzai-starting-branch` (branch antes da Fase 4), `pelizzai-tdd` (teste que falha), `pelizzai-verification-before-completion` (confirmar o fix), `pelizzai-review` (revisar o fix), `pelizzai-finish-task` (fechar o ciclo). Para causa raiz em lib externa, fundamente no `context7`.

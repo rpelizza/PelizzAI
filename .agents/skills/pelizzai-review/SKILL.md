@@ -48,6 +48,8 @@ Verifique que o implementador construiu **exatamente** o que foi pedido — nada
   Alegou que algo funciona mas não implementou?
 - Extra/desnecessário: construiu o que não foi pedido? Super-engenharia? "Nice to haves" fora da spec?
 - Mal-entendidos: interpretou diferente do pretendido? Resolveu o problema errado? Certo, mas do jeito errado?
+- Traceabilidade por linha: toda linha alterada rastreia diretamente a um requisito do pedido?
+  Linha sem rastro é scope creep — achado de primeira classe, não observação.
 ```
 
 Use o template **[references/spec-reviewer.md](references/spec-reviewer.md)** (sem rodar testes — Verification é do Estágio 2). Resultado: **✅ Conforme a spec** (tudo bate após inspeção do código), **❌ Problemas** (liste o que falta/sobra, com `arquivo:linha`), ou **⚠️ Não verificável** → exige avaliação do coordenador contra o plano antes de concluir (ver `pelizzai-execution-plans` → `references/task-cycle.md` §3-§4).
@@ -93,6 +95,23 @@ O reviewer **nunca** recebe o histórico da sessão.
 
 ---
 
+## Anti-corrupção do pipeline de review
+
+Estas regras protegem a independência do review (as demais skills referenciam esta seção):
+
+```text
+- NUNCA instrua o reviewer sobre o que NÃO flagrar, nem pré-classifique severidade no prompt —
+  se o prompt que você está escrevendo contém "não aponte…", você está pré-julgando o review.
+- Finding causado pelo PRÓPRIO plano (a implementação seguiu o que o plano mandou) sobe ao
+  humano — quem escreveu o plano não dá nota no próprio trabalho.
+- Minors acumulam num LEDGER e são triados no review final — um roll-up que ninguém lê é um
+  descarte silencioso.
+- Os findings do review final são corrigidos por UM único fixer (um despacho com todos os
+  achados) — nunca um fixer por finding.
+```
+
+---
+
 ## Severidade e formato de saída
 
 O reviewer devolve, nesta estrutura (detalhe em `references/code-reviewer.md`):
@@ -120,6 +139,8 @@ Ao concluir todas as tarefas, revise a **branch inteira** (range commitado `<BAS
 **Quem dispara o review final:** `pelizzai-execution-plans` (fechamento de plano). O fix de bug (`pelizzai-debugging`) usa o **review de mudança avulsa** abaixo — no track de bug nada está commitado no momento do review (a consolidação é da `pelizzai-finish-task`), então não existe range para um review final. O track de ajuste (`pelizzai-quick-fix`) dispensa review formal por escopo trivial.
 
 **Review de mudança avulsa** (bug/quick-fix, fora de plano): use o **escopo B** (working tree não commitada: `git diff` + arquivos novos) e aplique o **Estágio 2** (qualidade) com o bloco `Verification` (evidência fresca), **sem** a maquinaria por-tarefa / review-final / circuit-breaker.
+
+**Track de review avulso** (o usuário pediu um review — roteado pela `pelizzai-router` como track `review`): primeiro defina o **escopo** com o usuário (working tree, range de branch `<BASE>..<HEAD>` ou PR) e aplique o **Estágio 2** com `Verification`, como acima. Este track **não abre tarefa**: não cria nem mantém `pelizzai/data/state.md`. Achado **Critical** não se corrige dentro do review — vira um track de `bug`/`ajuste` novo via `pelizzai-router` (o handback de branch protegida abaixo vale quando o fix virar código); Important/Minor são entregues no relatório para o usuário decidir.
 
 ---
 
@@ -168,6 +189,8 @@ Em PR no GitHub, responda no THREAD do comentário inline (não como comentário
 - Passar o histórico da sessão ao reviewer (ele recebe só o contexto fabricado).
 - Concordância performática ao receber feedback ("você está certíssimo", agradecer).
 - Despachar o estágio de qualidade antes do estágio de spec passar.
+- Instruir o reviewer sobre o que NÃO flagrar, ou pré-classificar severidade no prompt.
+- Corrigir os findings do review final com um fixer por finding (é UM fixer para todos).
 ```
 
 ---

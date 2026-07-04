@@ -46,6 +46,8 @@ O subagente **não herda o seu contexto** — cole no prompt tudo o que ele prec
 - Raciocínio: técnica principal sugerida de `pelizzai-reasoning` conforme a tarefa. Para APIs de
   libs externas, fundamente no MCP `context7` — não na memória.
 - Contrato de entrega: o formato EXATO do retorno (lista de achados arquivo:linha; diff; relatório X/Y/Z).
+- Salvo-conduto (no texto do briefing): é sempre OK parar e dizer "isso é difícil demais para mim" —
+  trabalho ruim é pior que trabalho nenhum; o subagente não será penalizado por escalar.
 - Restrições: o que não tocar; só leitura, quando aplicável.
 ```
 

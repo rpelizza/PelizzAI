@@ -36,7 +36,8 @@ A `pelizzai-router` já preparou o contexto de um `ajuste`: `isolation: branch` 
 1.5. Skills de domínio — confira em pelizzai/domain-skills.md se há skill de domínio cobrindo o
    arquivo/área e siga-a (trivial ≠ desleixado: o ajuste pula o review formal, então esta é a
    única rede que garante as convenções do projeto).
-2. Mudança + verificação mínima — escolha o balde honestamente:
+2. Mudança + verificação mínima — toda linha alterada deve rastrear diretamente ao pedido
+   (linha sem rastro é scope creep: remova ou escale). Escolha o balde honestamente:
    - Comportamento testável (constante, condição, valor retornado): pelizzai-tdd — menor teste que falha primeiro, depois a mudança.
    - Refatoração que preserva comportamento (rename/extract/inline): NÃO escreva teste novo — garanta cobertura verde antes (characterization tests), depois refatore no verde.
    - Config/IaC (comportamental mas não testável em unidade): valide por apply/dry-run/validate da ferramenta e registre via pelizzai-verification-before-completion.

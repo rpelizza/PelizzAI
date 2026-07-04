@@ -59,3 +59,20 @@ test('createUser torna o usuário recuperável', async () => {
 	expect(retrieved.name).toBe('Alice');
 });
 ```
+
+## Antipadrão: Teste Tautológico
+
+O valor esperado deve vir de **fonte independente** da implementação: um literal conhecido, um exemplo trabalhado à mão, a spec. Se o esperado é calculado pela mesma lógica sob teste (ou copiado da saída atual do código), o teste só prova que o código faz o que o código faz — e passa para sempre, inclusive com o bug.
+
+```typescript
+// RUIM: esperado derivado da própria lógica sob teste
+test('calcula o total com desconto', () => {
+	const esperado = aplicarDesconto(subtotal(carrinho), cupom); // mesma lógica!
+	expect(calcularTotal(carrinho, cupom)).toBe(esperado);
+});
+
+// BOM: esperado de fonte independente (exemplo trabalhado: 100 − 10% = 90)
+test('calcula o total com desconto', () => {
+	expect(calcularTotal(carrinhoDe100, cupom10PorCento)).toBe(90);
+});
+```

@@ -44,6 +44,9 @@ Leia `isolation` em `pelizzai/data/state.md`:
 
 - Track ajuste: não pergunte — isolamento é branch, apenas avise ("Como é um ajuste pontual,
   vou trabalhar numa branch").
+
+Menu canônico: pelizzai-execution-plans, Gate de setup pós-plano (o resumo acima é para a
+entrada direta, quando não há decisão registrada).
 ```
 
 ### 1. Detectar o estado atual

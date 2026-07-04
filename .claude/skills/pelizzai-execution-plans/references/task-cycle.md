@@ -18,6 +18,9 @@ O briefing de cada tarefa inclui:
 - Instrução de TDD (pelizzai-tdd). Para APIs de libs/frameworks externos, fundamente no MCP
   `context7` (resolve-library-id → query-docs) — não na memória.
 - O formato de retorno esperado e o status (ver abaixo).
+- Salvo-conduto de escalada (frase canônica, no TEXTO do briefing): "É sempre OK parar e dizer
+  'isso é difícil demais para mim'. Trabalho ruim é pior que trabalho nenhum. Você não será
+  penalizado por escalar (reporte BLOCKED)."
 ```
 
 Responda às perguntas do membro **antes** de o trabalho começar; re-despache se faltar contexto.
@@ -49,6 +52,8 @@ Nesta ordem, com `pelizzai-review`:
 ```
 
 Aprovação exige **os dois** verdicts: spec ✅ **e** qualidade ✅. Itens "⚠️ não verificável" exigem avaliação do coordenador contra o plano antes de marcar concluído.
+
+Anti-corrupção do pipeline (regras completas na `pelizzai-review`): não instrua o reviewer sobre o que NÃO flagrar nem pré-classifique severidade; finding causado pelo próprio plano sobe ao humano; Minors acumulam num ledger triado no review final; os findings do review final são corrigidos por UM único fixer.
 
 ## 4. Status do membro
 
