@@ -24,6 +24,10 @@
 # Teste manual (num shell PowerShell):
 #   '{"tool_input":{"command":"git reset --hard"}}' | pwsh -NoProfile -File pelizzai-guardrails.ps1; echo $LASTEXITCODE
 #   -> motivo no stderr e exit code 2. Comando inofensivo (ex.: "git status") -> 0.
+#
+# Falso positivo conhecido (fail-closed, aceitavel para rede de seguranca): texto CITADO
+# que contenha um padrao perigoso - ex.: git commit -m "docs: explica git reset --hard" -
+# e bloqueado. Saida: reformule a mensagem ou rode o commit manualmente.
 
 $ErrorActionPreference = 'SilentlyContinue'
 try {
@@ -53,12 +57,14 @@ try {
        Test = { param($s) ($s -cmatch '\bgit\b.*\bbranch\b') -and ($s -cmatch '(^|\s)-D(\s|$)') }
        Why  = 'forca a remocao de uma branch NAO mesclada - os commits dela podem se perder.'
        Safe = 'use -d (so remove branch ja mesclada) ou confirme o descarte com o usuario (a pelizzai-finish-task exige o texto "descartar").' },
-    @{ Name = 'git checkout . / checkout -- .'
-       Test = { param($s) $s -cmatch '\bgit\b.*\bcheckout\b(\s+--)?\s+\.(\s|$)' }
+    @{ Name = 'git checkout . / checkout [<ref>] -- .'
+       # Cobre "checkout .", "checkout -- ." e "checkout <ref> -- ." (todas descartam a working tree).
+       Test = { param($s) ($s -cmatch '\bgit\b.*\bcheckout\b(\s+--)?\s+\.(\s|$)') -or ($s -cmatch '\bgit\b.*\bcheckout\b\s+\S+\s+--\s+\.(\s|$)') }
        Why  = 'sobrescreve TODAS as mudancas nao commitadas da working tree.'
        Safe = 'crie um ponto de retorno primeiro (git stash push -u -m "<motivo>") ou restaure so arquivos especificos.' },
     @{ Name = 'git restore . (working tree)'
-       Test = { param($s) ($s -cmatch '\bgit\b.*\brestore\b') -and ($s -cmatch '(^|\s)\.(\s|$)') -and (($s -cnotmatch '--staged\b') -or ($s -cmatch '--worktree\b') -or ($s -cmatch '(^|\s)-W(\s|$)')) }
+       # Sem --staged/-S (ou com --worktree/-W explicito), restore descarta a working tree.
+       Test = { param($s) ($s -cmatch '\bgit\b.*\brestore\b') -and ($s -cmatch '(^|\s)\.(\s|$)') -and ((-not (($s -cmatch '--staged\b') -or ($s -cmatch '(^|\s)-S(\s|$)'))) -or ($s -cmatch '--worktree\b') -or ($s -cmatch '(^|\s)-W(\s|$)')) }
        Why  = 'sem --staged, restore descarta as mudancas da working tree sem volta.'
        Safe = 'git restore --staged . apenas tira do stage (seguro); para descartar de verdade, crie um ponto de retorno (stash) e confirme com o usuario.' }
   )

@@ -31,8 +31,22 @@ Crie os arquivos de forma preguiçosa — só quando houver algo a escrever.
 - Discuta cenários concretos: estresse as relações com cenários específicos que forçam precisão nas fronteiras.
 - Cruze com o código: o que o usuário diz bate com o código? Contradição → traga à tona.
 - Atualize o pelizzai/context.md inline: termo resolvido → escreva ali na hora, não acumule.
-- Ofereça ADR com parcimônia: só quando os TRÊS forem verdade — (1) difícil de reverter, (2) surpreendente
-  sem contexto, (3) resultado de um trade-off real. Faltando qualquer um, pule o ADR.
+- REGISTRE o ADR automaticamente quando os TRÊS forem verdade — (1) difícil de reverter, (2) surpreendente
+  sem contexto, (3) resultado de um trade-off real. Faltando qualquer um, pule o ADR (a parcimônia é o
+  critério; a AÇÃO não espera aprovação). Crie o arquivo numerado na hora e anuncie em 1 linha simples:
+  "Registrei o ADR-000N: <título> — me avise se quiser ajustar ou remover."
+```
+
+## ADR: quando é registrado automaticamente
+
+Um ADR pode ter um parágrafo — título + a decisão em 1-3 frases + a alternativa rejeitada e o porquê. Os pontos do harness que registram automaticamente (sempre pelo critério triplo acima, sempre com o anúncio de 1 linha):
+
+```text
+- pelizzai-brainstorming — ao salvar a spec, as decisões de design que passam no critério.
+- pelizzai-debugging — no post-mortem, se "o que teria prevenido este bug?" derivar uma decisão.
+- pelizzai-prototype — a resposta validada pelo protótipo, antes de descartá-lo.
+- pelizzai-improving-architecture — candidato rejeitado com razão durável (ADR ou out-of-scope/).
+- Esta skill — decisão cristalizada durante o domain modeling.
 ```
 
 ## `pelizzai/out-of-scope/` — a KB de rejeições

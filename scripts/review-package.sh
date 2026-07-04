@@ -6,9 +6,13 @@
 #
 # Grava em pelizzai/data/handoffs/review-<timestamp>.md (gitignored):
 #  - modo range: a lista de commits do range, o `git diff --stat` e o `git diff -U10`;
-#  - modo --working-tree: `git status --short` + `git diff -U10` da working tree.
+#  - modo --working-tree: `git status --short` + `git diff -U10` + o CONTEÚDO dos
+#    arquivos novos (untracked) — o escopo B da pelizzai-review cobre "diff + arquivos novos".
 # Imprime o caminho gravado. O revisor lê o ARQUIVO — o diff nunca é colado no
 # contexto do coordenador.
+#
+# Os blocos usam fence de 4 backticks: diffs de arquivos .md contêm ``` e quebrariam
+# um fence de 3.
 #
 # IMPORTANTE — captura do BASE: o BASE é capturado ANTES do despacho do implementador
 # (`git rev-parse HEAD` no momento do dispatch). NUNCA use `HEAD~1` como base: isso
@@ -47,15 +51,35 @@ NOW=$(date '+%Y-%m-%d %H:%M')
     echo
     echo "## git status --short"
     echo
-    echo '```text'
+    echo '````text'
     git status --short
-    echo '```'
+    echo '````'
     echo
     echo "## git diff -U10"
     echo
-    echo '```diff'
+    echo '````diff'
     git diff -U10
-    echo '```'
+    echo '````'
+    echo
+    echo "## Arquivos novos (untracked) — conteúdo"
+    echo
+    UNTRACKED=$(git ls-files --others --exclude-standard | grep -v '^pelizzai/data/handoffs/' || true)
+    if [ -n "$UNTRACKED" ]; then
+      printf '%s\n' "$UNTRACKED" | while IFS= read -r f; do
+        echo "### $f"
+        echo
+        if grep -Iq '' "$f" 2>/dev/null; then
+          echo '````text'
+          cat "$f"
+          echo '````'
+        else
+          echo "_binário — conteúdo omitido._"
+        fi
+        echo
+      done
+    else
+      echo "_Nenhum._"
+    fi
   else
     echo "# Pacote de review — $BASE..$HEAD"
     echo
@@ -63,21 +87,21 @@ NOW=$(date '+%Y-%m-%d %H:%M')
     echo
     echo "## Commits ($BASE..$HEAD)"
     echo
-    echo '```text'
+    echo '````text'
     git log --oneline "$BASE..$HEAD"
-    echo '```'
+    echo '````'
     echo
     echo "## git diff --stat"
     echo
-    echo '```text'
+    echo '````text'
     git diff --stat "$BASE" "$HEAD"
-    echo '```'
+    echo '````'
     echo
     echo "## git diff -U10"
     echo
-    echo '```diff'
+    echo '````diff'
     git diff -U10 "$BASE" "$HEAD"
-    echo '```'
+    echo '````'
   fi
 } > "$OUT"
 

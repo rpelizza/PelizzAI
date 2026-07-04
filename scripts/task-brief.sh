@@ -31,16 +31,20 @@ esac
 [ -f "$PLAN" ] || fail "plano não encontrado: $PLAN"
 
 # Bloco Global Constraints do cabeçalho: da linha "**Global Constraints" até o primeiro '---' ou header.
+# Linhas que começam com ``` alternam o estado de code fence; headers/separadores DENTRO de
+# fence (ex.: comentário '#' de shell/python na coluna zero) não encerram o bloco.
 GC=$(awk '
-  in_block && ($0 ~ /^---[ \t]*$/ || $0 ~ /^#/) { exit }
+  /^```/ { in_fence = !in_fence }
+  in_block && !in_fence && ($0 ~ /^---[ \t]*$/ || $0 ~ /^#/) { exit }
   $0 ~ /\*\*Global Constraints/ { in_block = 1 }
   in_block { print }
 ' "$PLAN")
 
-# Tarefa N: do header "### Tarefa N" até o próximo header de nível <= 3 ou EOF.
+# Tarefa N: do header "### Tarefa N" até o próximo header de nível <= 3 (FORA de code fence) ou EOF.
 TASK=$(awk -v n="$N" '
-  in_task && ($0 ~ /^# / || $0 ~ /^## / || $0 ~ /^### /) { exit }
-  !in_task && $0 ~ ("^###[ \t]+Tarefa[ \t]+" n "([^0-9]|$)") { in_task = 1 }
+  /^```/ { in_fence = !in_fence }
+  in_task && !in_fence && ($0 ~ /^# / || $0 ~ /^## / || $0 ~ /^### /) { exit }
+  !in_task && !in_fence && $0 ~ ("^###[ \t]+Tarefa[ \t]+" n "([^0-9]|$)") { in_task = 1 }
   in_task { print }
 ' "$PLAN")
 

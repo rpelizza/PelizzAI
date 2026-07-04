@@ -27,6 +27,8 @@ Assuma um desenvolvedor competente que conhece quase nada do seu toolset, do dom
 
 Se a spec cobre múltiplos subsistemas independentes, ela deveria ter sido quebrada em sub-projetos no `pelizzai-brainstorming`. Se não foi, sugira separar em **planos distintos** — um por subsistema. Cada plano deve produzir software funcional e testável por si só.
 
+**Teste fog-vs-tarefa** (o que entra no plano AGORA vs fica como pendência): "eu consigo formular a **pergunta** com precisão agora?" — não "consigo respondê-la agora". Pergunta precisa e sem resposta vira uma tarefa de investigação/protótipo no plano; névoa que nem pergunta tem ainda **não** é fatiada em tarefas — registre como pendência da spec e planeje até a fronteira do que se enxerga.
+
 ## Estrutura de arquivos
 
 Antes de definir as tarefas, mapeie quais arquivos serão criados ou modificados e a responsabilidade de cada um — é aqui que as decisões de decomposição se fixam. Use `pelizzai-reasoning` (*Structured Decomposition*).
@@ -55,6 +57,10 @@ Cada tarefa é uma **fatia vertical**: um comportamento de ponta a ponta, testá
 ## Right-sizing das tarefas (pelo custo do gate)
 
 A tarefa é a **menor unidade que vale o gate de um reviewer fresco**: divida apenas onde um reviewer poderia **rejeitar uma tarefa aprovando a vizinha** — se duas "tarefas" só podem ser aprovadas ou rejeitadas juntas, são uma. Corolário: um **plano de 1 tarefa é legítimo** para uma feature pequena e óbvia — o fluxo inteiro (spec → plano → gate → execução → review), na escala mínima.
+
+## Durabilidade: plano imediato × artefato que sobrevive à sessão
+
+O plano deste fluxo é executado **imediatamente** (contexto fresco) — por isso os caminhos exatos de arquivo são obrigatórios. A regra INVERTE para artefatos que **sobrevivem à sessão** (issues, handoffs via `pelizzai-handoff`, briefs para trabalho assíncrono): neles, **durabilidade vence precisão** — descreva **contratos comportamentais** (o que o sistema faz, interfaces e tipos por nome), **critérios de aceite independentes e verificáveis** e o **fora-de-escopo explícito** (previne gold-plating); NÃO cite paths de arquivo nem números de linha, que apodrecem antes de serem lidos — quem executa depois explora o codebase fresco.
 
 ## Skills de domínio
 

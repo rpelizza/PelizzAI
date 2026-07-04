@@ -125,6 +125,7 @@ digraph brainstorming {
 - Salve o design validado (especificação) em `pelizzai/specs/AAAA-MM-DD-<topic>-design.md`
 - (Preferências do usuário quanto ao local da especificação prevalecem sobre esse padrão)
 - Inclua na spec uma seção **Testing Decisions**: os seams de teste escolhidos (e por quê) e o prior art de testes do codebase — como esta base já testa coisas parecidas. É desta seção que a `pelizzai-tdd` confirma os seams no planejamento.
+- Ao salvar a spec, **registre automaticamente como ADR** (via `pelizzai-domain-modeling`) cada decisão de design que passe no critério triplo (difícil de reverter + surpreendente sem contexto + trade-off real), anunciando em 1 linha — o registro não espera aprovação.
 - Use a skill `pelizzai-writing-clearly-and-concisely` para redigir a especificação de forma clara e concisa, evitando jargões e termos técnicos desnecessários.
 - **Não commite a spec neste momento** — o isolamento (branch/worktree) ainda não existe; ela é commitada na branch da tarefa, após o gate de setup pós-plano (junto do plano, no primeiro commit da tarefa)
 

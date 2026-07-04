@@ -36,23 +36,29 @@ if (-not (Test-Path -LiteralPath $PlanPath -PathType Leaf)) { Fail "plano nao en
 $lines = Get-Content -LiteralPath $PlanPath
 
 # Bloco Global Constraints do cabecalho: da linha "**Global Constraints" ate o primeiro '---' ou header.
+# Linhas que comecam com ``` alternam o estado de code fence; headers/separadores DENTRO de
+# fence (ex.: comentario '#' de shell/python na coluna zero) nao encerram o bloco.
 $gc = [System.Collections.Generic.List[string]]::new()
 $inGc = $false
+$inFence = $false
 foreach ($line in $lines) {
-  if ($inGc -and ($line -match '^---\s*$' -or $line -match '^#')) { break }
+  if ($line -match '^```') { $inFence = -not $inFence }
+  if ($inGc -and -not $inFence -and ($line -match '^---\s*$' -or $line -match '^#')) { break }
   if (-not $inGc -and $line -match '\*\*Global Constraints') { $inGc = $true }
   if ($inGc) { $gc.Add($line) }
 }
 
-# Tarefa N: do header "### Tarefa N" ate o proximo header de nivel <= 3 ou EOF.
+# Tarefa N: do header "### Tarefa N" ate o proximo header de nivel <= 3 (FORA de code fence) ou EOF.
 $task = [System.Collections.Generic.List[string]]::new()
 $inTask = $false
+$inFence = $false
 foreach ($line in $lines) {
+  if ($line -match '^```') { $inFence = -not $inFence }
   if (-not $inTask) {
-    if ($line -match "^###\s+Tarefa\s+$TaskNumber\b") { $inTask = $true; $task.Add($line) }
+    if (-not $inFence -and $line -match "^###\s+Tarefa\s+$TaskNumber\b") { $inTask = $true; $task.Add($line) }
     continue
   }
-  if ($line -match '^#{1,3}\s') { break }
+  if (-not $inFence -and $line -match '^#{1,3}\s') { break }
   $task.Add($line)
 }
 

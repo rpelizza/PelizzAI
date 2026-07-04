@@ -55,3 +55,5 @@ A doc entra em **commit próprio** — `docs(<feature>): <descrição>` — resp
 - `pelizzai-finish-task` — oferece esta skill (opt-in, não bloqueia) quando a entrega foi uma FEATURE.
 - `pelizzai-writing-clearly-and-concisely` — a redação do texto da doc.
 - `pelizzai-preferences` (§ Documentação) — README e docs sempre consistentes com o estado real do projeto.
+
+> Baseline desta skill: prática testada em campo em harness de referência (benchmark 2026-07-04).

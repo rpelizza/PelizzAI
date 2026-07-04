@@ -1,6 +1,6 @@
 # Autoria de skills — regras detalhadas
 
-Adaptação, para o harness PelizzAI, das regras de criação de skills da Anthropic (skill-creator) e das lições testadas em campo dos harnesses de origem do benchmark (obra/superpowers e mattpocock/skills). Leia antes de redigir uma skill.
+Adaptação, para o harness PelizzAI, das regras de criação de skills da Anthropic (skill-creator) e de lições testadas em campo em harnesses de referência maduros. Leia antes de redigir uma skill.
 
 ## Sumário
 
@@ -88,7 +88,7 @@ Escopo da lei:
   sem evidência de falha ou padrão real por trás.
 ```
 
-Por que a lei é dura: no superpowers, a skill de TDD precisou de **6 iterações** e de **mais de 10 racionalizações únicas** capturadas e bloqueadas uma a uma até atingir **100% de compliance** sob pressão. Sem o baseline RED, cada uma dessas racionalizações teria sobrevivido invisível — a skill "parecia boa" no texto e falhava em campo.
+Por que a lei é dura: em um harness de referência testado em campo, a skill de TDD precisou de **6 iterações** e de **mais de 10 racionalizações únicas** capturadas e bloqueadas uma a uma até atingir **100% de compliance** sob pressão. Sem o baseline RED, cada uma dessas racionalizações teria sobrevivido invisível — a skill "parecia boa" no texto e falhava em campo.
 
 ## Pressure tests versionados (`test-pressure-<n>.md`)
 
@@ -135,7 +135,7 @@ Apenas dois campos obrigatórios:
 
 ### A `description` nunca resume o workflow
 
-Descoberta contra-intuitiva, testada em campo (superpowers): quando a `description` resume o processo, o agente **segue a description e pula o corpo**. Caso real: uma skill com "code review between tasks" na description levou o agente a fazer **um** review em vez dos **dois** que o corpo do fluxo exigia — o resumo virou substituto do fluxo.
+Descoberta contra-intuitiva, testada em campo em harness de referência: quando a `description` resume o processo, o agente **segue a description e pula o corpo**. Caso real: uma skill com "code review between tasks" na description levou o agente a fazer **um** review em vez dos **dois** que o corpo do fluxo exigia — o resumo virou substituto do fluxo.
 
 ```text
 - description = O QUE a skill faz + QUANDO acioná-la (condições de disparo, frases-gatilho).
@@ -221,7 +221,7 @@ A forma da guidance tem que casar com o **tipo de falha** que ela corrige — er
 | Elemento omitido | Slot **REQUIRED** no template — a ausência fica sintaticamente visível |
 | Comportamento condicional errado | Condicional sobre **predicado observável** ("se o arquivo existir", não "se fizer sentido") |
 
-Por que receita positiva para forma de output — evidência A/B do superpowers: o braço com proibições ("don't X") produziu **MAIS** conteúdo indesejado que o controle **sem guidance nenhuma**. A proibição chama atenção exatamente para o padrão que quer suprimir. Para shaping de output, descreva o que o output **é**; nunca liste o que ele não é.
+Por que receita positiva para forma de output — evidência A/B de harness maduro: o braço com proibições ("don't X") produziu **MAIS** conteúdo indesejado que o controle **sem guidance nenhuma**. A proibição chama atenção exatamente para o padrão que quer suprimir. Para shaping de output, descreva o que o output **é**; nunca liste o que ele não é.
 
 Corolários:
 

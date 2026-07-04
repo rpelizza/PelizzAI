@@ -6,9 +6,13 @@
 #
 # Grava em pelizzai/data/handoffs/review-<timestamp>.md (gitignored):
 #  - modo range: a lista de commits do range, o `git diff --stat` e o `git diff -U10`;
-#  - modo --working-tree: `git status --short` + `git diff -U10` da working tree.
+#  - modo --working-tree: `git status --short` + `git diff -U10` + o CONTEUDO dos
+#    arquivos novos (untracked) - o escopo B da pelizzai-review cobre "diff + arquivos novos".
 # Imprime o caminho gravado. O revisor le o ARQUIVO - o diff nunca e colado no
 # contexto do coordenador.
+#
+# Os blocos usam fence de 4 backticks: diffs de arquivos .md contem ``` e quebrariam
+# um fence de 3.
 #
 # IMPORTANTE - captura do BASE: o BASE e capturado ANTES do despacho do implementador
 # (`git rev-parse HEAD` no momento do dispatch). NUNCA use `HEAD~1` como base: isso
@@ -50,9 +54,9 @@ $now = Get-Date -Format 'yyyy-MM-dd HH:mm'
 function Add-Block([System.Collections.Generic.List[string]]$List, [string]$Title, [string]$Fence, $Body) {
   $List.Add("## $Title")
   $List.Add('')
-  $List.Add('```' + $Fence)
+  $List.Add('````' + $Fence)
   foreach ($l in @($Body)) { if ($null -ne $l) { $List.Add([string]$l) } }
-  $List.Add('```')
+  $List.Add('````')
   $List.Add('')
 }
 
@@ -64,6 +68,28 @@ if ($workingTree) {
   $content.Add('')
   Add-Block $content 'git status --short' 'text' (git status --short)
   Add-Block $content 'git diff -U10' 'diff' (git diff -U10)
+  $content.Add('## Arquivos novos (untracked) - conteudo')
+  $content.Add('')
+  # Exclui o proprio diretorio de handoffs (o pacote em escrita nao entra no pacote).
+  $untracked = @(git ls-files --others --exclude-standard | Where-Object { $_ -notlike 'pelizzai/data/handoffs/*' })
+  if ($untracked.Count -gt 0) {
+    foreach ($f in $untracked) {
+      $content.Add("### $f")
+      $content.Add('')
+      $text = $null
+      try { $text = Get-Content -LiteralPath $f -Raw -ErrorAction Stop } catch {}
+      if ($null -ne $text -and $text -notmatch "`0") {
+        $content.Add('````text')
+        foreach ($l in ($text -split "`r?`n")) { $content.Add($l) }
+        $content.Add('````')
+      } else {
+        $content.Add('_binario ou ilegivel - conteudo omitido._')
+      }
+      $content.Add('')
+    }
+  } else {
+    $content.Add('_Nenhum._')
+  }
 } else {
   $content.Add("# Pacote de review - $Base..$Head")
   $content.Add('')

@@ -120,6 +120,10 @@ que devem sobreviver às versões futuras para outras IDEs.
 - **Domínio explícito:** cada projeto alvo ganha skills de domínio próprias, catalogadas e
   mantidas com base no código real e em documentação atual (MCP `context7` como fonte
   primária de docs de libs/frameworks; a web como fallback).
+- **Memória de decisões automática:** decisões que são difíceis de reverter, surpreendentes sem
+  contexto e resultado de um trade-off real viram **ADR** (`pelizzai/adr/`) sem pedir aprovação —
+  registradas na hora, com anúncio de uma linha. O que foi deliberadamente rejeitado vira uma
+  entrada durável em `pelizzai/out-of-scope/`, para não ser re-litigado depois.
 
 ## Fluxo global
 
@@ -146,7 +150,7 @@ flowchart TD
     CLS --> CONFLICT["conflito de merge/rebase"]
     CLS --> QUESTION["pergunta conceitual"]
 
-    FEATURE --> LIFE["brainstorming -> plano -> gate de setup pos-plano -> execucao<br/>-> validacao final -> verificacao -> fechamento"]
+    FEATURE --> LIFE["brainstorming (+ ADR automatico) -> plano -> gate de setup pos-plano<br/>-> execucao -> validacao final -> verificacao -> fechamento"]
     BUG --> DEBUG["debugging -> teste que falha -> fix -> review -> fechamento"]
     QUICK --> QF["branch -> mudanca minima -> verificacao -> fechamento"]
     REVIEW --> RV["2 estagios por tarefa de plano;<br/>avulso = estagio de qualidade c/ evidencia<br/>+ OWASP quando fizer sentido"]
@@ -205,27 +209,33 @@ flowchart TD
 
 ### Bug
 
-Debugging é inline por padrão. O harness proíbe correção por palpite: primeiro reproduz,
-investiga causa raiz, compara padrões, testa hipótese e só então implementa. As quatro
-fases são um ciclo OODA (observar → orientar → decidir → agir).
+Debugging é inline por padrão. O harness proíbe correção por palpite. A Fase 1 é a skill:
+**construir o loop de feedback primeiro** — um comando nomeado, já executado, que reproduz o
+sintoma exato (red-capable), determinístico, rápido e executável pelo agente. Sem esse comando,
+não há Fase 2. Depois vêm comparação de padrões, 3–5 hipóteses ranqueadas e falsificáveis, e só
+então o fix. As quatro fases são um ciclo OODA (observar → orientar → decidir → agir).
 
 ```mermaid
 flowchart TD
-    BUG["Erro, falha de teste<br/>ou comportamento inesperado"] --> RCA["Fase 1 (Observar)<br/>investigar causa raiz"]
+    BUG["Erro, falha de teste<br/>ou comportamento inesperado"] --> RCA["Fase 1 (Observar)<br/>construir o loop de feedback (red-capable)"]
     RCA --> PAT["Fase 2 (Orientar)<br/>comparar com padroes que funcionam"]
-    PAT --> HYP["Fase 3 (Decidir)<br/>formular e testar uma hipotese"]
-    HYP --> OK{"Hipotese explica a causa?"}
+    PAT --> HYP["Fase 3 (Decidir)<br/>3-5 hipoteses ranqueadas e falsificaveis"]
+    HYP --> OK{"Hipotese confirmada pelo loop?"}
     OK -- "nao" --> RCA
     OK -- "sim" --> SB["pelizzai-starting-branch"]
-    SB --> RED["Fase 4 (Agir): pelizzai-tdd<br/>teste de regressao falhando + skills de dominio"]
+    SB --> RED["Fase 4 (Agir): pelizzai-tdd<br/>teste de regressao falhando no seam certo + skills de dominio"]
     RED --> FIX["corrigir a origem<br/>uma mudanca por vez"]
     FIX --> VERIFY["verificacao fresca"]
-    VERIFY --> REVIEW["pelizzai-review"]
+    VERIFY --> POST["post-mortem<br/>(hipotese vencedora no commit; grep do prefixo [DEBUG-x])"]
+    POST --> REVIEW["pelizzai-review"]
     REVIEW --> FIN["pelizzai-finish-task"]
 ```
 
-Após três tentativas de fix sem sucesso, o fluxo para e escala: a hipótese ou a arquitetura
-precisa ser reavaliada.
+Instrumentação de debug carrega um prefixo único da sessão (`[DEBUG-x]`) para o cleanup virar um
+grep. Se não existe seam correto para o teste de regressão, isso é um achado arquitetural
+(`pelizzai-improving-architecture`). Após três tentativas de fix sem sucesso, o fluxo para e
+escala: a hipótese ou a arquitetura precisa ser reavaliada — e a investigação (fases 1–3) pode
+usar um time read-only de hipóteses concorrentes, mas o fix é sempre inline.
 
 ### Ajuste pequeno
 
@@ -360,22 +370,28 @@ cursor continuam serializados pelo coordenador.
 Ao inicializar um projeto ou workspace, o PelizzAI cria artefatos em `pelizzai/` na raiz.
 Esse diretório é a memória operacional do harness dentro daquele projeto.
 
+Regra única: a **raiz** de `pelizzai/` guarda conhecimento versionado; `data/` guarda o estado e
+os efêmeros. **Tudo que o harness gera fica dentro de `pelizzai/`** — nunca em `.pelizzai/`, no
+temp do SO, nem espalhado por outras pastas.
+
 ```text
-pelizzai/
+pelizzai/                         -- CONHECIMENTO (versionado) --
 ├── domain-skills.md              catalogo de skills de dominio; marca bootstrap concluido
 ├── profile.md                    perfil de execucao: comandos test/build/lint, package manager, stack baseline
 ├── context.md                    glossario de dominio, criado sob demanda
 ├── context/                      glossarios por contexto, em workspaces maiores
 ├── context-map.md                mapa entre contextos, quando existir
-├── adr/                          decisoes de arquitetura
+├── adr/                          decisoes de arquitetura (registradas automaticamente pelo criterio triplo)
 ├── out-of-scope/                 rejeicoes duraveis, um arquivo por conceito
 ├── specs/                        designs aprovados
 ├── plans/                        planos de implementacao
-└── data/
-    ├── state.md                  cursor da tarefa ativa
-    ├── review-domain-skills.md   ledger de manutencao de skills de dominio
-    ├── handoffs/                 briefs, relatorios e pacotes de review efemeros; fica no .gitignore
-    └── .cadence-state.json       contador local do hook; deve ficar no .gitignore
+└── data/                         -- ESTADO E EFEMEROS --
+    ├── state.md                  cursor da tarefa ativa                       (versionado)
+    ├── review-domain-skills.md   ledger de manutencao de skills de dominio    (versionado)
+    ├── .cadence-state.json       contador local do hook de cadencia           (gitignored)
+    ├── handoffs/                 briefs, pacotes de review e handoffs (task-brief/review-package/handoff)  (gitignored)
+    ├── mockups/                  telas do visual companion (pelizzai-brainstorming)                        (gitignored)
+    └── reports/                  relatorios HTML de arquitetura (pelizzai-improving-architecture)          (gitignored)
 ```
 
 `state.md` é o cursor retomável. Ele registra `slug`, `track`, `phase`, `branch`,
@@ -390,8 +406,14 @@ flowchart LR
     FIN["finish-task"] --> ST
 
     ST --> RESUME["Retomada apos compaction<br/>validar branch/worktree contra git"]
-    RESUME --> NEXT["continuar tarefa<br/>ou iniciar nova se phase done<br/>(sem herdar decisoes)"]
+    RESUME --> DIV{"state.md bate com o git?"}
+    DIV -- "sim" --> NEXT["continuar tarefa<br/>ou iniciar nova se phase done<br/>(sem herdar decisoes)"]
+    DIV -- "nao" --> REC["pelizzai-recovery<br/>ponto de retorno + menu + reconciliar cursor"]
+    REC --> NEXT
 ```
+
+> Após compaction, a fonte de verdade é o `state.md` + o `git log`, nunca a memória da sessão —
+> re-despachar tarefas já concluídas é a falha mais cara desse cenário.
 
 Estados principais:
 

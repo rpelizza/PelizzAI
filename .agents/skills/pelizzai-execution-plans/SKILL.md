@@ -179,7 +179,7 @@ Antes da Tarefa 1, leia o plano **uma vez** procurando contradições internas o
 
 ## Ciclo por tarefa
 
-O protocolo detalhado — briefing por colagem, TDD, review em dois estágios, status, circuit breaker e commit como gate — está em **[references/task-cycle.md](references/task-cycle.md)**. Resumo:
+O protocolo detalhado — briefing autossuficiente (por arquivo via `scripts/task-brief` quando disponível; senão por colagem), TDD, review em dois estágios, status, circuit breaker e commit como gate — está em **[references/task-cycle.md](references/task-cycle.md)**. Resumo:
 
 ```text
 1. Briefing: COLE o texto completo da tarefa + as skills de domínio relevantes no prompt

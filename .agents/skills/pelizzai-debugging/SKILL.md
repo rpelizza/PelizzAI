@@ -120,6 +120,8 @@ Com o fix verificado e ANTES da `pelizzai-finish-task`, feche a sessão de debug
 [ ] "O que teria prevenido este bug?" respondida AGORA, depois do fix — você tem informação
     que não tinha no início. A resposta é uma recomendação arquitetural (seam ausente →
     pelizzai-improving-architecture; validação na fronteira errada; teste que faltava), não culpa.
+    Se ela derivar uma DECISÃO que passa no critério triplo da pelizzai-domain-modeling,
+    registre o ADR automaticamente (anúncio de 1 linha).
 ```
 
 ---

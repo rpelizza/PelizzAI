@@ -40,7 +40,7 @@ Despache um subagente ou time **read-only** (`pelizzai-team`/`pelizzai-subagents
 
 ### 2. Relatório visual EFÊMERO
 
-Monte um HTML self-contained no **diretório temporário do SO** — nunca no repositório — e abra-o no navegador. Um card por candidato:
+Monte um HTML self-contained em **`pelizzai/data/reports/`** (gitignored — nunca versionado) e abra-o no navegador. Um card por candidato:
 
 ```text
 - Arquivos:  os caminhos envolvidos.
@@ -62,13 +62,13 @@ Apresente o relatório e deixe o usuário escolher **um** candidato. O escolhido
 
 ### 4. Rejeição vira registro
 
-Candidato rejeitado com razão durável → registre em ADR ou `pelizzai/out-of-scope/` (via `pelizzai-domain-modeling`), para a próxima revisão não re-sugerir.
+Candidato rejeitado com razão durável → registre **automaticamente** em ADR (se passar no critério triplo da `pelizzai-domain-modeling`) ou em `pelizzai/out-of-scope/`, e anuncie em 1 linha — para a próxima revisão não re-sugerir.
 
 ## Red flags
 
 ```text
 - Propor interfaces dentro do relatório (a interface nasce no design, não no menu).
-- Escrever o relatório no repositório (é EFÊMERO: temp dir do SO, aberto no navegador).
+- Escrever o relatório fora de pelizzai/data/reports/ ou versioná-lo (é EFÊMERO: gitignored, aberto no navegador).
 - Ganhos fora do vocabulário do glossário/codebase-design ("mais limpo", "mais fácil de manter").
 - Ignorar ADRs — todo conflito com ADR ganha callout explícito.
 - Re-sugerir candidato já rejeitado com razão registrada (cheque adr/ e out-of-scope/ antes).
@@ -81,4 +81,4 @@ Candidato rejeitado com razão durável → registre em ADR ou `pelizzai/out-of-
 
 **Usa:** `pelizzai-codebase-design` (vocabulário: profundidade, localidade, seam, teste da deleção), `pelizzai-domain-modeling` (glossário; ADR e `pelizzai/out-of-scope/` para rejeições), `pelizzai-team`/`pelizzai-subagents` (exploração read-only), `pelizzai-brainstorming` (o candidato escolhido entra pelo fluxo de design).
 
-> Baseline desta skill: o benchmark de harnesses de 2026-07-04 (`improve-codebase-architecture` do mattpocock, testada em campo); cenário de regressão em `test-pressure-1.md`.
+> Baseline desta skill: prática testada em campo em harness de referência (benchmark 2026-07-04); cenário de regressão em `test-pressure-1.md`.

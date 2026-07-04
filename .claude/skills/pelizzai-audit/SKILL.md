@@ -1,6 +1,6 @@
 ---
 name: pelizzai-audit
-description: Use essa skill no PRIMEIRO contato do usuário com o harness PelizzAI ou quando ele digitar "bootstrap". Ela faz o mapeamento completo do contexto — projeto único ou workspace, novo ou existente, stacks/frameworks/linguagens, MCPs instalados, skills de domínio, git/GitHub/GitLab — e orquestra a criação das skills de domínio (via `pelizzai-writing-skills`) e da documentação do harness (catálogo e ledger). Acione-a também sempre que o harness ainda não tiver sido inicializado neste projeto (sem `pelizzai/domain-skills.md`), ou quando o usuário pedir para "remapear", "reescanear" ou "reinicializar" o PelizzAI.
+description: Bootstrap do harness. Use essa skill no PRIMEIRO contato do usuário com o harness PelizzAI ou quando ele digitar "bootstrap" — é ela que inicializa o PelizzAI num projeto ou workspace, novo ou existente. Acione-a também sempre que o harness ainda não tiver sido inicializado neste projeto (sem `pelizzai/domain-skills.md`), ou quando o usuário pedir para "remapear", "reescanear" ou "reinicializar" o PelizzAI. Pergunta puramente conceitual não a dispara.
 ---
 
 # PelizzAI Audit
@@ -131,23 +131,28 @@ Recomende (sem impor; aguarde confirmação para qualquer ação que altere o am
 
 Toda a documentação e o estado do harness vivem em `pelizzai/`, na **raiz do repositório ou do workspace**. Este é o padrão único que todas as skills consomem — nunca espalhe artefatos do harness por outras pastas.
 
+Regra única de leitura: a **raiz** de `pelizzai/` guarda conhecimento versionado; `data/` guarda o estado e os efêmeros. **Tudo que o harness gera fica dentro de `pelizzai/`** — nunca em `.pelizzai/`, no temp do SO nem espalhado por outras pastas.
+
 ```text
 pelizzai/                         na raiz do repositório ou workspace
+│  ── CONHECIMENTO (versionado) ──
 ├── domain-skills.md              catálogo das skills de domínio (marca o bootstrap concluído)
 ├── profile.md                    perfil de execução: comandos test/build/lint, package manager, stack baseline (pelizzai-audit)
 ├── context.md                    glossário do domínio (pelizzai-domain-modeling); multi-contexto: context/<nome>.md + context-map.md
-├── adr/                          decisões de arquitetura (ADRs numerados)
+├── adr/                          decisões de arquitetura (ADRs numerados, registrados automaticamente)
 ├── out-of-scope/                 rejeições duráveis, um arquivo por conceito (pelizzai-domain-modeling)
 ├── specs/                        designs aprovados (pelizzai-brainstorming): AAAA-MM-DD-<topico>-design.md
 ├── plans/                        planos de implementação (pelizzai-writing-plans)
-└── data/                         estado e ledgers do harness
-    ├── state.md                  cursor da tarefa ativa (pelizzai-execution-plans)
-    ├── review-domain-skills.md   ledger de manutenção das skills de domínio
-    ├── handoffs/                 briefs, relatórios e pacotes de review efêmeros (vai para o .gitignore)
-    └── .cadence-state.json        contador do hook de cadência (vai para o .gitignore)
+└── data/                         ── ESTADO E EFÊMEROS ──
+    ├── state.md                  cursor da tarefa ativa (pelizzai-execution-plans) — versionado
+    ├── review-domain-skills.md   ledger de manutenção das skills de domínio — versionado
+    ├── .cadence-state.json       contador do hook de cadência                 — gitignored
+    ├── handoffs/                 briefs, relatórios, pacotes de review e handoffs (task-brief / review-package / pelizzai-handoff) — gitignored
+    ├── mockups/                  telas do visual companion (pelizzai-brainstorming)                                                — gitignored
+    └── reports/                  relatórios HTML de arquitetura (pelizzai-improving-architecture)                                   — gitignored
 ```
 
-> `context.md`, `adr/` e `out-of-scope/` são criados **sob demanda** por `pelizzai-domain-modeling` / `pelizzai-prototype`, não no bootstrap — sua ausência logo após o bootstrap é esperada.
+> `context.md`, `adr/`, `out-of-scope/` e os subdiretórios de `data/` são criados **sob demanda** pelas skills que os usam, não no bootstrap — sua ausência logo após o bootstrap é esperada.
 
 Em **workspace** (vários projetos na mesma pasta), o `pelizzai/` fica na raiz do workspace e cobre todos; cada skill registra a qual projeto um artefato pertence quando isso importar.
 

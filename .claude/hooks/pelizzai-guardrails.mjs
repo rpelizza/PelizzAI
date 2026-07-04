@@ -26,6 +26,10 @@
  *   echo '{"tool_input":{"command":"git reset --hard"}}' | node pelizzai-guardrails.mjs; echo $?
  *   → motivo no stderr e exit code 2. Comando inofensivo (ex.: "git status") → exit 0.
  *
+ * Falso positivo conhecido (fail-closed, aceitável para rede de segurança): texto CITADO
+ * que contenha um padrão perigoso — ex.: git commit -m "docs: explica git reset --hard" —
+ * é bloqueado. Saída: reformule a mensagem ou rode o commit manualmente.
+ *
  * Em frota sem Node, use a variante PowerShell pelizzai-guardrails.ps1 (mesmo matcher).
  */
 
@@ -62,18 +66,23 @@ const RULES = [
     safe: 'use -d (só remove branch já mesclada) ou confirme o descarte com o usuário (a pelizzai-finish-task exige o texto "descartar").',
   },
   {
-    name: 'git checkout . / checkout -- .',
-    test: (s) => /\bgit\b.*\bcheckout\b(\s+--)?\s+\.(\s|$)/.test(s),
+    name: 'git checkout . / checkout [<ref>] -- .',
+    // Cobre "checkout .", "checkout -- ." e "checkout <ref> -- ." (todas descartam a working tree).
+    test: (s) =>
+      /\bgit\b.*\bcheckout\b(\s+--)?\s+\.(\s|$)/.test(s) ||
+      /\bgit\b.*\bcheckout\b\s+\S+\s+--\s+\.(\s|$)/.test(s),
     why: 'sobrescreve TODAS as mudanças não commitadas da working tree.',
     safe: 'crie um ponto de retorno primeiro (git stash push -u -m "<motivo>") ou restaure só arquivos específicos.',
   },
   {
     name: 'git restore . (working tree)',
-    // Sem --staged (ou com --worktree/-W explícito), restore descarta a working tree.
+    // Sem --staged/-S (ou com --worktree/-W explícito), restore descarta a working tree.
     test: (s) =>
       /\bgit\b.*\brestore\b/.test(s) &&
       /(^|\s)\.(\s|$)/.test(s) &&
-      (!/--staged\b/.test(s) || /--worktree\b/.test(s) || /(^|\s)-W(\s|$)/.test(s)),
+      (!(/--staged\b/.test(s) || /(^|\s)-S(\s|$)/.test(s)) ||
+        /--worktree\b/.test(s) ||
+        /(^|\s)-W(\s|$)/.test(s)),
     why: 'sem --staged, restore descarta as mudanças da working tree sem volta.',
     safe: 'git restore --staged . apenas tira do stage (seguro); para descartar de verdade, crie um ponto de retorno (stash) e confirme com o usuário.',
   },
