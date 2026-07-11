@@ -169,6 +169,55 @@ try {
     Check-Match '.claude/skills/pelizzai-handoff/SKILL.md' 'Nunca crie `pelizzai/` no repo-fonte' 'handoff respeita source mode'
     Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Source mode:[\s\S]*State ausente é o contrato' 'retomada execution respeita source mode'
 
+    # Referências penduradas: todo token pelizzai-* citado nas skills existe de fato.
+    $hookNames = @(Get-ChildItem -LiteralPath (Join-Path $root '.claude/hooks') -File |
+        ForEach-Object { [IO.Path]::GetFileNameWithoutExtension($_.Name) } | Sort-Object -Unique)
+    $knownTokens = @($dirNames) + $hookNames + @('pelizzai-core-skills')
+    $danglingRefs = [System.Collections.Generic.List[string]]::new()
+    foreach ($doc in @(Get-ChildItem -LiteralPath $skillRoot -Recurse -File -Filter '*.md')) {
+        $content = Get-Content -LiteralPath $doc.FullName -Raw -Encoding utf8
+        foreach ($m in [regex]::Matches($content, 'pelizzai-[a-z][a-z0-9-]*')) {
+            if ($knownTokens -notcontains $m.Value) { $danglingRefs.Add("$($doc.Name): $($m.Value)") }
+        }
+    }
+    $danglingRefs = @($danglingRefs | Sort-Object -Unique)
+    Check ($danglingRefs.Count -eq 0) 'skills não citam pelizzai-* inexistente' ($danglingRefs -join '; ')
+
+    # Core e router concordam sobre o catálogo de head skills.
+    $coreText = Text '.claude/skills/pelizzai-core/SKILL.md'
+    $routerText = Text '.claude/skills/pelizzai-router/SKILL.md'
+    $coreHeadsSection = [regex]::Match($coreText, '(?s)### Head skills.*?### Overlays').Value
+    $coreHeads = @([regex]::Matches($coreHeadsSection, 'pelizzai-[a-z][a-z0-9-]*') |
+        ForEach-Object { $_.Value } | Sort-Object -Unique)
+    $headsMissingInRouter = @($coreHeads | Where-Object { $routerText -notmatch [regex]::Escape($_) })
+    Check ($coreHeads.Count -ge 8 -and $headsMissingInRouter.Count -eq 0) `
+        'router roteia toda head skill anunciada pelo core' "faltando=$($headsMissingInRouter -join ',')"
+
+    # Matriz efeito→prova: as cópias distribuídas concordam nas âncoras essenciais.
+    $proofMatrixFiles = @(
+        '.claude/skills/pelizzai-reasoning/SKILL.md',
+        '.claude/skills/pelizzai-tdd/SKILL.md',
+        '.claude/skills/pelizzai-execution-plans/references/task-cycle.md',
+        '.claude/skills/pelizzai-writing-plans/SKILL.md',
+        '.claude/skills/pelizzai-quick-fix/SKILL.md',
+        '.claude/skills/pelizzai-verification-before-completion/SKILL.md',
+        '.claude/skills/pelizzai-preferences/SKILL.md'
+    )
+    $proofAnchors = @(
+        @{ Name = 'refactor->characterization'; Effect = 'refator|refactor'; Proof = 'caracteriza|characterization' },
+        @{ Name = 'config/IaC->validate/dry-run'; Effect = 'IaC|migra|config'; Proof = 'validate|dry-run|\bplan\b' },
+        @{ Name = 'UI->pelizzai-frontend'; Effect = 'UI|visual|frontend'; Proof = 'pelizzai-frontend' },
+        @{ Name = 'docs->prova estática'; Effect = 'doc'; Proof = 'lint|render|est[áa]tic|static|inspeç' }
+    )
+    foreach ($file in $proofMatrixFiles) {
+        $skillName = ($file -split '/')[2]
+        $matrixLines = (Text $file) -split "`r?`n"
+        foreach ($anchor in $proofAnchors) {
+            $hit = @($matrixLines | Where-Object { $_ -match $anchor.Effect -and $_ -match $anchor.Proof })
+            Check ($hit.Count -ge 1) "matriz efeito→prova ($($anchor.Name)) em $skillName" $file
+        }
+    }
+
     $sessionHooks = (Text '.claude/hooks/pelizzai-session-start.mjs') + (Text '.claude/hooks/pelizzai-session-start.ps1')
     Check (-not [regex]::IsMatch($sessionHooks, 'regra do 1%')) 'hook de sessão não reintroduz regra do 1%'
 

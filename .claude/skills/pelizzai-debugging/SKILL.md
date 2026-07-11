@@ -63,8 +63,7 @@ Prefira um comando executável e já rodado que falhe pelo sintoma exato. No con
 `pelizzai/profile.md` quando existir; em source mode ou sem profile, descubra o comando nos
 manifests, scripts e workflows reais. Não chute nem crie profile para investigar. O menu de táticas
 vive em [references/feedback-loops.md](references/feedback-loops.md); **esta SKILL.md é canônica
-para triagem e ordem**, portanto a linguagem legada de “Fase 1 obrigatória” da referência não
-precede contenção nem recria as quatro fases universais.
+para triagem e ordem**.
 
 O oráculo pode ser teste, typecheck/build, script mínimo, query controlada, trace, métrica ou taxa de reprodução. Para falha flaky, registre condições e frequência; para incidente não reproduzível fora de produção, métricas/logs correlacionados podem ser o oráculo inicial.
 

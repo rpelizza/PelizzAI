@@ -25,6 +25,9 @@ O briefing de cada tarefa inclui:
   regras do projeto PREVALECEM sobre preferences/reasoning.
 - Estratégia de teste/validação escolhida pela matriz do §2. Para APIs externas, fundamente na
   documentação oficial disponível (MCP/conector quando configurado), não na memória.
+- Raciocínio: quando a tarefa envolve incerteza, decisão ou diagnóstico, a técnica dominante
+  sugerida de `pelizzai-reasoning` (decomposição, RCA, comparação, verification — ver a matriz da
+  skill); omita para tarefa mecânica de contrato claro — não imponha técnica sem gatilho.
 - Perfil de review escolhido no plano: `combined` ou `split`, com a justificativa de risco.
 - O formato de retorno esperado e o status (ver abaixo).
 - Salvo-conduto de escalada (frase canônica, no TEXTO do briefing): "É sempre OK parar e dizer

@@ -27,7 +27,8 @@ Conduzir execuções longas ou dinâmicas como um **loop macro** em que cada ite
 ```text
 1. OBSERVAR — colete a realidade externa ANTES de decidir:
    estado do git (branch, delta da base, commits novos), saída fresca de testes/lint/build,
-   vereditos de review, o estado registrado (pelizzai/data/state.md) validado contra o real.
+   vereditos de review, o registro da tarefa (state consumidor `pelizzai/data/state.md` ou
+   execution record nativo em source mode) validado contra o real.
    Observação é evidência colhida agora — não memória da iteração passada.
 
 2. ORIENTAR — interprete o observado contra o objetivo:
@@ -51,7 +52,7 @@ Conduzir execuções longas ou dinâmicas como um **loop macro** em que cada ite
 
 - **Uma iteração nunca herda o snapshot da anterior.** Re-observe antes de decidir; o custo de um `git status`/suite é menor que o de agir sobre realidade velha.
 - **Orientação honesta:** se a evidência contradiz o plano, o plano perde — replaneje ou escale; não continue com plano desatualizado.
-- **Decisão registrada:** em execução de plano, cada Decidir avança o cursor (`pelizzai/data/state.md`) — o loop sobrevive a compaction.
+- **Decisão registrada:** em execução de plano, cada Decidir avança o cursor — `pelizzai/data/state.md` no consumidor, execution record nativo em source mode — e o loop sobrevive a compaction.
 - **Critérios de parada:** a lista canônica das saídas legítimas do loop vive na `pelizzai-loop` (5 critérios: DoD verificada; dúvida material → `pelizzai-interview-me`; bloqueio → `phase: blocked` e escalar; evidência invalidou o caminho → replanejar; custo maior que o benefício → escalar/perguntar antes de insistir). Defina a DoD **antes** de entrar no loop.
 - **Não vire ritual:** em tarefa trivial, o loop colapsa para um único ciclo — observar rápido, agir, verificar.
 

@@ -19,7 +19,8 @@ Loops **macro**, nos quais a realidade pode mudar entre iterações, seguem **OO
 
 ```text
 OBSERVAR  — colete a realidade ATUAL: git, saída fresca de testes/lint/build, vereditos de
-            review, o state.md validado contra o real. Nunca o snapshot da iteração anterior.
+            review, o registro da tarefa (state consumidor ou execution record nativo)
+            validado contra o real. Nunca o snapshot da iteração anterior.
 ORIENTAR  — interprete contra o objetivo: o que mudou? a DoD está mais perto? alguma premissa caiu?
 DECIDIR   — próxima tarefa / corrigir / replanejar / parar e perguntar / escalar / concluir.
 AGIR      — execute (aqui vivem o TDD, o review, as ferramentas — os micro-ciclos ReAct).
@@ -58,7 +59,8 @@ O loop só encerra quando a DoD é atingida **e verificada** (`pelizzai-verifica
 2. Dúvida material no meio do loop → PARE e acione `pelizzai-interview-me`; só retome quando
    TODAS as dúvidas estiverem resolvidas. Nunca "chuta e segue".
 3. Bloqueio que você não resolve (circuit breaker estourado, decisão que pertence ao humano)
-   → registre phase: blocked no state.md e escale com mensagem acionável.
+   → registre phase: blocked no state consumidor ou execution record nativo e escale com
+   mensagem acionável.
 4. A evidência invalidou o caminho → replaneje (volte ao plano/design), não insista.
 5. Custo de continuar maior que o benefício (investigação/rodadas sem circuit breaker próprio
    que pararam de render informação) → escale ou pergunte antes de insistir; nunca saia em
