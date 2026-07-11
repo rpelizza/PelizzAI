@@ -1,6 +1,6 @@
 # Loops de feedback — menu de táticas
 
-Como construir o comando de reprodução que a Fase 1 (Observar) da `pelizzai-debugging` exige. O menu é **ordenado**: tente as táticas de cima primeiro — produzem loops mais tight (rápidos, determinísticos, executáveis pelo agente); desça só quando a de cima não se aplicar ao bug em mãos.
+Como construir o oráculo — o comando de reprodução que o Passo 2 da `pelizzai-debugging` exige. A triagem, a ordem e a contenção de dano ativo vivem na SKILL.md, que é canônica; este menu só cataloga táticas. O menu é **ordenado**: tente as táticas de cima primeiro — produzem loops mais tight (rápidos, determinísticos, executáveis pelo agente); desça só quando a de cima não se aplicar ao bug em mãos.
 
 ## Os quatro atributos do loop
 
@@ -13,7 +13,7 @@ Como construir o comando de reprodução que a Fase 1 (Observar) da `pelizzai-de
 
 ## O menu (em ordem de preferência)
 
-1. **Failing test** — um teste automatizado no framework do projeto que assere o sintoma. O melhor loop possível: já nasce no formato que a Fase 4 vai promover a teste de regressão. Use quando o bug é alcançável pela suíte existente.
+1. **Failing test** — um teste automatizado no framework do projeto que assere o sintoma. O melhor loop possível: já nasce no formato que o Passo 4 vai promover a teste de regressão. Use quando o bug é alcançável pela suíte existente.
 
 2. **Script curl** — para bugs de API/HTTP: uma chamada com payload fixo + assert no status/corpo (`curl -sf … | grep …`). Não exige subir o front nem clicar em nada.
 
@@ -27,7 +27,7 @@ Como construir o comando de reprodução que a Fase 1 (Observar) da `pelizzai-de
 
 7. **Property/fuzz com ~1000 inputs** — quando o input exato que quebra é desconhecido: gere ~1000 inputs (aleatórios com seed logada, ou property-based) e assere a invariante violada. O primeiro input que falhar vira a fixture da tática 3.
 
-8. **Bisection harness (`git bisect run`)** — quando o bug é uma REGRESSÃO e você tem um comando red-capable de qualquer tática acima: `git bisect run <comando>` encontra o commit culpado sozinho. O `<comando>` precisa ser **idempotente e sem efeitos colaterais persistentes** — o bisect o roda dezenas de vezes em commits diferentes; um comando que muta estado (grava no banco, altera arquivos versionados, publica algo) corrompe a busca e gera falsos culpados. O commit achado alimenta a Fase 2 (o diff é a lista de suspeitos).
+8. **Bisection harness (`git bisect run`)** — quando o bug é uma REGRESSÃO e você tem um comando red-capable de qualquer tática acima: `git bisect run <comando>` encontra o commit culpado sozinho. O `<comando>` precisa ser **idempotente e sem efeitos colaterais persistentes** — o bisect o roda dezenas de vezes em commits diferentes; um comando que muta estado (grava no banco, altera arquivos versionados, publica algo) corrompe a busca e gera falsos culpados. O commit achado alimenta as hipóteses do Passo 3 (o diff do commit culpado é a lista de suspeitos).
 
 9. **Differential loop** — rode a versão que funcionava e a que quebra (versão velha vs nova, lib A vs B, prod vs local) com o MESMO input e faça diff da saída. O ponto onde as saídas divergem localiza a quebra sem entender o sistema inteiro.
 
