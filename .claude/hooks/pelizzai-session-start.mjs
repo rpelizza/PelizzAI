@@ -2,8 +2,8 @@
 /**
  * PelizzAI — hook SessionStart (matcher startup|clear|compact). OPT-IN.
  *
- * Emite um lembrete CURTO no início da sessão: carregar a pelizzai-core antes de
- * responder qualquer coisa (regra do 1%) e, se pelizzai/data/state.md tiver tarefa
+ * Emite um lembrete CURTO no início da sessão: carregar core/router para tarefas de
+ * projeto, classificar o efeito antes de agir e, se pelizzai/data/state.md tiver tarefa
  * ativa (slug != <none> e phase != done), avisar que há retomada via pelizzai-router.
  *
  * Nota de valor: no Claude Code o CLAUDE.md já é re-injetado no startup e após o
@@ -41,8 +41,8 @@ function main() {
   }
 
   const lines = [
-    'PelizzAI: antes de responder QUALQUER coisa, carregue a skill pelizzai-core e honre a regra do 1% — se uma skill se aplica (mesmo a um ajuste trivial), acione-a.',
-    'Toda tarefa que toca o projeto passa por pelizzai-core → pelizzai-router.',
+    'PelizzAI: em tarefas de projeto, carregue pelizzai-core → pelizzai-router e classifique effect, risco, incerteza e superfícies antes de agir.',
+    'Escolha uma head skill e overlays proporcionais; read-only não inicializa estado, e qualquer escrita passa primeiro pelo gate de isolamento.',
   ];
 
   try {

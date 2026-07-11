@@ -1,94 +1,103 @@
 # Template de plano de implementação — PelizzAI
 
-Copie a estrutura abaixo para `pelizzai/plans/AAAA-MM-DD-<feature>.md`. Preencha tudo com conteúdo real — sem placeholders. Cada tarefa é uma fatia vertical; cada passo é uma ação de 2-5 min.
+Copie para `pelizzai/plans/AAAA-MM-DD-<feature>.md` e substitua todo texto entre colchetes por conteúdo real. Cada tarefa é uma fatia vertical verificável; a estratégia varia conforme o efeito.
 
 ---
 
-## Cabeçalho (obrigatório no topo do plano)
+## Cabeçalho obrigatório
 
 ```markdown
-# [Nome da feature] — Plano de implementação
+# [Nome] — Plano de implementação
 
-> **Para quem executa (agentes/humanos):** SUB-SKILL OBRIGATÓRIA — use `pelizzai-execution-plans`
-> para executar este plano tarefa a tarefa (ela escolhe o modo: team / subagents / inline). Os
-> passos usam checkbox (`- [ ]`) para rastreamento.
+> **Para quem executa:** SUB-SKILL OBRIGATÓRIA — use `pelizzai-execution-plans`.
 
-**Objetivo:** [uma frase descrevendo o que isto constrói]
+**Objetivo:** [resultado em uma frase]
 
-**Arquitetura:** [2-3 frases sobre a abordagem]
+**Arquitetura:** [abordagem e fronteiras em 2–3 frases]
 
-**Stack técnica:** [tecnologias/bibliotecas principais]
+**Stack técnica:** [tecnologias/bibliotecas]
 
-**Skills de domínio aplicáveis (catálogo):** [liste as de pelizzai/domain-skills.md que valem aqui; se nenhuma, escreva 'nenhuma']
+**Skills de domínio aplicáveis:** [nomes de `pelizzai/domain-skills.md` ou `nenhuma`]
+
+**Skills transversais do harness:** [ex.: `pelizzai-frontend`, `pelizzai-oswap`, `pelizzai-documenting-features` ou `nenhuma`]
 
 **Global Constraints (copiadas VERBATIM da spec):**
 
-- [requisito projeto-wide 1 — ex.: "todas as datas em UTC"]
-- [requisito projeto-wide 2]
-
-_Toda tarefa herda estas constraints implicitamente; o coordenador as inclui no briefing de cada membro (que só vê a própria tarefa). Se a spec não tiver nenhuma, escreva 'nenhuma'._
+- [constraint projeto-wide; se não houver, escreva `nenhuma`]
 
 ---
 ```
+
+O coordenador inclui Global Constraints e skills transversais aplicáveis no briefing de cada executor. Não liste overlay por possibilidade remota: UI exige `pelizzai-frontend`; superfície sensível exige `pelizzai-oswap`.
 
 ## Estrutura de cada tarefa
 
 ````markdown
-### Tarefa N: [Nome do componente]
+### Tarefa N: [resultado vertical]
 
 **Files:**
 
-- Criar: `caminho/exato/para/arquivo.ext`
-- Modificar: `caminho/exato/existente.ext:123-145`
-- Testar: `testes/caminho/exato/teste.ext`
+- Criar: `caminho/exato.ext`
+- Modificar: `caminho/exato.ext:123`
+- Validar: `caminho/exato/de/teste-ou-artefato.ext`
 
-**Skills de domínio a aplicar nesta tarefa:** [nomeie as relevantes; ex.: `<projeto>-convencao-api`; se nenhuma, escreva 'nenhuma']
+**Skills de domínio a aplicar:** [nomes ou `nenhuma`]
+
+**Skills transversais do harness a aplicar:** [nomes ou `nenhuma`]
 
 **Interfaces:**
 
-- Consome: `nomeExato(arg: Tipo): Retorno` — vem de [Tarefa M / código existente em `caminho`]
-- Produz: `outroNome(arg: Tipo): Retorno` — consumido por [Tarefa P]
+- Consome: `nomeExato(arg: Tipo): Retorno` — origem
+- Produz: `outroNome(arg: Tipo): Retorno` — consumidor
 
-_O implementador só vê a própria tarefa; este bloco é como ele descobre os nomes e tipos exatos que as tarefas vizinhas usam. Se a tarefa é autocontida, escreva 'nenhuma'._
+_Se autocontida, escreva `nenhuma`._
 
-- [ ] **Passo 1: Escreva o teste que falha** → verifique: o teste usa só a interface pública, no seam acordado
+**Estratégia de implementação e validação:**
 
-```python
-def test_comportamento_especifico():
-    resultado = funcao(entrada)
-    assert resultado == esperado
+- Efeito predominante: [comportamento | refatoração | config/IaC/migração | UI visual | documentação]
+- Implementação: [TDD red→green | caracterização no verde | validate/plan/dry-run | pelizzai-frontend + QA visual | checagem estática]
+- Oráculo: [o que prova o resultado]
+- Comando(s): `[comandos canônicos completos]`
+- Evidência esperada: [exit code, delta, estado visual ou saída exata]
+- Rollback: [quando aplicável; caso contrário, `não aplicável`]
+- Perfil de review: [combined | split] — [justificativa por risco/superfície]
+
+- [ ] **Passo 1: Estabeleça o baseline/oráculo** → verifique: [resultado exato]
+
+[comando, teste ou inspeção concreta]
+
+- [ ] **Passo 2: Aplique a menor mudança da fatia** → verifique: [critério local]
+
+```language
+[código/config/conteúdo completo]
 ```
 
-- [ ] **Passo 2: Rode o teste e veja-o falhar** → verifique: a saída esperada abaixo
+- [ ] **Passo 3: Execute a prova da estratégia** → verifique: [saída exata]
 
-Rode: `pytest testes/caminho/teste.py::test_nome -v`
-Esperado: FAIL com "function not defined"
+Rode: `[comando exato]`
+Esperado: `[resultado observável]`
 
-- [ ] **Passo 3: Implemente o mínimo para passar** → verifique: nada além do que o teste atual exige
-
-```python
-def funcao(entrada):
-    return esperado
-```
-
-- [ ] **Passo 4: Rode o teste e veja-o passar** → verifique: a saída esperada abaixo
-
-Rode: `pytest testes/caminho/teste.py::test_nome -v`
-Esperado: PASS
-
-- [ ] **Passo 5: Pronto para review → consolidar** — NÃO commite no meio da tarefa: o commit é o gate do coordenador, após spec ✅ + qualidade ✅ (em modo inline, o próprio controlador consolida). Ver `pelizzai-execution-plans` → `references/task-cycle.md`. → verifique: `git status` mostra apenas os arquivos desta tarefa
+- [ ] **Passo 4: Pronto para review → consolidar** — não commite no meio da tarefa; o commit é o gate do coordenador após as lentes spec ✅ + qualidade ✅ no perfil registrado. → verifique: `git status` contém somente o escopo desta tarefa
 ````
 
-## Lembre-se
+Adapte a ordem sem perder a prova:
 
 ```text
-- Caminhos de arquivo exatos, sempre.
-- Código completo em cada passo que mexe em código.
-- Comandos exatos com a saída esperada.
-- TODO passo carrega seu `→ verifique:` inline — plano sem check por passo é vago por construção.
-- Global Constraints verbatim da spec no cabeçalho; bloco Interfaces (Consome/Produz) por tarefa.
-- DRY, YAGNI, TDD, commits frequentes.
-- API externa: ancore na doc real e atual (context7), não na memória.
-- Siga e NOMEIE as skills de domínio do projeto nas tarefas relevantes.
-- Sem placeholders: "TBD", "tratar edge cases", "igual à Tarefa N" são defeitos de plano.
+- Comportamento/regressão: RED observado → implementação mínima → GREEN → refactor no verde.
+- Refatoração preservativa: caracterização verde → passo pequeno → mesma caracterização verde.
+- Config/IaC/migração: baseline → mudança → validate/plan/dry-run → inspecionar delta e rollback.
+- UI: comportamento quando houver + implementar estados → pelizzai-frontend em desktop/mobile → screenshot/navegador.
+- Docs/copy: editar → lint/links/exemplos/build-render → inspeção do resultado.
+```
+
+## Gates de qualidade do plano
+
+```text
+- Paths, interfaces, conteúdo, comandos e saídas são concretos.
+- Todo passo possui `→ verifique:`.
+- Cada tarefa registra skills transversais, estratégia de implementação/validação e perfil de review.
+- UI nunca omite `pelizzai-frontend`; Playwright/browser é ferramenta, não overlay.
+- Não há RED artificial para refatoração, CSS, docs, config, IaC ou migração.
+- Sem TBD/TODO, "tratar edge cases", "igual à Tarefa N" ou referências indefinidas.
+- API externa está ancorada em documentação atual, não memória.
 ```

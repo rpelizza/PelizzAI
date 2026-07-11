@@ -1,163 +1,173 @@
 ---
 name: pelizzai-debugging
-description: Loop de feedback primeiro, red antes do fix. Use ao encontrar qualquer bug, falha de teste ou comportamento inesperado, ANTES de propor correções — correção de sintoma é falha. É o head skill do track de **bug** (roteado pela `pelizzai-router`). Roda inline. Acione quando o usuário disser "não funciona", "tá com bug", "deu erro", "comportamento estranho", "para de chutar", ou quando um teste quebrar durante qualquer outra tarefa.
+description: Head skill do track de bug. Use ao encontrar bug, falha de teste, incidente ou comportamento inesperado. Faz triagem entre causa direta, bug determinístico incerto, falha flaky/distribuída e incidente com dano ativo; escolhe reasoning e validação proporcionais, contém dano reversivelmente antes de investigar e não obriga RCA, OODA ou quantidade fixa de hipóteses.
 ---
 
 # PelizzAI Debugging
 
 ## Objetivo
 
-Fixes aleatórios desperdiçam tempo e criam novos bugs; patches rápidos mascaram o problema real.
+Corrigir a causa comprovada com o menor processo que preserve evidência, segurança e regressão.
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Debugging para investigar a causa raiz antes de corrigir."
+**Anuncie ao iniciar:** "Usando a skill PelizzAI Debugging para classificar a falha, conter impacto se necessário e corrigi-la com evidência."
 
-> **Princípio:** SEMPRE encontre a causa raiz antes de tentar corrigir. Correção de sintoma é falha.
-
-## A Lei de Ferro
+## Invariantes
 
 ```text
-NENHUM FIX SEM INVESTIGAÇÃO DA CAUSA RAIZ PRIMEIRO.
+NENHUM FIX DEFINITIVO SEM EVIDÊNCIA SUFICIENTE DA CAUSA.
+CONTENÇÃO REVERSÍVEL NÃO É FIX E PODE PRECEDER A INVESTIGAÇÃO.
 ```
 
-Se você não completou a Fase 1, não pode propor correções. Use `pelizzai-reasoning` (*Root Cause Analysis*) para conduzir a investigação. O **fix** roda **inline** — nunca paralelize a correção de um bug. Exceção restrita à **investigação** (Fases 1–3): quando ≥3 fixes já falharam ou há hipóteses independentes entre si, um time **read-only** de hipóteses concorrentes (`pelizzai-team`) pode investigar e reportar — a Fase 4 volta sempre para a sessão principal, inline.
-
-**Prefixo único de instrumentação:** gere uma tag única no início da sessão de debugging (ex.: `[DEBUG-a4f2]`) e prefixe com ela TODO log de debug que você adicionar — logs do loop, de fronteira, de hipótese. O cleanup vira um único grep. Log sem tag sobrevive; log com tag morre.
+- Não confunda sintoma, hipótese, causa confirmada, contenção e prevenção.
+- Não imponha RCA a uma causa direta nem OODA a uma sequência curta.
+- Não invente um número de hipóteses. Mantenha apenas as materialmente plausíveis.
+- O fix roda inline. Delegue somente investigação read-only de hipóteses realmente independentes; a sessão principal decide e implementa.
 
 ---
 
-## As quatro fases (complete cada uma antes da próxima)
+## Passo 0 — há dano ativo?
 
-> As fases são um ciclo **OODA** (`pelizzai-loop`): Fase 1 = **Observar** (construir o loop de feedback), Fase 2 = **Orientar** (comparar com o que funciona), Fase 3 = **Decidir** (hipóteses ranqueadas), Fase 4 = **Agir** (teste que falha + fix na origem). Hipótese refutada → volte ao Observar com a informação nova.
+Antes da reprodução, verifique se usuários, dados, segurança, disponibilidade ou custo continuam sendo afetados.
 
-### Fase 1 — Observar: construa o loop de feedback PRIMEIRO
-
-Esta fase É a skill; o resto é mecânico. Antes de qualquer teoria, construa o **loop de feedback**: um comando que reproduz o sintoma sob demanda. O critério de saída da fase é um comando **nomeado, JÁ EXECUTADO ao menos uma vez** — cole a invocação e a saída — que seja:
+Se **sim**:
 
 ```text
-- red-capable: assere o SINTOMA EXATO que o usuário reportou, não "não crashou";
-- determinístico: mesmo resultado a cada execução (bug flaky → aumente a TAXA de
-  reprodução; ver a seção de não-determinismo do menu de táticas);
-- rápido: segundos, não minutos — um loop de 30s flaky mal vale; um de 2s determinístico
-  é tight, um superpoder de debugging;
-- executável por você (o agente), sem depender de um humano clicar — quando só um humano
-  pode operar, use o script HITL do menu.
+1. Confirme alvo, alcance e autorização.
+2. Preserve a evidência mínima que a contenção apagaria (métricas, IDs, logs, versão/diff).
+3. Aplique a menor contenção reversível disponível: rollback conhecido, feature flag, pausar consumer,
+   bloquear rota vulnerável ou reduzir exposição — conforme o sistema e as permissões.
+4. Monitore o sinal de impacto e confirme se estabilizou.
+5. Só então investigue a correção estrutural.
 ```
 
-**Sem esse comando, não há Fase 2.** Se você se pegar lendo código para montar teoria antes desse comando existir, PARE e volte a construir o loop. O menu ORDENADO de 10 táticas de construção (failing test → … → script HITL) e o tratamento de bugs não-determinísticos estão em **[references/feedback-loops.md](references/feedback-loops.md)**.
-
-```text
-1. Enquanto constrói o loop, colete a evidência barata: leia as mensagens de erro com atenção
-   (stack trace inteiro, linhas, arquivos, códigos) — muitas vezes contêm a solução.
-2. Cheque mudanças recentes (git diff/log, novas deps, config, ambiente) — um commit recente
-   na área é suspeito nº 1.
-3. Minimize o loop: corte UM elemento por vez (fixture, flag, passo) re-rodando o loop após
-   cada corte. Pronto quando todo elemento restante é load-bearing — remover qualquer um faz
-   o bug sumir ou o loop quebrar.
-4. Monte o loop com os comandos canônicos do projeto — o perfil `pelizzai/profile.md` tem os
-   comandos exatos de test/build/lint; não os chute.
-```
-
-### Fase 2 — Orientar: análise de padrão
-
-```text
-1. Ache exemplos que funcionam (código similar que funciona no mesmo projeto).
-2. Compare com referências (leia a implementação de referência COMPLETA, não por cima).
-3. Identifique TODAS as diferenças entre o que funciona e o que quebra (nenhuma é "irrelevante").
-4. Em sistemas multi-componente: instrumente cada fronteira com o prefixo da sessão (o que
-   entra/sai de cada camada) e rode o loop UMA vez para ver ONDE quebra.
-5. Rastreie o fluxo de dados: onde o valor ruim nasce? quem chamou com ele? O fix vai na
-   ORIGEM, não no sintoma.
-```
-
-### Fase 3 — Decidir: hipóteses ranqueadas e falsificáveis
-
-```text
-1. Gere 3–5 hipóteses RANQUEADAS antes de testar a primeira — gerar uma só ancora na
-   primeira ideia plausível. Cada hipótese carrega uma predição FALSIFICÁVEL: "se X é a
-   causa, mudar Y faz o bug sumir no loop". Sem predição enunciável, é palpite — não entra.
-2. Mostre o ranking ao usuário: ele re-ranqueia com conhecimento que você não tem
-   ("acabamos de deployar mudança no #3"). Não bloqueie se ele estiver ausente — siga o
-   seu ranking e deixe-o registrado.
-3. Teste a hipótese nº 1 minimamente: a MENOR mudança possível, UMA variável por vez,
-   verificada contra o loop.
-4. Predição confirmada → Fase 4. Refutada → próxima hipótese do ranking (não empilhe fixes).
-   Ranking esgotado → volte ao Observar com a informação nova.
-5. Não sabe? Diga "não entendo X" — não finja, pesquise (context7 quando a suspeita é lib externa).
-```
-
-### Fase 4 — Agir: implementação
-
-**Antes de tocar no código:** confirme que NÃO está em branch protegida — invoque `pelizzai-starting-branch` (branch) antes de escrever o teste ou o fix. (As Fases 1-3 podem instrumentar e experimentar de forma **temporária e descartável** — logs de fronteira, a menor mudança de hipótese —, mas **reverta tudo antes da Fase 4**: nenhuma mudança que vá ser COMMITADA acontece antes do gate, e uma working tree suja quebra o `git pull --ff-only` da starting-branch. Stash/descarte a instrumentação antes de criar a branch.) Leia também `pelizzai/domain-skills.md` e aplique as skills de domínio da área afetada ao escrever o teste e o fix — o fix segue as convenções do projeto, não padrões genéricos.
-
-```text
-1. Crie o teste que FALHA (via pelizzai-tdd), num seam que exercite o padrão REAL do bug —
-   o loop da Fase 1 costuma apontar o seam. OBRIGATÓRIO antes de corrigir. Se o seam correto
-   NÃO EXISTE, isso é um ACHADO ARQUITETURAL: registre-o e aponte para a
-   pelizzai-improving-architecture — não contorça a arquitetura dentro do fix nem escreva
-   um teste tautológico num seam errado.
-2. Implemente UM fix (a causa raiz; uma mudança; sem "já que estou aqui").
-3. Verifique: o teste passa? nenhum outro quebrou? Confirme com pelizzai-verification-before-completion.
-   → rode o POST-MORTEM (abaixo), encadeie pelizzai-review (revise o diff da working tree,
-     trate Critical/Important) e então pelizzai-finish-task para consolidar e integrar —
-     não deixe o bug corrigido parado na branch.
-4. Se o fix não funcionar: PARE. Conte os fixes tentados. < 3 → volte à Fase 1 com a info nova.
-   ≥ 3 → PARE e questione a arquitetura: acione `pelizzai-interview-me` para estressar a hipótese/arquitetura
-   com o usuário; se revelar problema estrutural/de design, escale para `pelizzai-brainstorming` (track feature).
-   Não tente o fix nº 4 sem essa discussão.
-```
+Se não houver contenção segura ou faltar autoridade, escale imediatamente com alvo, impacto, opção proposta e risco. **Nunca bloqueie a contenção aguardando uma reprodução perfeita.**
 
 ---
 
-## Post-mortem (obrigatório antes de fechar)
+## Passo 1 — classifique antes de escolher o reasoning
 
-Com o fix verificado e ANTES da `pelizzai-finish-task`, feche a sessão de debugging — todos os itens:
+| Classe | Sinais | Reasoning | Hipóteses | Caminho |
+| --- | --- | --- | --- | --- |
+| **Causa direta** | compilador, stack trace ou contrato aponta uma causa local inequívoca | ReAct + Verification | zero ou uma | reproduzir o erro → corrigir → rodar o mesmo oráculo |
+| **Determinístico incerto** | falha sempre, mas a origem ainda não está provada | RCA leve + ReAct | uma basta se discrimina; adicione outras só se competirem | loop mínimo → evidência → hipótese falsificável → fix |
+| **Flaky, recorrente ou distribuído** | taxa variável, concorrência, rede, múltiplas camadas/retries | RCA + Evidence Synthesis; Assumption Tracking quando útil | várias somente enquanto materialmente plausíveis | medir taxa → correlacionar fronteiras → testar hipótese mais informativa |
+| **Incidente com dano ativo** | produção degradada, exposição, perda/custo em curso | Constraint Satisfaction + Decision Making na contenção; RCA depois | depois de estabilizar | conter → monitorar → reclassificar e investigar |
+
+Use `pelizzai-loop`/OODA apenas quando houver **múltiplas rodadas** e cada rodada mudar evidência, hipótese ou realidade externa. OODA é o macro-loop de controle; não é técnica diagnóstica.
+
+---
+
+## Passo 2 — construa o oráculo mais barato que prove o sintoma
+
+Prefira um comando executável e já rodado que falhe pelo sintoma exato. No consumidor, use
+`pelizzai/profile.md` quando existir; em source mode ou sem profile, descubra o comando nos
+manifests, scripts e workflows reais. Não chute nem crie profile para investigar. O menu de táticas
+vive em [references/feedback-loops.md](references/feedback-loops.md); **esta SKILL.md é canônica
+para triagem e ordem**, portanto a linguagem legada de “Fase 1 obrigatória” da referência não
+precede contenção nem recria as quatro fases universais.
+
+O oráculo pode ser teste, typecheck/build, script mínimo, query controlada, trace, métrica ou taxa de reprodução. Para falha flaky, registre condições e frequência; para incidente não reproduzível fora de produção, métricas/logs correlacionados podem ser o oráculo inicial.
+
+Colete somente a evidência que diferencia caminhos:
 
 ```text
-[ ] Repro original re-rodada uma última vez (o loop da Fase 1, agora verde).
-[ ] grep do prefixo de debug ([DEBUG-…]) = ZERO ocorrências no código.
-[ ] Protótipos e harnesses descartáveis deletados.
-[ ] Hipótese vencedora registrada na MENSAGEM DE COMMIT do fix — o próximo debugger aprende.
-[ ] "O que teria prevenido este bug?" respondida AGORA, depois do fix — você tem informação
-    que não tinha no início. A resposta é uma recomendação arquitetural (seam ausente →
-    pelizzai-improving-architecture; validação na fronteira errada; teste que faltava), não culpa.
-    Se ela derivar uma DECISÃO que passa no critério triplo da pelizzai-domain-modeling,
-    registre o ADR automaticamente (anúncio de 1 linha).
+- mensagem completa, stack trace, input e ambiente;
+- mudanças recentes e diff da área;
+- exemplo equivalente que funciona;
+- fluxo do valor até o primeiro ponto em que se torna incorreto;
+- em múltiplas camadas, entrada/saída e correlation/request ID em cada fronteira.
 ```
 
----
-
-## Sinais do parceiro humano
-
-Frases do usuário que carregam diagnóstico — decodifique e aja, não argumente:
-
-| Sinal                          | Diagnóstico                                   | Ação                                                    |
-| ------------------------------ | --------------------------------------------- | ------------------------------------------------------- |
-| "Isso não está acontecendo?"   | você assumiu algo sem verificar               | verifique AGORA, com o loop                              |
-| "Para de chutar"               | suas hipóteses não têm predição falsificável  | volte à Fase 1/loop e re-derive o ranking                |
-| "A gente tá travado?"          | thrashing — fixes empilhados sem avanço       | PARE; resuma o que sabe, o que falta e o próximo passo   |
-| "Já tentamos isso"             | você perdeu o fio do que foi testado          | releia o ranking e os resultados antes de repetir        |
+Telemetria existente pode ser lida imediatamente. Qualquer instrumentação que altere código/config
+passa por `pelizzai-starting-branch` **antes** da edição; eventual deploy passa também pelo gate
+`external`. Se adicionar instrumentação temporária, crie um prefixo único `[DEBUG-<id>]`, use-o em
+todo log novo e remova-a antes da implementação definitiva.
 
 ---
 
-## Red flags — PARE e siga o processo
+## Passo 3 — teste hipóteses proporcionalmente
+
+Uma causa direta comprovável não precisa de brainstorming causal. Quando houver incerteza:
 
 ```text
-- Ler código para montar teoria ANTES de o comando do loop existir.
-- "Fix rápido por ora, investigo depois" / "Só muda X e vê se funciona".
-- Testar a primeira hipótese plausível sem gerar as 3–5 ranqueadas.
-- "Adiciona várias mudanças, roda os testes" / "Pula o teste, valido manual".
-- "Provavelmente é X, deixa eu corrigir" (sintoma ≠ causa raiz).
-- Log de debug sem o prefixo único da sessão.
-- "Mais uma tentativa de fix" (com 2+ já tentadas) → 3+ falhas = problema de arquitetura.
-- Cada fix revela um novo problema em outro lugar.
+1. Registre fatos confirmados separados de hipóteses.
+2. Para cada hipótese material, escreva uma predição falsificável.
+3. Escolha a observação que mais discrimina as hipóteses com menor custo/risco.
+4. Mude uma variável por vez; não empilhe fixes.
+5. Evidência refutou a hipótese → descarte-a e reoriente.
 ```
 
-Racionalizações comuns ("é simples, não precisa de processo"; "emergência, sem tempo"; "escrevo o teste depois") são todas falsas: debugging sistemático é MAIS rápido que chutar; o primeiro fix define o padrão; teste antes prova que pega.
+Mostre o ranking ao usuário apenas quando conhecimento operacional dele puder mudá-lo; não interrompa um bug local óbvio com cerimônia. Use `pelizzai-team` para investigação read-only somente quando hipóteses independentes puderem ser testadas em paralelo ou após thrashing real. Três fixes definitivos falhos são circuit breaker: pare, resuma evidência e questione hipótese/arquitetura antes de tentar outro.
 
 ---
+
+## Passo 4 — implemente e prove
+
+Antes de qualquer mutação no repositório — teste, instrumentação ou fix — use
+`pelizzai-starting-branch`. No consumidor, carregue as skills aplicáveis de
+`pelizzai/domain-skills.md`; em source mode, use regras/skills do próprio repo. Reverta experimentos
+descartáveis que não pertençam ao fix. Contenção operacional autorizada que não escreve no repo
+não espera uma branch.
+
+Escolha a estratégia pela natureza da mudança, conforme `pelizzai-reasoning`:
+
+```text
+- Bug de comportamento com seam automatizável: teste de regressão red→green via pelizzai-tdd.
+- Erro estático direto (import, tipo, build): o typecheck/build que reproduz pode ser prova suficiente;
+  adicione teste somente se proteger comportamento útil.
+- Refatoração necessária ao fix: caracterização verde antes, passos pequenos, mesma suíte verde depois.
+- Config/IaC/migração: validate/plan/dry-run e rollback; teste unitário só para lógica separável.
+- UI: pelizzai-frontend é overlay obrigatório; comportamento quando aplicável + verificação visual.
+- Documentação: lint/links/exemplos/build/render ou inspeção estática proporcional.
+```
+
+Implemente **um** fix na origem, sem "já que estou aqui". Depois:
+
+```text
+1. Rode de novo o oráculo original — agora verde.
+2. Rode a validação relevante e confirme nenhuma regressão.
+3. Revise a working tree com `pelizzai-review`; aplique findings e reexecute as provas afetadas.
+4. Consolide o conteúdo em commit definitivo. Se uma estratégia squash-final explicitamente
+   autorizada produziu WIPs, consolide-a agora, antes do seal; finish-task não reescreve histórico.
+5. Rode `pelizzai-verification-before-completion` contra o HEAD consolidado, grave
+   `validated-head` e só então chame `pelizzai-finish-task`: closure metadata-only no consumidor;
+   fechamento do execution record, sem runtime/closure, em source mode.
+```
+
+Se não existir seam adequado para uma regressão importante, registre o achado arquitetural e encaminhe a `pelizzai-improving-architecture`; não escreva teste tautológico num seam errado.
+
+---
+
+## Fechamento proporcional
+
+Sempre:
+
+```text
+[ ] Oráculo original reexecutado e verde.
+[ ] `rg "\[DEBUG-"` não encontra instrumentação desta sessão.
+[ ] Protótipos e mudanças experimentais removidos.
+[ ] Diff contém somente o fix e sua prova.
+```
+
+Para falha recorrente, distribuída, de segurança ou incidente, registre também: causa confirmada, fatores contribuintes, contenção, prevenção/detecção e "o que teria evitado isto?". Para um import incorreto evidente, não invente post-mortem.
+
+## Red flags
+
+```text
+- Investigar longamente enquanto o dano continua e há contenção reversível disponível.
+- Declarar causa raiz a partir de correlação temporal.
+- Exigir 3–5 hipóteses para erro direto ou aceitar uma só em sistema distribuído sem evidência.
+- Usar OODA como nome para cada comando/teste.
+- Corrigir duplicidade apenas com debounce/delay no frontend.
+- Aumentar timeout, desativar segurança ou esconder sintoma como solução definitiva.
+- Empilhar mudanças e depois perguntar qual funcionou.
+- Escrever teste artificial só para dizer que usou TDD.
+```
 
 ## Integração
 
-**Roteada por:** `pelizzai-router` (track `bug`), que já traz o contexto e a isolação decididos.
+**Roteada por:** `pelizzai-router` (track `bug`).
 
-**Usa:** `pelizzai-reasoning` (Root Cause Analysis; as fases seguem o OODA de `pelizzai-loop`), o menu de loops de **[references/feedback-loops.md](references/feedback-loops.md)** (Fase 1), as **skills de domínio** do projeto (`pelizzai/domain-skills.md` — a área afetada), `pelizzai-team` (investigação com hipóteses concorrentes, read-only, só quando ≥3 fixes falharam ou hipóteses independentes — nunca o fix), `pelizzai-starting-branch` (branch antes da Fase 4), `pelizzai-tdd` (teste que falha), `pelizzai-verification-before-completion` (confirmar o fix), `pelizzai-review` (revisar o fix), `pelizzai-finish-task` (fecha o ciclo — sempre DEPOIS do post-mortem). Seam ausente para o teste de regressão é achado arquitetural → `pelizzai-improving-architecture` (vocabulário de seams: `pelizzai-codebase-design`). Para causa raiz em lib externa, fundamente no `context7`.
+**Usa condicionalmente:** `pelizzai-reasoning` (seleção acima), `pelizzai-loop` (somente macro-loop em rodadas), [feedback-loops.md](references/feedback-loops.md), skills de domínio, `pelizzai-starting-branch`, `pelizzai-tdd` (bug comportamental automatizável), `pelizzai-frontend` (UI), `pelizzai-verification-before-completion`, `pelizzai-review` e `pelizzai-finish-task`.
+
+Para APIs/libs externas, confirme a documentação oficial atual disponível. Para seam ausente, use `pelizzai-improving-architecture` com o vocabulário de `pelizzai-codebase-design`.

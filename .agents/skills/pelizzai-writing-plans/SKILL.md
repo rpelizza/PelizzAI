@@ -1,158 +1,169 @@
 ---
 name: pelizzai-writing-plans
-description: Use quando houver uma spec, um design aprovado (`pelizzai-brainstorming`), um PRD ou requisitos para uma tarefa multi-etapa — ANTES de tocar no código. É a skill que transforma o design aprovado num plano de implementação executável, salvo em `pelizzai/plans/`. Acione após o brainstorming, ou quando o usuário disser "criar o plano", "plano de implementação", "quebrar em tarefas".
+description: Transforma requisitos, spec, PRD ou design aprovado em um plano de implementação executável antes do código. Use para features bounded, standard ou exploratory que precisam de uma ou mais tarefas coordenadas, ou quando o usuário pedir plano/decomposição. Dimensiona detalhe, validação, overlays e review por risco; não força brainstorming ou entrevista quando o aceite já está claro.
 ---
 
 # PelizzAI Writing Plans
 
 ## Objetivo
 
-Escrever um plano de implementação **completo**, assumindo que quem vai executar tem **zero contexto** da base de código. Documente tudo o que essa pessoa precisa: quais arquivos tocar em cada tarefa, o código, como testar, os comandos exatos. Entregue o trabalho como **tarefas bite-sized**, em **fatias verticais**, seguindo TDD e com commits frequentes. DRY. YAGNI.
+Produzir o menor plano que permite a um executor fresco implementar sem adivinhar contratos,
+escopo ou prova. O plano descreve decisões e critérios; não antecipa a implementação inteira.
 
-Assuma um desenvolvedor competente que conhece quase nada do seu toolset, do domínio do problema e de bom design de testes.
+**Anuncie:** "Usando a skill PelizzAI Writing Plans para transformar os requisitos num plano executável."
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Writing Plans para criar o plano de implementação."
+Em consumidor, salve em `pelizzai/plans/AAAA-MM-DD-<topico>.md`, salvo preferência explícita. Em
+source mode, use o plano nativo da plataforma e só crie arquivo se o usuário pedir um artefato
+persistente. A task/planning branch já deve existir; state é obrigatório apenas no consumidor.
 
-**Salve o plano em:** `pelizzai/plans/AAAA-MM-DD-<feature>.md` (padrão de diretório `pelizzai/`; preferências do usuário quanto ao local prevalecem).
-
----
-
-## Princípio central
-
-> Um bom plano transforma um problema em uma sequência de fatias verticais, cada uma testável e commitável por si só. Cada passo contém o conteúdo real (código, comando, saída esperada) — nunca um placeholder. Quem executa não deveria precisar fazer uma única pergunta.
-
----
-
-## Verificação de escopo
-
-Se a spec cobre múltiplos subsistemas independentes, ela deveria ter sido quebrada em sub-projetos no `pelizzai-brainstorming`. Se não foi, sugira separar em **planos distintos** — um por subsistema. Cada plano deve produzir software funcional e testável por si só.
-
-**Teste fog-vs-tarefa** (o que entra no plano AGORA vs fica como pendência): "eu consigo formular a **pergunta** com precisão agora?" — não "consigo respondê-la agora". Pergunta precisa e sem resposta vira uma tarefa de investigação/protótipo no plano; névoa que nem pergunta tem ainda **não** é fatiada em tarefas — registre como pendência da spec e planeje até a fronteira do que se enxerga.
-
-## Estrutura de arquivos
-
-Antes de definir as tarefas, mapeie quais arquivos serão criados ou modificados e a responsabilidade de cada um — é aqui que as decisões de decomposição se fixam. Use `pelizzai-reasoning` (*Structured Decomposition*).
+## Pré-condições
 
 ```text
-- Projete unidades com fronteiras claras e interfaces bem definidas; um arquivo, uma responsabilidade.
-- Prefira arquivos menores e focados a arquivos grandes que fazem demais.
-- Arquivos que mudam juntos vivem juntos. Divida por responsabilidade, não por camada técnica.
-- Em base existente, siga os padrões estabelecidos; não reestruture unilateralmente.
+- Objetivo e critério de aceite são claros o suficiente para planejar.
+- A branch foi aberta por pelizzai-starting-branch antes da spec/plano.
+- Source mode segue as regras do repo-fonte sem runtime `pelizzai/`; consumidor usa catálogo/profile.
+- Fato de biblioteca/API que pode ter mudado foi verificado em documentação oficial disponível.
 ```
 
-## Granularidade bite-sized (cada passo = uma ação de 2-5 min)
+Se ainda não é possível formular a pergunta técnica com precisão, volte ao brainstorming. Se a
+pergunta é precisa mas a resposta depende de evidência, crie uma tarefa curta de investigação ou
+protótipo com saída e critério de parada.
+
+## Profundidade do plano
+
+Use a lane registrada pelo router:
+
+| Lane | Forma do plano |
+| --- | --- |
+| `bounded` | 1–poucas tarefas compactas; paths, contrato, aceite, prova e comando. Não force brainstorming, entrevista ou snippets extensos. |
+| `standard` | tarefas verticais, interfaces e dependências explícitas; detalhe onde um executor poderia escolher errado. |
+| `exploratory` | riscos, decisões, migração/rollback e tarefas de descoberta delimitadas; não invente certeza nem implementação prematura. |
+
+Inclua código/config completo somente quando ele próprio é o contrato frágil (schema, formato,
+template, chamada pouco óbvia). Para implementação comum, nomes, interfaces, invariantes e exemplos
+curtos são mais duráveis que copiar o código futuro para o plano.
+
+## Decompor em fatias verticais
+
+Cada tarefa entrega um resultado observável de ponta a ponta. Não separe “todos os testes” de
+“toda a implementação”. Uma tarefa é uma unidade que pode ser aprovada ou rejeitada sem obrigar a
+mesma decisão sobre a vizinha; um plano de uma tarefa é válido.
 
 ```text
-- "Escreva o teste que falha"            → passo
-- "Rode o teste e veja-o falhar"         → passo
-- "Implemente o mínimo para passar"      → passo
-- "Rode o teste e veja-o passar"         → passo
-- "Commit"                               → passo
+- Siga a estrutura existente; não use o plano para reestruturar o repo sem requisito.
+- Nomeie paths e interfaces que já são conhecidos; marque glob/pasta apenas quando a descoberta
+  do arquivo correto fizer parte explícita da tarefa.
+- Declare dependências entre tarefas e evite paralelismo falso em uma working tree compartilhada.
+- Tarefa durável/assíncrona privilegia contrato e aceite; não congele número de linha perecível.
 ```
 
-## Fatias verticais (não horizontais)
+## Skills aplicáveis
 
-Cada tarefa é uma **fatia vertical**: um comportamento de ponta a ponta, testável e commitável de forma independente — não "todos os testes" seguidos de "toda a implementação". Esse é o ciclo do `pelizzai-tdd` (um teste → uma implementação → repetir). Tarefas independentes podem ser assumidas por executores diferentes — em paralelo real quando o usuário escolher `worktree` no gate de setup (caminhos disjuntos), ou integradas **em série** pelo coordenador quando escolher `branch` (ver `pelizzai-execution-plans`). Um plano com frentes independentes bem separadas é o que torna a recomendação de worktree + team honesta no gate.
+Registre no cabeçalho e em cada tarefa:
 
-## Right-sizing das tarefas (pelo custo do gate)
+- skills de domínio selecionadas do catálogo, ou `nenhuma`;
+- **Skills transversais do harness**, ou `nenhuma`.
 
-A tarefa é a **menor unidade que vale o gate de um reviewer fresco**: divida apenas onde um reviewer poderia **rejeitar uma tarefa aprovando a vizinha** — se duas "tarefas" só podem ser aprovadas ou rejeitadas juntas, são uma. Corolário: um **plano de 1 tarefa é legítimo** para uma feature pequena e óbvia — o fluxo inteiro (spec → plano → gate → execução → review), na escala mínima.
+Overlays obrigatórios por superfície:
 
-## Durabilidade: plano imediato × artefato que sobrevive à sessão
+| Superfície | Overlay |
+| --- | --- |
+| página, componente, CSS, layout, estado visual, UX | `pelizzai-frontend` |
+| auth, autorização, input não confiável, SQL, upload, segredo, dado sensível | `pelizzai-oswap` |
+| documentação humana que faz parte da entrega | `pelizzai-documenting-features` |
 
-O plano deste fluxo é executado **imediatamente** (contexto fresco) — por isso os caminhos exatos de arquivo são obrigatórios. A regra INVERTE para artefatos que **sobrevivem à sessão** (issues, handoffs via `pelizzai-handoff`, briefs para trabalho assíncrono): neles, **durabilidade vence precisão** — descreva **contratos comportamentais** (o que o sistema faz, interfaces e tipos por nome), **critérios de aceite independentes e verificáveis** e o **fora-de-escopo explícito** (previne gold-plating); NÃO cite paths de arquivo nem números de linha, que apodrecem antes de serem lidos — quem executa depois explora o codebase fresco.
+Não liste skill por possibilidade remota. UI nunca troca `pelizzai-frontend` por Playwright,
+browser ou screenshot; esses são apenas ferramentas do overlay.
 
-## Skills de domínio
+## Estratégia por tarefa
 
-Se o projeto tem skills de domínio (catálogo `pelizzai/domain-skills.md`), o plano **deve** seguir suas convenções e **nomeá-las nas tarefas relevantes**, para que o executor (e qualquer subagente/teammate) as aplique em vez de padrões genéricos. Se `pelizzai/domain-skills.md` **não existir**, o harness não foi inicializado — rode `pelizzai-audit` (bootstrap) antes de escrever o plano. Para bibliotecas/frameworks externos, ancore as tarefas na **API real e atual** — use o MCP `context7` (ou a web) quando não tiver certeza de assinaturas ou opções; não confie na memória.
+Preencha **Estratégia de implementação e validação**:
 
-## Documento do plano
+| Efeito | Estratégia primária | Evidência |
+| --- | --- | --- |
+| comportamento/regressão automatizável | TDD red→green pelo contrato público | RED observado, GREEN, teste focal |
+| refactor preservativo/legado | characterization | mesma prova verde antes/depois |
+| config, IaC, schema, migração, script | validate | parser, fixture, plan/dry-run e rollback aplicável |
+| UI visual/interação | visual + funcional | app rodando, estados/viewports, acessibilidade |
+| docs, prompt, policy, artefato estático | static/scenario | lint, render, link/schema/grep ou consumo real |
 
-Use o template em **[templates/plan.md](templates/plan.md)**. Todo plano começa com um cabeçalho (Objetivo / Arquitetura / Stack técnica / **Global Constraints** — requisitos projeto-wide copiados **verbatim** da spec, que toda tarefa herda e o coordenador cola no briefing de cada membro — + a sub-skill obrigatória de execução) e cada tarefa traz **Files** (criar/modificar/testar com caminhos exatos), o bloco **Interfaces** (Consome/Produz com assinaturas exatas) e os passos de TDD com **código completo**, **comandos exatos** e **`→ verifique:` em todo passo**.
+Tarefas mistas combinam estratégias. Não fabrique RED para CSS, Markdown ou configuração só para
+uniformizar o plano.
 
-## Sem placeholders
+Registre também **Perfil de review**:
 
-Todo passo precisa do conteúdo real. Estes são **defeitos de plano** — nunca os escreva:
+- `combined`: bounded, risco baixo, escopo coeso, sem segurança/dados/migração/contrato público;
+- `split`: risco médio/alto, superfície sensível, contrato público, dados, migração ou múltiplas partes.
+
+Ambos cobrem spec e qualidade; muda a quantidade de despachos, não o critério de aprovação.
+
+## Documento
+
+Use [templates/plan.md](templates/plan.md) e mantenha apenas campos aplicáveis. Cada tarefa contém:
 
 ```text
-- "TBD", "TODO", "implementar depois", "preencher detalhes".
-- "Adicionar tratamento de erro adequado" / "adicionar validação" / "tratar edge cases".
-- "Escrever testes para o acima" (sem o código do teste).
-- "Igual à Tarefa N" (repita o código — as tarefas podem ser lidas fora de ordem).
-- Passos que dizem o quê sem mostrar o como (passo de código exige bloco de código).
-- Referências a tipos/funções/métodos não definidos em nenhuma tarefa.
+resultado + fora de escopo
+files/interfaces
+skills de domínio + overlays
+dependências/constraints
+estratégia de implementação e validação
+perfil de review
+passos e comandos suficientes
+critério observável de conclusão e rollback quando aplicável
 ```
 
-## Autoavaliação (você mesmo, sem subagente)
+São defeitos: `TBD`, “tratar edge cases” sem nomeá-los, comandos inexistentes, API lembrada sem
+fonte atual, placeholders, tarefa horizontal ou prova que não observa o efeito.
 
-Após escrever o plano completo, releia a spec com um olhar renovado e confira:
+## Verificar o plano
+
+Antes do handoff:
+
+1. Mapeie cada requisito para uma tarefa e cada tarefa para um requisito.
+2. Confirme interfaces/nomenclatura entre tarefas e dependências.
+3. Confirme overlays e estratégia de prova por artefato.
+4. Procure placeholders e comandos chutados.
+5. Confirme que a lane não recebeu cerimônia maior que seu risco.
+
+Use revisão independente ou `pelizzai-interview-me` somente quando incerteza, risco ou decisões
+reais justificarem. Para `bounded`, a autoavaliação acima normalmente basta. Para `standard`, use
+stress focal se restarem trade-offs. Para `exploratory`, stress/review independente é esperado.
+Não reabra design aprovado sem evidência nova.
+
+## Handoff
+
+No consumidor, atualize o campo `plan:` no state. Em source mode, entregue o plano nativo/execution
+record a `pelizzai-execution-plans`. A branch/base já estão definidas; o gate pós-plano resolve
+apenas decisões pendentes com defaults proporcionais:
 
 ```text
-1. Cobertura da spec: para cada requisito, aponte a tarefa que o implementa. Liste lacunas.
-2. Varredura de placeholders: procure os padrões da seção acima e corrija.
-3. Consistência de tipos: assinaturas e nomes usados em tarefas tardias batem com os definidos antes?
-   (clearLayers() na Tarefa 3 e clearFullLayers() na Tarefa 7 é um bug.)
+isolation: branch por default; worktree apenas se pedido/justificado
+execution-mode: inline por default; subagents/team por independência ou coordenação real
+commit-strategy: granular por default; squash-final só com trade-off/pedido
 ```
 
-Corrija inline. Se faltar tarefa para um requisito, adicione-a.
+Não mostre todas as opções quando o default é seguro e reversível. Se o usuário pediu **apenas o
+plano**, não execute código: valide o artefato, consolide/sele a entrega de planejamento e mantenha
+local salvo pedido externo.
 
-## Revisão independente do plano (recomendada)
-
-Antes do estresse com `pelizzai-interview-me`, considere uma revisão **independente** do plano por um subagente (`pelizzai-subagents` / `pelizzai-team`) — a autoavaliação do próprio autor tem ponto cego conhecido. O reviewer confere: **completude** (todo requisito da spec virou tarefa?), **alinhamento** com a spec, **qualidade da decomposição** (fatias verticais coesas) e **executabilidade** (passos sem placeholders, código completo). Aplique os achados antes de seguir.
-
-## Estresse obrigatório com `pelizzai-interview-me`
-
-Após salvar o plano, **estresse-o com `pelizzai-interview-me` (OBRIGATÓRIO — não é oferta)** antes de qualquer execução: uma entrevista que **exponha as lacunas e riscos do plano**. Anuncie: "Vou estressar este plano e expor as lacunas antes de executar." Se a entrevista desfizer o plano, volte ao `pelizzai-brainstorming`.
-
-## Handoff para a execução
-
-Plano salvo e estressado → entregue à **`pelizzai-execution-plans`**, que conduz o **GATE DE SETUP PÓS-PLANO** com o usuário (os menus canônicos moram lá), nesta ordem: (1) isolamento — **worktree ou branch normal?**; (2) nome da branch/worktree sugerido e confirmado via `pelizzai-starting-branch` (`feat/`, `fix/`, `refactor/`, …); (3) modo de execução — **team / subagents / inline** (as três opções sempre visíveis); (4) estratégia de commit — **granular ou commit único final**. Tudo registrado em `pelizzai/data/state.md`. **Não decida nada disso aqui** — o plano apenas informa a recomendação (frentes paralelas → worktree + team).
-
-Informe à `pelizzai-execution-plans` o **caminho exato do plano salvo** — ela o registra no campo `plan:` de `pelizzai/data/state.md` (a fonte das tarefas, relida após compaction) antes da Tarefa 1. A `pelizzai-writing-plans` não escreve o `state.md`.
-
-Confirme: "Plano salvo em `pelizzai/plans/<arquivo>.md` e estressado. Vou conduzir o gate de setup (worktree/branch, nome, modo de execução, commits) e executá-lo com a `pelizzai-execution-plans`."
-
----
-
-## Anti-padrões
+## Red flags
 
 ```text
-- Escrever o plano com placeholders ou passos sem código.
-- Fatias horizontais (todos os testes, depois toda a implementação) em vez de verticais.
-- Ignorar as skills de domínio do projeto, ou não nomeá-las nas tarefas.
-- Ancorar tarefas em API de memória em vez da doc real (context7).
-- Decidir o modo de execução, o isolamento ou a estratégia de commit aqui (é do gate de setup
-  pós-plano, na pelizzai-execution-plans).
-- Pular o estresse obrigatório com pelizzai-interview-me.
-- Plano gigante para múltiplos subsistemas em vez de um plano por subsistema.
+- Escrever plano antes da task branch.
+- Forçar brainstorming/interview/reviewer independente em lane bounded clara.
+- Duplicar no plano todo o código que a execução deve escrever.
+- Omitir overlay frontend/security detectável.
+- TDD universal ou review split universal.
+- Team/worktree por preferência do harness, sem ganho concreto.
+- Plano gigante cobrindo subsistemas que deveriam ser tarefas/projetos separados.
 ```
-
----
 
 ## Integração
 
-**Combina com:**
+Combina com `pelizzai-brainstorming` quando houve design, `pelizzai-reasoning` para decomposição,
+`pelizzai-frontend`/`pelizzai-oswap` como overlays e `pelizzai-execution-plans` para execução.
 
-- `pelizzai-brainstorming` — de onde o design aprovado normalmente chega.
-- `pelizzai-reasoning` — *Structured Decomposition* (estrutura de arquivos) e *Plan and Execute* (ordem das tarefas).
-- `pelizzai-tdd` — cada tarefa é uma fatia vertical com passos de TDD.
-- `pelizzai-interview-me` — estresse obrigatório do plano antes de executar.
-- `pelizzai-execution-plans` — executa o plano (escolhe o modo team/subagents/inline).
-- `pelizzai-audit` — padrão de diretório `pelizzai/` e catálogo de skills de domínio.
+## Instrução final
 
----
-
-## Instrução final para o agente
-
-```text
-Escreva o plano que um bom engenheiro sem contexto executaria sem fazer uma única pergunta.
-
-Prefira:
-- fatias verticais a fatias horizontais;
-- código completo a placeholders;
-- API real (context7) a memória;
-- seguir e nomear as skills de domínio a padrões genéricos.
-
-Salve em pelizzai/plans/. Estresse com pelizzai-interview-me (obrigatório).
-Entregue à pelizzai-execution-plans; não decida o modo de execução aqui.
-```
+Planeje o contrato, a prova e as fronteiras na profundidade da lane. Deixe a implementação para a
+execução e não transforme clareza em cerimônia.

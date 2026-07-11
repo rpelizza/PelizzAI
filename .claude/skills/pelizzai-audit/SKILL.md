@@ -1,193 +1,201 @@
 ---
 name: pelizzai-audit
-description: Bootstrap do harness. Use essa skill no PRIMEIRO contato do usuário com o harness PelizzAI ou quando ele digitar "bootstrap" — é ela que inicializa o PelizzAI num projeto ou workspace, novo ou existente. Acione-a também sempre que o harness ainda não tiver sido inicializado neste projeto (sem `pelizzai/domain-skills.md`), ou quando o usuário pedir para "remapear", "reescanear" ou "reinicializar" o PelizzAI. Pergunta puramente conceitual não a dispara.
+description: Mapeia um projeto para o harness PelizzAI em dois modos. Use `scan-only` para análises/reviews read-only sem criar arquivos; use `bootstrap-write` quando o usuário pedir bootstrap/remapeamento persistente ou autorizar preparar catálogo, profile e skills de domínio. Não execute bootstrap consumidor no repo-fonte do próprio PelizzAI.
 ---
 
 # PelizzAI Audit
 
-<FIRST-TIME-USING-PELIZZAI>
-Na **primeira vez** que o usuário interagir com o harness PelizzAI, ou sempre que ele digitar **"bootstrap"**, esta skill **PRECISA** ser invocada antes de qualquer trabalho. Sem este mapeamento, o harness atua às cegas.
-
-O harness está inicializado neste projeto quando existe o arquivo `pelizzai/domain-skills.md`. Se ele **não** existe, trate como primeira vez.
-</FIRST-TIME-USING-PELIZZAI>
-
 ## Objetivo
 
-Mapear o contexto de trabalho para que o PelizzAI atue com precisão: identificar **o que** é o projeto (único ou workspace, novo ou existente), **com que** é construído (stacks, frameworks, linguagens, ferramentas), **o que já existe** de infraestrutura (MCPs, git/host remoto, skills de domínio) e, a partir disso, **preparar o harness** — criando as skills de domínio e a documentação que o tornam assertivo.
+Descobrir apenas o contexto que muda decisões do agente e, quando autorizado, materializá-lo num bootstrap pequeno, versionável e portátil.
 
-O mapeamento é **insumo**, não fim: ele existe para habilitar as próximas tarefas, não para produzir um relatório por si só.
+**Anuncie:** "Usando a skill PelizzAI Audit em modo `<scan-only|bootstrap-write>` para mapear o projeto proporcionalmente."
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Audit para mapear seu contexto e preparar o harness."
+## Escolher o modo
 
----
+| Modo | Gatilho | Pode escrever? |
+| --- | --- | --- |
+| `scan-only` | analisar, explicar, revisar, diagnosticar; tarefa mutável ainda sem autorização de bootstrap | Não. Nem state, branch, profile, catálogo, ledger, hook ou skill. |
+| `bootstrap-write` | usuário disse `bootstrap`/`reinicializar`, ou aprovou a proposta após scan | Sim, dentro da task branch criada antes da primeira escrita. |
 
-## Princípio central
+Um pedido read-only nunca vira bootstrap mutável só porque `pelizzai/domain-skills.md` não existe.
 
-> Mapeie antes de agir, mas mapeie na medida certa. Um projeto novo e vazio precisa de uma entrevista; um monorepo maduro precisa de um repo-scan paralelo. Ajuste a profundidade ao que existe — e converta cada descoberta em um artefato útil (skill de domínio, recomendação ou registro), nunca em ruído.
+## Source mode
 
-Não transforme o bootstrap em interrogatório nem em auditoria interminável. Recomende mudanças (git, MCPs, integrações); **não as imponha** sem confirmação do usuário.
+Se existirem `.claude/skills/pelizzai-core/SKILL.md`, `scripts/pelizzai-core-skills.txt` e `scripts/sync-harness.ps1`, trate o projeto como repo-fonte PelizzAI. Não crie `pelizzai/` consumidor; faça apenas o scan necessário à tarefa.
 
----
-
-## Como executar o mapeamento
-
-Conduza o levantamento com um **time de agentes**: use `pelizzai-team` (preferência) ou, se for indisponível/desnecessário, `pelizzai-subagents`. O mapeamento é naturalmente paralelizável — cada frente do inventário (estrutura, stacks, MCPs, git/host, skills existentes) é uma frente disjunta, ideal para um membro do time.
-
-- Coordene pelo protocolo da `pelizzai-team`: um briefing por frente, arquivos/áreas próprios, e síntese ao final.
-- Cada frente é **leitura** (read-only): prefira o agentType `Explore` no modo subagents.
-
----
-
-## Fluxo lógico do bootstrap
-
-```mermaid
-flowchart TD
-    Start([Primeira interacao OU bootstrap]) --> Eng[Motor de mapeamento:\npelizzai-team / pelizzai-subagents]
-    Eng --> Inv[Inventario paralelo do contexto]
-    Inv --> Tri{Workspace ou projeto unico?}
-    Tri --> New{Projeto novo ou existente?}
-
-    New -- Novo --> Bra[brainstorming + interview-me\ndesign aprovado]
-    Bra --> Wri
-
-    New -- Existente / Workspace --> Scan[Repo-scan completo:\npadroes, stacks, frameworks, convencoes]
-    Scan --> Wri[pelizzai-writing-skills:\ncria o maximo de skills de dominio\ncom context7 + regras Anthropic]
-
-    Wri --> Doc[Documentacao do harness:\npelizzai/domain-skills.md catalogo\npelizzai/data/review-domain-skills.md ledger]
-    Doc --> Rec[Recomendacoes ao usuario:\ngit init, GitHub/GitLab, MCPs, context7]
-    Rec --> End([Harness pronto para atuar])
-```
-
----
-
-## Fase 1 — Triagem do alvo
-
-Determine, antes de tudo, **o que** você está mapeando:
-
-- **Workspace ou projeto único?** Vários projetos independentes na mesma pasta (múltiplos `package.json`/`pyproject.toml`/`.git`, subpastas autossuficientes) indicam workspace/monorepo — mapeie cada projeto e a relação entre eles.
-- **Novo ou existente?** Pasta vazia ou só com scaffolding (sem código de domínio, sem histórico relevante de git) → **novo**. Caso contrário → **existente**.
-
-## Fase 2 — Inventário do contexto (em paralelo)
-
-Levante, em frentes simultâneas:
+## Profundidade proporcional
 
 ```text
-- Estrutura: layout de pastas, monorepo vs único, módulos e fronteiras.
-- Stacks: linguagens, frameworks, gerenciadores de pacote, build, runtime, banco de dados.
-- MCPs: instalados no projeto (.mcp.json, .claude/settings.json) e globais (~/.claude).
-- Skills de domínio: já existe alguma skill não-`pelizzai-` neste projeto?
-- Versionamento: git inicializado? remoto no GitHub/GitLab? CI/CD? branch atual e fluxo.
-- Convenções: CLAUDE.md/AGENTS.md, linters, padrões de teste, estilo de commit.
+projeto pequeno/stack simples
+→ inspeção inline focada.
+
+monorepo ou múltiplas frentes independentes
+→ subagents/time read-only quando reduzirem latência ou aumentarem cobertura.
+
+projeto novo/vazio
+→ entender produto e stack pretendida; não inventar padrões ainda inexistentes.
 ```
 
-> O sinal canônico de **bootstrap concluído** é a existência de `pelizzai/domain-skills.md` — não a presença de skills de domínio avulsas. Skills de domínio sem catálogo devem ser inventariadas e então **catalogadas** pela `pelizzai-writing-skills`, não tratadas como bootstrap já feito. **Auto-reparo do estado parcial:** se o catálogo existir mas o ledger `pelizzai/data/review-domain-skills.md` estiver ausente, NÃO refaça o bootstrap — semeie apenas o ledger via `pelizzai-writing-skills` (sem ele, a cadência de manutenção fica silenciosamente morta).
+Team não é default. Use-o somente quando as frentes são independentes e a síntese vale o custo.
 
-## Fase 3 — Ramificação
+## Scan-only
 
-**Projeto NOVO:**
-
-1. `pelizzai-brainstorming` — capturar a intenção e produzir um design enxuto aprovado (a brainstorming já usa `pelizzai-interview-me` internamente para estressar). **No bootstrap, o destino após o design é a `pelizzai-writing-skills`, não a `pelizzai-writing-plans`.**
-2. `pelizzai-writing-skills` — criar as skills de domínio iniciais e escrever `pelizzai/domain-skills.md` (marca o bootstrap concluído), a partir do design aprovado.
-3. Só então, se o usuário quiser implementar, segue-se o fluxo de feature normal (`pelizzai-writing-plans` → `pelizzai-execution-plans`).
-
-**Projeto EXISTENTE ou WORKSPACE:**
-
-1. **Repo-scan completo** — padrões, stacks, frameworks, linguagens, convenções e pontos de extensão.
-2. `pelizzai-writing-skills` — criar o **máximo de skills de domínio** úteis a partir dos padrões observados, usando o MCP `context7` para fundamentar cada uma na documentação real das libs/frameworks, conforme as regras de criação de skills da Anthropic.
-
-> A criação, a nomenclatura, o catálogo e o ledger das skills de domínio são responsabilidade da `pelizzai-writing-skills`. O `pelizzai-audit` **orquestra** e garante que essa etapa aconteça.
-
-## Fase 4 — Documentação do harness
-
-Garanta que o bootstrap deixe três artefatos (os dois primeiros criados/atualizados via `pelizzai-writing-skills`; o perfil, por esta skill):
-
-- **`pelizzai/domain-skills.md`** — catálogo das skills de domínio: o que cada uma faz e quando usá-la.
-- **`pelizzai/data/review-domain-skills.md`** — ledger de manutenção: quando cada skill de domínio foi criada/atualizada e a referência de git correspondente.
-- **`pelizzai/profile.md`** — perfil de execução (template: [templates/profile.md](templates/profile.md)): comandos de test/build/lint/format/dev, package manager e stack baseline. Detecte lendo os scripts **REAIS** do projeto (`package.json` → `scripts`, Makefile/Justfile, pyproject, etc. — nunca chute `npm test`); honre o package manager do **LOCKFILE** (instalar com npm num projeto pnpm corrompe o lock); quando a detecção for inconclusiva, **confirme com o usuário** antes de gravar. O stack baseline (stack + versões-chave dos manifests, com data) ancora o eixo version-driven da `pelizzai-writing-skills`.
-
-Ofereça também instalar os **hooks opt-in do Claude Code** (um a um, com confirmação — nunca imponha):
-
-- **Hook de cadência** (`pelizzai-cadence.mjs`/`.ps1`, UserPromptSubmit): lembra de revisar as skills de domínio (ver `pelizzai-writing-skills` → `references/domain-skill-maintenance.md`).
-- **Hook de guarda git** (`pelizzai-guardrails.mjs`/`.ps1`, PreToolUse com matcher `Bash`): bloqueia, antes de rodarem, `push --force` (exceto `--force-with-lease`), `reset --hard`, `clean -f`, `branch -D`, `checkout .` e `restore .` — enforcement executável dos gates fail-closed que, sem ele, dependem só da obediência do modelo. Instruções de instalação e teste no cabeçalho do próprio hook.
-- **Hook de SessionStart** (`pelizzai-session-start.mjs`/`.ps1`, matcher `startup|clear|compact`): re-injeta o lembrete da `pelizzai-core` (regra do 1%) e o aviso de tarefa ativa no `state.md` — valor maior no `clear` e em plataformas que não re-injetam a entrada sempre-carregada.
-
-A existência de `pelizzai/domain-skills.md` é o sinal de que o harness já foi inicializado neste projeto.
-
-## Fase 5 — Recomendações ao usuário
-
-Recomende (sem impor; aguarde confirmação para qualquer ação que altere o ambiente):
+Responda às perguntas relevantes, sem transformar o scan em inventário universal:
 
 ```text
-- Git ausente → sugerir `git init` (o harness atua melhor com histórico).
-- Sem remoto → sugerir integração com GitHub ou GitLab.
-- MCPs → pesquisar na web os MCPs mais relevantes para a stack identificada e sugerir.
-- context7 ausente → sugerir a instalação. É um MCP essencial para o PelizzAI fundamentar
-  skills e respostas na documentação real, em vez de adivinhar.
+Estrutura: repo único, monorepo ou workspace de múltiplos repos?
+Stack: manifests, lockfiles, frameworks, runtime, banco e versões-chave?
+Execução: comandos reais de test/build/lint/dev e seus diretórios?
+Convenções: instruções, linters, testes, commits, design system e padrões repetidos?
+Git: branch atual, default real, remotos/provider, CI e working tree?
+Skills: roots instalados, domain skills existentes e catálogo?
+Ferramentas: MCPs/conectores que realmente mudam esta tarefa?
 ```
 
----
+Separe fatos observados de inferências. Não escreva relatório genérico se o pedido exige apenas uma resposta localizada.
 
-## Padrão de diretório `pelizzai/`
+Ao terminar scan-only:
 
-Toda a documentação e o estado do harness vivem em `pelizzai/`, na **raiz do repositório ou do workspace**. Este é o padrão único que todas as skills consomem — nunca espalhe artefatos do harness por outras pastas.
+- entregue a análise solicitada;
+- se uma tarefa mutável precisa de bootstrap, proponha o menor conjunto de artefatos/skills e peça consentimento uma vez;
+- não crie placeholders para "preparar depois".
 
-Regra única de leitura: a **raiz** de `pelizzai/` guarda conhecimento versionado; `data/` guarda o estado e os efêmeros. **Tudo que o harness gera fica dentro de `pelizzai/`** — nunca em `.pelizzai/`, no temp do SO nem espalhado por outras pastas.
+## Bootstrap-write
+
+### 1. Isolar antes de escrever
+
+Se houver Git, invoque `pelizzai-starting-branch` e crie uma task branch como
+`chore/bootstrap-harness` antes de qualquer arquivo. Se não houver Git, ofereça `git init`; se o
+usuário recusar, explique que não haverá histórico/rollback e prossiga somente com autorização.
+
+O bootstrap é uma transação própria. Seus artefatos precisam estar commitados/integrados ou permanecer na mesma task branch antes de um worktree de feature depender deles.
+
+### 2. Detectar skill roots
+
+Registre no `pelizzai/profile.md` os roots realmente instalados:
 
 ```text
-pelizzai/                         na raiz do repositório ou workspace
-│  ── CONHECIMENTO (versionado) ──
-├── domain-skills.md              catálogo das skills de domínio (marca o bootstrap concluído)
-├── profile.md                    perfil de execução: comandos test/build/lint, package manager, stack baseline (pelizzai-audit)
-├── context.md                    glossário do domínio (pelizzai-domain-modeling); multi-contexto: context/<nome>.md + context-map.md
-├── adr/                          decisões de arquitetura (ADRs numerados, registrados automaticamente)
-├── out-of-scope/                 rejeições duráveis, um arquivo por conceito (pelizzai-domain-modeling)
-├── specs/                        designs aprovados (pelizzai-brainstorming): AAAA-MM-DD-<topico>-design.md
-├── plans/                        planos de implementação (pelizzai-writing-plans)
-└── data/                         ── ESTADO E EFÊMEROS ──
-    ├── state.md                  cursor da tarefa ativa (pelizzai-execution-plans) — versionado
-    ├── review-domain-skills.md   ledger de manutenção das skills de domínio — versionado
-    ├── .cadence-state.json       contador do hook de cadência                 — gitignored
-    ├── handoffs/                 briefs, relatórios, pacotes de review e handoffs (task-brief / review-package / pelizzai-handoff) — gitignored
-    ├── mockups/                  telas do visual companion (pelizzai-brainstorming)                                                — gitignored
-    └── reports/                  relatórios HTML de arquitetura (pelizzai-improving-architecture)                                   — gitignored
+source-mode: false
+skill-roots:
+  - .claude/skills   # se existir/for usado
+  - .agents/skills   # se existir/for usado
+canonical-skill-root: <root ativo>
 ```
 
-> `context.md`, `adr/`, `out-of-scope/` e os subdiretórios de `data/` são criados **sob demanda** pelas skills que os usam, não no bootstrap — sua ausência logo após o bootstrap é esperada.
+`pelizzai-writing-skills` escreve domain skills no root ativo; se ambos estiverem instalados, mantém cópias byte a byte e verifica paridade.
 
-Em **workspace** (vários projetos na mesma pasta), o `pelizzai/` fica na raiz do workspace e cobre todos; cada skill registra a qual projeto um artefato pertence quando isso importar.
+### 3. Selecionar o menor conjunto de domain skills
 
----
-
-## Critério de conclusão
+Crie uma candidata somente quando todos forem verdadeiros:
 
 ```text
-[ ] Alvo classificado (workspace/único, novo/existente).
-[ ] Inventário do contexto levantado (stacks, MCPs, git/host, skills, convenções).
-[ ] Skills de domínio criadas ou confirmadas como já existentes (via pelizzai-writing-skills).
-[ ] Catálogo (domain-skills.md) e ledger (review-domain-skills.md) presentes/atualizados.
-[ ] Recomendações apresentadas ao usuário (git, host, MCPs, context7).
+- existe padrão/invariante recorrente e específico deste projeto;
+- ele não está suficientemente coberto por instruções/skill existentes;
+- carregá-lo mudaria uma decisão ou evitaria erro real do agente;
+- há evidência no repo, design aprovado ou documentação oficial.
 ```
 
----
+Zero domain skills é resultado válido. Em muitos projetos, 1–3 bastam. Não crie uma skill por pasta, ferramenta ou responsabilidade genérica.
+
+Apresente as candidatas (nome + erro que evitam) e aguarde confirmação antes de redigi-las. Para stack/lib externa, fundamente na documentação oficial atual; `context7` é preferencial quando disponível, não um bloqueio para regras internas observadas no repo.
+
+### 4. Criar os artefatos
+
+O bootstrap persistente deixa:
+
+- `pelizzai/domain-skills.md` — catálogo, inclusive `_nenhuma por enquanto_` quando aplicável;
+- `pelizzai/data/review-domain-skills.md` — ledger semeado com a data/HEAD atuais;
+- `pelizzai/profile.md` — comandos reais, package manager, stack baseline e skill roots;
+- `pelizzai/.gitignore` — proteção scoped dos efêmeros.
+
+Conteúdo obrigatório de `pelizzai/.gitignore`:
+
+```gitignore
+data/.cadence-state.json
+data/handoffs/
+data/mockups/
+data/reports/
+```
+
+Verifique com `git check-ignore` usando arquivos de prova temporários; remova as provas depois.
+
+Crie sob demanda, não no bootstrap: `context.md`, `adr/`, `out-of-scope/`, `specs/`, `plans/` e diretórios efêmeros.
+
+### 5. Projeto novo
+
+Sem código/padrões, use `pelizzai-brainstorming` no modo proporcional para aprovar o design. Depois crie apenas domain skills justificadas pelo design; não escreva plano de implementação automaticamente se o usuário pediu apenas bootstrap.
+
+### 6. Hooks e integrações
+
+Hooks Claude são opt-in e separados:
+
+- cadence: lembrete não bloqueante;
+- guardrails: rede de segurança Git;
+- SessionStart: entrada + tarefa ativa.
+
+Explique o efeito de cada um e só edite settings após confirmação. Recomende provider/MCP apenas quando agregar ao projeto; não pesquise catálogo de ferramentas por rotina.
+
+### 7. Validar e fechar
+
+Antes de declarar bootstrap pronto:
+
+```text
+[ ] catálogo existe e corresponde às skills reais;
+[ ] ledger/profile não têm placeholders;
+[ ] comandos vieram de manifests/scripts reais;
+[ ] skill roots e paridade foram verificados;
+[ ] efêmeros passam em git check-ignore;
+[ ] diff contém somente artefatos aprovados;
+```
+
+Revise o diff inteiro em perfil `combined` (ou `split` se hooks/settings/segurança elevarem o risco),
+commite os artefatos aprovados com paths exatos e só então rode
+`pelizzai-verification-before-completion` contra esse HEAD. Após gravar `validated-head`, feche a
+transação via `pelizzai-finish-task`. Não deixe bootstrap não commitado nem tente fazer a
+finish-task consolidá-lo.
+
+## Estado parcial
+
+- catálogo existe, ledger ausente → proponha/repare somente o ledger em modo write;
+- skill existe fora do catálogo → catalogue após confirmar origem/conteúdo;
+- profile desatualizado → atualize apenas os campos afetados;
+- read-only → apenas reporte a inconsistência.
+
+## Layout canônico
+
+```text
+pelizzai/
+├── .gitignore
+├── domain-skills.md
+├── profile.md
+├── context.md | context/           sob demanda
+├── adr/ | out-of-scope/            sob demanda
+├── specs/ | plans/                 sob demanda
+└── data/
+    ├── state.md                    versionado
+    ├── review-domain-skills.md     versionado
+    ├── .cadence-state.json         ignorado
+    ├── handoffs/                   ignorado
+    ├── mockups/                    ignorado
+    └── reports/                    ignorado
+```
+
+Em workspace com múltiplos repositórios, não finja que um state escalar cobre todos: faça bootstrap por repo ou declare explicitamente a raiz dona dos artefatos.
 
 ## Anti-padrões
 
 ```text
-- Pular o bootstrap na primeira interação e começar a trabalhar às cegas.
-- Transformar o mapeamento em interrogatório ou em auditoria sem fim.
-- Impor mudanças (git init, instalar MCP, criar skills) sem confirmação do usuário.
-- Criar skill de domínio com prefixo `pelizzai-` (reservado ao harness).
-- Mapear um monorepo como se fosse um projeto único (ou vice-versa).
-- Concluir sem deixar o catálogo e o ledger que tornam o mapeamento reaproveitável.
+- Mudar arquivos em scan-only.
+- Reexecutar bootstrap em toda nova sessão.
+- Criar o "máximo" de domain skills.
+- Usar team num repo que uma inspeção focada resolve.
+- Criar profile com comandos chutados.
+- Gravar skill apenas em .claude quando a plataforma ativa usa .agents (ou vice-versa).
+- Declarar diretório gitignored sem provar no projeto consumidor.
+- Deixar o bootstrap solto em main ou invisível ao worktree seguinte.
 ```
-
----
 
 ## Integração
 
-**Combina com:**
-
-- `pelizzai-team` / `pelizzai-subagents` — motor paralelo do mapeamento.
-- `pelizzai-interview-me` / `pelizzai-brainstorming` — ramo de projeto novo.
-- `pelizzai-writing-skills` — cria as skills de domínio, o catálogo e o ledger.
-- `pelizzai-reasoning` — raciocínio do mapeamento (Structured Decomposition, Evidence Synthesis).
+Usa `pelizzai-starting-branch` e `pelizzai-finish-task` somente em `bootstrap-write`; `pelizzai-writing-skills` cria o conjunto mínimo de domain skills; `pelizzai-brainstorming` entra apenas no ramo de projeto novo/incerto.

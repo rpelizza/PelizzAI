@@ -1,30 +1,56 @@
 ---
-description: Harness de skills PelizzAI — como trabalhar neste projeto (entrada, roteamento e protecao de branch)
+description: Harness PelizzAI — entrada determinística, roteamento proporcional e proteção de escrita
 alwaysApply: true
 ---
 
 # Harness PelizzAI (Cursor)
 
-Este projeto usa o harness de skills **PelizzAI**. As skills (instrucoes de processo) vivem em `.agents/skills/<nome>/SKILL.md` — um espelho de `.claude/skills/` (a fonte de verdade). Leia e siga a skill relevante ANTES de agir.
+Este projeto usa o harness de skills **PelizzAI**. Para tarefas que precisam inspecionar ou alterar
+o projeto, leia `.agents/skills/pelizzai-core/SKILL.md` e depois
+`.agents/skills/pelizzai-router/SKILL.md`. Perguntas puramente conceituais, sem contexto de projeto,
+podem ser respondidas diretamente.
 
-## Entrada
+## Contrato de entrada
 
-Para QUALQUER tarefa que toque codigo, arquivos, configuracao ou o projeto, comece lendo e seguindo `.agents/skills/pelizzai-core/SKILL.md` e depois `.agents/skills/pelizzai-router/SKILL.md`. O router:
+O router deriva `effect`, `intent`, `risk`, `uncertainty` e `surfaces`; escolhe exatamente uma head
+skill e acrescenta overlays apenas por sinais observáveis.
 
-1. entende o projeto e le/cria o estado em `pelizzai/data/state.md`;
-2. classifica a intencao (feature / bug / ajuste / refactor / infra / review / conflito de merge);
-3. roteia para a head skill (ex.: `pelizzai-brainstorming` para feature, `pelizzai-debugging` para bug, `pelizzai-quick-fix` para ajuste);
-4. nos tracks com plano, o isolamento (branch vs worktree), o modo de execucao e a estrategia de commit sao decididos no **gate de setup pos-plano** da `pelizzai-execution-plans`.
+- `read-only`: inspecione sem criar branch, state, profile, catálogo, relatório ou bootstrap.
+- `write-local`: passe pelo gate de primeira escrita antes de qualquer arquivo persistente.
+- `external`: valide também autoridade, alvo, reversibilidade e confirmação no gate da ação.
+- UI/UX/CSS/componente/layout/acessibilidade: aplique `pelizzai-frontend` como overlay obrigatório,
+  incluindo design system, anti-AI-slop e QA visual.
+- Superfícies de segurança, skills de domínio e documentação acompanham o trabalho até Verification.
 
-Pergunta conceitual que nao muda nada no projeto: responda direto, sem o router.
+Para feature/refactor/infra, escolha a lane pelo risco e pela incerteza:
 
-## Regras inegociaveis
+- `bounded`: plano compacto, sem brainstorming obrigatório;
+- `standard`: brainstorming compacto e plano;
+- `exploratory`: descoberta e stress proporcionais antes do plano.
 
-- **Nunca commite em branch protegida** (`main`/`master`/`develop`/`dev`, ou HEAD destacado). Antes de qualquer commit, rode `git branch --show-current`; se protegida, isole via `pelizzai-starting-branch`.
-- **Grafia da marca:** ao anunciar uma skill, use sempre "PelizzAI" (P, A e I maiusculos).
-- **Idioma:** codigo em ingles; respostas ao usuario em portugues do Brasil.
-- **Fundamentacao:** para bibliotecas/frameworks/APIs externas, use o MCP `context7` — nao a memoria.
-- **Shell:** os blocos das skills sao exemplos POSIX; no Windows use os equivalentes PowerShell (ver `.agents/skills/pelizzai-preferences/SKILL.md`).
-- Siga as diretrizes completas em `AGENTS.md` (gerado a partir de `CLAUDE.md`).
+OODA é uma técnica macro adaptativa, não um ritual universal. Debugging faz triagem e contenção
+quando necessária, usando somente as hipóteses que discriminam as causas plausíveis. TDD, team,
+subagents e entrevistas também são situacionais. A estratégia de teste depende do artefato.
 
-> `.agents/skills/`, `AGENTS.md` e `GEMINI.md` sao **gerados** a partir de `.claude/skills/` e `CLAUDE.md`. Nao edite os arquivos gerados a mao — edite a fonte e rode `pwsh scripts/sync-harness.ps1`.
+## Regras inegociáveis
+
+- Nunca commite em `main`, `master`, `develop`, `dev` ou HEAD destacado.
+- Para tarefas mutáveis, crie/valide a task branch antes de state, spec, plano, ADR, código,
+  configuração, teste, scaffold ou protótipo.
+- Specs e planos ficam na task branch. Um worktree posterior parte da mesma branch existente após
+  checkpoint do planejamento.
+- O conteúdo só está pronto quando review, overlays e Verification validam o mesmo commit e gravam
+  seu SHA em `validated-head`. Finish pode acrescentar apenas o commit metadata-only de `state.md`.
+- Push, PR, deploy, mensagem, descarte e outras ações externas exigem o gate correspondente.
+- Código em inglês; respostas ao usuário em português do Brasil.
+- Para bibliotecas, frameworks e APIs externas, fundamente-se em documentação oficial disponível.
+- No Windows, traduza exemplos POSIX para PowerShell quando necessário.
+- Siga as diretrizes completas em `AGENTS.md`.
+
+## Propriedade dos arquivos
+
+`.claude/skills/` e `CLAUDE.md` são as fontes canônicas. `.agents/skills/`, `AGENTS.md` e
+`GEMINI.md` são gerados por `scripts/sync-harness.ps1` e não devem ser editados à mão.
+
+Este arquivo `.cursor/rules/pelizzai.mdc` é um **adaptador manual**, não um alvo gerado. Mantenha-o
+curto e alinhado aos entrypoints `pelizzai-core` e `pelizzai-router`.

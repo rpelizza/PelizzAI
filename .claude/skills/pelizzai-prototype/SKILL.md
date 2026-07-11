@@ -1,43 +1,76 @@
 ---
 name: pelizzai-prototype
-description: Construir um protótipo descartável para amadurecer um design — um app de terminal interativo para perguntas de estado/lógica de negócio, ou várias variações radicalmente diferentes de UI numa única rota, alternáveis. Use quando o usuário quer explorar "esse modelo de estado/lógica faz sentido?" ou "como isso deveria parecer?" antes de comprometer-se com a implementação real.
+description: Overlay para construir um experimento descartável que responda uma pergunta de design mais barato que implementar ou discutir. Use para incerteza concreta de estado, integração, viabilidade ou UI. Não use como etapa obrigatória, demo polida ou atalho para produção; exige branch antes de escrita e remoção/absorção antes do seal.
 ---
 
 # PelizzAI Prototype
 
-Um protótipo é **código descartável que responde a uma pergunta**. A pergunta decide o formato.
+## Objetivo
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Prototype para um protótipo descartável que responde a uma pergunta de design."
+Comprar informação com o menor experimento possível. O protótipo existe para responder **uma
+pergunta**; quando a resposta aparece, ele termina.
 
-## Escolha o ramo
+**Anuncie:** "Usando PelizzAI Prototype para responder `<pergunta>` com um experimento descartável."
 
-Identifique qual pergunta está sendo respondida (pelo pedido, pelo código ao redor, ou perguntando ao usuário):
+## Gate
 
-```text
-- "Esse modelo de estado/lógica faz sentido?" → app de terminal pequeno e interativo que empurra a máquina
-  de estados por casos difíceis de raciocinar no papel.
-- "Como isso deveria parecer?" → várias variações radicalmente diferentes de UI numa ÚNICA rota, alternáveis
-  por um search param na URL e uma barra flutuante (valide a UI rodando via pelizzai-frontend).
-```
-
-Os dois ramos produzem artefatos bem diferentes — errar o ramo desperdiça o protótipo. Se ambíguo e o usuário indisponível, escolha pelo código ao redor (módulo de backend → lógica; página/componente → UI) e declare a suposição no topo.
-
-## Regras (valem para os dois ramos)
+Use somente quando:
 
 ```text
-1. Descartável desde o dia 1, e marcado como tal. Coloque perto de onde será usado, mas nomeie de forma que
-   qualquer um veja que é protótipo, não produção.
-2. Um comando para rodar (o task runner que o projeto já usa).
-3. Sem persistência por padrão — estado em memória. Persistência é o que o protótipo CHECA, não algo de que depende.
-4. Sem polish — sem testes, sem tratamento de erro além do necessário para rodar, sem abstrações.
-5. Exponha o estado — depois de cada ação (lógica) ou em cada troca de variante (UI), mostre o estado relevante.
-6. Apague ou absorva quando terminar — delete, ou dobre a decisão validada no código real; não deixe apodrecer no repo.
+[ ] existe uma incerteza material e falsificável;
+[ ] análise, prior art ou teste menor não respondem com custo menor;
+[ ] a resposta pode mudar o design;
+[ ] há critério de parada e destino do código.
 ```
 
-## Quando terminar
+Protótipo escreve: passe por `pelizzai-starting-branch` antes. Use path temporário ignorado ou path
+de protótipo já adotado pelo projeto. Source mode nunca cria runtime `pelizzai/`; prefira temp do
+sistema ou estrutura nativa. Não inclua segredo/dado real desnecessário.
 
-A **resposta** é a única coisa que vale guardar de um protótipo. Se ela passa no critério triplo da `pelizzai-domain-modeling` (difícil de reverter + surpreendente + trade-off real), **registre-a automaticamente como ADR** em `pelizzai/adr/` (anúncio de 1 linha, sem esperar aprovação); senão, capture-a na mensagem de commit — sempre junto com a pergunta que ela responde. Depois, apague ou absorva o protótipo (o código descartável em si pode ter um `NOTES.md` ao lado até ser deletado).
+## Escolha a forma pela pergunta
 
-## Integração
+| Pergunta | Experimento provável |
+| --- | --- |
+| Estado/regra/algoritmo | script/CLI mínimo com casos que discriminam os modelos |
+| Integração/viabilidade | spike fino na fronteira real, sandbox/fixture e timeout explícito |
+| UI/fluxo | uma ou mais variantes apenas quando há alternativas reais; overlay `pelizzai-frontend` e conteúdo plausível |
 
-**Combina com:** `pelizzai-brainstorming` (explorar antes de comprometer o design), `pelizzai-frontend` (validar as variações de UI rodando), `pelizzai-reasoning` (Tree of Thoughts para explorar caminhos), `pelizzai-domain-modeling` (registrar a resposta como ADR).
+Não force várias variantes “radicalmente diferentes” quando uma hipótese basta. Não use UI para
+responder pergunta de domínio nem mock para remover justamente a fronteira que está sendo testada.
+
+## Contrato do experimento
+
+Antes de codar, registre no plano/execution record:
+
+```text
+pergunta
+hipótese/alternativas materiais
+observação que confirma ou refuta
+timebox/custo máximo
+o que deliberadamente não terá qualidade de produção
+destino: apagar | absorver | transformar em tarefa
+```
+
+Implemente o mínimo executável. “Descartável” reduz polish e abstração, não elimina segurança básica
+nem a prova que responde à pergunta. Rode o cenário, preserve saída/limitações e pare no critério.
+
+## Encerrar
+
+1. Resuma evidência, resposta e confiança; inconclusivo é resultado válido.
+2. Atualize design/plano nativo com a decisão. ADR só se estiver autorizado, houver path correto e
+   passar o critério da `pelizzai-domain-modeling`; nunca registre automaticamente em `pelizzai/`.
+3. Apague o código descartável ou absorva apenas as partes que passam pelo ciclo normal de
+   implementação/teste/review.
+4. Confirme que nenhum protótipo, fixture sensível, dependência ou flag temporária ficou antes do
+   review final/seal.
+
+## Red flags
+
+```text
+- Protótipo sem pergunta falsificável.
+- Virar mini-produto com polish, abstrações e scope creep.
+- Manter código experimental sem decisão explícita.
+- Declarar viabilidade usando mock que remove o risco real.
+- ADR automático ou runtime consumidor em source mode.
+- Pular frontend em protótipo visual ou tratá-lo como QA final de produção.
+```

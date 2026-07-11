@@ -1,6 +1,6 @@
 ---
 name: pelizzai-quick-fix
-description: Use para ajustes pequenos e triviais (texto, label, cor, constante, correção óbvia) — no máximo ~1 arquivo, menos de ~50 linhas, sem nova superfície pública e sem nova regra de negócio. É o head skill do track de **ajuste** (roteado pela `pelizzai-router`): pula design e plano, sem perder a disciplina do harness. Acione quando o usuário pedir uma mudança pontual e óbvia. Se for algo QUEBRADO, use `pelizzai-debugging`; se crescer, escale para `pelizzai-brainstorming`.
+description: Head skill para ajuste local, coeso, claro e de baixo risco, sem nova superfície pública, regra de negócio ou decisão arquitetural. Use para texto, label, estilo localizado, rename/refactor mecânico ou configuração óbvia quando design/plano não agregam. Tamanho e número de arquivos são sinais, não limites rígidos. Algo quebrado usa `pelizzai-debugging`; se surgir contrato ou decisão, reclassifique pela lane do router.
 ---
 
 # PelizzAI Quick Fix
@@ -13,19 +13,21 @@ Um caminho enxuto para mudanças triviais. Evita o custo de design + plano quand
 
 > **Princípio:** trivial ≠ desleixado. Pule o design, não a disciplina.
 
-## Critérios (precisa de TODOS)
+## Critérios sem contagem rígida
 
 É `quick-fix` quando a mudança:
 
 ```text
-- toca ~1 arquivo (um par arquivo+teste conta como um; mais que isso → escale para feature);
-- tem menos de ~50 linhas;
-- NÃO cria nova superfície pública (rota, comando, endpoint, API, nova config);
-- NÃO muda comportamento/regra de negócio;
-- não exige decisão de arquitetura.
+- objetivo e aceite são inequívocos;
+- mudança é local, coesa, reversível e de baixo risco;
+- NÃO cria superfície pública, regra de negócio ou decisão de arquitetura;
+- prova e rollback são diretos;
+- o diff esperado é pequeno o bastante para um review formal não agregar sinal material.
 ```
 
-Se QUALQUER critério for excedido — na avaliação ou no meio do trabalho — **escale para `feature`** (`pelizzai-brainstorming` → `pelizzai-writing-plans`). Se for algo **quebrado** (erro, comportamento errado), use `pelizzai-debugging`, não esta skill.
+Linhas e arquivos ajudam a detectar crescimento, mas não decidem sozinhos. Se surgir contrato com
+aceite claro, promova para lane `bounded` e plano compacto; se surgir decisão/incerteza, use
+`standard`/`exploratory` e brainstorming proporcional. Algo **quebrado** usa debugging.
 
 ## Processo
 
@@ -33,24 +35,30 @@ A `pelizzai-router` já preparou o contexto de um `ajuste`: `isolation: branch` 
 
 ```text
 1. Branch — invoque pelizzai-starting-branch (nunca em branch protegida).
-1.5. Skills de domínio — confira em pelizzai/domain-skills.md se há skill de domínio cobrindo o
-   arquivo/área e siga-a (trivial ≠ desleixado: o ajuste pula o review formal, então esta é a
-   única rede que garante as convenções do projeto).
+1.5. Regras locais — no consumidor, confira `pelizzai/domain-skills.md`; em source mode, use as
+   regras/skills do próprio repo. Siga somente as aplicáveis à área.
 2. Mudança + verificação mínima — toda linha alterada deve rastrear diretamente ao pedido
    (linha sem rastro é scope creep: remova ou escale). Escolha o balde honestamente:
    - Comportamento testável (constante, condição, valor retornado): pelizzai-tdd — menor teste que falha primeiro, depois a mudança.
-   - Refatoração que preserva comportamento (rename/extract/inline): NÃO escreva teste novo — garanta cobertura verde antes (characterization tests), depois refatore no verde.
-   - Config/IaC (comportamental mas não testável em unidade): valide por apply/dry-run/validate da ferramenta e registre via pelizzai-verification-before-completion.
-   - Puramente cosmético, sem comportamento (cor, label, copy): nada a testar em unidade — valide com a checagem manual registrada via pelizzai-verification-before-completion.
+   - Refatoração que preserva comportamento (rename/extract/inline): NÃO fabrique RED — garanta caracterização/suíte verde antes, refatore em passo pequeno e rode a mesma prova depois.
+   - Config/IaC/migração: use validate/plan/dry-run e confira compatibilidade/rollback; teste unitário só para lógica separável.
+   - UI/CSS/estado visual: aplique obrigatoriamente pelizzai-frontend e use a prova visual
+     proporcional definida lá; TDD entra apenas se houver comportamento.
+   - Documentação, label ou copy: lint/links/build-render ou inspeção estática proporcional; nada a testar em unidade.
    Não se auto-classifique uma mudança de comportamento como "cosmética"/"config" para pular o teste.
-3. Verifique — rode o comando de teste do projeto e confirme verde (pelizzai-verification-before-completion antes de dizer "pronto").
-3.5. Commite a mudança conforme a commit-strategy registrada: granular → commit definitivo
-   (<tipo>(<escopo>): <descrição>); squash-final → wip(<slug>): <descrição>. Sem este passo o
-   fix chegaria não commitado ao fechamento (a finish-task granular presume commits existentes).
-4. Feche — invoque pelizzai-finish-task (honra a commit-strategy registrada).
+3. Prove a working tree — rode a prova selecionada acima e, quando houver código executável, a
+   suíte relevante do projeto. Corrija antes de consolidar.
+3.5. Commite o **conteúdo** com paths exatos e mensagem definitiva
+   `<tipo>(<escopo>): <descrição>`. Quick-fix já produz um único commit; não crie WIP nem deixe
+   squash para a finish-task.
+4. Sele e feche — rode `pelizzai-verification-before-completion` contra esse HEAD, grave
+   `validated-head` somente após sucesso e invoque `pelizzai-finish-task`: consumidor acrescenta
+   apenas o closure de state; source mode fecha o execution record sem arquivo/commit de closure.
 ```
 
-> O track de ajuste **pula o code-review formal** por ser trivial (<~50 linhas, sem nova superfície/regra); a verificação mínima + `pelizzai-finish-task` cobrem o fechamento. Se a mudança crescer e exigir review, ela já deixou de ser ajuste — escale para feature.
+> O track de ajuste pula review formal somente enquanto permanecer low-risk, coeso e sem nova
+> superfície/regra. A prova adequada + Verification cobrem o fechamento. Se o diff revelar risco,
+> promova a lane e aplique `pelizzai-review` antes de consolidar.
 
 ---
 
@@ -68,6 +76,9 @@ Nunca: tratar como quick-fix algo que cria nova superfície ou muda regra de neg
 
 **Roteada por:** `pelizzai-router` (track `ajuste`).
 
-**Usa:** `pelizzai-starting-branch`, as **skills de domínio** do projeto (`pelizzai/domain-skills.md` — passo 1.5), `pelizzai-tdd` (TDD completo quando há comportamento testável; mudança só cosmética não tem o que testar em unidade), `pelizzai-verification-before-completion`, `pelizzai-finish-task`.
+**Usa:** `pelizzai-starting-branch`, regras/skills locais, `pelizzai-reasoning` (seleção da
+estratégia), `pelizzai-tdd` somente para comportamento, `pelizzai-frontend` como overlay
+obrigatório para UI, `pelizzai-verification-before-completion` e `pelizzai-finish-task`.
 
-**Escala para:** `pelizzai-brainstorming` (se virar feature) ou `pelizzai-debugging` (se for um bug).
+**Escala para:** `pelizzai-writing-plans` em bounded, `pelizzai-brainstorming` quando houver decisão
+ou incerteza, ou `pelizzai-debugging` quando for bug.

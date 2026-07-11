@@ -6,7 +6,8 @@
 # Extrai do plano (pelizzai/plans/*.md) o texto da Tarefa N - do header
 # "### Tarefa N: ..." ate o proximo header de mesmo nivel (ou superior) ou EOF -
 # MAIS o bloco "Global Constraints" do cabecalho do plano (toda tarefa o herda),
-# e grava em pelizzai/data/handoffs/task-<N>-brief.md (gitignored).
+# e grava no handoff dir seguro: pelizzai/data/handoffs quando o bootstrap provou o ignore,
+# ou temp do sistema (source mode/projeto sem bootstrap).
 # Imprime o caminho gravado. Falha com mensagem clara se o plano nao existir
 # ou a tarefa nao for encontrada.
 #
@@ -23,10 +24,27 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $false
 
 function Fail([string]$Message) {
   [Console]::Error.WriteLine("task-brief: $Message")
   exit 1
+}
+
+function Get-HandoffDir {
+  if ($env:PELIZZAI_HANDOFF_DIR) { return [IO.Path]::GetFullPath($env:PELIZZAI_HANDOFF_DIR) }
+  $projectIgnore = Join-Path (Get-Location).Path 'pelizzai/.gitignore'
+  if (Test-Path -LiteralPath $projectIgnore -PathType Leaf) {
+    git check-ignore -q -- 'pelizzai/data/handoffs/.pelizzai-probe' 2>$null
+    if ($LASTEXITCODE -eq 0) { return (Join-Path (Get-Location).Path 'pelizzai/data/handoffs') }
+  }
+  $identity = try { (git rev-parse --show-toplevel 2>$null | Select-Object -First 1) } catch { $null }
+  if (-not $identity) { $identity = (Get-Location).Path }
+  $bytes = [Text.Encoding]::UTF8.GetBytes([string]$identity)
+  $sha = [Security.Cryptography.SHA256]::Create()
+  try { $digest = $sha.ComputeHash($bytes) } finally { $sha.Dispose() }
+  $hash = (-join ($digest | ForEach-Object { $_.ToString('x2') })).Substring(0, 12)
+  return (Join-Path ([IO.Path]::GetTempPath()) "pelizzai-handoffs/$hash")
 }
 
 if (-not $PlanPath -or -not $TaskNumber) { Fail 'uso: task-brief.ps1 <caminho-do-plano> <N>' }
@@ -64,7 +82,7 @@ foreach ($line in $lines) {
 
 if (-not $inTask) { Fail "Tarefa $TaskNumber nao encontrada em $PlanPath (esperado um header '### Tarefa ${TaskNumber}: ...')" }
 
-$outDir = Join-Path 'pelizzai' (Join-Path 'data' 'handoffs')
+$outDir = Get-HandoffDir
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 $outPath = Join-Path $outDir "task-$TaskNumber-brief.md"
 
@@ -85,7 +103,8 @@ foreach ($l in $task) { $content.Add($l) }
 $content.Add('')
 $content.Add('---')
 $content.Add('')
-$content.Add("Relatorio: grave o resultado em ``pelizzai/data/handoffs/task-$TaskNumber-report.md`` (espelhando este brief) e responda no chat em, no maximo, 15 linhas.")
+$reportPath = Join-Path $outDir "task-$TaskNumber-report.md"
+$content.Add("Relatorio: grave o resultado em ``$reportPath`` (espelhando este brief) e responda no chat em, no maximo, 15 linhas.")
 
 Set-Content -LiteralPath $outPath -Value ($content -join "`n") -Encoding utf8
 Write-Output $outPath

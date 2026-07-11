@@ -23,11 +23,16 @@ description: Use quando houver um conflito de merge/rebase do git em andamento p
    ao usuário com as opções — incluindo abortar (`--abort`) e recomeçar com mais contexto.
    O abort é decisão do usuário, nunca sua saída autônoma para fugir do conflito.
 
-4. Descubra os checks automatizados do projeto e rode-os — tipicamente typecheck → testes → format.
-   Conserte o que o merge quebrou (use pelizzai-verification-before-completion: evidência fresca).
+4. Reaplique skills de domínio e overlays da mudança (frontend/security/docs quando a resolução
+   tocar essas superfícies). Rode a prova adequada ao artefato: teste focal/completo, typecheck,
+   parser, dry-run, render ou QA visual. Não execute formatter/checks irrelevantes por ritual.
 
-5. Conclua o merge/rebase. Faça stage de tudo e commite. Se for rebase, continue até todos os commits
-   serem rebaseados.
+5. Estagie somente os paths resolvidos, confira `git diff --cached` e confirme que
+   `git diff --name-only --diff-filter=U` está vazio. Continue o merge/rebase pelo comando indicado
+   em `git status`; a cada novo conflito, volte ao passo 1. Nunca use `git add -A`.
+
+6. Ao concluir, rode Verification contra o estado integrado. Se este conflito pertence a uma
+   tarefa ativa, devolva o controle ao lifecycle; não crie um fechamento paralelo.
 ```
 
 ## Red flags
@@ -35,7 +40,8 @@ description: Use quando houver um conflito de merge/rebase do git em andamento p
 ```text
 Nunca: dar `git merge --abort`/`git rebase --abort` por conta própria para fugir do conflito (abortar é
        decisão do usuário, após você escalar com as opções); inventar comportamento que não estava em
-       nenhum dos lados; resolver sem entender a intenção original; concluir sem rodar os checks.
+       nenhum dos lados; resolver sem entender a intenção original; `git add -A`; concluir sem
+       prova proporcional ou sem conferir conflitos não resolvidos.
 ```
 
 ## Integração

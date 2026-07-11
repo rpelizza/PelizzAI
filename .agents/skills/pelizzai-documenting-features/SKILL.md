@@ -1,59 +1,67 @@
 ---
 name: pelizzai-documenting-features
-description: Documentação para HUMANOS do contrato estável de uma feature (rotas, comandos, APIs, telas) em `docs/<área>/<feature>.md`. Use quando a `pelizzai-finish-task` oferecer a doc ao fechar uma FEATURE, ou quando o usuário disser "documenta essa feature", "escreve a doc de uso", "faz a documentação de <feature>". NÃO é para artefatos do harness — specs/planos/ADRs vivem em `pelizzai/` e são de processo, não doc humana.
+description: Overlay de documentação HUMANA do contrato estável de uma feature, como rotas, comandos, APIs e telas. Use quando docs fazem parte do escopo, o diff cria uma superfície estável que precisa ser explicada ou o usuário pede documentação de uso. Entra antes do review final e de validated-head; não é oferta tardia da finish-task nem se aplica a specs/planos/ADRs do harness.
 ---
 
 # PelizzAI Documenting Features
 
 ## Objetivo
 
-Registrar para HUMANOS (devs do time, futuros mantenedores, usuários técnicos) o contrato estável de uma feature — o que ela expõe e como usá-la — separado dos artefatos de processo do harness.
+Explicar para humanos o contrato observável e durável da entrega, sem narrar detalhes internos que
+envelhecem no próximo refactor.
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Documenting Features para documentar a feature."
+**Anuncie:** "Usando a skill PelizzAI Documenting Features para documentar o contrato da feature."
 
-> **Princípio:** documente o CONTRATO (rotas, comandos, APIs, telas — o que é estável), não a implementação volátil. Doc que narra a implementação envelhece no primeiro refactor.
+## Onde
 
-## Onde e como
+Siga a estrutura de docs existente, seu índice e gerador. Sem convenção, use
+`docs/<area>/<feature>.md`. Docs humanas não vivem em `pelizzai/`; specs, planos e ADRs são
+artefatos de processo.
 
-- Arquivo: `docs/<área>/<feature>.md` (crie `docs/` se não existir; se o projeto já tem estrutura de docs, siga-a).
-- **NUNCA dentro de `pelizzai/`** — o estado do harness é off-limits para docs humanas.
-- Se o projeto tem um índice de docs (`docs/README.md`, sumário, mkdocs/docusaurus), linke a doc nova nele.
+## Conteúdo proporcional
 
-## Estrutura da doc
+Inclua somente se aplicável:
 
 ```markdown
 # <Feature>
 
 ## Propósito
-Por que existe; que problema resolve (2–3 frases).
-
-## Como funciona
-Visão de alto nível do comportamento observável — sem detalhes de implementação.
+Problema e público.
 
 ## Uso
-Rotas/comandos/APIs/telas com exemplos concretos (request/response, comando + saída, passos na UI).
+Rotas, comandos, APIs ou fluxo de tela com exemplo real.
 
-## Gotchas
-Limites, pré-condições, erros comuns e como diagnosticá-los.
+## Contrato
+Inputs, outputs, estados, permissões e compatibilidade.
+
+## Limites e diagnóstico
+Pré-condições, erros relevantes e como observar/corrigir.
 ```
 
-## Commit
+- Documente comportamento público, não funções/arquivos internos.
+- Use nomes, exemplos e saídas reais; não invente placeholder/dado de produto.
+- Atualize índice/README somente quando a convenção exigir.
+- Não crie um documento separado se comentário, schema ou página existente é o local canônico.
 
-A doc entra em **commit próprio** — `docs(<feature>): <descrição>` — respeitando o gate de branch protegida (nunca commitar em main/master/develop/dev; ver `pelizzai-starting-branch`). Quando ofertada pela `pelizzai-finish-task`, o commit acontece ANTES do push/PR — o gate da working tree garante que nada fica dangling.
+## Validação e lifecycle
+
+Valide links, exemplos, snippets e build/render aplicáveis. A doc é conteúdo da entrega: consolide
+pela commit-strategy da head skill **antes** do review final e de `validated-head`. Commit próprio é
+opção quando melhora o histórico, não obrigação. Qualquer correção reabre as provas afetadas.
+
+Finish-task nunca oferece, gera ou corrige documentação; depois do seal é tarde.
 
 ## Red flags
 
 ```text
-- Documentar a implementação (funções internas, estrutura de arquivos) em vez do contrato.
-- Doc dentro de pelizzai/ (specs/planos/ADRs são artefatos de processo, não doc humana).
-- Doc sem exemplo concreto de uso.
-- Deixar a doc sem commit próprio (dangling na working tree).
+- Documentar implementação volátil em vez do contrato.
+- Criar docs humanas dentro de pelizzai/.
+- Exemplo que não foi validado.
+- Duplicar documentação canônica já existente.
+- Deixar doc dangling ou criá-la depois do seal.
 ```
 
 ## Integração
 
-- `pelizzai-finish-task` — oferece esta skill (opt-in, não bloqueia) quando a entrega foi uma FEATURE.
-- `pelizzai-writing-clearly-and-concisely` — a redação do texto da doc.
-- `pelizzai-preferences` (§ Documentação) — README e docs sempre consistentes com o estado real do projeto.
-
-> Baseline desta skill: prática testada em campo em harness de referência (benchmark 2026-07-04).
+Router/plano registram este overlay; execution-plans o executa antes do review final. Combine com
+skills de domínio e `pelizzai-writing-clearly-and-concisely` quando isso mudar a redação.

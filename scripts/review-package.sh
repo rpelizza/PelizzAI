@@ -4,26 +4,45 @@
 # Uso: sh scripts/review-package.sh <BASE> <HEAD>
 #      sh scripts/review-package.sh --working-tree
 #
-# Grava em pelizzai/data/handoffs/review-<timestamp>.md (gitignored):
+# Grava no handoff dir seguro (gitignored no consumidor; temp em source mode):
 #  - modo range: a lista de commits do range, o `git diff --stat` e o `git diff -U10`;
-#  - modo --working-tree: `git status --short` + `git diff -U10` + o CONTEÚDO dos
-#    arquivos novos (untracked) — o escopo B da pelizzai-review cobre "diff + arquivos novos".
+#  - modo --working-tree: status + diffs staged e unstaged + o CONTEÚDO dos untracked.
 # Imprime o caminho gravado. O revisor lê o ARQUIVO — o diff nunca é colado no
 # contexto do coordenador.
 #
 # Os blocos usam fence de 4 backticks: diffs de arquivos .md contêm ``` e quebrariam
 # um fence de 3.
 #
-# IMPORTANTE — captura do BASE: o BASE é capturado ANTES do despacho do implementador
-# (`git rev-parse HEAD` no momento do dispatch). NUNCA use `HEAD~1` como base: isso
-# descarta silenciosamente tudo menos o último commit (uma tarefa com N commits, ou o
-# range de várias tarefas, ficaria fora do review).
+# IMPORTANTE — range é exclusivo do review final. BASE é o `base-sha` persistido no
+# state quando a branch foi criada. Review por tarefa usa --working-tree. NUNCA use
+# HEAD~1: isso descartaria silenciosamente parte da entrega.
 #
 # Equivalente PowerShell: scripts/review-package.ps1.
 
 set -u
 
 fail() { echo "review-package: $1" >&2; exit 1; }
+
+handoff_dir() {
+  if [ -n "${PELIZZAI_HANDOFF_DIR:-}" ]; then
+    printf '%s\n' "$PELIZZAI_HANDOFF_DIR"
+  elif [ -f 'pelizzai/.gitignore' ] && git check-ignore -q -- 'pelizzai/data/handoffs/.pelizzai-probe' 2>/dev/null; then
+    printf '%s\n' "$(pwd -P)/pelizzai/data/handoffs"
+  else
+    identity=$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)
+    key=$(printf '%s' "$identity" | cksum | awk '{print $1}')
+    printf '%s\n' "${TMPDIR:-/tmp}/pelizzai-handoffs-$key"
+  fi
+}
+
+is_sensitive_untracked() {
+  leaf=${1##*/}
+  case "$leaf" in
+    .env.example|.env.sample|.env.template) return 1 ;;
+    .env|.env.*|.npmrc|.pypirc|.netrc|credentials.json|id_rsa|id_ed25519|secret.json|secret.yaml|secret.yml|secret.toml|secret.ini|secrets.json|secrets.yaml|secrets.yml|secrets.toml|secrets.ini|*.pem|*.key|*.p12|*.pfx) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || fail "não é um repositório git (rode a partir da raiz do projeto)"
 
@@ -38,9 +57,15 @@ else
   git rev-parse --verify --quiet "$HEAD^{commit}" >/dev/null || fail "HEAD inválido: $HEAD"
 fi
 
-OUT_DIR="pelizzai/data/handoffs"
+OUT_DIR=$(handoff_dir)
 mkdir -p "$OUT_DIR"
-OUT="$OUT_DIR/review-$(date '+%Y%m%d-%H%M%S').md"
+STEM="$OUT_DIR/review-$(date '+%Y%m%d-%H%M%S')-$$"
+OUT="$STEM.md"
+COLLISION=0
+while [ -e "$OUT" ]; do
+  COLLISION=$((COLLISION + 1))
+  OUT="$STEM-$COLLISION.md"
+done
 NOW=$(date '+%Y-%m-%d %H:%M')
 
 {
@@ -55,7 +80,13 @@ NOW=$(date '+%Y-%m-%d %H:%M')
     git status --short
     echo '````'
     echo
-    echo "## git diff -U10"
+    echo "## Staged — git diff --cached -U10"
+    echo
+    echo '````diff'
+    git diff --cached -U10
+    echo '````'
+    echo
+    echo "## Unstaged — git diff -U10"
     echo
     echo '````diff'
     git diff -U10
@@ -68,7 +99,13 @@ NOW=$(date '+%Y-%m-%d %H:%M')
       printf '%s\n' "$UNTRACKED" | while IFS= read -r f; do
         echo "### $f"
         echo
-        if grep -Iq '' "$f" 2>/dev/null; then
+        if [ -L "$f" ]; then
+          echo "_link simbólico — conteúdo omitido para não ler fora do repositório._"
+        elif is_sensitive_untracked "$f"; then
+          echo "_arquivo potencialmente sensível — conteúdo omitido; revise o path localmente._"
+        elif [ "$(wc -c < "$f" | tr -d ' ')" -gt 262144 ]; then
+          echo "_arquivo maior que 256 KiB — conteúdo omitido._"
+        elif grep -Iq '' "$f" 2>/dev/null; then
           echo '````text'
           cat "$f"
           echo '````'
@@ -83,7 +120,7 @@ NOW=$(date '+%Y-%m-%d %H:%M')
   else
     echo "# Pacote de review — $BASE..$HEAD"
     echo
-    echo "> Gerado em $NOW. BASE capturado ANTES do despacho (git rev-parse HEAD) — nunca HEAD~1."
+    echo "> Gerado em $NOW. Range final: BASE = base-sha persistido no state — nunca HEAD~1."
     echo
     echo "## Commits ($BASE..$HEAD)"
     echo

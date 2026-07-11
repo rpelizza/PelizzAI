@@ -1,154 +1,132 @@
 ---
 name: pelizzai-tdd
-description: Desenvolvimento orientado a testes (TDD). Use para desenvolver funcionalidades ou corrigir bugs com a abordagem "test-first" (ciclo red-green-refactor, fatias verticais, testes de integração). É também a disciplina POR TAREFA do harness: acione ao implementar cada tarefa de um plano (via `pelizzai-execution-plans`) e quando um membro de `pelizzai-team`/`pelizzai-subagents` escreve código. Use sempre que o trabalho envolver escrever ou corrigir código com testes.
+description: Estratégia test-first para comportamento novo, alterado ou regressão de bug quando existe um oráculo automatizável útil. Use red→green→refactor em fatias verticais por contrato público. Não use como ritual universal para refatoração preservativa, CSS visual, documentação, configuração, IaC, migração ou código gerado; nesses casos selecione caracterização, validação nativa, dry-run, QA visual ou checagem estática.
 ---
 
-# Desenvolvimento Orientado a Testes (TDD)
+# PelizzAI TDD
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI TDD para implementar test-first (red → green → refatorar)."
+## Objetivo
 
-## Filosofia
+Usar um teste comportamental como instrumento de design e prova quando a tarefa realmente altera comportamento observável.
 
-**Princípio fundamental**: Testes devem verificar o comportamento por meio de interfaces públicas, não de detalhes de implementação. O código pode mudar completamente; os testes não deveriam.
+**Anuncie ao iniciar:** "Usando a skill PelizzAI TDD para implementar este comportamento em red → green → refactor."
 
-**Bons testes** são do tipo integração: eles exercitam caminhos reais de código através de APIs públicas. Eles descrevem _o que_ o sistema faz, não _como_ ele faz. Um bom teste é lido como uma especificação — "usuário pode finalizar a compra com um carrinho válido" informa exatamente qual funcionalidade existe. Esses testes sobrevivem a refatorações porque não dependem da estrutura interna.
+## Gate de adequação
 
-**Testes ruins** estão acoplados à implementação. Eles utilizam _mocks_ para colaboradores internos, testam métodos privados ou verificam resultados por meios externos (como consultar um banco de dados diretamente em vez de usar a interface). O sinal de alerta: seu teste quebra quando você refatora, mas o comportamento não mudou. Se você renomeia uma função interna e os testes falham, esses testes estavam testando a implementação, não o comportamento.
+Use TDD quando todas forem verdadeiras:
 
-Consulte [tests.md](tests.md) para exemplos e [mocking.md](mocking.md) para diretrizes sobre o uso de _mocks_.
-
-## Antipadrão: Fatias Horizontais
-
-**NÃO escreva todos os testes primeiro para depois escrever toda a implementação.** Isso é "fatiamento horizontal" — tratar o estado VERMELHO (RED) como "escrever todos os testes" e o estado VERDE (GREEN) como "escrever todo o código".
-
-Isso gera **testes ruins**:
-
-- Testes escritos em lote testam comportamentos _imaginados_, não comportamentos _reais_
-- Você acaba testando a _forma_ das coisas (estruturas de dados, assinaturas de funções) em vez do comportamento visível ao usuário
-- Os testes tornam-se insensíveis a mudanças reais: passam quando o comportamento quebra e falham quando o comportamento está correto
-- Você avança além da sua visibilidade, comprometendo-se com a estrutura de testes antes de compreender a implementação
-
-**Abordagem correta**: Fatias verticais via _tracer bullets_ (testes de ponta a ponta que percorrem todo o caminho do sistema). Um teste → uma implementação → repetir. Cada teste responde ao que você aprendeu no ciclo anterior. Como você acabou de escrever o código, sabe exatamente qual comportamento é importante e como verificá-lo.
-
-```
-ERRADO (horizontal):
-  RED:   test1, test2, test3, test4, test5
-  GREEN: impl1, impl2, impl3, impl4, impl5
-
-CERTO (vertical):
-  RED→GREEN: test1→impl1
-  RED→GREEN: test2→impl2
-  RED→GREEN: test3→impl3
-  ...
+```text
+[ ] Existe comportamento observável novo, alterado ou quebrado.
+[ ] Há interface/seam adequado para exercitá-lo sem acoplar o teste à implementação.
+[ ] O teste automatizado reduz risco de regressão e é mais estável que o detalhe testado.
 ```
 
-## Fluxo de Trabalho
+Caso contrário, use a estratégia selecionada por `pelizzai-reasoning` e registrada no plano:
 
-### 1. Planejamento
+| Efeito | Estratégia correta |
+| --- | --- |
+| Refatoração sem mudança comportamental | cobertura/suíte de caracterização verde antes; refatorar no verde; mesma suíte depois |
+| Configuração ou IaC | validator/plan/dry-run da ferramenta e checagem de compatibilidade/rollback |
+| Migração | validação de schema, dry-run/ambiente descartável, forward/rollback conforme suporte |
+| UI puramente visual | `pelizzai-frontend` + navegador/screenshot em viewports e estados relevantes |
+| Documentação/copy | lint, links, exemplos, build/render ou inspeção estática proporcional |
+| Código gerado/vendor | validar fonte/gerador e regeneração determinística; não testar o artefato como código autoral |
 
-Explore a base de código e respeite as ADRs (Architecture Decision Records — Decisões de Arquitetura) da área em que você está trabalhando.
+Combinações são normais: um formulário usa TDD para submissão/erros **e** `pelizzai-frontend` para aparência, acessibilidade e responsividade.
 
-Antes de escrever qualquer código:
+---
 
-- [ ] Leia `pelizzai/domain-skills.md` e carregue as skills de domínio relevantes ao comportamento em teste — os padrões do projeto prevalecem sobre padrões genéricos (se você é um membro despachado, elas já vêm coladas no seu briefing)
-- [ ] Para comportamento de lib/framework externo, confirme a API real e atual via MCP `context7` (`resolve-library-id` → `query-docs`) antes de escrever o teste — não confie na memória
-- [ ] O comando de teste vem do perfil de execução `pelizzai/profile.md` — nunca chute (`npm test` num projeto pnpm é o anti-padrão); sem profile, leia o manifest real do projeto
-- [ ] Confirme com o usuário quais alterações de interface são necessárias (use `pelizzai-interview-me` quando houver dúvida material)
-- [ ] Acorde os **seams** antes dos testes: **nenhum teste é escrito num seam não confirmado**. Em fluxo de feature, os seams já vêm da spec (`pelizzai-brainstorming`, seção Testing Decisions) — confirme-os; fora dele, acorde-os aqui (vocabulário de seam: `pelizzai-codebase-design`)
-- [ ] Confirme com o usuário quais comportamentos devem ser testados (priorize-os)
-- [ ] Identifique oportunidades para criar módulos "profundos" (interface simples, implementação robusta) — use o vocabulário da `pelizzai-codebase-design` e a `pelizzai-reasoning` (Structured Decomposition) para mapear o vocabulário e a testabilidade; em design novo, isso vem da `pelizzai-brainstorming`
-- [ ] Liste os comportamentos a serem testados (não os passos de implementação)
-- [ ] Obtenha a aprovação do usuário para o plano
+## Princípio de teste
 
-Pergunte (a pergunta canônica do planejamento): "Qual é a interface pública, e em quais seams vamos testar? Quais comportamentos são mais importantes?"
+Teste comportamento por interface pública, não detalhes internos. O teste deve sobreviver a uma refatoração que preserve o contrato.
 
-**Não é possível testar tudo.** Confirme com o usuário exatamente quais comportamentos são mais relevantes. Concentre os esforços de teste em caminhos críticos e lógicas complexas, e não em todos os casos de borda (_edge cases_) possíveis.
+Prefira integração fina ou tracer bullet que percorra o caminho real. Use mocks somente em fronteiras externas caras, lentas ou não determinísticas; não simule colaboradores internos para validar a forma do código. Consulte [tests.md](tests.md) e [mocking.md](mocking.md) quando precisar de exemplos.
 
-### 2. Tracer Bullet (Teste de Integração Inicial)
+## Preparação mínima
 
-Escreva UM teste que confirme UMA única coisa sobre o sistema:
+Antes do primeiro teste:
 
-```
-RED:   Escreva o teste para o primeiro comportamento → o teste falha
-GREEN:     Escreva o código mínimo para passar → o teste passa
-```
-
-Este é o seu _tracer bullet_ (teste de integração inicial) — ele comprova que o caminho funciona de ponta a ponta.
-
-### 3. Ciclo Incremental
-
-Para cada comportamento restante:
-
-```
-RED:   Escreva o próximo teste → falha
-GREEN: Código mínimo para passar → passa
+```text
+1. Consumidor: leia `pelizzai/domain-skills.md`; source mode: use regras/skills do repo-fonte.
+2. Obtenha o comando canônico em `pelizzai/profile.md`, quando existir, ou no manifest/script real.
+3. Confirme contrato, comportamento e seam no pedido/aceite; use spec/plano quando existirem.
+4. Para API externa incerta, consulte a documentação oficial atual disponível.
+5. Pergunte apenas se restar ambiguidade material; não reabra decisões já aprovadas.
 ```
 
-Regras:
+Se o seam necessário não existe, isso é sinal arquitetural. Não contorça o teste: registre a lacuna e use `pelizzai-improving-architecture` quando ela exigir mudança de design.
 
-- Um teste por vez
-- Apenas o código necessário para passar no teste atual
-- Não antecipe testes futuros
-- Mantenha os testes focados em comportamento observável
+---
 
-### 4. Refatoração
+## Ciclo por fatia vertical
 
-Após todos os testes passarem, identifique [candidatos à refatoração](refactoring.md):
+### 1. RED
 
-- [ ] Extraia código duplicado
-- [ ] Aprofunde módulos (encapsule a complexidade atrás de interfaces simples)
-- [ ] Aplique princípios SOLID onde fizer sentido
-- [ ] Considere o que o novo código revela sobre o código existente
-- [ ] Execute os testes após cada etapa de refatoração
+Escreva **um** teste para **um** comportamento observável. Rode-o e confirme:
 
-**Nunca refatore enquanto estiver no estado VERMELHO (RED).** Primeiro, chegue ao estado VERDE (GREEN).
-
-## Checklist por Ciclo
-
-```
-[ ] O teste descreve o comportamento, não a implementação
-[ ] O teste utiliza apenas a interface pública
-[ ] O teste resistiria a uma refatoração interna
-[ ] O código é o mínimo necessário para este teste
-[ ] Nenhuma funcionalidade especulativa foi adicionada
+```text
+- falha pelo motivo esperado;
+- falha no código de produção, não por fixture/import/setup quebrado;
+- passaria somente se o comportamento existisse.
 ```
 
-## Ciclo de TDD (visão geral)
+Teste que já passa não provou a regressão nem guiou a implementação. Corrija o teste/seam antes de seguir.
 
-```mermaid
-flowchart LR
-    P[Planejar: listar comportamentos] --> T[Tracer bullet: 1 teste ponta-a-ponta]
-    T --> R[RED: proximo teste -> falha]
-    R --> G[GREEN: codigo minimo -> passa]
-    G --> C{Mais comportamentos criticos?}
-    C -- Sim --> R
-    C -- Nao --> RF[Refatorar no verde]
-    RF --> D{Definition of Done?}
-    D -- Nao --> R
-    D -- Sim --> done([Tarefa pronta para review])
+### 2. GREEN
+
+Implemente o mínimo coerente para satisfazer o comportamento. Rode o teste e leia exit code/contagem. Não antecipe casos futuros nem misture refator amplo.
+
+### 3. Próxima fatia
+
+Repita um comportamento por vez. Não escreva todos os testes primeiro para depois escrever toda a implementação; isso congela uma forma imaginada antes do aprendizado do ciclo anterior.
+
+### 4. REFACTOR
+
+Somente no verde:
+
+```text
+- remova duplicação;
+- melhore nomes e fronteiras;
+- aprofunde módulos quando simplificar a interface;
+- rode a suíte relevante após cada passo.
 ```
+
+Use [refactoring.md](refactoring.md) para candidatos. Refatoração pode acontecer dentro do ciclo, mas uma tarefa cujo único efeito é refatorar não precisa fabricar RED: ela começa e termina com caracterização verde.
+
+---
+
+## Checklist por ciclo
+
+```text
+[ ] O teste descreve o contrato observável.
+[ ] Usa a interface/seam acordado, sem detalhe privado.
+[ ] O RED foi observado pela razão esperada.
+[ ] O GREEN foi observado com saída fresca.
+[ ] O código adicionado é proporcional ao comportamento atual.
+[ ] Nenhuma funcionalidade especulativa entrou.
+```
+
+Para bug de regressão, `pelizzai-verification-before-completion` pode exigir a prova reforçada: verde com o fix, falha ao remover/reverter somente o fix, verde após restaurá-lo.
+
+## Quando um teste falha inesperadamente
+
+Não invoque RCA por reflexo:
+
+```text
+- causa direta explícita → ReAct + Verification;
+- bug determinístico com causa incerta → RCA leve;
+- flaky/recorrente/distribuído → RCA + síntese de evidência;
+- dano ativo → contenção reversível primeiro.
+```
+
+Siga a triagem de `pelizzai-debugging`.
 
 ## Integração no harness
 
-**Quando o TDD entra:**
+- `pelizzai-writing-plans` registra TDD **por tarefa** somente quando o efeito é comportamental.
+- `pelizzai-execution-plans` aplica a estratégia registrada; não injeta TDD universalmente.
+- `pelizzai-debugging` usa regressão red→green quando há comportamento automatizável.
+- `pelizzai-frontend` continua obrigatório para UI mesmo quando testes de componente passam.
+- `pelizzai-verification-before-completion` valida o resultado completo antes de qualquer alegação.
 
-- Diretamente, quando o usuário desenvolve test-first ou corrige um bug — escreva primeiro o teste de regressão que reproduz o bug.
-- Como **disciplina por tarefa** ao executar um plano: a `pelizzai-execution-plans` despacha um subagente por tarefa, e cada tarefa é implementada por este ciclo TDD.
-- Por **membros de `pelizzai-team` / `pelizzai-subagents`**: cada membro que escreve código implementa sua frente via TDD.
-- **Caminho leve:** para um único teste de regressão (`pelizzai-debugging` Fase 4) ou um teste mínimo de ajuste (`pelizzai-quick-fix`), pule a cerimônia de aprovação de plano do Planejamento — o comportamento-alvo já está fixado pela causa raiz / pelo critério do ajuste.
-
-**Raciocínio — `pelizzai-reasoning`:**
-
-- Planejamento: liste os comportamentos com *Structured Decomposition* (comportamentos, não passos de implementação).
-- Teste vermelho inesperado ou bug: *Root Cause Analysis* antes de mexer no código.
-- Estado verde: *Verification* confirma que o comportamento existe de fato — não basta "passou".
-
-**Loop até a entrega — `pelizzai-loop` (OODA):**
-
-- O ciclo RED→GREEN é um loop: repita teste→código por comportamento até a *Definition of Done* (comportamentos críticos testados e verdes, refatorado no verde).
-- No nível da tarefa/plano, o harness mantém o loop **OODA** (observar a evidência fresca → orientar contra o plano → decidir → agir) até a tarefa ser entregue com êxito. Em dúvida material, **pare** e use `pelizzai-interview-me`.
-
-**Aprovação e conclusão:**
-
-- Confirme interface e comportamentos com `pelizzai-interview-me`, ou no design aprovado da `pelizzai-brainstorming`, antes de escrever testes.
-- Antes de declarar pronto, passe pela `pelizzai-verification-before-completion` e pela `pelizzai-review` (exceção: o track **ajuste** dispensa o review formal por escopo trivial — ver `pelizzai-quick-fix`; a verificação vale sempre).
+> TDD é uma ferramenta forte para comportamento, não uma prova universal de qualidade.

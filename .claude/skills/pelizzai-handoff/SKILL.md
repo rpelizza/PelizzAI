@@ -1,54 +1,72 @@
 ---
 name: pelizzai-handoff
-description: Handoff bifurca; compact continua. Use ao passar o trabalho para uma SESSÃO NOVA — ao mudar de rumo ou abrir outra frente com a janela de contexto cheia, ou quando a janela se aproxima da zona segura ANTES de uma fase nova. Acione quando o usuário disser "faz um handoff", "continua em outra sessão", "passa isso para outra conversa". Para continuar o MESMO trabalho na mesma direção, compacte (regra geral de higiene de contexto na `pelizzai-core`) — não use esta skill.
+description: Prepara uma nova sessão ou frente com contexto mínimo, verificável e seguro. Use quando o usuário pedir handoff/continuação em outra conversa ou quando mudar de rumo numa borda de fase. Para continuar o mesmo trabalho na mesma sessão, use compaction nativa. Respeita state consumidor e execution record source sem criar runtime indevido.
 ---
 
 # PelizzAI Handoff
 
 ## Objetivo
 
-Bifurcar o trabalho para uma sessão nova sem herdar uma janela poluída: um doc de handoff curto, com ponteiros por PATH para os artefatos que já existem, dá à próxima sessão exatamente o que ela precisa — e nada além.
+Dar à próxima sessão tudo que ela precisa para retomar, sem copiar uma narrativa inteira nem
+inventar estado que Git pode provar.
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Handoff para preparar a próxima sessão."
+**Anuncie:** "Usando PelizzAI Handoff para preparar a próxima sessão."
 
-> **Princípio:** handoff bifurca; compact continua. A regra geral de higiene de contexto (zona segura ~120k, bordas de fase) mora na `pelizzai-core`. O `pelizzai/data/state.md` continua sendo a fonte de retomada — o handoff NÃO o substitui.
-
-## Quando
-
-- Mudar de rumo ou abrir OUTRA frente com a janela cheia.
-- Passar o trabalho para uma sessão nova (outro dia, outro agente, outra frente).
-- A janela se aproxima da zona segura ANTES de uma fase nova — bifurque na borda, não no meio.
-- Trabalho multi-sessão: uma frente/"ticket" por sessão — cada handoff carrega UMA próxima missão clara.
-
-## Processo
-
-1. **Feche a borda:** nunca faça handoff no meio de uma fase (review ✅ + cursor + commit primeiro).
-2. **Grave o doc em `pelizzai/data/handoffs/handoff-<AAAA-MM-DD>-<HHMMSS>-<slug>.md`** (gitignored — efêmero, mas descobrível: TUDO que o harness gera vive dentro de `pelizzai/`). O `<HHMMSS>` evita que dois handoffs do mesmo slug no mesmo dia se sobrescrevam.
-3. **Conteúdo, nesta ordem:**
-   - Objetivo da próxima sessão (aceite-o como argumento do pedido de handoff).
-   - Estado atual: o que foi feito e o que foi decidido (fatos, não narrativa).
-   - Ponteiros por PATH para specs/planos/ADRs/`pelizzai/data/state.md` — **não duplique** o conteúdo; artefato que tem path é referenciado, nunca colado.
-   - Pendências: o que falta, riscos abertos, decisões pendentes de humano.
-   - **Skills sugeridas** para a próxima sessão (as do harness e as de domínio aplicáveis).
-4. **Durabilidade acima de precisão:** o doc sobrevive à sessão — descreva **comportamentos e critérios de aceite** (independentes e verificáveis) e o **fora-de-escopo explícito** (evita gold-plating); NÃO cite paths de arquivos de código nem números de linha (apodrecem — a próxima sessão explora o codebase fresca). Ponteiros por path só para ARTEFATOS do harness (specs, planos, ADRs), que são estáveis.
-5. **Redija segredos:** tokens, senhas e URLs internas sensíveis nunca entram no doc — substitua por `<redigido>` + onde obter.
-6. Entregue o path do doc ao usuário; a sessão nova começa pelo doc e segue o fluxo normal (`pelizzai-core` → `pelizzai-router`).
-
-## Red flags
+## Handoff ou compaction?
 
 ```text
-- Colar conteúdo de artefatos que já têm path (o handoff vira uma cópia que envelhece).
-- Paths de código e números de linha no doc (apodrecem; descreva o comportamento).
-- Handoff no meio de uma fase — feche a borda primeiro.
-- Segredos em texto claro no doc.
-- Gravar o doc fora de pelizzai/data/handoffs/ ou versioná-lo.
-- Usar handoff para continuar o MESMO trabalho na mesma direção — isso é compact.
+mesma missão + mesma direção → compaction/continuação nativa
+nova sessão, nova frente ou mudança de direção → handoff
 ```
 
-## Integração
+Não use limiar fixo de tokens como gatilho. Use sinais da plataforma, perda de legibilidade do
+contexto e bordas reais de fase. Nunca interrompa uma mutação/review pela metade só para handoff;
+primeiro deixe Git + registro em estado verificável, ou marque explicitamente WIP/BLOCKED.
 
-- `pelizzai-core` — dona da regra geral de higiene de contexto (zona segura, "handoff bifurca; compact continua").
-- `pelizzai-execution-plans` — bordas de fase: o handoff acontece na borda (review ✅ + cursor + commit), nunca no meio.
-- `pelizzai/data/state.md` — o cursor continua sendo a fonte de retomada; o handoff complementa (contexto), não substitui (estado).
+## Onde entregar
 
-> Baseline desta skill: prática testada em campo em harness de referência (benchmark 2026-07-04).
+Prefira o recurso nativo de handoff/task da plataforma. Se for necessário um arquivo:
+
+- consumidor com runtime configurado: `pelizzai/data/handoffs/handoff-<timestamp>-<slug>.md`
+  somente se o path estiver ignorado;
+- source mode ou consumidor sem runtime seguro: diretório temporário do sistema;
+- arquivo versionado: somente por pedido explícito, via router + branch antes da escrita.
+
+Nunca crie `pelizzai/` no repo-fonte para armazenar handoff.
+
+## Conteúdo mínimo
+
+```text
+Objetivo/aceite da próxima sessão
+Modo e efeito autorizados; ações externas ainda não autorizadas
+Estado confirmado: branch, base-sha, HEAD, isolation/worktree e working tree
+Progresso: concluído, próximo, pendente/bloqueado
+Decisões duráveis e fora de escopo
+Plano/spec/ADR relevantes por path ou conteúdo nativo
+Skills locais + overlays que realmente se aplicam
+Evidência já válida e o que foi invalidado pela última mutação
+Próximo comando/ação segura
+```
+
+No consumidor, `state.md` continua sendo a fonte do cursor; em source mode, o execution record +
+Git. O handoff aponta para eles, não os substitui. Sem arquivo de plano persistente, inclua a tarefa
+pendente do plano nativo — não invente path.
+
+## Regras de qualidade
+
+- Fatos vêm de Git/artefatos, não da memória da conversa.
+- Redija tokens, senhas, dados pessoais e URLs internas sensíveis; diga onde obtê-los.
+- Use paths estáveis apenas quando existem. Linhas de código podem ser incluídas como evidência
+  atual, marcadas como potencialmente voláteis; não esconda achado acionável por medo de drift.
+- Não replique specs/ADRs inteiros quando a próxima sessão consegue acessá-los.
+- Um handoff carrega uma missão; frentes independentes recebem handoffs separados.
+
+## Definition of Done
+
+```text
+[ ] Git e registro concordam ou a divergência está explícita;
+[ ] nenhuma autoridade externa foi ampliada;
+[ ] próxima sessão sabe o próximo passo e como provar sucesso;
+[ ] nenhum segredo foi copiado;
+[ ] source mode não ganhou runtime consumidor.
+```

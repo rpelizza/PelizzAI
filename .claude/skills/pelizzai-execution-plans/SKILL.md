@@ -1,75 +1,66 @@
 ---
 name: pelizzai-execution-plans
-description: Use para EXECUTAR um plano de implementação já aprovado (de `pelizzai-writing-plans`, um PRD ou issues). É a dona do GATE DE SETUP PÓS-PLANO e do loop de execução tarefa por tarefa até a validação final da entrega; mantém o estado em `pelizzai/data/state.md` (retomável após compaction). Acione quando houver um plano pronto e for hora de implementar, ou quando o usuário disser "executar o plano", "implementar as tarefas", "tocar o plano". NUNCA comece em main/master sem consentimento.
+description: Executa um plano aprovado tarefa por tarefa, escolhendo prova/review proporcionais, mantendo state no consumidor ou execution record no source mode e selando o candidato final. Use quando houver plano/PRD/issues prontos para implementar. Nunca escreva em branch protegida; starting-branch prepara o isolamento antes da execução.
 ---
 
 # PelizzAI Execution Plans
 
 ## Objetivo
 
-Executar um plano de implementação aprovado com **disciplina por tarefa**: cada tarefa é implementada via TDD, revisada (spec + qualidade) e só então consolidada, em **loop** até o plano inteiro ser entregue com êxito — e a entrega é validada no final pelo **coordenador/líder** (review final + suíte completa + checklist do plano). A skill conduz o **gate de setup pós-plano** (como isolar, como executar, como commitar) e mantém um **estado retomável**.
+Executar um plano aprovado com **disciplina por tarefa**: cada tarefa recebe a estratégia de
+teste/validação adequada ao artefato, passa pelas lentes de spec + qualidade no perfil de review
+proporcional e só então é
+consolidada. No final, overlays que podem escrever rodam antes de o conteúdo ser selado por
+review, suíte e checklist. A skill mantém estado retomável e impede integrar conteúdo diferente
+do que foi validado.
 
 **Anuncie ao iniciar:** "Usando a skill PelizzAI Execution Plans para executar o plano, tarefa por tarefa."
 
 <MEMBRO-DO-TIME-STOP>
-Se você é um **membro** (teammate/subagente) encarregado de **uma tarefa**, implemente apenas a sua: siga `pelizzai-tdd`, aplique as skills de domínio coladas no seu briefing (elas prevalecem sobre padrões genéricos), respeite a camada global (`pelizzai-preferences`) e devolva o resultado com um dos status (`DONE` / `DONE_WITH_CONCERNS` / `BLOCKED` / `NEEDS_CONTEXT`). Não orquestre o plano nem commite — a consolidação é do coordenador. Ver `references/task-cycle.md`.
+Se você é um **membro** (teammate/subagente) encarregado de **uma tarefa**, implemente apenas a
+sua: siga a estratégia de teste declarada, as skills de domínio e as skills transversais/overlays
+coladas no briefing; respeite `pelizzai-preferences` e devolva `DONE`, `DONE_WITH_CONCERNS`,
+`BLOCKED` ou `NEEDS_CONTEXT`. Não orquestre nem commite. Ver `references/task-cycle.md`.
 </MEMBRO-DO-TIME-STOP>
 
 ---
 
 ## Princípio central
 
-> Execute um plano aprovado com gates humanos nas **bordas** (setup pós-plano, destino, conclusão) e autonomia **entre as tarefas** (não pare para perguntar "sigo?" a cada tarefa). Nenhuma tarefa é consolidada sem TDD e review. Nenhuma entrega é declarada sem a validação final do coordenador. Nunca o modo "mãos-livres" que remove os gates de borda.
+> Execute um plano aprovado com gates humanos nas **bordas** e autonomia entre tarefas. Nenhuma
+> tarefa é consolidada sem evidência apropriada ao artefato e review. Nenhum conteúdo muda depois
+> de `validated-head`; consumidor acrescenta só o closure metadata-only, source mode nenhum commit.
 
 ---
 
 ## Gate de setup pós-plano (OBRIGATÓRIO antes da Tarefa 1)
 
-Com o plano salvo e estressado, conduza as **quatro perguntas, nesta ordem** (é aqui que elas acontecem — o router registrou `<pending>` nos tracks com plano). Cada resposta é registrada em `pelizzai/data/state.md`. Se algum campo já estiver decidido **para esta tarefa** (retomada real), honre — não re-pergunte. Os menus abaixo são os **canônicos** do harness: as demais skills (`pelizzai-router`, `pelizzai-starting-branch`, `pelizzai-writing-plans`) os referenciam em vez de duplicá-los.
+O normal é a branch de tarefa/planejamento já existir: `pelizzai-starting-branch` a criou **antes**
+da spec/plano e gravou `base-ref`/`base-sha`. Se um plano externo chegou sem branch, invoque-a
+agora antes de continuar. Com o plano aprovado, resolva as três decisões ainda pendentes e grave
+no state consumidor ou execution record nativo; em retomada real, honre valores já decididos.
 
-**1. Isolamento — pergunte e aguarde:**
+**1. Isolamento:** branch é o default seguro: continue na branch de planejamento. Só proponha
+worktree quando o working tree principal precisa ficar livre/isolado ou o usuário o pediu; explique
+que será necessário um checkpoint e confirme essa mudança material. Worktree não autoriza vários
+writers concorrentes no mesmo diretório.
 
-```text
-Plano pronto. Como você prefere trabalhar nesta tarefa?
+**2. Aplicar isolamento — invoque `pelizzai-starting-branch`:** branch faz checkpoint do setup
+persistente quando existir e mantém a branch atual; worktree captura `checkpoint-sha` após o
+checkpoint opcional, libera a branch no working tree principal, adiciona
+o worktree com a **branch existente** e registra o novo path antes da Tarefa 1. Ambos começam a
+implementação com working tree limpa.
 
-1. Branch — troca no lugar, no working tree atual (recomendado para a maioria)
-2. Worktree — uma cópia isolada do projeto em outra pasta; vale a pena quando o plano tem
-   partes independentes (ex.: backend e frontend) que podem ser construídas em paralelo
+**3. Modo de execução:** selecione a menor coordenação suficiente e registre-a. Inline é default
+para mudança pequena/sequencial; subagents para investigação/unidades que só reportam; team para
+dependências que exigem coordenação e diálogo. Não existe prioridade
+`team > subagents > inline`. Preferência explícita do usuário prevalece; só pergunte se duas opções
+tiverem trade-off material. Escritas/review/commit na working tree são serializados.
 
-Qual opção?
-```
-
-Recomende com base no plano: frentes independentes paralelizáveis → sugira `worktree`; plano sequencial → sugira `branch`.
-
-**2. Nome e criação — invoque `pelizzai-starting-branch`:** ela sugere o tipo conventional a partir do track (`feat/`, `fix/`, `refactor/`, …), propõe `<tipo>/<slug>`, confirma com o usuário e cria a branch ou o worktree (com baseline de testes no worktree).
-
-**3. Modo de execução — pergunte e aguarde, SEMPRE com as três opções visíveis:**
-
-```text
-Como você quer que eu execute o plano?
-
-1. team — um time de agentes coordenados, papéis/frentes em paralelo (pelizzai-team)
-   [recomendado quando o plano tem múltiplas frentes ou pede revisão multi-perspectiva]
-2. subagents — um subagente isolado por tarefa, que reporta de volta (pelizzai-subagents)
-3. inline — eu mesmo, nesta sessão, tarefa a tarefa
-
-Qual opção?
-```
-
-Ordem de preferência **team > subagents > inline**, proporcional ao plano (não monte um time para um plano trivial — mas a opção team SEMPRE aparece no menu).
-
-**4. Estratégia de commit — pergunte e aguarde:**
-
-```text
-Como você quer os commits desta tarefa?
-
-1. granular — um commit definitivo por tarefa concluída (histórico detalhado, mantido no fim)
-2. squash-final — commits de trabalho (wip) durante a execução e UM commit único consolidado no fechamento
-
-Qual opção?
-```
-
-A escolha é honrada até o fim: `granular` não ganha squash no fechamento; `squash-final` já autoriza a consolidação final.
+**4. Estratégia de commit:** granular é o default seguro. `squash-final` exige pedido/preferência ou
+trade-off real apresentado ao usuário, pois consolida a branch. Registre a decisão. Qualquer squash
+ocorre **antes** de review final/testes/`validated-head`; `pelizzai-finish-task` nunca reescreve
+conteúdo ou histórico após o seal.
 
 ---
 
@@ -79,69 +70,70 @@ Antes da primeira tarefa, confirme:
 
 ```text
 [ ] Existe um plano aprovado (pelizzai-writing-plans, PRD ou issues). Sem plano → volte a pelizzai-writing-plans.
-[ ] Existe o catálogo pelizzai/domain-skills.md. Se NÃO existe, o harness não foi inicializado:
-    rode pelizzai-audit (bootstrap) e só então volte.
-[ ] As skills de domínio relevantes foram selecionadas do catálogo, prontas para aplicar/colar —
-    obrigatório nos três modos (ver abaixo).
+[ ] Consumidor: catálogo existe (zero domain skills é válido) e state foi preparado.
+    Source mode: NÃO crie catálogo/state consumidor; use as regras do repo-fonte e execution record.
+[ ] As skills de domínio relevantes foram selecionadas quando o consumidor as possui.
+[ ] `overlays` foi inferido pelo efeito/superfície e as skills transversais estão prontas para
+    aplicar/colar nos briefings de executores e reviewers.
 [ ] O gate de setup pós-plano foi conduzido: isolation/execution-mode/commit-strategy registrados
     (nenhum <pending>) e o isolamento criado via pelizzai-starting-branch.
-[ ] NÃO está em branch protegida (main/master/develop/dev, ou HEAD vazio — fail-closed).
-[ ] O estado existe em pelizzai/data/state.md (se não, instancie a partir do template e preencha
-    slug/track/phase/branch/isolation/execution-mode/commit-strategy/plan antes da Tarefa 1) e
+[ ] NÃO está em branch protegida (default real/base-ref, main/master/develop/dev, ou HEAD vazio).
+[ ] Em consumidor, o estado existe em pelizzai/data/state.md (se não, instancie a partir do template e preencha
+    slug/track/phase/project/branch/base-ref/base-sha/isolation/execution-mode/
+    commit-strategy/overlays/plan antes da Tarefa 1; `validated-head: <none>`) e
     foi validado contra o git (branch: `git branch --show-current`; worktree: `git worktree list`
     ou o comando rodado DENTRO do worktree-path).
 ```
 
-O diretório `pelizzai/` segue o **padrão único do harness** (ver `pelizzai-audit` → "Padrão de diretório `pelizzai/`"). O estado desta skill vive em **`pelizzai/data/state.md`**.
+No consumidor, o diretório `pelizzai/` segue o padrão do harness e o estado vive em
+`pelizzai/data/state.md`. Em source mode, o estado vive somente no execution record nativo.
 
 ---
 
-## Ler as skills de domínio (obrigatório nos três modos)
+## Construir o pacote de skills (obrigatório nos três modos)
 
-As skills de domínio capturam os padrões deste projeto. **Todo executor as aplica** — em time, com subagentes ou inline — e elas **prevalecem** sobre padrões genéricos e sobre as regras genéricas de `pelizzai-preferences`/`pelizzai-reasoning`.
+Skills de domínio capturam padrões do projeto; skills transversais/overlays capturam uma superfície
+da mudança. **Todo executor e reviewer recebe as aplicáveis**. Recalcule overlays pelo diff real: UI inclui
+`pelizzai-frontend`; superfície sensível inclui `pelizzai-oswap`; nova superfície estável pode
+incluir `pelizzai-documenting-features`. Persistir nomes em `overlays:` não substitui colar seus
+gates no briefing.
 
 ```text
-1. Leia o catálogo `pelizzai/domain-skills.md` e selecione as skills de domínio relevantes à tarefa.
-2. Inline: carregue essas skills no seu contexto e aplique-as ao implementar.
-3. Subagents/Team: o membro NÃO herda seu contexto — COLE as skills de domínio relevantes
-   (ou seus pontos-chave) no briefing de cada tarefa, junto com o texto completo da tarefa.
+1. Consumidor: leia `pelizzai/domain-skills.md`; source mode: use regras/skills do repo-fonte.
+2. Leia `overlays:` no state/execution record e complemente pelo efeito/superfície observada.
+3. Inline: carregue domínio + overlays. Subagents/Team: COLE seus pontos operacionais no briefing.
+4. Propague o mesmo pacote ao reviewer; ele precisa julgar requisitos de UI/segurança/docs também.
+5. Prioridade: pedido explícito e regras do projeto > skills de domínio > overlays aplicáveis >
+   preferences/reasoning genéricos. Conflito material sobe ao coordenador.
 ```
 
-Se o catálogo não existir, o projeto não foi inicializado: rode a `pelizzai-audit` (bootstrap) antes de executar.
+No consumidor, catálogo ausente volta a `pelizzai-audit`. Em source mode, ausência é o contrato.
 
 ---
 
 ## Os três modos de execução
 
-Ordem de preferência: **team → subagents → inline**. Escolha proporcional ao plano (não monte um time para um plano trivial).
+Não há ranking universal; use a menor coordenação que preserve qualidade.
 
 | Modo                 | Skill              | Quando                                                                       |
 | -------------------- | ------------------ | ---------------------------------------------------------------------------- |
-| **team** (preferido) | `pelizzai-team`    | Plano com **frentes paralelas** ou cross-layer (ex.: backend + frontend + testes), donos distintos que se beneficiam de coordenação/diálogo |
+| **team**             | `pelizzai-team`    | Frentes com dependências que exigem coordenação e troca durante a execução |
 | **subagents**        | `pelizzai-subagents` | Tarefas independentes que só precisam **reportar**; um subagente fresco por tarefa, contexto isolado, review por tarefa |
-| **inline** (último)  | —                  | Subagentes/time indisponíveis, ou plano **pequeno e muito sequencial**; o coordenador implementa tarefa a tarefa na própria sessão |
+| **inline**           | —                  | Plano pequeno/sequencial em que delegar custaria mais que executar |
 
 ```text
-Isolamento e paralelismo (condicionado à escolha do usuário no gate):
-- isolation: branch → um working tree só. A execução que ESCREVE roda uma frente por vez e o
-  COORDENADOR integra as contribuições EM SÉRIE. O paralelismo de team/subagents fica para o que
-  NÃO escreve concorrentemente: investigação, leitura, review e decomposição.
-- isolation: worktree → o worktree ÚNICO da tarefa permite escrita paralela quando as frentes
-  tocam CAMINHOS DISJUNTOS (arquivos que não se sobrepõem). Não crie um worktree por agente —
-  um por tarefa; frentes com paths disjuntos escrevem em paralelo dentro dele; review, commit e
-  cursor continuam serializados pelo coordenador. Se aparecer conflito real, o par não era
-  disjunto — replaneje em vez de forçar.
-- Review com escrita paralela em curso (worktree): a working tree contém WIP de OUTRAS frentes.
-  (a) escope o diff do review por tarefa aos paths da frente (git diff -- <paths-da-frente>);
-  (b) instrua o revisor a IGNORAR mudanças fora desses paths (não são "extra" da tarefa em
-  revisão — pertencem a outra frente); (c) para a evidência de teste, rode o subconjunto da
-  frente ou aguarde/quiesça as escritas das demais frentes antes de rodar a suíte completa —
-  um RED intencional de outra frente no exit code não pode reprovar esta tarefa.
+Branch e worktree desta tarefa têm UMA working tree de integração. Apenas o coordenador aplica
+escritas nela, em série. Agentes podem investigar/revisar em paralelo ou devolver patches; não
+mantêm WIP concorrente no diretório compartilhado. Antes do review por tarefa, quiesça writers e
+gere `review-package --working-tree`, que deve representar somente a tarefa em revisão.
 ```
 
-**Desempate team × subagents:** team = múltiplas frentes em paralelo (via teammates ou subagentes internos do `pelizzai-team`); subagents = um subagente isolado por tarefa, em série. Havendo paralelismo de frentes, prefira **team** mesmo que os membros só reportem.
+**Desempate:** team quando membros precisam conversar/negociar dependências; subagents quando cada
+unidade só precisa reportar; inline quando o trabalho é curto e serial. Paralelismo, sozinho, não
+obriga team.
 
-O modo escolhido é registrado em `pelizzai/data/state.md` (`execution-mode: team | subagents | inline`).
+Registre o modo no `state.md` consumidor ou execution record nativo
+(`execution-mode: team | subagents | inline`).
 
 ---
 
@@ -149,25 +141,33 @@ O modo escolhido é registrado em `pelizzai/data/state.md` (`execution-mode: tea
 
 ```mermaid
 flowchart TD
-    PL[Plano aprovado e estressado] --> GATE[Gate de setup pos-plano:\n1. isolamento branch/worktree\n2. nome via starting-branch\n3. modo team/subagents/inline\n4. commit granular/squash-final]
-    GATE --> DOM[Carregar skills de dominio\npelizzai/domain-skills.md]
+    PL[Plano aprovado na branch de planejamento] --> GATE[Gate pos-plano:\nisolamento + modo + commits]
+    GATE --> DOM[Carregar dominio + overlays]
     DOM --> PRE[Pre-voo: varrer plano por contradicoes]
-    PRE --> CY[Ciclo OODA por tarefa\nref: task-cycle.md]
-    CY --> T[Implementar via pelizzai-tdd\n+ skills de dominio]
-    T --> RV[Review: spec -> qualidade\npelizzai-review]
+    PRE --> CY[Ciclo adaptativo por tarefa\nref: task-cycle.md]
+    CY --> T[Implementar com estrategia por artefato\n+ dominio + overlays]
+    T --> RV[Review proporcional\ncombined ou split]
     RV --> Q{Aprovado nos dois?}
     Q -- Nao --> FX[Corrigir e re-revisar\ncircuit breaker: 3 ciclos/estagio]
     FX --> RV
     Q -- Sim --> CM[Coordenador avanca o cursor E consolida\num commit so, cursor incluso]
     CM --> MORE{Mais tarefas?}
     MORE -- Sim --> CY
-    MORE -- Nao --> VAL[VALIDACAO FINAL DA ENTREGA\nreview final + suite completa + checklist do plano]
-    VAL --> VC[pelizzai-verification-before-completion]
-    VC --> FIN[pelizzai-finish-task]
+    MORE -- Nao --> OV[Overlays que podem escrever\nsecurity + frontend + docs]
+    OV --> CONS[Congelar historico\nsquash-final se escolhido]
+    CONS --> VAL[Review final + suite + checklist]
+    VAL -- Fix --> OV
+    VAL -- Aprovado --> VC[pelizzai-verification-before-completion]
+    VC -- Fix --> OV
+    VC -- Aprovado --> SEAL[validated-head = HEAD]
+    SEAL --> FIN[pelizzai-finish-task\nmetadata-only + destino]
     FIN --> done([Plano entregue])
 ```
 
-O laço macro **desta skill** é um ciclo **OODA** (`pelizzai-loop`): **Observar** o estado real (testes, diffs, reviews) → **Orientar** contra o plano e a Definition of Done → **Decidir** a próxima ação (próxima tarefa, corrigir, escalar) → **Agir** — repetido até a DoD do plano.
+OODA é útil como **controle macro** quando há feedback e estado mutável: observar evidência,
+orientar contra a DoD, decidir e agir. Não é o reasoning obrigatório de toda tarefa. O briefing
+seleciona a técnica que ataca o problema (decomposição, RCA, hipótese, comparação, verification);
+OODA apenas coordena iterações quando existe um loop real.
 
 ---
 
@@ -179,42 +179,50 @@ Antes da Tarefa 1, leia o plano **uma vez** procurando contradições internas o
 
 ## Ciclo por tarefa
 
-O protocolo detalhado — briefing autossuficiente (por arquivo via `scripts/task-brief` quando disponível; senão por colagem), TDD, review em dois estágios, status, circuit breaker e commit como gate — está em **[references/task-cycle.md](references/task-cycle.md)**. Resumo:
+O protocolo detalhado — briefing autossuficiente, estratégia por artefato, review proporcional
+com duas lentes, circuit breaker e commit como gate — está em
+**[references/task-cycle.md](references/task-cycle.md)**. Resumo:
 
 ```text
-1. Briefing: COLE o texto completo da tarefa + as skills de domínio relevantes no prompt
-   (o membro nunca lê o arquivo do plano; com scripts/task-brief.* no projeto, o brief e o
-   relatório viajam por ARQUIVO em pelizzai/data/handoffs/ — ver task-cycle.md §1, incluindo
-   o review-package com BASE capturado antes do despacho). Instrua a camada global (pelizzai-preferences +
-   pelizzai-reasoning) com a prioridade certa: skills de DOMÍNIO > preferences/reasoning.
+1. Briefing: COLE o texto completo + skills de domínio + overlays + estratégia de evidência e
+   perfil de review (`combined` ou `split`)
+   (o membro nunca lê o arquivo inteiro do plano; use scripts/task-brief.* somente quando houver
+   plano Markdown persistente compatível. Plano nativo usa colagem/brief construído — ver §1,
+   incluindo
+   `review-package --working-tree`; range é só final). Instrua preferences/reasoning com a
+   prioridade certa: regras do projeto > domínio > overlays > camada genérica.
    Responda perguntas ANTES de o trabalho começar.
-2. Implementar via pelizzai-tdd (Iron Law: teste que falha primeiro). O membro NÃO commita.
-3. Review em dois estágios, nesta ordem: (a) conformidade com a spec — o revisor NÃO confia no
-   relatório do implementador, compara código vs requisitos linha a linha; (b) qualidade do código,
-   com evidência de teste FRESCA (rodou e colou a saída + exit code — não inferida; o que não
-   rodou = UNVERIFIED, nunca ✅). Use pelizzai-review.
+2. Aplicar TDD, characterization, validate, visual ou static/scenario conforme o artefato. O
+   membro NÃO commita.
+3. Review com duas lentes: (a) conformidade com a spec; (b) qualidade + evidência FRESCA.
+   `combined` aplica ambas em um despacho/relatório para tarefa bounded/low-risk; `split` usa
+   estágios sequenciais quando risco, contrato, dados, segurança ou complexidade pedirem.
 4. Reprovou? Corrija (re-despachando ao implementador — não corrija à mão, polui o contexto) e
-   RE-REVISE no mesmo estágio. Circuit breaker: 3 ciclos por estágio por tarefa; mesma issue 2x
+   RE-REVISE na mesma lente. Circuit breaker: 3 ciclos por lente por tarefa; mesma issue 2x
    escala na 2ª; rejeição estrutural escala de imediato; ao estourar → registra phase: blocked
    e escala ao humano com mensagem acionável.
-5. Aprovou nos dois? O COORDENADOR avança o cursor em pelizzai/data/state.md e consolida —
-   nesta ordem, num commit só: atualiza o state.md, estagia tudo e commita (granular: commit
-   definitivo; squash-final: wip). O cursor viaja DENTRO do commit da tarefa.
+5. As duas lentes aprovaram? O COORDENADOR consolida: estagia paths EXATOS da tarefa e, no
+   consumidor, atualiza/estagia state no mesmo commit; em source mode avança o execution record
+   sem arquivo. Inspeciona `git diff --cached` e commita (granular: definitivo; squash-final: wip).
+   Nunca use `git add -A`.
 ```
 
 ---
 
-## Modo Team (preferido)
+## Modo Team
 
-Use `pelizzai-team`. Cada **frente** do plano (conjunto coeso de tarefas, ex.: uma camada) vira um membro; o coordenador (lead) delega por briefing autossuficiente (com as skills de domínio coladas e a camada global instruída), monitora e sintetiza. Escrita paralela: só com `isolation: worktree` e caminhos disjuntos por frente (ver "Isolamento e paralelismo" acima); em `branch`, o coordenador integra as escritas **em série**, reservando o paralelismo para investigação, review e decomposição. O ciclo por tarefa acima vale dentro de cada frente.
+Use `pelizzai-team` quando frentes precisam coordenar dependências. O lead delega briefings com
+domínio + overlays e sintetiza. Investigação pode ser paralela; aplicação na working tree, review,
+cursor e commit são serializados pelo coordenador.
 
 ## Modo Subagents
 
-Use `pelizzai-subagents`. Um subagente **fresco por tarefa**, despachado pelo coordenador, com contexto isolado. O coordenador roteia, revisa (dois estágios) e consolida. Execução contínua entre tarefas; sem pausa por tarefa.
+Use `pelizzai-subagents`. Um subagente **fresco por tarefa**, despachado pelo coordenador, com contexto isolado. O coordenador roteia, aplica o perfil de review e consolida. Execução contínua entre tarefas; sem pausa por tarefa.
 
-## Modo Inline (último recurso)
+## Modo Inline
 
-Sem subagentes/time, ou plano pequeno e sequencial: o coordenador implementa tarefa a tarefa na própria sessão, seguindo o mesmo ciclo (TDD → review → consolidar → avançar cursor). É o **fallback** — prefira team ou subagents quando disponíveis.
+Para plano pequeno e sequencial, o coordenador executa na própria sessão seguindo o mesmo ciclo.
+Inline é uma escolha adequada, não um fallback inferior.
 
 ---
 
@@ -235,47 +243,51 @@ A regra geral (zona segura, fases, "handoff bifurca; compact continua") mora na 
 
 ---
 
-## Estado e retomada — `pelizzai/data/state.md`
+## Estado e retomada
 
-O cursor da tarefa ativa vive em `pelizzai/data/state.md` (template: [templates/state.md](templates/state.md)). Campos: identidade da tarefa (`slug`, `track`, `phase`), `branch`, `isolation`, `worktree-path`, `execution-mode`, `commit-strategy`, `audience`, `plan` (caminho do plano em execução), `project` (projeto-alvo, em workspace), progresso (`delivered`/`next`/`pending`) e o `## Histórico`. Se o arquivo não existir, instancie-o a partir do template antes da Tarefa 1.
+Invariantes comuns:
 
 ```text
-- Sentinela: slug: <none> ou phase: done → não há tarefa ativa (começa do zero; os gates
-  perguntam de novo — tarefa nova NUNCA herda isolation/execution-mode/commit-strategy).
-- Avance o cursor a cada tarefa concluída; em granular o toque do cursor entra no MESMO
-  commit da tarefa; em squash-final, entra no commit wip da tarefa — DURANTE a execução,
-  nunca um commit órfão só do cursor (exceções: o registro de phase: blocked do circuit
-  breaker — ver references/task-cycle.md §5 — e o commit de fechamento do cursor da
-  pelizzai-finish-task no modo granular).
-- Retomada após compaction: confie no state.md e no git log, NÃO na sua memória (a falha mais
-  cara desse cenário é re-despachar tarefas já concluídas) — e VALIDE contra a realidade: com
-  isolation: branch, a branch registrada bate com `git branch --show-current`? Com
-  isolation: worktree, valide pela saída de `git worktree list` (caminho + branch) ou rode
-  o comando DENTRO do worktree-path (no working tree principal ele devolve outra branch —
-  divergência falso-positiva)?
-  Releia o arquivo apontado em `plan:` para reconstruir o texto das tarefas pendentes (o membro
-  nunca lê o plano; quem cola é o coordenador). Em divergência que arrisque o trabalho, NÃO confie
-  cego: acione a `pelizzai-recovery` (ponto de retorno → menu → reconciliar e commitar o cursor)
-  antes de prosseguir.
-- Em workspace, a branch e os comandos de teste/lint/build são POR-PROJETO; use o campo `project:`.
+- `phase: done`/slug vazio significa nenhuma tarefa ativa; tarefa nova não herda decisões.
+- `base-ref`/`base-sha` são o snapshot inicial e nunca são recalculados no fim.
+- mudança de conteúdo invalida `validated-head`; ele só nasce após a validação final.
+- `project` é exatamente um repo; outro repo recebe outro registro de execução.
+- branch/worktree, HEAD e progresso do registro precisam concordar com Git.
 ```
+
+**Consumidor:** o cursor vive em `pelizzai/data/state.md` (template em
+[templates/state.md](templates/state.md)). Avance-o no mesmo commit da tarefa; os únicos commits
+só de cursor são `phase: blocked` e o closure final. Após compaction, reconstrua pelo state, arquivo
+`plan:` e Git.
+
+**Source mode:** o cursor vive no plano/execution record nativo. Avance-o após cada commit, leia o
+plano nativo para tarefas pendentes e reconstrua pelo record + Git; não procure/crie state, arquivo
+de plano consumidor nem commit de cursor. State ausente é o contrato, não uma divergência.
+
+Em ambos os modos, valide branch com `git branch --show-current` e worktree por
+`git worktree list`/comando dentro do path registrado. Divergência material chama
+`pelizzai-recovery` no modo correspondente; ela preserva WIP antes de reconciliar.
 
 ---
 
-## Loop até a entrega (OODA)
+## Loop até a entrega (controle adaptativo)
 
-O laço macro — implementar → testar → revisar → corrigir, repetido até a **Definition of Done** do plano (todas as tarefas concluídas, testes verdes com evidência, validação final aprovada) — é conduzido por **esta skill** como um ciclo **OODA** (ver `pelizzai-loop`): Observar a evidência fresca de cada ciclo, Orientar contra o plano/DoD, Decidir a próxima ação, Agir. De `pelizzai-loop` importe: (a) a noção de **Definition of Done** do plano, (b) a lente OODA do laço e (c) a regra — em dúvida material durante o loop, **pare** e use `pelizzai-interview-me`; só retome quando resolvida.
+O loop usa evidência e Definition of Done. OODA pode coordenar o macro-loop, mas o reasoning local
+é selecionado pela situação. Em dúvida material, pare e use `pelizzai-interview-me`; não transforme
+incerteza em mais uma volta automática.
 
 ---
 
 ## Gates humanos (bordas) e autonomia entre tarefas
 
 ```text
-GATES (exigem confirmação do usuário):
+GATES (exigem confirmação quando há escolha/efeito material):
 - Começar em branch protegida (main/master/develop/dev) — proibido, sem exceção.
-- Gate de setup pós-plano: isolamento (branch/worktree), nome da branch/worktree,
-  modo de execução (team/subagents/inline) e estratégia de commit (granular/squash-final).
-- Destino: push direto / push + PR / manter local / descartar (pelizzai-finish-task).
+- Branch/nome/base antes do planejamento somente quando ambíguos; worktree e squash-final quando
+  saem dos defaults seguros.
+- Modo de execução só vira pergunta quando há trade-off material ou preferência explícita.
+- Destino externo: push / PR / descarte e remoção de worktree exigem decisão; sem pedido externo,
+  finish-task mantém local por default.
 - Conclusão.
 
 AUTONOMIA (sem perguntar a cada passo):
@@ -289,35 +301,68 @@ NUNCA o modo "mãos-livres" que remove os gates de borda (reprovado em campo no 
 
 ## Validação final da entrega (coordenador/líder)
 
-Ao terminar todas as tarefas, o **coordenador/líder valida a entrega inteira** — independente de qualquer alegação anterior dos membros. Nesta ordem:
+Ao terminar as tarefas, o coordenador valida a entrega inteira. A ordem é um contrato:
+
+### 1. Rodar overlays que podem escrever
+
+Reavalie `base-sha..HEAD` e execute, quando aplicável, **antes** do review final:
 
 ```text
-1. REVIEW FINAL da branch inteira (range <BASE>..<HEAD>, não só por tarefa) via pelizzai-review,
-   com o modelo mais capaz disponível e effort máximo. Critical/Important abertos bloqueiam:
-   re-despache o fix (a um implementador novo com briefing do achado; em inline, corrija) e
-   RE-REVISE — com o MESMO circuit breaker do task-cycle §5 aplicado ao review final
-   (3 ciclos → phase: blocked e escalar ao humano; nunca loop infinito de fix→re-review).
-2. SUÍTE COMPLETA rodada pelo próprio coordenador: testes + lint + build do projeto (os
-   comandos do perfil pelizzai/profile.md, quando existir — nunca chutados), do zero,
-   com saída e exit code colados — não reaproveite runs por tarefa nem confie em relatório
-   de membro ("subagente disse que passou" não é evidência; o diff do git e a suíte são).
-3. CHECKLIST DO PLANO, requisito a requisito: releia o plano/spec e aponte, para cada requisito,
-   onde ele foi entregue. Requisito sem tarefa entregue = lacuna → volte ao ciclo (não é "done").
-   Conformidade com a spec é BINÁRIA — "quase tudo" não é entregue.
-4. pelizzai-verification-before-completion — o gate de evidência fresca antes de qualquer
-   alegação de conclusão.
-5. pelizzai-finish-task — fechar o cursor (phase: done), consolidar honrando a commit-strategy
-   (sem re-perguntar squash), perguntar destino (push/PR/local/descartar) e, se worktree,
-   oferecer a remoção.
+- pelizzai-oswap: auth, input, SQL/query, segredo, upload, dependência, autorização etc.;
+- pelizzai-frontend: requisitos anti-slop durante a implementação + app rodando, estados e
+  viewports na validação visual;
+- pelizzai-documenting-features: documentação exigida para nova superfície estável.
 ```
+
+Overlay aplicável não é oferta tardia da finish-task. Correção ou doc gerada vira conteúdo da
+entrega, recebe a evidência proporcional e é commitada antes de seguir.
+
+### 2. Congelar a estratégia de commits
+
+- `granular`: confirme working tree limpa e mantenha os commits definitivos.
+- `squash-final`: consolide **agora**, nunca na finish-task. Prefira a alternativa recuperável a
+  `reset --soft`: renomeie a branch atual para um nome único `<branch>-preseal-<timestamp>`, crie
+  novamente `<branch>` em `base-sha`, aplique `git merge --squash <preseal>` e faça o commit final
+  aprovado. A branch preseal preserva o histórico; não a delete automaticamente. Pare se a branch
+  já estiver publicada ou se qualquer guarda falhar.
+
+Depois desta etapa, `git status --porcelain` deve estar vazio e `validated-head` continua `<none>`.
+
+### 3. Validar o candidato congelado
+
+```text
+1. Capture candidate-head = `git rev-parse HEAD`.
+2. REVIEW FINAL via pelizzai-review no range exato `base-sha..candidate-head`. Use reviewer
+   independente e capacidade proporcional ao risco. Exceção: uma única tarefa `bounded`, perfil
+   `combined`, sem mutação posterior pode reutilizar o review da tarefa se
+   `reviewed-tree == candidate-head^{tree}`; qualquer ausência de prova exige review normal.
+   Critical/Important bloqueiam.
+3. Rode pelo próprio coordenador todos os checks aplicáveis do perfil (test/lint/build/render/
+   dry-run/visual etc.), do zero, com saída e exit code. Não invente suíte para artefato estático.
+4. Releia plano/spec requisito a requisito e aponte onde cada um foi entregue.
+5. Rode pelizzai-verification-before-completion com a evidência fresca.
+```
+
+Qualquer fix nos passos 2–5 — inclusive segurança, UI ou docs — invalida o candidato: grave
+`validated-head: <none>`, commite o fix, volte ao passo 1 (overlays), reconsolide se a estratégia
+for squash-final e **reabra o review final**. Aplique o circuit breaker do task-cycle ao loop.
+
+### 4. Selar e entregar à finish-task
+
+Com tudo aprovado e HEAD ainda igual a `candidate-head`, em consumidor escreva no state
+`validated-head: <SHA completo de candidate-head>`, sem commitar; essa é a única sujeira permitida.
+Em source mode, grave o SHA no execution record e mantenha a working tree limpa. Chame
+`pelizzai-finish-task`: consumidor fecha com um commit metadata-only de state; source mode não cria
+closure. Nenhum código, config ou doc pode mudar depois do seal.
 
 ---
 
 ## Raciocínio — `pelizzai-reasoning`
 
-- Laço macro e replanejamento: *OODA* (a lente do loop) com *Plan and Execute* (ordenar tarefas e checkpoints).
-- Tarefa que falha de forma inesperada: *Root Cause Analysis* (e a `pelizzai-tdd`/diagnóstico).
-- Antes de consolidar: *Verification* — o comportamento existe de fato, com evidência.
+- Sequência conhecida: *Plan and Execute*; dependências: *Structured Decomposition*.
+- Falha inesperada: hipótese + *Root Cause Analysis*; decisão entre alternativas: comparação/ToT.
+- Feedback contínuo e realidade mutável: OODA como controlador macro, não como ritual local.
+- Antes de consolidar e selar: *Verification* com evidência do artefato.
 
 ---
 
@@ -325,14 +370,15 @@ Ao terminar todas as tarefas, o **coordenador/líder valida a entrega inteira** 
 
 ```text
 - Executar sem plano aprovado, sem o gate de setup pós-plano, ou sem isolamento (em branch protegida).
-- Pular a leitura das skills de domínio — ou não colá-las no briefing dos membros.
-- Omitir a opção team do menu de modo de execução (as TRÊS opções sempre aparecem).
-- Deixar o membro/subagente commitar (o commit é gate do coordenador, após os dois reviews).
+- Pular skills de domínio/overlays — ou não colá-las nos briefings de executor e reviewer.
+- Escolher team por preferência universal, ou forçar effort máximo numa tarefa mecânica.
+- Deixar o membro/subagente commitar (o commit é gate do coordenador, após as duas lentes de review).
 - Aceitar "testes passam" inferido, sem evidência fresca colada.
 - Corrigir à mão o trabalho reprovado de um membro (re-despache — corrigir à mão polui o contexto).
 - Pular a re-revisão após um fix ("corrigi" é só mais uma alegação não verificada).
 - Loop infinito de fix→re-review (ignorar o circuit breaker de 3 ciclos).
-- Declarar o plano entregue sem a validação final do coordenador (review final + suíte + checklist).
+- Declarar entregue sem overlays aplicáveis + review final (ou reutilização bounded comprovada) +
+  checks + checklist + seal.
 - Pausar a cada tarefa de um plano já aprovado (quebra a execução contínua) — ou, no extremo oposto,
   remover os gates de borda (mãos-livres).
 - Fazer o subagente ler o arquivo do plano inteiro (cole o texto da tarefa).
@@ -340,7 +386,9 @@ Ao terminar todas as tarefas, o **coordenador/líder valida a entrega inteira** 
   phase: blocked do circuit breaker e o commit de fechamento do cursor da pelizzai-finish-task
   no modo granular).
 - Confiar no state.md sem validar contra o git ao retomar.
-- Um worktree por agente (é um por tarefa, com paths disjuntos por frente).
+- Writers concorrentes na mesma working tree, tornando `--working-tree` impossível de escopar.
+- Rodar security/frontend/docs depois da validação final, ou não reabrir review após fix.
+- Executar squash/reset/rebase na finish-task depois de `validated-head`.
 ```
 
 ---
@@ -349,33 +397,32 @@ Ao terminar todas as tarefas, o **coordenador/líder valida a entrega inteira** 
 
 **Combina com:**
 
-- `pelizzai-writing-plans` — produz o plano que esta skill executa (o gate de setup roda AQUI, não lá).
-- `pelizzai-starting-branch` — cria o isolamento (branch ou worktree) dentro do gate de setup.
-- `pelizzai-tdd` — disciplina por tarefa (test-first).
-- `pelizzai-team` / `pelizzai-subagents` — os dois modos paralelos; inline é o fallback.
+- `pelizzai-writing-plans` — produz o plano na branch de tarefa já aberta.
+- `pelizzai-starting-branch` — cria a branch antes do plano e aplica o isolamento pós-plano.
+- `pelizzai-tdd` — disciplina para comportamento executável; outras estratégias estão no task-cycle.
+- `pelizzai-team` / `pelizzai-subagents` — modos usados conforme a topologia; inline é par legítimo.
 - `pelizzai-review` — review por tarefa (spec + qualidade) e review final da branch.
-- `pelizzai-loop` — a lente OODA do laço macro, a Definition of Done e a parada por dúvida.
+- `pelizzai-loop` — OODA quando houver loop real, Definition of Done e parada por dúvida.
 - `pelizzai-reasoning` — ordenação, diagnóstico e verificação.
 - `pelizzai-verification-before-completion` / `pelizzai-finish-task` — conclusão com gates.
 - `pelizzai-audit` — padrão de diretório `pelizzai/` e catálogo de skills de domínio.
 
-**Todas as skills irmãs da cadeia estão materializadas** — invoque-as diretamente conforme os encadeamentos acima (`pelizzai-starting-branch`, `pelizzai-tdd`, `pelizzai-review`, `pelizzai-verification-before-completion`, `pelizzai-finish-task`, `pelizzai-subagents`, `pelizzai-team`). Não há mais fallback inline.
+Invoque apenas as skills exigidas pelo efeito, risco, domínio e overlays da tarefa; não transforme o
+catálogo inteiro em checklist.
 
 ---
 
 ## Instrução final para o agente
 
 ```text
-Execute o plano aprovado, tarefa por tarefa, sempre via TDD e review, em loop OODA até a entrega.
-
-Conduza o gate de setup pós-plano (isolamento → nome → modo → commit) antes da Tarefa 1 —
-as quatro perguntas ao usuário, com a opção team sempre visível.
-Prefira team → subagents → inline, de forma proporcional ao plano.
-Leia e aplique as skills de domínio nos três modos (cole-as no briefing dos membros;
-elas prevalecem sobre preferences/reasoning genéricas).
+Execute tarefa por tarefa com estratégia de evidência adequada e review working-tree.
+Crie a branch antes de spec/plano; no gate pós-plano resolva isolamento, modo e commits.
+Escolha inline/subagents/team pela topologia, sem ranking universal.
+Propague domínio + overlays para executor e reviewers.
 Mantenha gates humanos nas bordas; execute com autonomia entre tarefas.
 Consolide só após spec ✅ e qualidade ✅ com evidência fresca.
-Feche com a VALIDAÇÃO FINAL do coordenador: review final + suíte completa + checklist do plano.
-Estado em pelizzai/data/state.md; valide contra o git ao retomar.
+Rode overlays antes de congelar/validar; qualquer fix reabre o review final.
+Grave validated-head só após aprovação; finish cria closure só no consumidor.
+Estado no state consumidor ou execution record source; um repo por tarefa; valide contra Git.
 Nunca comece em branch protegida. Nunca mãos-livres.
 ```

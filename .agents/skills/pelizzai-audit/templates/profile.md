@@ -8,6 +8,15 @@
 > → eixo version-driven). Atualize quando os scripts/manifests mudarem; em workspace,
 > repita as seções por projeto.
 
+## Harness e skill roots
+
+- Source mode: `<true | false>`
+- Canonical skill root: `<.claude/skills | .agents/skills | outro root nativo>`
+- Installed mirrors: `<nenhum | lista de roots que devem permanecer byte a byte>`
+
+_Detecte pelos arquivos realmente instalados. Domain skills são gravadas no root canônico e,
+quando houver mirrors, sincronizadas e verificadas; nunca assuma `.claude/skills` em toda IDE._
+
 ## Comandos
 
 | Ação   | Comando exato        | Diretório           |

@@ -178,11 +178,14 @@ Roteamento:
 
 Próxima ação:
 - Inspecionar contrato, padrões existentes e paginação antes de alterar código.
+- Registrar `pelizzai-frontend` como overlay obrigatório.
+- Usar TDD para o comportamento e QA visual via `pelizzai-frontend` para a UI.
 ```
 
 #### Falha
 
 - Implementar filtro apenas no frontend sem verificar API.
+- Tratar Playwright/browser como substituto da skill `pelizzai-frontend`.
 - Criar árvore de alternativas sem necessidade.
 - Concluir sem build, teste ou validação proporcional.
 
@@ -330,9 +333,9 @@ Classificação:
 - Reversibilidade: rollback disponível
 
 Roteamento:
-- Técnica principal: Root Cause Analysis.
-- Técnicas auxiliares: ReAct; Verification;
-  Plan and Execute (versão mínima — contenção em poucos passos, sem plano extenso).
+- Fase de contenção: Constraint Satisfaction como principal; Decision Making e ReAct como auxiliares.
+- Verification confirma alvo e monitora recuperação.
+- Após estabilizar: Root Cause Analysis como principal para a correção estrutural.
 - Técnicas evitadas: Tree of Thoughts.
 
 Ação:
@@ -341,8 +344,6 @@ Ação:
 - Monitorar taxa de erro após rollback.
 - Investigar causa raiz depois de restaurar o serviço.
 ```
-
-> Nota: "Plan and Execute (versão mínima)" indica um plano curto de contenção, não a variante "ReAct leve". Não existe rótulo "Plan and Execute leve" no `pelizzai-reasoning`.
 
 #### Falha
 
@@ -628,7 +629,8 @@ id: G-14
 categoria: laço macro de execução
 prompt: 'Execute o plano aprovado (6 tarefas) até entregar tudo. O repositório recebe commits de outras pessoas durante a execução.'
 contexto: |
-    Plano aprovado e estressado; setup concluído; TDD + review em dois estágios por tarefa.
+    Plano aprovado e estressado; setup concluído; cada tarefa registra sua estratégia
+    (TDD, caracterização, validate/dry-run, frontend visual ou checagem estática) e review proporcional.
     A base remota avança durante a execução (commits de terceiros).
 ```
 
@@ -648,7 +650,7 @@ Roteamento:
 
 Próxima ação:
 - Entrar no loop: observar o delta da base, orientar contra o plano/DoD, decidir a próxima
-  tarefa, agir via TDD; repetir a partir do OBSERVAR até a DoD.
+  tarefa, agir pela estratégia registrada; repetir a partir do OBSERVAR até a DoD.
 ```
 
 #### Falha grave
@@ -697,6 +699,7 @@ Penalidades (subtraem da pontuação do cenário; "reprovação imediata" invali
 | Execução reversível        | G-12       |
 | Premissa não confirmada    | G-13       |
 | Loop macro (OODA)          | G-14       |
+| Estratégia por efeito      | G-02, G-14 |
 
 ## Resultado de execução
 

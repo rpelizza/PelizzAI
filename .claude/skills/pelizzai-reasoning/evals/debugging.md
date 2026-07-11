@@ -9,8 +9,8 @@ O agente deve ser capaz de:
 ```text
 - reconhecer quando um erro é direto e quando exige investigação;
 - diferenciar sintoma, causa imediata, causa raiz e fatores contribuintes;
-- coletar evidências antes de modificar o sistema;
-- formular hipóteses concorrentes;
+- preservar evidência mínima antes de contenção e coletar evidência diagnóstica antes do fix definitivo;
+- formular uma ou mais hipóteses conforme a incerteza, sem quantidade ritual;
 - selecionar testes e observações com alto valor informacional;
 - evitar conclusões baseadas em correlação, memória ou primeira impressão;
 - aplicar contenção proporcional quando houver impacto ativo;
@@ -31,6 +31,7 @@ Este eval não mede apenas se o agente encontrou uma resposta plausível. Mede s
 | [Verification](../techniques/verification.md)                       | Confirmar causa e validar correção                          |
 | [Critique and Refine](../techniques/critique-and-refine.md)         | Ajustar correção após falha, review ou regressão            |
 | [Constraint Satisfaction](../techniques/constraint-satisfaction.md) | Preservar contratos legados e requisitos de compatibilidade |
+| [Decision Making](../techniques/decision-making.md)                 | Escolher contenção reversível sob dano ativo                 |
 
 ## Protocolo de avaliação
 
@@ -50,7 +51,7 @@ Classificação:
 Fatos confirmados:
 - [somente observações diretas]
 
-Hipóteses relevantes:
+Hipóteses relevantes (omita pluralidade quando a causa direta já estiver provada):
 1. [hipótese]
    - Evidência necessária:
    - Próxima validação:
@@ -76,7 +77,7 @@ Cada cenário vale 10 pontos.
 | ------------- | -----: | --------------------------------------------------------------- |
 | Classificação |      1 | Distingue erro simples, bug estrutural, incidente ou regressão  |
 | Evidências    |      2 | Separa fatos observados de suposições e busca fontes adequadas  |
-| Hipóteses     |      2 | Formula hipóteses concorrentes e critérios de descarte          |
+| Hipóteses     |      2 | Usa quantidade proporcional e critérios de confirmação/descarte |
 | Próxima ação  |      1 | Escolhe contenção, investigação ou correção direta proporcional |
 | Correção      |      2 | Ataca mecanismo causal, não apenas sintoma                      |
 | Validação     |      2 | Inclui reprodução, testes relacionados e prevenção de regressão |
@@ -431,15 +432,17 @@ contexto: |
 #### Conduta esperada
 
 ```text
-Técnica principal:
-- Root Cause Analysis.
+Fase de contenção:
+- Técnica principal: Constraint Satisfaction.
+- Auxiliar: Decision Making; ReAct para executar; Verification para monitorar.
 
 Ação imediata:
-- Avaliar rollback ou desativação por feature flag como contenção.
 - Capturar métricas, logs e diff de versão.
+- Avaliar e aplicar rollback ou desativação por feature flag como contenção reversível.
 - Priorizar restauração do serviço antes de investigação longa.
 
-Depois:
+Depois de estabilizar:
+- Técnica principal: Root Cause Analysis.
 - Comparar versão anterior e atual.
 - Identificar erro por endpoint, stack trace e configuração.
 ```
