@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 #Requires -Version 7.0
 # Start the brainstorm server and output connection info (PowerShell counterpart of start-server.sh)
-# Usage: start-server.ps1 [-ProjectDir <path>] [-BindHost <bind-host>] [-UrlHost <display-host>] [-Foreground] [-Background]
+# Usage: start-server.ps1 [-ProjectDir <path>] [-BindHost <bind-host>] [-UrlHost <display-host>] [-Open] [-IdleTimeoutMinutes <n>] [-Foreground|-Background]
 #
 # Starts server on a random high port, outputs JSON with URL.
 # Each session gets its own directory to avoid conflicts.
@@ -12,18 +12,29 @@
 #   -BindHost <host>    Host/interface to bind (default: 127.0.0.1).
 #                       Use 0.0.0.0 in remote/containerized environments.
 #   -UrlHost <host>     Hostname shown in returned URL JSON.
+#   -Open               Open the authenticated URL in the default browser.
+#   -IdleTimeoutMinutes Stop after N idle minutes (default: 240).
 #   -Foreground         Run server in the current terminal (no backgrounding).
 #   -Background         Force background mode.
+#   -Help               Show usage and exit.
 param(
     [string]$ProjectDir = '',
     [string]$BindHost = '127.0.0.1',
     [string]$UrlHost = '',
+    [switch]$Open,
+    [ValidateRange(1, 10080)][int]$IdleTimeoutMinutes = 240,
     [switch]$Foreground,
-    [switch]$Background
+    [switch]$Background,
+    [switch]$Help
 )
 
 $ErrorActionPreference = 'Stop'
 $scriptDir = $PSScriptRoot
+
+if ($Help) {
+    Get-Content -LiteralPath $PSCommandPath | Select-Object -First 20
+    exit 0
+}
 
 if (-not $UrlHost) {
     $UrlHost = if ($BindHost -in '127.0.0.1', 'localhost') { 'localhost' } else { $BindHost }
@@ -64,12 +75,15 @@ $env:BRAINSTORM_DIR       = $sessionDir
 $env:BRAINSTORM_HOST      = $BindHost
 $env:BRAINSTORM_URL_HOST  = $UrlHost
 $env:BRAINSTORM_OWNER_PID = "$ownerPid"
+$env:BRAINSTORM_OPEN      = if ($Open) { 'true' } else { 'false' }
+$env:BRAINSTORM_IDLE_TIMEOUT_MINUTES = "$IdleTimeoutMinutes"
 
 # Foreground mode for environments that reap detached processes.
 if ($Foreground -and -not $Background) {
-    Set-Content -Path $pidFile -Value $PID
-    node server.cjs
-    exit $LASTEXITCODE
+    $proc = Start-Process node -ArgumentList 'server.cjs' -NoNewWindow -PassThru
+    Set-Content -Path $pidFile -Value $proc.Id
+    $proc.WaitForExit()
+    exit $proc.ExitCode
 }
 
 # Background: detached node process; child inherits the BRAINSTORM_* environment.
@@ -87,7 +101,7 @@ for ($i = 0; $i -lt 50; $i++) {
             Start-Sleep -Milliseconds 100
         }
         if (-not $alive) {
-            $retry = "$scriptDir\start-server.ps1$(if ($ProjectDir) { " -ProjectDir $ProjectDir" }) -BindHost $BindHost -UrlHost $UrlHost -Foreground"
+            $retry = "$scriptDir\start-server.ps1$(if ($ProjectDir) { " -ProjectDir $ProjectDir" }) -BindHost $BindHost -UrlHost $UrlHost -IdleTimeoutMinutes $IdleTimeoutMinutes -Foreground"
             Write-Output "{`"error`": `"Server started but was killed. Retry in a persistent terminal with: $retry`"}"
             exit 1
         }

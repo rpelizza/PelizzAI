@@ -151,7 +151,12 @@ Se você não consegue responder a esses cinco itens para um membro, **a decompo
 
 Os cinco itens do HARD-GATE têm lar permanente: cada um corresponde a um campo do briefing e a uma coluna do roster (ver mapeamento abaixo). Se a célula do roster está vazia, a decomposição daquele membro ainda não está pronta.
 
-**Regra de escrita — vale para os DOIS modos (teammates e subagents):** o que a escrita concorrente pode fazer depende do isolamento registrado em `pelizzai/data/state.md`. Com `isolation: branch`, **uma frente de escrita por vez** — o coordenador integra em série; teammates implementadores na mesma working tree escrevendo ao mesmo tempo colidem. Com `isolation: worktree`, frentes escrevem em paralelo **dentro do worktree único da tarefa**, desde que toquem **caminhos disjuntos** (nunca um worktree por membro); review, commit e cursor continuam serializados pelo coordenador. Membros **não commitam** em nenhum modo.
+**Regra de escrita — vale para teammates e subagents:** branch ou worktree da tarefa possui uma
+única working tree de integração. Worktree isola a tarefa do repo principal, **não isola agentes
+entre si**. Mantenha um writer por vez; membros podem investigar/revisar em paralelo e devolver
+achados/patches, mas o coordenador aplica escrita, review, stage, commit e cursor em série. Membros
+não commitam. Paralelismo real de writers exigiria branches/worktrees independentes e um fluxo de
+integração explícito, fora do default deste harness.
 
 **Responsabilidades do coordenador:**
 
@@ -201,7 +206,8 @@ Structured Decomposition   (dividir em papéis coesos, contratos e dependências
 
 - Use **Constraint Satisfaction** quando houver requisitos rígidos, compatibilidade, segurança ou proibições que todos os membros devem respeitar.
 - Para investigação, o coordenador conduz **Root Cause Analysis** e distribui **hipóteses concorrentes** entre os membros (cada um defende/refuta uma teoria).
-- Respeite o teto de carregamento de técnicas por fase definido em `pelizzai-reasoning` (uma principal + até duas auxiliares).
+- Carregue a técnica dominante e somente auxiliares que resolvam lacunas distintas, conforme
+  `pelizzai-reasoning`; não distribua técnicas por quota ou por papel decorativo.
 
 Cada **membro** também raciocina: o briefing instrui o membro a acionar `pelizzai-reasoning` para sua subtarefa (ver protocolo de delegação).
 
@@ -226,7 +232,9 @@ Dê a cada lente/hipótese um membro distinto — um único agente tende a ancor
 
 ## Protocolo de delegação por membro
 
-Para cada membro, entregue um **briefing autossuficiente**. Os membros **não herdam o histórico da sua conversa** (nem teammates nem subagentes) — o briefing precisa conter tudo o que o membro precisa para agir sozinho. Em execução de plano com `scripts/task-brief.*` no projeto, o briefing da tarefa viaja por **arquivo** (`pelizzai/data/handoffs/`) — ver `pelizzai-execution-plans` → `references/task-cycle.md` §1.
+Para cada membro, entregue um **briefing autossuficiente**. Os membros não herdam o histórico. Em
+execução de plano, use `task-brief.*` somente com plano Markdown persistente compatível; plano
+nativo usa conteúdo colado. Handoffs ficam no path gitignored consumidor ou temp em source mode.
 
 ```text
 Briefing de [nome do membro] — papel: [papel]
@@ -239,8 +247,8 @@ Briefing de [nome do membro] — papel: [papel]
 - Frentes/arquivos próprios: [conjunto disjunto; quem mais NÃO toca aqui]
 - Contexto necessário: [caminhos, contratos, decisões já tomadas, links de spec,
   convenções do projeto — tudo, porque o membro não viu esta conversa]
-- Skills de domínio relevantes: [coladas do catálogo pelizzai/domain-skills.md, ou os
-  pontos-chave; "nenhuma" se não houver — o membro as aplica em vez de padrões genéricos]
+- Regras/skills locais relevantes: [catálogo consumidor ou repo-fonte em source mode; cole os
+  pontos-chave; "nenhuma" se não houver]
 - Camada global: aplique `pelizzai-preferences` e raciocine via `pelizzai-reasoning`; em
   conflito, as SKILLS DE DOMÍNIO coladas acima e as regras do projeto PREVALECEM sobre elas
 - Dependências: [o que precisa de outro membro; o que já pode começar]  (HARD-GATE 3)
@@ -322,7 +330,10 @@ o orçamento de esforço de `pelizzai-reasoning`: mais rodadas só se reduzirem 
 ```
 
 - **Cross-check adversarial:** spawnar **verificadores céticos** cujo único trabalho é tentar **refutar** os achados/implementações. Como o verificador é stateless, **cole no prompt dele o artefato a refutar**. Mantenha um achado só se ele sobrevive.
-- **Evitar conflito de arquivos:** atribua **arquivos disjuntos** por membro. O que a escrita paralela pode fazer depende do **isolamento escolhido no gate** (`pelizzai/data/state.md`): com `isolation: branch`, não há escrita paralela isolada — o **coordenador integra as contribuições em série** (despache uma frente de escrita por vez), reservando o paralelismo para investigação, leitura e review. Com `isolation: worktree`, as frentes podem escrever **em paralelo dentro do worktree único da tarefa**, desde que toquem **caminhos disjuntos** (nunca um worktree por agente); review, commit e cursor continuam serializados pelo coordenador.
+- **Evitar conflito de arquivos:** uma working tree de integração tem um writer por vez, seja
+  `isolation: branch` ou `worktree`. Use paralelo para investigação/leitura/review; o coordenador
+  aplica contribuições em série. Paths disjuntos reduzem conflito lógico, mas não tornam Git/index,
+  review-package ou o diretório compartilhado transacionais.
 - **Lista de tarefas:** é o **seu** roster (não há lista compartilhada nativa) — atualize-o a cada rodada.
 - **Síntese:** o coordenador integra os entregáveis e cruza as divergências com `pelizzai-reasoning` (`Evidence Synthesis`, com `Verification` auxiliar).
 

@@ -1,6 +1,6 @@
 ---
 name: pelizzai-review
-description: Skill de code review do harness PelizzAI. Use após completar uma tarefa de um plano, ao implementar uma feature relevante, antes de mergear, ou quando o usuário pedir um review avulso de código/branch/PR. Também orienta como RECEBER feedback de review com rigor técnico (sem concordância performática). Acione quando o usuário disser "revisar o código", "code review", "está pronto para mergear?". Para segurança/OWASP, use `pelizzai-oswap`.
+description: Skill de code review proporcional do harness PelizzAI. Use no gate de uma tarefa de plano, antes de integrar uma entrega ou quando o usuário pedir review de working tree, branch ou PR. Aplica as lentes spec e qualidade em perfil combinado ou separado conforme risco e orienta como receber feedback com rigor técnico. Para segurança/OWASP, componha `pelizzai-oswap`.
 ---
 
 # PelizzAI Review
@@ -15,7 +15,8 @@ Pegar problemas antes que eles se propaguem. O reviewer recebe **contexto fabric
 
 ## Princípio central
 
-> Revise cedo e sempre. Um review é uma verificação independente do produto: leia o código de fato, não confie no relatório de quem implementou, e dê um veredito claro com evidência — nunca um "parece bom".
+> Revise com profundidade proporcional. Leia o produto de fato, não confie no relatório de quem
+> implementou e dê um veredito claro com evidência — nunca um "parece bom".
 
 ---
 
@@ -23,9 +24,9 @@ Pegar problemas antes que eles se propaguem. O reviewer recebe **contexto fabric
 
 ```text
 Obrigatório:
-- Após CADA tarefa na execução de um plano (pelizzai-execution-plans).
-- Ao concluir uma feature relevante.
-- Antes de mergear para a base.
+- No gate de cada tarefa de plano, pelo perfil registrado (`combined` ou `split`).
+- No candidato final de uma entrega planejada, antes de `validated-head`.
+- Quando o usuário pede review.
 
 Opcional, mas valioso:
 - Quando travado (perspectiva nova).
@@ -35,9 +36,18 @@ Opcional, mas valioso:
 
 ---
 
-## Os dois estágios (review por tarefa)
+## Perfis de review por tarefa
 
-Na execução de um plano, cada tarefa passa por dois estágios, **nesta ordem**. O implementador **não commitou** — o código está na working tree (o review é o gate).
+Na execução de um plano, cada tarefa passa pelas lentes **spec** e **qualidade**, nesta ordem. O
+implementador **não commitou** — o código está na working tree. O plano escolhe:
+
+| Perfil | Predicado | Forma |
+| --- | --- | --- |
+| `combined` | bounded, low-risk, coesa, sem segurança/dados/migração/contrato público | um despacho e um relatório; spec primeiro, qualidade depois |
+| `split` | risco médio/alto, superfície sensível, contrato público, dados, migração, múltiplas partes | spec aprova antes de despachar qualidade; independência proporcional |
+
+O perfil reduz handoffs, não critérios. Se o diff revelar risco maior ou o combined sofrer rejeição
+estrutural, promova para `split`.
 
 ### Estágio 1 — Conformidade com a spec
 
@@ -56,7 +66,8 @@ Use o template **[references/spec-reviewer.md](references/spec-reviewer.md)** (s
 
 ### Estágio 2 — Qualidade do código
 
-**Só despache após o Estágio 1 passar.** Use a rubrica completa em **[references/code-reviewer.md](references/code-reviewer.md)**. Avalie: separação de responsabilidades, tratamento de erro, segurança de tipos, DRY sem abstração prematura, edge cases, arquitetura, segurança, testes (verificam comportamento real, não mocks), prontidão para produção. Além disso:
+No perfil `split`, só despache esta lente após spec passar. No `combined`, aplique-a na segunda
+parte do mesmo relatório. Use a rubrica completa em **[references/code-reviewer.md](references/code-reviewer.md)**. Avalie: separação de responsabilidades, tratamento de erro, segurança de tipos, DRY sem abstração prematura, edge cases, arquitetura, segurança, testes (verificam comportamento real, não mocks), prontidão para produção. Além disso:
 
 ```text
 - Cada arquivo tem UMA responsabilidade clara e interface bem definida?
@@ -64,7 +75,8 @@ Use o template **[references/spec-reviewer.md](references/spec-reviewer.md)** (s
 - A implementação segue a estrutura de arquivos do plano?
 - Esta mudança criou arquivos já grandes, ou inchou demais arquivos existentes?
   (Não aponte tamanho pré-existente — foque no que ESTA mudança contribuiu.)
-- Julgue a mudança também contra as SKILLS DE DOMÍNIO do projeto (pelizzai/domain-skills.md).
+- Julgue a mudança também contra as regras/skills locais aplicáveis: catálogo no consumidor;
+  regras/skills do repo-fonte em source mode.
 ```
 
 Se o reviewer sinalizar **superfície sensível** (auth, input do usuário, query/SQL, segredos, upload, novas dependências), acione `pelizzai-oswap` (OWASP) antes de concluir — não deixe a segurança só como item de lista.
@@ -73,23 +85,41 @@ Se o reviewer sinalizar **superfície sensível** (auth, input do usuário, quer
 
 ## Evidência fresca (bloco Verification, obrigatório)
 
-O reviewer de qualidade **roda de fato** os comandos de teste/lint/build do projeto e **cola a saída + exit code** num bloco `### Verification`. **Não infira** passa/falha lendo o diff. Qualquer check que não pôde rodar é **UNVERIFIED — nunca ✅** — e diga quais comandos rodaram.
+O reviewer de qualidade seleciona e **roda de fato** os checks que podem provar o artefato
+(teste, lint, build, parser, render, dry-run ou cenário), colando comando, saída e exit code num
+bloco `### Verification`. Não imponha test/lint/build quando não há diff executável ou relação
+causal; review arquitetural codebase-wide usa `pelizzai-improving-architecture`. **Não infira**
+passa/falha lendo o diff. Check relevante que não pôde rodar é **UNVERIFIED — nunca ✅**.
 
 ---
 
 ## Como despachar o reviewer
 
-Despache um subagente (`pelizzai-subagents`) ou, se indisponível, faça inline. O **Estágio 1** usa **[references/spec-reviewer.md](references/spec-reviewer.md)**; o **Estágio 2** e o **review final** usam **[references/code-reviewer.md](references/code-reviewer.md)**. Preencha com:
+Use um reviewer independente quando risco/complexidade justificarem; para tarefa bounded, o
+coordenador pode aplicar o perfil `combined` inline. A lente spec usa
+**[references/spec-reviewer.md](references/spec-reviewer.md)**; qualidade e review final usam
+**[references/code-reviewer.md](references/code-reviewer.md)**. Em `combined`, incorpore as duas
+rubricas num único briefing, mantendo a ordem. Preencha com:
 
 ```text
 - Descrição: o que foi construído.
 - Requisitos/Plano: o que deveria fazer (texto da tarefa ou caminho do plano em pelizzai/plans/).
 - Diff a revisar:
-  - Por tarefa (estágio de qualidade) → escopo B do template: working tree NÃO commitada —
-    `git diff`, `git diff --staged` e arquivos novos via `git status` (não há commit da tarefa ainda).
-  - Review final → escopo A do template: range commitado — `git diff <BASE_SHA>..<HEAD_SHA>`.
-- Skills de domínio relevantes (coladas) — o reviewer julga a mudança contra elas.
+  - Por tarefa (spec E qualidade, combined ou split) → gere `review-package --working-tree`. O pacote contém,
+    separadamente, `git diff --cached`, `git diff` e o conteúdo dos untracked. Não use range:
+    a tarefa ainda não foi commitada e um range vazio esconderia todo o trabalho.
+  - Review final → gere `review-package <base-sha> <HEAD_SHA>` e use o range commitado.
+    `base-sha` vem do `state.md` consumidor ou execution record nativo; não redescubra a base.
+- Regras/skills locais relevantes (coladas) — o reviewer julga a mudança contra elas.
+- Skills transversais/overlays registradas no state/execution record (coladas) — frontend, segurança,
+  documentação ou outra restrição aplicável também fazem parte do contrato de review.
 ```
+
+Use `pwsh scripts/review-package.ps1 --working-tree` ou
+`sh scripts/review-package.sh --working-tree`. O helper grava um nome único no handoff dir
+gitignored do consumidor ou no temp do sistema em source mode; passe esse arquivo ao reviewer. O
+modo `<BASE> <HEAD>` é usado no review final da entrega; fora do lifecycle, somente quando o
+usuário pediu explicitamente um range avulso.
 
 O reviewer **nunca** recebe o histórico da sessão.
 
@@ -124,7 +154,7 @@ O reviewer devolve, nesta estrutura (detalhe em `references/code-reviewer.md`):
   #### Minor         — estilo, otimização, polimento de doc (anotar para depois)
   (cada issue: arquivo:linha, o que está errado, por que importa, como corrigir)
 ### Recommendations
-### Verification     — comandos RODADOS (test/lint/build) + saída + exit code; o que não rodou = UNVERIFIED
+### Verification     — checks aplicáveis RODADOS + saída + exit code; check relevante não rodado = UNVERIFIED
 ### Assessment       — Pronto para mergear? [Sim | Não | Com correções] + 1-2 frases de justificativa
 ```
 
@@ -134,13 +164,41 @@ Categorize pela severidade REAL — nem tudo é Critical; um nitpick não é Cri
 
 ## Review final da branch
 
-Ao concluir todas as tarefas, revise a **branch inteira** (range commitado `<BASE>..<HEAD>` — em squash-final, o range dos commits wip), não só por tarefa, com o **modelo mais capaz** disponível e **effort máximo**. É o passo 1 da **validação final da entrega** do coordenador (`pelizzai-execution-plans` → "Validação final da entrega"): depois dele vêm a suíte completa rodada pelo próprio coordenador, o checklist requisito a requisito do plano, a `pelizzai-verification-before-completion` e a `pelizzai-finish-task`. Critical/Important abertos bloqueiam a conclusão.
+Ao concluir todas as tarefas, revise a **branch inteira** no range commitado
+`<base-sha>..<HEAD>` — depois da consolidação `squash-final`, quando escolhida — e não só por
+tarefa. Use um reviewer independente e capacidade/effort proporcionais à complexidade e ao
+risco; não force effort máximo para toda mudança. Este review acontece **depois** dos overlays
+que podem escrever (segurança, frontend e documentação) e antes da suíte completa, checklist e
+`pelizzai-verification-before-completion`. Critical/Important abertos bloqueiam a conclusão.
 
-**Quem dispara o review final:** `pelizzai-execution-plans` (fechamento de plano). O fix de bug (`pelizzai-debugging`) usa o **review de mudança avulsa** abaixo — no track de bug nada está commitado no momento do review (a consolidação é da `pelizzai-finish-task`), então não existe range para um review final. O track de ajuste (`pelizzai-quick-fix`) dispensa review formal por escopo trivial.
+Exceção de reutilização: plano de **uma única tarefa bounded**, perfil `combined`, sem findings nem
+mutação de conteúdo posterior pode tratar o review da tarefa como review final quando o tree SHA
+pós-commit é exatamente o tree SHA candidato revisado. Continue checks, checklist e Verification.
+Na ausência dessa prova — múltiplas tarefas, overlay/fix posterior, risco promovido, compaction sem
+evidência ou qualquer dúvida — faça o review final normal.
 
-**Review de mudança avulsa** (bug/quick-fix, fora de plano): use o **escopo B** (working tree não commitada: `git diff` + arquivos novos) e aplique o **Estágio 2** (qualidade) com o bloco `Verification` (evidência fresca), **sem** a maquinaria por-tarefa / review-final / circuit-breaker.
+Qualquer fix — de finding, overlay, teste, checklist ou verificação visual — altera o candidato:
+invalide `validated-head`, consolide o fix, rode novamente os overlays afetados e **reabra o
+review final** sobre o novo HEAD. “Já foi revisado antes do fix” não vale como aprovação.
 
-**Track de review avulso** (o usuário pediu um review — roteado pela `pelizzai-router` como track `review`): primeiro defina o **escopo** com o usuário (working tree, range de branch `<BASE>..<HEAD>` ou PR) e aplique o **Estágio 2** com `Verification`, como acima. Este track **não abre tarefa**: não cria nem mantém `pelizzai/data/state.md`. Achado **Critical** não se corrige dentro do review — vira um track de `bug`/`ajuste` novo via `pelizzai-router` (o handback de branch protegida abaixo vale quando o fix virar código); Important/Minor são entregues no relatório para o usuário decidir.
+**Quem dispara o review final:** `pelizzai-execution-plans` (fechamento de plano). O fix de bug
+(`pelizzai-debugging`) usa o **review de mudança avulsa** abaixo ainda na working tree; depois o
+debugging consolida o conteúdo, roda Verification contra o HEAD e só então chama finish-task.
+O track de ajuste (`pelizzai-quick-fix`) dispensa review formal enquanto continuar trivial.
+
+**Review de mudança avulsa** (bug fora de plano, ou ajuste reclassificado antes do commit): use
+`review-package --working-tree` (staged + unstaged + untracked) e aplique o **Estágio 2**
+(qualidade) com o bloco `Verification`, **sem** a maquinaria por-tarefa / review-final /
+circuit-breaker.
+
+Quick-fix válido não entra nesse procedimento. Se o diff elevar o risco, reclassifique pelo router
+e aplique o review da nova rota antes do commit.
+
+**Track de review avulso:** derive o escopo do pedido e do Git (working tree, range
+`<BASE>..<HEAD>` ou PR); pergunte apenas se duas interpretações mudarem materialmente o resultado.
+Aplique a lente de qualidade + Verification. Este track é read-only e não cria state. Achado
+Critical não se corrige dentro do review: vira um novo track de bug/ajuste via router; os demais
+achados são entregues para decisão do usuário.
 
 ---
 
@@ -153,7 +211,11 @@ Ao concluir todas as tarefas, revise a **branch inteira** (range commitado `<BAS
 - Reviewer errado → faça push back com raciocínio técnico (mostre código/testes que provam).
 ```
 
-Isso alimenta o circuit breaker da `pelizzai-execution-plans` (3 ciclos por estágio, por tarefa; detalhe e resets em `pelizzai-execution-plans` → `references/task-cycle.md` §5). **Handback de branch protegida:** se agir sobre o feedback significa escrever código e não há isolamento registrado em `pelizzai/data/state.md`, passe por `pelizzai-starting-branch` antes — para os fixes não caírem em branch protegida.
+Isso alimenta o circuit breaker da `pelizzai-execution-plans` (3 ciclos por lente, por tarefa;
+detalhe e resets em `pelizzai-execution-plans` → `references/task-cycle.md` §5). **Handback de
+branch protegida:** se agir sobre o feedback significa escrever código e não há isolamento no state
+consumidor ou execution record nativo, passe por `pelizzai-starting-branch` antes — para os fixes
+não caírem em branch protegida.
 
 ---
 
@@ -181,16 +243,18 @@ Em PR no GitHub, responda no THREAD do comentário inline (não como comentário
 ## Anti-padrões / red flags
 
 ```text
-- Pular o review porque "é simples".
+- Pular um review exigido pela lane/perfil ou rebaixar o perfil apesar de risco novo.
 - Ignorar Critical, ou seguir com Important em aberto.
 - Dar feedback sobre código que não leu de fato.
 - Marcar nitpick como Critical, ou ser vago ("melhorar o tratamento de erro").
 - Relatar como ✅ um check que não rodou (evidência inferida do diff).
 - Passar o histórico da sessão ao reviewer (ele recebe só o contexto fabricado).
 - Concordância performática ao receber feedback ("você está certíssimo", agradecer).
-- Despachar o estágio de qualidade antes do estágio de spec passar.
+- No perfil split, despachar qualidade antes de spec passar; no combined, inverter as lentes.
 - Instruir o reviewer sobre o que NÃO flagrar, ou pré-classificar severidade no prompt.
 - Corrigir os findings do review final com um fixer por finding (é UM fixer para todos).
+- Usar `<BASE>..<HEAD>` no review por tarefa; antes do commit, o escopo é sempre `--working-tree`.
+- Aceitar como final um review anterior ao último fix ou overlay que escreveu arquivos.
 ```
 
 ---
@@ -199,7 +263,7 @@ Em PR no GitHub, responda no THREAD do comentário inline (não como comentário
 
 **Combina com:**
 
-- `pelizzai-execution-plans` — review por tarefa (dois estágios) e review final; ver `task-cycle.md` na `pelizzai-execution-plans`.
+- `pelizzai-execution-plans` — review por tarefa (combined/split) e review final; ver `task-cycle.md`.
 - `pelizzai-tdd` — os testes que o review confere nascem do ciclo TDD.
 - `pelizzai-starting-branch` — handback quando agir sobre feedback vira escrever código.
 - `pelizzai-reasoning` — *Critique and Refine* (agir sobre o feedback) e *Verification* (evidência fresca).
@@ -219,6 +283,6 @@ Prefira:
 - severidade real a marcar tudo como Critical;
 - rigor técnico a concordância performática ao receber feedback.
 
-Spec primeiro, qualidade depois. Critical/Important antes de seguir; Minor para o final.
+Spec primeiro, qualidade depois — em um ou dois despachos conforme risco. Critical/Important antes de seguir; Minor para o final.
 Nunca passe o histórico da sessão ao reviewer. Para segurança, use pelizzai-oswap.
 ```

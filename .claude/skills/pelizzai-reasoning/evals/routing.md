@@ -13,7 +13,7 @@ O objetivo não é avaliar a qualidade completa da resposta final, do código ou
 3. adiciona apenas técnicas auxiliares justificadas;
 4. evita técnicas pesadas em tarefas simples;
 5. reconhece quando precisa pesquisar, usar ferramenta, pedir esclarecimento, validar, bloquear ou agir diretamente;
-6. respeita o limite padrão de uma técnica principal e até duas auxiliares.
+6. exige função distinta e observável para cada técnica, sem quota arbitrária.
 
 ## Técnicas avaliadas
 
@@ -87,7 +87,7 @@ O cenário deve receber no máximo 3 pontos quando ocorrer qualquer uma destas s
 - Fazer Root Cause Analysis para erro simples e explicitamente identificado.
 - Usar Tree of Thoughts ou Self-Consistency como padrão para toda tarefa.
 - Fazer pergunta de esclarecimento quando o contexto ou uma fonte direta resolve a dúvida.
-- Ultrapassar o teto de duas técnicas auxiliares sem justificativa concreta de criticidade.
+- Carregar auxiliares que não mudam decisão, evidência ou prova, ainda que caibam numa quota.
 ```
 
 ## Critérios globais de aprovação
@@ -99,7 +99,7 @@ A implementação de [pelizzai-reasoning](../SKILL.md) passa neste conjunto quan
 - Nenhuma falha grave nos cenários de alto impacto.
 - Acerto de técnica principal em pelo menos 80% dos cenários.
 - Nenhuma técnica pesada é usada indevidamente em mais de 10% dos cenários simples.
-- Técnicas auxiliares não ultrapassam o limite padrão sem justificativa concreta.
+- Cada técnica auxiliar resolve uma lacuna distinta e técnicas redundantes são removidas.
 ```
 
 ## Cenários
@@ -219,6 +219,9 @@ Técnicas auxiliares aceitáveis:
 
 Próxima ação:
 - Inspecionar contrato e padrões existentes antes de alterar código.
+- Registrar `pelizzai-frontend` como overlay obrigatório da tarefa de UI.
+- Usar TDD para o comportamento de filtro/paginação e verificação visual via `pelizzai-frontend`
+  para estados, responsividade e interação; Playwright/browser é ferramenta, não substituto.
 ```
 
 #### Técnicas a evitar inicialmente
@@ -231,7 +234,7 @@ Próxima ação:
 
 #### Critério de aprovação
 
-O agente reconhece dependência entre interface, contrato da API, paginação e testes, sem criar árvore de alternativas desnecessária.
+O agente reconhece dependência entre interface, contrato da API, paginação e testes, propaga o overlay de frontend e escolhe provas complementares sem criar árvore de alternativas desnecessária.
 
 ### R-05 — Requisitos ambíguos de feature
 
@@ -359,8 +362,7 @@ Técnica principal:
 Técnicas auxiliares:
 - ReAct.
 - Evidence Synthesis.
-- Verification (3ª auxiliar — permitida porque incidente em produção é alto impacto;
-  fora de alto impacto o teto é de duas).
+- Verification (fecha uma lacuna distinta: prova contenção/fix e ausência de regressão).
 
 Próxima ação:
 - Delimitar impacto, preservar evidências, criar hipóteses concorrentes
@@ -395,8 +397,7 @@ Técnica principal:
 Técnicas auxiliares:
 - Assumption Tracking.
 - Decision Making.
-- Verification (3ª auxiliar — permitida por ser ação destrutiva de alto impacto;
-  fora de alto impacto o teto é de duas).
+- Verification (fecha uma lacuna distinta: confirma o alvo e a prova antes/depois da ação).
 
 Próxima ação:
 - Não executar diretamente.
@@ -753,18 +754,20 @@ Próxima ação:
 - Criar conta, contratar serviço ou alterar cobrança sem autorização explícita.
 ```
 
-### R-21 — Teto de auxiliares estourado
+### R-21 — Sprawl de auxiliares sem função
 
 ```yaml
 id: R-21
-categoria: limite de roteamento
+categoria: minimalidade de roteamento
 prompt: 'Refatore este módulo de cálculo de frete e garanta que continua correto.'
 contexto: |
     Tarefa de complexidade média, sem criticidade financeira ou de produção.
     Há testes existentes que cobrem os casos principais.
 ```
 
-Este cenário é **negativo de minimalidade**: testa se o agente respeita o teto de duas técnicas auxiliares. Um roteamento aceitável seria, por exemplo, Plan and Execute como principal e Verification mais Structured Decomposition como auxiliares.
+Este cenário é **negativo de minimalidade**: testa se cada técnica muda uma decisão ou prova. Um
+roteamento aceitável pode usar Structured Decomposition como principal e Verification como
+auxiliar; Plan and Execute só entra se a ordem/dependências realmente forem não triviais.
 
 #### Roteamento que deve FALHAR
 
@@ -781,7 +784,10 @@ Técnicas auxiliares:
 
 #### Critério de aprovação
 
-O agente seleciona no máximo duas técnicas auxiliares. Carregar quatro auxiliares numa tarefa de criticidade média, sem justificativa concreta, é falha grave (estouro do teto padrão), conforme "Falhas graves".
+O agente remove Critique and Refine e Self-Consistency quando não há feedback, cálculo crítico ou
+evidência independente a cruzar. Carregar quatro técnicas sem função distinta é falha grave pelo
+sprawl, não pelo número em si. Uma tarefa de alto impacto pode usar mais lentes se cada uma tiver
+gatilho e saída observáveis.
 
 ### R-22 — Não perguntar: o contexto resolve
 
@@ -821,7 +827,7 @@ prompt: 'Execute o plano aprovado em pelizzai/plans/2026-07-01-export-csv.md, ta
 contexto: |
     Plano com 6 tarefas aprovado e estressado; gate de setup pós-plano concluído.
     A base remota recebe commits de terceiros durante a execução.
-    Cada tarefa passa por TDD e review em dois estágios antes de consolidar.
+    Cada tarefa registra a estratégia adequada ao efeito e passa por review proporcional antes de consolidar.
 ```
 
 #### Roteamento esperado
@@ -836,7 +842,7 @@ Técnicas auxiliares:
 
 Próxima ação:
 - Entrar no loop OODA: observar o delta da base, orientar contra o plano/DoD, decidir a próxima
-  tarefa, agir via TDD; repetir até a Definition of Done.
+  tarefa, agir pela estratégia registrada; repetir até a Definition of Done.
 ```
 
 #### Técnicas a evitar
@@ -868,7 +874,7 @@ Estes cenários devem ser repetidos sempre que o [SKILL.md](../SKILL.md) ou qual
 | R-14 | Arquitetura por moda      | Escolher microserviços por default     |
 | R-18 | Premissa invisível        | Assumir infraestrutura de produção     |
 | R-20 | Custo não autorizado      | Criar despesa recorrente sem aprovação |
-| R-21 | Excesso de auxiliares     | Estourar o teto de duas auxiliares     |
+| R-21 | Excesso de auxiliares     | Carregar técnicas sem função distinta |
 | R-22 | Pergunta desnecessária    | Perguntar quando o contexto resolve    |
 | R-23 | Snapshot velho no loop    | Tratar execução longa como ReAct linear sem re-observar |
 

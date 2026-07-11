@@ -1,6 +1,6 @@
 ---
 name: pelizzai-reasoning
-description: Orquestra técnicas de raciocínio para tarefas que exigem planejamento, investigação, validação, decisão ou uso de ferramentas. Use sempre que a tarefa pedir raciocínio estruturado — decompor um problema, sintetizar evidência, criticar uma solução, decidir sob incerteza — e sempre que o esforço precisar ser proporcional ao risco, à incerteza e ao impacto.
+description: Seleciona técnicas de raciocínio quando há incerteza material, investigação, decisão entre alternativas, síntese de evidência, planejamento não trivial ou validação de alto impacto. Use dentro da head skill para atacar a pergunta dominante; não é obrigatória para ação mecânica direta cujo contrato e prova já estão claros.
 ---
 
 # PelizzAI Reasoning
@@ -39,7 +39,7 @@ Siga esta ordem de prioridade:
 Use esta skill quando a tarefa envolver ao menos uma destas condições:
 
 - múltiplas etapas;
-- código, arquivos, ferramentas ou integrações;
+- código, ferramentas ou integrações com incerteza, dependências ou risco material;
 - fatos verificáveis ou potencialmente atuais;
 - incerteza material;
 - decisão entre alternativas;
@@ -96,17 +96,33 @@ Use a skill `pelizzai-interview-me` somente quando houver ambiguidade material q
 
 ---
 
+## Seletor operacional: método e prova pelo efeito
+
+Classifique separadamente **o efeito da tarefa**, **a incerteza** e **o dinamismo do ambiente**. A head skill define o ciclo de vida; esta skill escolhe as heurísticas. Nenhuma head skill deve impor OODA, RCA ou TDD sem o gatilho correspondente.
+
+| Efeito predominante | Estratégia de implementação e validação |
+| --- | --- |
+| Comportamento novo ou alterado | `pelizzai-tdd`: teste comportamental red→green pelo contrato público |
+| Bug comportamental | Regressão red→green quando houver seam automatizável; outro oráculo reproduzível quando não houver |
+| Refatoração sem mudança de comportamento | Suíte/cobertura de caracterização verde antes; refatorar em passos pequenos; mesma suíte verde depois |
+| Configuração, IaC ou migração | `validate`/`plan`/`dry-run`, compatibilidade e estratégia de rollback; teste unitário só para lógica separável |
+| UI/UX/visual | Overlay obrigatório `pelizzai-frontend`, teste de comportamento quando aplicável e verificação visual real |
+| Documentação/copy | Checagem estática proporcional: lint, links, exemplos, build/render ou inspeção do diff |
+
+Uma tarefa pode combinar estratégias: um formulário novo usa TDD para comportamento **e** `pelizzai-frontend` para estados, acessibilidade, responsividade e QA visual. Registre a combinação no plano; não force um teste vermelho artificial para provar CSS, Markdown ou um `terraform plan`.
+
+---
+
 ## Carregamento progressivo de técnicas
 
-1. Escolha **uma técnica principal**.
-2. Adicione no máximo **duas técnicas auxiliares**.
-3. Leia apenas os arquivos necessários para a tarefa atual.
-4. Adicione outra técnica somente quando nova evidência justificar.
-5. Em tarefas de alto impacto, até três técnicas auxiliares são permitidas quando realmente necessárias.
+1. Escolha a técnica que responde à **pergunta dominante** da fase.
+2. Leia apenas o arquivo dessa técnica e as auxiliares que fecham uma lacuna distinta.
+3. Adicione ou troque técnica quando nova evidência mudar a pergunta; não mantenha um pipeline por inércia.
+4. Considere o custo de contexto: cada técnica precisa justificar uma decisão ou prova observável.
 
-O teto de **uma principal + duas auxiliares** (três em alto impacto) vale **por fase de raciocínio**. Um pipeline (ver a seção **Composições recomendadas**) encadeia fases ao longo do tempo: cada seta é uma transição de fase, não o carregamento simultâneo de cinco técnicas.
-
-**Principal vs auxiliar:** a técnica principal governa o objetivo central e a ordem das demais; as auxiliares dão suporte pontual e são acionadas sob demanda. Quando a matriz listar várias candidatas, escolha como principal a que responde à pergunta dominante da tarefa — executar, planejar, investigar, decidir ou validar — e trate as outras como auxiliares.
+Não há quota fixa. Em geral uma principal basta; alto impacto pode exigir várias lentes, enquanto
+uma tarefa direta pode exigir nenhuma. Um pipeline (ver **Composições recomendadas**) encadeia
+fases ao longo do tempo — não carrega todo o catálogo simultaneamente.
 
 ---
 
@@ -127,7 +143,7 @@ Leia a técnica correspondente antes de aplicá-la.
 | Decision Making          | Escolher entre alternativas válidas, com trade-offs e reversibilidade            | [decision-making.md](techniques/decision-making.md)                   |
 | Tree of Thoughts         | Explorar caminhos concorrentes com poda e backtracking controlados               | [tree-of-thoughts.md](techniques/tree-of-thoughts.md)                 |
 | Self-Consistency         | Comparar tentativas independentes quando convergência agrega confiança           | [self-consistency.md](techniques/self-consistency.md)                 |
-| Root Cause Analysis      | Investigar bugs, incidentes, sintomas, causas e prevenção de recorrência         | [root-cause-analysis.md](techniques/root-cause-analysis.md)           |
+| Root Cause Analysis      | Investigar causa incerta, recorrência, flakiness, incidentes e falhas entre sistemas | [root-cause-analysis.md](techniques/root-cause-analysis.md)        |
 | Critique and Refine      | Melhorar artefato após feedback, falha, inconsistência ou requisito não atendido | [critique-and-refine.md](techniques/critique-and-refine.md)           |
 
 > A skill `pelizzai-interview-me` é uma **skill irmã**, não uma das técnicas do catálogo: acione-a para resolver ambiguidade material por entrevista, conforme a Triagem inicial e a matriz.
@@ -143,8 +159,10 @@ Leia a técnica correspondente antes de aplicá-la.
 | Feature com múltiplas partes                                 | Plan and Execute         | Structured Decomposition, Verification                        |
 | Código existente com partes/contratos desconhecidos          | Structured Decomposition | Plan and Execute, Verification                                |
 | Refatoração preservando comportamento                        | Structured Decomposition | Verification de regressão, Constraint Satisfaction            |
-| Bug simples e evidente                                       | ReAct                    | Verification                                                  |
-| Bug recorrente ou incidente                                  | Root Cause Analysis      | ReAct, Evidence Synthesis, Verification                       |
+| Erro explícito com causa direta                              | ReAct                    | Verification                                                  |
+| Bug determinístico com causa incerta                         | Root Cause Analysis leve | ReAct, Verification                                           |
+| Bug flaky, recorrente ou distribuído                         | Root Cause Analysis      | Evidence Synthesis, Assumption Tracking, Verification         |
+| Incidente com dano ativo                                     | Constraint Satisfaction  | Decision Making, ReAct, Verification; RCA após conter         |
 | Escolha entre bibliotecas ou arquiteturas                    | Decision Making          | Constraint Satisfaction, Evidence Synthesis, Tree of Thoughts |
 | Pesquisa com várias fontes                                   | Evidence Synthesis       | Verification, Assumption Tracking                             |
 | Requisitos ambíguos ou incompletos                           | Assumption Tracking      | Constraint Satisfaction, pelizzai-interview-me                |
@@ -161,6 +179,7 @@ Leia a técnica correspondente antes de aplicá-la.
 Use estas distinções quando duas técnicas parecerem candidatas à principal:
 
 - **OODA vs ReAct:** [ReAct](techniques/react.md) é o **micro-ciclo** de uma ação (pensar → agir com ferramenta → observar o resultado imediato). [OODA](techniques/ooda.md) é o **macro-loop** de uma execução inteira: re-**Observar** a realidade externa (git, testes, reviews, o que mudou no mundo), re-**Orientar** contra o objetivo/plano/DoD, **Decidir** a próxima iteração e **Agir** — repetindo até a Definition of Done. Um loop OODA contém muitos ciclos ReAct dentro da fase Agir.
+- **RCA vs causa direta:** use [Root Cause Analysis](techniques/root-cause-analysis.md) quando ainda houver uma pergunta causal material. Erro explícito cujo contrato, stack trace ou compilador já identifica a causa usa ReAct + Verification; não invente hipóteses concorrentes. Em incidente com dano ativo, contenção reversível e preservação mínima de evidência precedem a RCA.
 - **Tree of Thoughts vs Decision Making:** [Decision Making](techniques/decision-making.md) é a técnica padrão para escolher entre alternativas por trade-offs. Use [Tree of Thoughts](techniques/tree-of-thoughts.md) apenas quando os caminhos são **interdependentes** e exigem **poda e backtracking** — não para comparação linear de opções. As duas raramente atuam juntas.
 - **Structured Decomposition vs Plan and Execute:** decomponha com [Structured Decomposition](techniques/structured-decomposition.md) quando **partes, responsabilidades ou contratos ainda são desconhecidos**; passe a [Plan and Execute](techniques/plan-and-execute.md) quando as partes já são conhecidas e o que falta é ordená-las e executá-las.
 - **Self-Consistency é auxiliar:** [Self-Consistency](techniques/self-consistency.md) cruza tentativas independentes como apoio à [Verification](techniques/verification.md); não substitui o cálculo, a fonte ou o teste real.
@@ -177,11 +196,15 @@ Cada seta é uma **transição de fase**: a técnica seguinte assume quando a an
 ```text
 Structured Decomposition
 → Plan and Execute
-→ [loop OODA: ReAct dentro de Agir]
+→ ReAct na execução
+→ [OODA somente se houver macro-loop com realidade reobservada]
 → Verification
 ```
 
-Use Constraint Satisfaction quando houver requisitos rígidos, compatibilidade, segurança ou proibições. O loop OODA é a lente do laço de execução (`pelizzai-loop` / `pelizzai-execution-plans`): re-observe a realidade a cada tarefa antes de decidir a próxima.
+Use Constraint Satisfaction quando houver requisitos rígidos, compatibilidade, segurança ou
+proibições. OODA só governa `pelizzai-loop`/`pelizzai-execution-plans` quando existem múltiplas
+iterações e a realidade (git, testes, review, ambiente) pode mudar a próxima decisão. Uma tarefa
+linear ou um plano de uma fatia não ganha OODA só por ter ferramentas.
 
 ### Pesquisa ou recomendação técnica
 
@@ -197,14 +220,13 @@ Use Assumption Tracking quando a recomendação depender de informações ainda 
 ### Debugging ou incidente
 
 ```text
-Root Cause Analysis
-→ ReAct
-→ Evidence Synthesis
-→ Verification
-→ Critique and Refine
+Causa direta: ReAct → Verification
+Causa determinística incerta: RCA leve → ReAct → Verification
+Flaky/recorrente/distribuído: RCA + Evidence Synthesis → [OODA só se houver rodadas] → Verification
+Dano ativo: Constraint Satisfaction + Decision Making → contenção reversível → RCA após estabilizar → Verification
 ```
 
-Não trate o primeiro sintoma visível como causa raiz.
+O número de hipóteses acompanha a incerteza: uma hipótese direta e falsificável pode bastar; mantenha múltiplas apenas quando causas materialmente plausíveis competirem. Não trate o primeiro sintoma como causa raiz nem transforme um erro explícito em investigação cerimonial.
 
 ### Decisão arquitetural
 
@@ -400,6 +422,8 @@ Não faça isto:
 - Usar Self-Consistency para resposta simples.
 - Criar plano extenso para ajuste local.
 - Fazer Root Cause Analysis para erro de sintaxe evidente.
+- Impor OODA a uma sequência curta sem re-observação macro útil.
+- Impor TDD a refatoração, CSS, documentação, configuração, IaC ou migração sem comportamento automatizável.
 - Pesquisar múltiplas fontes quando existe contrato direto.
 - Usar Critique and Refine sem feedback ou problema concreto.
 - Usar Verification apenas como checklist decorativo.
@@ -433,12 +457,13 @@ Após alterar uma técnica, rode a suíte especializada correspondente e a `regr
 ```text
 1. Entenda objetivo, escopo, risco e critério de conclusão.
 2. Verifique contexto, regras do projeto e evidências disponíveis.
-3. Escolha uma técnica principal e até duas auxiliares.
-4. Leia os arquivos Markdown correspondentes.
-5. Execute com ReAct quando houver ferramenta, observação ou incerteza.
-6. Valide proporcionalmente ao risco.
-7. Replaneje somente se nova evidência invalidar o caminho atual.
-8. Conclua quando os critérios de conclusão forem atendidos.
+3. Classifique o efeito e escolha a estratégia de implementação/validação correspondente.
+4. Escolha a técnica dominante e somente auxiliares com função distinta.
+5. Leia os arquivos Markdown correspondentes.
+6. Execute com ReAct quando houver ferramenta, observação ou incerteza.
+7. Valide proporcionalmente ao risco e ao efeito.
+8. Replaneje somente se nova evidência invalidar o caminho atual.
+9. Conclua quando os critérios de conclusão forem atendidos.
 ```
 
 ---

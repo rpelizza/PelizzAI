@@ -4,7 +4,8 @@ Use este modelo ao acionar um subagente ou teammate revisor de documentos de esp
 
 **Objetivo:** Verificar se a especificação está completa, consistente e pronta para o planejamento da implementação.
 
-**Acionar após:** O documento de especificação ter sido gravado em `pelizzai/specs/`.
+**Acionar após:** A especificação existir como arquivo no consumidor ou como conteúdo nativo no
+source mode. Não crie `pelizzai/specs/` apenas para usar este prompt.
 
 ```
 Task tool (general-purpose):
@@ -12,7 +13,7 @@ Task tool (general-purpose):
   prompt: |
     You are a spec document reviewer. Verify this spec is complete and ready for planning.
 
-    **Spec to review:** [SPEC_FILE_PATH]
+    **Spec to review:** [SPEC_FILE_PATH_OR_INLINE_CONTENT]
 
     ## What to Check
 

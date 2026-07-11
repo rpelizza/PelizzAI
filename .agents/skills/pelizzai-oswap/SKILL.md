@@ -1,67 +1,89 @@
 ---
 name: pelizzai-oswap
-description: Use para revisar a SEGURANÇA de uma mudança (diff) antes de integrar — checklist OWASP Top 10 focado no que mudou, especialmente quando toca autenticação/autorização, input do usuário, queries/SQL, dados sensíveis/segredos, upload, desserialização, CORS/headers, SSRF ou novas dependências. Oferecida pela `pelizzai-finish-task` antes do push/PR, e é a dimensão de segurança do review (`pelizzai-review`). Acione quando o usuário disser "revisão de segurança", "checar OWASP", "isso é seguro?".
+description: Overlay de segurança para mudanças que tocam autenticação/autorização, input não confiável, SQL/query, dados sensíveis, upload, CORS/SSRF, dependências/supply chain, integridade, logging ou exceções. Aplica o OWASP Top 10 atual ao diff e produz fixes/evidência antes do review final e de validated-head. Use também quando o usuário pedir revisão OWASP; nunca adie para finish-task.
 ---
 
 # PelizzAI OWASP
 
 ## Objetivo
 
-Revisão de segurança focada no **diff** (não no código inteiro), guiada pelo **OWASP Top 10**. Objetivo: pegar vulnerabilidades **introduzidas pela mudança** antes de integrar.
+Revisar o diff e as trust boundaries afetadas, encontrando caminhos plausíveis de exploração ou
+falha segura antes de integrar.
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI OWASP para checar a segurança desta mudança (OWASP Top 10)."
+Baseline: [OWASP Top 10:2025](https://owasp.org/Top10/2025/0x00_2025-Introduction/). Ao manter esta
+skill, confirme a edição oficial atual; não preserve categorias antigas por memória.
 
-> **Princípio:** revise o que mudou, no contexto de quem chama. Um achado sem caminho de exploração plausível é ruído; um achado com caminho de exploração é prioridade.
+**Anuncie:** "Usando a skill PelizzAI OWASP para revisar as superfícies de segurança desta mudança."
 
----
+## Quando
 
-## Quando usar
+O router/plano registra este overlay assim que o escopo ou diff toca auth, autorização, entrada
+externa, query, segredo/PII, upload, rede/URL, dependência/build, integridade, logging/alerta ou
+tratamento de falha. Review pode promovê-lo quando descobrir uma superfície não prevista.
+
+## Escopo
+
+- tarefa ainda não commitada: working tree completa, inclusive staged/untracked;
+- candidato final: `base-sha..candidate-head`;
+- pedido read-only: range/PR explicitamente delimitado, sem criar state.
+
+Liste entradas, atores, trust boundaries, ativos e efeitos externos. Não revise o repo inteiro por
+reflexo, mas siga uma cadeia chamada pelo diff quando isso for necessário para provar autorização
+ou sanitização.
+
+## OWASP Top 10:2025 — lentes aplicáveis
+
+| # | Categoria | Pergunta para o diff |
+| --- | --- | --- |
+| A01 | Broken Access Control | Autorização por objeto/ação? IDOR? SSRF/acesso interno controlado? |
+| A02 | Security Misconfiguration | Defaults, debug, CORS/headers, permissões ou fail-open? |
+| A03 | Software Supply Chain Failures | Dependência/build/publish necessários, pinados e com proveniência/integridade? |
+| A04 | Cryptographic Failures | Segredo/dado em claro? Algoritmo, chave, armazenamento e transporte adequados? |
+| A05 | Injection | Input chega a SQL, shell, template, LDAP ou interpreter sem parametrização/escaping? |
+| A06 | Insecure Design | Trust boundary, abuso, rate/size limit e regra de negócio foram modelados? |
+| A07 | Authentication Failures | Sessão/token, expiração, rotação, brute-force e recuperação estão corretos? |
+| A08 | Software or Data Integrity Failures | Desserialização, update, artefato ou dado cruza boundary sem integridade? |
+| A09 | Security Logging & Alerting Failures | Evento gera log sem segredo/PII e alerta acionável? |
+| A10 | Mishandling of Exceptional Conditions | Erro, timeout, retry, partial failure e estado anormal falham com segurança? |
+
+Carregue apenas categorias tocadas. OWASP é uma taxonomia de lentes, não uma lista para marcar sem
+evidência.
+
+## Achado e prova
+
+Para cada suspeita:
 
 ```text
-- Oferecida pela pelizzai-finish-task quando o diff toca superfície sensível.
-- Como dimensão de segurança do review (pelizzai-review).
-- A pedido do usuário.
-- Especialmente: auth, input do usuário, SQL/queries, dados sensíveis/segredos, upload,
-  desserialização, novas dependências, CORS/headers, SSRF.
+categoria + severidade
+arquivo:linha
+precondição → entrada → boundary → efeito → impacto
+evidência observada
+fix mínimo
+teste/check que falha antes e passa depois, quando automatizável
 ```
 
-## Processo
+Sem caminho plausível, rebaixe ou retire; não invente exploit. Nova dependência exige fonte oficial
+e scanner/lockfile disponível, sem alegar ausência de CVE quando a consulta não rodou.
 
-1. **Escopo do diff** — `git diff <base>..HEAD`. Liste os pontos de entrada e os dados externos que a mudança introduz ou altera.
-2. **Checklist OWASP Top 10** (foco no que o diff toca):
+## Lifecycle
 
-| #   | Categoria                  | O que checar no diff                                                                 |
-| --- | -------------------------- | ------------------------------------------------------------------------------------ |
-| A01 | Broken Access Control      | Autorização verificada em cada novo endpoint/ação? IDOR (acessar recurso de outro por id)? |
-| A02 | Cryptographic Failures     | Segredos/dados sensíveis em texto claro? Hash de senha adequado (bcrypt/argon2)? TLS? |
-| A03 | Injection                  | Input concatenado em SQL/shell/template? Use queries parametrizadas / escaping.       |
-| A04 | Insecure Design            | Falta rate limiting, validação de regra de negócio, limite de tamanho?               |
-| A05 | Security Misconfiguration  | Debug ligado, CORS `*`, headers de segurança ausentes, defaults inseguros?           |
-| A06 | Vulnerable Components       | Nova dependência: versão com CVE? pinada? realmente necessária?                      |
-| A07 | Auth Failures              | Sessão/token: expiração, rotação, força de senha, proteção contra brute-force?       |
-| A08 | Integrity Failures          | Desserialização insegura? Update/CI sem verificação de integridade?                  |
-| A09 | Logging Failures            | Loga segredos/PII? Falta log de eventos de segurança?                                |
-| A10 | SSRF                       | Requisição a URL controlada pelo usuário sem allowlist?                              |
-
-3. **Validar o exploit** — para cada suspeita, descreva o caminho concreto de exploração. Sem caminho plausível, baixe a severidade.
-4. **Reportar** — por achado: categoria OWASP, severidade (crítico/alto/médio/baixo), local (`arquivo:linha`), exploit e **correção concreta**.
-
----
+Fix de segurança altera o candidato: implemente antes do seal, execute a prova, consolide e reabra
+as categorias/reviews afetados. Critical/High bloqueiam `validated-head`; risco aceito exige decisão
+explícita do dono e registro durável apropriado. Finish-task nunca executa este overlay.
 
 ## Red flags
 
 ```text
-Nunca: revisar o código inteiro quando o pedido é sobre uma mudança (foque no diff); reportar
-       achado teórico sem caminho de exploração como se fosse crítico; aprovar sem checar input
-       não confiável e autorização nos pontos novos.
-Sempre: tratar input do usuário como hostil; checar as versões de novas dependências; entregar
-        uma correção acionável, não só apontar o problema.
+- Oferta tardia na finish-task.
+- Checklist das dez categorias sem relação com o diff.
+- Achado crítico teórico sem boundary/caminho.
+- Aprovar input/autorização sem seguir o dado até o enforcement.
+- Consultar CVE/dependência de memória.
+- Corrigir depois de validated-head sem invalidar o seal.
 ```
-
----
 
 ## Integração
 
-**Oferecida por:** `pelizzai-finish-task` (antes do push/PR, quando o diff toca superfície sensível).
-
-**Combina com:** `pelizzai-review` — aquela foca em qualidade/correção; esta foca em segurança. `pelizzai-reasoning` (Evidence Synthesis para correlacionar o exploit).
+É overlay do router/writing-plans/execution-plans/review e combina com skills de domínio. Use
+Evidence Synthesis quando logs/scanners/fontes divergem; não transforme a taxonomia em reasoning
+universal.

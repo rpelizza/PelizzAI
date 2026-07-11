@@ -1,71 +1,115 @@
 ---
 name: pelizzai-interview-me
-description: Use essa skill para entrevistar o usuário — entender o objetivo, estressar um plano ou estressar uma ideia (brainstorming). Invoque-a quando o usuário não tiver um objetivo claro, quando ele precisar de ajuda para definir um objetivo ou plano, quando um pedido for ambíguo ou comportar múltiplas interpretações, ou quando um design/plano precisar ser estressado antes de virar implementação.
+description: Resolve ambiguidade material por entrevista ou submete uma ideia/design/plano existente a stress focal. Use quando o usuário pedir para ser entrevistado, quando evidência local não resolve uma decisão que muda escopo/risco/solução ou quando uma lane standard/exploratory ainda tem premissas críticas. Não use como etapa obrigatória de toda feature ou plano claro.
 ---
 
 # PelizzAI Interview Me
 
-## Visão geral
+## Objetivo
 
-A skill "PelizzAI Interview Me" é projetada para ajudar os usuários a esclarecer seus objetivos antes de um brainstorming, após um brainstorming para encontrar lacunas, estressar planos ou gerar ideias através de entrevistas estruturadas, feitas **uma de cada vez**, resolvendo cada ramificação antes de passar para a próxima até que haja um entendimento completo. Ela faz perguntas abertas e direcionadas para entender o contexto da tarefa, as habilidades disponíveis e identificar lacunas no conhecimento do usuário, sugerindo recursos ou estratégias para preenchê-las.
+Obter as decisões humanas que a evidência não consegue fornecer, com o menor número de turnos.
+Entrevista não substitui leitura do projeto nem serve para fabricar lacunas.
 
-**Princípio fundamental**: uma pergunta de cada vez, sempre acompanhada da sua recomendação; explore o código quando a resposta estiver nele; **exponha ativamente as lacunas do projeto**; pare quando não houver mais decisões pendentes.
+**Anuncie:** "Usando a skill PelizzAI Interview Me para resolver as decisões materiais ainda abertas."
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Interview Me para ajudá-lo a esclarecer seus objetivos e gerar ideias."
+## Modos
 
-Para cada pergunta, ofereça 4 opções de resposta, sendo uma delas "Outro" para que o usuário possa fornecer uma resposta personalizada. As perguntas devem ser abertas e direcionadas, incentivando o usuário a refletir sobre seus objetivos e necessidades.
+| Modo | Gatilho | Saída |
+| --- | --- | --- |
+| descoberta | objetivo/aceite tem interpretações materialmente diferentes | objetivo, escopo, restrições e decisão |
+| stress focal | ideia/design/plano já existe, mas há premissa ou risco concreto | decisão, risco aceito/mitigado e alteração necessária |
+| entrevista explícita | usuário pediu perguntas/entrevista | profundidade pedida, sem prolongar além do útil |
 
-**Formas de acesso — exigem uma entrevista aprofundada que exponha lacunas:**
+`pelizzai-brainstorming` cria o design. Esta skill resolve decisões humanas pendentes; se ainda não
+há design ou opções concretas, devolva ao brainstorming.
 
-- **Por solicitação do usuário** ("me questione", "me entreviste", "teste a robustez deste plano") — encaminhado pelo `pelizzai-router`.
+## Antes de perguntar
 
-- **Como uma etapa obrigatória no fluxo da funcionalidade** — Antes do `pelizzai-brainstorming` para esclarecer suas dúvidas, após o `pelizzai-brainstorming` para estressar o design e após a `pelizzai-writing-plans` para estressar o plano. Neste modo, não é opcional: conduza a entrevista até o fim e **liste as lacunas** antes do repasse. Você só pode encerrar mais cedo depois que as lacunas tiverem sido **realmente identificadas e resolvidas** — ou explicitamente aceitas pelo usuário; nunca pule essa etapa para "economizar tempo".
+1. Leia pedido, spec/plano, state e somente o código/documentação relevantes.
+2. Separe fatos observados, inferências e decisões que pertencem ao usuário.
+3. Remova perguntas cuja resposta já está no projeto ou tem default seguro/reversível.
+4. Ordene o restante por dependência e impacto.
 
-## Fronteira com o _brainstorming_
+Não estime esforço como fato sem medir. Quando duas interpretações mudarem materialmente escopo ou
+custo, mostre a evidência disponível e a consequência de cada uma.
 
-- **`pelizzai-brainstorming`** — ainda não há um design; criar do zero (propósito, abordagens, design, aprovação).
-- **`pelizzai-interview-me`** — já existe um plano/design/ideia; submetê-lo a testes rigorosos, identificar lacunas, resolver decisões pendentes.
+## Como perguntar
 
-Se, durante a entrevista, ficar claro que não existe um plano real, redirecione para o `pelizzai-brainstorming`.
+- Agrupe perguntas **independentes** num lote curto para reduzir turnos.
+- Faça uma por vez quando a próxima depende da resposta anterior.
+- Use 2–3 opções somente quando forem reais e suficientemente completas; inclua recomendação com
+  motivo quando a evidência sustentar uma.
+- Use pergunta aberta para descoberta, linguagem de produto ou quando listar opções enviesaria a
+  resposta.
+- Não force “Outro”, quatro opções ou múltipla escolha por formato.
+- Explique por que a resposta muda a entrega; corte perguntas cosméticas/reversíveis.
 
-## Processo
+Se a ferramenta da plataforma impuser um formato específico de pergunta, siga-o sem alterar a
+semântica deste contrato.
 
-1. **Mapeie a árvore de decisão**: identifique todas as decisões pendentes, lacunas de conhecimento e áreas de incerteza. Liste cada decisão como um nó na árvore, com ramificações para cada opção possível.
-2. Se necessário, use a skill `pelizzai-reasoning` para analisar cada decisão e suas ramificações, considerando os trade-offs e implicações de cada escolha.
-3. **Faça uma pergunta de cada vez**: apresente uma decisão ou lacuna de conhecimento, forneça opções de resposta e incentive o usuário a refletir sobre suas escolhas.
-4. **Explore cada ramificação**: para cada resposta, explore as implicações e consequências, identificando novas decisões ou lacunas de conhecimento que surgem.
-5. **Investigue antes de perguntar**: antes de fazer uma pergunta, investigue o contexto e as informações disponíveis para evitar perguntas desnecessárias ou repetitivas.
-6. **Registre as decisões** à medida que forem tomadas (faça um breve resumo ao concluir cada ramo).
-7. **Dê preferência a perguntas de múltipla escolha** sempre que possível — são mais fáceis de responder do que perguntas abertas.
-8. **Exponha as lacunas explicitamente** — investigue ativamente o que o projeto NÃO contempla: erros ou edge cases não tratados, validações ausentes, falhas de segurança ou autorização, estados indefinidos, premissas de escalabilidade/desempenho, caminhos não testados e contradições. Aponte essas questões claramente; não deixe uma lacuna passar despercebida apenas porque o usuário não a mencionou.
-9. **Interpretações múltiplas com preço**: quando um pedido ou decisão comportar 2-3 leituras materialmente diferentes, apresente cada uma com o esforço estimado e o dado medido do estado atual (arquivos afetados, cobertura, o que der para medir) — e deixe o usuário escolher. Nunca escolha uma leitura em silêncio.
+## Stress proporcional
 
-## Critério de encerramento
+Procure apenas falhas plausíveis para a superfície real:
 
-Pare quando: todos os ramos da árvore estiverem resolvidos; não houver nenhuma decisão pendente que altere a implementação; e o usuário puder descrever o plano sem ambiguidade. Não prolongue o processo apenas por prolongar.
+```text
+contrato/aceite ausente
+estado de erro ou vazio relevante
+autorização/segurança/dados
+compatibilidade/migração/rollback
+premissa de escala ou integração não confirmada
+contradição entre spec, plano e código
+```
 
-## Artefato de saída
+Não invente uma lista de riscos para provar profundidade. Lane bounded normalmente dispensa esta
+skill. Standard usa stress focal; exploratory pode exigir várias decisões, mas ainda encerra quando
+o próximo passo deixa de depender do usuário.
 
-Ao finalizar, produza um resumo do **plano submetido a testes de estresse**: cada decisão, a escolha feita e a justificativa, e — **obrigatório** — uma lista explícita e numerada das **lacunas/riscos revelados** e como cada um foi resolvido ou conscientemente aceito pelo usuário. Um resumo sem a seção de lacunas está incompleto (um projeto real sempre apresenta falhas que vale a pena identificar).
+## Critério de parada
 
-**Transferência pelo chamador (não pule diretamente para `pelizzai-writing-plans`):**
+Pare quando:
 
-- **Como etapa de projeto `pelizzai-brainstorming`** → NÃO invoque `pelizzai-writing-plans`. **Retorne o controle para `pelizzai-brainstorming`** para que a etapa conclua sua lista de verificação restante (Escrever documento de projeto → Autoavaliação da especificação → Revisão da especificação pelo usuário).
-- **Como etapa de planejamento `pelizzai-writing-plans`** → retorne para `pelizzai-writing-plans`, que salva/estressa o plano e faz o handoff para a execução (`pelizzai-execution-plans`); é a `pelizzai-execution-plans` que escolhe o modo (team > subagents > inline) — a `pelizzai-writing-plans` não decide nem assume modo.
-- **Independente** (usuário solicitou teste de estresse em um plano existente) → prossiga para `pelizzai-writing-plans` caso o plano avance para a implementação.
-- **Em qualquer modo**, se o plano se mostrar inviável, retorne para `pelizzai-brainstorming`.
+- nenhuma decisão humana aberta muda escopo, risco, autoridade ou solução;
+- premissas críticas têm prova, dono ou aceitação explícita;
+- o próximo passo e seu critério de sucesso estão claros.
 
-## Sinais de Alerta (Red Flags)
+Não busque “entendimento completo” de todo o sistema. Se uma resposta cria nova decisão dependente,
+continue; se cria trabalho técnico investigável, devolva-o ao fluxo como tarefa, não como pergunta.
 
-**Nunca:**
+## Saída e handback
 
-- Despeje várias perguntas de uma só vez.
-- Pergunte algo que você poderia descobrir lendo o código.
-- Faça uma pergunta sem apresentar sua própria recomendação.
-- Continue a entrevista depois que não houver mais decisões em aberto.
-- Passe a tarefa adiante (ou permita que o usuário prossiga) sem ter exposto explicitamente as lacunas do design — revelar essas falhas é justamente o objetivo.
-- Trate a etapa obrigatória de validação do fluxo de funcionalidades como algo que pode ser pulado "para economizar tempo".
+Retorne de forma compacta:
+
+```text
+Decisões:
+- escolha — motivo/evidência
+
+Riscos ou lacunas materiais:
+- risco — mitigação, aceitação ou tarefa de investigação
+
+Premissas abertas:
+- somente as que ainda limitam a execução
+
+Próximo passo:
+- skill/artefato que retoma o controle
+```
+
+Se nenhum risco novo foi encontrado, diga isso; não fabrique um. Retorne ao chamador
+(`pelizzai-brainstorming`, `pelizzai-writing-plans` ou router). Esta skill não escolhe team,
+subagents, branch ou commit strategy.
+
+## Red flags
+
+```text
+- Perguntar o que código/spec já responde.
+- Uma pergunta por turno quando poderiam ser respondidas juntas.
+- Lote de perguntas dependentes que muda após a primeira resposta.
+- Quatro opções artificiais e recomendação sem evidência.
+- Entrevista obrigatória em feature bounded clara.
+- Continuar depois que o próximo passo não depende mais do usuário.
+- Declarar que todo projeto necessariamente tem uma lacuna.
+```
 
 ## Integração
 
-**Combina com:** `pelizzai-brainstorming` (criar do zero) e `pelizzai-writing-plans` (transformar o plano testado sob pressão em um plano de implementação).
+Combina com `pelizzai-brainstorming`, `pelizzai-writing-plans` e `pelizzai-reasoning` somente quando
+o router ou a evidência identificarem ambiguidade material.

@@ -1,91 +1,137 @@
 ---
 name: pelizzai-recovery
-description: Recuperação segura quando o estado REAL (git) diverge do esperado (`pelizzai/data/state.md`). Use quando a `pelizzai-router` detectar inconsistência state.md×git na retomada; após sessão interrompida ou crash no meio de uma tarefa; com worktree órfão; ou quando o usuário disser "recuperar", "estado inconsistente", "deu ruim no git". NUNCA execute operação destrutiva de git para "resolver" uma divergência sem passar por esta skill.
+description: Reconcilia com segurança divergências entre o registro da tarefa e Git após interrupção, crash, worktree órfão ou retomada no diretório errado. Usa state no consumidor e execution record no source mode. Começa read-only, distingue falso alarme de risco real e preserva WIP antes de qualquer operação que possa movê-lo ou descartá-lo. Nunca faz stash/reset/delete/abort automaticamente.
 ---
 
 # PelizzAI Recovery
 
 ## Objetivo
 
-Reconciliar o estado registrado com a realidade do git SEM perder trabalho: capturar o estado real, criar um ponto de retorno, deixar o usuário escolher o caminho e commitar a reconciliação do cursor — nesta ordem.
+Reconstruir a realidade sem perder trabalho nem transformar toda divergência em um menu Git.
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Recovery para recuperar o estado com segurança."
+**Anuncie:** "Usando a skill PelizzAI Recovery para reconciliar o registro com o Git sem perder WIP."
 
-> **Princípio:** primeiro o ponto de retorno, depois qualquer decisão. Caminho destrutivo é SEMPRE decisão do usuário — nunca sua.
+## 1. Diagnóstico read-only
 
-## Quando
-
-- `pelizzai-router` (Passo 0) detecta divergência state.md×git na retomada.
-- Sessão interrompida/crash no meio de uma tarefa (working tree suja, WIP de origem incerta).
-- Worktree órfão (registrado no state.md mas ausente no `git worktree list`, ou vice-versa).
-- Usuário: "recuperar", "estado inconsistente", "deu ruim no git".
-
-## Processo
-
-### 1. PARE — nenhuma operação de ESCRITA (git ou arquivos) até o fim do Passo 3; diagnóstico primeiro
-
-### 2. Capture o estado REAL e compare
+Não escreva nem mova WIP até classificar a divergência:
 
 ```bash
-git status
-git stash list
-git worktree list
-git log --oneline -5
+git rev-parse --show-toplevel
+git status --short --branch
 git branch --show-current
+git worktree list --porcelain
+git log --oneline -10
+git stash list
 ```
 
-Compare com `pelizzai/data/state.md` (slug/phase/branch/isolation/worktree-path) e liste as divergências concretas: "o state diz branch X; o git está em Y", "o worktree registrado não existe", "há WIP que o progresso não menciona".
+Leia `project`, `branch`, `base-ref`, `base-sha`, `validated-head`, `isolation`, `worktree-path`,
+`phase`, `delivered` e `next` do `state.md` consumidor ou execution record nativo. State ausente em
+source mode é normal. Separe:
 
-### 3. Ponto de retorno ANTES de qualquer operação destrutiva
+| Classe | Exemplo | Conduta |
+| --- | --- | --- |
+| diretório errado | registro aponta worktree válido, mas comando rodou no repo principal | mude para o path correto; zero escrita |
+| cursor atrasado | Git/commits são coerentes e registro perdeu progresso | reconciliar apenas o registro, com evidência |
+| WIP recuperável | working tree suja na branch correta | preservar e retomar; não stash por reflexo |
+| identidade divergente | branch/path/base não correspondem e origem do WIP é incerta | decisão humana após inventário |
+| risco de perda/histórico reescrito | commits sumiram, refs mudaram, worktree órfão sujo | preserve refs/WIP e escale |
 
-Com working tree suja: `git stash push -u -m "recovery/<slug>/<data>"` (stash **nomeado**). **Não** faça commit WIP direto — a recovery pode estar rodando em branch protegida ou HEAD vazio, e o commit direto violaria o gate de `pelizzai-starting-branch`; se precisar mesmo de um WIP commit, crie antes uma branch segura via `pelizzai-starting-branch`. **Nunca prossiga sem o ponto de retorno** — é o que torna qualquer caminho abaixo reversível.
+Se for falso alarme de diretório, corrija o contexto e retorne ao router sem tocar o registro.
 
-### 4. MENU de recuperações — o usuário decide
+## 2. Inventariar o WIP
 
-Apresente as opções aplicáveis, com a SUA recomendação e o porquê (baseados no diagnóstico do Passo 2):
+Antes de propor qualquer mutação, mostre:
 
 ```text
-Encontrei divergência entre o estado registrado e o git: <resumo das divergências>.
-Como recuperar?
-
-1. Retomar de onde parou — restaurar/continuar o trabalho da tarefa ativa (recomendado quando o WIP é bom)
-2. Consolidar o WIP — commitar o que existe como está e seguir
-3. Descartar as mudanças — voltar ao último estado limpo (DESTRUTIVO; o ponto de retorno do Passo 3 já existe)
-4. Reconciliar só o cursor — o trabalho está certo; só o state.md está desatualizado
-
-Qual opção?
+tracked staged/unstaged
+untracked (nomes, sem ler segredos)
+commits exclusivos da branch
+stashes relevantes
+worktrees/refs que ainda apontam para o conteúdo
 ```
 
-**Nunca decida um caminho destrutivo sozinho** — a opção 3 só roda após escolha explícita do usuário.
+Não trate arquivos desconhecidos como pertencentes à tarefa. Descubra origem/escopo antes de
+incluí-los em commit ou stash.
 
-### 5. Reconcilie o state.md e COMMITE o cursor imediatamente
+## 3. Escolher a menor recuperação
 
-Atualize `pelizzai/data/state.md` para refletir a realidade pós-recuperação (slug/phase/branch/progresso; linha datada no `## Histórico` registrando a recuperação) e commite já, com esta **escada de fallback**:
+Use default seguro quando inequívoco:
+
+- branch/worktree correto com WIP coerente → retome no lugar;
+- cursor comprovadamente atrasado e sem conflito de identidade → atualize apenas os campos
+  evidenciados;
+- registro ativo aponta para worktree válido → execute de lá.
+
+Pergunte somente quando há caminhos materialmente diferentes. Apresente recomendação e efeitos:
 
 ```text
-- Branch protegida (main/master/develop/dev, ou HEAD vazio — fail-closed)? NÃO commite nela:
-  crie uma branch segura via `pelizzai-starting-branch` e pouse a reconciliação lá.
-- Conflito impedindo o commit? Stash nomeado com as instruções de retomada ESCRITAS no próprio
-  state.md (qual stash, como aplicar) — e commite ao menos o state.md.
-- Nunca deixe a reconciliação nem commitada nem stashed: cursor solto é a próxima inconsistência.
+1. Retomar o WIP no local correto.
+2. Criar branch de resgate/checkpoint e depois reconciliar.
+3. Guardar WIP em stash nomeado (muda a working tree).
+4. Descartar/restaurar conteúdo (destrutivo; confirmação explícita).
+5. Reconciliar apenas o cursor.
 ```
 
-### 6. Retome ou escale
+Não mostre opções inaplicáveis. Descarte, stash, abort, reset, deleção ou remoção de worktree nunca
+são escolhidos autonomamente.
 
-Divergência resolvida → devolva o fluxo (`pelizzai-router` re-roteia; se a recuperação fechou a tarefa, `pelizzai-finish-task` faz o fechamento formal). Situação além do menu (histórico reescrito, remoto divergente, suspeita de perda real de dados) → escale ao humano com o diagnóstico do Passo 2 e o ponto de retorno do Passo 3.
+## 4. Ponto de retorno antes de risco
+
+Se a rota selecionada mover, esconder, reescrever ou descartar WIP:
+
+1. obtenha confirmação explícita da operação e do escopo;
+2. prefira uma branch/ref de resgate quando os commits já existem;
+3. para working tree arbitrária, use stash **nomeado** somente após listar staged/unstaged/untracked
+   e confirmar que não capturará arquivos alheios/sensíveis;
+4. registre nome/SHA e comando de restauração antes de continuar.
+
+Nunca use `reset --hard`, branch `-D`, worktree `--force` ou `git clean -f`. Se o usuário realmente
+quiser uma operação bloqueada pelos guardrails, entregue diagnóstico e instrução manual; não burle
+o hook.
+
+## 5. Reconciliar o registro
+
+Atualize somente campos comprovados. Antes do commit:
+
+- esteja numa branch segura e não protegida; se necessário, use `pelizzai-starting-branch` sem
+  perder a ref de resgate;
+- consumidor: estagie apenas `pelizzai/data/state.md` quando a recuperação é só cursor;
+- source mode: atualize apenas o execution record nativo; não crie state nem commit de cursor;
+- se WIP legítimo também será consolidado, devolva ao lifecycle normal para review/prova/commit;
+  não misture conteúdo não revisado num “commit de recovery”.
+
+No consumidor, adicione ao Histórico divergência, evidência e recuperação. Em source mode, registre
+o mesmo resumo no mecanismo nativo. Valide novamente contra Git. Se não puder persistir com
+segurança, preserve o ponto de retorno e escale; não invente commit em branch protegida.
+
+## 6. Retomar
+
+Retorne ao router com:
+
+```text
+realidade confirmada
+ponto de retorno (se houve)
+registro reconciliado ou razão para não alterá-lo
+próximo passo exato
+limitações/decisão pendente
+```
+
+Se a tarefa estava selada e qualquer conteúdo mudou, invalide `validated-head` e volte a review +
+Verification. Recovery nunca chama finish-task com um seal antigo.
 
 ## Red flags
 
 ```text
-- "reset --hard resolve" sem ponto de retorno (o hook opt-in pelizzai-guardrails bloqueia por um motivo).
-- Reconciliar o cursor e NÃO commitá-lo (a próxima sessão herda a mesma inconsistência).
-- Decidir descarte sem confirmação explícita do usuário.
-- Começar a "arrumar" o git antes de capturar o estado real (Passo 2).
+- Stash automático apenas porque a working tree está suja.
+- Menu completo para simples execução no diretório errado.
+- Misturar arquivo alheio no checkpoint/commit.
+- Reconciliar state/execution record por memória sem Git.
+- Operação destrutiva sem confirmação e ponto de retorno.
+- Preservar validated-head depois que o conteúdo mudou.
 ```
 
 ## Integração
 
-- `pelizzai-router` — aciona esta skill ao detectar divergência state.md×git na retomada.
-- `pelizzai-starting-branch` — cria a branch segura da escada de fallback (Passo 5).
-- `pelizzai-execution-plans` — dona do `state.md` (cursor) que esta skill reconcilia.
-- `pelizzai-finish-task` — se a recuperação fechar a tarefa, o fechamento formal é dela.
+É chamada por router/starting-branch/execution-plans quando o registro e Git divergem. Usa
+`pelizzai-starting-branch` para resgate seguro e devolve o trabalho ao lifecycle; finish-task só
+entra depois de novo conteúdo consolidado e selado.

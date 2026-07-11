@@ -12,12 +12,13 @@ Conduzir execuções longas ou dinâmicas como um **loop macro** em que cada ite
 
 - Execução longa em loop até a Definition of Done (executar um plano tarefa por tarefa).
 - Situações dinâmicas: a base avança (colegas pusharam), testes/reviews devolvem informação nova, dependências mudam de versão.
-- Investigações iterativas em que cada rodada muda o que vale a pena fazer na próxima.
+- Investigações **em múltiplas rodadas** em que cada rodada muda hipóteses, evidência ou o que vale a pena fazer na próxima.
 - Retomada de tarefa após pausa/compaction (o mundo pode ter mudado desde o registro).
 
 ## Quando evitar
 
 - Tarefa curta de ação única — ali o [ReAct](react.md) sozinho basta.
+- Bug determinístico com repro→correção→verificação direta — OODA não é técnica diagnóstica e não substitui ReAct/RCA.
 - Trabalho puramente analítico sobre insumos estáticos (nada muda entre "iterações") — não há o que re-observar.
 - Quando um circuit breaker específico já governa o laço (fix→re-review do task-cycle) — o OODA é a lente, não um segundo contador.
 
@@ -67,7 +68,7 @@ Conduzir execuções longas ou dinâmicas como um **loop macro** em que cada ite
 ## Integração no harness
 
 - `pelizzai-loop` — a DoD e a regra de parar-em-dúvida são os limites deste loop.
-- `pelizzai-execution-plans` — o laço macro por tarefa É um loop OODA (observar evidência → orientar contra o plano → decidir a próxima tarefa/fix → agir via TDD+review).
+- `pelizzai-execution-plans` — o laço macro por tarefa É um loop OODA (observar evidência → orientar contra o plano → decidir a próxima tarefa/fix → agir pela estratégia registrada + review).
 - `pelizzai-router` (Sync & delta) — o Observar de início de tarefa: delta do git desde a última tarefa.
-- `pelizzai-debugging` — as 4 fases mapeiam o ciclo: Fase 1 (observar/reproduzir), Fase 2 (orientar contra padrões que funcionam), Fase 3 (decidir a hipótese), Fase 4 (agir com teste + fix).
+- `pelizzai-debugging` — usa OODA somente como macro-lente quando a investigação realmente exigir rodadas; causa direta e bug determinístico curto não precisam dela.
 - [ReAct](react.md) — o micro-ciclo dentro do Agir. [Verification](verification.md) — confirma a DoD antes de sair do loop.

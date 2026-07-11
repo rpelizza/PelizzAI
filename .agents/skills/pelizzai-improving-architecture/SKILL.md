@@ -1,84 +1,140 @@
 ---
 name: pelizzai-improving-architecture
-description: Fricção como bússola — revisão PROATIVA de arquitetura. Use periodicamente (a cada poucos dias de trabalho intenso no projeto), quando a `pelizzai-debugging` registrar um seam ausente para o teste de regressão, ou quando o usuário pedir "revisar a arquitetura", "o que vale refatorar?", "dívida técnica". NÃO é para reagir a um bug (isso é o track de bug) nem para reescrever o mundo.
+description: Head skill read-only para revisão codebase-wide de arquitetura, dívida técnica e seams ausentes. Use quando o usuário pedir análise arquitetural ampla, o que vale refatorar ou quando debugging registrar uma lacuna estrutural. Entrega candidatos priorizados por evidência; não edita código, relatório, ADR ou out-of-scope. Review de diff/branch/PR usa pelizzai-review.
 ---
 
 # PelizzAI Improving Architecture
 
 ## Objetivo
 
-Arquitetura degrada em silêncio: cada tarefa olha o próprio diff e ninguém olha o todo. Esta skill faz a revisão proativa — encontrar, com evidência de fricção real, os pontos onde a arquitetura está cobrando pedágio, e apresentá-los ao usuário como **candidatos**, não como refactors já decididos.
+Encontrar onde a arquitetura está cobrando custo **observável** e devolver poucas oportunidades
+acionáveis, sem transformar preferência estética em refactor nem uma análise read-only em escrita.
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Improving Architecture para revisar a arquitetura proativamente."
+**Anuncie:** "Usando a skill PelizzAI Improving Architecture para revisar a arquitetura por evidência."
 
-## Quando (e quando não)
+## Contrato de efeito
 
-```text
-USE:     periodicamente (a cada poucos dias de trabalho intenso); quando a pelizzai-debugging
-         registrou um SEAM AUSENTE (não havia onde escrever o teste de regressão); quando o
-         usuário pedir uma revisão de arquitetura.
-NÃO USE: para reagir a um bug (track de bug → pelizzai-debugging); para reescrever o mundo
-         (o resultado é um MENU de candidatos, nunca um plano de refactor total); no meio de
-         uma tarefa em andamento (feche-a primeiro).
-```
-
-## Processo
-
-### 1. Explorar organicamente (read-only)
-
-Despache um subagente ou time **read-only** (`pelizzai-team`/`pelizzai-subagents`, agentes de leitura) com um briefing de fricção, não de checklist:
+O modo padrão é `read-only`:
 
 ```text
-- Não siga heurísticas rígidas: anote onde VOCÊ sentiu fricção lendo o código.
-- Sinais que valem anotar: pular entre muitos módulos pequenos para entender UM conceito;
-  funções puras extraídas "por testabilidade" cujos bugs reais moram em quem as chama
-  (a lógica perdeu localidade); interfaces mais largas que o uso real.
-- Aplique o teste da deleção (pelizzai-codebase-design): apague o módulo mentalmente —
-  a complexidade some (pass-through) ou reaparece nos callers (ele pagava o próprio custo)?
-- Colete os achados já registrados: seams ausentes flagrados pela pelizzai-debugging.
+- não cria branch, state, HTML, ADR, spec, out-of-scope ou qualquer arquivo;
+- entrega o relatório no chat/recurso nativo da plataforma;
+- não corrige os candidatos encontrados;
+- só executa checks focalizados quando eles discriminam uma hipótese arquitetural.
 ```
 
-### 2. Relatório visual EFÊMERO
+Se o usuário pedir um artefato persistente ou escolher implementar um candidato, volte ao router,
+reclassifique para `write-local` e passe por `pelizzai-starting-branch` **antes** da primeira escrita.
+Consumidor usa os paths do harness; source mode usa paths nativos do repo e nunca cria `pelizzai/`.
 
-Monte um HTML self-contained em **`pelizzai/data/reports/`** (gitignored — nunca versionado) e abra-o no navegador. Um card por candidato:
+## Escopo
+
+Use para:
+
+- revisão ampla de arquitetura/dívida/seams;
+- fricção recorrente sustentada por bugs, mudanças ou navegação reais;
+- seam ausente que impediu uma regressão útil.
+
+Não use para:
+
+- bug ativo (`pelizzai-debugging`);
+- review de diff, working tree, branch ou PR (`pelizzai-review`);
+- implementar um refactor já decidido (lane/plano do router);
+- varredura periódica sem pedido ou sinal concreto.
+
+## Processo adaptativo
+
+### 1. Fixe a pergunta
+
+Derive o escopo do pedido e da evidência existente. Pergunte somente quando duas fronteiras
+plausíveis mudarem materialmente o resultado. Não transforme "repo inteiro" em formulário.
+
+### 2. Colete fricção, não smells por checklist
+
+Inspecione o mínimo capaz de testar sinais reais:
 
 ```text
-- Arquivos:  os caminhos envolvidos.
-- Problema:  1 frase.
-- Solução:   1 frase (direção, não interface — ver red flags).
-- Ganhos:    bullets de ≤6 palavras usando SÓ o vocabulário do glossário (pelizzai/context.md)
-             e da pelizzai-codebase-design (profundidade, localidade, alavancagem, seam…).
-             "Mais fácil de manter" não está no glossário — não entra.
-- Diagrama:  before/after (caixas e setas bastam).
-- Badge:     Forte / Vale explorar / Especulativo.
-- Conflito com ADR: callout explícito quando houver ("contradiz ADR-0007 — mas vale reabrir
-  porque…"). Só liste candidatos que valham reabrir a decisão; não liste todo refactor
-  teórico que um ADR proíbe.
+- mudanças semelhantes espalhadas por muitos lugares;
+- bugs/fixes recorrentes na mesma fronteira;
+- seam ausente ou teste que precisa conhecer implementação demais;
+- módulo pass-through cujo custo reaparece nos callers;
+- contrato largo para uso estreito;
+- conceito que exige saltos excessivos entre módulos;
+- dependência/ciclo que aumenta blast radius.
 ```
 
-### 3. O usuário escolhe
+Use histórico, testes, imports/callers e ADRs quando ajudarem. Subagentes read-only só quando houver
+frentes independentes. Ausência de métrica perfeita não autoriza inventar frequência ou impacto.
 
-Apresente o relatório e deixe o usuário escolher **um** candidato. O escolhido entra no fluxo normal do harness — `pelizzai-brainstorming` + plano para refactor arquitetural, ou track de ajuste, conforme o porte. Esta skill **não propõe interfaces** no relatório: a interface nasce no design, com o processo inteiro.
+### 3. Teste cada hipótese
 
-### 4. Rejeição vira registro
+Para cada candidato material:
 
-Candidato rejeitado com razão durável → registre **automaticamente** em ADR (se passar no critério triplo da `pelizzai-domain-modeling`) ou em `pelizzai/out-of-scope/`, e anuncie em 1 linha — para a próxima revisão não re-sugerir.
+1. descreva a fricção observada;
+2. aplique o teste da deleção: sem essa camada, a complexidade some ou apenas migra?;
+3. encontre contraexemplo/prior art que possa refutar a hipótese;
+4. verifique ADR/constraint que explique o desenho atual;
+5. estime alcance, reversibilidade e risco de migração.
+
+Use `pelizzai-codebase-design` como vocabulário/lente, não como segunda head skill. Reasoning útil:
+Evidence Synthesis para sinais dispersos, Assumption Tracking para lacunas e Decision Making para
+priorização. Não force OODA sem rodadas reais nem TDD numa análise.
+
+### 4. Priorize com honestidade
+
+Classifique cada candidato:
+
+| Classe | Evidência |
+| --- | --- |
+| Forte | fricção recorrente + mecanismo causal + direção plausível |
+| Vale explorar | sinal real, mas benefício ou desenho ainda precisa discovery |
+| Especulativo | hipótese útil sem evidência suficiente; não recomendar implementação |
+
+Prefira 1–5 candidatos. Se nada justificar mudança, diga isso; "nenhuma refatoração recomendada"
+é uma conclusão válida.
+
+### 5. Entregue o relatório
+
+Para cada candidato, informe:
+
+```text
+evidência: arquivos/linhas, histórico ou teste relevante
+fricção: custo concreto hoje
+mecanismo: por que a estrutura produz esse custo
+direção: mudança de fronteira, sem inventar a interface final
+ganho esperado e trade-offs
+confiança: Forte | Vale explorar | Especulativo
+próxima prova mais barata
+```
+
+Inclua também "manter como está" quando for alternativa racional. Visualização só quando relações
+entre módulos ficarem materialmente mais claras; use recurso inline/nativo no modo read-only.
+
+## Depois da escolha
+
+- Candidato escolhido: router decide `bounded | standard | exploratory`; arquitetura aberta
+  normalmente passa por brainstorming, mas refactor claro pode ir direto ao plano.
+- Rejeição com razão durável: **ofereça** registrar em ADR/out-of-scope; não escreva automaticamente.
+- Seam ausente: entregue a evidência ao fluxo de design, sem fabricar teste tautológico.
 
 ## Red flags
 
 ```text
-- Propor interfaces dentro do relatório (a interface nasce no design, não no menu).
-- Escrever o relatório fora de pelizzai/data/reports/ ou versioná-lo (é EFÊMERO: gitignored, aberto no navegador).
-- Ganhos fora do vocabulário do glossário/codebase-design ("mais limpo", "mais fácil de manter").
-- Ignorar ADRs — todo conflito com ADR ganha callout explícito.
-- Re-sugerir candidato já rejeitado com razão registrada (cheque adr/ e out-of-scope/ antes).
-- "Já ir refatorando" candidatos direto do relatório — UM candidato escolhido, fluxo normal.
+- Criar relatório/ADR/out-of-scope durante análise read-only.
+- Confundir review arquitetural amplo com code review de diff.
+- Recomendar refactor só por tamanho, estilo ou "clean code".
+- Inventar interface definitiva antes do design.
+- Ignorar ADR/constraint que explica o trade-off atual.
+- Reescrever o mundo em vez de priorizar poucos candidatos.
+- Forçar subagentes, visual ou checks sem ganho de sinal.
 ```
 
-## Integração
+## Definition of Done
 
-**Acionada por:** cadência do usuário (revisão periódica) e `pelizzai-debugging` (seam ausente é achado arquitetural).
-
-**Usa:** `pelizzai-codebase-design` (vocabulário: profundidade, localidade, seam, teste da deleção), `pelizzai-domain-modeling` (glossário; ADR e `pelizzai/out-of-scope/` para rejeições), `pelizzai-team`/`pelizzai-subagents` (exploração read-only), `pelizzai-brainstorming` (o candidato escolhido entra pelo fluxo de design).
-
-> Baseline desta skill: prática testada em campo em harness de referência (benchmark 2026-07-04); cenário de regressão em `test-pressure-1.md`.
+```text
+[ ] cada recomendação aponta para evidência verificável;
+[ ] hipótese, fato e inferência estão separados;
+[ ] trade-offs e alternativa de não agir foram considerados;
+[ ] nenhum estado foi alterado no modo read-only;
+[ ] próxima rota está clara sem iniciar implementação implicitamente.
+```

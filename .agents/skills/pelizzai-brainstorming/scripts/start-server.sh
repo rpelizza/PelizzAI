@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Start the brainstorm server and output connection info
-# Usage: start-server.sh [--project-dir <path>] [--host <bind-host>] [--url-host <display-host>] [--foreground] [--background]
+# Usage: start-server.sh [--project-dir <path>] [--host <bind-host>] [--url-host <display-host>] [--open] [--idle-timeout-minutes <n>] [--foreground|--background]
 #
 # Starts server on a random high port, outputs JSON with URL.
 # Each session gets its own directory to avoid conflicts.
@@ -11,8 +11,11 @@
 #   --host <bind-host>    Host/interface to bind (default: 127.0.0.1).
 #                         Use 0.0.0.0 in remote/containerized environments.
 #   --url-host <host>     Hostname shown in returned URL JSON.
+#   --open                Open the authenticated URL in the default browser.
+#   --idle-timeout-minutes <n>  Stop after N idle minutes (default: 240).
 #   --foreground          Run server in the current terminal (no backgrounding).
 #   --background          Force background mode (overrides Codex auto-foreground).
+#   --help                Show this help and exit.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
@@ -22,6 +25,8 @@ FOREGROUND="false"
 FORCE_BACKGROUND="false"
 BIND_HOST="127.0.0.1"
 URL_HOST=""
+OPEN_BROWSER="false"
+IDLE_TIMEOUT_MINUTES="240"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --project-dir)
@@ -36,6 +41,15 @@ while [[ $# -gt 0 ]]; do
       URL_HOST="$2"
       shift 2
       ;;
+    --open)
+      OPEN_BROWSER="true"
+      shift
+      ;;
+    --idle-timeout-minutes)
+      [[ "${2:-}" =~ ^[1-9][0-9]*$ ]] || { echo '{"error": "--idle-timeout-minutes expects a positive integer"}'; exit 1; }
+      IDLE_TIMEOUT_MINUTES="$2"
+      shift 2
+      ;;
     --foreground|--no-daemon)
       FOREGROUND="true"
       shift
@@ -43,6 +57,10 @@ while [[ $# -gt 0 ]]; do
     --background|--daemon)
       FORCE_BACKGROUND="true"
       shift
+      ;;
+    --help|-h)
+      sed -n '2,18p' "$0"
+      exit 0
       ;;
     *)
       echo "{\"error\": \"Unknown argument: $1\"}"
@@ -110,13 +128,12 @@ fi
 # Foreground mode for environments that reap detached/background processes.
 if [[ "$FOREGROUND" == "true" ]]; then
   echo "$$" > "$PID_FILE"
-  env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" node server.cjs
-  exit $?
+  exec env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" BRAINSTORM_OPEN="$OPEN_BROWSER" BRAINSTORM_IDLE_TIMEOUT_MINUTES="$IDLE_TIMEOUT_MINUTES" node server.cjs
 fi
 
 # Start server, capturing output to log file
 # Use nohup to survive shell exit; disown to remove from job table
-nohup env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" node server.cjs > "$LOG_FILE" 2>&1 &
+nohup env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" BRAINSTORM_OPEN="$OPEN_BROWSER" BRAINSTORM_IDLE_TIMEOUT_MINUTES="$IDLE_TIMEOUT_MINUTES" node server.cjs > "$LOG_FILE" 2>&1 &
 SERVER_PID=$!
 disown "$SERVER_PID" 2>/dev/null
 echo "$SERVER_PID" > "$PID_FILE"

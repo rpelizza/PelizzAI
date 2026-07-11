@@ -1,6 +1,6 @@
 ---
 name: pelizzai-loop
-description: Use essa skill para trabalhar em LOOP até que o objetivo ou a tarefa seja concluída com sucesso — ela define a lente OODA (Observar → Orientar → Decidir → Agir) do laço de execução do harness, a Definition of Done (DoD) que encerra o loop e a regra de parada em dúvida material. Acione quando a execução for iterativa (plano tarefa a tarefa, fix→re-review, investigação em rodadas) ou quando o usuário disser "continua até terminar", "repete até passar", "trabalha em loop".
+description: Use para conduzir loops macro até a entrega — execução tarefa a tarefa, fix→re-review ou investigação em múltiplas rodadas — com OODA (Observar → Orientar → Decidir → Agir), Definition of Done e critérios de parada. Não use para transformar todo microciclo de teste ou ação única em OODA.
 ---
 
 # PelizzAI Loop
@@ -13,9 +13,9 @@ Dar ao harness a disciplina do **laço**: repetir o ciclo de trabalho até a ent
 
 ---
 
-## O loop é OODA
+## O loop macro é OODA
 
-Todo laço do harness segue o ciclo **OODA** (técnica completa: `pelizzai-reasoning` → [techniques/ooda.md](../pelizzai-reasoning/techniques/ooda.md)):
+Loops **macro**, nos quais a realidade pode mudar entre iterações, seguem **OODA** (técnica completa: `pelizzai-reasoning` → [techniques/ooda.md](../pelizzai-reasoning/techniques/ooda.md)):
 
 ```text
 OBSERVAR  — colete a realidade ATUAL: git, saída fresca de testes/lint/build, vereditos de
@@ -31,9 +31,10 @@ Onde esse loop roda no harness:
 | Laço                                    | Condução                        | O que esta skill contribui            |
 | --------------------------------------- | ------------------------------- | ------------------------------------- |
 | Plano tarefa a tarefa                   | `pelizzai-execution-plans`      | lente OODA + DoD + parada em dúvida   |
-| RED→GREEN por comportamento             | `pelizzai-tdd`                  | repetir teste→código até a DoD        |
 | fix → re-review                         | `pelizzai-review` + task-cycle  | re-observar (re-review) após cada fix |
-| Investigação em rodadas                 | `pelizzai-team` / `pelizzai-debugging` | convergência com critério de parada |
+| Investigação em múltiplas rodadas       | `pelizzai-team` / `pelizzai-debugging` | reorientação por evidência nova     |
+
+RED→GREEN e chamadas de ferramenta são microciclos de TDD/ReAct dentro de **Agir**; não repita o vocabulário OODA a cada teste. Um bug direto com uma única sequência repro→fix→verify não aciona esta skill.
 
 ## Definition of Done (DoD)
 
@@ -42,8 +43,8 @@ O loop só encerra quando a DoD é atingida **e verificada** (`pelizzai-verifica
 ```text
 - De um plano: todas as tarefas entregues + validação final do coordenador (review final da branch,
   suíte completa verde com evidência, checklist requisito a requisito do plano).
-- De uma tarefa: comportamento implementado via TDD, spec ✅ e qualidade ✅ com evidência fresca.
-- De um fix de bug: teste de regressão red→green comprovado e nenhum outro teste quebrado.
+- De uma tarefa: efeito entregue com a estratégia registrada no plano (TDD, caracterização, validate/dry-run, visual ou estática), spec ✅ e qualidade ✅ com evidência fresca.
+- De um fix de bug: sintoma original agora verde pelo oráculo adequado; regressão red→green quando houver comportamento automatizável; nenhuma regressão relevante.
 - De uma especificação/workflow: quem for executar consegue trabalhar sem fazer UMA pergunta —
   enquanto restar dúvida, não está pronto.
 ```
@@ -78,7 +79,7 @@ Fora da execução de código, "loop" também é um padrão recorrente na vida d
 
 - `pelizzai-execution-plans` — conduz o laço macro de planos com esta lente (OODA + DoD + parada em dúvida).
 - `pelizzai-reasoning` — a técnica OODA (macro) e ReAct (micro) vivem lá; Verification confirma a DoD.
-- `pelizzai-tdd` — o RED→GREEN é o loop no nível do comportamento.
+- `pelizzai-tdd` — microciclo para comportamento quando essa for a estratégia selecionada; não torna OODA obrigatório.
 - `pelizzai-interview-me` — destino obrigatório da parada por dúvida material.
 - `pelizzai-verification-before-completion` — nenhuma saída do loop sem evidência fresca.
 - `pelizzai-router` — o Sync & delta é o Observar do início de cada tarefa.

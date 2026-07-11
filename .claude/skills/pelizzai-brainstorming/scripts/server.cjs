@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { spawn } = require('child_process');
 
 // ========== WebSocket Protocol (RFC 6455) ==========
 
@@ -97,6 +98,28 @@ let ownerPid = process.env.BRAINSTORM_OWNER_PID ? Number(process.env.BRAINSTORM_
 // inject events when binding beyond loopback.
 const SESSION_KEY = crypto.randomBytes(16).toString('hex');
 const KEY_COOKIE = 'brainstorm_key';
+const OPEN_BROWSER = process.env.BRAINSTORM_OPEN === 'true';
+const idleMinutesRaw = Number(process.env.BRAINSTORM_IDLE_TIMEOUT_MINUTES || '240');
+const IDLE_TIMEOUT_MINUTES = Number.isFinite(idleMinutesRaw) && idleMinutesRaw > 0 ? idleMinutesRaw : 240;
+
+function openBrowser(url) {
+	try {
+		let child;
+		if (process.platform === 'win32') {
+			child = spawn('cmd.exe', ['/c', 'start', '', url], { detached: true, stdio: 'ignore', windowsHide: true });
+		} else if (process.platform === 'darwin') {
+			child = spawn('open', [url], { detached: true, stdio: 'ignore' });
+		} else {
+			child = spawn('xdg-open', [url], { detached: true, stdio: 'ignore' });
+		}
+		child.on('error', (error) => {
+			console.error(JSON.stringify({ type: 'browser-open-failed', message: error.message }));
+		});
+		child.unref();
+	} catch (error) {
+		console.error(JSON.stringify({ type: 'browser-open-failed', message: error.message }));
+	}
+}
 
 function timingSafeEqualStr(a, b) {
 	const ba = Buffer.from(String(a));
@@ -312,7 +335,7 @@ function broadcast(msg) {
 
 // ========== Activity Tracking ==========
 
-const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+const IDLE_TIMEOUT_MS = IDLE_TIMEOUT_MINUTES * 60 * 1000;
 let lastActivity = Date.now();
 
 function touchActivity() {
@@ -388,7 +411,7 @@ function startServer() {
 		}
 	}
 
-	// Check every 60s: exit if owner process died or idle for 30 minutes
+	// Check every 60s: exit if owner process died or the configured idle timeout elapsed.
 	const lifecycleCheck = setInterval(() => {
 		if (!ownerAlive()) shutdown('owner process exited');
 		else if (Date.now() - lastActivity > IDLE_TIMEOUT_MS) shutdown('idle timeout');
@@ -410,17 +433,20 @@ function startServer() {
 	}
 
 	server.listen(PORT, HOST, () => {
+		const url = 'http://' + URL_HOST + ':' + PORT + '/?key=' + SESSION_KEY;
 		const info = JSON.stringify({
 			type: 'server-started',
 			port: Number(PORT),
 			host: HOST,
 			url_host: URL_HOST,
-			url: 'http://' + URL_HOST + ':' + PORT + '/?key=' + SESSION_KEY,
+			url,
 			screen_dir: CONTENT_DIR,
 			state_dir: STATE_DIR,
+			idle_timeout_minutes: IDLE_TIMEOUT_MINUTES,
 		});
 		console.log(info);
 		fs.writeFileSync(path.join(STATE_DIR, 'server-info'), info + '\n');
+		if (OPEN_BROWSER) openBrowser(url);
 	});
 }
 

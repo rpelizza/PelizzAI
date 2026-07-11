@@ -3,8 +3,8 @@
 #
 # Equivalente ao pelizzai-session-start.mjs, para frota sem Node. Requer PowerShell 7+.
 #
-# Emite um lembrete CURTO no inicio da sessao: carregar a pelizzai-core antes de
-# responder qualquer coisa (regra do 1%) e, se pelizzai/data/state.md tiver tarefa
+# Emite um lembrete CURTO no inicio da sessao: carregar core/router para tarefas de
+# projeto, classificar o efeito antes de agir e, se pelizzai/data/state.md tiver tarefa
 # ativa (slug != <none> e phase != done), avisar que ha retomada via pelizzai-router.
 #
 # Nota de valor: no Claude Code o CLAUDE.md ja e re-injetado no startup e apos o
@@ -25,8 +25,8 @@ try {
   if ($raw) { try { $j = $raw | ConvertFrom-Json; if ($j.cwd) { $cwd = $j.cwd } } catch {} }
 
   $lines = @(
-    'PelizzAI: antes de responder QUALQUER coisa, carregue a skill pelizzai-core e honre a regra do 1% - se uma skill se aplica (mesmo a um ajuste trivial), acione-a.',
-    'Toda tarefa que toca o projeto passa por pelizzai-core -> pelizzai-router.'
+    'PelizzAI: em tarefas de projeto, carregue pelizzai-core -> pelizzai-router e classifique effect, risco, incerteza e superficies antes de agir.',
+    'Escolha uma head skill e overlays proporcionais; read-only nao inicializa estado, e qualquer escrita passa primeiro pelo gate de isolamento.'
   )
 
   $statePath = Join-Path $cwd 'pelizzai/data/state.md'

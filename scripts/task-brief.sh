@@ -6,7 +6,7 @@
 # Extrai do plano (pelizzai/plans/*.md) o texto da Tarefa N — do header
 # "### Tarefa N: ..." até o próximo header de mesmo nível (ou superior) ou EOF —
 # MAIS o bloco "Global Constraints" do cabeçalho do plano (toda tarefa o herda),
-# e grava em pelizzai/data/handoffs/task-<N>-brief.md (gitignored).
+# e grava no handoff dir seguro (gitignored no consumidor; temp em source mode).
 # Imprime o caminho gravado. Falha com mensagem clara se o plano não existir
 # ou a tarefa não for encontrada.
 #
@@ -19,6 +19,18 @@
 set -u
 
 fail() { echo "task-brief: $1" >&2; exit 1; }
+
+handoff_dir() {
+  if [ -n "${PELIZZAI_HANDOFF_DIR:-}" ]; then
+    printf '%s\n' "$PELIZZAI_HANDOFF_DIR"
+  elif [ -f 'pelizzai/.gitignore' ] && git check-ignore -q -- 'pelizzai/data/handoffs/.pelizzai-probe' 2>/dev/null; then
+    printf '%s\n' "$(pwd -P)/pelizzai/data/handoffs"
+  else
+    identity=$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)
+    key=$(printf '%s' "$identity" | cksum | awk '{print $1}')
+    printf '%s\n' "${TMPDIR:-/tmp}/pelizzai-handoffs-$key"
+  fi
+}
 
 [ $# -eq 2 ] || fail "uso: task-brief.sh <caminho-do-plano> <N>"
 PLAN=$1
@@ -50,7 +62,7 @@ TASK=$(awk -v n="$N" '
 
 [ -n "$TASK" ] || fail "Tarefa $N não encontrada em $PLAN (esperado um header '### Tarefa $N: ...')"
 
-OUT_DIR="pelizzai/data/handoffs"
+OUT_DIR=$(handoff_dir)
 mkdir -p "$OUT_DIR"
 OUT="$OUT_DIR/task-$N-brief.md"
 
@@ -69,7 +81,7 @@ OUT="$OUT_DIR/task-$N-brief.md"
   echo
   echo "---"
   echo
-  echo "Relatório: grave o resultado em \`pelizzai/data/handoffs/task-$N-report.md\` (espelhando este brief) e responda no chat em, no máximo, 15 linhas."
+  echo "Relatório: grave o resultado em \`$OUT_DIR/task-$N-report.md\` (espelhando este brief) e responda no chat em, no máximo, 15 linhas."
 } > "$OUT"
 
 echo "$OUT"

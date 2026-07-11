@@ -25,8 +25,14 @@ Frontend aceitável precisa passar por quatro provas:
 1. Produto: resolve o fluxo real do usuário, com conteúdo realista e estados completos.
 2. Sistema: respeita stack, componentes, tokens, rotas, dados e convenções existentes.
 3. Design: tem direção visual própria, coerente com o domínio, sem clichês automáticos de IA.
-4. Verificação: foi visto em navegador ou screenshot, em mobile e desktop, sem sobreposição ou quebra.
+4. Verificação: foi visto na menor matriz de navegador/viewports capaz de revelar a falha provável.
 ```
+
+### Precedência: intenção aprovada vence heurística
+
+Instrução explícita do usuário, spec/Figma aprovado, brand guide e design system do produto prevalecem sobre as preferências e proibições **default** desta skill. Anti-slop não significa apagar uma direção intencional: gradiente, glassmorphism, raio grande, hero ou outra escolha normalmente suspeita continuam válidos quando fazem parte do sistema aprovado e servem ao fluxo.
+
+Quando não houver direção aprovada, as regras abaixo impedem defaults genéricos de IA. Quando houver, execute-a com fidelidade, use os tokens/componentes reais e sinalize somente conflito funcional, acessível ou técnico — não redesenhe por gosto pessoal.
 
 ---
 
@@ -72,7 +78,9 @@ Exemplos ruins:
 - "Dashboard bonito."
 ```
 
-Quando a tarefa vier de `pelizzai-brainstorming` ou de uma especificação aprovada, a direção visual já aprovada prevalece. Não invente uma nova personalidade no meio da execução.
+Quando a tarefa vier de `pelizzai-brainstorming` ou de uma especificação/tela aprovada, a direção
+visual já aprovada prevalece. Alteração local herda essa direção; não invente uma nova tese estética
+nem uma nova personalidade no meio da execução.
 
 ### 3. Fazer um plano visual compacto
 
@@ -95,7 +103,7 @@ Não apresente longas defesas estéticas ao usuário durante a execução. Use o
 
 ### Proibições fortes
 
-Não entregue:
+Sem base explícita na spec/design system/produto, não entregue:
 
 ```text
 - Hero marketing quando o pedido é uma ferramenta/app/tela operacional.
@@ -232,7 +240,7 @@ Construa layouts estáveis:
 - Evite texto que estoura o container; trate wrap, truncamento ou reflow.
 - Não use fonte escalada por viewport width.
 - Evite letter-spacing negativo.
-- Cards, quando existirem, devem ter raio discreto (8px ou menos), salvo design system contrário.
+- Cards, quando existirem, devem seguir o radius do sistema; sem token/direção, prefira raio discreto (8px ou menos).
 - Não coloque card dentro de card.
 ```
 
@@ -258,9 +266,15 @@ Animação deve ajudar percepção de causa, mudança de estado ou orientação 
 
 ## Verificação visual
 
-Nunca finalize UI apenas lendo código.
+Não finalize mudança visual/interativa relevante apenas lendo código. A profundidade da prova segue
+o que pode quebrar:
 
-Sempre que o projeto puder rodar em navegador:
+| Mudança | Prova mínima |
+| --- | --- |
+| Copy, label, token ou estilo local sem mudar geometria/interação | renderize a superfície afetada no viewport de maior risco; screenshot é opcional. Adicione outro viewport se houver risco de wrap, tradução ou breakpoint. |
+| Layout, componente, fluxo, interação ou responsividade | desktop + mobile, estados principais e screenshot quando disponível. |
+
+Para a segunda linha da matriz, sempre que o projeto puder rodar em navegador:
 
 ```text
 1. Inicie ou use o dev server existente.
@@ -287,6 +301,10 @@ Se não for possível rodar a UI, declare isso no resultado final e compense com
 
 ## Integração com o harness
 
+Esta skill é **overlay obrigatório** para qualquer tarefa que altere página, componente, CSS, layout, estados visuais ou experiência de UI — independentemente de a head skill ser feature, bug ou ajuste. O router registra o overlay; `pelizzai-writing-plans` o inclui em **Skills transversais do harness** e na tarefa; o executor deve carregá-lo antes de implementar e antes de revisar.
+
+Playwright, browser MCP e screenshots são **ferramentas** para executar a verificação desta skill, não alternativas ao seu contrato de produto, anti-slop, acessibilidade, estados e responsividade.
+
 **Combina com:**
 
 ```text
@@ -311,7 +329,7 @@ Antes de dizer que terminou, confirme:
 [ ] Usa padrões/componentes/tokens existentes ou justifica desvios.
 [ ] Não contém placeholders, dados fake indevidos ou texto genérico.
 [ ] Cobre estados relevantes: loading, empty, error, disabled, success.
-[ ] É responsiva em mobile e desktop.
+[ ] Responsividade foi verificada nos viewports aplicáveis ao risco da mudança.
 [ ] Tem foco visível, nomes acessíveis e contraste adequado.
 [ ] Não tem decoração sem função nem clichês visuais automáticos.
 [ ] Foi verificada no navegador/screenshot quando possível.

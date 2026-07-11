@@ -2,13 +2,18 @@
 
 ## Harness PelizzAI (entrada obrigatória)
 
-Este repositório é o harness **PelizzAI**. A entrada de toda tarefa é a skill `pelizzai-core` (que exige acionar uma skill aplicável antes de qualquer resposta) e o `pelizzai-router` (que classifica o track e roteia). As diretrizes abaixo **complementam** as skills: em processo (planos, branches, reviews, fechamento), as skills do harness prevalecem. Ao anunciar uma skill, use sempre a grafia exata da marca: **"PelizzAI"**.
+Este repositório é o **repo-fonte** do harness PelizzAI. Para pedidos que inspecionem ou alterem o projeto, entre por `pelizzai-core` → `pelizzai-router`; perguntas conceituais sem contexto de projeto podem ser respondidas diretamente. O router escolhe uma head skill e overlays por sinais observáveis — não por uma regra probabilística. Em processo (efeito, isolamento, review, validação e fechamento), siga os contratos canônicos das skills. Ao anunciar, use a grafia **"PelizzAI"**.
+
+Como este é o repo-fonte (há `.claude/skills/pelizzai-core`, `scripts/pelizzai-core-skills.txt` e
+`scripts/sync-harness.ps1`), não execute bootstrap consumidor nem crie runtime `pelizzai/` aqui.
+Use plano/execution record nativo; Verification sela o SHA em memória/registro e Finish não cria
+closure commit de state no source mode.
 
 ## Diretrizes comportamentais
 
 Diretrizes para reduzir erros comuns de codificação cometidos por LLMs. Combine com instruções específicas do projeto conforme necessário.
 
-**Trade-off:** Estas diretrizes priorizam cautela em vez de velocidade. Para tarefas triviais, use bom senso — mas o "bom senso" não anula a regra do 1% da `pelizzai-core`: se uma skill se aplica (mesmo a um ajuste trivial, ex.: `pelizzai-quick-fix`), acione-a; a proporcionalidade vive DENTRO das skills, não em pulá-las.
+**Trade-off:** preserve invariantes; adapte heurísticas. Segurança, autoridade, isolamento antes da primeira escrita e evidência antes de conclusão não são opcionais. Brainstorming, TDD, OODA, team, número de reviews e effort variam com efeito, risco e incerteza.
 
 ## 1. Pense Antes de Codificar
 
@@ -16,10 +21,10 @@ Diretrizes para reduzir erros comuns de codificação cometidos por LLMs. Combin
 
 Antes de implementar:
 
-- Declare suas premissas explicitamente. Se houver incerteza, pergunte.
-- Se existirem múltiplas interpretações, apresente-as; não escolha em silêncio.
+- Declare apenas premissas materiais. Se houver incerteza que mude a solução, consulte evidência e então pergunte.
+- Se existirem múltiplas interpretações materialmente diferentes, apresente-as; não crie menu para detalhe reversível.
 - Se existir uma abordagem mais simples, diga. Questione quando fizer sentido.
-- Se algo não estiver claro, pare. Diga o que está confuso. Pergunte.
+- Se algo indispensável não estiver claro, pare com uma pergunta acionável. Caso contrário, faça a suposição segura e prossiga.
 
 ## 2. Simplicidade Primeiro
 
@@ -69,7 +74,7 @@ Para micro-planos de resposta (poucos passos, dentro de uma mesma mensagem), apr
 3. [Etapa] → verificar: [checagem]
 ```
 
-Tarefas multi-etapa de verdade seguem o fluxo formal do harness: o plano nasce na `pelizzai-writing-plans`, vive em `pelizzai/plans/` e é estressado com `pelizzai-interview-me` antes da execução — este formato breve não o substitui.
+O `pelizzai-router` escolhe a lane: mudança bounded usa plano compacto; standard usa design/plano proporcionais; exploratory/high-risk recebe stress completo. Não force plano formal ou entrevista quando objetivo, aceite e abordagem já estão claros.
 
 Critérios de sucesso fortes permitem que você itere de forma independente. Critérios fracos ("fazer funcionar") exigem esclarecimentos constantes.
 
@@ -81,7 +86,10 @@ Sinais observáveis de que estas diretrizes e as skills estão cumprindo o papel
 
 - os diffs estão menores e sem mudanças não relacionadas ao pedido;
 - há menos reescritas causadas por excesso de complexidade;
-- as perguntas de esclarecimento vêm ANTES da implementação, não depois do erro;
+- perguntas aparecem apenas nas bordas em que mudam a decisão;
+- uma tarefa read-only não cria estado nem artefatos;
+- overlays de frontend/security chegam ao executor antes da implementação/review;
+- o conteúdo entregue é exatamente o conteúdo validado;
 - o histórico tem menos "fix do fix" (commits corrigindo o commit imediatamente anterior).
 
 Sinais na direção contrária são gatilho para revisar as skills — não para abandoná-las.

@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
+  sync-check:
     # windows-latest de proposito: o sync-harness.ps1 usa separadores '\' e gera
     # AGENTS.md/GEMINI.md com CRLF casando com o working tree sob autocrlf=true
     # (default da imagem Windows). Em ubuntu a comparacao byte a byte do -Check falharia.
@@ -22,5 +22,18 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Validar harness (espelho .agents, AGENTS.md, GEMINI.md, refs, manifesto)
-        run: pwsh scripts/sync-harness.ps1 -Check
+      - name: Validar fonte e alvos gerados
+        run: pwsh scripts/sync-harness.ps1 -Check -SourceMode
+
+  contract-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Executar contratos do harness
+        run: pwsh scripts/test-harness-contracts.ps1
