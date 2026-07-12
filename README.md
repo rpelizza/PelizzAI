@@ -8,6 +8,40 @@ fluxo seguro e produz evidência verificável sem transformar toda mudança em u
 > `scripts/pelizzai-core-skills.txt`. `.cursor/rules/pelizzai.mdc` é um adaptador manual: não é
 > gerado pelo sync.
 
+## Guia rápido: instalar e usar
+
+### 1. Instale no seu projeto
+
+A partir do repo-fonte PelizzAI, um comando (funciona para instalar E para atualizar):
+
+```powershell
+pwsh scripts/sync-harness.ps1 -ExportConsumer C:\caminho\do\seu-projeto
+```
+
+Isso copia as skills core, os hooks e os scripts úteis, gera o `CLAUDE.md` consumidor e valida os
+espelhos — sem tocar skills de domínio, `pelizzai/` ou `settings.json` que já existam no destino.
+
+### 2. Registre os hooks (opcional, recomendado)
+
+No `.claude/settings.json` do projeto, registre os hooks opt-in (`writegate`, `cadence`,
+`guardrails`, `session-start`) — a `pelizzai-audit` propõe e faz esse registro, com sua
+confirmação, durante o bootstrap.
+
+### 3. Use — um único comando: `bootstrap`
+
+- **Repositório existente**: abra o agente no projeto e digite **`bootstrap`**. É o único comando
+  do PelizzAI. O harness escaneia a stack real (lockfiles, versões), propõe o conjunto de skills
+  de domínio fundamentadas em documentação oficial atual, mais catálogo, profile e a cadência de
+  manutenção — você dá um único "sim" (ou ajusta a proposta) e ele materializa tudo.
+- **Projeto novo**: nem o `bootstrap` é necessário — apenas peça a primeira tarefa ("crie um app
+  de..."). O harness conduz descoberta → design → plano → execução e propõe as skills de domínio
+  na borda certa.
+- **Dali em diante, não há comandos**: trabalhe pedindo tarefas normalmente. O router classifica
+  cada pedido e escolhe a rota sozinho; as decisões estruturais (isolamento, modo de execução,
+  commits, destino) chegam até você como recomendação pré-selecionada num gate único por borda —
+  aceitar tudo custa um "ok". Mesmo sem digitar `bootstrap`, o harness detecta catálogo ausente
+  numa tarefa mutável e propõe o bootstrap sozinho. Classificar é do harness; decidir é do usuário.
+
 ## O kernel inteligente
 
 O PelizzAI separa invariantes de heurísticas. Proteção de branch, autorização para efeitos
