@@ -222,7 +222,8 @@ separa as skills core do harness das skills de domínio deste projeto; as skills
 do projeto — a atualização do harness nunca as sobrescreve.
 
 '@
-    $consumer = $bridge + $srcClaude.Substring($idx)
+    # O here-string nao inclui a newline final: emenda explicita para nao colar o heading seguinte.
+    $consumer = $bridge.TrimEnd() + "`r`n`r`n" + $srcClaude.Substring($idx)
     Set-Content -LiteralPath (Join-Path $dst 'CLAUDE.md') -Value $consumer -Encoding utf8 -NoNewline
 
     # 5) Regenera espelhos/entry points DO DESTINO (inclui as skills de dominio de la) e valida.
