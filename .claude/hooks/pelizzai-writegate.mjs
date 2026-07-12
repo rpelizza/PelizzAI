@@ -23,7 +23,7 @@
  *   escrever caminho de PRODUTO (fora de pelizzai/) enquanto pelizzai/data/state.md NÃO
  *   contém o marcador "kickoff: ratificado" → BLOQUEIA. Escritas em pelizzai/ (state, plano,
  *   spec) são sempre liberadas: são os artefatos que registram o próprio gate.
- *   Em SOURCE MODE (repo-fonte PelizzAI: os 3 sentinels abaixo) a Regra B é PULADA — ali o
+ *   Em SOURCE MODE (repo-fonte PelizzAI: sentinela pelizzai-source-repo.txt) a Regra B é PULADA — ali o
  *   marcador vive no execution record nativo, não em arquivo, e só a Regra A vale.
  *
  * Bloqueio: exit 2 + motivo e caminho seguro no stderr (o agente lê e corrige a rota).
@@ -61,11 +61,11 @@ const PROTECTED = ['main', 'master', 'develop', 'dev'];
 // Marcador máquina-legível do gate consolidado no state.md (kickoff/pós-plano ratificado
 // pelo usuário: conteúdo + isolamento + modo + commit). O writegate e a retomada dependem dele.
 const KICKOFF_RATIFIED = /kickoff:\s*ratificado/i;
-// Sentinels do repo-fonte PelizzAI (source mode): presentes os 3, a Regra B é pulada.
+// Sentinela DEDICADA do repo-fonte PelizzAI (source mode): presente, a Regra B é pulada.
+// Critério único e inequívoco: manifesto e sync-harness existem também nos consumidores
+// instalados via -ExportConsumer e NÃO indicam source mode.
 const SOURCE_SENTINELS = [
-  ['.claude', 'skills', 'pelizzai-core', 'SKILL.md'],
-  ['scripts', 'pelizzai-core-skills.txt'],
-  ['scripts', 'sync-harness.ps1'],
+  ['scripts', 'pelizzai-source-repo.txt'],
 ];
 // Fail-open "não pôde decidir": avisa no máximo 1x por janela (por repo) para não spammar.
 const WARN_SNOOZE_MS = 86400000; // 24h

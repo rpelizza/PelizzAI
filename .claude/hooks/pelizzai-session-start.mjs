@@ -70,10 +70,8 @@ function main() {
   // é no-op — ali não há catálogo consumidor. Criar pelizzai/domain-skills.md (mesmo
   // `_nenhuma por enquanto_`) silencia o nudge sem exigir skills de domínio.
   try {
-    const sourceMode =
-      existsSync(join(cwd, '.claude', 'skills', 'pelizzai-core', 'SKILL.md')) &&
-      existsSync(join(cwd, 'scripts', 'pelizzai-core-skills.txt')) &&
-      existsSync(join(cwd, 'scripts', 'sync-harness.ps1'));
+    // Sentinela dedicada: só o repo-fonte a tem (consumidores têm manifesto/sync e NÃO são fonte).
+    const sourceMode = existsSync(join(cwd, 'scripts', 'pelizzai-source-repo.txt'));
     if (!sourceMode && !existsSync(join(cwd, 'pelizzai', 'domain-skills.md'))) {
       lines.push(
         'Projeto sem catálogo de skills de domínio (pelizzai/domain-skills.md ausente). Se for ' +

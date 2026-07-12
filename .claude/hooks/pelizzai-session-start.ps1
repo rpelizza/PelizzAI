@@ -47,9 +47,8 @@ try {
   # read-only (propor->confirmar; nada e criado sem consentimento). Em source mode (repo-fonte)
   # e no-op. Criar pelizzai/domain-skills.md (mesmo `_nenhuma por enquanto_`) silencia o nudge.
   try {
-    $srcMode = (Test-Path -LiteralPath (Join-Path $cwd '.claude/skills/pelizzai-core/SKILL.md')) -and `
-               (Test-Path -LiteralPath (Join-Path $cwd 'scripts/pelizzai-core-skills.txt')) -and `
-               (Test-Path -LiteralPath (Join-Path $cwd 'scripts/sync-harness.ps1'))
+    # Sentinela dedicada: so o repo-fonte a tem (consumidores tem manifesto/sync e NAO sao fonte).
+    $srcMode = Test-Path -LiteralPath (Join-Path $cwd 'scripts/pelizzai-source-repo.txt')
     if ((-not $srcMode) -and (-not (Test-Path -LiteralPath (Join-Path $cwd 'pelizzai/domain-skills.md')))) {
       $lines += 'Projeto sem catalogo de skills de dominio (pelizzai/domain-skills.md ausente). Se for trabalhar no codigo, considere pelizzai-audit em scan-only -> propor bootstrap-write. Nada e criado sem sua confirmacao.'
     }

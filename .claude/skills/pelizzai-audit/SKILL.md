@@ -22,7 +22,7 @@ Um pedido read-only nunca vira bootstrap mutável só porque `pelizzai/domain-sk
 
 ## Source mode
 
-Se existirem `.claude/skills/pelizzai-core/SKILL.md`, `scripts/pelizzai-core-skills.txt` e `scripts/sync-harness.ps1`, trate o projeto como repo-fonte PelizzAI. Não crie `pelizzai/` consumidor; faça apenas o scan necessário à tarefa.
+Se existir a sentinela `scripts/pelizzai-source-repo.txt`, trate o projeto como repo-fonte PelizzAI. Não crie `pelizzai/` consumidor; faça apenas o scan necessário à tarefa. A presença de manifesto/sync-harness NÃO indica repo-fonte — consumidores instalados via `-ExportConsumer` também os têm.
 
 ## Profundidade proporcional
 

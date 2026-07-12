@@ -22,7 +22,7 @@
 #   escrever caminho de PRODUTO (fora de pelizzai/) enquanto pelizzai/data/state.md NAO
 #   contem "kickoff: ratificado" -> BLOQUEIA. Escritas em pelizzai/ sao sempre liberadas
 #   (sao os artefatos que registram o proprio gate). Em SOURCE MODE (repo-fonte PelizzAI:
-#   os 3 sentinels) a Regra B e PULADA - ali o marcador vive no execution record nativo.
+#   sentinela pelizzai-source-repo.txt) a Regra B e PULADA - ali o marcador vive no execution record nativo.
 #
 # Bloqueio: exit 2 + motivo e caminho seguro no stderr. Erros do PROPRIO hook e casos em que
 # NAO da para decidir com seguranca: exit 0 (fail-open - bug ou falso positivo nunca trava o
@@ -52,8 +52,10 @@ $PROTECTED = @('main', 'master', 'develop', 'dev')
 # Marcador maquina-legivel do gate consolidado no state.md (kickoff/pos-plano ratificado
 # pelo usuario: conteudo + isolamento + modo + commit). writegate e retomada dependem dele.
 $KICKOFF_RATIFIED = 'kickoff:\s*ratificado'
-# Sentinels do repo-fonte PelizzAI (source mode): presentes os 3, a Regra B e pulada.
-$SOURCE_SENTINELS = @('.claude/skills/pelizzai-core/SKILL.md', 'scripts/pelizzai-core-skills.txt', 'scripts/sync-harness.ps1')
+# Sentinela DEDICADA do repo-fonte PelizzAI (source mode): presente, a Regra B e pulada.
+# Criterio unico e inequivoco: manifesto e sync-harness existem tambem nos consumidores
+# instalados via -ExportConsumer e NAO indicam source mode.
+$SOURCE_SENTINELS = @('scripts/pelizzai-source-repo.txt')
 # Fail-open "nao pode decidir": avisa no maximo 1x por janela (por repo) para nao spammar.
 $script:WARN_SNOOZE_MS = 86400000L  # 24h
 # Windows e macOS comparam caminhos sem case; Linux com case.
