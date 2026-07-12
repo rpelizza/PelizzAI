@@ -37,6 +37,8 @@ Use matching determinístico, não probabilidade vaga:
    → pelizzai-router com effect: external; confirme autoridade/alvo no gate adequado.
 ```
 
+A classificação de efeito/rota não é decisão silenciosa: o `pelizzai-router` a apresenta como recomendação no **Gate de kickoff**, e o usuário ratifica ou ajusta antes de investir.
+
 O router escolhe:
 
 - exatamente **uma head skill** de ciclo de vida;
@@ -58,7 +60,9 @@ Sucesso: qual observação prova que terminou?
 Ambiguidade: falta algo que mudaria materialmente o resultado?
 ```
 
-Use contexto, código e documentação antes de perguntar. Pergunte apenas quando a resposta muda escopo, risco, custo, autoridade ou solução. Se uma suposição segura e reversível bastar, declare-a brevemente e prossiga.
+Use contexto, código e documentação antes de perguntar. Pergunte apenas quando a resposta muda escopo, risco, custo, autoridade ou solução. Para detalhe reversível, faça a suposição segura, declare-a brevemente e prossiga; para decisão que muda escopo/UX/arquitetura/segurança, exponha-a na Análise da proposta do router — não a assuma em silêncio. A linha `Ambiguidade` acima alimenta essa análise.
+
+Quando o usuário parecer não-técnico, ou a intenção admitir ≥2 leituras materialmente diferentes, **sinalize** isso ao router (o `audience` e as leituras em aberto) — não abra um segundo gate aqui. É o `pelizzai-router` que reapresenta o entendimento ("Entendi que você quer X; vou tratar como <feature/ajuste/bug> — confere?") e registra `audience` dentro do **Gate de kickoff**: um único ponto de ratificação, sem pulverizar.
 
 ## Camadas do harness
 
@@ -92,7 +96,7 @@ Overlays não substituem a head skill:
 
 - UI/UX/CSS/componente/tela → `pelizzai-frontend`;
 - auth/input/SQL/upload/segredo/dependência/superfície sensível → `pelizzai-oswap` no review;
-- padrões do projeto → skills de domínio do catálogo;
+- padrões do projeto → skills de domínio do catálogo (em dúvida se uma skill de domínio se aplica à tarefa, inclua-a: o custo de incluir é menor que o de ignorar uma regra do projeto);
 - documentação humana nova → `pelizzai-documenting-features` quando fizer parte do escopo.
 
 `pelizzai-preferences` é um piso leve de comunicação, segurança e escopo; use-a somente quando suas regras mudarem a execução. `pelizzai-reasoning` seleciona heurísticas proporcionais, não adiciona cerimônia por si só.
