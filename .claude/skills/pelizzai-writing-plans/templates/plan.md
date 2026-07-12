@@ -11,6 +11,8 @@ Copie para `pelizzai/plans/AAAA-MM-DD-<feature>.md` e substitua todo texto entre
 
 > **Para quem executa:** SUB-SKILL OBRIGATÓRIA — use `pelizzai-execution-plans`.
 
+**Lane ratificada:** [`bounded` | `standard` | `exploratory` — recomendada pelo router e ratificada pelo usuário]
+
 **Objetivo:** [resultado em uma frase]
 
 **Arquitetura:** [abordagem e fronteiras em 2–3 frases]
@@ -29,6 +31,14 @@ Copie para `pelizzai/plans/AAAA-MM-DD-<feature>.md` e substitua todo texto entre
 ```
 
 O coordenador inclui Global Constraints e skills transversais aplicáveis no briefing de cada executor. Não liste overlay por possibilidade remota: UI exige `pelizzai-frontend`; superfície sensível exige `pelizzai-oswap`.
+
+## Lacunas materiais expostas
+
+Liste as premissas residuais e lacunas materiais **novas do plano** (casos não tratados, validação ausente, estado/erro indefinido, autorização faltante, contradições spec↔plano). Cada uma sai da borda resolvida, aceita explicitamente pelo usuário, ou convertida em tarefa de investigação — nunca em silêncio. Se não houver, escreva `nenhuma`.
+
+```text
+- [lacuna → resolução | aceita pelo usuário | Tarefa de investigação N]
+```
 
 ## Estrutura de cada tarefa
 
@@ -101,3 +111,7 @@ Adapte a ordem sem perder a prova:
 - Sem TBD/TODO, "tratar edge cases", "igual à Tarefa N" ou referências indefinidas.
 - API externa está ancorada em documentação atual, não memória.
 ```
+
+## Encaminhamento à execução
+
+Plano materializado e lacunas expostas → **encaminhe ao Gate de setup pós-plano** da `pelizzai-execution-plans`, que ratifica numa única mensagem o conteúdo do plano (item 0) e o setup (isolamento, modo com as três opções, commits, review). O plano leva a recomendação; o usuário ratifica antes da Tarefa 1. Não decida isolamento/modo/commit aqui.
