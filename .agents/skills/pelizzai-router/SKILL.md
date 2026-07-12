@@ -74,13 +74,14 @@ Sob briefing fechado (SUBAGENT-STOP), não produza a Análise da proposta nem ab
 
 ## Source mode e bootstrap
 
-Detecte o repo-fonte do próprio PelizzAI pela presença conjunta de:
+Detecte o repo-fonte do próprio PelizzAI EXCLUSIVAMENTE pela sentinela:
 
 ```text
-.claude/skills/pelizzai-core/SKILL.md
-scripts/pelizzai-core-skills.txt
-scripts/sync-harness.ps1
+scripts/pelizzai-source-repo.txt
 ```
+
+Manifesto (`scripts/pelizzai-core-skills.txt`) e `scripts/sync-harness.ps1` existem também nos
+consumidores instalados via `-ExportConsumer` — a presença deles NÃO indica source mode.
 
 Em **source mode**, não exija `pelizzai/domain-skills.md` nem crie runtime consumidor. Trabalhe
 pelas regras do repo-fonte. Para tarefas mutáveis, ainda use task branch e prova, mas mantenha

@@ -1,0 +1,14 @@
+# SENTINELA DO REPO-FONTE PelizzAI (source mode)
+#
+# A PRESENCA deste arquivo e o UNICO criterio que marca este repositorio como o
+# repo-fonte do harness PelizzAI. Com ele presente:
+#   - o harness NAO cria runtime `pelizzai/` consumidor (state/specs/plans/profile);
+#   - o hook pelizzai-writegate PULA a Regra B (kickoff via state consumidor);
+#   - o hook pelizzai-session-start NAO sugere bootstrap consumidor;
+#   - pelizzai-audit trata o projeto como fonte (scan sem bootstrap).
+#
+# NUNCA copie este arquivo para um projeto consumidor: ele desativaria o lifecycle
+# consumidor e o enforcement do writegate la. A distribuicao correta e:
+#   pwsh scripts/sync-harness.ps1 -ExportConsumer <caminho-do-projeto>
+# que copia skills core, hooks e scripts uteis, gera o CLAUDE.md consumidor e
+# EXCLUI esta sentinela por contrato (removendo-a do destino se existir).

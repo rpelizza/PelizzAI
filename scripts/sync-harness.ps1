@@ -35,13 +35,25 @@
   Torna a validacao do manifesto estrita para este repo-fonte: o conjunto do manifesto
   deve ser exatamente igual ao conjunto de diretorios em .claude/skills. Use com -Check.
 
+.PARAMETER ExportConsumer
+  Caminho de um projeto CONSUMIDOR. Instala/atualiza o harness la: copia as skills CORE
+  (somente as do manifesto), os hooks pelizzai-* e os scripts uteis (manifesto, sync,
+  contratos); gera o CLAUDE.md consumidor (ponte consumidora + diretrizes do fonte) e
+  regenera/valida os espelhos do destino. NUNCA copia a sentinela
+  scripts/pelizzai-source-repo.txt (e a REMOVE do destino se veio de copia manual).
+  Skills de dominio, runtime pelizzai/ e settings do destino nao sao tocados.
+  So roda no repo-fonte (sentinela presente). E o caminho OFICIAL de distribuicao —
+  copia manual do repositorio inteiro levaria a sentinela junto e promoveria o
+  consumidor a repo-fonte por engano.
+
 .EXAMPLE
   pwsh scripts/sync-harness.ps1                   # regenera .agents, AGENTS.md, GEMINI.md
   pwsh scripts/sync-harness.ps1 -Check            # valida apenas
   pwsh scripts/sync-harness.ps1 -Check -SourceMode # valida o contrato do repo-fonte
   pwsh scripts/sync-harness.ps1 -UpdateManifest   # atualiza o manifesto de core (so no repo-fonte)
+  pwsh scripts/sync-harness.ps1 -ExportConsumer C:\projetos\meu-app  # distribui ao consumidor
 #>
-param([switch]$Check, [switch]$UpdateManifest, [switch]$SourceMode)
+param([switch]$Check, [switch]$UpdateManifest, [switch]$SourceMode, [string]$ExportConsumer)
 
 $ErrorActionPreference = 'Stop'
 $root         = Split-Path -Parent $PSScriptRoot
@@ -58,7 +70,7 @@ if ($SourceMode -and -not $Check) {
 
 # Tokens `pelizzai-*` que NAO sao skills (nao devem contar como referencia quebrada).
 # pelizzai-cadence, pelizzai-guardrails, pelizzai-session-start e pelizzai-writegate sao HOOKS (.claude/hooks/).
-$refIgnore = @('pelizzai-cadence', 'pelizzai-core-skills', 'pelizzai-guardrails', 'pelizzai-session-start', 'pelizzai-writegate')
+$refIgnore = @('pelizzai-cadence', 'pelizzai-core-skills', 'pelizzai-guardrails', 'pelizzai-session-start', 'pelizzai-writegate', 'pelizzai-source-repo')
 
 function Build-AgentsMd {
     $skills = (Get-ChildItem $srcSkills -Directory | Sort-Object Name).Name
@@ -138,6 +150,95 @@ function Test-Refs {
         ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } | Sort-Object -Unique
     $broken = @($refs | Where-Object { ($dirs -notcontains $_) -and ($refIgnore -notcontains $_) })
     return [pscustomobject]@{ BrokenRefs = $broken }
+}
+
+# Distribuicao oficial para um projeto consumidor. Ver .PARAMETER ExportConsumer.
+function Export-Consumer([string]$dst) {
+    $sentinel = Join-Path $root 'scripts\pelizzai-source-repo.txt'
+    if (-not (Test-Path $sentinel)) {
+        throw '-ExportConsumer so roda no repo-fonte do PelizzAI (sentinela scripts/pelizzai-source-repo.txt ausente).'
+    }
+    if (-not (Test-Path $dst)) { throw "Destino nao existe: $dst" }
+    $dst = (Resolve-Path -LiteralPath $dst).Path
+    if (($dst.TrimEnd('\', '/')) -ieq ($root.TrimEnd('\', '/'))) { throw 'Destino nao pode ser o proprio repo-fonte.' }
+
+    $core = Read-CoreManifest
+    if (-not $core) { throw 'Manifesto scripts/pelizzai-core-skills.txt ausente; rode -UpdateManifest primeiro.' }
+
+    # 1) Skills CORE (somente as do manifesto): substituicao exata por skill.
+    #    Skills de dominio do destino (fora do manifesto) NUNCA sao tocadas.
+    $dstSkillsRoot = Join-Path $dst '.claude\skills'
+    New-Item -ItemType Directory -Force $dstSkillsRoot | Out-Null
+    foreach ($name in $core) {
+        $s = Join-Path $srcSkills $name
+        if (-not (Test-Path $s)) { throw "Skill core ausente na fonte: $name (rode -UpdateManifest)." }
+        $d = Join-Path $dstSkillsRoot $name
+        if (Test-Path $d) { Remove-Item -LiteralPath $d -Recurse -Force }
+        Copy-Item -LiteralPath $s -Destination $d -Recurse
+    }
+    $orphans = @(Get-ChildItem $dstSkillsRoot -Directory |
+        Where-Object { $_.Name -like 'pelizzai-*' -and ($core -notcontains $_.Name) }).Name
+    if ($orphans.Count -gt 0) {
+        Write-Host "AVISO: skill(s) pelizzai-* no destino fora do core atual (avalie remover manualmente): $($orphans -join ', ')"
+    }
+
+    # 2) Hooks (pares .mjs/.ps1). O registro em settings continua opt-in — settings intocado.
+    $dstHooks = Join-Path $dst '.claude\hooks'
+    New-Item -ItemType Directory -Force $dstHooks | Out-Null
+    Get-ChildItem (Join-Path $root '.claude\hooks') -File -Filter 'pelizzai-*' |
+        ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $dstHooks $_.Name) -Force }
+
+    # 3) Scripts uteis no consumidor: manifesto (o router separa core de dominio por ele) e o
+    #    proprio sync (regenera espelhos do consumidor quando skills mudam). A suite de contratos
+    #    (test-harness-contracts.ps1) e do REPO-FONTE e nao vai junto — no consumidor ela geraria
+    #    FAILs falsos. A SENTINELA NUNCA vai junto (e sai, se veio de copia manual).
+    $dstScripts = Join-Path $dst 'scripts'
+    New-Item -ItemType Directory -Force $dstScripts | Out-Null
+    foreach ($f in @('pelizzai-core-skills.txt', 'sync-harness.ps1')) {
+        Copy-Item -LiteralPath (Join-Path $root "scripts\$f") -Destination (Join-Path $dstScripts $f) -Force
+    }
+    $dstSentinel = Join-Path $dstScripts 'pelizzai-source-repo.txt'
+    if (Test-Path $dstSentinel) {
+        Remove-Item -LiteralPath $dstSentinel -Force
+        Write-Host 'AVISO: sentinela de repo-fonte encontrada no consumidor (copia manual anterior) — removida.'
+    }
+
+    # 4) CLAUDE.md consumidor: ponte consumidora + diretrizes do fonte (a partir do marcador).
+    $marker = '## Diretrizes comportamentais'
+    $srcClaude = Get-Content $claudeMd -Raw -Encoding utf8
+    $idx = $srcClaude.IndexOf($marker)
+    if ($idx -lt 0) { throw "CLAUDE.md do fonte sem a secao '$marker'." }
+    $bridge = @'
+# CLAUDE.md
+
+## Harness PelizzAI (entrada obrigatória)
+
+Este repositório **consome** o harness PelizzAI (instalado/atualizado via `sync-harness.ps1 -ExportConsumer`). Para pedidos que inspecionem ou alterem o projeto, entre por `pelizzai-core` → `pelizzai-router`; perguntas conceituais sem contexto de projeto podem ser respondidas diretamente. O router escolhe uma head skill e overlays por sinais observáveis — não por uma regra probabilística. Em processo (efeito, isolamento, review, validação e fechamento), siga os contratos canônicos das skills. Ao anunciar, use a grafia **"PelizzAI"**.
+
+Este é um projeto CONSUMIDOR — não há a sentinela `scripts/pelizzai-source-repo.txt` (critério
+único de source mode). Bootstrap, skills de domínio e o runtime `pelizzai/` (state/specs/plans/
+profile) seguem o lifecycle consumidor das skills. O manifesto `scripts/pelizzai-core-skills.txt`
+separa as skills core do harness das skills de domínio deste projeto; as skills de domínio são
+do projeto — a atualização do harness nunca as sobrescreve.
+
+'@
+    $consumer = $bridge + $srcClaude.Substring($idx)
+    Set-Content -LiteralPath (Join-Path $dst 'CLAUDE.md') -Value $consumer -Encoding utf8 -NoNewline
+
+    # 5) Regenera espelhos/entry points DO DESTINO (inclui as skills de dominio de la) e valida.
+    #    Processo pwsh separado: o script filho usa exit e nao pode derrubar este.
+    & pwsh -NoProfile -File (Join-Path $dstScripts 'sync-harness.ps1')
+    if ($LASTEXITCODE -ne 0) { throw "Sync no destino falhou: $dst" }
+    & pwsh -NoProfile -File (Join-Path $dstScripts 'sync-harness.ps1') -Check
+    if ($LASTEXITCODE -ne 0) { throw "Check no destino falhou: $dst" }
+
+    Write-Host "Export consumidor concluido: $dst ($($core.Count) skills core copiadas; skills de dominio e pelizzai/ preservados; sentinela ausente no destino)."
+}
+
+if ($ExportConsumer) {
+    if ($Check -or $UpdateManifest -or $SourceMode) { throw '-ExportConsumer nao combina com -Check/-UpdateManifest/-SourceMode.' }
+    Export-Consumer $ExportConsumer
+    exit 0
 }
 
 if ($Check) {

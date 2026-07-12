@@ -345,7 +345,8 @@ try {
                 Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 0) "writegate libera produto após kickoff ratificado ($leaf)"
             }
 
-            # Source mode (os 3 sentinels do repo-fonte): Regra B é pulada; produto sem kickoff -> exit 0.
+            # Consumidor instalado via -ExportConsumer tem manifesto+sync+skills core: isso NÃO é
+            # source mode (regressão da distribuição por cópia manual) — a Regra B continua valendo.
             New-Item -ItemType Directory -Path (Join-Path $wgTemp '.claude/skills/pelizzai-core') -Force | Out-Null
             New-Item -ItemType Directory -Path (Join-Path $wgTemp 'scripts') -Force | Out-Null
             Set-Content -LiteralPath (Join-Path $wgTemp '.claude/skills/pelizzai-core/SKILL.md') -Value 'x' -Encoding utf8
@@ -354,7 +355,14 @@ try {
             Set-Content -LiteralPath (Join-Path $wgTemp 'pelizzai/data/state.md') -Value "- kickoff: <pendente>`n" -Encoding utf8
             foreach ($wg in @($wgMjs, $wgPs1)) {
                 $leaf = Split-Path -Leaf $wg
-                Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 0) "writegate em source mode pula a Regra B ($leaf)"
+                Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 2) "writegate: manifesto+sync no consumidor NÃO viram source mode ($leaf)"
+            }
+
+            # Source mode (sentinela dedicada scripts/pelizzai-source-repo.txt): Regra B é pulada.
+            Set-Content -LiteralPath (Join-Path $wgTemp 'scripts/pelizzai-source-repo.txt') -Value 'x' -Encoding utf8
+            foreach ($wg in @($wgMjs, $wgPs1)) {
+                $leaf = Split-Path -Leaf $wg
+                Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 0) "writegate em source mode (sentinela) pula a Regra B ($leaf)"
             }
         } finally {
             if (Test-Path -LiteralPath $wgTemp) { Remove-Item -LiteralPath $wgTemp -Recurse -Force }
@@ -363,6 +371,18 @@ try {
     } else {
         Write-Host "SKIP: pelizzai-writegate ausente (co-land com o pacote de hooks B1; existência travada pelo check de refs penduradas). Fixtures comportamentais: pendência para co-autoria com o hook."
     }
+
+    # -- Sentinela dedicada de source mode + distribuição consumidor segura --
+    Check (Test-Path (Join-Path $root 'scripts/pelizzai-source-repo.txt')) 'sentinela de repo-fonte existe no fonte'
+    Check-Match 'scripts/pelizzai-source-repo.txt' 'NUNCA copie' 'sentinela documenta a proibição de cópia'
+    foreach ($sf in @('.claude/hooks/pelizzai-writegate.mjs', '.claude/hooks/pelizzai-writegate.ps1', '.claude/hooks/pelizzai-session-start.mjs', '.claude/hooks/pelizzai-session-start.ps1', '.claude/skills/pelizzai-audit/SKILL.md', '.claude/skills/pelizzai-router/SKILL.md', 'CLAUDE.md')) {
+        Check-Match $sf 'pelizzai-source-repo\.txt' "source mode detectado pela sentinela dedicada ($sf)"
+    }
+    foreach ($sf in @('.claude/hooks/pelizzai-writegate.mjs', '.claude/hooks/pelizzai-writegate.ps1', '.claude/hooks/pelizzai-session-start.mjs', '.claude/hooks/pelizzai-session-start.ps1')) {
+        Check-NotMatch $sf 'pelizzai-core-skills' "hook não usa o manifesto como sentinela de source mode ($sf)"
+    }
+    Check-Match 'scripts/sync-harness.ps1' 'ExportConsumer' 'sync-harness tem a distribuição -ExportConsumer'
+    Check-Match 'scripts/sync-harness.ps1' 'Remove-Item -LiteralPath \$dstSentinel' 'export remove a sentinela do consumidor'
 
     # -- Paridade multi-superfície: não-negociáveis chegam ao AGENTS.md gerado E ao Cursor --
     Check-Match 'AGENTS.md' 'Gate de ratificacao' 'AGENTS.md gerado recebe o gate de ratificação'
@@ -385,7 +405,7 @@ try {
     # Referências penduradas: todo token pelizzai-* citado nas skills existe de fato.
     $hookNames = @(Get-ChildItem -LiteralPath (Join-Path $root '.claude/hooks') -File |
         ForEach-Object { [IO.Path]::GetFileNameWithoutExtension($_.Name) } | Sort-Object -Unique)
-    $knownTokens = @($dirNames) + $hookNames + @('pelizzai-core-skills')
+    $knownTokens = @($dirNames) + $hookNames + @('pelizzai-core-skills', 'pelizzai-source-repo')
     $danglingRefs = [System.Collections.Generic.List[string]]::new()
     foreach ($doc in @(Get-ChildItem -LiteralPath $skillRoot -Recurse -File -Filter '*.md')) {
         $content = Get-Content -LiteralPath $doc.FullName -Raw -Encoding utf8

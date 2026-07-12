@@ -6,10 +6,13 @@
 
 Este repositório é o **repo-fonte** do harness PelizzAI. Para pedidos que inspecionem ou alterem o projeto, entre por `pelizzai-core` → `pelizzai-router`; perguntas conceituais sem contexto de projeto podem ser respondidas diretamente. O router escolhe uma head skill e overlays por sinais observáveis — não por uma regra probabilística. Em processo (efeito, isolamento, review, validação e fechamento), siga os contratos canônicos das skills. Ao anunciar, use a grafia **"PelizzAI"**.
 
-Como este é o repo-fonte (há `.claude/skills/pelizzai-core`, `scripts/pelizzai-core-skills.txt` e
-`scripts/sync-harness.ps1`), não execute bootstrap consumidor nem crie runtime `pelizzai/` aqui.
-Use plano/execution record nativo; Verification sela o SHA em memória/registro e Finish não cria
-closure commit de state no source mode.
+O que marca este repositório como repo-fonte é a sentinela `scripts/pelizzai-source-repo.txt`
+(critério único de source mode — manifesto e sync existem também nos consumidores e não provam
+nada). Aqui, não execute bootstrap consumidor nem crie runtime `pelizzai/`. Use plano/execution
+record nativo; Verification sela o SHA em memória/registro e Finish não cria closure commit de
+state no source mode. Para distribuir a projetos consumidores, use
+`pwsh scripts/sync-harness.ps1 -ExportConsumer <destino>` — nunca cópia manual (ela levaria a
+sentinela junto e promoveria o consumidor a repo-fonte por engano).
 
 ## Diretrizes comportamentais
 
