@@ -81,9 +81,13 @@ Algoritmo:
    `refs/remotes/origin/<nome>` existir.
 4. Sem candidato inequívoco, mostre as refs existentes e pergunte a base. Nunca crie `develop`
    como convenção do harness.
-5. Com candidato inequívoco e atual, use-o e reporte ref + SHA; não transforme o default comprovado
-   em pergunta. Pergunte somente quando houver ambiguidade, ref possivelmente obsoleta ou conflito
-   com uma preferência explícita.
+5. Com candidato inequívoco e atual, use-o e reporte ref + SHA como parte da linha nome/base do
+   bloco de ratificação: **não abra pergunta avulsa pela base; leve-a como linha do bloco
+   consolidado a confirmar**. O usuário ratifica a base descoberta por visibilidade; uma base
+   materialmente diferente é um recomeço explícito (redescobrir a base e recriar a branch), não uma
+   troca in-place no gate — `base-ref`/`base-sha` continuam imutáveis durante a tarefa (ver
+   Invariantes). Pergunte de imediato apenas quando houver ambiguidade, ref possivelmente obsoleta
+   ou conflito com uma preferência explícita.
 
 O nome apontado pelo default descoberto passa a ser tratado como branch protegida pelo harness,
 mesmo que não se chame main/master/develop/dev.
@@ -108,9 +112,12 @@ falhar, apresente a idade/limitação da ref local e peça confirmação; não f
 
 ## 3. Nomear a branch de tarefa/planejamento
 
-Derive `<tipo>/<slug-kebab>` (slug ASCII, minúsculo, até 50 caracteres) e use-o quando estiver
-livre. Informe o nome; pergunte somente em colisão, convenção incompatível ou preferência explícita.
-O tipo vem do efeito real da tarefa, não de preferência fixa:
+Derive `<tipo>/<slug-kebab>` (slug ASCII, minúsculo, até 50 caracteres). **Proponha** o
+`<tipo>/<slug>` e a base descoberta como a **primeira linha do bloco de ratificação** — o gate de
+setup pós-plano nos tracks com plano, ou o confirm compacto da head skill nos tracks sem plano. O
+usuário aceita ou pede outro nome/tipo antes da Tarefa 1; não trave o nome em silêncio sem ele ter
+sido visto. Colisão, convenção incompatível ou preferência explícita continuam forçando pergunta
+imediata. O tipo vem do efeito real da tarefa, não de preferência fixa:
 
 | Natureza | Tipo sugerido |
 | --- | --- |
@@ -147,6 +154,11 @@ que o state inicial contamine o review do bug/ajuste/bootstrap. Em source mode, 
 commit de setup; branch/worktree + execution record bastam.
 
 ## 5. Aplicar o isolamento escolhido após o plano
+
+Se o usuário ajustou o **nome** da branch no bloco de ratificação, renomeie com `git branch -m
+<novo-nome>` antes da Tarefa 1 — renomear a branch de planejamento e seus artefatos é seguro e
+reversível (nunca use `-M`, que sobrescreve um destino existente). A **base** não é reescrita aqui:
+mudança material de base é recomeço explícito, não rename.
 
 ### Manter como branch
 
@@ -221,6 +233,7 @@ material chama `pelizzai-recovery`, não heurística.
 - Recalcular base-sha no fechamento; ele é um snapshot do início.
 - Misturar vários repositórios em um único state.
 - `git add -A`, stash, reset, force-delete ou limpeza automática para liberar o worktree.
+- Travar nome/base em silêncio sem o usuário tê-los visto no bloco de ratificação (colisão pergunta de imediato).
 ```
 
 ## Integração

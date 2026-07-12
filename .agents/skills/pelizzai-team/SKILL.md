@@ -22,6 +22,8 @@ O protocolo de coordenação e delegação é **o mesmo nos dois modos**; muda a
 Se você foi designado como **membro** de um time (teammate ou subagente executando uma subtarefa), **não acione esta skill** para criar um sub-time. Não há times aninhados. Execute sua subtarefa, acione `pelizzai-reasoning` para raciocinar sobre ela, **aplique as skills de domínio coladas no seu briefing** (elas prevalecem sobre padrões genéricos) e a camada global `pelizzai-preferences`, e devolva o entregável no formato combinado no seu briefing. **Não commite** — a consolidação (commit) é do coordenador, após os reviews; deixe o trabalho na working tree.
 
 Um membro **produz artefatos** (spec, relatório, diff) como **entregável para o coordenador** — não conduz por conta própria fluxos que exijam aprovação do usuário (`pelizzai-brainstorming`, `pelizzai-writing-plans`). Esses fluxos pertencem ao coordenador / à sessão principal.
+
+Sob briefing fechado (MEMBRO-DO-TIME-STOP/SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing, **sinalize no retorno** (`DONE_WITH_CONCERNS`/`NEEDS_CONTEXT`) se faltou skill de domínio cobrindo a stack da sua tarefa, e escale ao coordenador o que exigir decisão.
 </MEMBRO-DO-TIME-STOP>
 
 ---
@@ -168,6 +170,7 @@ integração explícito, fora do default deste harness.
 - Tratar **falhas de membro** (ver seção própria).
 - Verificar os resultados de forma adversarial (cross-check, refutação).
 - Sintetizar tudo em uma entrega única, resolvendo divergências.
+- Coletar as lacunas de skill de domínio sinalizadas pelos membros e consolidá-las numa **única** proposta no fechamento (alimenta o eixo adoption-driven de `pelizzai-finish-task`); nunca criar skill no meio da tarefa.
 - Decidir a conclusão e encerrar os membros.
 
 ### Quantos membros
@@ -247,8 +250,11 @@ Briefing de [nome do membro] — papel: [papel]
 - Frentes/arquivos próprios: [conjunto disjunto; quem mais NÃO toca aqui]
 - Contexto necessário: [caminhos, contratos, decisões já tomadas, links de spec,
   convenções do projeto — tudo, porque o membro não viu esta conversa]
-- Regras/skills locais relevantes: [catálogo consumidor ou repo-fonte em source mode; cole os
-  pontos-chave; "nenhuma" se não houver]
+- Regras/skills locais relevantes: SEMPRE inclua o pacote de skills de domínio aplicável à stack da
+  frente [catálogo consumidor ou repo-fonte em source mode; cole os pontos-chave]. Em dúvida se uma
+  skill de domínio do catálogo se aplica à frente, inclua-a: o custo de incluir é menor que o de
+  ignorar uma regra do projeto. Se a stack da frente não tem skill cobrindo, diga isso e instrua o
+  membro a sinalizar a lacuna no retorno
 - Camada global: aplique `pelizzai-preferences` e raciocine via `pelizzai-reasoning`; em
   conflito, as SKILLS DE DOMÍNIO coladas acima e as regras do projeto PREVALECEM sobre elas
 - Dependências: [o que precisa de outro membro; o que já pode começar]  (HARD-GATE 3)

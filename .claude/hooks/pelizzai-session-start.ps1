@@ -43,6 +43,37 @@ try {
     } catch {}
   }
 
+  # Consumidor sem catalogo de skills de dominio: sugere UMA vez o caminho de bootstrap
+  # read-only (propor->confirmar; nada e criado sem consentimento). Em source mode (repo-fonte)
+  # e no-op. Criar pelizzai/domain-skills.md (mesmo `_nenhuma por enquanto_`) silencia o nudge.
+  try {
+    $srcMode = (Test-Path -LiteralPath (Join-Path $cwd '.claude/skills/pelizzai-core/SKILL.md')) -and `
+               (Test-Path -LiteralPath (Join-Path $cwd 'scripts/pelizzai-core-skills.txt')) -and `
+               (Test-Path -LiteralPath (Join-Path $cwd 'scripts/sync-harness.ps1'))
+    if ((-not $srcMode) -and (-not (Test-Path -LiteralPath (Join-Path $cwd 'pelizzai/domain-skills.md')))) {
+      $lines += 'Projeto sem catalogo de skills de dominio (pelizzai/domain-skills.md ausente). Se for trabalhar no codigo, considere pelizzai-audit em scan-only -> propor bootstrap-write. Nada e criado sem sua confirmacao.'
+    }
+  } catch {}
+
+  # Recap da politica de execucao ja ratificada (anti-fadiga): o router reaplica como recap de
+  # 1 linha em vez de re-perguntar. destination NUNCA e default: push/PR/publicacao por tarefa.
+  try {
+    $profilePath = Join-Path $cwd 'pelizzai/profile.md'
+    if (Test-Path -LiteralPath $profilePath) {
+      $profile = Get-Content -LiteralPath $profilePath -Raw
+      $ratified = @()
+      $mIso = [regex]::Match($profile, 'isolation-default:\s*(\S+)')
+      $mMode = [regex]::Match($profile, 'execution-mode-default:\s*(\S+)')
+      $mCommit = [regex]::Match($profile, 'commit-strategy-default:\s*(\S+)')
+      if ($mIso.Success -and $mIso.Groups[1].Value -ne 'unset') { $ratified += "isolamento $($mIso.Groups[1].Value)" }
+      if ($mMode.Success -and $mMode.Groups[1].Value -ne 'unset') { $ratified += "modo $($mMode.Groups[1].Value)" }
+      if ($mCommit.Success -and $mCommit.Groups[1].Value -ne 'unset') { $ratified += "commit $($mCommit.Groups[1].Value)" }
+      if ($ratified.Count -gt 0) {
+        $lines += "Politica de execucao ratificada do projeto (pelizzai/profile.md): $($ratified -join ', ') - reaplique como recap de 1 linha; nao re-pergunte o que ja foi ratificado (destino continua por tarefa)."
+      }
+    }
+  } catch {}
+
   $out = [pscustomobject]@{
     hookSpecificOutput = [pscustomobject]@{
       hookEventName     = 'SessionStart'

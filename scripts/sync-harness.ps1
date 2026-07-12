@@ -57,8 +57,8 @@ if ($SourceMode -and -not $Check) {
 }
 
 # Tokens `pelizzai-*` que NAO sao skills (nao devem contar como referencia quebrada).
-# pelizzai-cadence, pelizzai-guardrails e pelizzai-session-start sao HOOKS (.claude/hooks/).
-$refIgnore = @('pelizzai-cadence', 'pelizzai-core-skills', 'pelizzai-guardrails', 'pelizzai-session-start')
+# pelizzai-cadence, pelizzai-guardrails, pelizzai-session-start e pelizzai-writegate sao HOOKS (.claude/hooks/).
+$refIgnore = @('pelizzai-cadence', 'pelizzai-core-skills', 'pelizzai-guardrails', 'pelizzai-session-start', 'pelizzai-writegate')
 
 function Build-AgentsMd {
     $skills = (Get-ChildItem $srcSkills -Directory | Sort-Object Name).Name
@@ -82,6 +82,8 @@ Este projeto usa o harness de skills **PelizzAI**. As skills (instrucoes de proc
 **Grafia da marca:** ao anunciar uma skill, use sempre "PelizzAI" (P, A e I maiusculos). Identificadores (`pelizzai-*`) e o diretorio de estado `pelizzai/` ficam em minusculas.
 
 **Protecao de branch (inegociavel):** nunca commite em `main`/`master`/`develop`/`dev` (nem em HEAD destacado). Antes de qualquer commit, rode `git branch --show-current`; se protegida, isole via `pelizzai-starting-branch`.
+
+**Gate de ratificacao (inegociavel):** decisoes estruturais — isolamento, modo de execucao (com `team` sempre visivel) e estrategia de commit — sao apresentadas como recomendacao e ratificadas pelo usuario num unico gate por borda (kickoff ou setup pos-plano), nunca aplicadas em silencio; `squash-final` so a pedido explicito. A politica ratificada vive em `pelizzai/profile.md` e reaparece como recap de uma linha; push/PR/publicacao sao confirmados por tarefa.
 
 **Fundamentacao:** para fatos externos instaveis, use a ferramenta de documentacao oficial disponivel na plataforma; nao trate memoria como fonte atual.
 

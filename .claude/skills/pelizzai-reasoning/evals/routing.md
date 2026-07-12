@@ -35,6 +35,8 @@ O objetivo não é avaliar a qualidade completa da resposta final, do código ou
 
 > Nota: [pelizzai-interview-me](../../pelizzai-interview-me/SKILL.md) é uma skill **irmã** (entrevista para esclarecer objetivo/premissas), não uma das técnicas de raciocínio do catálogo. Quando citada num roteamento, é a ação de "pedir esclarecimento", não uma técnica auxiliar contável.
 
+> Nota: **Proposal Stress (Premortem de escopo)** é a aplicação de [Assumption Tracking](../techniques/assumption-tracking.md) a um pedido novo — produz a Análise da proposta que o `pelizzai-router` apresenta antes de rotear. Não é uma técnica separada nesta suíte: cenários de pedido novo com incerteza material (ex.: R-05) esperam Assumption Tracking como principal e a exposição das lacunas materiais como saída, não uma pergunta reflexa.
+
 ## Protocolo e formato de resultado
 
 Para cada cenário, o avaliador deve verificar a decisão de roteamento **antes da execução completa da tarefa**. O agente avaliado produz a classificação e o roteamento de forma compacta, no formato definido no índice — ver "Como executar um cenário" em [README.md](README.md). O agente não deve expor cadeia de pensamento detalhada.

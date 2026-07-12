@@ -112,8 +112,15 @@ entre módulos ficarem materialmente mais claras; use recurso inline/nativo no m
 
 ## Depois da escolha
 
+Ao fim da análise, sem sair do modo read-only, ofereça registrar o que for durável — propor-confirmar,
+nunca escrita por reflexo:
+
 - Candidato escolhido: router decide `bounded | standard | exploratory`; arquitetura aberta
   normalmente passa por brainstorming, mas refactor claro pode ir direto ao plano.
+- Decisão arquitetural durável que valha memória (adotar uma nova fronteira, ou manter a atual por um
+  trade-off real): **ofereça** registrar um ADR via `pelizzai-domain-modeling`. A gravação só ocorre
+  depois de reclassificar para `write-local` e passar pela primeira-write gate; o relatório em si não
+  escreve.
 - Rejeição com razão durável: **ofereça** registrar em ADR/out-of-scope; não escreva automaticamente.
 - Seam ausente: entregue a evidência ao fluxo de design, sem fabricar teste tautológico.
 

@@ -73,9 +73,10 @@ Skills de domínio capturam os padrões, stacks e convenções **deste projeto**
 ```text
 - NUNCA use o prefixo `pelizzai-` (reservado às skills do harness).
 - Nomeie com o prefixo do projeto + verbo descritivo: ex.: `<projeto>-gerar-relatorio`, `<projeto>-migrar-schema`.
-- Skill de stack/lib externa deve ser fundamentada na documentação oficial da versão real;
-  use `context7` quando disponível, senão fonte oficial. Skill de convenção interna se fundamenta
-  no código, testes, ADRs e histórico do próprio projeto.
+- Skill de stack/lib externa deve ser **fundamentada em context7 ou documentação oficial atual**
+  da versão travada no lockfile; sem essa fundamentação disponível, não escreva a skill de stack —
+  fundamente ou adie (nunca invente de memória). Skill de convenção interna se fundamenta no código,
+  testes, ADRs e histórico do próprio projeto, onde `context7` é preferencial, não um bloqueio.
 - Toda skill de domínio criada/atualizada entra no catálogo `pelizzai/domain-skills.md` e no
   ledger `pelizzai/data/review-domain-skills.md` (ver Templates).
 ```
@@ -132,12 +133,13 @@ Acionado em `bootstrap-write`, depois que a `pelizzai-audit` mapeou o contexto e
 
 ## Modo Manutenção
 
-Mantém as skills de **domínio** vivas conforme o projeto evolui. Detalhe completo em **[references/domain-skill-maintenance.md](references/domain-skill-maintenance.md)**. Dois eixos:
+Mantém as skills de **domínio** vivas conforme o projeto evolui. Detalhe completo em **[references/domain-skill-maintenance.md](references/domain-skill-maintenance.md)**. Três eixos — dois **atualizam** o que já existe, um **cria** a primeira skill de uma stack nova:
 
-> **Escopo (inegociável):** a manutenção autônoma — os dois eixos e a cadência — atua **somente** sobre skills de domínio. As skills do harness (`pelizzai-*`) **nunca** são alteradas pelo sistema autônomo; só são criadas ou editadas a pedido explícito do usuário.
+> **Escopo (inegociável):** a manutenção autônoma — os três eixos e a cadência — atua **somente** sobre skills de domínio. As skills do harness (`pelizzai-*`) **nunca** são alteradas pelo sistema autônomo; só são criadas ou editadas a pedido explícito do usuário.
 
-- **Version-driven (refresh):** a stack mudou de versão maior ou ganhou dependência significativa → reler a doc da versão atual (context7) e **atualizar** a skill afetada. O drift é detectado comparando os manifests atuais com o **Stack baseline** de `pelizzai/profile.md` (gravado pela `pelizzai-audit` no bootstrap).
-- **Rework-driven (histórico):** o mesmo ajuste foi feito à mão várias vezes no git → o padrão vira uma regra na skill.
+- **Version-driven (refresh — ATUALIZA):** a stack mudou de versão maior ou ganhou dependência significativa → reler a doc da versão atual (context7) e **atualizar** a skill existente afetada. O drift é detectado comparando os manifests atuais com o **Stack baseline** de `pelizzai/profile.md` (gravado pela `pelizzai-audit` no bootstrap).
+- **Rework-driven (histórico — ATUALIZA):** o mesmo ajuste foi feito à mão várias vezes no git → o padrão vira uma regra na skill existente.
+- **Adoption-driven (nova stack — CRIA):** a tarefa adotou dependência/serviço significativo **ainda não coberto** por skill do catálogo (top-level novo nos manifests, ausente do **Stack baseline** e do catálogo) → **propor CRIAR** a primeira skill dessa stack, **fundamentada em context7 ou documentação oficial atual** da versão travada — não apenas atualizar. A proposta é SEMPRE apresentada no fechamento, agrupada; criar/adiar/não-criar é decisão do usuário (mantém o "menor conjunto justificado"). É o único eixo que devolve a criação incremental sem voltar ao "máximo" do bootstrap antigo.
 
 <HARD-GATE>
 **Refresh nunca sobrescreve às cegas.** Leia a skill atual, mude **só** o que a nova versão/padrão
@@ -215,8 +217,10 @@ Depois que uma skill está pronta, você pode **otimizar a `description`** para 
    → valide/forward-test → registre no catálogo e ledger quando for domain skill.
 3. BOOTSTRAP: liste o menor conjunto → CONFIRME → redija no modo proporcional → sincronize roots
    → catalogue → semeie o ledger → aceite final do usuário.
-4. MANUTENÇÃO: detecte o eixo (versão/histórico) → leia a skill atual → confirme se for proposta
-   proativa → mude só o necessário → valide proporcionalmente → mostre o diff → registre no ledger.
+4. MANUTENÇÃO: detecte o eixo (versão/histórico/adoção) → version/rework leem a skill existente e
+   mudam só o necessário; adoption PROPÕE criar a skill da stack nova (context7/doc oficial atual) →
+   confirme se for proposta proativa → valide proporcionalmente → mostre o diff → registre no ledger
+   com o eixo.
 5. CADÊNCIA: ao fechar a tarefa, cheque o ledger e proponha revisão se o limiar foi cruzado.
 ```
 
@@ -248,5 +252,7 @@ Prefira:
 
 Toda skill de domínio entra no catálogo e no ledger.
 Nenhuma atualização proativa é aplicada sem confirmação; toda atualização mostra diff e evidência.
+A criação incremental (eixo adoption) segue o mesmo propor→confirmar e nunca escreve skill de stack
+sem fundamentação em context7 ou documentação oficial atual.
 A cadência sugere; nunca bloqueia.
 ```

@@ -26,7 +26,7 @@ Antes de implementar:
 - Declare apenas premissas materiais. Se houver incerteza que mude a solução, consulte evidência e então pergunte.
 - Se existirem múltiplas interpretações materialmente diferentes, apresente-as; não crie menu para detalhe reversível.
 - Se existir uma abordagem mais simples, diga. Questione quando fizer sentido.
-- Se algo indispensável não estiver claro, pare com uma pergunta acionável. Caso contrário, faça a suposição segura e prossiga.
+- Se algo indispensável não estiver claro, pare com uma pergunta acionável. Para detalhe reversível, faça a suposição segura, declare-a e prossiga; para decisão que muda escopo/UX/arquitetura/segurança, apresente-a na análise da proposta e proponha a descoberta — não assuma em silêncio.
 
 ## 2. Simplicidade Primeiro
 
@@ -76,7 +76,7 @@ Para micro-planos de resposta (poucos passos, dentro de uma mesma mensagem), apr
 3. [Etapa] → verificar: [checagem]
 ```
 
-O `pelizzai-router` escolhe a lane: mudança bounded usa plano compacto; standard usa design/plano proporcionais; exploratory/high-risk recebe stress completo. Não force plano formal ou entrevista quando objetivo, aceite e abordagem já estão claros.
+O `pelizzai-router` escolhe a lane: mudança bounded usa plano compacto; standard usa design/plano proporcionais; exploratory/high-risk recebe stress completo. Não force plano formal ou entrevista quando objetivo, aceite e abordagem já estão claros. A rota classificada (lane, head skill, overlays) é apresentada como recomendação num **kickoff** compacto que você ratifica ou ajusta antes de investir; subir a descoberta (brainstorming/entrevista) está sempre a uma palavra de distância. Porém SEMPRE apresente a análise da proposta (premissas, lacunas, riscos, alternativas); quando houver lacuna material que mude escopo/UX/arquitetura, PROPONHA brainstorming/entrevista e deixe o usuário decidir fazer ou pular. **Recomende e ratifique: classificar é do harness; decidir é do usuário.**
 
 Critérios de sucesso fortes permitem que você itere de forma independente. Critérios fracos ("fazer funcionar") exigem esclarecimentos constantes.
 
@@ -89,6 +89,10 @@ Sinais observáveis de que estas diretrizes e as skills estão cumprindo o papel
 - os diffs estão menores e sem mudanças não relacionadas ao pedido;
 - há menos reescritas causadas por excesso de complexidade;
 - perguntas aparecem apenas nas bordas em que mudam a decisão;
+- no kickoff, a rota classificada (lane, descoberta, overlays) é apresentada para o usuário ratificar ou ajustar antes de investir esforço;
+- a análise da proposta aparece em toda tarefa mutável não-trivial, e decisões de escopo/UX/arquitetura são ratificadas — não assumidas em silêncio;
+- as decisões estruturais (isolamento, modo com `team` visível, commits, review, destino) são recomendação ratificada num único gate por borda, nunca default silencioso;
+- a política de execução ratificada do projeto reaparece como recap de uma linha, não como pergunta repetida;
 - uma tarefa read-only não cria estado nem artefatos;
 - overlays de frontend/security chegam ao executor antes da implementação/review;
 - o conteúdo entregue é exatamente o conteúdo validado;
@@ -107,6 +111,8 @@ Este projeto usa o harness de skills **PelizzAI**. As skills (instrucoes de proc
 **Grafia da marca:** ao anunciar uma skill, use sempre "PelizzAI" (P, A e I maiusculos). Identificadores (`pelizzai-*`) e o diretorio de estado `pelizzai/` ficam em minusculas.
 
 **Protecao de branch (inegociavel):** nunca commite em `main`/`master`/`develop`/`dev` (nem em HEAD destacado). Antes de qualquer commit, rode `git branch --show-current`; se protegida, isole via `pelizzai-starting-branch`.
+
+**Gate de ratificacao (inegociavel):** decisoes estruturais — isolamento, modo de execucao (com `team` sempre visivel) e estrategia de commit — sao apresentadas como recomendacao e ratificadas pelo usuario num unico gate por borda (kickoff ou setup pos-plano), nunca aplicadas em silencio; `squash-final` so a pedido explicito. A politica ratificada vive em `pelizzai/profile.md` e reaparece como recap de uma linha; push/PR/publicacao sao confirmados por tarefa.
 
 **Fundamentacao:** para fatos externos instaveis, use a ferramenta de documentacao oficial disponivel na plataforma; nao trate memoria como fonte atual.
 

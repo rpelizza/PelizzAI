@@ -39,6 +39,7 @@ Nunca crie `pelizzai/` no repo-fonte para armazenar handoff.
 ```text
 Objetivo/aceite da próxima sessão
 Modo e efeito autorizados; ações externas ainda não autorizadas
+Rota/política ratificada a honrar: lane, isolamento, modo de execução e estratégia de commit (a próxima sessão segue sem re-perguntar; destino externo não é default — confirma-se por tarefa)
 Estado confirmado: branch, base-sha, HEAD, isolation/worktree e working tree
 Progresso: concluído, próximo, pendente/bloqueado
 Decisões duráveis e fora de escopo

@@ -56,7 +56,7 @@ Em app existente, a primeira obrigação é continuidade. Diferenciação visual
 
 ### 2. Definir a direção visual em uma frase
 
-Antes de codar, formule mentalmente uma tese específica:
+Antes de codar, formule uma tese específica:
 
 ```text
 "Esta tela deve parecer <qualidade visual> porque o usuário precisa <objetivo real> em um contexto de <domínio/pressão/ritmo>."
@@ -78,9 +78,28 @@ Exemplos ruins:
 - "Dashboard bonito."
 ```
 
-Quando a tarefa vier de `pelizzai-brainstorming` ou de uma especificação/tela aprovada, a direção
-visual já aprovada prevalece. Alteração local herda essa direção; não invente uma nova tese estética
-nem uma nova personalidade no meio da execução.
+Quando a tarefa vier de `pelizzai-brainstorming` ou de uma especificação/tela/Figma aprovada, a
+direção visual já aprovada prevalece: execute-a com fidelidade. Alteração local herda essa direção
+sem gate; não invente uma nova tese estética nem uma nova personalidade no meio da execução.
+
+**Gate de direção visual (redesign ou tela nova, antes de implementar):** sem direção aprovada, uma
+tela nova ou um redesenho não começa por suposição silenciosa — a tese é apresentada e ratificada
+antes de escrever UI. Ler produto e sistema e propor a direção continua sendo seu trabalho (a
+inteligência é preservada); a direção, o dark mode, os gráficos/métricas e o layout viram
+recomendação a ratificar, não decisão aplicada em silêncio.
+
+```text
+Direção visual proposta (responda "ok" ou ajuste):
+- Recomendada: <tese em 1 frase> — <por que serve ao fluxo/domínio>
+- Alternativas: <2-3 direções materialmente diferentes> — SOMENTE quando há ambiguidade estética real
+- Decisões duráveis: <dark mode | gráficos/métricas exibidos | densidade/layout> — recomendação por item
+```
+
+- Ambiguidade estética real → 2-3 direções materialmente diferentes, uma recomendada.
+- Design system/brand guide já decide a linguagem → uma recomendação basta; não fabrique alternativas.
+- Quando ver antes reduz retrabalho, ofereça mockups/wireframes navegáveis no navegador antes de implementar.
+
+Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing e escale ao coordenador o que exigir decisão.
 
 ### 3. Fazer um plano visual compacto
 

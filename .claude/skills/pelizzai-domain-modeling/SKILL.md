@@ -22,8 +22,23 @@ a task branch já deve existir antes de editar documentação.
 | Consumidor | glossário em `pelizzai/context.md` ou `pelizzai/context/`; ADRs em `pelizzai/adr/`; rejeições em `pelizzai/out-of-scope/`, criados somente quando necessários |
 | Source mode | documentação nativa já adotada pelo repo ou plano/execution record; nunca crie `pelizzai/`. Se não houver path nativo e um arquivo não foi pedido, mantenha a decisão no artefato de design nativo |
 
-Não registre ADR/rejeição automaticamente fora do escopo autorizado. Quando a decisão emerge numa
-análise read-only, proponha o registro; escrita volta ao router/primeira-write gate.
+Registro de ADR/rejeição segue o gate, nunca o reflexo:
+
+- **Decisão já ratificada num gate de design/plano**, dentro de um fluxo de escrita autorizado (task
+  branch aberta): REGISTRE o ADR automaticamente quando os três critérios do §3 forem verdade e
+  anuncie em uma linha ("Registrei ADR-000N: <título> — avise se quiser ajustar ou remover"). O
+  harness apenas memoriza uma decisão que o usuário já tomou; não decide nada novo.
+- **Decisão arquitetural emergente** — surgida na execução, numa lane sem gate de design, ou numa
+  causa-raiz de debugging: não grave em silêncio. Apresente-a ao usuário na borda de
+  validação/conclusão (que já é gate) antes de gravar o ADR.
+- A criação do ADR é ação do **coordenador**; um membro de time apenas sinaliza a decisão no
+  relatório, sem gravar.
+- **Nunca** grave ADR depois de `candidate-head`/`validated-head`: doc escrito após o seal invalida
+  o candidato. Fixe a escrita ao ciclo da tarefa onde a decisão é tomada (pré-seal).
+- Em análise read-only, apenas **proponha** o registro; a escrita volta ao gate de primeira escrita.
+
+Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing
+e escale ao coordenador o que exigir decisão.
 
 ## Processo
 
@@ -54,8 +69,12 @@ termos novos se o vocabulário atual já é preciso.
 ### 3. Atualize o menor artefato durável
 
 - Glossário: definição, contexto e distinção necessária; sem detalhes de implementação.
-- ADR: apenas se a decisão for difícil de reverter, surpreendente sem contexto **e** fruto de
-  trade-off real. Registre decisão, alternativa rejeitada e consequência em formato curto.
+- ADR: quando a decisão é difícil de reverter, surpreendente sem contexto **e** fruto de trade-off
+  real (os três juntos). Use `templates/adr.md` — arquivo numerado (ADR-000N) com contexto, decisão,
+  alternativas rejeitadas e consequências, sem frontmatter. No consumidor grave em `pelizzai/adr/`;
+  em source mode, registre no execution record/artefato de design nativo e **ofereça** materializar
+  como arquivo no path de ADR nativo do repo quando o usuário quiser durabilidade (default: manter no
+  registro), sem criar `pelizzai/`.
 - Out-of-scope: apenas rejeição durável; adiamento/capacidade momentânea não é rejeição.
 
 Um conceito atualiza o registro existente; não crie arquivo por conversa. Algo já implementado não
@@ -72,6 +91,13 @@ Registre no plano/briefing os termos e invariantes que a implementação/review 
 `pelizzai-brainstorming` usa este overlay somente quando o modelo muda; `pelizzai-writing-plans`
 propaga os invariantes; `pelizzai-codebase-design` traduz as fronteiras para módulos; reasoning útil
 é Constraint Satisfaction + Assumption Tracking.
+
+Pontos de registro de ADR (todos filtrados pelo critério triplo, todos ação do coordenador):
+`pelizzai-brainstorming` ao salvar a spec de um design ratificado (auto + anúncio de 1 linha);
+`pelizzai-execution-plans` ao consolidar uma decisão arquitetural durável — já ratificada no gate de
+design (auto, pré-seal) ou emergente (apresenta ao usuário antes de gravar); `pelizzai-debugging` numa
+causa-raiz durável (emergente → apresenta); `pelizzai-improving-architecture` apenas **oferece**, por
+ser read-only.
 
 ## Red flags
 

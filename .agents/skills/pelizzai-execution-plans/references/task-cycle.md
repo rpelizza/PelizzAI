@@ -16,7 +16,11 @@ O briefing de cada tarefa inclui:
 ```text
 - Texto completo da tarefa (do brief em arquivo, ou colado do plano, com valores exatos a usar
   verbatim) — incluindo as Global Constraints do cabeçalho do plano.
-- Skills de domínio relevantes (coladas, ou seus pontos-chave) — o membro não herda o seu contexto.
+- Skills de domínio aplicáveis do catálogo (coladas, ou seus pontos-chave) — o membro não herda o
+  seu contexto. Em dúvida se uma skill de domínio do catálogo se aplica à tarefa, inclua-a: o custo
+  de incluir é menor que o de ignorar uma regra do projeto. Se a superfície da tarefa toca uma stack
+  SEM domain skill cobrindo, o membro aplica o que tem e SINALIZA a lacuna no retorno
+  (`DONE_WITH_CONCERNS`); nunca cria skill no meio da tarefa.
 - Skills transversais em `overlays:` no state (frontend, segurança, documentação etc.), com os
   gates que cada uma exige. Propague-as para implementador **e reviewers**; não basta nomeá-las.
 - Convenções e contratos necessários (caminhos, interfaces, decisões já tomadas).
@@ -92,7 +96,7 @@ O membro reporta um destes status:
 | Status               | Significado                                   | Conduta do coordenador                                         |
 | -------------------- | --------------------------------------------- | -------------------------------------------------------------- |
 | `DONE`               | Trabalho completo                             | Segue para o review                                            |
-| `DONE_WITH_CONCERNS` | Completo, mas com ressalvas                   | Leia as ressalvas antes de prosseguir                          |
+| `DONE_WITH_CONCERNS` | Completo, mas com ressalvas                   | Leia as ressalvas antes de prosseguir; lacuna de domain skill vai ao registro e é acumulada para o eixo adoption-driven no fechamento (não vira gate por tarefa) |
 | `NEEDS_CONTEXT`      | Falta informação                              | Forneça o contexto e re-despache                               |
 | `BLOCKED`            | Não consegue concluir                         | Avalie: dar contexto → mudar abordagem/quebrar tarefa → escalar ao humano |
 

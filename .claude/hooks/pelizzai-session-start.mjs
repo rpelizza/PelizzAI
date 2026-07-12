@@ -65,6 +65,51 @@ function main() {
     /* sem aviso de retomada — segue com o lembrete básico */
   }
 
+  // Consumidor sem catálogo de skills de domínio: sugere UMA vez o caminho de bootstrap
+  // read-only (propor→confirmar; nada é criado sem consentimento). Em source mode (repo-fonte)
+  // é no-op — ali não há catálogo consumidor. Criar pelizzai/domain-skills.md (mesmo
+  // `_nenhuma por enquanto_`) silencia o nudge sem exigir skills de domínio.
+  try {
+    const sourceMode =
+      existsSync(join(cwd, '.claude', 'skills', 'pelizzai-core', 'SKILL.md')) &&
+      existsSync(join(cwd, 'scripts', 'pelizzai-core-skills.txt')) &&
+      existsSync(join(cwd, 'scripts', 'sync-harness.ps1'));
+    if (!sourceMode && !existsSync(join(cwd, 'pelizzai', 'domain-skills.md'))) {
+      lines.push(
+        'Projeto sem catálogo de skills de domínio (pelizzai/domain-skills.md ausente). Se for ' +
+          'trabalhar no código, considere pelizzai-audit em scan-only → propor bootstrap-write. ' +
+          'Nada é criado sem sua confirmação.'
+      );
+    }
+  } catch {
+    /* sem nudge de bootstrap — segue */
+  }
+
+  // Recap da política de execução já ratificada (anti-fadiga): quando o profile registra os
+  // Defaults de execução ratificados, o router reaplica como recap de 1 linha em vez de
+  // re-perguntar. destination NUNCA é default: push/PR/publicação seguem por tarefa.
+  try {
+    const profilePath = join(cwd, 'pelizzai', 'profile.md');
+    if (existsSync(profilePath)) {
+      const profile = readFileSync(profilePath, 'utf8');
+      const iso = (profile.match(/isolation-default:\s*(\S+)/) || [])[1];
+      const mode = (profile.match(/execution-mode-default:\s*(\S+)/) || [])[1];
+      const commit = (profile.match(/commit-strategy-default:\s*(\S+)/) || [])[1];
+      const ratified = [];
+      if (iso && iso !== 'unset') ratified.push(`isolamento ${iso}`);
+      if (mode && mode !== 'unset') ratified.push(`modo ${mode}`);
+      if (commit && commit !== 'unset') ratified.push(`commit ${commit}`);
+      if (ratified.length) {
+        lines.push(
+          `Política de execução ratificada do projeto (pelizzai/profile.md): ${ratified.join(', ')} — ` +
+            'reaplique como recap de 1 linha; não re-pergunte o que já foi ratificado (destino continua por tarefa).'
+        );
+      }
+    }
+  } catch {
+    /* sem recap de política — segue */
+  }
+
   process.stdout.write(
     JSON.stringify({
       hookSpecificOutput: {
