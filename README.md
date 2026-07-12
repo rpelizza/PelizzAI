@@ -250,6 +250,26 @@ flowchart TD
 Arquivos gerados não são editados à mão. O adaptador Cursor é revisado manualmente porque sua
 função é apenas encaminhar aos entrypoints e às regras compartilhadas.
 
+### Instalar/atualizar em um projeto consumidor
+
+A distribuição oficial é um comando, rodado a partir do repo-fonte:
+
+```powershell
+pwsh scripts/sync-harness.ps1 -ExportConsumer C:\caminho\do\projeto
+```
+
+Ele copia as skills **core** (somente as do manifesto — as skills de domínio do projeto nunca são
+tocadas), os hooks `pelizzai-*` e os scripts úteis (manifesto + sync); gera o `CLAUDE.md`
+consumidor; regenera e valida os espelhos do destino. Atualizar = rodar o mesmo comando de novo.
+Após a primeira instalação, registre os hooks desejados no `.claude/settings.json` do projeto
+(opt-in) e deixe a `pelizzai-audit` propor o bootstrap na primeira tarefa.
+
+**Nunca distribua por cópia manual do repositório.** O que distingue o repo-fonte de um consumidor
+é exclusivamente a sentinela `scripts/pelizzai-source-repo.txt`: uma cópia manual a levaria junto e
+promoveria o consumidor a repo-fonte por engano (writegate sem Regra B, bootstrap mudo, runtime
+`pelizzai/` desativado). O `-ExportConsumer` exclui a sentinela por contrato — e a remove do
+destino se encontrá-la.
+
 ## Estrutura do repositório
 
 ```text
@@ -260,8 +280,9 @@ PelizzAI/
 ├── .agents/skills/               espelho gerado
 ├── .cursor/rules/pelizzai.mdc    adaptador manual
 ├── scripts/
-│   ├── sync-harness.ps1
+│   ├── sync-harness.ps1          sync + distribuição (-ExportConsumer)
 │   ├── test-harness-contracts.ps1
+│   ├── pelizzai-source-repo.txt  sentinela de source mode (NUNCA copiar a consumidores)
 │   ├── task-brief.ps1|.sh
 │   └── review-package.ps1|.sh
 ├── CLAUDE.md                     entrada canônica
