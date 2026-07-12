@@ -57,23 +57,29 @@ incluí-los em commit ou stash.
 
 Use default seguro quando inequívoco:
 
-- branch/worktree correto com WIP coerente → retome no lugar;
 - cursor comprovadamente atrasado e sem conflito de identidade → atualize apenas os campos
   evidenciados;
-- registro ativo aponta para worktree válido → execute de lá.
+- registro ativo aponta para worktree válido → execute de lá;
+- WIP coerente **fora** de retomada mid-plan (ajuste/bug avulso na branch certa) → retome no lugar.
 
-Pergunte somente quando há caminhos materialmente diferentes. Apresente recomendação e efeitos:
+**Retomada mid-plan com WIP sempre abre o gate de recuperação.** Reabrir um plano no meio com working
+tree suja é decisão estrutural: não retome in-place em silêncio só porque o WIP parece coerente.
+Apresente o ponto de retorno e as opções, com a recomendada pré-selecionada:
 
 ```text
-1. Retomar o WIP no local correto.
-2. Criar branch de resgate/checkpoint e depois reconciliar.
-3. Guardar WIP em stash nomeado (muda a working tree).
-4. Descartar/restaurar conteúdo (destrutivo; confirmação explícita).
-5. Reconciliar apenas o cursor.
+Gate de recuperação — plano "<nome>" retomado no meio (responda "ok" ou escolha outra opção):
+Ponto de retorno: <ref/branch de resgate proposta | "dispensável: retomar in-place não move o WIP">
+1. [recomendado] Retomar in-place — segue de onde parou; não move o WIP.
+2. Voltar ao último estado selado (validated-head <sha>) — descarta/revisa o WIP com confirmação.
+3. Revisar o diff antes de decidir — inventário completo do WIP (§2) e então reescolha.
+4. Descartar o WIP — destrutivo; exige confirmação explícita e ponto de retorno antes (§4).
 ```
 
-Não mostre opções inaplicáveis. Descarte, stash, abort, reset, deleção ou remoção de worktree nunca
-são escolhidos autonomamente.
+Fora da retomada mid-plan, pergunte somente quando há caminhos materialmente diferentes; não mostre
+opções inaplicáveis. Descarte, stash, abort, reset, deleção ou remoção de worktree nunca são
+escolhidos autonomamente.
+
+Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing e escale ao coordenador o que exigir decisão.
 
 ## 4. Ponto de retorno antes de risco
 

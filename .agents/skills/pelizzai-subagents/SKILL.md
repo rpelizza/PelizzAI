@@ -18,6 +18,8 @@ Delegar trabalho a um **subagente isolado**: contexto próprio, sem poluir o seu
 
 <MEMBRO-DO-TIME-STOP>
 Se você é o subagente despachado, execute apenas a sua tarefa: acione `pelizzai-reasoning`, aplique as skills de domínio coladas no seu briefing (elas prevalecem sobre padrões genéricos) e a camada global `pelizzai-preferences`, e devolva o resultado no formato combinado. Não delegue sub-subagentes nem orquestre o fluxo. Em tarefa de implementação, **não commite** — a consolidação é do coordenador, após review e verificação.
+
+Sob briefing fechado (MEMBRO-DO-TIME-STOP/SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing, **sinalize no retorno** (`DONE_WITH_CONCERNS`/`NEEDS_CONTEXT`) se faltou skill de domínio cobrindo a stack da sua tarefa, e escale ao coordenador o que exigir decisão.
 </MEMBRO-DO-TIME-STOP>
 
 ---
@@ -44,8 +46,11 @@ O handoff dir é gitignored no consumidor e temp em source mode (ver task-cycle 
 ```text
 - Objetivo: o resultado único e claro esperado.
 - Contexto necessário: caminhos, contratos, decisões já tomadas, convenções (o subagente não viu a conversa).
-- Regras/skills locais relevantes: consumidor usa o catálogo; source mode usa o repo-fonte. Cole os
-  pontos operacionais — o subagente deve aplicá-los em vez de padrões genéricos.
+- Regras/skills locais relevantes: SEMPRE inclua o pacote de skills de domínio aplicável à stack da
+  tarefa (consumidor usa o catálogo; source mode usa o repo-fonte). Em dúvida se uma skill de domínio
+  do catálogo se aplica à tarefa, inclua-a: o custo de incluir é menor que o de ignorar uma regra do
+  projeto. Cole os pontos operacionais — o subagente deve aplicá-los em vez de padrões genéricos. Se
+  a stack não tem skill cobrindo, diga isso e peça que o subagente sinalize a lacuna no retorno.
 - Camada global: instrua o subagente a aplicar `pelizzai-preferences` e a raciocinar via
   `pelizzai-reasoning`; em conflito, as SKILLS DE DOMÍNIO coladas e as regras do projeto PREVALECEM.
 - Raciocínio: técnica principal sugerida de `pelizzai-reasoning` conforme a tarefa. Para APIs de
@@ -62,6 +67,10 @@ O resultado de um subagente **não** é verdade até ser conferido. Para impleme
 duas lentes do `pelizzai-review` no perfil proporcional (`combined` ou `split`) e pela
 `pelizzai-verification-before-completion` antes de consolidar. Para pesquisa, cruze achados
 conflitantes e desconfie de relatório não verificado.
+
+Se o subagente sinalizou lacuna de skill de domínio para a stack da tarefa, o coordenador acumula
+essas lacunas e as consolida numa única proposta no fechamento (eixo adoption-driven de
+`pelizzai-finish-task`) — nunca cria skill no meio da tarefa.
 
 ---
 

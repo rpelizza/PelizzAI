@@ -4,14 +4,17 @@ Como o PelizzAI mantém as skills de domínio vivas conforme o projeto evolui, c
 somente quando o projeto o autorizou. Este documento descreve a manutenção **proativa**; uma edição
 pedida explicitamente pelo usuário já tem autorização local e segue o fluxo direto da SKILL.md.
 
-## Os dois eixos de atualização
+## Os três eixos de manutenção
 
-| Eixo               | Disparo                                                              | Ação                                                              |
-| ------------------ | ------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| **Version-driven** | A stack mudou de versão maior, ou ganhou dependência significativa   | Reler a documentação oficial atual e **atualizar** a skill afetada (refresh) |
-| **Rework-driven**  | O mesmo ajuste foi feito à mão várias vezes no histórico do git      | O padrão repetido vira uma **regra** dentro da skill              |
+Dois eixos **atualizam** skills que já existem; um eixo **cria** a primeira skill de uma stack recém-adotada.
 
-Os dois são **opt-in**: o harness detecta, **propõe**, o usuário decide. Nunca rodam sozinhos.
+| Eixo                | Disparo                                                              | Ação                                                              |
+| ------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| **Version-driven**  | A versão maior de um item do Stack baseline mudou nos manifests      | Reler a documentação oficial atual e **atualizar** a skill existente (refresh) |
+| **Rework-driven**   | O mesmo ajuste foi feito à mão várias vezes no histórico do git      | O padrão repetido vira uma **regra** dentro da skill existente    |
+| **Adoption-driven** | A tarefa adotou dependência/serviço significativo AINDA NÃO coberto por skill do catálogo (top-level novo nos manifests/lockfiles, ausente do Stack baseline de `pelizzai/profile.md` E do catálogo) | **PROPOR CRIAR** a primeira skill dessa stack, fundamentada em context7 ou documentação oficial atual da versão travada — não apenas atualizar |
+
+Os três são **opt-in**: o harness detecta, **propõe**, o usuário decide. Nunca rodam sozinhos.
 
 ### Version-driven (refresh)
 
@@ -21,6 +24,26 @@ Os dois são **opt-in**: o harness detecta, **propõe**, o usuário decide. Nunc
 3. Atualize a skill afetada em modo refresh (ver "Refresh nunca sobrescreve às cegas").
 4. Registre no ledger (eixo = version-driven, novo commit/ref, data).
 ```
+
+### Adoption-driven (criar do manifest)
+
+Version-driven e rework-driven só **atualizam** o que já existe. Adoption-driven é o único eixo que **cria** — restaura a criação incremental que acompanha a evolução real da stack, sem voltar ao "máximo" do bootstrap antigo (que mirava criar o máximo de skills). Ele só dispara quando uma stack nova, significativa e não coberta entra no projeto.
+
+```text
+1. Detecte a adoção: o diff dos manifests/lockfiles desde `last-review` mostra um top-level novo,
+   ausente do **Stack baseline** de `pelizzai/profile.md` E do catálogo `pelizzai/domain-skills.md`.
+2. Filtre por alavancagem: só proponha para tecnologia externa significativa (framework, ORM/dados,
+   auth, pagamentos, fila/infra sensível). Utilitário trivial não vira skill (mantém "menor conjunto").
+3. No FECHAMENTO da tarefa (nudge read-only da `pelizzai-finish-task`), apresente UMA proposta
+   agrupada — nunca um gate por tarefa: "A tarefa adotou <lib@versão do lockfile>, sem domain skill
+   cobrindo. Criar uma agora, fundamentada em context7 ou documentação oficial atual?
+   [criar · adiar · não criar]". Recomendado: "criar" para libs de alta alavancagem; "adiar" para utilitário.
+4. Só após "sim": crie UMA skill (mini bootstrap-write de uma skill) reutilizando o motor de autoria,
+   fundamentada em context7 ou documentação oficial atual da versão travada — sem doc atual disponível,
+   adie (nunca invente de memória). Catalogue e registre no ledger com eixo = adoption-driven.
+```
+
+As lacunas de cobertura sinalizadas durante o consumo (execução inline/subagents/time que toca uma stack sem skill cobrindo) alimentam este eixo: são coletadas e viram UMA proposta agrupada no fechamento, jamais uma criação no meio da tarefa. A detecção do drift/adoção é automática (a inteligência permanece); a escrita da skill exige "sim" e nunca sobrescreve às cegas — o mesmo `propor → confirmar → aplicar → registrar` dos outros eixos.
 
 ### Rework-driven (aprender com o histórico)
 

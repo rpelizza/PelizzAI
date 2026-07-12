@@ -58,8 +58,32 @@ Separe fatos observados de inferências. Não escreva relatório genérico se o 
 Ao terminar scan-only:
 
 - entregue a análise solicitada;
-- se uma tarefa mutável precisa de bootstrap, proponha o menor conjunto de artefatos/skills e peça consentimento uma vez;
+- nas bordas design→plano e plano→execução, PUXE proativamente a proposta do menor conjunto de domain skills (não espere o usuário digitar `bootstrap`) — ver **Gate proativo de domain skills**; peça consentimento uma vez;
 - não crie placeholders para "preparar depois".
+
+## Gate proativo de domain skills (bordas design→plano e plano→execução)
+
+A classificação de stack e a lista de candidatas são SEMPRE computadas — a inteligência do scan permanece — mas viram **recomendação a ratificar**, nunca escrita silenciosa. Puxe a proposta nas duas bordas de alto valor, uma vez e agrupada, em vez de esperar o usuário digitar `bootstrap`:
+
+- **design→plano (projeto novo):** após o design ser aprovado (`pelizzai-brainstorming`), detecte a stack escolhida; para cada tecnologia externa significativa (framework, ORM/dados, auth, pagamentos, fila/infra), proponha as domain skills fundamentadas em `context7`/doc oficial da versão pretendida, antes de entregar à `pelizzai-writing-skills`.
+- **plano→execução (projeto existente):** antes de fixar a lane de build, se a stack de uma tarefa mutável não está coberta pelo catálogo (ausente, OU presente mas sem cobrir aquela stack), proponha o conjunto mínimo que evitaria erro do agente.
+
+Gate único, com default recomendado pré-selecionado:
+
+```text
+Detectei a stack <X, Y, Z>. Proponho <N> domain skills: [nome — decisão/erro que corrige],
+fundamentadas em context7/doc oficial da versão travada no manifest.
+Opções: [A] criar as N recomendadas · [B] escolher subconjunto · [C] nenhuma agora (registro o motivo).
+Recomendado: <A ou o subconjunto de alta alavancagem — auth, pagamentos, dados/ORM, framework>.
+[ ] armar manutenção: gravar Stack baseline no profile + semear ledger + hook de cadência (opt-in) —
+    recomendado "sim" mesmo quando você escolhe nenhuma skill agora.
+```
+
+Zero domain skills é um resultado possível QUANDO ratificado pelo usuário diante da proposta: a decisão de não criar é do usuário, não do classificador. "Primeira interação" não dispara ESCRITA de bootstrap sozinha; uma tarefa mutável cuja stack não está no catálogo dispara esta PROPOSTA (não a escrita). Nada — skill, catálogo, ledger, profile ou hook — é gravado sem "sim" explícito (propor-confirmar); `scan-only` permanece read-only até lá.
+
+Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing e escale ao coordenador o que exigir decisão.
+
+**Source mode** (repo-fonte PelizzAI): este gate NÃO roda; regras de domínio, se houver, ficam no execution record nativo.
 
 ## Bootstrap-write
 
@@ -96,9 +120,9 @@ Crie uma candidata somente quando todos forem verdadeiros:
 - há evidência no repo, design aprovado ou documentação oficial.
 ```
 
-Zero domain skills é resultado válido. Em muitos projetos, 1–3 bastam. Não crie uma skill por pasta, ferramenta ou responsabilidade genérica.
+Zero domain skills é um resultado possível QUANDO ratificado pelo usuário diante da proposta — a decisão de não criar é do usuário, não do classificador. Em muitos projetos, 1–3 bastam. Não crie uma skill por pasta, ferramenta ou responsabilidade genérica.
 
-Apresente as candidatas (nome + erro que evitam) e aguarde confirmação antes de redigi-las. Para stack/lib externa, fundamente na documentação oficial atual; `context7` é preferencial quando disponível, não um bloqueio para regras internas observadas no repo.
+Apresente SEMPRE as candidatas (nome + erro que evitam) e aguarde confirmação antes de redigi-las — a proposta é apresentada mesmo quando o conjunto recomendado é pequeno ou vazio. Para stack/lib externa, a skill deve ser fundamentada em `context7` ou documentação oficial atual da versão travada; para regras internas observadas no repo, `context7` é preferencial, não um bloqueio.
 
 ### 4. Criar os artefatos
 
@@ -106,7 +130,7 @@ O bootstrap persistente deixa:
 
 - `pelizzai/domain-skills.md` — catálogo, inclusive `_nenhuma por enquanto_` quando aplicável;
 - `pelizzai/data/review-domain-skills.md` — ledger semeado com a data/HEAD atuais;
-- `pelizzai/profile.md` — comandos reais, package manager, stack baseline e skill roots;
+- `pelizzai/profile.md` — comandos reais, package manager, **Stack baseline** (âncora de drift dos eixos version/adoption) e skill roots; grave também a seção **Defaults de execução ratificados** com todos os campos em `<unset>` — o bootstrap não chuta política; o usuário ratifica no gate pós-plano;
 - `pelizzai/.gitignore` — proteção scoped dos efêmeros.
 
 Conteúdo obrigatório de `pelizzai/.gitignore`:
@@ -122,9 +146,11 @@ Verifique com `git check-ignore` usando arquivos de prova temporários; remova a
 
 Crie sob demanda, não no bootstrap: `context.md`, `adr/`, `out-of-scope/`, `specs/`, `plans/` e diretórios efêmeros.
 
+**Armar a manutenção é resultado de 1ª classe, mesmo com zero skills.** A inicialização mínima (arm-only) grava o profile (Stack baseline + skill roots + comandos reais), semeia o ledger com a data de hoje e oferece o hook de cadência — sem exigir criar nenhuma skill (`_nenhuma por enquanto_` é catálogo válido). Trate "armar a manutenção" como item ratificável distinto de "criar skills": sem a âncora (Stack baseline + ledger), os eixos version/adoption/rework e a cadência ficam sem onde disparar depois — a maquinaria morre na origem.
+
 ### 5. Projeto novo
 
-Sem código/padrões, use `pelizzai-brainstorming` no modo proporcional para aprovar o design. Depois crie apenas domain skills justificadas pelo design; não escreva plano de implementação automaticamente se o usuário pediu apenas bootstrap.
+Sem código/padrões, use `pelizzai-brainstorming` no modo proporcional para aprovar o design. Após aprovar o design, aplique o **Gate proativo de domain skills** na borda design→plano: detecte a stack escolhida e proponha o conjunto recomendado (com o item de armar manutenção) antes de entregar à `pelizzai-writing-skills`. Depois crie apenas domain skills justificadas pelo design e ratificadas pelo usuário; não escreva plano de implementação automaticamente se o usuário pediu apenas bootstrap.
 
 ### 6. Hooks e integrações
 
@@ -132,9 +158,27 @@ Hooks Claude são opt-in e separados:
 
 - cadence: lembrete não bloqueante;
 - guardrails: rede de segurança Git;
-- SessionStart: entrada + tarefa ativa.
+- SessionStart: entrada + tarefa ativa;
+- writegate: rede de segurança fail-closed (`PreToolUse`) que bloqueia escrita de produto em branch protegida/destacada ou enquanto o gate de isolamento continua `<pending>` em `pelizzai/data/state.md` — move o invariante "isolamento antes da primeira escrita" da obediência do modelo para enforcement executável; fail-open em qualquer erro do próprio hook (sempre exit 0 quando não pode decidir).
 
-Explique o efeito de cada um e só edite settings após confirmação. Recomende provider/MCP apenas quando agregar ao projeto; não pesquise catálogo de ferramentas por rotina.
+Explique o efeito de cada um e só edite settings após confirmação. O writegate, como os demais, é opt-in e mesclado em `.claude/settings.json` sem sobrescrever hooks/permissões já existentes; instalação recomendada em todo consumidor e desabilitável a qualquer momento:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-writegate.mjs\"" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Em frota sem Node, use o `.ps1` equivalente (`pwsh -NoProfile -File "${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-writegate.ps1"`). Recomende provider/MCP apenas quando agregar ao projeto; não pesquise catálogo de ferramentas por rotina.
 
 ### 7. Validar e fechar
 
@@ -142,7 +186,7 @@ Antes de declarar bootstrap pronto:
 
 ```text
 [ ] catálogo existe e corresponde às skills reais;
-[ ] ledger/profile não têm placeholders;
+[ ] ledger/profile não têm placeholders (campos `<unset>` em *Defaults de execução ratificados* são estado válido — política ainda não ratificada —, não placeholder a preencher);
 [ ] comandos vieram de manifests/scripts reais;
 [ ] skill roots e paridade foram verificados;
 [ ] efêmeros passam em git check-ignore;

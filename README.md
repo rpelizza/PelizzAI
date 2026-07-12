@@ -18,15 +18,17 @@ subagents são ferramentas situacionais.
 flowchart LR
     U["Pedido"] --> C["pelizzai-core<br/>objetivo e sucesso"]
     C --> R["pelizzai-router<br/>effect · intent · risk<br/>uncertainty · surfaces"]
-    R --> H["exatamente uma head skill"]
-    R --> O["overlays obrigatórios<br/>por superfície"]
+    R --> K["Gate de kickoff<br/>rota recomendada · ratificada"]
+    K --> H["exatamente uma head skill"]
+    K --> O["overlays obrigatórios<br/>por superfície"]
     H --> E["execução proporcional"]
     O --> E
     E --> V["review + Verification<br/>selam o conteúdo"]
     V --> F["Finish integra<br/>sem mudar o conteúdo"]
 ```
 
-O envelope de decisão é derivado do pedido e das evidências; não vira formulário para o usuário:
+O envelope de decisão é derivado do pedido e das evidências; não vira formulário para o usuário —
+mas a rota montada volta como **recomendação a ratificar** no Gate de kickoff antes de investir:
 
 | Campo | Valores | Decisão que governa |
 | --- | --- | --- |
@@ -35,6 +37,25 @@ O envelope de decisão é derivado do pedido e das evidências; não vira formul
 | `risk` | low, medium, high | profundidade de validação, review e contenção |
 | `uncertainty` | low, medium, high | quanto descobrir antes de implementar |
 | `surfaces` | UI, security, data, public-contract, docs, none | quais overlays atravessam o fluxo |
+
+### Kickoff: a rota é recomendação, não decisão
+
+A classificação continua rica e derivada em silêncio, mas nunca é aplicada em silêncio. Antes de
+investir, o `pelizzai-router` apresenta a **Análise da proposta** (premissas, lacunas, riscos e
+alternativas materiais) e, no **Gate de kickoff**, a rota proposta — lane, head skill, overlays e
+descoberta — como um bloco único de recomendação com o default já pré-selecionado. Classificar é do
+harness; decidir é do usuário.
+
+- Efeito read-only, ou ajuste/`bounded` de risco e incerteza baixos, seguem numa **linha única** que
+  nomeia a classificação para permitir veto, sem parar.
+- Lane `standard`/`exploratory`, `risk: high`, `uncertainty` média/alta, efeito `external` ou ≥2
+  leituras materiais abrem o **bloco** que para e aguarda o "ok" — ou o ajuste item a item.
+- Quando o usuário parece não-técnico ou a intenção admite leituras diferentes, o kickoff reapresenta
+  o entendido ("vou tratar como feature/ajuste/bug/refactor — confere?") e registra `audience`.
+
+Subir a descoberta — `pelizzai-brainstorming` ou `pelizzai-interview-me` — está sempre a uma palavra
+de distância: quando há lacuna material que muda escopo, UX, arquitetura, segurança ou dados, o
+harness a propõe, e a decisão de pular a descoberta é do usuário.
 
 ### Uma head skill, overlays transversais
 
@@ -79,9 +100,19 @@ flowchart TD
     CP --> WT["worktree da mesma branch existente"]
 ```
 
-Branch, execução inline e commits granulares são defaults seguros para trabalho comum. Worktree,
-team ou subagents entram somente quando frentes realmente independentes justificam o custo. O
-usuário não recebe menus sem uma escolha material.
+Branch, execução inline e commits granulares são os defaults **recomendados** para trabalho comum;
+worktree, team e subagents entram quando frentes realmente independentes justificam o custo. Nada
+disso é aplicado em silêncio: isolamento, modo de execução — com `team` **sempre visível** e sem
+ranking — e estratégia de commit voltam como recomendação a ratificar num único bloco por borda.
+Tracks com plano resolvem isso no **Gate de setup pós-plano** da `pelizzai-execution-plans` (conteúdo
+do plano, isolamento, branch, modo, commits e review numa só mensagem, antes da Tarefa 1); ajuste e
+bug usam um confirm de uma linha da head skill. `squash-final` só ocorre a pedido explícito do usuário.
+
+Decisões estruturais que o usuário ratifica viram **política do projeto** em `pelizzai/profile.md`
+(seção *Defaults de execução ratificados*, que nasce `<unset>` e só o usuário preenche): as tarefas
+seguintes veem um recap de uma linha ("seguindo a política deste projeto: … — muda algo?") e
+prosseguem, parando de novo só quando a tarefa foge da política ou o usuário pede. `destination`
+nunca é política herdada — push, PR e publicação são confirmados por tarefa.
 
 ## Rotas proporcionais
 
@@ -168,7 +199,9 @@ projeto consumidor:
 
 - análise sem escrita usa `pelizzai-audit` em `scan-only`;
 - `bootstrap-write` só ocorre por pedido explícito ou consentimento após a proposta;
-- o bootstrap cria o menor conjunto útil de skills de domínio — zero é válido;
+- nas bordas design→plano e plano→execução a audit **propõe** proativamente o menor conjunto útil de
+  skills de domínio (fundamentadas em documentação oficial atual), em vez de esperar o comando
+  `bootstrap`; nada é escrito sem um "sim" e zero skills é um resultado válido quando ratificado;
 - `pelizzai/.gitignore` é criado e verificado com `git check-ignore` para os efêmeros.
 
 ```text
@@ -187,10 +220,13 @@ pelizzai/
     └── reports/                ignorado
 ```
 
-O `state.md` é escalar por repositório e registra, entre outros campos, `effect`, `risk`,
-`overlays`, `base-ref`, `base-sha`, `branch`, `isolation`, `execution-mode`, `plan` e
-`validated-head`. Na retomada, esses dados são confrontados com Git; divergências perigosas vão
-para `pelizzai-recovery`.
+O `state.md` é escalar por repositório e registra, entre outros campos, `effect`, `risk`, `lane`,
+`overlays`, `audience`, `base-ref`, `base-sha`, `branch`, `isolation`, `execution-mode`,
+`commit-strategy`, `kickoff`, `plan` e `validated-head`. Isolamento, modo e commit nascem
+`<pending>` e só deixam de sê-lo quando o usuário ratifica o gate; `kickoff: ratificado` marca a
+rota confirmada. A política de execução ratificada do projeto vive à parte, em `pelizzai/profile.md`,
+e não é herança de tarefa. Na retomada, esses dados são confrontados com Git; divergências perigosas
+vão para `pelizzai-recovery`.
 
 ## Fonte, distribuição e compatibilidade
 
@@ -220,7 +256,7 @@ função é apenas encaminhar aos entrypoints e às regras compartilhadas.
 PelizzAI/
 ├── .claude/
 │   ├── skills/                   fonte canônica das skills
-│   └── hooks/                    cadence, guardrails e SessionStart opt-in
+│   └── hooks/                    cadence, guardrails, writegate e SessionStart opt-in
 ├── .agents/skills/               espelho gerado
 ├── .cursor/rules/pelizzai.mdc    adaptador manual
 ├── scripts/
@@ -235,8 +271,11 @@ PelizzAI/
 ```
 
 Os hooks são redes de segurança, não o cérebro do harness. Guardrails bloqueiam comandos Git
-destrutivos conhecidos; erros internos do hook são fail-open para não sequestrar a ferramenta.
-Cadence e SessionStart apenas lembram contexto quando instalados com consentimento.
+destrutivos conhecidos; o writegate opt-in é um `PreToolUse` fail-closed que barra escrita de produto
+em branch protegida/destacada ou enquanto o isolamento está `<pending>`, movendo o invariante "isolar
+antes da primeira escrita" da obediência do modelo para enforcement executável. Erros internos de
+qualquer hook são fail-open para não sequestrar a ferramenta. Cadence e SessionStart apenas lembram
+contexto quando instalados com consentimento.
 
 ## Desenvolvimento do harness
 

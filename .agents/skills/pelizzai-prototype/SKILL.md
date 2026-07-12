@@ -23,6 +23,19 @@ Use somente quando:
 [ ] há critério de parada e destino do código.
 ```
 
+Os itens acima são o teste de adequação (decidir que um spike é o movimento certo continua seu
+trabalho); eles **não** autorizam sozinhos escrever o experimento. Um protótipo descartável é decisão
+estrutural e exige **aval explícito do usuário**, ratificado no gate certo — não no gate interno da
+skill:
+
+- com descoberta/plano → proponha o spike no gate de descoberta (`pelizzai-brainstorming`) ou no gate de setup pós-plano;
+- track de escrita sem plano → inclua o spike no confirm de kickoff da head skill.
+
+Recomende e aguarde: "posso gastar `<timebox>` num spike descartável para responder `<pergunta>`?
+destino: `<apagar|absorver|virar tarefa>`". Sem "sim", não escreva o experimento.
+
+Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing e escale ao coordenador o que exigir decisão.
+
 Protótipo escreve: passe por `pelizzai-starting-branch` antes. Use path temporário ignorado ou path
 de protótipo já adotado pelo projeto. Source mode nunca cria runtime `pelizzai/`; prefira temp do
 sistema ou estrutura nativa. Não inclua segredo/dado real desnecessário.

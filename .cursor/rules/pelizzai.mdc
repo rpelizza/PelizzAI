@@ -13,7 +13,9 @@ podem ser respondidas diretamente.
 ## Contrato de entrada
 
 O router deriva `effect`, `intent`, `risk`, `uncertainty` e `surfaces`; escolhe exatamente uma head
-skill e acrescenta overlays apenas por sinais observáveis.
+skill e acrescenta overlays apenas por sinais observáveis. A rota classificada (lane, head skill,
+overlays) é apresentada como **recomendação a ratificar** no Gate de kickoff antes de investir —
+bloco único, não formulário; subir a descoberta (brainstorming/entrevista) está a uma palavra.
 
 - `read-only`: inspecione sem criar branch, state, profile, catálogo, relatório ou bootstrap.
 - `write-local`: passe pelo gate de primeira escrita antes de qualquer arquivo persistente.
@@ -39,6 +41,11 @@ subagents e entrevistas também são situacionais. A estratégia de teste depend
   configuração, teste, scaffold ou protótipo.
 - Specs e planos ficam na task branch. Um worktree posterior parte da mesma branch existente após
   checkpoint do planejamento.
+- Isolamento, modo de execução (com `team` **sempre visível**, sem ranking) e estratégia de commit
+  são recomendação a ratificar num único gate — no kickoff (lanes sem plano) ou no Gate de setup
+  pós-plano — nunca default silencioso; `squash-final` só a pedido explícito. A política ratificada
+  do projeto vive em `pelizzai/profile.md` e reaparece como recap de uma linha, não como pergunta
+  repetida; `destination` (push/PR/publicação) é confirmado por tarefa, nunca herdado.
 - O conteúdo só está pronto quando review, overlays e Verification validam o mesmo commit e gravam
   seu SHA em `validated-head`. Finish pode acrescentar apenas o commit metadata-only de `state.md`.
 - Push, PR, deploy, mensagem, descarte e outras ações externas exigem o gate correspondente.

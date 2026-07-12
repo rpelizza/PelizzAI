@@ -1,12 +1,15 @@
 # Perfil de execução — <projeto>
 
 > Detectado pela `pelizzai-audit` no bootstrap, lendo os scripts REAIS do projeto
-> (package.json `scripts`, Makefile/Justfile, pyproject, …) — nunca chutado.
+> (package.json `scripts`, Makefile/Justfile, pyproject, …) — nunca chutado. A exceção é
+> a seção *Defaults de execução ratificados*, que NÃO é detectada: nasce `<unset>` e só o
+> usuário a preenche ao ratificar a política no gate pós-plano.
 > Vive em `pelizzai/profile.md`. Consumido por: `pelizzai-tdd` (comando de teste),
-> `pelizzai-execution-plans` (validação final), `pelizzai-finish-task` (verificação),
-> `pelizzai-debugging` (loop de feedback) e `pelizzai-writing-skills` (stack baseline
-> → eixo version-driven). Atualize quando os scripts/manifests mudarem; em workspace,
-> repita as seções por projeto.
+> `pelizzai-execution-plans` (gate pós-plano + validação final), `pelizzai-finish-task`
+> (verificação e destino), `pelizzai-router` (recomendação dos defaults de execução),
+> `pelizzai-debugging` (loop de feedback) e `pelizzai-writing-skills` (Stack baseline
+> → eixos version/adoption-driven). Atualize quando os scripts/manifests mudarem; em
+> workspace, repita as seções por projeto.
 
 ## Harness e skill roots
 
@@ -16,6 +19,19 @@
 
 _Detecte pelos arquivos realmente instalados. Domain skills são gravadas no root canônico e,
 quando houver mirrors, sincronizadas e verificadas; nunca assuma `.claude/skills` em toda IDE._
+
+## Defaults de execução ratificados
+
+> Política de PROJETO explicitamente ratificada pelo usuário — NÃO é herança da tarefa anterior.
+> O gate pós-plano segue estes valores e só interrompe quando a tarefa foge deles. No bootstrap
+> nascem todos `<unset>`; o harness só os aplica pela 1ª vez após ratificação no gate pós-plano.
+
+- isolation-default: <branch|worktree|unset>
+- execution-mode-default: <inline|subagents|team|unset>
+- commit-strategy-default: <granular|squash-final|unset>
+- review-policy-default: <combinado|split|unset>
+- Ratificado em: <AAAA-MM-DD> | Overrides desde então: <n>
+<!-- destination não é persistível: push/PR/publicação exigem confirmação por tarefa -->
 
 ## Comandos
 
@@ -44,7 +60,10 @@ _Data do snapshot: AAAA-MM-DD (bootstrap ou último refresh)._
 | `<framework>`     | `<x.y.z>`         |
 | `<lib-chave>`     | `<x.y.z>`         |
 
-_Âncora do eixo version-driven da `pelizzai-writing-skills`: drift = manifests atuais ≠ baseline._
+_Âncora dos eixos version-driven e adoption-driven da `pelizzai-writing-skills`:
+version-driven = a versão de um item deste baseline mudou nos manifests (drift de versão);
+adoption-driven = há top-level novo nos manifests, ausente deste baseline E do catálogo
+`pelizzai/domain-skills.md` → proposta de CRIAR skill da stack nova._
 
 ## MCPs disponíveis (opcional)
 

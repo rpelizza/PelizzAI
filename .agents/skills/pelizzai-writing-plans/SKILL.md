@@ -12,9 +12,12 @@ escopo ou prova. O plano descreve decisões e critérios; não antecipa a implem
 
 **Anuncie:** "Usando a skill PelizzAI Writing Plans para transformar os requisitos num plano executável."
 
-Em consumidor, salve em `pelizzai/plans/AAAA-MM-DD-<topico>.md`, salvo preferência explícita. Em
-source mode, use o plano nativo da plataforma e só crie arquivo se o usuário pedir um artefato
-persistente. A task/planning branch já deve existir; state é obrigatório apenas no consumidor.
+Em consumidor, o plano é **sempre materializado** em `pelizzai/plans/AAAA-MM-DD-<feature>.md`
+(salvo local diferente pedido explicitamente); é o artefato durável que a execução lê. Em source
+mode, registre o plano no execution record nativo de forma **discoverable e verificável** (as
+tarefas e o mapa requisito→tarefa ficam rastreáveis, não efêmeros) e **ofereça materializar** em
+arquivo no path nativo do repo quando o usuário quiser durabilidade; nunca crie runtime `pelizzai/`
+consumidor no repo-fonte. A task/planning branch já deve existir; state é obrigatório apenas no consumidor.
 
 ## Pré-condições
 
@@ -124,27 +127,45 @@ Antes do handoff:
 3. Confirme overlays e estratégia de prova por artefato.
 4. Procure placeholders e comandos chutados.
 5. Confirme que a lane não recebeu cerimônia maior que seu risco.
+6. **Exponha as lacunas materiais** do plano: caça ativa por casos não tratados, validação
+   ausente, estado/erro indefinido, autorização faltante e contradições spec↔plano↔tarefa.
 
-Use revisão independente ou `pelizzai-interview-me` somente quando incerteza, risco ou decisões
-reais justificarem. Para `bounded`, a autoavaliação acima normalmente basta. Para `standard`, use
-stress focal se restarem trade-offs. Para `exploratory`, stress/review independente é esperado.
-Não reabra design aprovado sem evidência nova.
+Liste as premissas residuais **novas do plano** — apenas as que a descoberta ainda não resolveu,
+sem re-litigar decisões fechadas na borda de design. Cada lacuna material sai da borda resolvida,
+explicitamente aceita pelo usuário, ou convertida em tarefa de investigação registrada — nunca
+engolida em silêncio. Se uma premissa residual muda escopo, contrato ou prova, **proponha**
+`pelizzai-interview-me` focal ou revisão independente e registre a decisão do usuário; nunca a
+imponha. Para `bounded` sem premissa material, a autoavaliação acima basta; `standard` usa stress
+focal se restarem trade-offs; `exploratory` espera stress/review independente. Não reabra design
+aprovado sem evidência nova.
+
+Apresente o plano na borda — `bounded`: resumo das tarefas; `standard`/`exploratory`: mapa
+requisito→tarefa. A ratificação do conteúdo ocorre no gate consolidado (item 0), junto do setup:
+não emita uma pergunta separada só para o plano.
+
+Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o
+briefing e escale ao coordenador o que exigir decisão.
 
 ## Handoff
 
-No consumidor, atualize o campo `plan:` no state. Em source mode, entregue o plano nativo/execution
-record a `pelizzai-execution-plans`. A branch/base já estão definidas; o gate pós-plano resolve
-apenas decisões pendentes com defaults proporcionais:
+No consumidor, atualize o campo `plan:` no state e confirme o caminho materializado
+(`pelizzai/plans/AAAA-MM-DD-<feature>.md`). Em source mode, entregue o plano nativo/execution
+record a `pelizzai-execution-plans` de forma discoverable. A branch/base já estão definidas;
+**encaminhe ao Gate de setup pós-plano** da `pelizzai-execution-plans`, que apresenta numa única
+mensagem o bloco consolidado de ratificação: o **conteúdo** do plano (item 0, para aprovar) e o
+**como** — isolamento, modo (as três opções sempre visíveis), commits e review. A
+`pelizzai-writing-plans` leva apenas a **recomendação**, não a decisão:
 
 ```text
-isolation: branch por default; worktree apenas se pedido/justificado
-execution-mode: inline por default; subagents/team por independência ou coordenação real
-commit-strategy: granular por default; squash-final só com trade-off/pedido
+isolation: branch recomendado; worktree apenas se pedido/justificado — levado ao gate
+execution-mode: inline recomendado; subagents/team por independência ou coordenação real — levado ao gate
+commit-strategy: granular recomendado; squash-final só com trade-off/pedido — levado ao gate
 ```
 
-Não mostre todas as opções quando o default é seguro e reversível. Se o usuário pediu **apenas o
-plano**, não execute código: valide o artefato, consolide/sele a entrega de planejamento e mantenha
-local salvo pedido externo.
+Não aplique isolamento, modo ou commit como decisão sem ratificação do usuário no gate consolidado;
+o plano informa e o gate ratifica antes da Tarefa 1. Se o usuário pediu **apenas o plano**, não
+execute código: valide o artefato, consolide/sele a entrega de planejamento e mantenha local salvo
+pedido externo.
 
 ## Red flags
 
@@ -161,7 +182,8 @@ local salvo pedido externo.
 ## Integração
 
 Combina com `pelizzai-brainstorming` quando houve design, `pelizzai-reasoning` para decomposição,
-`pelizzai-frontend`/`pelizzai-oswap` como overlays e `pelizzai-execution-plans` para execução.
+`pelizzai-interview-me` para stress focal de premissa residual material, `pelizzai-frontend`/
+`pelizzai-oswap` como overlays e `pelizzai-execution-plans` para execução.
 
 ## Instrução final
 

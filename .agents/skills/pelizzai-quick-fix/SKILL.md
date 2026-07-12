@@ -31,12 +31,30 @@ aceite claro, promova para lane `bounded` e plano compacto; se surgir decisão/i
 
 ## Processo
 
-A `pelizzai-router` já preparou o contexto de um `ajuste`: `isolation: branch` (num ajuste pontual não se oferece worktree — a starting-branch apenas avisa "vou trabalhar numa branch"), `execution-mode` (normalmente `inline`) e `commit-strategy`. Honre — não re-pergunte.
+A `pelizzai-router` recomenda em silêncio os defaults deste `ajuste` (`isolation: branch`,
+`execution-mode: inline`, `commit-strategy: granular`) e **não** pergunta. A head skill é o único
+emissor da ratificação: antes da primeira escrita de produto, apresente um confirm compacto de UMA
+linha — não um menu, sem enumerar os três modos —, preenchido com o nome/base que a
+`pelizzai-starting-branch` propôs:
+
+`Kickoff: quick-fix na branch <tipo>/<slug> @ <base>, inline, commit único granular — ok? (ou worktree/squash)`
+
+Um "ok" aceita tudo; um override nomeado (worktree, squash) ajusta a linha. Ratificado, não
+re-pergunte. Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates:
+aplique o briefing e escale ao coordenador o que exigir decisão.
 
 ```text
-1. Branch — invoque pelizzai-starting-branch (nunca em branch protegida).
+1. Branch — a pelizzai-starting-branch propõe `<tipo>/<slug>` e a base descoberta e cria a branch
+   (nunca em branch protegida); esses valores preenchem o confirm de uma linha acima, ratificado
+   antes da primeira escrita de produto (rename via `git branch -m` se o usuário ajustar o nome).
 1.5. Regras locais — no consumidor, confira `pelizzai/domain-skills.md`; em source mode, use as
    regras/skills do próprio repo. Siga somente as aplicáveis à área.
+1.6. Registrar a ratificação (só após o "ok") — grave o marcador `kickoff: ratificado <AAAA-MM-DD>`
+   (com `isolation`/`execution-mode`/`commit-strategy` ratificados) no state consumidor
+   `pelizzai/data/state.md` ou, em source mode, no execution record nativo com a mesma palavra-chave,
+   ANTES da primeira escrita de produto. A head skill é o único dono deste marcador no track
+   `ajuste`; sem ele o writegate (Regra B) bloqueia a primeira escrita de produto e a retomada não
+   reconhece o gate.
 2. Mudança + verificação mínima — toda linha alterada deve rastrear diretamente ao pedido
    (linha sem rastro é scope creep: remova ou escale). Escolha o balde honestamente:
    - Comportamento testável (constante, condição, valor retornado): pelizzai-tdd — menor teste que falha primeiro, depois a mudança.

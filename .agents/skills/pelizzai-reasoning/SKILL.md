@@ -92,6 +92,8 @@ Critério de conclusão:
 
 Não faça perguntas por reflexo. Primeiro use contexto disponível, arquivos, documentação, código e ferramentas adequadas.
 
+Para um pedido novo de feature/refactor com efeito mutável e incerteza material, produza a **Análise da proposta** com [Proposal Stress](techniques/proposal-stress.md) (premortem de escopo) antes de rotear — premissas, lacunas materiais, riscos e alternativas — como resultado apresentado pelo `pelizzai-router`, não como pergunta. Read-only e ajuste trivial não a disparam; risco alto isolado eleva prova e gates, não a incerteza.
+
 Use a skill `pelizzai-interview-me` somente quando houver ambiguidade material que não possa ser resolvida com evidência disponível.
 
 ---
@@ -148,6 +150,8 @@ Leia a técnica correspondente antes de aplicá-la.
 
 > A skill `pelizzai-interview-me` é uma **skill irmã**, não uma das técnicas do catálogo: acione-a para resolver ambiguidade material por entrevista, conforme a Triagem inicial e a matriz.
 
+> **Proposal Stress (Premortem de escopo)** é a rotina de [Assumption Tracking](techniques/assumption-tracking.md) aplicada a um pedido novo, documentada em [proposal-stress.md](techniques/proposal-stress.md): produz a **Análise da proposta** que o `pelizzai-router` apresenta antes de rotear. Não é uma técnica extra do catálogo — é a mesma máquina de premissas com lente de premortem de escopo.
+
 ---
 
 ## Matriz de seleção
@@ -165,6 +169,7 @@ Leia a técnica correspondente antes de aplicá-la.
 | Incidente com dano ativo                                     | Constraint Satisfaction  | Decision Making, ReAct, Verification; RCA após conter         |
 | Escolha entre bibliotecas ou arquiteturas                    | Decision Making          | Constraint Satisfaction, Evidence Synthesis, Tree of Thoughts |
 | Pesquisa com várias fontes                                   | Evidence Synthesis       | Verification, Assumption Tracking                             |
+| Novo pedido de feature/refactor com incerteza material, antes de rotear | Assumption Tracking + Proposal Stress | Constraint Satisfaction, pelizzai-interview-me |
 | Requisitos ambíguos ou incompletos                           | Assumption Tracking      | Constraint Satisfaction, pelizzai-interview-me                |
 | Plano dependente de premissa não confirmada                  | Assumption Tracking      | Plan and Execute, Verification                                |
 | Múltiplas alternativas interdependentes com impacto material | Tree of Thoughts         | Decision Making, Constraint Satisfaction                      |

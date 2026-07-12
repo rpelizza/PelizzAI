@@ -23,6 +23,10 @@ Entrevista não substitui leitura do projeto nem serve para fabricar lacunas.
 `pelizzai-brainstorming` cria o design. Esta skill resolve decisões humanas pendentes; se ainda não
 há design ou opções concretas, devolva ao brainstorming.
 
+Esta skill é PROPOSTA pela Análise da proposta do router ou pelo gate de descoberta do
+`pelizzai-brainstorming`, ou pedida diretamente pelo usuário — nunca é etapa cega de toda feature.
+O router a reconecta ao roteamento; evidência local que resolve a decisão dispensa a entrevista.
+
 ## Antes de perguntar
 
 1. Leia pedido, spec/plano, state e somente o código/documentação relevantes.
@@ -60,8 +64,9 @@ premissa de escala ou integração não confirmada
 contradição entre spec, plano e código
 ```
 
-Não invente uma lista de riscos para provar profundidade. Lane bounded normalmente dispensa esta
-skill. Standard usa stress focal; exploratory pode exigir várias decisões, mas ainda encerra quando
+Não invente uma lista de riscos para provar profundidade. A lane `bounded` costuma dispensar esta
+skill, mas `bounded` com lacuna material também pode oferecê-la — o gatilho é a lacuna, não a lane.
+Standard usa stress focal; exploratory pode exigir várias decisões, mas ainda encerra quando
 o próximo passo deixa de depender do usuário.
 
 ## Critério de parada
@@ -77,14 +82,20 @@ continue; se cria trabalho técnico investigável, devolva-o ao fluxo como taref
 
 ## Saída e handback
 
+A entrevista **termina com a lista numerada de lacunas e como cada uma muda a solução** — caça ativa,
+não prosa: aponte cada lacuna material ainda que o usuário não a tenha citado e diga como ela foi
+resolvida, explicitamente aceita ou convertida em tarefa de investigação.
+Um resumo sem a seção de lacunas está incompleto.
+
 Retorne de forma compacta:
 
 ```text
 Decisões:
 - escolha — motivo/evidência
 
-Riscos ou lacunas materiais:
-- risco — mitigação, aceitação ou tarefa de investigação
+Lacunas (numeradas — cada uma com o que muda na solução):
+1. lacuna — muda escopo/UX/arquitetura/segurança/dados — resolvida, aceita ou vira tarefa
+2. ...
 
 Premissas abertas:
 - somente as que ainda limitam a execução
@@ -93,9 +104,9 @@ Próximo passo:
 - skill/artefato que retoma o controle
 ```
 
-Se nenhum risco novo foi encontrado, diga isso; não fabrique um. Retorne ao chamador
-(`pelizzai-brainstorming`, `pelizzai-writing-plans` ou router). Esta skill não escolhe team,
-subagents, branch ou commit strategy.
+Se nenhum risco novo foi encontrado, diga isso; não fabrique um nem declare que todo projeto tem uma
+lacuna. Retorne ao chamador (`pelizzai-brainstorming`, `pelizzai-writing-plans` ou router). Esta
+skill não escolhe team, subagents, branch ou commit strategy.
 
 ## Red flags
 
