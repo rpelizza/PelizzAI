@@ -91,6 +91,11 @@ Depois de todas as mutações de produto e da estratégia de commits final:
 6. Entregue a pelizzai-finish-task.
 ```
 
+Ao gravar `validated-head`, confirme que o state/execution record carrega `kickoff: ratificado`: o
+conteúdo selado nasceu de uma rota estrutural ratificada, não de defaults silenciosos. Se o marcador
+está `pendente` numa entrega planejada, a rota não foi ratificada — resolva no gate certo antes de
+selar. É uma âncora de uma linha, não um checklist novo; read-only/trivial não sela e não a exige.
+
 Na entrada da finish-task em consumidor:
 
 - `git rev-parse HEAD == validated-head`;

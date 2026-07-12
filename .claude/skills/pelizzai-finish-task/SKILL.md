@@ -38,7 +38,7 @@ As seções de state/closure abaixo são exclusivas do projeto consumidor.
 - Depois do seal, não roda squash/rebase/reset, overlay, formatter, codegen, teste que escreva
   snapshot, doc generator nem fix.
 - O único commit novo toca somente pelizzai/data/state.md.
-- Manter local é o default sem efeito externo. Push/PR/remover worktree/descarte exigem decisão explícita.
+- Manter local é o default, apresentado proativamente como gate ao fechar — não suprimido. Push/PR/remover worktree/descarte exigem decisão explícita por tarefa, nunca herdada de profile.
 - Nunca use reset --hard, branch -D, worktree remove --force ou stash automático.
 ```
 
@@ -108,11 +108,10 @@ incluiu outro arquivo ou deixou sujeira invalida o fechamento; pare, não faça 
 
 ## 3. Resolver o destino
 
-Se o usuário não pediu publicação, PR, integração ou descarte, **mantenha local** e reporte branch,
-`validated-head` e `delivery-head` (mais `closure-head` no consumidor); não interrompa com menu.
-
-Quando houver intenção externa já expressa, confirme somente o alvo que ainda for materialmente
-ambíguo. Se o usuário pediu opções, apresente:
+Ao fechar, **ofereça o destino** uma vez: **Manter local** é o default, recomendado e
+pré-selecionado. Sempre que houver qualquer intenção externa plausível — o usuário mencionou
+publicar/PR/integrar antes, ou a entrega fecha um plano completo — apresente proativamente o menu e
+aguarde a escolha antes de qualquer efeito externo:
 
 ```text
 Como integrar o conteúdo validado?
@@ -124,6 +123,15 @@ Como integrar o conteúdo validado?
 
 Qual opção?
 ```
+
+Numa tarefa trivial estritamente local, sem qualquer sinal externo, não abra o menu completo:
+ofereça em uma linha ("Mantendo local; quer que eu publique ou abra PR?") e siga o default local se
+o usuário não pedir efeito externo. Quando a intenção externa já foi expressa, confirme somente o
+alvo que ainda for materialmente ambíguo. Push, PR e descarte exigem confirmação **por tarefa** —
+nunca aplicados a partir de um default de profile.
+
+Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing
+e escale ao coordenador o que exigir decisão.
 
 Imediatamente antes de qualquer efeito externo, repita:
 
@@ -200,9 +208,23 @@ Falha significa parar e reportar. Não use `--force`. Não crie outro commit par
 
 ## 5. Nudge de manutenção (read-only)
 
-No consumidor, após o destino, verifique o ledger de domain skills. Se os limiares documentados
-em `pelizzai-writing-skills` estiverem vencidos, sugira uma vez; não bloqueie nem altere a entrega.
-Source mode ou ledger ausente: no-op silencioso.
+No consumidor, após o destino, sem bloquear nem alterar a entrega — tudo aqui é propor-confirmar e
+ação do coordenador; um membro de time apenas sinaliza a lacuna no relatório:
+
+- **Cadência vencida:** verifique o ledger de domain skills. Se os limiares documentados em
+  `pelizzai-writing-skills` estiverem vencidos, sugira a revisão uma vez.
+- **Adoção de stack nova (adoption-driven):** cheque no range fechado desta tarefa
+  (`git diff <base-sha>..<validated-head>` sobre manifests/lockfiles) se uma dependência ou serviço
+  significativo foi adotado sem domain skill cobrindo. Se sim, proponha UMA vez criar a skill,
+  fundamentada em context7/doc oficial da versão travada no lockfile: "A tarefa adotou
+  `<lib@versão>`, sem domain skill cobrindo. Criar uma agora? [criar · adiar · não criar]". Recomende
+  `criar` para libs de alta alavancagem (auth, pagamentos, ORM/dados, framework, fila/infra sensível)
+  e `adiar` para utilitário trivial; a escrita só ocorre depois do "sim", via `pelizzai-writing-skills`.
+- **Manutenção não armada:** se o hook de cadência está instalado mas o ledger está ausente, informe
+  UMA vez ("cadência inativa: sem ledger; rode a inicialização mínima da `pelizzai-audit` para
+  ativar") para distinguir "desligado" de "quebrado".
+
+Source mode, ou sem hook e sem ledger: no-op silencioso.
 
 ## Red flags
 

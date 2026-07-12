@@ -96,7 +96,7 @@ Uma causa direta comprovável não precisa de brainstorming causal. Quando houve
 5. Evidência refutou a hipótese → descarte-a e reoriente.
 ```
 
-Mostre o ranking ao usuário apenas quando conhecimento operacional dele puder mudá-lo; não interrompa um bug local óbvio com cerimônia. Use `pelizzai-team` para investigação read-only somente quando hipóteses independentes puderem ser testadas em paralelo ou após thrashing real. Três fixes definitivos falhos são circuit breaker: pare, resuma evidência e questione hipótese/arquitetura antes de tentar outro.
+Apresente o ranking de hipóteses ao usuário sempre que restar mais de uma hipótese materialmente plausível — o conhecimento operacional dele frequentemente reordena as prioridades; não interrompa um bug local de causa única ou óbvia com cerimônia. Use `pelizzai-team` para investigação read-only somente quando hipóteses independentes puderem ser testadas em paralelo ou após thrashing real. Três fixes definitivos falhos são circuit breaker: pare, resuma evidência e questione hipótese/arquitetura antes de tentar outro.
 
 ---
 
@@ -107,6 +107,22 @@ Antes de qualquer mutação no repositório — teste, instrumentação ou fix �
 `pelizzai/domain-skills.md`; em source mode, use regras/skills do próprio repo. Reverta experimentos
 descartáveis que não pertençam ao fix. Contenção operacional autorizada que não escreve no repo
 não espera uma branch.
+
+Depois da branch e antes de editar o fix, apresente um confirm compacto de UMA linha para ratificar
+isolamento/modo/commit — a head skill é o único emissor, o router não pergunta, e nem o Passo 0
+(contenção reversível) nem a investigação read-only esperam por ele:
+
+`Kickoff: fix na branch <tipo>/<slug> @ <base>, inline, commit único granular — ok? (ou worktree/squash)`
+
+Um "ok" ratifica; um override nomeado ajusta a linha. Ratificado o "ok", grave o marcador
+`kickoff: ratificado <AAAA-MM-DD>` (com isolamento/modo/commit) — no consumidor em
+`pelizzai/data/state.md`, em source mode no execution record nativo com a mesma palavra-chave —
+ANTES da primeira escrita de produto no repositório. A head skill é o único dono deste marcador no
+track `bug`; sem ele o writegate (Regra B) bloqueia a escrita de produto e a retomada não reconhece
+o gate. Contenção reversível (Passo 0) e investigação read-only não esperam por ele; instrumentação
+temporária, teste de regressão e fix, sim — se a instrumentação do Passo 2 for a primeira mutação de
+produto, conduza o confirm e grave o marcador antes dela. Sob briefing fechado (SUBAGENT-STOP), não
+produza análises de rota nem abra gates: aplique o briefing e escale ao coordenador o que exigir decisão.
 
 Escolha a estratégia pela natureza da mudança, conforme `pelizzai-reasoning`:
 
@@ -120,7 +136,15 @@ Escolha a estratégia pela natureza da mudança, conforme `pelizzai-reasoning`:
 - Documentação: lint/links/exemplos/build/render ou inspeção estática proporcional.
 ```
 
-Implemente **um** fix na origem, sem "já que estou aqui". Depois:
+Implemente **um** fix na origem, sem "já que estou aqui".
+
+Se a causa-raiz confirmada estabelece uma decisão arquitetural durável (difícil de reverter,
+surpreendente sem contexto **e** fruto de trade-off real, os três juntos), acione
+`pelizzai-domain-modeling` para registrar o ADR **antes do seal**. Como é decisão emergente — sem
+gate de design prévio —, a domain-modeling a apresenta ao usuário na borda de conclusão antes de
+gravar; a criação do ADR é ação do coordenador. Nunca grave ADR depois de `validated-head`.
+
+Depois:
 
 ```text
 1. Rode de novo o oráculo original — agora verde.

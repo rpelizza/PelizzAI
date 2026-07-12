@@ -194,11 +194,19 @@ circuit-breaker.
 Quick-fix válido não entra nesse procedimento. Se o diff elevar o risco, reclassifique pelo router
 e aplique o review da nova rota antes do commit.
 
-**Track de review avulso:** derive o escopo do pedido e do Git (working tree, range
-`<BASE>..<HEAD>` ou PR); pergunte apenas se duas interpretações mudarem materialmente o resultado.
-Aplique a lente de qualidade + Verification. Este track é read-only e não cria state. Achado
-Critical não se corrige dentro do review: vira um novo track de bug/ajuste via router; os demais
-achados são entregues para decisão do usuário.
+**Track de review avulso:** recomende o escopo derivado do pedido e do Git e **confirme quando for
+ambíguo** — working tree, range `<BASE>..<HEAD>` e PR são interpretações materialmente diferentes;
+não revise o alvo errado por suposição. Com uma só leitura plausível, siga sem perguntar. Aplique a
+lente de qualidade + Verification. Este track é read-only e não cria state. Achado Critical não se
+corrige dentro do review: vira um novo track de bug/ajuste via router; os demais achados são
+entregues para decisão do usuário.
+
+Quando o usuário autoriza **aplicar** os achados, aplique **todos** — Critical, Important e Minor
+(must/should/nice) num despacho consolidado, não só os Critical; roll-up que ninguém corrige é
+descarte silencioso. Cada achado que vira escrita segue a rota do router (quick-fix/tdd/debugging) e,
+depois dos fixes, **reabra o review** sobre o novo conteúdo — "já revisei antes do fix" não vale.
+
+Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing e escale ao coordenador o que exigir decisão.
 
 ---
 

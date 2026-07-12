@@ -58,6 +58,28 @@ Se o seam necessário não existe, isso é sinal arquitetural. Não contorça o 
 
 ---
 
+## Plano de teste na borda (antes do primeiro RED)
+
+Quando a superfície é nova ou alterada de forma material, os comportamentos e seams a testar não
+começam por suposição: apresente o plano de teste na borda e ratifique antes do primeiro RED. A
+escolha de comportamentos/seams continua sua (o desenho é preservado); ela vira recomendação a
+ratificar, não decisão aplicada em silêncio.
+
+```text
+Plano de teste proposto (responda "ok" ou ajuste):
+- Comportamentos por fatia: <lista ordenada de comportamentos observáveis, um por fatia>
+- Seams: <interface/fronteira que exercita cada um sem acoplar à implementação>
+- Fora de escopo: <o que este ciclo não cobre>
+```
+
+Proporcional: fatia única de contrato óbvio, ou plano que já aprovou os comportamentos/seams da
+tarefa, dispensam o gate — não reabra decisão já ratificada. O gate de adequação (acima) permanece:
+se TDD não é a estratégia certa, ele decide isso antes.
+
+Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing e escale ao coordenador o que exigir decisão.
+
+---
+
 ## Ciclo por fatia vertical
 
 ### 1. RED
