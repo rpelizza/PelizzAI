@@ -14,8 +14,8 @@ podem ser respondidas diretamente.
 
 O router deriva `effect`, `intent`, `risk`, `uncertainty` e `surfaces`; escolhe exatamente uma head
 skill e acrescenta overlays apenas por sinais observáveis. A rota classificada (lane, head skill,
-overlays) é apresentada como **recomendação a ratificar** no Gate de kickoff antes de investir —
-bloco único, não formulário; subir a descoberta (brainstorming/entrevista) está a uma palavra.
+overlays) é apresentada como **recomendação a ratificar** no Gate de kickoff. O harness escolhe
+como raciocinar; o usuário decide requisitos, escopo, UX, arquitetura, dados, risco e aceite.
 
 - `read-only`: inspecione sem criar branch, state, profile, catálogo, relatório ou bootstrap.
 - `write-local`: passe pelo gate de primeira escrita antes de qualquer arquivo persistente.
@@ -30,6 +30,10 @@ Para feature/refactor/infra, escolha a lane pelo risco e pela incerteza:
 - `standard`: brainstorming compacto e plano;
 - `exploratory`: descoberta e stress proporcionais antes do plano.
 
+Produto/projeto greenfield é sempre `exploratory`, mesmo com stack definida: faça uma pergunta por
+vez, sempre recomende a melhor opção, produza e estresse spec e plano, obtenha aprovação e decida
+domain skills antes de implementar. Context7 fundamenta opções técnicas; nunca decide pelo usuário.
+
 OODA é uma técnica macro adaptativa, não um ritual universal. Debugging faz triagem e contenção
 quando necessária, usando somente as hipóteses que discriminam as causas plausíveis. TDD, team,
 subagents e entrevistas também são situacionais. A estratégia de teste depende do artefato.
@@ -41,11 +45,9 @@ subagents e entrevistas também são situacionais. A estratégia de teste depend
   configuração, teste, scaffold ou protótipo.
 - Specs e planos ficam na task branch. Um worktree posterior parte da mesma branch existente após
   checkpoint do planejamento.
-- Isolamento, modo de execução (com `team` **sempre visível**, sem ranking) e estratégia de commit
-  são recomendação a ratificar num único gate — no kickoff (lanes sem plano) ou no Gate de setup
-  pós-plano — nunca default silencioso; `squash-final` só a pedido explícito. A política ratificada
-  do projeto vive em `pelizzai/profile.md` e reaparece como recap de uma linha, não como pergunta
-  repetida; `destination` (push/PR/publicação) é confirmado por tarefa, nunca herdado.
+- Base/nome da branch, isolamento, modo de execução (com `team` sempre visível) e estratégia de
+  commit são recomendados e ratificados uma pergunta por vez; nunca default silencioso.
+  `squash-final` só a pedido explícito e `destination` é confirmado por tarefa.
 - O conteúdo só está pronto quando review, overlays e Verification validam o mesmo commit e gravam
   seu SHA em `validated-head`. Finish pode acrescentar apenas o commit metadata-only de `state.md`.
 - Push, PR, deploy, mensagem, descarte e outras ações externas exigem o gate correspondente.
@@ -57,7 +59,8 @@ subagents e entrevistas também são situacionais. A estratégia de teste depend
 ## Propriedade dos arquivos
 
 `.claude/skills/` e `CLAUDE.md` são as fontes canônicas. `.agents/skills/`, `AGENTS.md` e
-`GEMINI.md` são gerados por `scripts/sync-harness.ps1` e não devem ser editados à mão.
+`GEMINI.md` são gerados pelo núcleo portátil `scripts/sync-harness.mjs` (wrappers `.ps1`/`.sh`) e
+não devem ser editados à mão.
 
 Este arquivo `.cursor/rules/pelizzai.mdc` é um **adaptador manual**, não um alvo gerado. Mantenha-o
 curto e alinhado aos entrypoints `pelizzai-core` e `pelizzai-router`.

@@ -108,13 +108,15 @@ Antes de qualquer mutação no repositório — teste, instrumentação ou fix �
 descartáveis que não pertençam ao fix. Contenção operacional autorizada que não escreve no repo
 não espera uma branch.
 
-Depois da branch e antes de editar o fix, apresente um confirm compacto de UMA linha para ratificar
-isolamento/modo/commit — a head skill é o único emissor, o router não pergunta, e nem o Passo 0
-(contenção reversível) nem a investigação read-only esperam por ele:
+Depois que `pelizzai-starting-branch` ratificou base/nome e criou a branch, e antes de editar o fix,
+ratifique isolamento, modo e commits **uma pergunta por turno**. A head skill é o único emissor; o
+router não duplica, e contenção reversível/investigação read-only não esperam por ele:
 
-`Kickoff: fix na branch <tipo>/<slug> @ <base>, inline, commit único granular — ok? (ou worktree/squash)`
+1. `Isolamento recomendado: branch — <motivo>. Alternativa: worktree. Qual escolhe?`
+2. `Modo recomendado: inline — <motivo>. Alternativas: subagents · team. Qual escolhe?`
+3. `Commits recomendados: granular — <motivo>. Alternativa: squash-final. Qual escolhe?`
 
-Um "ok" ratifica; um override nomeado ajusta a linha. Ratificado o "ok", grave o marcador
+Após as três respostas, grave o marcador
 `kickoff: ratificado <AAAA-MM-DD>` (com isolamento/modo/commit) — no consumidor em
 `pelizzai/data/state.md`, em source mode no execution record nativo com a mesma palavra-chave —
 ANTES da primeira escrita de produto no repositório. A head skill é o único dono deste marcador no
@@ -193,4 +195,6 @@ Para falha recorrente, distribuída, de segurança ou incidente, registre també
 
 **Usa condicionalmente:** `pelizzai-reasoning` (seleção acima), `pelizzai-loop` (somente macro-loop em rodadas), [feedback-loops.md](references/feedback-loops.md), skills de domínio, `pelizzai-starting-branch`, `pelizzai-tdd` (bug comportamental automatizável), `pelizzai-frontend` (UI), `pelizzai-verification-before-completion`, `pelizzai-review` e `pelizzai-finish-task`.
 
-Para APIs/libs externas, confirme a documentação oficial atual disponível. Para seam ausente, use `pelizzai-improving-architecture` com o vocabulário de `pelizzai-codebase-design`.
+Para APIs/libs externas, derive a versão dos manifests/lockfiles e consulte Context7 antes de fixar
+a hipótese; documentação oficial atual é fallback. Para seam ausente, use
+`pelizzai-improving-architecture` com o vocabulário de `pelizzai-codebase-design`.

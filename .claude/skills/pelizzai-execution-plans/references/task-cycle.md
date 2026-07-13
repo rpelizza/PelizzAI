@@ -28,7 +28,7 @@ O briefing de cada tarefa inclui:
   raciocine via `pelizzai-reasoning`; em conflito, as SKILLS DE DOMÍNIO coladas neste briefing e as
   regras do projeto PREVALECEM sobre preferences/reasoning.
 - Estratégia de teste/validação escolhida pela matriz do §2. Para APIs externas, fundamente na
-  documentação oficial disponível (MCP/conector quando configurado), não na memória.
+  Context7 para a versão observada; documentação oficial atual é fallback, nunca memória.
 - Raciocínio: quando a tarefa envolve incerteza, decisão ou diagnóstico, a técnica dominante
   sugerida de `pelizzai-reasoning` (decomposição, RCA, comparação, verification — ver a matriz da
   skill); omita para tarefa mecânica de contrato claro — não imponha técnica sem gatilho.

@@ -9,6 +9,7 @@
 #
 # NUNCA copie este arquivo para um projeto consumidor: ele desativaria o lifecycle
 # consumidor e o enforcement do writegate la. A distribuicao correta e:
-#   pwsh scripts/sync-harness.ps1 -ExportConsumer <caminho-do-projeto>
+#   node scripts/sync-harness.mjs --export-consumer <caminho-do-projeto>
+#   # ou os wrappers sync-harness.ps1 / sync-harness.sh
 # que copia skills core, hooks e scripts uteis, gera o CLAUDE.md consumidor e
 # EXCLUI esta sentinela por contrato (removendo-a do destino se existir).

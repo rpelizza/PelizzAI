@@ -31,25 +31,23 @@ aceite claro, promova para lane `bounded` e plano compacto; se surgir decisão/i
 
 ## Processo
 
-A `pelizzai-router` recomenda em silêncio os defaults deste `ajuste` (`isolation: branch`,
-`execution-mode: inline`, `commit-strategy: granular`) e **não** pergunta. A head skill é o único
-emissor da ratificação: antes da primeira escrita de produto, apresente um confirm compacto de UMA
-linha — não um menu, sem enumerar os três modos —, preenchido com o nome/base que a
-`pelizzai-starting-branch` propôs:
+A `pelizzai-router` calcula as recomendações deste ajuste; esta head skill é o único emissor do
+setup. Depois que `pelizzai-starting-branch` ratificou base/nome e criou a branch, pergunte uma
+decisão por turno antes da primeira escrita:
 
-`Kickoff: quick-fix na branch <tipo>/<slug> @ <base>, inline, commit único granular — ok? (ou worktree/squash)`
+1. `Isolamento recomendado: branch — ajuste local. Alternativa: worktree. Qual escolhe?`
+2. `Modo recomendado: inline — tarefa curta. Alternativas: subagents · team. Qual escolhe?`
+3. `Commits recomendados: granular — checkpoint auditável. Alternativa: squash-final. Qual escolhe?`
 
-Um "ok" aceita tudo; um override nomeado (worktree, squash) ajusta a linha. Ratificado, não
-re-pergunte. Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates:
+Só grave a ratificação após as três respostas. Sob briefing fechado (SUBAGENT-STOP), não abra gates:
 aplique o briefing e escale ao coordenador o que exigir decisão.
 
 ```text
-1. Branch — a pelizzai-starting-branch propõe `<tipo>/<slug>` e a base descoberta e cria a branch
-   (nunca em branch protegida); esses valores preenchem o confirm de uma linha acima, ratificado
-   antes da primeira escrita de produto (rename via `git branch -m` se o usuário ajustar o nome).
+1. Branch — a pelizzai-starting-branch propõe e ratifica base e `<tipo>/<slug>` antes de criar a
+   branch (nunca em branch protegida).
 1.5. Regras locais — no consumidor, confira `pelizzai/domain-skills.md`; em source mode, use as
    regras/skills do próprio repo. Siga somente as aplicáveis à área.
-1.6. Registrar a ratificação (só após o "ok") — grave o marcador `kickoff: ratificado <AAAA-MM-DD>`
+1.6. Registrar a ratificação (só após as três respostas) — grave o marcador `kickoff: ratificado <AAAA-MM-DD>`
    (com `isolation`/`execution-mode`/`commit-strategy` ratificados) no state consumidor
    `pelizzai/data/state.md` ou, em source mode, no execution record nativo com a mesma palavra-chave,
    ANTES da primeira escrita de produto. A head skill é o único dono deste marcador no track

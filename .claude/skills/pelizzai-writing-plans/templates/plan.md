@@ -13,6 +13,10 @@ Copie para `pelizzai/plans/AAAA-MM-DD-<feature>.md` e substitua todo texto entre
 
 **Lane ratificada:** [`bounded` | `standard` | `exploratory` — recomendada pelo router e ratificada pelo usuário]
 
+**Status:** [rascunho | aprovado em AAAA-MM-DD]
+
+**Spec aprovada:** [caminho ou dispensa explícita registrada]
+
 **Objetivo:** [resultado em uma frase]
 
 **Arquitetura:** [abordagem e fronteiras em 2–3 frases]
@@ -20,6 +24,8 @@ Copie para `pelizzai/plans/AAAA-MM-DD-<feature>.md` e substitua todo texto entre
 **Stack técnica:** [tecnologias/bibliotecas]
 
 **Skills de domínio aplicáveis:** [nomes de `pelizzai/domain-skills.md` ou `nenhuma`]
+
+**Decisão sobre domain skills:** [ratificada em AAAA-MM-DD — conjunto escolhido ou nenhuma]
 
 **Skills transversais do harness:** [ex.: `pelizzai-frontend`, `pelizzai-oswap`, `pelizzai-documenting-features` ou `nenhuma`]
 
@@ -114,4 +120,6 @@ Adapte a ordem sem perder a prova:
 
 ## Encaminhamento à execução
 
-Plano materializado e lacunas expostas → **encaminhe ao Gate de setup pós-plano** da `pelizzai-execution-plans`, que ratifica numa única mensagem o conteúdo do plano (item 0) e o setup (isolamento, modo com as três opções, commits, review). O plano leva a recomendação; o usuário ratifica antes da Tarefa 1. Não decida isolamento/modo/commit aqui.
+Plano materializado, estressado e aprovado → **encaminhe ao Gate de setup pós-plano sequencial** da
+`pelizzai-execution-plans`. O plano leva recomendações; o usuário decide isolamento, branch, modo,
+commits e review uma pergunta por vez antes da Tarefa 1.

@@ -7,7 +7,8 @@
 > Sem tarefa ativa = `slug: <none>`. `phase: done` = tarefa anterior fechada (começa do zero).
 > `phase: blocked` = travada, aguardando decisão humana.
 > Tarefa NOVA nunca herda as decisões da anterior: ao abrir uma tarefa, sobrescreva
-> lane/kickoff/audience/isolation/execution-mode/commit-strategy/overlays com os placeholders da
+> lane/kickoff/audience/discovery/spec/spec-approval/domain-skills-decision/plan/plan-approval/
+> isolation/execution-mode/commit-strategy/overlays com os placeholders da
 > nova tarefa.
 > Isso vale para carryover ACIDENTAL de state; a política de projeto explicitamente ratificada em
 > `pelizzai/profile.md` (§Defaults de execução ratificados) NÃO é herança — ela pré-seleciona a
@@ -36,7 +37,12 @@
 - risk: <low | medium | high>
 - overlays: <none | nomes separados por vírgula>   # skills transversais exigidas, ex.: pelizzai-frontend, pelizzai-oswap
 - audience: <technical | layperson>
-- plan: <caminho do plano em execução, ex.: pelizzai/plans/AAAA-MM-DD-<topico>.md>
+- discovery: <pending | ratificada AAAA-MM-DD | dispensada explicitamente AAAA-MM-DD | not-applicable>
+- spec: <pending | caminho da spec | dispensada explicitamente AAAA-MM-DD | not-applicable>
+- spec-approval: <pending | ratificada AAAA-MM-DD | not-applicable>
+- domain-skills-decision: <pending | ratificada AAAA-MM-DD | not-applicable>
+- plan: <pending | caminho do plano em execução, ex.: pelizzai/plans/AAAA-MM-DD-<topico>.md>
+- plan-approval: <pending | ratificado AAAA-MM-DD | not-applicable>
 - project: <none | caminho do único repositório Git desta tarefa>
 
 ## Progresso

@@ -1,52 +1,107 @@
 # PelizzAI
 
-Harness de engenharia para agentes de código. O PelizzAI classifica a tarefa, escolhe o menor
-fluxo seguro e produz evidência verificável sem transformar toda mudança em uma cerimônia.
+Harness de engenharia para agentes de código. O PelizzAI classifica, raciocina, investiga e
+recomenda; o usuário decide o produto. Depois de spec e plano ratificados, o harness executa e
+produz evidência verificável sem inflar mudanças locais já especificadas.
 
-> A fonte de verdade é `.claude/skills/` + `CLAUDE.md`. O `scripts/sync-harness.ps1` mantém o
-> espelho `.agents/skills/`, `AGENTS.md`, `GEMINI.md` e, no modo próprio, o manifesto
+> A fonte de verdade é `.claude/skills/` + `CLAUDE.md`. O núcleo portátil
+> `scripts/sync-harness.mjs` mantém o espelho `.agents/skills/`, `AGENTS.md`, `GEMINI.md` e, no modo próprio, o manifesto
 > `scripts/pelizzai-core-skills.txt`. `.cursor/rules/pelizzai.mdc` é um adaptador manual: não é
-> gerado pelo sync.
+> gerado pelo sync. `sync-harness.ps1` e `sync-harness.sh` são apenas wrappers do mesmo núcleo.
 
 ## Guia rápido: instalar e usar
 
 ### 1. Instale no seu projeto
 
-A partir do repo-fonte PelizzAI, um comando (funciona para instalar E para atualizar):
+A partir do repo-fonte PelizzAI, use o comando da sua plataforma. Instalar e atualizar são a mesma
+operação:
 
 ```powershell
+# Windows
 pwsh scripts/sync-harness.ps1 -ExportConsumer C:\caminho\do\seu-projeto
 ```
 
+```bash
+# macOS ou Linux
+bash scripts/sync-harness.sh --export-consumer /caminho/do/seu-projeto
+```
+
+```bash
+# Entrada portátil direta, em qualquer sistema com Node.js 18+
+node scripts/sync-harness.mjs --export-consumer /caminho/do/seu-projeto
+```
+
 Isso copia as skills core, os hooks e os scripts úteis, gera o `CLAUDE.md` consumidor e valida os
-espelhos — sem tocar skills de domínio, `pelizzai/` ou `settings.json` que já existam no destino.
+espelhos — sem tocar skills de domínio ou `pelizzai/`. Por default também preserva
+`settings.json`; somente a escolha explícita `--install-hooks` faz o merge dos hooks.
 
-### 2. Registre os hooks (opcional, recomendado)
+### 2. Decida sobre os hooks
 
-No `.claude/settings.json` do projeto, registre os hooks opt-in (`writegate`, `cadence`,
-`guardrails`, `session-start`) — a `pelizzai-audit` propõe e faz esse registro, com sua
-confirmação, durante o bootstrap.
+Os hooks são copiados na instalação, mas não são ativados silenciosamente. Há dois caminhos:
+
+- instalar junto com o harness, acrescentando `-InstallHooks` no PowerShell ou `--install-hooks`
+  no Bash/Node;
+- deixar para a primeira interação mutável: a `pelizzai-audit` executa o check, recomenda a
+  instalação e faz uma única pergunta. Depois do “sim”, roda o instalador.
+
+O instalador é multiplataforma, idempotente e preserva hooks, permissões e demais campos já
+existentes em `.claude/settings.json`:
+
+```bash
+node scripts/install-hooks.mjs --check   # somente verifica
+node scripts/install-hooks.mjs           # registra após confirmação
+node scripts/install-hooks.mjs --remove  # remove somente os hooks PelizzAI
+```
+
+Esses hooks são consumidos pelo Claude Code. Em Codex, Gemini, Cursor e outros agentes, os mesmos
+invariantes continuam nas skills e arquivos de entrada; cada plataforma pode ganhar enforcement
+nativo quando expuser um mecanismo equivalente.
 
 ### 3. Use — um único comando: `bootstrap`
 
 - **Repositório existente**: abra o agente no projeto e digite **`bootstrap`**. É o único comando
   do PelizzAI. O harness escaneia a stack real (lockfiles, versões), propõe o conjunto de skills
-  de domínio fundamentadas em documentação oficial atual, mais catálogo, profile e a cadência de
-  manutenção — você dá um único "sim" (ou ajusta a proposta) e ele materializa tudo.
-- **Projeto novo**: nem o `bootstrap` é necessário — apenas peça a primeira tarefa ("crie um app
-  de..."). O harness conduz descoberta → design → plano → execução e propõe as skills de domínio
-  na borda certa.
+  de domínio fundamentadas em Context7/documentação oficial da versão observada, mais catálogo,
+  profile e a cadência de
+  manutenção — você decide primeiro o conjunto de skills e depois, separadamente, se quer armar a
+  cadência; cada decisão vem com recomendação.
+- **Projeto novo**: nem o `bootstrap` é necessário — peça o produto. O harness conduz descoberta
+  com uma pergunta por vez → spec → stress/aprovação → domain skills → plano → stress/aprovação →
+  setup → execução. Cada pergunta traz a melhor opção recomendada; nenhuma é auto-confirmada.
 - **Dali em diante, não há comandos**: trabalhe pedindo tarefas normalmente. O router classifica
-  cada pedido e escolhe a rota sozinho; as decisões estruturais (isolamento, modo de execução,
-  commits, destino) chegam até você como recomendação pré-selecionada num gate único por borda —
-  aceitar tudo custa um "ok". Mesmo sem digitar `bootstrap`, o harness detecta catálogo ausente
+  cada pedido e recomenda a rota; tarefas mutáveis aguardam ratificação. Decisões estruturais
+  (base/branch, isolamento, modo, commits e destino) são perguntadas uma por vez, com recomendação.
+  Mesmo sem digitar `bootstrap`, o harness detecta catálogo ausente
   numa tarefa mutável e propõe o bootstrap sozinho. Classificar é do harness; decidir é do usuário.
+
+## Context7: a inteligência técnica transversal
+
+Context7 é a fonte técnica preferencial do PelizzAI — a “arma secreta” para evitar decisões
+baseadas em memória desatualizada. Ele não é uma etapa exclusiva do bootstrap nem aparece somente
+depois das perguntas:
+
+| Situação | Como o harness usa Context7 |
+| --- | --- |
+| Projeto novo | valida capacidades e trade-offs da stack informada ou das candidatas antes de recomendar |
+| Projeto existente | lê manifests/lockfiles primeiro e consulta a documentação da versão realmente instalada |
+| Feature ou plano | confirma APIs, limites, integração e compatibilidade antes de decompor a solução |
+| Debugging | confronta sintoma/código com contratos e mudanças da versão usada |
+| Upgrade | verifica breaking changes, migração e alvo suportado |
+| Skills de domínio | cria ou atualiza regras de stack a partir da versão real, preservando customizações |
+
+Context7 é read-only e pode ser usado antes do Gate de kickoff para eliminar dúvida factual e
+formular perguntas melhores. Ele nunca escolhe requisitos, UX, regra de negócio, arquitetura
+preferida, risco aceito ou critério de aceite. Isso continua sendo ratificado pelo usuário.
+
+O servidor Context7 não é instalado à força pelo repositório porque cada host configura MCP de
+forma diferente. No bootstrap, o harness verifica se a ferramenta está disponível e recomenda sua
+configuração quando faltar. Documentação oficial atual é o fallback; memória da LLM não é.
 
 ## O kernel inteligente
 
-O PelizzAI separa invariantes de heurísticas. Proteção de branch, autorização para efeitos
-externos e validação do conteúdo são invariantes. OODA, TDD, brainstorming, entrevistas, team e
-subagents são ferramentas situacionais.
+O PelizzAI separa autoridade, invariantes e heurísticas. Proteção de branch, autoridade do usuário,
+autorização externa e validação são invariantes. OODA, TDD, brainstorming, team e subagents são
+ferramentas situacionais; elas escolhem como trabalhar, não o que o produto deve fazer.
 
 ```mermaid
 flowchart LR
@@ -74,22 +129,21 @@ mas a rota montada volta como **recomendação a ratificar** no Gate de kickoff 
 
 ### Kickoff: a rota é recomendação, não decisão
 
-A classificação continua rica e derivada em silêncio, mas nunca é aplicada em silêncio. Antes de
+A classificação continua rica e derivada pelo harness, mas nunca é aplicada em silêncio. Antes de
 investir, o `pelizzai-router` apresenta a **Análise da proposta** (premissas, lacunas, riscos e
 alternativas materiais) e, no **Gate de kickoff**, a rota proposta — lane, head skill, overlays e
-descoberta — como um bloco único de recomendação com o default já pré-selecionado. Classificar é do
+  descoberta — como uma recomendação e uma pergunta de confirmação. Classificar é do
 harness; decidir é do usuário.
 
-- Efeito read-only, ou ajuste/`bounded` de risco e incerteza baixos, seguem numa **linha única** que
-  nomeia a classificação para permitir veto, sem parar.
-- Lane `standard`/`exploratory`, `risk: high`, `uncertainty` média/alta, efeito `external` ou ≥2
-  leituras materiais abrem o **bloco** que para e aguarda o "ok" — ou o ajuste item a item.
+- Somente efeito `read-only` informa e segue sem ratificação, pois não altera estado.
+- Toda tarefa mutável, inclusive ajuste/`bounded`, para no kickoff até receber confirmação.
 - Quando o usuário parece não-técnico ou a intenção admite leituras diferentes, o kickoff reapresenta
   o entendido ("vou tratar como feature/ajuste/bug/refactor — confere?") e registra `audience`.
 
-Subir a descoberta — `pelizzai-brainstorming` ou `pelizzai-interview-me` — está sempre a uma palavra
-de distância: quando há lacuna material que muda escopo, UX, arquitetura, segurança ou dados, o
-harness a propõe, e a decisão de pular a descoberta é do usuário.
+Em greenfield, descoberta é o default obrigatório: `pelizzai-interview-me` pergunta uma decisão por
+turno e `pelizzai-brainstorming` produz a spec. Pular descoberta/spec/plano exige dispensa explícita;
+Context7 entra cedo para responder fatos técnicos e melhorar recomendações; nunca responde pelo
+usuário decisões de produto.
 
 ### Uma head skill, overlays transversais
 
@@ -127,7 +181,7 @@ flowchart TD
     Q -- "read-only" --> S["scan focado<br/>zero escrita"]
     Q -- "write-local / external" --> G["gate de primeira escrita"]
     G --> B["task/planning branch"]
-    B --> P["spec/plano quando necessários"]
+    B --> P["greenfield: descoberta + spec + plano<br/>ratificados"]
     P --> I{"isolamento para executar"}
     I -- "branch" --> SAME["continuar na mesma branch"]
     I -- "worktree" --> CP["checkpoint do planejamento"]
@@ -136,17 +190,14 @@ flowchart TD
 
 Branch, execução inline e commits granulares são os defaults **recomendados** para trabalho comum;
 worktree, team e subagents entram quando frentes realmente independentes justificam o custo. Nada
-disso é aplicado em silêncio: isolamento, modo de execução — com `team` **sempre visível** e sem
-ranking — e estratégia de commit voltam como recomendação a ratificar num único bloco por borda.
-Tracks com plano resolvem isso no **Gate de setup pós-plano** da `pelizzai-execution-plans` (conteúdo
-do plano, isolamento, branch, modo, commits e review numa só mensagem, antes da Tarefa 1); ajuste e
-bug usam um confirm de uma linha da head skill. `squash-final` só ocorre a pedido explícito do usuário.
+disso é aplicado em silêncio. Base e nome da branch são ratificados antes do planejamento. Depois
+do plano aprovado, isolamento, modo — com `team` sempre visível —, commits e review são decididos
+**uma pergunta por vez**. Ajuste e bug usam o mesmo princípio em forma curta. `squash-final` só
+ocorre a pedido explícito.
 
-Decisões estruturais que o usuário ratifica viram **política do projeto** em `pelizzai/profile.md`
-(seção *Defaults de execução ratificados*, que nasce `<unset>` e só o usuário preenche): as tarefas
-seguintes veem um recap de uma linha ("seguindo a política deste projeto: … — muda algo?") e
-prosseguem, parando de novo só quando a tarefa foge da política ou o usuário pede. `destination`
-nunca é política herdada — push, PR e publicação são confirmados por tarefa.
+Decisões estruturais ratificadas podem virar **política do projeto** em `pelizzai/profile.md` e
+pré-selecionar futuras recomendações. Elas não auto-confirmam uma tarefa nova, salvo delegação
+explícita do usuário. `destination` nunca é herdado — push, PR e publicação são confirmados por tarefa.
 
 ## Rotas proporcionais
 
@@ -157,6 +208,9 @@ nunca é política herdada — push, PR e publicação são confirmados por tare
 | `bounded` | aceite claro, risco e incerteza baixos, sem decisão arquitetural | plano compacto; brainstorming não é obrigatório |
 | `standard` | contrato/aceite claros, risco médio ou trade-offs limitados | plano; brainstorming compacto só se restar decisão real |
 | `exploratory` | alta incerteza ou decisões arquiteturais/sensíveis acopladas | brainstorming completo + stress proporcional → plano |
+
+Todo produto/projeto greenfield entra como `exploratory`, mesmo com stack definida. Framework,
+linguagem e banco não definem usuários, regras, estados, UX, dados nem critérios de aceite.
 
 Entrevistas e comparação de múltiplas abordagens só aparecem quando existe ambiguidade ou decisão
 real. Uma mudança grande e mecânica pode continuar simples; um endpoint pequeno, aditivo e com
@@ -234,7 +288,7 @@ projeto consumidor:
 - análise sem escrita usa `pelizzai-audit` em `scan-only`;
 - `bootstrap-write` só ocorre por pedido explícito ou consentimento após a proposta;
 - nas bordas design→plano e plano→execução a audit **propõe** proativamente o menor conjunto útil de
-  skills de domínio (fundamentadas em documentação oficial atual), em vez de esperar o comando
+  skills de domínio (fundamentadas em Context7/documentação oficial atual da versão observada), em vez de esperar o comando
   `bootstrap`; nada é escrito sem um "sim" e zero skills é um resultado válido quando ratificado;
 - `pelizzai/.gitignore` é criado e verificado com `git check-ignore` para os efêmeros.
 
@@ -256,7 +310,8 @@ pelizzai/
 
 O `state.md` é escalar por repositório e registra, entre outros campos, `effect`, `risk`, `lane`,
 `overlays`, `audience`, `base-ref`, `base-sha`, `branch`, `isolation`, `execution-mode`,
-`commit-strategy`, `kickoff`, `plan` e `validated-head`. Isolamento, modo e commit nascem
+  `commit-strategy`, `kickoff`, `discovery`, `spec-approval`, `domain-skills-decision`, `plan`,
+  `plan-approval` e `validated-head`. Isolamento, modo e commit nascem
 `<pending>` e só deixam de sê-lo quando o usuário ratifica o gate; `kickoff: ratificado` marca a
 rota confirmada. A política de execução ratificada do projeto vive à parte, em `pelizzai/profile.md`,
 e não é herança de tarefa. Na retomada, esses dados são confrontados com Git; divergências perigosas
@@ -266,7 +321,9 @@ vão para `pelizzai-recovery`.
 
 ```mermaid
 flowchart TD
-    SRC["Fonte editável<br/>.claude/skills + CLAUDE.md"] --> SYNC["sync-harness.ps1"]
+    SRC["Fonte editável<br/>.claude/skills + CLAUDE.md"] --> SYNC["sync-harness.mjs<br/>núcleo portátil"]
+    PS["PowerShell wrapper"] --> SYNC
+    SH["Bash wrapper"] --> SYNC
     SYNC --> AS[".agents/skills"]
     SYNC --> AG["AGENTS.md"]
     SYNC --> GE["GEMINI.md"]
@@ -286,17 +343,21 @@ função é apenas encaminhar aos entrypoints e às regras compartilhadas.
 
 ### Instalar/atualizar em um projeto consumidor
 
-A distribuição oficial é um comando, rodado a partir do repo-fonte:
+A distribuição oficial usa o mesmo núcleo em todos os sistemas:
 
 ```powershell
 pwsh scripts/sync-harness.ps1 -ExportConsumer C:\caminho\do\projeto
 ```
 
+```bash
+bash scripts/sync-harness.sh --export-consumer /caminho/do/projeto
+```
+
 Ele copia as skills **core** (somente as do manifesto — as skills de domínio do projeto nunca são
-tocadas), os hooks `pelizzai-*` e os scripts úteis (manifesto + sync); gera o `CLAUDE.md`
+tocadas), os hooks `pelizzai-*` e os scripts portáteis; gera o `CLAUDE.md`
 consumidor; regenera e valida os espelhos do destino. Atualizar = rodar o mesmo comando de novo.
-Após a primeira instalação, registre os hooks desejados no `.claude/settings.json` do projeto
-(opt-in) e deixe a `pelizzai-audit` propor o bootstrap na primeira tarefa.
+Os hooks só são registrados na exportação com `--install-hooks`/`-InstallHooks`; sem essa escolha,
+a `pelizzai-audit` verifica e pede confirmação na primeira tarefa mutável.
 
 **Nunca distribua por cópia manual do repositório.** O que distingue o repo-fonte de um consumidor
 é exclusivamente a sentinela `scripts/pelizzai-source-repo.txt`: uma cópia manual a levaria junto e
@@ -314,7 +375,10 @@ PelizzAI/
 ├── .agents/skills/               espelho gerado
 ├── .cursor/rules/pelizzai.mdc    adaptador manual
 ├── scripts/
-│   ├── sync-harness.ps1          sync + distribuição (-ExportConsumer)
+│   ├── sync-harness.mjs          núcleo portátil de sync + distribuição
+│   ├── sync-harness.ps1          wrapper Windows/PowerShell
+│   ├── sync-harness.sh           wrapper macOS/Linux
+│   ├── install-hooks.mjs         merge/check/remove de hooks Claude Code
 │   ├── test-harness-contracts.ps1
 │   ├── pelizzai-source-repo.txt  sentinela de source mode (NUNCA copiar a consumidores)
 │   ├── task-brief.ps1|.sh
@@ -325,7 +389,8 @@ PelizzAI/
 └── .github/workflows/check-harness.yml
 ```
 
-Os hooks são redes de segurança, não o cérebro do harness. Guardrails bloqueiam comandos Git
+Os hooks são redes de segurança, não o cérebro do harness. Os arquivos `.mjs` rodam com Node em
+Windows, macOS e Linux; os `.ps1` ficam como fallback Windows. Guardrails bloqueiam comandos Git
 destrutivos conhecidos; o writegate opt-in é um `PreToolUse` fail-closed que barra escrita de produto
 em branch protegida/destacada ou enquanto o isolamento está `<pending>`, movendo o invariante "isolar
 antes da primeira escrita" da obediência do modelo para enforcement executável. Erros internos de
@@ -334,15 +399,18 @@ contexto quando instalados com consentimento.
 
 ## Desenvolvimento do harness
 
-Edite somente as fontes canônicas e o adaptador Cursor quando necessário. Depois:
+Edite somente as fontes canônicas e o adaptador Cursor quando necessário. A
+`pelizzai-writing-skills` executa sync e check automaticamente depois de qualquer edição de skill
+já autorizada. Para manutenção manual do harness:
 
-```powershell
-pwsh scripts/sync-harness.ps1 -UpdateManifest
-pwsh scripts/sync-harness.ps1 -Check -SourceMode
+```bash
+node scripts/sync-harness.mjs --update-manifest
+node scripts/sync-harness.mjs --check --source-mode
 pwsh scripts/test-harness-contracts.ps1
 ```
 
-O CI executa o check de sync em Windows e os testes de contrato em Windows e Ubuntu. Os contratos
+O CI executa o núcleo portátil e os wrappers em Windows, Ubuntu e macOS; os testes de contrato
+rodam em Windows e Ubuntu. Os contratos
 cobrem composição do kernel, roteamento, manifest, guardrails, helpers, Visual Companion e paridade
 dos alvos gerados.
 

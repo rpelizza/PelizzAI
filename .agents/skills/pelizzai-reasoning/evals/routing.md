@@ -265,7 +265,7 @@ Ação de esclarecimento: acionar [pelizzai-interview-me](../../pelizzai-intervi
 
 ```text
 Próxima ação:
-- Identificar premissas críticas e perguntar apenas o necessário.
+- Identificar decisões críticas e perguntar uma por vez, recomendando a melhor opção.
 ```
 
 #### Critério de aprovação
@@ -813,12 +813,14 @@ Técnicas auxiliares:
 - Verification, se houver typecheck ou build disponível.
 
 Próxima ação:
-- Renomear e ajustar os usos diretamente; não pedir esclarecimento.
+- Não abrir discovery nem pedir esclarecimento de produto; no lifecycle mutável, ainda ratificar
+  rota/base/setup e então renomear conforme o contrato já explícito.
 ```
 
 #### Critério de aprovação
 
-O agente age diretamente porque o contexto resolve. Fazer pergunta de esclarecimento aqui é falha grave (pergunta desnecessária quando o contexto ou uma fonte direta resolve), conforme "Falhas graves".
+O agente não inventa perguntas de produto porque o contexto resolve. Isso não remove os gates de
+autoridade/isolamento do lifecycle mutável.
 
 ### R-23 — Execução longa em loop até a entrega (OODA, não ReAct puro)
 

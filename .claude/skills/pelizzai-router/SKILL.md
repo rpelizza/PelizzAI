@@ -1,6 +1,6 @@
 ---
 name: pelizzai-router
-description: Orquestrador de qualquer pedido que precise inspecionar ou alterar um projeto. Classifica efeito, intenção, risco, incerteza e superfícies; escolhe uma head skill e overlays proporcionais; garante isolamento antes da primeira escrita. Use após `pelizzai-core`, inclusive para análises read-only de repositório. Não use em conversa puramente conceitual sem contexto de projeto.
+description: Orquestrador de qualquer pedido que precise inspecionar ou alterar um projeto. Classifica efeito, intenção, risco, incerteza e superfícies; recomenda uma head skill e overlays; garante ratificação e isolamento antes da escrita. Todo produto/projeto greenfield entra em discovery, spec e plano aprovados mesmo com stack definida. Use após `pelizzai-core`; não use em conversa puramente conceitual sem projeto.
 ---
 
 # PelizzAI Router
@@ -50,25 +50,32 @@ high   — dados, auth, segurança, produção, contrato público breaking ou de
 ### Uncertainty
 
 ```text
-low    — objetivo, aceite e abordagem estão claros/evidenciados.
+low    — objetivo, aceite e abordagem foram explicitados ou ratificados pelo usuário.
 medium — há escolhas reais, mas o espaço é limitado.
 high   — requisitos/causa/arquitetura ainda precisam ser descobertos.
 ```
 
-Não transforme essas classificações em formulário para o usuário. Derive-as do pedido e da evidência em silêncio; pergunte apenas se uma decisão material pertence a ele. Mas apresente a ROTA montada (lane, head skill, overlays) como recomendação única no **Gate de kickoff** antes de investir — isso não é um formulário, é um bloco só.
+Não transforme essas classificações em formulário. Derive-as do pedido e da evidência, mas não
+confunda inferência do harness com decisão humana. Apresente a ROTA montada (lane, head skill,
+overlays e artefatos) como recomendação no **Gate de kickoff** e aguarde ratificação em toda tarefa
+mutável. Classificar é trabalho do harness; aceitar ou ajustar a rota é decisão do usuário.
 
 ## Análise da proposta (sempre que houver efeito mutável não-trivial)
 
 Depois de derivar o envelope e ANTES de escolher a head skill, faça uma passada de stress compacta do pedido — acione a técnica `assumption-tracking` da `pelizzai-reasoning` (premortem de escopo). Apresente em ≤6 bullets:
 
-- premissas materiais que o harness assumiria para prosseguir;
+- premissas materiais que precisariam ser ratificadas para prosseguir;
 - lacunas que mudam escopo/UX/arquitetura/segurança/dados;
 - riscos concretos;
 - alternativas materialmente diferentes, quando existirem.
 
-A Análise da proposta é resultado apresentado, não pergunta; ela alimenta a linha de **Descoberta** do Gate de kickoff quando há lacuna material — nunca bloqueia sozinha.
+A Análise da proposta é diagnóstico, não autorização. Ela alimenta a linha de **Descoberta** do
+Gate de kickoff; cada lacuna que pertença ao usuário será resolvida depois, uma pergunta por vez.
 
-Proporcionalidade (não vira formulário nem cerimônia): só dispara em tarefa **mutável não-trivial** com incerteza material. Em `read-only` puro e em ajuste/bug trivial com tudo claro, a análise **colapsa a zero** — sem linha, sem preâmbulo (risco alto com escopo claro eleva prova/gates/overlays, não a incerteza; não force a análise por risco isolado). Em `bounded`/ajuste com uma ou outra premissa aberta, colapsa numa linha: "Sem lacunas materiais; premissas assumidas: <lista curta>".
+Proporcionalidade não remove autoridade. Em `read-only` puro e ajuste/bug trivial cujo contrato foi
+explicitado, a análise pode colapsar a zero. Em `bounded`, colapsa numa linha: "Sem lacunas
+materiais; contrato informado: <lista curta>". Projeto/produto greenfield nunca colapsa: stack
+informada não define usuários, fluxos, estados, políticas, UX, dados nem aceite.
 
 Sob briefing fechado (SUBAGENT-STOP), não produza a Análise da proposta nem abra a Descoberta: aplique o briefing e escale ao coordenador o que exigir decisão.
 
@@ -80,7 +87,7 @@ Detecte o repo-fonte do próprio PelizzAI EXCLUSIVAMENTE pela sentinela:
 scripts/pelizzai-source-repo.txt
 ```
 
-Manifesto (`scripts/pelizzai-core-skills.txt`) e `scripts/sync-harness.ps1` existem também nos
+Manifesto (`scripts/pelizzai-core-skills.txt`) e scripts `sync-harness.*` existem também nos
 consumidores instalados via `-ExportConsumer` — a presença deles NÃO indica source mode.
 
 Em **source mode**, não exija `pelizzai/domain-skills.md` nem crie runtime consumidor. Trabalhe
@@ -159,10 +166,11 @@ Nunca crie worktree da base limpa depois de escrever spec/plano em outro working
 | Review de diff, working tree, branch ou PR | `review` → `pelizzai-review` |
 | Revisão codebase-wide de arquitetura, dívida ou seams | `review` → `pelizzai-improving-architecture` |
 | Conflito Git em andamento | `pelizzai-resolving-merge-conflicts` |
+| Produto/projeto greenfield, mesmo com stack definida | `exploratory` → `pelizzai-brainstorming` + `pelizzai-interview-me` → spec → plano |
 | Feature/refactor/infra com design já aprovado e plano pronto | `pelizzai-execution-plans` |
 | Design/spec/Figma aprovado, aceite claro, mas sem plano | `pelizzai-writing-plans`; brainstorming/interview-me **propostos** quando a Análise da proposta sinaliza lacuna material |
 | Estressar design/plano existente, resolver lacuna material sinalizada, ou pedido de entrevista | proposto pela Análise da proposta ou pelo usuário → `pelizzai-interview-me` |
-| Feature/refactor/infra com requisitos claros, mas sem plano | use lane abaixo |
+| Feature/refactor/infra existente com requisitos ratificados, mas sem plano | use lane abaixo |
 
 ### Lanes de feature/refactor/infra
 
@@ -171,6 +179,32 @@ Nunca crie worktree da base limpa depois de escrever spec/plano em outro working
 | `bounded` | baixa incerteza/risco; um comportamento coeso; aceite claro; sem decisão arquitetural | `pelizzai-writing-plans` em modo compacto; não force brainstorming. |
 | `standard` | risco médio e/ou algumas partes/contratos, com solução e aceite claros | `pelizzai-writing-plans`; prependa brainstorming compacto somente se restar trade-off real. |
 | `exploratory` | alta incerteza ou risco alto que exige descoberta/mitigação de design; arquitetura ou decisões sensíveis acopladas | `pelizzai-brainstorming` completo + stress proporcional → plano. |
+
+### Regra greenfield
+
+Produto/projeto greenfield é sempre `exploratory` na entrada: isso inclui criar sistema, aplicativo,
+serviço ou MVP do zero, ainda que framework, linguagem e banco já tenham sido escolhidos. A stack reduz incerteza
+técnica; não resolve decisões de produto. A rota obrigatória, salvo dispensa explícita do usuário
+em cada artefato, é:
+
+```text
+entendimento ratificado
+→ descoberta com uma pergunta por vez e recomendação
+→ design/spec
+→ stress da spec + aprovação
+→ proposta e ratificação de domain skills
+→ plano de implementação
+→ stress do plano + aprovação
+→ setup ratificado
+→ execução
+```
+
+Context7/documentação oficial é reconhecimento técnico read-only, não etapa tardia. Depois de
+identificar a stack e a versão real em manifests/lockfiles — ou a stack candidata em greenfield —,
+consulte-o antes do kickoff quando isso melhorar a classificação, revelar restrições, evitar uma
+pergunta factual ou tornar a recomendação mais precisa. Continue usando-o durante design, plano,
+implementação, debugging, upgrades e autoria/manutenção de skills. Nunca o use para inventar
+persona, regra de negócio, permissão, estado, prioridade, retenção ou critério de aceite.
 
 Um endpoint pequeno, aditivo e com contrato claro pode ser `standard` com review/overlays mais
 fortes; risco eleva prova e gates, não cria incerteza artificial. Uma mudança grande e mecânica
@@ -207,10 +241,12 @@ squash-final:
   só quando o histórico intermediário não tem valor; consolida ANTES da validação final.
 ```
 
-O router não pergunta nem aplica esses defaults por conta própria — recomenda e encaminha:
+O router não aplica esses defaults — calcula a recomendação e encaminha para ratificação:
 
 - **Tracks com plano** (bounded/standard/exploratory): defira isolamento, modo e commit ao **Gate de setup pós-plano** consolidado da `pelizzai-execution-plans` — é lá que as três opções de modo (inline · subagents · **team**) ficam sempre visíveis e a estratégia de commit é sempre mostrada.
-- **Write-local sem plano** (ajuste/bug): **recomende em silêncio** à head skill; a própria head skill (`pelizzai-quick-fix`/`pelizzai-debugging`) emite um confirm compacto de uma linha antes da primeira escrita. O router **não** emite esse confirm — um único emissor, sem dupla pergunta.
+- **Write-local sem plano** (ajuste/bug): entregue a recomendação à head skill; a própria head skill
+  (`pelizzai-quick-fix`/`pelizzai-debugging`) emite um confirm compacto antes da primeira escrita.
+  O router não duplica a pergunta.
 
 `worktree` e `squash-final` nunca são aplicados sem escolha do usuário. Use subagents/time para independência real, diversidade de hipóteses ou ganho mensurável; não os trate como hierarquicamente melhores que inline.
 
@@ -235,11 +271,19 @@ nativo em source mode, sem criar arquivo. Campos lógicos:
 ```text
 slug, track, lane, phase, effect, risk, overlays,
 base-ref, base-sha, branch, isolation, worktree-path,
-execution-mode, commit-strategy, audience, kickoff, plan, project,
+execution-mode, commit-strategy, audience, kickoff,
+discovery, spec, spec-approval, domain-skills-decision, plan, plan-approval, project,
 validated-head (somente após validação final).
 ```
 
-Ao ratificar o Gate de kickoff, registre a `lane`/`audience`/overlays da rota, mas deixe `kickoff: pendente`: o marcador `kickoff: ratificado <AAAA-MM-DD>` pertence a quem é dono da ratificação de **escrita** — o Gate de setup pós-plano da `pelizzai-execution-plans` (tracks com plano) ou o confirm de uma linha da head skill (`pelizzai-quick-fix`/`pelizzai-debugging` em ajuste/bug) — e é gravado por ele antes da primeira escrita de produto. Nunca carimbe `ratificado` no kickoff de UMA LINHA que informa e segue sem parar; em todo track mutável um confirm/gate downstream é o dono. A retomada honra a rota ratificada sem re-perguntar; uma tarefa nova nunca herda `lane`/`kickoff`/`audience` — o Gate de kickoff dispara de novo. Setup ratificado como política **de projeto** vive em `pelizzai/profile.md`, não é carryover de state.
+Em greenfield, `discovery`, `spec-approval`, `domain-skills-decision` e `plan-approval` começam
+`pending`. O gate de setup não pode gravar `kickoff: ratificado` enquanto algum deles continuar
+pendente, salvo dispensa explícita registrada no campo correspondente.
+
+Ao ratificar o Gate de kickoff, registre a `lane`/`audience`/overlays da rota, mas deixe `kickoff:
+pendente`: o marcador `kickoff: ratificado <AAAA-MM-DD>` pertence ao Gate de setup pós-plano ou ao
+confirm da head skill de ajuste/bug, antes da primeira escrita de produto. A retomada honra decisões
+já ratificadas; uma tarefa nova nunca herda `lane`/`kickoff`/`audience`.
 
 Uma tarefa nova nunca herda decisões da anterior. O fechamento pertence a `pelizzai-finish-task`.
 
@@ -249,11 +293,14 @@ Uma tarefa nova nunca herda decisões da anterior. O fechamento pertence a `peli
 - Bootstrap mutável para responder pedido read-only.
 - Escrever state/spec/plano antes do isolamento.
 - Forçar brainstorming completo numa feature bounded.
+- Classificar produto/projeto greenfield como bounded porque a stack foi informada.
 - Usar linha/arquivo como único medidor de complexidade.
 - Tratar frontend/security como oferta tardia.
 - Aplicar isolamento, modo de execução ou estratégia de commit sem ratificação do usuário.
 - Pulverizar a rota ou o setup em várias micro-perguntas em vez de um bloco agrupado.
 - Assumir em silêncio decisão que muda escopo/UX/arquitetura sem apresentá-la na Análise da proposta nem no Gate de kickoff.
+- Usar Context7, convenção ou “default seguro” como voto do usuário.
+- Fazer várias perguntas de descoberta no mesmo turno quando a resposta anterior muda a próxima.
 - Paralelizar escrita numa working tree compartilhada como se worktree isolasse agentes.
 - Herdar `lane`/base/branch/strategy de state de uma tarefa ANTERIOR como carryover acidental — a política de projeto explicitamente ratificada no `profile.md` é a única exceção.
 - Acionar várias head skills ao mesmo tempo.
@@ -263,29 +310,49 @@ Uma tarefa nova nunca herda decisões da anterior. O fechamento pertence a `peli
 
 Depois de montar envelope → Análise da proposta → lane → head skill → overlays, apresente a **rota proposta** como uma **recomendação a ratificar** antes de investir — nunca um formulário, um bloco só com o default já pré-selecionado. A classificação continua sua; segui-la ou ajustá-la é do usuário. O router é o **único** emissor do kickoff; o core apenas sinaliza intenção/audiência/ambiguidade e entrega.
 
-**Quando é UMA LINHA que informa e segue (sem parar):** `read-only` de review/análise/explicação (rota anunciada, sem parada); ou lane `bounded`/ajuste/bug com `risk: low` E `uncertainty: low`. Mesmo aí, NOMEIE a base da classificação para permitir veto — ex.: "Classifiquei como ajuste local, risco baixo, incerteza baixa → sigo com `pelizzai-quick-fix`." O setup (branch/base/commit) é confirmado pela head skill antes da primeira escrita, não aqui.
+**Quando informa e segue:** somente `read-only` de review/análise/explicação, porque não existe
+mutação a autorizar. Toda rota mutável para no kickoff, inclusive `bounded`, ajuste e bug; a
+profundidade do bloco pode ser uma única linha, mas a resposta afirmativa é obrigatória.
 
-**Quando é um BLOCO que para e aguarda ratificação** (uma pergunta agrupada, nunca N micro-perguntas): lane `standard` ou `exploratory`; ou `risk: high`; ou `uncertainty: medium|high`; ou `effect: external`; ou a rota suprimiria uma descoberta/entrevista que um lane-up restauraria; ou há ≥2 leituras materialmente diferentes. Formato:
+**Para toda tarefa mutável:** pare e aguarde ratificação. Faça uma única pergunta sobre a rota;
+mostre detalhes como contexto, não como várias perguntas simultâneas:
 
 ```text
-**Gate de kickoff — rota proposta (responda "ok" ou ajuste qualquer item):**
-- Entendi que você quer <X>; vou tratar como <feature|ajuste|bug|refactor> — confere?   (só quando audience=leigo ou há ≥2 leituras materiais)
+**Gate de kickoff — rota proposta:**
+- Entendimento: <X> como <feature|ajuste|bug|refactor>
 - Lane: <bounded|standard|exploratory|high-risk> — <justificativa em 1 linha>
 - Head + overlays: <head skill> + <overlays ou "nenhum">
 - Descoberta: <"sem lacunas materiais" | lista numerada de lacunas → recomendo <pelizzai-brainstorming compacto|completo|pelizzai-interview-me focal>>
 - Artefatos: <spec/plano/ADR previstos nesta lane | "nenhum além do plano nativo">
+
+Recomendação: aceitar esta rota porque <motivo>.
+Pergunta única: Posso seguir com esta rota? (sim ou ajuste)
 ```
 
-"ok" aceita a rota inteira; o usuário sobe a descoberta, troca a lane ou inclui/remove overlay em uma palavra. O default pré-selecionado é **recomendado/destacado, nunca auto-confirmado**: sem resposta afirmativa, segure o turno — não atravesse a borda análise→plano assumindo o default.
+Uma resposta afirmativa aceita a rota; o usuário pode ajustar lane, descoberta, artefatos ou overlay.
+Sem resposta afirmativa, segure o turno. Depois do kickoff, a descoberta pergunta **uma decisão por
+turno**, sempre com recomendação; não transforme o bloco de rota num questionário de requisitos.
 
 **Audiência:** quando o usuário parece não-técnico ou a intenção admite ≥2 leituras materiais, a primeira linha do bloco reapresenta o entendimento (handshake) antes de rotear; registre `audience: technical | layperson` (ver Registro de execução). Não despeje jargão; siga `pelizzai-writing-clearly-and-concisely`.
 
-**Descoberta:** quando a Análise da proposta sinalizou ≥1 lacuna material (escopo/UX/arquitetura/segurança/dados), **proponha** `pelizzai-brainstorming` (compacto ou completo) ou `pelizzai-interview-me` focal com o default recomendado; aceitar faz a descoberta, ajustar deixa o usuário prosseguir com as premissas declaradas ou responder as perguntas na hora. A decisão de pular a descoberta é do usuário — o router nunca a pula em silêncio numa tarefa que classificou `risk: high` ou `uncertainty ≥ medium`.
+**Descoberta:** quando houver lacuna material, recomende `pelizzai-brainstorming`/`pelizzai-interview-me`.
+Aceitar inicia a entrevista sequencial. Pular descoberta exige pedido explícito e registra quais
+decisões ficaram sem validação; a LLM não preenche essas decisões por conta própria.
 
 **Setup fica fora deste bloco:** isolamento, modo (com `team` sempre visível) e commit são ratificados no Gate de setup pós-plano da `pelizzai-execution-plans` (tracks com plano) ou no confirm de uma linha da head skill (ajuste/bug). O router recomenda em silêncio e não repete a pergunta.
 
 Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra o Gate de kickoff: aplique o briefing e escale ao coordenador o que exigir decisão.
 
+## Avaliação de regressão
+
+Ao alterar regras de routing, Context7, discovery, spec, plano ou autoridade, valide a matriz
+[adaptive-user-control.md](evals/adaptive-user-control.md). Ela combina a falha histórica com
+greenfield em outra plataforma, feature existente, upgrade/refresh de skill, debugging e ajuste
+local para impedir tanto autonomia quanto sobreajuste a um prompt ou stack.
+
 ## Instrução final
 
-Classifique efeito, intenção, risco, incerteza e superfícies. Apresente a Análise da proposta quando houver efeito mutável não-trivial e a rota no **Gate de kickoff**; só invoque a head skill com o kickoff resolvido (anunciado na linha única ou ratificado no bloco). Garanta primeira escrita segura, escolha uma head skill, propague overlays e deixe reasoning/test/review variarem proporcionalmente.
+Classifique efeito, intenção, risco, incerteza e superfícies. Apresente a Análise da proposta e a
+rota recomendada; em tarefa mutável, só invoque a head skill após ratificação explícita. Greenfield
+sempre descobre, especifica, estressa e planeja antes de implementar. Selecione reasoning/test/review
+proporcionalmente, sem transformar inteligência de processo em autoridade sobre o produto.

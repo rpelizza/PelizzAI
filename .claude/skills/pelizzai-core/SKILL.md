@@ -60,9 +60,42 @@ Sucesso: qual observação prova que terminou?
 Ambiguidade: falta algo que mudaria materialmente o resultado?
 ```
 
-Use contexto, código e documentação antes de perguntar. Pergunte apenas quando a resposta muda escopo, risco, custo, autoridade ou solução. Para detalhe reversível, faça a suposição segura, declare-a brevemente e prossiga; para decisão que muda escopo/UX/arquitetura/segurança, exponha-a na Análise da proposta do router — não a assuma em silêncio. A linha `Ambiguidade` acima alimenta essa análise.
+Use contexto, código e documentação antes de perguntar para eliminar dúvidas factuais. Não use essa
+evidência para decidir intenção de produto. Pergunte quando a resposta muda requisito, escopo, UX,
+arquitetura, dados, segurança, custo, autoridade, aceite ou solução. Faça **uma pergunta por vez**,
+na ordem de dependência; ofereça 2–3 opções reais quando isso ajudar e marque a melhor recomendação
+com motivo curto. Não adote uma suposição de produto para “destravar” o trabalho. Uma escolha
+reversível só pode ser aplicada mecanicamente quando já está contida em spec/plano ratificado ou foi
+explicitamente delegada pelo usuário. A linha `Ambiguidade` acima alimenta a análise do router.
 
-Quando o usuário parecer não-técnico, ou a intenção admitir ≥2 leituras materialmente diferentes, **sinalize** isso ao router (o `audience` e as leituras em aberto) — não abra um segundo gate aqui. É o `pelizzai-router` que reapresenta o entendimento ("Entendi que você quer X; vou tratar como <feature/ajuste/bug> — confere?") e registra `audience` dentro do **Gate de kickoff**: um único ponto de ratificação, sem pulverizar.
+Quando o usuário parecer não-técnico, ou a intenção admitir ≥2 leituras materialmente diferentes,
+**sinalize** isso ao router (`audience` e leituras em aberto). O router reapresenta o entendimento no
+Gate de kickoff; depois, a descoberta resolve cada decisão dependente uma por vez.
+
+## Limite de autoridade
+
+```text
+O harness decide:
+- classificação, técnica de reasoning, ordem de investigação, evidência e recomendação.
+
+O usuário decide:
+- o que o produto deve fazer e para quem;
+- requisitos, escopo, UX, arquitetura, dados, segurança, custo e risco aceito;
+- critérios de aceite e dispensas de spec/plano/documentação;
+- isolamento, modo de execução, commits e efeitos externos.
+
+O executor decide sozinho apenas:
+- passos mecânicos, locais e reversíveis já cobertos por uma decisão ratificada.
+```
+
+Context7 é a fonte técnica preferencial quando biblioteca, framework, API, serviço, ferramenta,
+versão ou capacidade externa influencia a tarefa. Inspecione primeiro manifests, lockfiles,
+configuração e código para descobrir a versão real; consulte Context7 cedo o bastante para eliminar
+dúvidas factuais e melhorar a rota, as opções e as perguntas. Em greenfield, ele pode informar a
+análise técnica inicial antes do kickoff; em projeto existente, deve ser combinado com o
+comportamento observado no repo. Se não estiver disponível, use documentação oficial atual e
+declare a limitação. Evidência técnica fundamenta a recomendação; nunca ratifica decisão em nome do
+usuário.
 
 ## Camadas do harness
 
@@ -81,7 +114,7 @@ core
 | Intenção | Head skill |
 | --- | --- |
 | Bootstrap/remapeamento autorizado | `pelizzai-audit` |
-| Feature/refactor/infra com decisão de design | `pelizzai-brainstorming` |
+| Produto/projeto greenfield ou feature/refactor/infra com decisão de design | `pelizzai-brainstorming` |
 | Plano/design já claro | `pelizzai-writing-plans` ou `pelizzai-execution-plans` |
 | Bug/comportamento inesperado | `pelizzai-debugging` |
 | Ajuste local sem nova regra/contrato | `pelizzai-quick-fix` |
@@ -124,6 +157,8 @@ Use o mecanismo nativo da plataforma. Sem carregamento nativo, leia `.agents/ski
 - Várias head skills competindo pela mesma tarefa.
 - Bootstrap mutável para responder uma análise read-only.
 - Perguntar antes de consultar evidência já disponível.
+- Usar Context7 ou convenção para responder uma decisão de produto pelo usuário.
+- Tratar stack informada como requisitos/aceite suficientes para um projeto greenfield.
 - Confundir heurística (OODA/TDD/team) com invariante universal.
 - Começar a escrever antes do router e do gate de primeira escrita.
 ```

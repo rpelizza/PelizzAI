@@ -98,10 +98,9 @@ Antes de montar o time, determine o modo:
    - Sim, e o recurso está habilitado → Modo Teammates.
    - Não → Modo Subagents (mais barato), mesmo com o recurso habilitado.
 
-Desempate (detecção indeterminada): se a capacidade NÃO puder ser confirmada com segurança
-— env var apenas no shell e fora do alcance de leitura, settings.json ausente/ilegível, ou
-sinais conflitantes — assuma o Modo Subagents (degradação segura: sempre disponível e mais
-barato). Se o usuário havia pedido teammates, informe a incerteza e ofereça habilitar/confirmar.
+Detecção indeterminada: se a capacidade não puder ser confirmada, informe a limitação e recomende
+Subagents como fallback mais disponível/barato. Pergunte se o usuário aceita o fallback; não troque
+o modo ratificado por conta própria.
 ```
 
 **Se o usuário pediu teammates explicitamente, mas o recurso está desabilitado:** informe como habilitar e ofereça o fallback. Não habilite por conta própria sem confirmação.

@@ -21,7 +21,8 @@
  *
  * REGRA B (só consumidor: existe pelizzai/ e NÃO é o repo-fonte) — nada de código antes do gate:
  *   escrever caminho de PRODUTO (fora de pelizzai/) enquanto pelizzai/data/state.md NÃO
- *   contém o marcador "kickoff: ratificado" → BLOQUEIA. Escritas em pelizzai/ (state, plano,
+ *   contém o marcador "kickoff: ratificado" → BLOQUEIA. Quando o state usa os campos de
+ *   aprovação greenfield, qualquer campo ainda pending também bloqueia. Escritas em pelizzai/ (state, plano,
  *   spec) são sempre liberadas: são os artefatos que registram o próprio gate.
  *   Em SOURCE MODE (repo-fonte PelizzAI: sentinela pelizzai-source-repo.txt) a Regra B é PULADA — ali o
  *   marcador vive no execution record nativo, não em arquivo, e só a Regra A vale.
@@ -58,9 +59,10 @@ import { tmpdir } from 'node:os';
 
 // Branches protegidas por default (Regra A). origin/HEAD enriquece a lista em runtime.
 const PROTECTED = ['main', 'master', 'develop', 'dev'];
-// Marcador máquina-legível do gate consolidado no state.md (kickoff/pós-plano ratificado
+// Marcadores máquina-legíveis dos gates sequenciais no state.md (kickoff/pós-plano ratificado
 // pelo usuário: conteúdo + isolamento + modo + commit). O writegate e a retomada dependem dele.
 const KICKOFF_RATIFIED = /kickoff:\s*ratificado/i;
+const PENDING_USER_APPROVAL = /^\s*-?\s*(discovery|spec-approval|domain-skills-decision|plan-approval):\s*<?pending>?\s*$/im;
 // Sentinela DEDICADA do repo-fonte PelizzAI (source mode): presente, a Regra B é pulada.
 // Critério único e inequívoco: manifesto e sync-harness existem também nos consumidores
 // instalados via -ExportConsumer e NÃO indicam source mode.
@@ -316,7 +318,14 @@ function main() {
   } catch {
     return 0; // não conseguiu ler o marcador → fail-open
   }
-  if (KICKOFF_RATIFIED.test(state)) return 0; // kickoff ratificado → escrita de produto liberada
+  if (KICKOFF_RATIFIED.test(state) && !PENDING_USER_APPROVAL.test(state)) return 0;
+
+  if (PENDING_USER_APPROVAL.test(state)) {
+    return block(
+      'há aprovação humana pendente no lifecycle (discovery/spec/domain skills/plano). ' +
+        'Resolva uma decisão por vez com o usuário e atualize o state antes de escrever produto.'
+    );
+  }
 
   return block(
     'o kickoff ainda não foi ratificado (falta "kickoff: ratificado" em pelizzai/data/state.md). ' +

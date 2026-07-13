@@ -14,9 +14,10 @@ incisiva ou ritualizada; fica melhor quando aciona no contexto certo e reduz uma
 5. Valide o comportamento no nível de risco adequado.
 6. Remova duplicação, sincronize os mirrors aplicáveis e registre limitações reais.
 
-Não peça confirmação se a intenção e o formato já estão claros. Não pesquise por reflexo quando
-o conhecimento necessário está no próprio projeto. Para fatos externos que podem ter mudado,
-prefira a documentação oficial disponível na plataforma.
+Não repita uma decisão que o usuário já ratificou. Quando intenção, escopo ou formato ainda forem
+decisões humanas, faça uma pergunta por vez com a melhor recomendação; não os preencha com defaults.
+Não pesquise por reflexo quando o conhecimento necessário está no projeto. Para fatos externos que
+podem ter mudado, prefira documentação oficial — ela fundamenta opções, não decide pelo usuário.
 
 ## Grau de liberdade
 
@@ -102,12 +103,13 @@ No repo-fonte do PelizzAI:
 
 - edite `.claude/skills/<nome>/`;
 - trate `.agents/skills/` como mirror gerado;
-- rode `pwsh scripts/sync-harness.ps1` e valide com `-Check -SourceMode`.
+- depois de uma edição autorizada, rode automaticamente `node scripts/sync-harness.mjs` e valide
+  com `node scripts/sync-harness.mjs --check --source-mode`; `.ps1` e `.sh` são wrappers.
 
 Num projeto consumidor, detecte o root ativo antes de escrever. Use `.claude/skills/` **ou**
 `.agents/skills/`, conforme a plataforma e as convenções existentes; não duplique a edição nos
 dois roots por conta própria. Se o projeto declarar um processo de geração, edite a fonte e rode
-esse processo.
+esse processo automaticamente como parte da edição já autorizada.
 
 ## Como escrever
 

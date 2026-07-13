@@ -25,6 +25,7 @@ material:
 - refactor com contrato/fronteira em jogo;
 - mudança estrutural, de dados ou de segurança;
 - qualquer pedido em que uma decisão de escopo/UX/arquitetura ainda está em aberto.
+- todo produto/projeto greenfield, mesmo com stack informada.
 ```
 
 ## Quando evitar
@@ -50,16 +51,20 @@ Dado um pedido:
    dados, de segurança, de integração, de compatibilidade). Use os sinais de premissa oculta de
    [Assumption Tracking](assumption-tracking.md).
 2. **Classificar cada premissa** por impacto × incerteza (a mesma matriz de criticidade).
-3. **Marcar como MATERIAL** as premissas cuja leitura errada mudaria escopo, UX, arquitetura,
-   segurança ou dados — as reversíveis e locais ficam como suposição declarada.
+3. **Marcar como MATERIAL** as premissas cuja leitura errada mudaria requisito, escopo, UX,
+   arquitetura, segurança, dados ou aceite. Decisão de produto reversível continua pertencendo ao
+   usuário; somente detalhe mecânico coberto por contrato ratificado pode virar suposição operacional.
 4. **Emitir a análise compacta** e apontar **quais lacunas materiais justificam PROPOR descoberta**
    (brainstorming compacto ou `pelizzai-interview-me` focal).
 
 ## Formato da análise (≤ 6 bullets, proporcional)
 
 ```text
-Premissas assumidas (reversíveis, declaradas):
-- <premissa> — sigo com esta leitura
+Fatos e decisões já ratificadas:
+- <item> — <evidência ou decisão do usuário>
+
+Decisões ainda abertas:
+- <decisão> — muda <requisito/escopo/UX/arquitetura/segurança/dados/aceite>
 
 Lacunas materiais (mudam escopo/UX/arquitetura/segurança/dados):
 - <lacuna> — o que muda se a leitura for outra
@@ -71,15 +76,14 @@ Alternativas materialmente diferentes (quando existirem):
 - <alternativa> — trade-off central
 ```
 
-Em bounded/ajuste com tudo claro, a passada colapsa em **uma linha**: `Sem lacunas materiais;
-premissas assumidas: <lista curta>`. Não vira formulário nem cerimônia.
+Em bounded/ajuste já especificado, a passada colapsa em **uma linha**: `Sem lacunas materiais;
+contrato informado: <lista curta>`. Greenfield nunca colapsa.
 
 ## Ligação com o roteamento
 
-- **Sem lacuna material** → siga a rota (a análise é uma linha de premissas declaradas).
-- **≥ 1 lacuna material** → o router propõe a descoberta num gate agrupado; a decisão de fazer ou
-  pular é do usuário. A análise nunca bloqueia por si só, mas a decisão de escopo/UX/arquitetura
-  também nunca atravessa a borda por suposição silenciosa: ou é declarada e aceita, ou vai ao gate.
+- **Sem lacuna material** → recomende a rota e aguarde ratificação se houver mutação.
+- **≥ 1 lacuna material** → o router recomenda descoberta; depois a entrevista resolve uma decisão
+  por turno. Pular é decisão explícita do usuário; recomendação não é autorização.
 
 ## Carve-out de subagente
 
@@ -100,6 +104,7 @@ descoberta: aplique o briefing e escale ao coordenador a decisão de escopo que 
 ```text
 - Rodar a análise em tarefa read-only ou ajuste trivial (cerimônia sem efeito).
 - Escolher em silêncio uma leitura de escopo/UX/arquitetura e prosseguir sem declará-la.
+- Tratar reversibilidade como autorização para a LLM decidir uma preferência de produto.
 - Tratar risco alto como incerteza e inflar a análise de um pedido de escopo claro.
 - Transformar a análise numa pergunta em vez de resultado apresentado.
 - Abrir o gate de descoberta sob briefing fechado (SUBAGENT-STOP).

@@ -17,7 +17,9 @@ Exemplos:
 - A biblioteca é compatível com a versão atual do framework.
 ```
 
-Premissas podem ser necessárias. O problema não é assumir algo.
+Premissas técnicas podem ser necessárias para orientar investigação. Decisões de produto não são
+premissas que a LLM pode adotar: requisito, escopo, UX, arquitetura preferida, dados, segurança,
+risco aceito e aceite pertencem ao usuário.
 
 O problema é:
 
@@ -455,7 +457,9 @@ Melhor:
 "Não há requisito de auditoria identificado; verificar se o domínio, segurança ou regras internas exigem rastreabilidade."
 ```
 
-Quando a premissa for material e não puder ser validada por contexto, código ou documentação, use a skill [pelizzai-interview-me](../../pelizzai-interview-me/SKILL.md).
+Quando a questão material for factual, valide por contexto, código ou documentação. Quando for
+decisão humana, use [pelizzai-interview-me](../../pelizzai-interview-me/SKILL.md), uma pergunta por
+vez, com recomendação; documentação não decide pelo usuário.
 
 ## Premissas em debugging
 
@@ -561,7 +565,7 @@ Não trate "aceita como risco" como "confirmada".
 
 Em alguns casos, não será possível validar uma premissa antes de avançar.
 
-Só aceite risco quando:
+Só registre risco aceito após ratificação do usuário e quando:
 
 ```text
 - a premissa não é crítica;

@@ -23,7 +23,8 @@ Se o sentinel do repo-fonte estiver presente, não procure/crie `pelizzai/data/s
 execution record `branch`, `base-ref`, `base-sha` e `validated-head`; exija branch segura,
 `git rev-parse HEAD == validated-head` e working tree limpa. Defina
 `delivery-head=validated-head`, pule o closure commit e vá direto a
-**Resolver o destino**. Sem pedido externo, mantenha local. Ao terminar, marque o execution record
+**Resolver o destino**. Sem pedido externo, recomende manter local e aguarde a escolha. Ao terminar,
+marque o execution record
 `phase: done` com `validated-head`, `delivery-head` e status do destino. Qualquer divergência volta
 ao lifecycle.
 
@@ -38,7 +39,9 @@ As seções de state/closure abaixo são exclusivas do projeto consumidor.
 - Depois do seal, não roda squash/rebase/reset, overlay, formatter, codegen, teste que escreva
   snapshot, doc generator nem fix.
 - O único commit novo toca somente pelizzai/data/state.md.
-- Manter local é o default, apresentado proativamente como gate ao fechar — não suprimido. Push/PR/remover worktree/descarte exigem decisão explícita por tarefa, nunca herdada de profile.
+- Manter local é a recomendação padrão, mas também exige resposta no gate. Push/PR, remover
+  worktree e descarte exigem decisão explícita por tarefa: nunca são aplicados a partir de um
+  default de profile nem herdados de outra tarefa.
 - Nunca use reset --hard, branch -D, worktree remove --force ou stash automático.
 ```
 
@@ -108,10 +111,8 @@ incluiu outro arquivo ou deixou sujeira invalida o fechamento; pare, não faça 
 
 ## 3. Resolver o destino
 
-Ao fechar, **ofereça o destino** uma vez: **Manter local** é o default, recomendado e
-pré-selecionado. Sempre que houver qualquer intenção externa plausível — o usuário mencionou
-publicar/PR/integrar antes, ou a entrega fecha um plano completo — apresente proativamente o menu e
-aguarde a escolha antes de qualquer efeito externo:
+Ao fechar, **ofereça o destino** uma vez. **Manter local** é recomendado quando não houve intenção
+externa, mas nunca é auto-confirmado. Faça uma única pergunta e aguarde:
 
 ```text
 Como integrar o conteúdo validado?
@@ -124,11 +125,9 @@ Como integrar o conteúdo validado?
 Qual opção?
 ```
 
-Numa tarefa trivial estritamente local, sem qualquer sinal externo, não abra o menu completo:
-ofereça em uma linha ("Mantendo local; quer que eu publique ou abra PR?") e siga o default local se
-o usuário não pedir efeito externo. Quando a intenção externa já foi expressa, confirme somente o
-alvo que ainda for materialmente ambíguo. Push, PR e descarte exigem confirmação **por tarefa** —
-nunca aplicados a partir de um default de profile.
+Numa tarefa trivial local, a pergunta pode ser curta: "Recomendo manter local; confirma ou prefere
+publicar/abrir PR?". Ainda assim, aguarde resposta. Quando intenção externa já foi expressa,
+confirme somente o alvo materialmente ambíguo. Destino nunca vem de default de profile.
 
 Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing
 e escale ao coordenador o que exigir decisão.

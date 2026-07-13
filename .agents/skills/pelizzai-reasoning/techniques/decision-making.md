@@ -29,7 +29,9 @@ Ela exige:
 
 ## Princípio central
 
-> Escolha a alternativa que melhor atende aos critérios e restrições confirmados, com risco proporcional à qualidade das evidências e à reversibilidade da decisão.
+> Selecione e justifique a melhor **recomendação**. Execute-a somente quando a decisão for mecânica e
+> já estiver coberta por spec/plano ratificado ou quando o usuário delegar explicitamente essa
+> categoria. Reversibilidade reduz risco; não transfere autoridade sobre o produto para a LLM.
 
 ```mermaid
 flowchart TD
@@ -213,7 +215,8 @@ Teste:
     caso contrário, decida com risco explicitado e gatilho de revisão.
 ```
 
-Detalhe secundário (não move a escolha) não justifica adiar decisão reversível.
+Detalhe secundário não justifica pesquisa infinita. Se a escolha pertence ao usuário, apresente a
+recomendação e pergunte mesmo quando reversível.
 
 ### Regra de desempate
 
@@ -301,7 +304,9 @@ A pergunta correta é:
 ```mermaid
 flowchart TD
     A[Incerteza relevante] --> B{Decisão reversível?}
-    B -- Sim --> C[Executar experimento pequeno ou decisão reversível]
+    B -- Sim --> C{Decisão foi delegada ou já ratificada?}
+    C -- Sim --> G[Executar experimento pequeno/mecânico]
+    C -- Não --> H[Recomendar e perguntar ao usuário]
     B -- Não --> D{Evidência crítica está ausente?}
     D -- Sim --> E[Adiar, investigar ou pedir confirmação]
     D -- Não --> F[Decidir com risco explicitado]
@@ -342,12 +347,12 @@ Escolha entre:
 
 | Ação                     | Quando usar                                                             |
 | ------------------------ | ----------------------------------------------------------------------- |
-| Decidir e executar       | Evidência suficiente e risco proporcional                               |
+| Decidir e executar       | Passo mecânico coberto por decisão ratificada/delegada                   |
 | Decidir condicionalmente | Depende de premissa rastreada                                           |
 | Executar experimento     | Incerteza relevante, mas decisão reversível                             |
 | Adiar                    | Falta evidência crítica e o custo de esperar é aceitável                |
-| Pedir confirmação        | A escolha altera escopo, custo, prioridade ou risco aceito pelo usuário |
-| Aceitar risco            | Incerteza não crítica, ação reversível e mitigação disponível           |
+| Pedir confirmação        | A escolha pertence ao produto/usuário, mesmo quando reversível          |
+| Aceitar risco            | Usuário ratificou; incerteza não crítica, reversível e mitigada         |
 | Bloquear                 | Não há opção válida, segura ou autorizada                               |
 | Escalar                  | Decisão depende de responsável, permissão ou conhecimento externo       |
 

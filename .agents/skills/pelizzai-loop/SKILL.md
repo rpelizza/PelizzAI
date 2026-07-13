@@ -56,8 +56,8 @@ O loop só encerra quando a DoD é atingida **e verificada** (`pelizzai-verifica
 
 ```text
 1. DoD atingida e VERIFICADA (evidência fresca) → concluir.
-2. Dúvida material no meio do loop → PARE e acione `pelizzai-interview-me`; só retome quando
-   TODAS as dúvidas estiverem resolvidas. Nunca "chuta e segue".
+2. Decisão material no meio do loop → PARE e acione `pelizzai-interview-me`; resolva uma pergunta
+   por vez, com recomendação, e só retome quando nenhuma decisão humana estiver pendente.
 3. Bloqueio que você não resolve (circuit breaker estourado, decisão que pertence ao humano)
    → registre phase: blocked no state consumidor ou execution record nativo e escale com
    mensagem acionável.
@@ -67,7 +67,9 @@ O loop só encerra quando a DoD é atingida **e verificada** (`pelizzai-verifica
    silêncio por cansaço.
 ```
 
-Fora esses cinco, **não pare** — em plano aprovado, não pergunte "sigo?" entre tarefas (autonomia entre tarefas, gates nas bordas). Estes cinco critérios são a lista canônica; `techniques/ooda.md` remete a ela.
+Fora esses cinco, não peça permissão para cada passo mecânico já aprovado. Execução contínua não é
+autonomia decisória: qualquer escolha nova de produto aciona o critério 2. Estes cinco critérios
+são a lista canônica; `techniques/ooda.md` remete a ela.
 
 ---
 

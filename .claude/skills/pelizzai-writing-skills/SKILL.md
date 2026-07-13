@@ -98,6 +98,25 @@ Consumidor com ambos:
 
 Nunca crie uma domain skill num diretório que a plataforma atual não carrega. Catálogo e ledger registram o caminho real.
 
+### Sync obrigatório como parte da edição
+
+Depois que o usuário autorizou criar, alterar ou remover uma skill, sincronizar os roots gerados é
+parte mecânica dessa mesma alteração — não peça uma segunda autorização:
+
+```text
+1. Edite somente o canonical-skill-root.
+2. Se scripts/sync-harness.mjs existir, rode automaticamente:
+   node scripts/sync-harness.mjs
+   node scripts/sync-harness.mjs --check [--source-mode no repo-fonte]
+3. Os wrappers sync-harness.ps1 e sync-harness.sh são entradas equivalentes, não implementações
+   diferentes. Use o disponível quando `node` não estiver diretamente exposto pelo agente.
+4. Ao criar/remover skill core no repo-fonte, inclua --update-manifest antes do --check.
+5. Sem script de geração, espelhe conforme o profile e compare hashes.
+```
+
+Não sincronize uma proposta de manutenção ainda não ratificada. Depois da ratificação, não deixe
+skill canônica e mirrors divergentes nem transfira esse passo ao usuário.
+
 ---
 
 ## Modo Bootstrap (chamado pela `pelizzai-audit`)
@@ -126,8 +145,9 @@ Acionado em `bootstrap-write`, depois que a `pelizzai-audit` mapeou o contexto e
    autorização existente ou para efeito externo.
 ```
 
-> Em projeto **novo** (sem código), não há padrões a extrair: use `pelizzai-brainstorming` e stress
-> somente quando risco/incerteza justificarem; depois crie skills a partir do design aprovado.
+> Em projeto **novo** (sem código), não há padrões a extrair: conclua primeiro descoberta
+> sequencial, design, stress e spec aprovada. Depois proponha domain skills fundamentadas na stack e
+> no design ratificados; só escreva as escolhidas pelo usuário e só então siga para o plano.
 
 ---
 
@@ -135,7 +155,9 @@ Acionado em `bootstrap-write`, depois que a `pelizzai-audit` mapeou o contexto e
 
 Mantém as skills de **domínio** vivas conforme o projeto evolui. Detalhe completo em **[references/domain-skill-maintenance.md](references/domain-skill-maintenance.md)**. Três eixos — dois **atualizam** o que já existe, um **cria** a primeira skill de uma stack nova:
 
-> **Escopo (inegociável):** a manutenção autônoma — os três eixos e a cadência — atua **somente** sobre skills de domínio. As skills do harness (`pelizzai-*`) **nunca** são alteradas pelo sistema autônomo; só são criadas ou editadas a pedido explícito do usuário.
+> **Escopo (inegociável):** a detecção proativa dos três eixos e da cadência atua somente sobre
+> skills de domínio e apenas propõe mudanças. As skills do harness (`pelizzai-*`) nunca são alteradas
+> sem pedido explícito do usuário.
 
 - **Version-driven (refresh — ATUALIZA):** a stack mudou de versão maior ou ganhou dependência significativa → reler a doc da versão atual (context7) e **atualizar** a skill existente afetada. O drift é detectado comparando os manifests atuais com o **Stack baseline** de `pelizzai/profile.md` (gravado pela `pelizzai-audit` no bootstrap).
 - **Rework-driven (histórico — ATUALIZA):** o mesmo ajuste foi feito à mão várias vezes no git → o padrão vira uma regra na skill existente.
@@ -244,7 +266,7 @@ Depois que uma skill está pronta, você pode **otimizar a `description`** para 
 Crie skills que generalizam e mantenha-as vivas sem nunca destruir o trabalho de quem veio antes.
 
 Prefira:
-- fundamentar no context7 a confiar na memória;
+- fundamentar no context7 a confiar na memória, sem tratar documentação como decisão do usuário;
 - mostrar o diff a sobrescrever;
 - confirmação para manutenção proativa; execução direta para edição já pedida;
 - references/ a um SKILL.md gigante;
