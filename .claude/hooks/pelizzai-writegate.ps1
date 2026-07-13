@@ -20,7 +20,8 @@
 #
 # REGRA B (so consumidor: existe pelizzai/ e NAO e o repo-fonte) - nada de codigo antes do gate:
 #   escrever caminho de PRODUTO (fora de pelizzai/) enquanto pelizzai/data/state.md NAO
-#   contem "kickoff: ratificado" -> BLOQUEIA. Escritas em pelizzai/ sao sempre liberadas
+#   contem "kickoff: ratificado" -> BLOQUEIA. Quando o state usa campos de aprovacao
+#   greenfield, qualquer campo pending tambem bloqueia. Escritas em pelizzai/ sao sempre liberadas
 #   (sao os artefatos que registram o proprio gate). Em SOURCE MODE (repo-fonte PelizzAI:
 #   sentinela pelizzai-source-repo.txt) a Regra B e PULADA - ali o marcador vive no execution record nativo.
 #
@@ -49,9 +50,10 @@ $ErrorActionPreference = 'SilentlyContinue'
 
 # Branches protegidas por default (Regra A). origin/HEAD enriquece a lista em runtime.
 $PROTECTED = @('main', 'master', 'develop', 'dev')
-# Marcador maquina-legivel do gate consolidado no state.md (kickoff/pos-plano ratificado
+# Marcadores maquina-legiveis dos gates sequenciais no state.md (kickoff/pos-plano ratificado
 # pelo usuario: conteudo + isolamento + modo + commit). writegate e retomada dependem dele.
 $KICKOFF_RATIFIED = 'kickoff:\s*ratificado'
+$PENDING_USER_APPROVAL = '^\s*-?\s*(discovery|spec-approval|domain-skills-decision|plan-approval):\s*<?pending>?\s*$'
 # Sentinela DEDICADA do repo-fonte PelizzAI (source mode): presente, a Regra B e pulada.
 # Criterio unico e inequivoco: manifesto e sync-harness existem tambem nos consumidores
 # instalados via -ExportConsumer e NAO indicam source mode.
@@ -268,7 +270,12 @@ try {
   }
   $state = ''
   try { $state = Get-Content -LiteralPath $statePath -Raw } catch { exit 0 } # nao leu o marcador -> fail-open
-  if ([regex]::IsMatch($state, $KICKOFF_RATIFIED, 'IgnoreCase')) { exit 0 } # kickoff ratificado -> liberado
+  $kickoffRatified = [regex]::IsMatch($state, $KICKOFF_RATIFIED, 'IgnoreCase')
+  $approvalPending = [regex]::IsMatch($state, $PENDING_USER_APPROVAL, 'IgnoreCase, Multiline')
+  if ($kickoffRatified -and -not $approvalPending) { exit 0 }
+  if ($approvalPending) {
+    Invoke-Block 'ha aprovacao humana pendente no lifecycle (discovery/spec/domain skills/plano). Resolva uma decisao por vez com o usuario e atualize o state antes de escrever produto.'
+  }
 
   Invoke-Block 'o kickoff ainda nao foi ratificado (falta "kickoff: ratificado" em pelizzai/data/state.md). Conduza o gate de kickoff/pos-plano COM o usuario - isolamento, modo de execucao e estrategia de commit -, grave "kickoff: ratificado" em pelizzai/data/state.md e entao escreva o codigo.'
 } catch {

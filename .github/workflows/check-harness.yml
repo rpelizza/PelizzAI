@@ -14,16 +14,23 @@ concurrency:
 
 jobs:
   sync-check:
-    # windows-latest de proposito: o sync-harness.ps1 usa separadores '\' e gera
-    # AGENTS.md/GEMINI.md com CRLF casando com o working tree sob autocrlf=true
-    # (default da imagem Windows). Em ubuntu a comparacao byte a byte do -Check falharia.
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Validar fonte e alvos gerados
+      - name: Validar núcleo portátil
+        run: node scripts/sync-harness.mjs --check --source-mode
+      - name: Validar wrapper PowerShell
+        if: runner.os == 'Windows'
         run: pwsh scripts/sync-harness.ps1 -Check -SourceMode
+      - name: Validar wrapper Bash
+        if: runner.os != 'Windows'
+        run: bash scripts/sync-harness.sh --check --source-mode
 
   contract-tests:
     strategy:

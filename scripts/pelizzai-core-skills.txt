@@ -1,8 +1,5 @@
-# skills core do PelizzAI — GERADO por `scripts/sync-harness.ps1 -UpdateManifest`.
-# Sao as skills que acompanham o harness. O pelizzai-router usa esta lista para
-# distinguir skills de core das skills de dominio/stack do proprio projeto
-# (dominio presente = diretorios de skill - esta lista de core).
-# Regenere APENAS no repo-fonte do PelizzAI (-UpdateManifest) quando o core mudar.
+# skills core do PelizzAI — GERADO por scripts/sync-harness.mjs --update-manifest.
+# Regenere apenas no repo-fonte. Consumidores usam este manifesto para separar core de domínio.
 pelizzai-audit
 pelizzai-brainstorming
 pelizzai-codebase-design

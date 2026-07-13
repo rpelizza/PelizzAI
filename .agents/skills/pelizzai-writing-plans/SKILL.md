@@ -1,6 +1,6 @@
 ---
 name: pelizzai-writing-plans
-description: Transforma requisitos, spec, PRD ou design aprovado em um plano de implementação executável antes do código. Use para features bounded, standard ou exploratory que precisam de uma ou mais tarefas coordenadas, ou quando o usuário pedir plano/decomposição. Dimensiona detalhe, validação, overlays e review por risco; não força brainstorming ou entrevista quando o aceite já está claro.
+description: Transforma requisitos ratificados, spec, PRD ou design aprovado em plano de implementação durável, estressado e aprovado antes do código. Use para features bounded, standard, exploratory e todo produto/projeto greenfield, ou quando o usuário pedir plano/decomposição. Dimensiona detalhe, validação, overlays e review por risco sem decidir requisitos pelo usuário.
 ---
 
 # PelizzAI Writing Plans
@@ -22,10 +22,12 @@ consumidor no repo-fonte. A task/planning branch já deve existir; state é obri
 ## Pré-condições
 
 ```text
-- Objetivo e critério de aceite são claros o suficiente para planejar.
+- Objetivo e critério de aceite foram explicitados ou ratificados pelo usuário.
 - A branch foi aberta por pelizzai-starting-branch antes da spec/plano.
 - Source mode segue as regras do repo-fonte sem runtime `pelizzai/`; consumidor usa catálogo/profile.
-- Fato de biblioteca/API que pode ter mudado foi verificado em documentação oficial disponível.
+- Fato de biblioteca/API que pode ter mudado foi verificado no Context7 para a versão observada;
+  documentação oficial atual é fallback quando a ferramenta estiver indisponível.
+- Greenfield/standard/exploratory possui spec aprovada, ou dispensa explícita registrada.
 ```
 
 Se ainda não é possível formular a pergunta técnica com precisão, volte ao brainstorming. Se a
@@ -38,13 +40,17 @@ Use a lane registrada pelo router:
 
 | Lane | Forma do plano |
 | --- | --- |
-| `bounded` | 1–poucas tarefas compactas; paths, contrato, aceite, prova e comando. Não force brainstorming, entrevista ou snippets extensos. |
+| `bounded` | 1–poucas tarefas compactas; paths, contrato, aceite, prova e comando. Não force entrevista quando o usuário já especificou a mudança. |
 | `standard` | tarefas verticais, interfaces e dependências explícitas; detalhe onde um executor poderia escolher errado. |
 | `exploratory` | riscos, decisões, migração/rollback e tarefas de descoberta delimitadas; não invente certeza nem implementação prematura. |
 
 Inclua código/config completo somente quando ele próprio é o contrato frágil (schema, formato,
 template, chamada pouco óbvia). Para implementação comum, nomes, interfaces, invariantes e exemplos
 curtos são mais duráveis que copiar o código futuro para o plano.
+
+Em greenfield, inclua uma fatia de documentação de uso/desenvolvimento (por exemplo README com
+setup, execução, testes e limites do MVP) como recomendação padrão. O usuário pode ajustar ou
+dispensar ao aprovar o plano; a LLM não remove documentação para acelerar a implementação.
 
 ## Decompor em fatias verticais
 
@@ -116,7 +122,8 @@ critério observável de conclusão e rollback quando aplicável
 ```
 
 São defeitos: `TBD`, “tratar edge cases” sem nomeá-los, comandos inexistentes, API lembrada sem
-fonte atual, placeholders, tarefa horizontal ou prova que não observa o efeito.
+fonte atual, placeholders, tarefa horizontal, prova que não observa o efeito ou requisito criado
+pela LLM sem ratificação.
 
 ## Verificar o plano
 
@@ -127,21 +134,20 @@ Antes do handoff:
 3. Confirme overlays e estratégia de prova por artefato.
 4. Procure placeholders e comandos chutados.
 5. Confirme que a lane não recebeu cerimônia maior que seu risco.
-6. **Exponha as lacunas materiais** do plano: caça ativa por casos não tratados, validação
+6. **Estresse e exponha as lacunas materiais** do plano: caça ativa por casos não tratados, validação
    ausente, estado/erro indefinido, autorização faltante e contradições spec↔plano↔tarefa.
 
-Liste as premissas residuais **novas do plano** — apenas as que a descoberta ainda não resolveu,
-sem re-litigar decisões fechadas na borda de design. Cada lacuna material sai da borda resolvida,
-explicitamente aceita pelo usuário, ou convertida em tarefa de investigação registrada — nunca
-engolida em silêncio. Se uma premissa residual muda escopo, contrato ou prova, **proponha**
-`pelizzai-interview-me` focal ou revisão independente e registre a decisão do usuário; nunca a
-imponha. Para `bounded` sem premissa material, a autoavaliação acima basta; `standard` usa stress
-focal se restarem trade-offs; `exploratory` espera stress/review independente. Não reabra design
-aprovado sem evidência nova.
+Liste premissas residuais **novas do plano**, sem re-litigar o design aprovado. Cada lacuna material
+sai da borda resolvida, aceita pelo usuário ou convertida em investigação. Quando exigir decisão
+humana, use `pelizzai-interview-me` e faça uma pergunta por vez, com recomendação. `bounded` usa
+stress compacto; `standard` usa stress focal; `exploratory`/greenfield exige uma passada completa
+de stress. Context7 pode confirmar API e versão, mas não fechar requisito, UX, regra de negócio ou
+aceite. Não reabra design aprovado sem evidência nova.
 
-Apresente o plano na borda — `bounded`: resumo das tarefas; `standard`/`exploratory`: mapa
-requisito→tarefa. A ratificação do conteúdo ocorre no gate consolidado (item 0), junto do setup:
-não emita uma pergunta separada só para o plano.
+Apresente o plano e o resultado do stress na borda — `bounded`: resumo das tarefas;
+`standard`/`exploratory`: mapa requisito→tarefa. Faça **uma pergunta de aprovação do conteúdo do
+plano** e aguarde. Somente depois avance ao setup; aprovação do QUÊ e decisões de COMO não são
+comprimidas numa resposta única.
 
 Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o
 briefing e escale ao coordenador o que exigir decisão.
@@ -151,10 +157,10 @@ briefing e escale ao coordenador o que exigir decisão.
 No consumidor, atualize o campo `plan:` no state e confirme o caminho materializado
 (`pelizzai/plans/AAAA-MM-DD-<feature>.md`). Em source mode, entregue o plano nativo/execution
 record a `pelizzai-execution-plans` de forma discoverable. A branch/base já estão definidas;
-**encaminhe ao Gate de setup pós-plano** da `pelizzai-execution-plans`, que apresenta numa única
-mensagem o bloco consolidado de ratificação: o **conteúdo** do plano (item 0, para aprovar) e o
-**como** — isolamento, modo (as três opções sempre visíveis), commits e review. A
-`pelizzai-writing-plans` leva apenas a **recomendação**, não a decisão:
+**encaminhe ao Gate de setup pós-plano** da `pelizzai-execution-plans` somente após aprovação do
+conteúdo. O gate ratifica o **como** em decisões sequenciais — isolamento, branch, modo (as três
+opções sempre visíveis), commits e review. A `pelizzai-writing-plans` leva recomendações, não
+decisões:
 
 ```text
 isolation: branch recomendado; worktree apenas se pedido/justificado — levado ao gate
@@ -162,7 +168,7 @@ execution-mode: inline recomendado; subagents/team por independência ou coorden
 commit-strategy: granular recomendado; squash-final só com trade-off/pedido — levado ao gate
 ```
 
-Não aplique isolamento, modo ou commit como decisão sem ratificação do usuário no gate consolidado;
+Não aplique isolamento, modo ou commit como decisão sem ratificação do usuário no gate sequencial;
 o plano informa e o gate ratifica antes da Tarefa 1. Se o usuário pediu **apenas o plano**, não
 execute código: valide o artefato, consolide/sele a entrega de planejamento e mantenha local salvo
 pedido externo.
@@ -172,10 +178,13 @@ pedido externo.
 ```text
 - Escrever plano antes da task branch.
 - Forçar brainstorming/interview/reviewer independente em lane bounded clara.
+- Planejar greenfield sem spec aprovada ou dispensa explícita.
+- Pular stress e aprovação do plano para começar a implementar.
 - Duplicar no plano todo o código que a execução deve escrever.
 - Omitir overlay frontend/security detectável.
 - TDD universal ou review split universal.
 - Team/worktree por preferência do harness, sem ganho concreto.
+- Usar Context7 para decidir requisitos ou critérios de aceite.
 - Plano gigante cobrindo subsistemas que deveriam ser tarefas/projetos separados.
 ```
 

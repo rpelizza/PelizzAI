@@ -50,7 +50,8 @@ Antes do primeiro teste:
 1. Consumidor: leia `pelizzai/domain-skills.md`; source mode: use regras/skills do repo-fonte.
 2. Obtenha o comando canônico em `pelizzai/profile.md`, quando existir, ou no manifest/script real.
 3. Confirme contrato, comportamento e seam no pedido/aceite; use spec/plano quando existirem.
-4. Para API externa incerta, consulte a documentação oficial atual disponível.
+4. Para API externa incerta, derive a versão instalada e consulte Context7; use documentação
+   oficial atual como fallback.
 5. Pergunte apenas se restar ambiguidade material; não reabra decisões já aprovadas.
 ```
 

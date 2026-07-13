@@ -1,5 +1,6 @@
-<!-- GERADO por scripts/sync-harness.ps1 a partir de CLAUDE.md — NAO edite a mao. -->
-<!-- Para mudar as diretrizes, edite CLAUDE.md e rode: pwsh scripts/sync-harness.ps1 -->
+<!-- GERADO por scripts/sync-harness.mjs a partir de CLAUDE.md — NÃO edite à mão. -->
+<!-- Para mudar as diretrizes, edite CLAUDE.md e rode o sync-harness da sua plataforma. -->
+
 # CLAUDE.md
 
 ## Harness PelizzAI (entrada obrigatória)
@@ -10,15 +11,24 @@ O que marca este repositório como repo-fonte é a sentinela `scripts/pelizzai-s
 (critério único de source mode — manifesto e sync existem também nos consumidores e não provam
 nada). Aqui, não execute bootstrap consumidor nem crie runtime `pelizzai/`. Use plano/execution
 record nativo; Verification sela o SHA em memória/registro e Finish não cria closure commit de
-state no source mode. Para distribuir a projetos consumidores, use
-`pwsh scripts/sync-harness.ps1 -ExportConsumer <destino>` — nunca cópia manual (ela levaria a
+state no source mode. Para distribuir a projetos consumidores, use o sync portátil
+(`node scripts/sync-harness.mjs --export-consumer <destino>`, ou o wrapper `.ps1`/`.sh`) — nunca
+cópia manual (ela levaria a
 sentinela junto e promoveria o consumidor a repo-fonte por engano).
 
 ## Diretrizes comportamentais
 
 Diretrizes para reduzir erros comuns de codificação cometidos por LLMs. Combine com instruções específicas do projeto conforme necessário.
 
-**Trade-off:** preserve invariantes; adapte heurísticas. Segurança, autoridade, isolamento antes da primeira escrita e evidência antes de conclusão não são opcionais. Brainstorming, TDD, OODA, team, número de reviews e effort variam com efeito, risco e incerteza.
+**Trade-off:** preserve invariantes; adapte heurísticas. Segurança, autoridade do usuário, isolamento antes da primeira escrita e evidência antes de conclusão não são opcionais. Brainstorming, TDD, OODA, team, número de reviews e effort variam com efeito, risco e incerteza. O harness pode escolher como raciocinar, investigar e recomendar; não pode escolher pelo usuário requisitos, escopo, UX, arquitetura, dados, risco aceito ou critérios de aceite.
+
+**Context7 é a fonte técnica preferencial do harness.** Sempre que biblioteca, framework, API,
+serviço, ferramenta, versão ou capacidade externa puder mudar a solução, primeiro identifique no
+repositório a tecnologia e a versão realmente usada; depois consulte Context7 para confirmar APIs,
+limites, migrações e alternativas. Em greenfield, use-o desde a leitura técnica inicial para
+qualificar sugestões e perguntas. Em projeto existente, combine-o com manifests, lockfiles, código
+e testes. Se indisponível, use documentação oficial atual e declare a limitação. Context7 elimina
+dúvidas factuais e melhora recomendações; nunca ratifica uma decisão pertencente ao usuário.
 
 ## 1. Pense Antes de Codificar
 
@@ -27,9 +37,10 @@ Diretrizes para reduzir erros comuns de codificação cometidos por LLMs. Combin
 Antes de implementar:
 
 - Declare apenas premissas materiais. Se houver incerteza que mude a solução, consulte evidência e então pergunte.
-- Se existirem múltiplas interpretações materialmente diferentes, apresente-as; não crie menu para detalhe reversível.
+- Se existirem múltiplas interpretações materialmente diferentes, apresente a melhor recomendação e pergunte qual o usuário escolhe.
 - Se existir uma abordagem mais simples, diga. Questione quando fizer sentido.
-- Se algo indispensável não estiver claro, pare com uma pergunta acionável. Para detalhe reversível, faça a suposição segura, declare-a e prossiga; para decisão que muda escopo/UX/arquitetura/segurança, apresente-a na análise da proposta e proponha a descoberta — não assuma em silêncio.
+- Se algo pertencente ao produto não estiver explícito, pare com **uma pergunta por vez**, começando pela decisão que condiciona as demais. Ofereça 2–3 opções reais quando ajudarem, marque a recomendada e explique o motivo em uma linha.
+- Evidência do projeto e Context7/documentação oficial eliminam perguntas factuais; não autorizam a LLM a responder decisões de produto pelo usuário. Uma decisão reversível só pode ser tomada mecanicamente quando já está contida numa spec ou plano ratificado.
 
 ## 2. Simplicidade Primeiro
 
@@ -79,9 +90,9 @@ Para micro-planos de resposta (poucos passos, dentro de uma mesma mensagem), apr
 3. [Etapa] → verificar: [checagem]
 ```
 
-O `pelizzai-router` escolhe a lane: mudança bounded usa plano compacto; standard usa design/plano proporcionais; exploratory/high-risk recebe stress completo. Não force plano formal ou entrevista quando objetivo, aceite e abordagem já estão claros. A rota classificada (lane, head skill, overlays) é apresentada como recomendação num **kickoff** compacto que você ratifica ou ajusta antes de investir; subir a descoberta (brainstorming/entrevista) está sempre a uma palavra de distância. Porém SEMPRE apresente a análise da proposta (premissas, lacunas, riscos, alternativas); quando houver lacuna material que mude escopo/UX/arquitetura, PROPONHA brainstorming/entrevista e deixe o usuário decidir fazer ou pular. **Recomende e ratifique: classificar é do harness; decidir é do usuário.**
+O `pelizzai-router` escolhe e recomenda a lane, head skill, overlays e técnicas de reasoning; o usuário ratifica a rota antes de qualquer tarefa mutável. Uma alteração bounded pode usar plano compacto e dispensar entrevista quando o próprio usuário já forneceu objetivo, aceite e abordagem. **Produto/projeto greenfield nunca é bounded só porque a stack foi informada:** faça descoberta uma pergunta por vez, produza spec, estresse-a, obtenha aprovação, produza plano, estresse-o e obtenha nova aprovação antes da execução. Specs e planos são o default durável; só são omitidos por dispensa explícita do usuário. **Recomende e ratifique: raciocinar é do harness; decidir é do usuário.**
 
-Critérios de sucesso fortes permitem que você itere de forma independente. Critérios fracos ("fazer funcionar") exigem esclarecimentos constantes.
+Depois que critérios, spec e plano estão ratificados, a LLM pode executar passos mecânicos e verificáveis dentro dessas fronteiras. Qualquer decisão emergente que altere produto, escopo, UX, arquitetura, dados, segurança, custo ou aceite interrompe a execução e volta ao usuário.
 
 ---
 
@@ -91,13 +102,17 @@ Sinais observáveis de que estas diretrizes e as skills estão cumprindo o papel
 
 - os diffs estão menores e sem mudanças não relacionadas ao pedido;
 - há menos reescritas causadas por excesso de complexidade;
-- perguntas aparecem apenas nas bordas em que mudam a decisão;
+- descoberta de produto faz uma pergunta por vez, com a melhor opção recomendada e justificativa curta;
 - no kickoff, a rota classificada (lane, descoberta, overlays) é apresentada para o usuário ratificar ou ajustar antes de investir esforço;
-- a análise da proposta aparece em toda tarefa mutável não-trivial, e decisões de escopo/UX/arquitetura são ratificadas — não assumidas em silêncio;
-- as decisões estruturais (isolamento, modo com `team` visível, commits, review, destino) são recomendação ratificada num único gate por borda, nunca default silencioso;
-- a política de execução ratificada do projeto reaparece como recap de uma linha, não como pergunta repetida;
+- projetos greenfield passam por descoberta → spec → stress → aprovação → plano → stress → aprovação;
+- decisões de escopo/UX/arquitetura/dados/segurança são ratificadas — nunca preenchidas por Context7, convenção ou default silencioso;
+- Context7 aparece cedo e de forma version-aware em greenfield, features, debugging, upgrades,
+  planos e manutenção de skills sempre que houver dependência de tecnologia externa;
+- as decisões estruturais (base/branch, isolamento, modo com `team` visível, commits, review, destino) são recomendadas e ratificadas uma por vez, nunca em default silencioso;
+- a política de execução ratificada pré-seleciona recomendações, mas só é aplicada em lote quando o usuário delega explicitamente;
 - uma tarefa read-only não cria estado nem artefatos;
 - overlays de frontend/security chegam ao executor antes da implementação/review;
+- a stack aprovada dispara proposta explícita de domain skills antes do plano/execução, e novas lacunas de domínio reaparecem no fechamento;
 - o conteúdo entregue é exatamente o conteúdo validado;
 - o histórico tem menos "fix do fix" (commits corrigindo o commit imediatamente anterior).
 
@@ -107,16 +122,16 @@ Sinais na direção contrária são gatilho para revisar as skills — não para
 
 ## Harness de skills (PelizzAI)
 
-Este projeto usa o harness de skills **PelizzAI**. As skills (instrucoes de processo) vivem em `.agents/skills/<nome>/SKILL.md` — um espelho de `.claude/skills/` (a fonte de verdade). Leia e siga a skill relevante ANTES de agir.
+Este projeto usa o harness de skills **PelizzAI**. As skills vivem em `.agents/skills/<nome>/SKILL.md`, espelho de `.claude/skills/`. Leia e siga a skill relevante antes de agir.
 
-**Entrada:** comece por `pelizzai-core` e `pelizzai-router`. O router classifica `effect`, risco, incerteza e superficies afetadas; escolhe exatamente uma head skill e adiciona overlays transversais quando necessarios. Operacoes somente leitura nao inicializam estado nem alteram o projeto. Antes da primeira escrita, o first-write gate confirma isolamento e branch. No repo-fonte PelizzAI, use plano/execution record nativo e nao crie runtime `pelizzai/`; em consumidor, state/specs/planos seguem o lifecycle.
+**Entrada:** comece por `pelizzai-core` e `pelizzai-router`. O router classifica efeito, risco, incerteza e superfícies; escolhe uma head skill e overlays. Operações somente leitura não inicializam estado. Antes da primeira escrita, confirme isolamento e branch. No repo-fonte use plano/execution record nativo; no consumidor, state/specs/planos seguem o lifecycle.
 
-**Grafia da marca:** ao anunciar uma skill, use sempre "PelizzAI" (P, A e I maiusculos). Identificadores (`pelizzai-*`) e o diretorio de estado `pelizzai/` ficam em minusculas.
+**Proteção de branch:** nunca commite em `main`/`master`/`develop`/`dev` nem em HEAD destacado. Isole via `pelizzai-starting-branch`.
 
-**Protecao de branch (inegociavel):** nunca commite em `main`/`master`/`develop`/`dev` (nem em HEAD destacado). Antes de qualquer commit, rode `git branch --show-current`; se protegida, isole via `pelizzai-starting-branch`.
+**Autoridade do usuário:** o harness classifica, raciocina, pesquisa com Context7/documentação oficial e recomenda; o usuário decide requisitos, escopo, UX, arquitetura, dados, risco aceito e critérios de aceite. Faça uma pergunta por vez, com a melhor opção recomendada. Greenfield passa por descoberta, spec e plano estressados e ratificados.
 
-**Gate de ratificacao (inegociavel):** decisoes estruturais — isolamento, modo de execucao (com `team` sempre visivel) e estrategia de commit — sao apresentadas como recomendacao e ratificadas pelo usuario num unico gate por borda (kickoff ou setup pos-plano), nunca aplicadas em silencio; `squash-final` so a pedido explicito. A politica ratificada vive em `pelizzai/profile.md` e reaparece como recap de uma linha; push/PR/publicacao sao confirmados por tarefa.
+**Context7:** trate-o como fonte técnica preferencial quando bibliotecas, frameworks, APIs, versões ou capacidades externas influenciarem a tarefa. Inspecione manifests/lockfiles primeiro, consulte a documentação da versão relevante e use a evidência para melhorar perguntas e recomendações; nunca a transforme em voto do usuário.
 
-**Fundamentacao:** para fatos externos instaveis, use a ferramenta de documentacao oficial disponivel na plataforma; nao trate memoria como fonte atual.
+**Gate de ratificação:** isolamento, modo de execução (com `team` sempre visível) e estratégia de commit são recomendações ratificadas antes de serem aplicadas; `squash-final` só a pedido explícito. Push/PR/publicação são confirmados por tarefa.
 
-Skills disponiveis (31): pelizzai-audit, pelizzai-brainstorming, pelizzai-codebase-design, pelizzai-core, pelizzai-debugging, pelizzai-documenting-features, pelizzai-domain-modeling, pelizzai-execution-plans, pelizzai-finish-task, pelizzai-frontend, pelizzai-handoff, pelizzai-improving-architecture, pelizzai-interview-me, pelizzai-loop, pelizzai-oswap, pelizzai-preferences, pelizzai-prototype, pelizzai-quick-fix, pelizzai-reasoning, pelizzai-recovery, pelizzai-resolving-merge-conflicts, pelizzai-review, pelizzai-router, pelizzai-starting-branch, pelizzai-subagents, pelizzai-tdd, pelizzai-team, pelizzai-verification-before-completion, pelizzai-writing-clearly-and-concisely, pelizzai-writing-plans, pelizzai-writing-skills.
+Skills disponíveis (31): pelizzai-audit, pelizzai-brainstorming, pelizzai-codebase-design, pelizzai-core, pelizzai-debugging, pelizzai-documenting-features, pelizzai-domain-modeling, pelizzai-execution-plans, pelizzai-finish-task, pelizzai-frontend, pelizzai-handoff, pelizzai-improving-architecture, pelizzai-interview-me, pelizzai-loop, pelizzai-oswap, pelizzai-preferences, pelizzai-prototype, pelizzai-quick-fix, pelizzai-reasoning, pelizzai-recovery, pelizzai-resolving-merge-conflicts, pelizzai-review, pelizzai-router, pelizzai-starting-branch, pelizzai-subagents, pelizzai-tdd, pelizzai-team, pelizzai-verification-before-completion, pelizzai-writing-clearly-and-concisely, pelizzai-writing-plans, pelizzai-writing-skills.

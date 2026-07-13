@@ -15,7 +15,8 @@ Esta skill não substitui skills de domínio, regras do projeto, documentação 
 
 ## Princípio central
 
-> Use a menor quantidade de raciocínio estruturado necessária para produzir um resultado correto, seguro, verificável e útil.
+> Use a menor quantidade de raciocínio estruturado necessária para diagnosticar, recomendar e
+> verificar. Reasoning escolhe **como pensar**; não concede autoridade para escolher **o produto**.
 
 Não carregue todas as técnicas por padrão. Não transforme tarefas simples em processos longos. Não use uma técnica apenas porque ela existe.
 
@@ -90,11 +91,14 @@ Critério de conclusão:
 - Como saber que a tarefa foi concluída corretamente?
 ```
 
-Não faça perguntas por reflexo. Primeiro use contexto disponível, arquivos, documentação, código e ferramentas adequadas.
+Não faça perguntas factuais por reflexo. Primeiro use contexto, arquivos, documentação, código e
+ferramentas. Quando restar decisão de requisito, escopo, UX, arquitetura, dados, segurança, custo,
+risco aceito ou aceite, pergunte ao usuário uma decisão por vez e recomende a melhor opção.
 
 Para um pedido novo de feature/refactor com efeito mutável e incerteza material, produza a **Análise da proposta** com [Proposal Stress](techniques/proposal-stress.md) (premortem de escopo) antes de rotear — premissas, lacunas materiais, riscos e alternativas — como resultado apresentado pelo `pelizzai-router`, não como pergunta. Read-only e ajuste trivial não a disparam; risco alto isolado eleva prova e gates, não a incerteza.
 
-Use a skill `pelizzai-interview-me` somente quando houver ambiguidade material que não possa ser resolvida com evidência disponível.
+Use `pelizzai-interview-me` em todo greenfield e quando houver decisão humana material. Evidência
+resolve fatos; não resolve preferência, política ou intenção do usuário.
 
 ---
 
@@ -199,7 +203,9 @@ Cada seta é uma **transição de fase**: a técnica seguinte assume quando a an
 ### Implementação de feature
 
 ```text
-Structured Decomposition
+Assumption Tracking + Constraint Satisfaction na descoberta
+→ Decision Making para recomendar alternativas ao usuário
+→ Structured Decomposition após decisões ratificadas
 → Plan and Execute
 → ReAct na execução
 → [OODA somente se houver macro-loop com realidade reobservada]
@@ -315,7 +321,13 @@ Código e comportamento:
 Tecnologia:
 - Documentação oficial via MCP `context7` quando disponível (`resolve-library-id` → `query-docs`);
   sem ele, changelog, repositório oficial e web. Prova de conceito quando a doc não bastar.
-  Nunca responda de memória sobre API/versão de lib externa quando o context7 puder confirmar.
+  Primeiro derive tecnologia e versão de manifests, lockfiles, config e código. Em greenfield sem
+  versão instalada, consulte a versão atual da stack informada ou de cada candidata real.
+  Use Context7 desde o reconhecimento inicial, e novamente quando design, plano, implementação,
+  debugging, upgrade ou manutenção de skill trouxer uma pergunta técnica nova.
+  Nunca responda de memória sobre API/versão de lib externa quando o Context7 puder confirmar.
+  Context7 pode confirmar capacidade e restrição técnica; nunca escolhe requisito, persona, fluxo,
+  política, arquitetura preferida ou critério de aceite em nome do usuário.
 
 Fatos atuais:
 - Fonte primária ou oficial atual.
@@ -331,7 +343,9 @@ Arquivos enviados:
 
 ## Perguntas de esclarecimento
 
-Pergunte somente quando a resposta muda materialmente o plano, a segurança, o escopo, o custo ou o resultado.
+Pergunte quando a resposta muda materialmente requisito, plano, UX, arquitetura, dados, segurança,
+custo, risco aceito ou resultado. Em greenfield, presuma que essas decisões ainda precisam ser
+obtidas até que a spec mostre o contrário.
 
 Antes de perguntar, verifique:
 
@@ -339,8 +353,7 @@ Antes de perguntar, verifique:
 - O contexto já responde?
 - O código ou arquivo responde?
 - A documentação responde?
-- É possível seguir com decisão reversível?
-- Existe uma alternativa segura e conservadora?
+- O usuário já delegou explicitamente esta categoria de decisão?
 ```
 
 Pergunte quando:
@@ -353,6 +366,10 @@ Pergunte quando:
 - a decisão pertence ao usuário ou responsável externo;
 - não existe solução válida com as restrições atuais.
 ```
+
+Faça uma pergunta por vez. Quando houver opções reais, mostre 2–3, destaque a recomendada e explique
+o motivo em uma linha. Não agrupe decisões para reduzir turnos; use a resposta para recalcular a
+próxima pergunta.
 
 ---
 
@@ -433,6 +450,8 @@ Não faça isto:
 - Usar Critique and Refine sem feedback ou problema concreto.
 - Usar Verification apenas como checklist decorativo.
 - Perguntar antes de consultar evidência disponível.
+- Fazer várias perguntas de descoberta no mesmo turno.
+- Usar uma técnica, Context7 ou “default seguro” para ratificar uma decisão do usuário.
 - Continuar investigando após critérios de conclusão serem atendidos.
 - Carregar todas as técnicas sem necessidade.
 ```
@@ -482,7 +501,7 @@ Escolha a menor combinação de técnicas que reduza incerteza, respeite restri�
 
 Prefira:
 - evidência a suposição;
-- decisão reversível a compromisso prematuro;
+- recomendação reversível a compromisso prematuro, sem decidir pelo usuário;
 - validação real a confiança subjetiva;
 - técnicas específicas a raciocínio genérico;
 - conclusão proporcional a investigação infinita.

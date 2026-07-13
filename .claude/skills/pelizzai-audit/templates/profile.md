@@ -23,8 +23,9 @@ quando houver mirrors, sincronizadas e verificadas; nunca assuma `.claude/skills
 ## Defaults de execução ratificados
 
 > Política de PROJETO explicitamente ratificada pelo usuário — NÃO é herança da tarefa anterior.
-> O gate pós-plano segue estes valores e só interrompe quando a tarefa foge deles. No bootstrap
-> nascem todos `<unset>`; o harness só os aplica pela 1ª vez após ratificação no gate pós-plano.
+> O gate pós-plano usa estes valores como recomendações nas perguntas sequenciais. Eles não
+> auto-confirmam uma tarefa nova, salvo quando o usuário delegar explicitamente aplicar a política.
+> No bootstrap nascem todos `<unset>`.
 
 - isolation-default: <branch|worktree|unset>
 - execution-mode-default: <inline|subagents|team|unset>

@@ -150,7 +150,8 @@ try {
     Check-NotMatch '.claude/skills/pelizzai-documenting-features/SKILL.md' 'Oferecida pela.*finish-task' 'documentação não é oferta tardia'
     Check-Match '.claude/skills/pelizzai-verification-before-completion/SKILL.md' 'validated-head' 'Verification sela conteúdo validado'
     Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'metadata-only' 'finish limita fechamento a metadata'
-    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'ofereça o destino[\s\S]{0,160}pré-selecionado' 'finish apresenta destino proativo com local como default recomendado'
+    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'ofereça o destino[\s\S]{0,180}Manter local[^\n]*recomend' 'finish apresenta destino com local recomendado'
+    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'nunca é auto-confirmado' 'finish exige decisão explícita até para manter local'
     Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'Source mode[\s\S]*não.*state|source mode[\s\S]*não.*state' 'finish não cria runtime no source mode'
     Check-Match '.claude/skills/pelizzai-quick-fix/SKILL.md' 'Commit[\s\S]*verification-before-completion[\s\S]*finish-task' 'quick-fix commita antes do seal'
     Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Revise[\s\S]*Consolide[\s\S]*verification-before-completion[\s\S]*finish-task' 'debugging revisa, commita e sela em ordem'
@@ -180,10 +181,9 @@ try {
     Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Source mode:[\s\S]*State ausente é o contrato' 'retomada execution respeita source mode'
 
     # =====================================================================
-    # Contratos do recomendar-e-ratificar (restauração pós-44df87c)
-    # Travam a doutrina "classificar é do harness; decidir é do usuário": os
-    # gates de ratificação estão presentes e NÃO regridem a default silencioso,
-    # sem reintroduzir cerimônia em read-only/trivial (anti-regressão simétrica).
+    # Contratos de inteligência com autoridade do usuário.
+    # O harness classifica, fundamenta e recomenda; decisões humanas são
+    # ratificadas e discovery ocorre uma pergunta por vez.
     # =====================================================================
 
     # -- Gate de kickoff (router): rota como recomendação a ratificar --
@@ -199,60 +199,81 @@ try {
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'assumption-tracking' 'Análise da proposta é fundamentada em técnica documentada'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'pelizzai-interview-me' 'interview-me reconectada ao roteamento (>0 menções)'
 
-    # -- Gate de setup pós-plano (execution-plans): três opções, team, squash --
+    # -- Gate de setup pós-plano sequencial: três opções, team, squash --
     Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' '## Gate de setup pós-plano' 'execution-plans tem seção Gate de setup pós-plano'
     Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'as três opções sempre visíveis' 'gate pós-plano: as três opções sempre visíveis'
     Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'team nunca é omitido' 'gate pós-plano: team nunca é omitido'
     Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'squash-final somente com pedido explícito' 'gate pós-plano: squash-final só com pedido explícito'
-    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'responda "ok"' 'gate pós-plano é checkpoint de ratificação batched'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'uma por vez|uma pergunta por turno' 'gate pós-plano ratifica uma decisão por turno'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/SKILL.md' 'autonomia entre tarefas' 'execution-plans não promete autonomia decisória'
     Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'SUBAGENT-STOP / MEMBRO-DO-TIME-STOP' 'gate pós-plano tem carve-out SUBAGENT-STOP'
 
     # -- writing-plans encaminha ao gate e expõe lacunas (sem forçar entrevista em bounded) --
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'encaminhe ao Gate de setup pós-plano' 'writing-plans encaminha ao Gate de setup pós-plano'
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'Exponha as lacunas materiais' 'writing-plans expõe as lacunas materiais'
-    Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'exploratory[^\n]{0,40}(stress|review independente)' 'writing-plans espera stress para exploratory (positivo, sem forçar bounded)'
+    Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'exploratory[\s\S]{0,120}(stress|review independente)' 'writing-plans espera stress para exploratory (positivo, sem forçar bounded)'
 
-    # -- brainstorming: gate Propor descoberta (pular é decisão do usuário) --
-    Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'Propor descoberta' 'brainstorming tem gate Propor descoberta'
-    Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'decisão de pular a descoberta é do usuário' 'brainstorming: pular a descoberta é decisão do usuário'
+    # -- brainstorming/interview: uma pergunta por vez, recomendação, spec --
+    Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'uma pergunta por vez' 'brainstorming entrevista sequencialmente'
+    Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'Recomendação:' 'brainstorming recomenda antes de perguntar'
+    Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'Pular a\s+descoberta inteira exige pedido explícito' 'brainstorming: pular descoberta exige decisão do usuário'
     Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'SUBAGENT-STOP\), não produza análises de rota nem abra gates' 'brainstorming tem carve-out SUBAGENT-STOP'
-    Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'Não exija stress interview duas vezes' 'brainstorming preserva a guarda anti-entrevista-dupla (anti-fadiga)'
+    Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'Não exija stress[^\n]*duas vezes' 'brainstorming preserva a guarda anti-stress duplicado'
 
     # -- interview-me: exposição numerada de lacunas --
     Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'termina com a lista numerada de lacunas e como cada uma muda a solução' 'interview-me termina com lista numerada de lacunas'
     Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'sem a seção de lacunas está incompleto' 'interview-me: resumo sem seção de lacunas é incompleto'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'exatamente uma pergunta por turno' 'interview-me faz exatamente uma pergunta por turno'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'Recomendado:' 'interview-me destaca a melhor opção'
 
     # -- audit: gate proativo de domain skills nas bordas (propor-confirmar) --
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'Gate proativo de domain skills' 'audit tem Gate proativo de domain skills'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'bordas design.plano e plano.execução' 'audit: gate nas bordas design->plano e plano->execução'
-    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'propor-confirmar' 'audit preserva propor-confirmar'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'recomendação a\s+ratificar' 'audit preserva propor-confirmar'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'O plano não começa enquanto' 'domain skills são decididas antes do plano greenfield'
 
     # -- writing-skills: context7 obrigatório na criação + eixo adoption-driven --
     Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' 'fundamentada em context7 ou documentação oficial atual' 'writing-skills exige context7/doc oficial ao criar skill de stack'
+    Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' 'Sync obrigatório como parte da edição' 'writing-skills sincroniza automaticamente após edição autorizada'
+    Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' 'node scripts/sync-harness\.mjs[\s\S]*--check' 'writing-skills executa sync e check portáteis'
     Check-Match '.claude/skills/pelizzai-writing-skills/references/domain-skill-maintenance.md' '[Aa]doption-driven' 'domain-skill-maintenance tem o eixo adoption-driven (cria skill de stack nova)'
 
     # -- finish-task: destino proativo (local default, externo por tarefa) --
-    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'apresente proativamente' 'finish-task apresenta o menu de destino proativamente'
-    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'nunca aplicados a partir de um default de profile' 'finish-task: push/PR/descarte confirmados por tarefa (destino não herdado)'
+    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'Faça uma única pergunta e aguarde' 'finish-task pergunta o destino e aguarda'
+    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'nunca (?:são )?aplicados a partir de um\s+default de profile' 'finish-task: push/PR/descarte confirmados por tarefa (destino não herdado)'
 
     # -- Doutrina de entrada (CLAUDE.md) --
-    Check-Match 'CLAUDE.md' 'Recomende e ratifique: classificar é do harness; decidir é do usuário' 'CLAUDE.md fixa a doutrina recomendar-e-ratificar'
-    Check-Match 'CLAUDE.md' 'decisões estruturais[\s\S]{0,160}nunca default silencioso' 'CLAUDE.md: sinal de saúde do gate único ratificado'
+    Check-Match 'CLAUDE.md' 'Recomende e ratifique:' 'CLAUDE.md fixa a doutrina recomendar-e-ratificar'
+    Check-Match 'CLAUDE.md' 'raciocinar é do harness; decidir é do usuário' 'CLAUDE.md separa reasoning de autoridade'
+    Check-Match 'CLAUDE.md' 'Produto/projeto greenfield nunca é bounded' 'CLAUDE.md protege o fluxo greenfield'
+    Check-Match 'CLAUDE.md' 'decisões estruturais[\s\S]{0,180}nunca (em )?default silencioso' 'CLAUDE.md: decisões estruturais nunca usam default silencioso'
 
     # -- Marcadores máquina-legíveis do state.md (schema do writegate/retomada) --
     Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'kickoff: <pendente \| ratificado' 'state.md tem marcador kickoff (pendente|ratificado)'
     Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'isolation: <pending[\s\S]*execution-mode: <pending[\s\S]*commit-strategy: <pending' 'state.md: isolation/execution-mode/commit-strategy nascem <pending>'
+    Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'discovery:[\s\S]*spec-approval:[\s\S]*domain-skills-decision:[\s\S]*plan-approval:' 'state.md registra aprovações greenfield'
 
     # -- Seção Defaults de execução ratificados no profile.md (memória de decisão) --
     Check-Match '.claude/skills/pelizzai-audit/templates/profile.md' '## Defaults de execução ratificados' 'profile.md tem seção Defaults de execução ratificados'
     Check-Match '.claude/skills/pelizzai-audit/templates/profile.md' 'isolation-default[\s\S]*execution-mode-default[\s\S]*commit-strategy-default' 'profile.md lista os defaults de execução'
     Check-Match '.claude/skills/pelizzai-audit/templates/profile.md' 'destination não é persistível' 'profile.md: destination nunca persistível (push/PR por tarefa)'
 
-    # -- Anti-regressão SIMÉTRICA: sem cerimônia em read-only/trivial --
+    # -- Anti-regressão simétrica: read-only e near miss local continuam proporcionais --
     # (o Check-NotMatch de :134 "plano bounded não força entrevista" permanece intacto acima.)
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'nunca cria/edita state' 'router: read-only não cria estado/artefato'
     Check-Match 'CLAUDE.md' 'read-only não cria estado nem artefatos' 'CLAUDE.md: read-only sem estado/artefato'
-    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'UMA LINHA que informa e segue' 'router: kickoff de uma linha para read-only/trivial'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Quando informa e segue:[^\n]*somente `read-only`' 'router só segue sem ratificação em read-only'
+    Check-Match '.claude/skills/pelizzai-router/evals/adaptive-user-control.md' 'G-01.*greenfield com stack informada' 'eval preserva a regressão greenfield histórica'
+    Check-Match '.claude/skills/pelizzai-router/evals/adaptive-user-control.md' 'G-02.*outra plataforma' 'eval cobre greenfield em outra stack'
+    Check-Match '.claude/skills/pelizzai-router/evals/adaptive-user-control.md' 'F-01.*feature em projeto existente' 'eval cobre feature em projeto existente'
+    Check-Match '.claude/skills/pelizzai-router/evals/adaptive-user-control.md' 'V-01.*upgrade e manutenção de skill' 'eval cobre upgrade e refresh de skill'
+    Check-Match '.claude/skills/pelizzai-router/evals/adaptive-user-control.md' 'B-01.*near miss local' 'eval protege ajuste local contra inflação'
+    Check-NotMatch '.claude/skills/pelizzai-brainstorming/SKILL.md' 'React, Express, SQLite' 'brainstorming normativo não sobreajusta ao prompt histórico'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'produto/projeto greenfield[\s\S]{0,120}sempre `exploratory`' 'router classifica greenfield como exploratory'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Context7/documentação oficial é reconhecimento técnico read-only' 'router usa Context7 cedo sem efeito mutável'
+    Check-Match '.claude/skills/pelizzai-reasoning/SKILL.md' 'Use Context7 desde o reconhecimento inicial' 'reasoning torna Context7 transversal'
+    Check-Match '.claude/skills/pelizzai-reasoning/SKILL.md' 'Context7 pode confirmar[\s\S]{0,180}nunca escolhe requisito' 'reasoning impede Context7 de decidir produto'
+    Check-Match 'CLAUDE.md' 'Context7 é a fonte técnica preferencial do harness' 'CLAUDE fixa Context7 como arma técnica transversal'
 
     # -- Envelope de segurança dos hooks: cadence/session-start fail-open, nunca bloqueiam --
     $failOpenMjs = @('.claude/hooks/pelizzai-cadence.mjs', '.claude/hooks/pelizzai-session-start.mjs')
@@ -303,6 +324,7 @@ try {
             $leaf = Split-Path -Leaf $wgRel
             Check-Match $wgRel 'main[\s\S]{0,40}master[\s\S]{0,40}develop[\s\S]{0,40}dev' "writegate conhece as branches protegidas ($leaf)"
             Check-Match $wgRel 'kickoff[\s\S]{0,20}ratificado' "writegate chaveia no marcador kickoff: ratificado ($leaf)"
+            Check-Match $wgRel 'discovery[\s\S]{0,80}spec-approval[\s\S]{0,80}domain-skills-decision[\s\S]{0,80}plan-approval' "writegate protege aprovações greenfield ($leaf)"
         }
 
         # Fixture comportamental: repo git temporário, matriz de cenários nas DUAS pernas
@@ -345,6 +367,30 @@ try {
                 Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 0) "writegate libera produto após kickoff ratificado ($leaf)"
             }
 
+            Set-Content -LiteralPath (Join-Path $wgTemp 'pelizzai/data/state.md') -Value @"
+- kickoff: ratificado 2026-07-12
+- discovery: pending
+- spec-approval: pending
+- domain-skills-decision: pending
+- plan-approval: pending
+"@ -Encoding utf8
+            foreach ($wg in @($wgMjs, $wgPs1)) {
+                $leaf = Split-Path -Leaf $wg
+                Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 2) "writegate bloqueia produto com aprovação greenfield pendente ($leaf)"
+            }
+
+            Set-Content -LiteralPath (Join-Path $wgTemp 'pelizzai/data/state.md') -Value @"
+- kickoff: ratificado 2026-07-12
+- discovery: ratificada 2026-07-12
+- spec-approval: ratificada 2026-07-12
+- domain-skills-decision: ratificada 2026-07-12
+- plan-approval: ratificado 2026-07-12
+"@ -Encoding utf8
+            foreach ($wg in @($wgMjs, $wgPs1)) {
+                $leaf = Split-Path -Leaf $wg
+                Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 0) "writegate libera produto após aprovações greenfield ($leaf)"
+            }
+
             # Consumidor instalado via -ExportConsumer tem manifesto+sync+skills core: isso NÃO é
             # source mode (regressão da distribuição por cópia manual) — a Regra B continua valendo.
             New-Item -ItemType Directory -Path (Join-Path $wgTemp '.claude/skills/pelizzai-core') -Force | Out-Null
@@ -381,14 +427,48 @@ try {
     foreach ($sf in @('.claude/hooks/pelizzai-writegate.mjs', '.claude/hooks/pelizzai-writegate.ps1', '.claude/hooks/pelizzai-session-start.mjs', '.claude/hooks/pelizzai-session-start.ps1')) {
         Check-NotMatch $sf 'pelizzai-core-skills' "hook não usa o manifesto como sentinela de source mode ($sf)"
     }
-    Check-Match 'scripts/sync-harness.ps1' 'ExportConsumer' 'sync-harness tem a distribuição -ExportConsumer'
-    Check-Match 'scripts/sync-harness.ps1' 'Remove-Item -LiteralPath \$dstSentinel' 'export remove a sentinela do consumidor'
+    Check (Test-Path (Join-Path $root 'scripts/sync-harness.mjs')) 'sync portátil Node existe'
+    Check (Test-Path (Join-Path $root 'scripts/sync-harness.ps1')) 'wrapper PowerShell existe'
+    Check (Test-Path (Join-Path $root 'scripts/sync-harness.sh')) 'wrapper macOS/Linux existe'
+    Check-Match 'scripts/sync-harness.mjs' 'exportConsumer' 'sync portátil tem distribuição de consumidor'
+    Check-Match 'scripts/sync-harness.mjs' "rmSync\(join\(targetScripts, 'pelizzai-source-repo\.txt'\)" 'export portátil remove sentinela do consumidor'
+    Check-Match 'scripts/sync-harness.ps1' 'sync-harness\.mjs' 'wrapper PowerShell delega ao núcleo portátil'
+    Check-Match 'scripts/sync-harness.sh' 'sync-harness\.mjs' 'wrapper Unix delega ao núcleo portátil'
+    Run-Native { node --check scripts/sync-harness.mjs } 'node parse sync portátil'
+    Run-Native { node --check scripts/install-hooks.mjs } 'node parse instalador de hooks'
+
+    # Instalador de hooks: merge idempotente e remoção cirúrgica.
+    $hooksTemp = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-hooks-test-" + [guid]::NewGuid().ToString('N'))
+    try {
+        New-Item -ItemType Directory -Path (Join-Path $hooksTemp '.claude/hooks') -Force | Out-Null
+        Copy-Item -Path (Join-Path $root '.claude/hooks/*') -Destination (Join-Path $hooksTemp '.claude/hooks') -Force
+        $settingsPath = Join-Path $hooksTemp '.claude/settings.json'
+        @'
+{
+  "permissions": { "deny": ["Bash(rm -rf:*)"] },
+  "hooks": { "PreToolUse": [ { "matcher": "Read", "hooks": [ { "type": "command", "command": "echo custom" } ] } ] }
+}
+'@ | Set-Content -LiteralPath $settingsPath -Encoding utf8 -NoNewline
+        Run-Native { node scripts/install-hooks.mjs --project $hooksTemp } 'instalador registra hooks preservando settings'
+        Run-Native { node scripts/install-hooks.mjs --project $hooksTemp } 'instalador de hooks é idempotente'
+        Run-Native { node scripts/install-hooks.mjs --project $hooksTemp --check } 'check confirma hooks registrados'
+        $installedSettings = Get-Content -LiteralPath $settingsPath -Raw -Encoding utf8
+        Check ([regex]::Matches($installedSettings, 'pelizzai-(?:guardrails|writegate|cadence|session-start)\.mjs').Count -eq 5) 'instalador não duplica handlers PelizzAI'
+        Check ($installedSettings -match 'echo custom') 'instalador preserva hook existente'
+        Check ($installedSettings -match 'Bash\(rm -rf:\*\)') 'instalador preserva permissões existentes'
+        Run-Native { node scripts/install-hooks.mjs --project $hooksTemp --remove } 'instalador remove somente hooks PelizzAI'
+        $removedSettings = Get-Content -LiteralPath $settingsPath -Raw -Encoding utf8
+        Check ($removedSettings -notmatch 'pelizzai-(?:guardrails|writegate|cadence|session-start)\.mjs') 'remoção elimina handlers PelizzAI'
+        Check ($removedSettings -match 'echo custom' -and $removedSettings -match 'Bash\(rm -rf:\*\)') 'remoção preserva configurações alheias'
+    } finally {
+        if (Test-Path -LiteralPath $hooksTemp) { Remove-Item -LiteralPath $hooksTemp -Recurse -Force }
+    }
 
     # -- Paridade multi-superfície: não-negociáveis chegam ao AGENTS.md gerado E ao Cursor --
-    Check-Match 'AGENTS.md' 'Gate de ratificacao' 'AGENTS.md gerado recebe o gate de ratificação'
-    Check-Match 'GEMINI.md' 'Gate de ratificacao' 'GEMINI.md gerado recebe o gate de ratificação'
-    Check-Match 'AGENTS.md' 'team[^\n]{0,20}sempre visivel' 'AGENTS.md: team sempre visível no modo'
-    Check-Match 'AGENTS.md' 'squash-final[^\n]{0,20}so a pedido explicito' 'AGENTS.md: squash-final só a pedido explícito'
+    Check-Match 'AGENTS.md' 'Gate de ratificação' 'AGENTS.md gerado recebe o gate de ratificação'
+    Check-Match 'GEMINI.md' 'Gate de ratificação' 'GEMINI.md gerado recebe o gate de ratificação'
+    Check-Match 'AGENTS.md' 'team[^\n]{0,30}visível' 'AGENTS.md: team sempre visível no modo'
+    Check-Match 'AGENTS.md' 'squash-final[^\n]{0,30}só a pedido explícito' 'AGENTS.md: squash-final só a pedido explícito'
     $parityAnchors = @(
         @{ Name = 'proteção de branch'; Pattern = 'master[\s\S]{0,30}develop' },
         @{ Name = 'gate de primeira escrita'; Pattern = 'primeira escrita' },

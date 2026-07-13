@@ -1,13 +1,14 @@
 ---
 name: pelizzai-brainstorming
-description: Explora design antes de implementar quando uma feature, refactor ou mudança estrutural ainda possui trade-offs, requisitos incertos, arquitetura, UX ou risco que exige descoberta. Use em modo compacto para decisões limitadas e completo para alta incerteza ou decisões sensíveis acopladas. O gatilho é a lacuna material: sem ela — design aprovado, feature bounded com objetivo e aceite claros, ajuste trivial ou bug com causa já investigada — não use.
+description: Explora e ratifica design antes de implementar um produto/projeto greenfield ou feature, refactor e mudança estrutural com trade-offs, requisitos, arquitetura, UX, dados ou risco ainda abertos. Greenfield usa modo completo mesmo com stack definida; mudança existente pode usar modo compacto. Não use para design já aprovado, ajuste trivial ou bug em investigação.
 ---
 
 # PelizzAI Brainstorming
 
 ## Objetivo
 
-Resolver as decisões que seriam caras de descobrir durante a implementação, sem transformar toda feature em workshop.
+Transformar intenção em design decidido pelo usuário antes da implementação. A skill investiga,
+expõe alternativas e recomenda; nunca preenche uma decisão de produto para ganhar velocidade.
 
 **Anuncie:** "Usando a skill PelizzAI Brainstorming em modo `<compacto|completo>` para resolver as decisões de design antes de implementar."
 
@@ -15,7 +16,8 @@ Resolver as decisões que seriam caras de descobrir durante a implementação, s
 
 - O router já classificou efeito, risco, incerteza e overlays.
 - Para qualquer escrita de spec/ADR/protótipo, a task/planning branch já existe.
-- Na lane `bounded` com objetivo, aceite e abordagem claros e risco baixo, volte ao router e siga sem brainstorming; a oferta de uma spec curta cabe ao gate do plano, não a uma exploração forçada aqui.
+- Na lane `bounded` de um produto existente, com objetivo, aceite e abordagem já fornecidos pelo
+  usuário, volte ao router e siga sem brainstorming. Greenfield nunca usa essa exceção.
 - Nas lanes `standard`/`exploratory` nenhuma implementação começa antes de a spec de design existir e ter sido apresentada na borda de design — salvo dispensa explícita do usuário. A profundidade escala pela lane (enxuta no `standard` de aceite claro, completa no `exploratory`); o classificador não conclui sozinho "não há trade-off, pulo a spec".
 
 ## Escolher profundidade
@@ -24,6 +26,10 @@ Resolver as decisões que seriam caras de descobrir durante a implementação, s
 | --- | --- | --- |
 | `compacto` | incerteza média, poucas decisões, escopo coeso | contexto focal → design curto → uma aprovação → spec enxuta. |
 | `completo` | alta incerteza, arquitetura aberta ou decisões sensíveis acopladas | exploração, alternativas reais, stress proporcional, spec detalhada. |
+
+Produto/projeto greenfield sempre começa em `completo`. Informar qualquer combinação de linguagem,
+framework, runtime, banco, serviço ou plataforma reduz incerteza técnica, mas não resolve atores,
+jornadas, estados, regras, exceções nem aceite.
 
 Complexidade visual ou número de arquivos não basta para escolher modo; use custo de decisão errada e incerteza real. Em `standard`/`exploratory` a spec é o artefato-padrão: o modo escolhe a profundidade da spec (enxuta vs completa), não se ela existe.
 
@@ -43,6 +49,12 @@ Leia apenas o necessário para responder:
 
 Use subagent read-only somente quando a busca tem frentes independentes. Não faça repo scan completo por reflexo.
 
+Quando tecnologia externa afetar viabilidade ou opções, identifique a versão em manifests/lockfiles
+e consulte Context7 antes de formular a pergunta correspondente. Em greenfield sem dependências
+instaladas, consulte a documentação atual da stack informada ou das candidatas que pretende
+recomendar. Use essa evidência para descartar opções incompatíveis e explicar trade-offs; a escolha
+continua no gate do usuário.
+
 ### 2. Fixar objetivo e fronteiras
 
 Defina:
@@ -53,23 +65,39 @@ Defina:
 - restrições e compatibilidade;
 - decisões reversíveis vs difíceis de reverter.
 
-Consulte evidência antes de perguntar. Agrupe perguntas independentes numa mensagem curta; pergunte uma por vez apenas quando a resposta muda a próxima pergunta. Prefira uma recomendação com opção de ajuste a menus artificiais.
-
-### 3. Propor descoberta quando houver lacuna material
-
-Quando o contexto e o objetivo revelam lacunas materiais que mudam escopo, UX, arquitetura, segurança ou dados, não as resolva por suposição silenciosa. Reúna TODAS as lacunas materiais ainda em aberto em UMA única mensagem — nunca pulverizada — e apresente o gate:
+Consulte evidência antes de perguntar para não pedir fatos já observáveis. Para decisões do usuário,
+faça **uma pergunta por vez**, mesmo quando pareçam independentes: a resposta pode alterar prioridade,
+vocabulário e opções das seguintes. Cada turno de descoberta contém:
 
 ```text
-**Propor descoberta — encontrei N lacunas materiais (responda escolhendo A, B ou C):**
-1. <lacuna> → muda <escopo|UX|arquitetura|segurança|dados>
-2. <lacuna> → muda <...>
-Recomendo <A: descoberta agora — as lacunas mudam a solução>.
-A) Fazer a descoberta agora (stress focal ou `pelizzai-interview-me`).
-B) Prosseguir com estas premissas declaradas: <lista> (eu assumo e sigo).
-C) Você responde estas N perguntas agora.
+Decisão: <por que isso muda a solução>
+Opções reais: <2–3 quando ajudarem>
+Recomendação: <melhor opção> — <motivo em uma linha>
+Pergunta: <uma única pergunta>
 ```
 
-O gate PARA o turno e exige uma escolha afirmativa. O default recomendado é destacado, nunca auto-confirmado: silêncio ou ausência de resposta não valem como decisão, e a opção B jamais é executada sozinha sobre lacuna material. **A decisão de pular a descoberta é do usuário**, não do classificador; a escolha de B, com as premissas visíveis, é a própria ratificação de seguir sem descoberta.
+Pergunta aberta é válida quando opções enviesariam a resposta. Nunca esconda uma decisão dentro de
+uma “premissa segura”.
+
+### 3. Conduzir a descoberta quando houver lacuna material
+
+Quando contexto e objetivo revelarem lacunas de escopo, UX, arquitetura, segurança ou dados, não as
+resolva por suposição. Ordene internamente as lacunas por dependência e impacto, mas apresente
+somente a próxima decisão. Exemplo:
+
+```text
+Encontrei decisões de produto ainda abertas. A primeira condiciona as demais:
+
+Decisão: <lacuna> — muda <escopo|UX|arquitetura|segurança|dados>.
+Opções: A) <...> · B) <...> · C) <...>.
+Recomendação: <B> — <motivo>.
+Pergunta: qual opção você escolhe?
+```
+
+O turno para após a pergunta. Silêncio, recomendação e Context7 não valem como resposta. Depois da
+escolha, registre a decisão, recalcule as lacunas e faça somente a próxima pergunta. Pular a
+descoberta inteira exige pedido explícito; nesse caso, não invente respostas: registre as decisões
+não tomadas como limitações e confirme se ainda existe uma spec implementável.
 
 Não reabra o que o gate de kickoff do router já ratificou: agrupe apenas as lacunas materiais ainda em aberto. Em `bounded` sem lacuna material, o gate não aparece.
 
@@ -77,7 +105,8 @@ Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra ga
 
 ### 4. Explorar alternativas quando existirem
 
-Apresente 2–3 abordagens somente se forem realmente válidas e materialmente diferentes. Compare pelo que importa à tarefa: simplicidade, risco, manutenção, migração, performance, UX e reversibilidade.
+Apresente 2–3 abordagens somente se forem realmente válidas e materialmente diferentes. Compare
+pelo que importa e recomende uma. Peça a escolha do usuário antes de incorporá-la ao design.
 
 Se há uma única abordagem compatível com os contratos, explique-a diretamente; não invente alternativas para cumprir ritual.
 
@@ -111,15 +140,20 @@ premissa de escala ou integração não confirmada
 contradição entre spec, plano e código
 ```
 
-Modo completo, ou descoberta aceita no gate: proponha `pelizzai-interview-me` quando restarem premissas materiais abertas sobre autorização, dados, falhas, estados ou rollout. Cada lacuna encontrada é resolvida, explicitamente aceita pelo usuário, ou convertida em tarefa de investigação antes de sair da borda de design. Risco alto com contrato explícito recebe challenge focal de ameaça/rollback; não invente uma entrevista genérica nem reabra decisões fechadas.
+Modo completo/greenfield: use `pelizzai-interview-me` para estressar o design. Toda nova decisão que
+pertence ao usuário volta como uma pergunta por vez, com recomendação. Cada lacuna é resolvida,
+explicitamente aceita ou convertida em tarefa de investigação antes de sair da borda de design.
 
 Modo compacto: faça uma passada curta de contraexemplos. Escale para entrevista somente se encontrar ambiguidade material.
 
-Não exija stress interview duas vezes sobre as mesmas decisões. Writing Plans testa executabilidade do plano, não reabre o design aprovado sem evidência nova.
+Não exija stress duas vezes sobre as mesmas decisões. Writing Plans testa executabilidade do plano,
+sem reabrir o design aprovado salvo evidência nova.
 
 ### 7. Aprovar na borda certa
 
-Apresente o design inteiro em tamanho proporcional e peça uma aprovação na borda de design. Nas lanes `standard`/`exploratory`, a spec (enxuta ou completa) é o artefato apresentado nessa borda antes de qualquer implementação; o usuário aprova, pede ajuste ou dispensa a spec explicitamente — e a dispensa fica registrada. Em solução longa, valide uma seção intermediária somente se a resposta puder mudar as seguintes.
+Apresente o design inteiro em tamanho proporcional e faça **uma pergunta de aprovação** na borda.
+Em greenfield/`standard`/`exploratory`, a spec é o artefato apresentado antes de qualquer plano ou
+implementação. O usuário aprova, pede ajuste ou dispensa explicitamente; a dispensa fica registrada.
 
 O usuário não precisa aprovar cada parágrafo, cada seam e depois o mesmo conteúdo na spec.
 
@@ -151,7 +185,9 @@ Faça autoavaliação inline: placeholders, contradições, ambiguidade, scope c
 ### 9. Transição
 
 - Fluxo normal: entregue a spec aprovada a `pelizzai-writing-plans`.
-- Bootstrap de projeto novo: entregue o design a `pelizzai-writing-skills` para criar somente domain skills justificadas; não crie plano automaticamente.
+- Projeto novo: após a spec aprovada, execute o Gate proativo de domain skills da `pelizzai-audit`;
+  crie somente as ratificadas e então siga para `pelizzai-writing-plans` quando o pedido original
+  inclui construir o produto. Pare após design/bootstrap apenas quando esse era o escopo pedido.
 
 ## Protótipos
 
@@ -176,15 +212,18 @@ Se aceitar, leia [visual-companion.md](visual-companion.md), use apenas flags do
 
 ```text
 - Brainstorming completo para feature bounded.
+- Tratar projeto greenfield como bounded porque a stack foi informada.
 - Repo scan completo sem pergunta concreta.
 - Pergunta cuja resposta já está no código/spec.
 - Sempre inventar três alternativas.
-- Aprovação após cada seção sem dependência real.
+- Fazer várias perguntas de descoberta no mesmo turno.
+- Oferecer uma recomendação e tratá-la como escolha do usuário.
 - Interview obrigatório em design de baixa incerteza.
 - Escrever spec/protótipo antes da task branch.
 - Usar frontend só como QA tardio em vez de overlay de design.
 - Reabrir decisão aprovada sem evidência nova.
 - Assumir em silêncio decisão de escopo/UX/arquitetura com lacuna material em vez de propor a descoberta.
+- Usar Context7 para inventar requisito, persona, regra de negócio ou critério de aceite.
 - Suprimir a spec de uma lane standard/exploratory sem dispensa explícita do usuário.
 ```
 

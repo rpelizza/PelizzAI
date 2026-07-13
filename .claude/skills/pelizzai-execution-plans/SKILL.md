@@ -27,73 +27,65 @@ coladas no briefing; respeite `pelizzai-preferences` e devolva `DONE`, `DONE_WIT
 
 ## Princípio central
 
-> Execute um plano aprovado com gates humanos nas **bordas** e autonomia entre tarefas. Nenhuma
-> tarefa é consolidada sem evidência apropriada ao artefato e review. Nenhum conteúdo muda depois
-> de `validated-head`; consumidor acrescenta só o closure metadata-only, source mode nenhum commit.
+> Execute somente o plano aprovado. Entre gates, tome decisões mecânicas cobertas pela spec/plano;
+> qualquer decisão emergente de requisito, escopo, UX, arquitetura, dados, segurança, custo ou
+> aceite pausa a execução e volta ao usuário. Nenhuma tarefa é consolidada sem evidência e review.
 
 ---
 
-## Gate de setup pós-plano (OBRIGATÓRIO antes da Tarefa 1)
+## Gate de setup pós-plano sequencial (OBRIGATÓRIO antes da Tarefa 1)
 
 O normal é a branch de tarefa/planejamento já existir: `pelizzai-starting-branch` a criou **antes**
 da spec/plano e gravou `base-ref`/`base-sha`. Se um plano externo (PRD/issues) chegou sem branch,
 invoque-a agora antes de continuar.
 
-Com o plano aprovado e **antes de qualquer escrita de produto**, apresente **UM bloco consolidado**
-com as decisões pré-preenchidas — cada uma com a recomendação e uma linha de porquê — e **aguarde a
-ratificação**. Não é autonomia nem pulverização: a classificação (lane/risco/topologia) continua
-rodando e agora POPULA os defaults recomendados. Leia primeiro `pelizzai/profile.md`
+Com o plano aprovado e **antes de qualquer escrita de produto**, ratifique as decisões de setup
+**uma por vez**. Em cada turno, apresente opções reais, destaque a recomendada com uma linha de
+porquê, faça uma única pergunta e aguarde. Leia primeiro `pelizzai/profile.md`
 (§Defaults de execução ratificados): campo preenchido = a recomendação já vem da política do
 projeto; `<unset>` = calcule o default proporcional. `destination` **nunca** sai do profile —
 push/PR/publicação são decididos por tarefa na `pelizzai-finish-task`.
 
 ```text
-**Gate de setup pós-plano — plano "<nome>" com N tarefas (responda "ok" ou ajuste item a item):**
-0. Plano: <aprovar conteúdo | ajustar antes>
-1. Isolamento: [recomendado: <branch|worktree> — <porquê>] | alternativa: <...>
-2. Branch: <tipo>/<slug> sobre <base descoberta> [confirme o nome]
-3. Modo de execução: [recomendado: <inline|subagents|team> — <porquê>] | inline | subagents | team
-4. Commits: [recomendado: granular] | squash-final (somente com seu pedido)
-5. Review por tarefa: [recomendado: <perfil> conforme o plano]
+1. Isolamento
+   Recomendado: <branch|worktree> — <porquê>.
+   Alternativa: <...>.
+   Pergunta: qual isolamento você escolhe?
+
+2. Modo (somente depois de 1)
+   Opções sempre visíveis: inline · subagents · team.
+   Recomendado: <modo> — <porquê>.
+   Pergunta: qual modo você escolhe?
+
+3. Commits (somente depois de 2)
+   Opções: granular · squash-final.
+   Recomendado: granular — preserva checkpoints; squash-final só com seu pedido.
+   Pergunta: qual estratégia você escolhe?
+
+4. Review (somente depois de 3)
+   Recomendado: <combined|split> — <porquê conforme risco/superfície>.
+   Pergunta: confirma este perfil?
 ```
 
-Regras do bloco: o item 3 mantém **as três opções sempre visíveis** — **team nunca é omitido** —
-mesmo quando inline é a recomendação; recomende team/subagents quando o paralelismo é real e a
-coordenação compensa, sem impor (a escolha é do usuário; não existe ranking `team > subagents >
-inline`). O item 4 traz **squash-final somente com pedido explícito do usuário**. O item 0 ratifica
-o **conteúdo** do plano (o QUÊ); os itens 1-5 são o **como** — itens distintos na MESMA mensagem,
-nunca duas perguntas sequenciais. Plano gerado pelo harness precisa de aprovação explícita no item
-0; PRD/issues fornecidos pelo próprio usuário já contam como ratificados e o item 0 apenas confirma.
-Um "ok" aceita todas as recomendações; o usuário sobrescreve item a item. **Aguarde a resposta** —
-silêncio e o próprio default NÃO valem como aprovação. NUNCA antes do "ok": código da Tarefa 1,
-criação/mudança de worktree, squash, ou gravação dessas decisões como finais.
+Regras: o modo mantém **as três opções sempre visíveis** — **team nunca é omitido**. Não existe
+ranking universal. **Squash-final somente com pedido explícito do usuário**. O conteúdo do plano
+(o QUÊ) já foi aprovado na borda anterior; este gate ratifica o COMO sem esconder várias decisões
+num único “ok”. Silêncio e recomendação não valem como resposta. Não escreva código, mova worktree,
+faça squash ou grave decisões finais até concluir os quatro passos. Base e nome da branch já foram
+ratificados antes da spec/plano pela `pelizzai-starting-branch`.
 
 Sob briefing fechado (SUBAGENT-STOP / MEMBRO-DO-TIME-STOP), não produza análises de rota nem abra
 gates: aplique o briefing e escale ao coordenador o que exigir decisão.
 
-**Recap-e-prossegue (política já ratificada).** Se `pelizzai/profile.md` já traz a política do
-projeto, o bloco vira um **recap de UMA linha** ("Seguindo a política deste projeto: worktree ·
-team (≥4 frentes) · granular · destino por-tarefa — muda algo nesta tarefa?") e PROSSEGUE.
+**Política já ratificada.** Valores do `profile.md` pré-selecionam a recomendação de cada passo,
+mas não auto-confirmam a tarefa atual. Faça as perguntas sequenciais normalmente; o usuário pode
+responder “usar a política para os itens restantes” e delegar explicitamente essa aplicação.
 
-**O recap-e-prossegue dispensa apenas os itens 1-5 (setup); o item 0 nunca colapsa.** Todo plano
-gerado pelo harness ainda tem o **conteúdo** (o QUÊ) apresentado e ratificado, mesmo com a política
-do profile já ratificada — as regras de aprovação do bloco valem sempre para o item 0: aguarde a
-resposta, silêncio e o próprio default não valem como aprovação. Só PRD/issues fornecidos pelo
-próprio usuário dispensam o item 0 (já contam como ratificados), e aí o recap é de fato uma linha. A
-política de projeto cobre o COMO, nunca o QUÊ.
+Se os sinais divergirem da política, explique a divergência na recomendação. Override não altera o
+profile; trocar a política pede confirmação separada antes de gravar. Em source mode, use o
+execution record nativo como memória da tarefa, nunca como autorização herdada.
 
-Só volte ao bloco item a item quando (a) o usuário pedir mudança ou (b) os sinais da tarefa
-divergirem da
-política (ex.: profile=inline mas o plano tem frentes independentes suficientes para team →
-sinalize a divergência, recomende o modo adequado e aguarde ratificação só nesse ponto). **Nova
-tarefa/plano re-exibe o recap** — nunca assuma a política em silêncio. Um override contra a política
-sem trocá-la é anotado (execution record nativo/efêmero, nunca no `profile.md` versionado antes do
-seal) e incrementa "Overrides desde então" ao re-ratificar. Trocar a política pede confirm-on-change
-("Atualizo o profile do projeto para X? [s/n]") antes de gravar; nunca silenciosa. Em source mode
-não há `pelizzai/profile.md`: os defaults ratificados vivem no execution record nativo (mesmo
-marcador `kickoff: ratificado`) e o recap lê de lá; sem esse registro, o bloco batched aparece.
-
-**Aplicar o isolamento — invoque `pelizzai-starting-branch` (PÓS-ratificação).** Só depois do "ok":
+**Aplicar o isolamento — invoque `pelizzai-starting-branch` (PÓS-ratificação).** Só depois das quatro respostas:
 branch faz checkpoint do setup persistente quando existir e mantém a branch atual; worktree captura
 `checkpoint-sha` após o checkpoint opcional, libera a branch no working tree principal, adiciona o
 worktree com a **branch existente** e registra o novo path antes da Tarefa 1. Ambos começam a
@@ -101,7 +93,7 @@ implementação com working tree limpa. Worktree não autoriza vários writers c
 diretório. Qualquer `squash-final` ocorre **antes** de review final/testes/`validated-head`;
 `pelizzai-finish-task` nunca reescreve conteúdo ou histórico após o seal.
 
-**Registrar (só após o "ok").** Grave isolation/execution-mode/commit-strategy e o marcador
+**Registrar (só após concluir o gate).** Grave isolation/execution-mode/commit-strategy e o marcador
 `kickoff: ratificado <AAAA-MM-DD>` no state consumidor (`pelizzai/data/state.md`) ou, em source mode,
 no execution record nativo com as mesmas palavras-chave. Em retomada real com valores já ratificados
 e gravados (`kickoff: ratificado`), honre sem re-perguntar. Escritas/review/commit na working tree
@@ -114,21 +106,24 @@ são serializados.
 Antes da primeira tarefa, confirme:
 
 ```text
-[ ] Plano ratificado na borda: plano gerado pelo harness recebeu aprovação explícita do CONTEÚDO
-    (item 0 do gate consolidado); PRD/issues fornecidos pelo próprio usuário já contam como
+[ ] Plano ratificado na borda: plano gerado pelo harness recebeu aprovação explícita do CONTEÚDO;
+    PRD/issues fornecidos pelo próprio usuário já contam como
     ratificados. Sem plano → volte a pelizzai-writing-plans.
+[ ] Greenfield: discovery, spec-approval, domain-skills-decision e plan-approval estão ratificados
+    ou possuem dispensa explícita registrada; nenhum campo permanece <pending>.
 [ ] Consumidor: catálogo existe (zero domain skills é válido) e state foi preparado.
     Source mode: NÃO crie catálogo/state consumidor; use as regras do repo-fonte e execution record.
 [ ] As skills de domínio relevantes foram selecionadas quando o consumidor as possui.
 [ ] `overlays` foi inferido pelo efeito/superfície e as skills transversais estão prontas para
     aplicar/colar nos briefings de executores e reviewers.
 [ ] O gate de setup pós-plano foi conduzido: isolation/execution-mode/commit-strategy RATIFICADOS
-    pelo usuário no bloco consolidado (nenhum default aplicado sem ratificação; nenhum <pending>;
+    pelo usuário em perguntas sequenciais (nenhum default aplicado sem ratificação; nenhum <pending>;
     `kickoff: ratificado`) e o isolamento criado via pelizzai-starting-branch APÓS o "ok".
 [ ] NÃO está em branch protegida (default real/base-ref, main/master/develop/dev, ou HEAD vazio).
 [ ] Em consumidor, o estado existe em pelizzai/data/state.md (se não, instancie a partir do template e preencha
     slug/track/lane/phase/project/branch/base-ref/base-sha/kickoff/isolation/execution-mode/
-    commit-strategy/overlays/plan antes da Tarefa 1; `validated-head: <none>`, `kickoff: pendente`
+    commit-strategy/overlays/discovery/spec/spec-approval/domain-skills-decision/plan/plan-approval
+    antes da Tarefa 1; `validated-head: <none>`, `kickoff: pendente`
     até a ratificação) e
     foi validado contra o git (branch: `git branch --show-current`; worktree: `git worktree list`
     ou o comando rodado DENTRO do worktree-path).
@@ -203,7 +198,7 @@ Registre o modo no `state.md` consumidor ou execution record nativo
 
 ```mermaid
 flowchart TD
-    PL[Plano aprovado na branch de planejamento] --> GATE[Gate pos-plano consolidado:\napresenta recomendacoes,\naguarda ratificacao]
+    PL[Plano aprovado na branch de planejamento] --> GATE[Gate pos-plano sequencial:\numa decisao por turno,\nrecomendacao + ratificacao]
     GATE --> DOM[Carregar dominio + overlays]
     DOM --> PRE[Pre-voo: varrer plano por contradicoes]
     PRE --> CY[Ciclo adaptativo por tarefa\nref: task-cycle.md]
@@ -235,7 +230,9 @@ OODA apenas coordena iterações quando existe um loop real.
 
 ## Pré-voo
 
-Antes da Tarefa 1, leia o plano **uma vez** procurando contradições internas ou conflitos com as skills de domínio/critérios de review. Se houver, apresente tudo ao usuário em **uma** pergunta batched; se estiver limpo, siga em silêncio.
+Antes da Tarefa 1, leia o plano procurando contradições internas ou conflitos com skills de
+domínio/review. Se houver fatos técnicos investigáveis, investigue. Se houver decisão humana,
+apresente a de maior impacto com recomendação e faça uma pergunta por vez. Se estiver limpo, siga.
 
 ---
 
@@ -256,6 +253,8 @@ com duas lentes, circuit breaker e commit como gate — está em
    Responda perguntas ANTES de o trabalho começar.
 2. Aplicar TDD, characterization, validate, visual ou static/scenario conforme o artefato. O
    membro NÃO commita.
+   Se surgir decisão não coberta pela spec/plano, devolva `NEEDS_CONTEXT`; o coordenador pausa e
+   pergunta ao usuário. Não escolha requisito, UX, arquitetura, dados, segurança ou aceite.
 3. Review com duas lentes: (a) conformidade com a spec; (b) qualidade + evidência FRESCA.
    `combined` aplica ambas em um despacho/relatório para tarefa bounded/low-risk; `split` usa
    estágios sequenciais quando risco, contrato, dados, segurança ou complexidade pedirem.
@@ -285,6 +284,10 @@ Use `pelizzai-subagents`. Um subagente **fresco por tarefa**, despachado pelo co
 
 Para plano pequeno e sequencial, o coordenador executa na própria sessão seguindo o mesmo ciclo.
 Inline é uma escolha adequada, não um fallback inferior.
+
+Em qualquer modo, “seguir até o fim” autoriza executar o plano ratificado; não autoriza completar
+lacunas de produto. Decisão emergente interrompe o loop, registra `phase: blocked`/pendência e volta
+ao usuário com uma pergunta e a melhor recomendação.
 
 ---
 
@@ -342,25 +345,26 @@ incerteza em mais uma volta automática.
 
 ---
 
-## Gates humanos (bordas) e autonomia entre tarefas
+## Gates humanos e execução controlada
 
 ```text
-GATES (recomendar-e-ratificar nas bordas; nunca aplicar decisão estrutural em silêncio):
+GATES (recomendar-e-ratificar; nunca aplicar decisão estrutural em silêncio):
 - Começar em branch protegida (main/master/develop/dev) — proibido, sem exceção.
-- Setup pós-plano: conteúdo do plano (item 0), isolamento, modo de execução com **as três opções
+- Plano: conteúdo e stress são aprovados antes do setup.
+- Setup pós-plano: isolamento, modo de execução com **as três opções
   sempre visíveis** (**team nunca é omitido**), estratégia de commit (**squash-final somente com
-  pedido explícito do usuário**), review por tarefa e nome/base da branch são apresentados JUNTOS
-  como recomendação, num único bloco consolidado, e ratificados antes da Tarefa 1. Nenhum
-  worktree/squash/modo é aplicado enquanto "fica no default" sem ratificação. Recomende
-  team/subagents quando o paralelismo é real e a coordenação compensa — sem impor.
+  pedido explícito do usuário**) e review são perguntados UM POR TURNO, sempre com recomendação,
+  e ratificados antes da Tarefa 1. Base e nome da branch já foram ratificados antes do planejamento.
 - Destino externo: push / PR / descarte e remoção de worktree exigem decisão POR TAREFA; sem pedido
   externo, finish-task mantém local por default. `destination` nunca é herdado de política do profile.
 - Conclusão.
 
-AUTONOMIA (sem perguntar a cada passo):
-- Entre as tarefas de um plano JÁ APROVADO e com o setup ratificado, execute de forma contínua
-  (não pergunte "sigo?"). O recap de política aparece uma vez na borda do setup, não a cada tarefa.
-- Pare apenas por: BLOCKED que você não resolve, ambiguidade material, ou plano concluído.
+EXECUÇÃO CONTROLADA:
+- Entre tarefas de plano aprovado, execute continuamente apenas passos mecânicos cobertos pelo
+  contrato ratificado; não peça permissão para cada comando local reversível.
+- Pare diante de qualquer escolha nova de requisito, escopo, UX, arquitetura, dados, segurança,
+  custo, risco aceito ou critério de aceite. Faça uma pergunta com recomendação e aguarde.
+- Pare também por BLOCKED real, evidência que invalida o plano ou plano concluído.
 
 Sob briefing fechado (SUBAGENT-STOP / MEMBRO-DO-TIME-STOP), não abra gates nem recaps de política:
 aplique o briefing e escale ao coordenador o que exigir decisão.
@@ -441,8 +445,7 @@ closure. Nenhum código, config ou doc pode mudar depois do seal.
 
 ```text
 - Executar sem plano aprovado, sem o gate de setup pós-plano, ou sem isolamento (em branch protegida).
-- Aplicar isolamento/modo/commit como decisão final sem ratificação do usuário (o correto é
-  recomendar-e-ratificar num único bloco consolidado), ou omitir a opção team do menu de modo.
+- Aplicar isolamento/modo/commit sem ratificação sequencial do usuário ou omitir team.
 - Pular skills de domínio/overlays — ou não colá-las nos briefings de executor e reviewer.
 - Escolher team por preferência universal, ou forçar effort máximo numa tarefa mecânica.
 - Deixar o membro/subagente commitar (o commit é gate do coordenador, após as duas lentes de review).
@@ -452,8 +455,8 @@ closure. Nenhum código, config ou doc pode mudar depois do seal.
 - Loop infinito de fix→re-review (ignorar o circuit breaker de 3 ciclos).
 - Declarar entregue sem overlays aplicáveis + review final (ou reutilização bounded comprovada) +
   checks + checklist + seal.
-- Pausar a cada tarefa de um plano já aprovado (quebra a execução contínua) — ou, no extremo oposto,
-  remover os gates de borda (mãos-livres).
+- Pedir permissão para cada comando mecânico já coberto pelo plano — ou, no extremo oposto,
+  escolher uma decisão emergente de produto para manter o loop rodando.
 - Fazer o subagente ler o arquivo do plano inteiro (cole o texto da tarefa).
 - Commit órfão só para mover o cursor DURANTE a execução (exceções legítimas: o registro de
   phase: blocked do circuit breaker e o commit de fechamento do cursor da pelizzai-finish-task
@@ -489,12 +492,11 @@ catálogo inteiro em checklist.
 
 ```text
 Execute tarefa por tarefa com estratégia de evidência adequada e review working-tree.
-Crie a branch antes de spec/plano; no gate pós-plano consolidado, recomende e ratifique conteúdo do
-plano, isolamento, modo (três opções, team visível) e commits antes da Tarefa 1; recap-e-prossegue
-quando a política do profile já foi ratificada.
+Crie a branch antes de spec/plano; aprove conteúdo e stress do plano; depois ratifique setup uma
+decisão por turno, com recomendação, antes da Tarefa 1.
 Escolha inline/subagents/team pela topologia, sem ranking universal.
 Propague domínio + overlays para executor e reviewers; sinalize lacuna de domain skill no relatório.
-Mantenha gates humanos nas bordas; execute com autonomia entre tarefas.
+Execute mecanicamente dentro do plano; devolva qualquer decisão nova ao usuário.
 Consolide só após spec ✅ e qualidade ✅ com evidência fresca.
 Rode overlays antes de congelar/validar; qualquer fix reabre o review final.
 Grave validated-head só após aprovação; finish cria closure só no consumidor.
