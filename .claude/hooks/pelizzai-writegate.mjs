@@ -15,9 +15,11 @@
  *    caminhos DENTRO da raiz do projeto. Mesma regra dos dois lados.
  *
  * REGRA A (invariante, ambos os modos) — isolamento antes da primeira escrita:
- *   escrever QUALQUER caminho dentro da raiz do repo estando em branch protegida
- *   (main/master/develop/dev, o default do origin/HEAD) ou em HEAD destacado → BLOQUEIA.
- *   Saída: isolar via pelizzai-starting-branch.
+ *   escrever caminho de PRODUTO (fora de pelizzai/) dentro da raiz do repo estando em branch
+ *   protegida (main/master/develop/dev, o default do origin/HEAD) ou em HEAD destacado → BLOQUEIA.
+ *   CARVE-OUT: escrita de metadata em pelizzai/** é liberada mesmo aqui (o sistema se atualizando;
+ *   é só de escrita de arquivo — o commit segue no fluxo de branch de tarefa). Saída (produto):
+ *   isolar via pelizzai-starting-branch.
  *
  * REGRA B (só consumidor: existe pelizzai/ e NÃO é o repo-fonte) — nada de código antes do gate:
  *   escrever caminho de PRODUTO (fora de pelizzai/) enquanto pelizzai/data/state.md NÃO
@@ -274,7 +276,25 @@ function main() {
     .filter((t) => eqOrInside(t, gitRoot));
   if (inRoot.length === 0) return 0;
 
-  // ── Regra A (ambos os modos): branch protegida/destacada bloqueia QUALQUER escrita in-root.
+  // Metadata do harness (pelizzai/**) vs. PRODUTO (fora de pelizzai/). Tanto o carve-out da
+  // Regra A quanto a Regra B se apoiam nessa separação.
+  const pelizzaiDir = join(gitRoot, 'pelizzai');
+  const products = inRoot.filter((t) => !eqOrInside(t, pelizzaiDir));
+
+  // ── Regra A (ambos os modos): branch protegida/destacada bloqueia escrita de PRODUTO in-root.
+  // CARVE-OUT DE METADATA: escrever dentro de pelizzai/** é LIBERADO mesmo em branch protegida ou
+  // HEAD destacado — é metadata do harness (state/plano/spec/reports), o sistema se atualizando,
+  // nunca produto. Isso destrava a reconciliação do state na própria branch protegida à qual o dev
+  // volta após o merge do PR. NOTA DE SEGURANÇA: o carve-out é SÓ de escrita de ARQUIVO e não abre
+  // brecha de produto nem de commit — produto (fora de pelizzai/) segue bloqueado por esta mesma
+  // Regra A; a metadata só é COMMITADA no primeiro commit da branch de tarefa nova (o fluxo nunca
+  // exige commit em protegida); e o pelizzai-guardrails continua barrando git destrutivo.
+  // LIMITE (symlink): a classificação metadata-vs-produto é por CAMINHO — resolve() normaliza `..`
+  // (por isso `pelizzai/../src` corretamente vira produto), mas NÃO segue symlinks. Um symlink dentro
+  // de pelizzai/ apontando para fora (ex.: `pelizzai/link -> ../src`) poderia fazer uma escrita real
+  // em produto ser lida como metadata e liberada em branch protegida. O carve-out NÃO é airtight
+  // quanto a symlink; os controles compensatórios permanecem: pelizzai-guardrails barra o git
+  // destrutivo e o review humano enxerga o alvo real.
   const branch = git(cwd, ['branch', '--show-current']); // '' = HEAD destacado (ou sem branch)
   let isProtected = branch === '' || PROTECTED.includes(branch);
   if (!isProtected) {
@@ -286,10 +306,11 @@ function main() {
       if (tail && tail === branch) isProtected = true;
     }
   }
-  if (isProtected) {
+  if (isProtected && products.length > 0) {
     return block(
       `branch protegida/destacada (${branch || 'HEAD destacado'}). Isole via pelizzai-starting-branch ` +
-        `antes de escrever — isolamento antes da primeira escrita é invariante.`
+        `antes de escrever produto — isolamento antes da primeira escrita é invariante ` +
+        `(escrita de metadata em pelizzai/ é liberada mesmo aqui).`
     );
   }
 
@@ -298,8 +319,6 @@ function main() {
   if (sourceMode) return 0;
 
   // ── Regra B (só consumidor): escrita de PRODUTO exige kickoff ratificado no state.md.
-  const pelizzaiDir = join(gitRoot, 'pelizzai');
-  const products = inRoot.filter((t) => !eqOrInside(t, pelizzaiDir));
   if (products.length === 0) return 0; // só artefatos de setup em pelizzai/ → liberado
 
   const statePath = join(gitRoot, 'pelizzai', 'data', 'state.md');
