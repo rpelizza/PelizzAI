@@ -91,6 +91,10 @@ Depois de todas as mutações de produto e da estratégia de commits final:
 6. Entregue a pelizzai-finish-task.
 ```
 
+A finish-task encerra em `phase: delivered` (conteúdo selado + destino executado), nunca em `done`;
+`done` é constatação posterior contra `confirmar:`, na próxima abertura/retomada. Verification sela o
+conteúdo, não declara `done`.
+
 Ao gravar `validated-head`, confirme que o state/execution record carrega `kickoff: ratificado`: o
 conteúdo selado nasceu de uma rota estrutural ratificada, não de defaults silenciosos. Se o marcador
 está `pendente` numa entrega planejada, a rota não foi ratificada — resolva no gate certo antes de
