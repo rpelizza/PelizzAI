@@ -98,7 +98,8 @@ plano/progresso no mecanismo nativo da plataforma e o seal como SHA do execution
 O **execution record nativo** é o estado lógico da tarefa no mecanismo de plano/task da plataforma,
 nunca um arquivo substituto no repo. Mantenha nele, quando aplicável: `phase`, branch/base,
 isolamento, decisões de execução, progresso, overlays, `validated-head`, `delivery-head` e status do
-destino (`local | pushed | pr-open | partial`). Termine em `phase: done` ou `phase: blocked`.
+destino (`local | pushed | pr-open | partial`). Termine em `phase: done` ou `phase: blocked`;
+`phase: delivered` é estado de repouso que ainda exige constatação de `done` (ver Estado e retomada).
 
 Em projeto consumidor:
 
@@ -121,6 +122,12 @@ slug: <none> ou phase: done
 
 phase: blocked
 → apresente o bloqueio antes de iniciar outra mutação.
+
+phase: delivered
+→ entrega selada aguardando constatação. Aplique a §Reconciliação da entrega anterior
+  (`pelizzai-execution-plans`; retomada: `pelizzai-recovery`) ANTES de tratar como tarefa ativa ou
+  conflito: verifique `confirmar:` contra o git e constate `done` — ou proponha retomar a branch ou
+  `abandoned`. Só então classifique o pedido novo.
 
 tarefa ativa que corresponde ao pedido
 → valide state contra Git e retome sem repetir decisões confirmadas.
@@ -323,7 +330,7 @@ mostre detalhes como contexto, não como várias perguntas simultâneas:
 - Lane: <bounded|standard|exploratory|high-risk> — <justificativa em 1 linha>
 - Head + overlays: <head skill> + <overlays ou "nenhum">
 - Descoberta: <"sem lacunas materiais" | lista numerada de lacunas → recomendo <pelizzai-brainstorming compacto|completo|pelizzai-interview-me focal>>
-- Artefatos: <spec/plano/ADR previstos nesta lane | "nenhum além do plano nativo">
+- Artefatos: <spec/plano/ADR previstos nesta lane | "nenhum além do plano nativo">; em greenfield/exploratory com catálogo ausente ou stack nova, liste também "domain skills da stack (proposta na borda do design)"
 
 Recomendação: aceitar esta rota porque <motivo>.
 Pergunta única: Posso seguir com esta rota? (sim ou ajuste)
@@ -332,6 +339,11 @@ Pergunta única: Posso seguir com esta rota? (sim ou ajuste)
 Uma resposta afirmativa aceita a rota; o usuário pode ajustar lane, descoberta, artefatos ou overlay.
 Sem resposta afirmativa, segure o turno. Depois do kickoff, a descoberta pergunta **uma decisão por
 turno**, sempre com recomendação; não transforme o bloco de rota num questionário de requisitos.
+
+Em lane greenfield/exploratory com catálogo ausente ou stack nova, a linha Artefatos antecipa as
+"domain skills da stack (proposta na borda do design)": elas serão propostas pelo **Gate proativo de
+domain skills** da `pelizzai-audit` na borda design→plano — o usuário já vê no kickoff que virão e
+decide lá.
 
 **Audiência:** quando o usuário parece não-técnico ou a intenção admite ≥2 leituras materiais, a primeira linha do bloco reapresenta o entendimento (handshake) antes de rotear; registre `audience: technical | layperson` (ver Registro de execução). Não despeje jargão; siga `pelizzai-writing-clearly-and-concisely`.
 
