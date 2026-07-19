@@ -33,7 +33,14 @@ O briefing de cada tarefa inclui:
   sugerida de `pelizzai-reasoning` (decomposição, RCA, comparação, verification — ver a matriz da
   skill); omita para tarefa mecânica de contrato claro — não imponha técnica sem gatilho.
 - Perfil de review escolhido no plano: `combined` ou `split`, com a justificativa de risco.
-- O formato de retorno esperado e o status (ver abaixo).
+- O formato de retorno esperado e o status (ver abaixo), incluindo o campo obrigatório
+  `Desvios do plano:` (ou `nenhum`).
+- Teste operacional de desvio (frase canônica, no TEXTO do briefing):
+  "se a decisão não está escrita no plano nem na spec, ela não está aprovada — apresente antes de implementar".
+  Decisão técnica, de escopo ou de abordagem que surja durante a implementação e não esteja no
+  plano/spec interrompe a tarefa e volta ao coordenador/usuário **como pergunta com 2–3 opções e a
+  recomendada** (porquê em uma linha); nunca é preenchida em silêncio nem devolvida como pergunta
+  aberta sem opções.
 - Salvo-conduto de escalada (frase canônica, no TEXTO do briefing): "É sempre OK parar e dizer
   'isso é difícil demais para mim'. Trabalho ruim é pior que trabalho nenhum. Você não será
   penalizado por escalar (reporte BLOCKED)."
@@ -60,32 +67,40 @@ estáticos proporcionais. O membro testa/valida, faz self-review e **não commit
 
 ## 3. Review proporcional com duas lentes
 
-Toda tarefa passa pelas lentes **spec** e **qualidade**, nesta ordem. O perfil decide se elas usam
-um ou dois despachos:
+Toda tarefa passa pelas lentes **spec** e **qualidade**, nesta ordem, com **cegueira assimétrica**:
+a lente spec julga o código às cegas contra o contrato; a lente qualidade é a lente de **evidência**
+e recebe o relatório do autor para verificá-lo. O perfil decide se elas usam um ou dois despachos:
 
 | Perfil | Quando | Execução |
 | --- | --- | --- |
 | `combined` | lane bounded, risco baixo, escopo coeso, sem segurança/dados/migração/contrato público | um reviewer e um relatório, primeiro spec e depois qualidade |
 | `split` | risco médio/alto, contrato público, segurança, dados, migração, múltiplas partes ou rejeição estrutural | estágio spec aprova antes de despachar qualidade; independência proporcional |
 
-Se o diff revelar superfície que muda o risco, promova `combined` para `split`; nunca rebaixe só
-para economizar uma rodada.
+Proporcionalidade: tarefas triviais/bounded seguem com review **combinado** (uma passada); o perfil
+de **lentes separadas com cegueira** entra em `standard`/`exploratory` ou quando o Gate de setup
+ratificar review reforçado. Se o diff revelar superfície que muda o risco, promova `combined` para
+`split`; nunca rebaixe só para economizar uma rodada.
 
 ```text
 (0) Material: gere `review-package --working-tree`; o mesmo pacote cobre staged, unstaged e
     untracked. Não use range antes de a tarefa ser commitada.
-(a) Conformidade com a spec: o código faz exatamente o que a tarefa pede? Nada a mais, nada a menos?
-    O revisor é ADVERSARIAL por instrução: NÃO confia no relatório do implementador ("terminou
-    rápido demais; o relatório pode estar incompleto ou otimista") — compara implementação real
-    vs requisitos LINHA A LINHA, procurando faltas, extras (escopo além do pedido) e mal-entendidos.
-(b) Qualidade do código: legibilidade, design, reuso, segurança — COM evidência FRESCA:
-    o revisor rodou de fato os checks aplicáveis ao artefato e colou saída + exit code.
-    "Testes passam" inferido NÃO conta como aprovado; check que não rodou = UNVERIFIED, nunca ✅.
+(a) Lente spec (CEGA): recebe SOMENTE o diff + a spec/plano da tarefa + as domain skills da área.
+    O revisor da lente spec NÃO recebe o relatório do implementador — julga o código contra o contrato, sem a narrativa do autor.
+    É ADVERSARIAL por instrução: compara implementação real vs requisitos LINHA A LINHA,
+    procurando faltas, extras (escopo além do pedido) e mal-entendidos.
+(b) Lente qualidade / evidência: recebe o relatório do autor e VERIFICA as alegações — testes
+    rodados? prova FRESCA? desvios declarados? — além de legibilidade, design, reuso e segurança.
+    Não confia cegamente no relatório: o revisor rodou de fato os checks aplicáveis ao artefato e
+    colou saída + exit code. "Testes passam" inferido NÃO conta como aprovado; check que não rodou
+    = UNVERIFIED, nunca ✅.
 ```
 
 Aprovação exige **os dois** verdicts: spec ✅ **e** qualidade ✅, estejam no mesmo relatório ou em
-estágios separados. Itens "⚠️ não verificável" exigem avaliação do coordenador contra o plano
-antes de marcar concluído.
+estágios separados. No perfil `combined` a assimetria é lógica: primeiro o julgamento cego contra o
+contrato, só depois a leitura do relatório para verificar a evidência — nunca o inverso. Conflito
+entre as lentes → o coordenador decide com evidência PRÓPRIA ou escala; a narrativa do autor nunca
+arbitra. Itens "⚠️ não verificável" exigem avaliação do coordenador contra o plano antes de marcar
+concluído.
 
 Anti-corrupção do pipeline (regras completas na `pelizzai-review`): não instrua o reviewer sobre o que NÃO flagrar nem pré-classifique severidade; finding causado pelo próprio plano sobe ao humano; Minors acumulam num ledger triado no review final; os findings do review final são corrigidos por UM único fixer.
 
@@ -99,6 +114,12 @@ O membro reporta um destes status:
 | `DONE_WITH_CONCERNS` | Completo, mas com ressalvas                   | Leia as ressalvas antes de prosseguir; lacuna de domain skill vai ao registro e é acumulada para o eixo adoption-driven no fechamento (não vira gate por tarefa) |
 | `NEEDS_CONTEXT`      | Falta informação                              | Forneça o contexto e re-despache                               |
 | `BLOCKED`            | Não consegue concluir                         | Avalie: dar contexto → mudar abordagem/quebrar tarefa → escalar ao humano |
+
+Todo relatório de tarefa — em qualquer status — inclui o campo obrigatório **`Desvios do plano:`**
+(ou `nenhum`): decisões técnicas, de escopo ou de abordagem que saíram do que o plano/spec
+escreveram, com a justificativa de cada uma. O coordenador **confere esse campo antes de aceitar
+`DONE`**: desvio material não ratificado não vira concluído — pelo teste operacional de desvio, volta
+ao usuário antes do review, nunca é absorvido em silêncio.
 
 Nunca ignore uma escalação nem re-despache sem mudar nada.
 

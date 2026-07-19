@@ -15,8 +15,10 @@
 #    caminhos DENTRO da raiz do projeto. Mesma regra dos dois lados.
 #
 # REGRA A (invariante, ambos os modos) - isolamento antes da primeira escrita:
-#   escrever QUALQUER caminho dentro da raiz estando em branch protegida
+#   escrever caminho de PRODUTO (fora de pelizzai/) dentro da raiz estando em branch protegida
 #   (main/master/develop/dev, o default do origin/HEAD) ou em HEAD destacado -> BLOQUEIA.
+#   CARVE-OUT: escrita de metadata em pelizzai/** e liberada mesmo aqui (o sistema se atualizando;
+#   e so de escrita de arquivo - o commit segue no fluxo de branch de tarefa).
 #
 # REGRA B (so consumidor: existe pelizzai/ e NAO e o repo-fonte) - nada de codigo antes do gate:
 #   escrever caminho de PRODUTO (fora de pelizzai/) enquanto pelizzai/data/state.md NAO
@@ -233,7 +235,25 @@ try {
   }
   if ($inRoot.Count -eq 0) { exit 0 }
 
-  # -- Regra A (ambos os modos): branch protegida/destacada bloqueia QUALQUER escrita in-root.
+  # Metadata do harness (pelizzai/**) vs. PRODUTO (fora de pelizzai/). Tanto o carve-out da
+  # Regra A quanto a Regra B se apoiam nessa separacao.
+  $pelizzaiDir = Join-Path $gitRoot 'pelizzai'
+  $products = @($inRoot | Where-Object { -not (Test-Inside $_ $pelizzaiDir) })
+
+  # -- Regra A (ambos os modos): branch protegida/destacada bloqueia escrita de PRODUTO in-root.
+  # CARVE-OUT DE METADATA: escrever dentro de pelizzai/** e LIBERADO mesmo em branch protegida ou
+  # HEAD destacado - e metadata do harness (state/plano/spec/reports), o sistema se atualizando,
+  # nunca produto. Isso destrava a reconciliacao do state na propria branch protegida a qual o dev
+  # volta apos o merge do PR. NOTA DE SEGURANCA: o carve-out e SO de escrita de ARQUIVO e nao abre
+  # brecha de produto nem de commit - produto (fora de pelizzai/) segue bloqueado por esta mesma
+  # Regra A; a metadata so e COMMITADA no primeiro commit da branch de tarefa nova (o fluxo nunca
+  # exige commit em protegida); e o pelizzai-guardrails continua barrando git destrutivo.
+  # LIMITE (symlink): a classificacao metadata-vs-produto e por CAMINHO - GetFullPath normaliza `..`
+  # (por isso `pelizzai/../src` corretamente vira produto), mas NAO segue symlinks. Um symlink dentro
+  # de pelizzai/ apontando para fora (ex.: `pelizzai/link -> ../src`) poderia fazer uma escrita real
+  # em produto ser lida como metadata e liberada em branch protegida. O carve-out NAO e airtight
+  # quanto a symlink; os controles compensatorios permanecem: pelizzai-guardrails barra o git
+  # destrutivo e o review humano enxerga o alvo real.
   $branch = Invoke-Git $cwd @('branch', '--show-current') # '' = HEAD destacado (ou sem branch)
   $isProtected = ($branch -eq '') -or ($PROTECTED -contains $branch)
   if (-not $isProtected) {
@@ -245,9 +265,9 @@ try {
       if ($tail -and ($tail -eq $branch)) { $isProtected = $true }
     }
   }
-  if ($isProtected) {
+  if ($isProtected -and $products.Count -gt 0) {
     $b = if ($branch) { $branch } else { 'HEAD destacado' }
-    Invoke-Block "branch protegida/destacada ($b). Isole via pelizzai-starting-branch antes de escrever - isolamento antes da primeira escrita e invariante."
+    Invoke-Block "branch protegida/destacada ($b). Isole via pelizzai-starting-branch antes de escrever produto - isolamento antes da primeira escrita e invariante (escrita de metadata em pelizzai/ e liberada mesmo aqui)."
   }
 
   # Source mode (repo-fonte PelizzAI): o marcador vive no execution record -> Regra B pulada.
@@ -258,8 +278,6 @@ try {
   if ($sourceMode) { exit 0 }
 
   # -- Regra B (so consumidor): escrita de PRODUTO exige kickoff ratificado no state.md.
-  $pelizzaiDir = Join-Path $gitRoot 'pelizzai'
-  $products = @($inRoot | Where-Object { -not (Test-Inside $_ $pelizzaiDir) })
   if ($products.Count -eq 0) { exit 0 } # so artefatos de setup em pelizzai/ -> liberado
 
   $statePath = Join-Path $gitRoot 'pelizzai/data/state.md'

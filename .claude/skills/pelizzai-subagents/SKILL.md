@@ -46,11 +46,13 @@ O handoff dir é gitignored no consumidor e temp em source mode (ver task-cycle 
 ```text
 - Objetivo: o resultado único e claro esperado.
 - Contexto necessário: caminhos, contratos, decisões já tomadas, convenções (o subagente não viu a conversa).
-- Regras/skills locais relevantes: SEMPRE inclua o pacote de skills de domínio aplicável à stack da
-  tarefa (consumidor usa o catálogo; source mode usa o repo-fonte). Em dúvida se uma skill de domínio
-  do catálogo se aplica à tarefa, inclua-a: o custo de incluir é menor que o de ignorar uma regra do
-  projeto. Cole os pontos operacionais — o subagente deve aplicá-los em vez de padrões genéricos. Se
-  a stack não tem skill cobrindo, diga isso e peça que o subagente sinalize a lacuna no retorno.
+- Regras/skills locais relevantes: monte um ESPECIALISTA — quando o subagente encarna um papel de
+  área (ex.: implementador-backend), nomeie-o pela área e cole o pacote **COMPLETO** de skills de
+  domínio dessa área (consumidor usa o catálogo; source mode usa o repo-fonte), não só as que parecem
+  aplicar à tarefa específica. Em dúvida se uma skill de domínio do catálogo pertence à área,
+  inclua-a: o custo de incluir é menor que o de ignorar uma regra do projeto. Cole os pontos
+  operacionais — o subagente deve aplicá-los em vez de padrões genéricos. Se a área não tem skill
+  cobrindo, diga isso e peça que o subagente sinalize a lacuna no retorno.
 - Camada global: instrua o subagente a aplicar `pelizzai-preferences` e a raciocinar via
   `pelizzai-reasoning`; em conflito, as SKILLS DE DOMÍNIO coladas e as regras do projeto PREVALECEM.
 - Raciocínio: técnica principal sugerida de `pelizzai-reasoning` conforme a tarefa. Para APIs de
@@ -64,7 +66,11 @@ O handoff dir é gitignored no consumidor e temp em source mode (ver task-cycle 
 ## Verificação e integração
 
 O resultado de um subagente **não** é verdade até ser conferido. Para implementação, passe pelas
-duas lentes do `pelizzai-review` no perfil proporcional (`combined` ou `split`) e pela
+duas lentes do `pelizzai-review` no perfil proporcional (`combined` ou `split`). No `split`, a
+cegueira é assimétrica: a **lente spec cega** recebe só diff + spec/plano + domain skills da área e
+**NÃO recebe o relatório** do subagente (julga o código contra o contrato, sem a narrativa); a
+**lente qualidade/evidência** recebe o relatório e verifica as alegações com prova fresca. O
+coordenador (a sessão principal) cruza as lentes e **nunca** é a lente cega. Depois, aplique
 `pelizzai-verification-before-completion` antes de consolidar. Para pesquisa, cruze achados
 conflitantes e desconfie de relatório não verificado.
 
@@ -81,6 +87,8 @@ essas lacunas e as consolida numa única proposta no fechamento (eixo adoption-d
 - Mandar um papel de escrita a um agentType read-only (Explore/Plan não editam).
 - Briefing vago, ou assumir que o subagente tem o histórico da conversa.
 - Tratar o relatório do subagente como verdade sem conferir (diff do git / evidência fresca).
+- Entregar o relatório do subagente à lente spec cega, ou o coordenador se despachar como essa lente.
+- Montar o subagente-especialista sem o pacote completo de domain skills da sua área.
 - Usar subagents para um TIME de papéis que precisam dialogar — isso é `pelizzai-team`.
 ```
 

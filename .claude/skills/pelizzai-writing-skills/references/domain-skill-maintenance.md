@@ -81,7 +81,7 @@ Modelo **híbrido**: núcleo portável na skill + hook de reforço no Claude Cod
 
 Vale nos roots de skill ativos (`.claude`/`.agents`); Cursor é apenas adaptador. Este bloco é
 referenciado pela `pelizzai-finish-task` no nudge read-only e não bloqueia o fechamento. O hook
-(Claude Code) é apenas rede de segurança, a cada 20 interações. Ao concluir uma tarefa que mexeu
+(Claude Code) é apenas rede de segurança, a cada 10 interações. Ao concluir uma tarefa que mexeu
 em código:
 
 ```bash
@@ -95,10 +95,11 @@ count=$(git rev-list --count --since="$last_review 00:00" HEAD 2>/dev/null || ec
 > Comandos em sh/Bash; em frota sem POSIX (ex.: só PowerShell), use o equivalente — o hook `.ps1` já implementa a mesma leitura por rótulo.
 
 ```text
-- Limiar de revisão: count >= 30 commits OU passaram-se > 14 dias desde last_review.
-  O eixo de DIAS é a âncora (cadência de ~sprint, previsível); os commits só ANTECIPAM
-  o nudge quando há um burst real de trabalho. Números calibrados para times ativos —
-  em time, 10 commits acontecem numa manhã, por isso o antigo 10/10 disparava cedo demais.
+- Limiar de revisão: count >= 10 commits OU passaram-se > 10 dias desde last_review.
+  O eixo de DIAS é a âncora (cadência curta e previsível); os commits só ANTECIPAM
+  o nudge quando há um burst real de trabalho. Cadência deliberadamente curta: o feedback
+  de campo mostrou que limiares longos deixavam as skills de domínio envelhecerem sem aviso —
+  melhor lembrar cedo (advisory, uma vez, com snooze) do que tarde demais.
 - Cruzou o limiar → proponha UMA vez:
   "Acumulamos <count> commits / <dias> dias desde a última revisão de skills de domínio.
    Posso rodar a manutenção (pelizzai-writing-skills) agora? Seguir agora ou deixar para depois?"
@@ -107,15 +108,15 @@ count=$(git rev-list --count --since="$last_review 00:00" HEAD 2>/dev/null || ec
   nos próximos ~7 dias (o hook persiste essa janela de supressão; ver abaixo).
 ```
 
-Repo-scan completo: se passaram > 21 dias desde `last-full-scan`, proponha um re-scan amplo (reusando a `pelizzai-audit`) e atualize as skills impactadas.
+Repo-scan completo: se passaram > 15 dias desde `last-full-scan`, proponha um re-scan amplo (reusando a `pelizzai-audit`) e atualize as skills impactadas.
 
-### Hook de reforço (a cada 20 interações — só Claude Code)
+### Hook de reforço (a cada 10 interações — só Claude Code)
 
-O hook `.claude/hooks/pelizzai-cadence.mjs` é um `UserPromptSubmit` que conta interações e, a cada 20, checa o delta do git; se o limiar for cruzado, injeta um lembrete curto. Os limiares são os mesmos do núcleo portável (30 commits / 14 dias de revisão / 21 dias de full-scan). Características de segurança:
+O hook `.claude/hooks/pelizzai-cadence.mjs` é um `UserPromptSubmit` que conta interações e, a cada 10, checa o delta do git; se o limiar for cruzado, injeta um lembrete curto. Os limiares são os mesmos do núcleo portável (10 commits / 10 dias de revisão / 15 dias de full-scan). Características de segurança:
 
 ```text
 - No-op silencioso se não houver ledger (harness ainda não inicializado neste projeto).
-- Só faz a checagem cara (git) a cada 20ª interação; nas demais, só incrementa o contador.
+- Só faz a checagem cara (git) a cada 10ª interação; nas demais, só incrementa o contador.
 - SEMPRE termina com exit 0 (nunca bloqueia o prompt do usuário).
 - Engole qualquer erro (git ausente, etc.) sem ruído.
 - Supressão: após emitir um lembrete, silencia por 7 dias (grava `snoozeUntil` no
@@ -123,7 +124,7 @@ O hook `.claude/hooks/pelizzai-cadence.mjs` é um `UserPromptSubmit` que conta i
 - O estado é retrocompatível: um `.cadence-state.json` antigo (só `{count}`) continua válido.
 ```
 
-> **Amostragem ≠ frequência do nudge.** `EVERY=20` decide de quanto em quanto o hook OLHA; quem decide se o nudge APARECE são os limiares (30 commits / 14 dias) + a supressão de 7 dias. Não suba `EVERY` a valores altos (ex.: 100): isso cega o hook em sessões curtas, sem reduzir a frequência real do aviso (que já é governada pelos limiares e pelo snooze).
+> **Amostragem ≠ frequência do nudge.** `EVERY=10` decide de quanto em quanto o hook OLHA; quem decide se o nudge APARECE são os limiares (10 commits / 10 dias) + a supressão de 7 dias. Não suba `EVERY` a valores altos (ex.: 100): isso cega o hook em sessões curtas, sem reduzir a frequência real do aviso (que já é governada pelos limiares e pelo snooze).
 
 Entrada no `settings.json` (instalada no bootstrap, com confirmação — opt-in):
 

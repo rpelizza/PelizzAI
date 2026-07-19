@@ -6,10 +6,10 @@
 #
 # Cadencia (calibrada para times ativos - ver pelizzai-writing-skills ->
 # references/domain-skill-maintenance.md):
-#  - Amostragem: checa a cada 20 interacoes (nao a cada mensagem).
-#  - Revisao devida: >= 30 commits OU > 14 dias desde last-review (o eixo de DIAS e a ancora
+#  - Amostragem: checa a cada 10 interacoes (nao a cada mensagem).
+#  - Revisao devida: >= 10 commits OU > 10 dias desde last-review (o eixo de DIAS e a ancora
 #    de sprint; os commits so ANTECIPAM num burst real de trabalho).
-#  - Repo-scan completo: > 21 dias desde last-full-scan.
+#  - Repo-scan completo: > 15 dias desde last-full-scan.
 #  - Supressao: depois de avisar, silencia por 7 dias (evita repetir a cada janela).
 #
 # Mesmas garantias do .mjs: no-op silencioso sem ledger; checagem cara (git) so a cada N
@@ -22,10 +22,10 @@
 
 $ErrorActionPreference = 'SilentlyContinue'
 try {
-  $EVERY = 20                  # checa a cada N interacoes (amostragem, nao frequencia do nudge)
-  $COMMIT_THRESHOLD = 30       # >= N commits desde a ultima revisao (antecipa em burst real)
-  $DAY_THRESHOLD_REVIEW = 14   # > N dias desde a ultima revisao (ancora de sprint)
-  $DAY_THRESHOLD_SCAN = 21     # > N dias desde o ultimo full-scan
+  $EVERY = 10                  # checa a cada N interacoes (amostragem, nao frequencia do nudge)
+  $COMMIT_THRESHOLD = 10       # >= N commits desde a ultima revisao (antecipa em burst real)
+  $DAY_THRESHOLD_REVIEW = 10   # > N dias desde a ultima revisao (ancora de sprint)
+  $DAY_THRESHOLD_SCAN = 15     # > N dias desde o ultimo full-scan
   $SNOOZE_DAYS = 7             # apos avisar, silencia por N dias
 
   $raw = [Console]::In.ReadToEnd()

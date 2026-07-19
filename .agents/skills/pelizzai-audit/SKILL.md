@@ -78,6 +78,12 @@ usuário digitar `bootstrap`:
   o usuário não escolher criar, reduzir, adiar ou registrar zero skills.
 - **plano→execução (projeto existente):** antes de fixar a lane de build, se a stack de uma tarefa mutável não está coberta pelo catálogo (ausente, OU presente mas sem cobrir aquela stack), proponha o conjunto mínimo que evitaria erro do agente.
 
+**Quem invoca este gate (não é só auto-serviço da audit):** `pelizzai-brainstorming` o aciona na
+borda design→plano, como passo numerado do fechamento da borda de design; `pelizzai-writing-plans` o
+aciona como rede de segurança antes da Tarefa 1, quando a stack do plano não tem cobertura no
+catálogo (ou o catálogo está ausente). Nesses dois pontos, o kickoff do `pelizzai-router` já anuncia
+nos Artefatos que as domain skills da stack virão como proposta na borda do design.
+
 Gate de uma pergunta, com recomendação:
 
 ```text
@@ -157,7 +163,10 @@ data/mockups/
 data/reports/
 ```
 
-Verifique com `git check-ignore` usando arquivos de prova temporários; remova as provas depois.
+`data/state.md`, `data/review-domain-skills.md` e `data/history/` são **versionados** — registro
+durável; nunca entram no ignore (um `data/*` amplo com exceções silenciaria `history/` e quebraria a
+durabilidade do registro de tarefas done/abandoned). Verifique com `git check-ignore` usando arquivos
+de prova temporários; remova as provas depois.
 
 Crie sob demanda, não no bootstrap: `context.md`, `adr/`, `out-of-scope/`, `specs/`, `plans/` e diretórios efêmeros.
 
@@ -247,6 +256,7 @@ pelizzai/
 └── data/
     ├── state.md                    versionado
     ├── review-domain-skills.md     versionado
+    ├── history/                    versionado (registro durável de tarefas done/abandoned)
     ├── .cadence-state.json         ignorado
     ├── handoffs/                   ignorado
     ├── mockups/                    ignorado

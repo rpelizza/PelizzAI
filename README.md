@@ -265,9 +265,12 @@ validated-head = SHA exato do último commit de conteúdo validado
 
 `pelizzai-finish-task` exige `HEAD == validated-head`; a única sujeira permitida é
 `pelizzai/data/state.md` contendo o seal pendente. Então cria exatamente um commit metadata-only,
-tocando apenas esse arquivo, para fechar o cursor.
+tocando apenas esse arquivo, para selar a tarefa em `phase: delivered` (conteúdo selado + destino
+executado) e gravar `confirmar:`, a condição observável que virará `done`.
 Antes de publicar, prova que `validated-head..closure-head` contém somente esse state e que nenhum
-conteúdo do produto mudou. Push, PR, descarte e remoção de worktree continuam opt-in.
+conteúdo do produto mudou. Push, PR, descarte e remoção de worktree continuam opt-in. `done` nunca é
+declarado aqui: é **constatado** na abertura da próxima tarefa ou na retomada — o harness confere
+`confirmar:` contra o Git e migra o bloco concluído para `pelizzai/data/history/` (versionado).
 
 ```mermaid
 flowchart LR
@@ -275,8 +278,8 @@ flowchart LR
     T --> R["review"]
     R --> V["Verification"]
     V --> S["validated-head"]
-    S --> M["commit metadata-only<br/>state.md"]
-    M --> X["destino confirmado"]
+    S --> M["commit metadata-only<br/>state.md → delivered"]
+    M --> X["destino confirmado<br/>done constatado depois"]
 ```
 
 ## Bootstrap consumidor
@@ -305,15 +308,17 @@ pelizzai/
     ├── .cadence-state.json     ignorado
     ├── handoffs/               ignorado
     ├── mockups/                ignorado
-    └── reports/                ignorado
+    ├── reports/                ignorado
+    └── history/                versionado (entregas constatadas em done)
 ```
 
 O `state.md` é escalar por repositório e registra, entre outros campos, `effect`, `risk`, `lane`,
 `overlays`, `audience`, `base-ref`, `base-sha`, `branch`, `isolation`, `execution-mode`,
   `commit-strategy`, `kickoff`, `discovery`, `spec-approval`, `domain-skills-decision`, `plan`,
-  `plan-approval` e `validated-head`. Isolamento, modo e commit nascem
+  `plan-approval`, `validated-head` e `confirmar`. Isolamento, modo e commit nascem
 `<pending>` e só deixam de sê-lo quando o usuário ratifica o gate; `kickoff: ratificado` marca a
-rota confirmada. A política de execução ratificada do projeto vive à parte, em `pelizzai/profile.md`,
+rota confirmada. A `pelizzai-finish-task` encerra a tarefa em `phase: delivered` e grava `confirmar:`;
+`done` é constatado depois, contra o Git, na abertura da próxima tarefa ou na retomada. A política de execução ratificada do projeto vive à parte, em `pelizzai/profile.md`,
 e não é herança de tarefa. Na retomada, esses dados são confrontados com Git; divergências perigosas
 vão para `pelizzai-recovery`.
 

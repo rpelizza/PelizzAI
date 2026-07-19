@@ -185,9 +185,10 @@ Faça autoavaliação inline: placeholders, contradições, ambiguidade, scope c
 ### 9. Transição
 
 - Fluxo normal: entregue a spec aprovada a `pelizzai-writing-plans`.
-- Projeto novo: após a spec aprovada, execute o Gate proativo de domain skills da `pelizzai-audit`;
-  crie somente as ratificadas e então siga para `pelizzai-writing-plans` quando o pedido original
-  inclui construir o produto. Pare após design/bootstrap apenas quando esse era o escopo pedido.
+- Projeto novo — checklist de fechamento da borda de design, cada passo obrigatório antes de sair do design:
+  1. Design aprovado → acione `pelizzai-audit` (Gate proativo de domain skills): proponha o conjunto para a stack decidida, com context7; a decisão é do usuário.
+  2. Crie somente as ratificadas e registre no catálogo/ledger.
+  3. Siga para `pelizzai-writing-plans` quando o pedido original inclui construir o produto; pare após design/bootstrap apenas quando esse era o escopo pedido.
 
 ## Protótipos
 
@@ -225,6 +226,7 @@ Se aceitar, leia [visual-companion.md](visual-companion.md), use apenas flags do
 - Assumir em silêncio decisão de escopo/UX/arquitetura com lacuna material em vez de propor a descoberta.
 - Usar Context7 para inventar requisito, persona, regra de negócio ou critério de aceite.
 - Suprimir a spec de uma lane standard/exploratory sem dispensa explícita do usuário.
+- Fechar a borda de design em projeto novo sem apresentar a proposta de domain skills.
 ```
 
 ## Definition of Done
@@ -236,5 +238,7 @@ Se aceitar, leia [visual-companion.md](visual-companion.md), use apenas flags do
 [ ] standard/exploratory: a spec proporcional foi produzida por default e apresentada na borda, ou
     o usuário a dispensou explicitamente (dispensa registrada); consumidor salva na task branch,
     source mode registra no execution record nativo sem runtime consumidor;
+[ ] projeto novo: a proposta de domain skills da stack foi apresentada na borda (Gate proativo da
+    `pelizzai-audit`) antes de seguir para o plano, e a decisão do usuário está registrada;
 [ ] a próxima skill recebe contexto suficiente sem repetir a entrevista.
 ```

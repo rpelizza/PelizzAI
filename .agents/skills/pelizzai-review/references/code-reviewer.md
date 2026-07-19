@@ -19,6 +19,15 @@ e identificar problemas antes que se propaguem.
 
 {SKILLS_DE_DOMÍNIO}   # colar as relevantes de pelizzai/domain-skills.md, ou "nenhuma"
 
+## Relatório do implementador — alegações a verificar
+
+{RELATÓRIO_DO_IMPLEMENTADOR}   # colar o relatório do autor; esta lente (qualidade/evidência) o RECEBE e o VERIFICA
+
+Esta é a lente que recebe o relatório (a lente spec é cega e não o vê). NÃO confie nele: cada
+alegação — "os testes passam", "cobri o edge case X", "sem desvio do plano" — é uma hipótese a
+DERRUBAR com evidência fresca. Rode você mesmo o check e compare com o que o autor afirmou. Confira
+em especial o campo `Desvios do plano:`: um desvio real que não foi declarado ali é um achado.
+
 ## Escopo a revisar (o chamador escolhe um)
 
 A) Range commitado — quando o trabalho já está em commits:
@@ -76,6 +85,11 @@ Testes:
 - Verificam comportamento real, não mocks? Edge cases cobertos? Testes de integração onde importam?
 - Todos os testes passam? (confirme no bloco Verification com evidência fresca, não inferida.)
 
+Verificação das alegações do relatório (lente evidência):
+- Cada alegação do relatório do implementador bate com o que você observou rodando os checks?
+- Prova é fresca (comando + saída + exit code), não inferida do diff? Desvios do plano foram
+  declarados? Alegação não confirmada por check é UNVERIFIED — reporte a divergência, nunca ✅.
+
 Prontidão para produção:
 - Estratégia de migração se o schema mudou? Compatibilidade retroativa? Sem bugs óbvios?
 
@@ -123,4 +137,4 @@ NÃO FAÇA: dizer "looks good" sem conferir; marcar nitpick como Critical; opina
       que não leu; ser vago ("melhorar o tratamento de erro"); fugir do veredito.
 ````
 
-**Placeholders:** `{DESCRIÇÃO}` (o que foi construído) · `{REQUISITOS_OU_PLANO}` (texto da tarefa ou caminho do plano em `pelizzai/plans/`) · `{SKILLS_DE_DOMÍNIO}` · `<BASE_SHA>`/`<HEAD_SHA>` (range, no review final).
+**Placeholders:** `{DESCRIÇÃO}` (o que foi construído) · `{REQUISITOS_OU_PLANO}` (texto da tarefa ou caminho do plano em `pelizzai/plans/`) · `{SKILLS_DE_DOMÍNIO}` · `{RELATÓRIO_DO_IMPLEMENTADOR}` (as alegações do autor — só esta lente o recebe) · `<BASE_SHA>`/`<HEAD_SHA>` (range, no review final).

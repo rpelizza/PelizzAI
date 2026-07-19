@@ -136,7 +136,11 @@ flowchart TD
 
 ## O papel do coordenador
 
-O coordenador é o **team lead** (Modo Teammates) ou a **sessão principal** (Modo Subagents). Em ambos, a regra é a mesma e inegociável:
+O coordenador é o **team lead** (Modo Teammates) ou a **sessão principal** (Modo Subagents). Ele
+**orquestra**: decompõe, delega, cruza as lentes e consolida. **Nunca** implementa uma frente por
+conta própria nem se despacha como a **lente spec cega** do review — ele já viu o relatório e o
+raciocínio dos membros, então não pode julgar às cegas; a lente cega é sempre um revisor
+independente. Em ambos os modos, a regra é a mesma e inegociável:
 
 <HARD-GATE>
 Não delegue uma subtarefa a um membro sem antes saber responder, para **cada** membro:
@@ -219,6 +223,14 @@ Cada **membro** também raciocina: o briefing instrui o membro a acionar `pelizz
 
 Escolha papéis com fronteiras que não se sobrepõem. Papéis comuns e a técnica de `pelizzai-reasoning` que normalmente os serve:
 
+**Papéis de implementação são ESPECIALISTAS por área.** Nomeie o papel pela área (ex.:
+`implementador-backend`, `implementador-frontend`, `implementador-dados`) e cole no briefing o pacote
+**COMPLETO** de skills de domínio daquela área do catálogo — não só as que parecem aplicar à tarefa
+específica, mas a área inteira do papel. Um especialista que carrega toda a sua área decide as
+fronteiras com o contexto que o histórico daria, em vez de reagir a um recorte estreito. As frentes
+continuam **disjuntas por arquivo** (invariante anti-conflito): a área define o pacote de skills que
+o membro recebe, não amplia os arquivos que ele pode escrever.
+
 | Papel                         | Mandato                                                                    | Técnica principal sugerida (pelizzai-reasoning) |
 | ----------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------- |
 | Investigador / Pesquisador    | Reunir evidências, mapear o código, testar uma hipótese específica         | Root Cause Analysis                             |
@@ -239,7 +251,7 @@ execução de plano, use `task-brief.*` somente com plano Markdown persistente c
 nativo usa conteúdo colado. Handoffs ficam no path gitignored consumidor ou temp em source mode.
 
 ```text
-Briefing de [nome do membro] — papel: [papel]
+Briefing de [nome do membro] — papel: [papel nomeado pela ÁREA, ex.: implementador-backend]
 
 - Objetivo: [um resultado único e claro]                              (HARD-GATE 1)
 - Missão global e papel desta frente: [o objetivo do time em uma frase
@@ -249,10 +261,11 @@ Briefing de [nome do membro] — papel: [papel]
 - Frentes/arquivos próprios: [conjunto disjunto; quem mais NÃO toca aqui]
 - Contexto necessário: [caminhos, contratos, decisões já tomadas, links de spec,
   convenções do projeto — tudo, porque o membro não viu esta conversa]
-- Regras/skills locais relevantes: SEMPRE inclua o pacote de skills de domínio aplicável à stack da
-  frente [catálogo consumidor ou repo-fonte em source mode; cole os pontos-chave]. Em dúvida se uma
-  skill de domínio do catálogo se aplica à frente, inclua-a: o custo de incluir é menor que o de
-  ignorar uma regra do projeto. Se a stack da frente não tem skill cobrindo, diga isso e instrua o
+- Regras/skills locais relevantes: monte um ESPECIALISTA — cole o pacote **COMPLETO** de skills de
+  domínio da **ÁREA** do papel [catálogo consumidor ou repo-fonte em source mode; cole os
+  pontos-chave], não só as que parecem aplicar à tarefa específica, mas a área inteira. Em dúvida se
+  uma skill de domínio do catálogo pertence à área, inclua-a: o custo de incluir é menor que o de
+  ignorar uma regra do projeto. Se a área da frente não tem skill cobrindo, diga isso e instrua o
   membro a sinalizar a lacuna no retorno
 - Camada global: aplique `pelizzai-preferences` e raciocine via `pelizzai-reasoning`; em
   conflito, as SKILLS DE DOMÍNIO coladas acima e as regras do projeto PREVALECEM sobre elas
@@ -371,6 +384,7 @@ Resultados de membros **não** são verdade até serem cruzados.
 - **Cross-check:** confronte entregáveis que se sobrepõem; achados em conflito disparam uma rodada de refutação (Modo Subagents) ou um debate via `SendMessage` (Modo Teammates).
 - **Verificação adversarial:** prefira que **outro** membro (ou um verificador dedicado) tente derrubar uma conclusão, em vez de o próprio autor confirmá-la.
 - **Self-Consistency:** quando vários membros chegam ao mesmo resultado por caminhos independentes, a convergência aumenta a confiança — mas não substitui teste/fonte real.
+- **Review por tarefa (duas lentes com cegueira assimétrica):** todo entregável de implementação passa pela `pelizzai-review` — a **lente spec cega** (recebe só diff + spec/plano + domain skills da área, NUNCA o relatório do autor: julga o código contra o contrato, sem a narrativa) e a **lente qualidade/evidência** (recebe o relatório e verifica as alegações com prova fresca). O coordenador despacha revisores independentes — **nunca é a lente cega** —, cruza os dois verdicts e, em conflito, decide com evidência própria ou escala. Proporcional: `combined` numa passada para trivial/bounded; o perfil cego/duplo (`split`) entra em standard/exploratory ou por ratificação no gate de setup.
 - **Gate de evidência:** antes de aceitar um entregável de **implementação**, aplique `pelizzai-verification-before-completion` — confira o **diff do git** e rode os comandos de teste você mesmo (ou exija a saída + exit code colados); o relatório do membro nunca é evidência.
 - **Síntese:** cruze os entregáveis com `Evidence Synthesis` e produza **uma** entrega, deixando claro o que é consenso, o que foi divergência resolvida e o que permanece em aberto.
 - **Impasse:** se o confronto **não** converge, o coordenador **não** força um consenso artificial: decide pelo critério dominante da tarefa (acionando `Decision Making`) e, quando a escolha pertence ao usuário ou o impacto é alto, **escala** apresentando as posições e seus trade-offs.
@@ -400,6 +414,8 @@ Aplique o **orçamento de esforço** de `pelizzai-reasoning`: a profundidade da 
 - Delegar um papel de escrita a um agentType read-only (Explore/Plan não editam).
 - "Continuar a conversa" com um subagente entre rodadas (cada rodada é um spawn novo, sem memória).
 - O coordenador começar a implementar em vez de delegar, esperar e sintetizar.
+- O coordenador se despachar como a lente spec cega (ele já viu o relatório) — a lente cega é sempre um revisor independente.
+- Entregar o relatório do implementador à lente spec cega, ou montar um membro sem o pacote completo de domain skills da sua área.
 - Aceitar achados sem verificação adversarial.
 - No Modo Subagents, esperar que os membros se coordenem sozinhos (eles não se falam).
 - Usar split-panes no Windows / Windows Terminal / terminal do VS Code / Ghostty.
@@ -416,6 +432,7 @@ Aplique o **orçamento de esforço** de `pelizzai-reasoning`: a profundidade da 
 - Delegue sem saber responder os cinco itens do `<HARD-GATE>` para cada membro.
 - Habilite o Agent Teams no `settings.json` do usuário sem confirmação.
 - Trate o resultado de um membro como verdade antes de cruzá-lo/refutá-lo.
+- Seja você mesmo (coordenador) a lente spec cega, ou passe o relatório do autor a ela.
 - Conclua silenciosamente com uma frente falha ou em aberto.
 - Encerre o time antes de validar os critérios de conclusão.
 - Deixe o lead concluir que "acabou" com tarefas ainda abertas — verifique o roster.

@@ -10,10 +10,10 @@
  *
  * Cadência (calibrada para times ativos — ver pelizzai-writing-skills →
  * references/domain-skill-maintenance.md):
- *  - Amostragem: checa a cada 20 interações (não a cada mensagem).
- *  - Revisão devida: >= 30 commits OU > 14 dias desde last-review (o eixo de DIAS é a
+ *  - Amostragem: checa a cada 10 interações (não a cada mensagem).
+ *  - Revisão devida: >= 10 commits OU > 10 dias desde last-review (o eixo de DIAS é a
  *    âncora — cadência de sprint; os commits só ANTECIPAM num burst real de trabalho).
- *  - Repo-scan completo: > 21 dias desde last-full-scan.
+ *  - Repo-scan completo: > 15 dias desde last-full-scan.
  *  - Supressão: depois de avisar, silencia por 7 dias (evita repetir a cada janela
  *    enquanto o usuário não roda a manutenção). "Avisa uma vez, nunca bloqueia."
  *
@@ -36,10 +36,10 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
-const EVERY = 20;                 // checa a cada N interações (amostragem, não frequência do nudge)
-const COMMIT_THRESHOLD = 30;      // >= N commits desde a última revisão (antecipa em burst real)
-const DAY_THRESHOLD_REVIEW = 14;  // > N dias desde a última revisão (âncora de sprint)
-const DAY_THRESHOLD_SCAN = 21;    // > N dias desde o último full-scan
+const EVERY = 10;                 // checa a cada N interações (amostragem, não frequência do nudge)
+const COMMIT_THRESHOLD = 10;      // >= N commits desde a última revisão (antecipa em burst real)
+const DAY_THRESHOLD_REVIEW = 10;  // > N dias desde a última revisão (âncora de sprint)
+const DAY_THRESHOLD_SCAN = 15;    // > N dias desde o último full-scan
 const SNOOZE_DAYS = 7;            // após avisar, silencia por N dias
 const MS_PER_DAY = 86400000;
 

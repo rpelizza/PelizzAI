@@ -1,6 +1,6 @@
 ---
 name: pelizzai-finish-task
-description: Use depois que overlays, consolidação e validação final selaram o conteúdo em validated-head. No consumidor, fecha o cursor com um commit metadata-only de state.md; no repo-fonte, valida o seal sem criar runtime/closure. Mantém local por default ou publica/abre PR com autorização. Nunca altera conteúdo ou histórico depois do seal.
+description: Use depois que overlays, consolidação e validação final selaram o conteúdo em validated-head. No consumidor, encerra a tarefa em phase delivered com um commit metadata-only de state.md (done é constatação posterior, não aqui); no repo-fonte, valida o seal sem criar runtime/closure. Mantém local por default ou publica/abre PR com autorização. Nunca altera conteúdo ou histórico depois do seal.
 ---
 
 # PelizzAI Finish Task
@@ -8,11 +8,14 @@ description: Use depois que overlays, consolidação e validação final selaram
 ## Objetivo
 
 Integrar **o conteúdo que foi validado**, sem uma última rodada oculta de mutações. Squash,
-security, frontend, documentação, fixes e testes pertencem ao fluxo anterior. Esta skill:
+security, frontend, documentação, fixes e testes pertencem ao fluxo anterior. Esta skill encerra em
+`phase: delivered` (conteúdo selado + destino executado) e grava `confirmar:`; `done` é constatação
+posterior, na próxima abertura/retomada — nunca declarado aqui. Esta skill:
 
 ```text
-consumer: validated-head → closure só de state.md → delivery-head
-source:   validated-head ─────────────────────────→ delivery-head
+consumer: validated-head → closure `delivered` (só state.md) → delivery-head
+source:   validated-head ──────────────────────────────────→ delivery-head
+                                     (done constatado depois, fora desta skill)
 ```
 
 **Anuncie ao iniciar:** "Usando a skill PelizzAI Finish Task para integrar o conteúdo já validado."
@@ -25,8 +28,9 @@ execution record `branch`, `base-ref`, `base-sha` e `validated-head`; exija bran
 `delivery-head=validated-head`, pule o closure commit e vá direto a
 **Resolver o destino**. Sem pedido externo, recomende manter local e aguarde a escolha. Ao terminar,
 marque o execution record
-`phase: done` com `validated-head`, `delivery-head` e status do destino. Qualquer divergência volta
-ao lifecycle.
+`phase: delivered` com `validated-head`, `delivery-head`, `confirmar:` e status do destino; `done` é
+constatado depois (mesma reconciliação, no execution record nativo, sem criar `pelizzai/`). Qualquer
+divergência volta ao lifecycle.
 
 As seções de state/closure abaixo são exclusivas do projeto consumidor.
 
@@ -76,24 +80,56 @@ aqui; volte à `pelizzai-execution-plans` e revalide o novo candidato.
 Se houver commits indevidos numa branch protegida, preserve-os criando uma branch de resgate e
 pare. Entregue instruções manuais para reconciliar a protegida; não faça reset automático.
 
-## 2. Closure commit metadata-only
+## 2. Resolver o destino e selar o closure (`delivered`)
 
-No `pelizzai/data/state.md` já modificado pelo seal:
+### 2a. Ofereça o destino
 
-1. Preserve `validated-head`, `base-ref`, `base-sha`, branch e decisões da tarefa.
-2. Acrescente ao Histórico uma linha datada de conclusão, sem prometer push/PR ainda.
-3. Defina `slug: <none>` e `phase: done`.
-4. Limpe `delivered`/`next`/`pending` para os placeholders da próxima tarefa e atualize a data.
+**Ofereça o destino** uma vez. **Manter local** é recomendado quando não houve intenção externa, mas
+nunca é auto-confirmado. Faça uma única pergunta e aguarde:
+
+```text
+Como integrar o conteúdo validado?
+
+1. Publicar esta branch sem abrir PR
+2. Publicar esta branch e abrir Pull Request
+3. Manter local
+4. Preparar descarte/arquivamento manual
+
+Qual opção?
+```
+
+Numa tarefa trivial local, a pergunta pode ser curta: "Recomendo manter local; confirma ou prefere
+publicar/abrir PR?". Ainda assim, aguarde resposta. Quando intenção externa já foi expressa, confirme
+somente o alvo materialmente ambíguo. Destino nunca vem de default de profile.
+
+Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing
+e escale ao coordenador o que exigir decisão.
+
+### 2b. Selar o closure em `delivered` (commit metadata-only)
+
+`delivered` = conteúdo selado + destino executado; grava-se ANTES de sair da branch de tarefa (sobe
+junto no PR). No `pelizzai/data/state.md` já modificado pelo seal:
+
+1. Preserve `validated-head`, `base-ref`, `base-sha`, branch, `slug`, o progresso e as decisões da
+   tarefa — NÃO limpe para placeholders (isso é da reconciliação `delivered`→`done` na próxima
+   abertura, que também migra o bloco íntegro para `data/history/`).
+2. Defina `phase: delivered` e grave `confirmar:` com a condição observável que vira `done`, derivada
+   do destino escolhido em 2a: publicar/PR → `base-ref contém validated-head (PR/branch integrada)`;
+   manter local → `entrega local aceita pelo usuário`; descarte/arquivamento (opção 4) → `arquivada
+   localmente, sem merge esperado` (não é entrega numa base: o §3d define arquivar ou descartar; a
+   constatação vira `done` quando o arquivo é aceito, ou `abandoned` se descartado).
+3. Acrescente ao Histórico uma linha datada de `delivered`, sem prometer merge/`done` ainda.
+4. Atualize a data.
 
 Estagie **somente** o state:
 
 ```bash
 git add -- pelizzai/data/state.md
 git diff --cached --name-only
-git commit -m "chore: fecha tarefa no cursor"
+git commit -m "chore: sela tarefa em delivered"
 ```
 
-Antes de oferecer destino, prove as três guardas:
+Antes de executar o destino, prove as três guardas:
 
 ```bash
 # deve listar exatamente pelizzai/data/state.md
@@ -109,28 +145,11 @@ git status --porcelain --untracked-files=all
 Grave `closure-head=$(git rev-parse HEAD)` e `delivery-head=$closure-head` apenas para as operações desta execução. Hook que
 incluiu outro arquivo ou deixou sujeira invalida o fechamento; pare, não faça outro commit corretivo.
 
-## 3. Resolver o destino
+## 3. Executar o destino
 
-Ao fechar, **ofereça o destino** uma vez. **Manter local** é recomendado quando não houve intenção
-externa, mas nunca é auto-confirmado. Faça uma única pergunta e aguarde:
-
-```text
-Como integrar o conteúdo validado?
-
-1. Publicar esta branch sem abrir PR
-2. Publicar esta branch e abrir Pull Request
-3. Manter local
-4. Preparar descarte/arquivamento manual
-
-Qual opção?
-```
-
-Numa tarefa trivial local, a pergunta pode ser curta: "Recomendo manter local; confirma ou prefere
-publicar/abrir PR?". Ainda assim, aguarde resposta. Quando intenção externa já foi expressa,
-confirme somente o alvo materialmente ambíguo. Destino nunca vem de default de profile.
-
-Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing
-e escale ao coordenador o que exigir decisão.
+O destino foi decidido em 2a e o closure `delivered` já foi commitado (2b). Execute agora o efeito
+escolhido. Sob briefing fechado (SUBAGENT-STOP), aplique o briefing e escale ao coordenador o que
+exigir decisão; não reabra o gate.
 
 Imediatamente antes de qualquer efeito externo, repita:
 
@@ -203,7 +222,8 @@ git worktree remove <caminho>
 ```
 
 Falha significa parar e reportar. Não use `--force`. Não crie outro commit para limpar
-`worktree-path`; o state fechado é histórico da execução e será sobrescrito pela próxima tarefa.
+`worktree-path`; o state selado em `delivered` é histórico da execução e a próxima abertura o
+reconcilia (`done` + `history/`) antes de sobrescrever.
 
 ## 5. Nudge de manutenção (read-only)
 
@@ -222,6 +242,9 @@ ação do coordenador; um membro de time apenas sinaliza a lacuna no relatório:
 - **Manutenção não armada:** se o hook de cadência está instalado mas o ledger está ausente, informe
   UMA vez ("cadência inativa: sem ledger; rode a inicialização mínima da `pelizzai-audit` para
   ativar") para distinguir "desligado" de "quebrado".
+- **State volumoso:** se `pelizzai/data/state.md` passou de ~150 linhas, sugira compactar uma vez
+  (advisory). A migração do bloco íntegro para `data/history/` na constatação de `done` já enxuga o
+  state; condensar conteúdo remanescente é propor-confirmar.
 
 Source mode, ou sem hook e sem ledger: no-op silencioso.
 
@@ -229,6 +252,7 @@ Source mode, ou sem hook e sem ledger: no-op silencioso.
 
 ```text
 - Oferecer OWASP/frontend/docs aqui; já é tarde, volte e revalide.
+- Declarar `phase: done` aqui (finish-task encerra em `delivered`; `done` é constatação posterior).
 - Squash/reset/rebase/amend depois de validated-head.
 - `git add -A` no closure commit.
 - Segundo commit de cursor para registrar o destino.

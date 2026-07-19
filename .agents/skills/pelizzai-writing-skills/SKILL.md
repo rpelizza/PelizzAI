@@ -182,16 +182,16 @@ A auto-manutenção combina lógica **portável na skill** (núcleo) com um **ho
 ```text
 - Ao FECHAR uma tarefa (núcleo, portável — vale em .claude/.agents/.cursor; DISPARO PRIMÁRIO):
   leia o ledger, conte commits desde `last-review` (git rev-list --since) e os dias decorridos.
-  Se >= 30 commits OU > 14 dias → proponha a revisão UMA vez ("avisa uma vez, nunca bloqueia").
-  O eixo de DIAS é a âncora (cadência de ~sprint); os commits só antecipam num burst real.
-- Repo-scan completo: se > 21 dias desde `last-full-scan` → proponha um re-scan e atualização ampla.
-- A cada 20 interações (hook de reforço, só Claude Code): rede de segurança que checa o delta do
+  Se >= 10 commits OU > 10 dias → proponha a revisão UMA vez ("avisa uma vez, nunca bloqueia").
+  O eixo de DIAS é a âncora (cadência curta); os commits só antecipam num burst real.
+- Repo-scan completo: se > 15 dias desde `last-full-scan` → proponha um re-scan e atualização ampla.
+- A cada 10 interações (hook de reforço, só Claude Code): rede de segurança que checa o delta do
   git e injeta um lembrete quando o limiar é cruzado, com supressão de 7 dias após avisar. Ver
   `references/domain-skill-maintenance.md` e o script `.claude/hooks/pelizzai-cadence.mjs`. Opt-in:
   instalado no bootstrap com confirmação.
 ```
 
-Os limiares (30 commits / 14 dias de revisão / 21 dias de full-scan / 20 interações / 7 dias de supressão) são calibrados para times ativos; ajuste-os ao ritmo do projeto. Nada na cadência **bloqueia** o trabalho do usuário — apenas sugere.
+Os limiares (10 commits / 10 dias de revisão / 15 dias de full-scan / 10 interações / 7 dias de supressão) são deliberadamente curtos para manter a manutenção perto do trabalho real; ajuste-os ao ritmo do projeto. Nada na cadência **bloqueia** o trabalho do usuário — apenas sugere.
 
 ---
 

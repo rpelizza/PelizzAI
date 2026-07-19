@@ -24,9 +24,9 @@ git log --oneline -10
 git stash list
 ```
 
-Leia `project`, `branch`, `base-ref`, `base-sha`, `validated-head`, `isolation`, `worktree-path`,
-`phase`, `delivered` e `next` do `state.md` consumidor ou execution record nativo. State ausente em
-source mode é normal. Separe:
+Leia `project`, `branch`, `base-ref`, `base-sha`, `validated-head`, `confirmar`, `isolation`,
+`worktree-path`, `phase`, o progresso e `next` do `state.md` consumidor ou execution record nativo.
+State ausente em source mode é normal. Separe:
 
 | Classe | Exemplo | Conduta |
 | --- | --- | --- |
@@ -37,6 +37,16 @@ source mode é normal. Separe:
 | risco de perda/histórico reescrito | commits sumiram, refs mudaram, worktree órfão sujo | preserve refs/WIP e escale |
 
 Se for falso alarme de diretório, corrija o contexto e retorne ao router sem tocar o registro.
+
+**Entrega em `delivered` na retomada.** Se o state trouxer `phase: delivered`, a tarefa foi selada e
+seu destino executado, faltando só constatar `done` — isto **não** é divergência de WIP. Aplique a
+mesma reconciliação da `pelizzai-execution-plans` (§Reconciliação da entrega anterior): verifique
+`confirmar:` contra o git (read-only) — `base-ref` contém `validated-head`? PR mergeado? branch
+integrada? (entrega local: o usuário aceita?). Constatada → grave `phase: done` + evidência de 1 linha
+e migre o bloco íntegro para `pelizzai/data/history/<AAAA-MM-DD>-<slug>.md`, deixando a linha de
+índice; a escrita de metadata em `pelizzai/` vale em qualquer branch, mas o commit espera a task
+branch nova (nunca em protegida). Falhou (PR fechado sem merge) → não grave `done`; informe e proponha
+retomar a branch ou arquivar como `abandoned`. Nenhum arquivo de trabalho é movido nesta constatação.
 
 ## 2. Inventariar o WIP
 
