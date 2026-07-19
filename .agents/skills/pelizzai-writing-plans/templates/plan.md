@@ -46,6 +46,17 @@ Liste as premissas residuais e lacunas materiais **novas do plano** (casos não 
 - [lacuna → resolução | aceita pelo usuário | Tarefa de investigação N]
 ```
 
+## Decisões técnicas deste plano
+
+Lista **numerada** das decisões técnicas materiais deste plano — cada uma em uma linha: **o quê** foi decidido, **onde foi ratificado**, a **alternativa rejeitada** e o **porquê**. Toda decisão material tem de estar ratificada antes de o plano fechar: a que emergiu ao montar o plano vai ao usuário como pergunta com 2–3 opções e recomendação (via `pelizzai-interview-me`), não como fato consumado. Se o plano é puramente mecânico e não toma nenhuma decisão técnica material, escreva exatamente `nenhuma decisão técnica material — plano puramente mecânico`. Nunca deixe a seção vazia nem a omita.
+
+```text
+1. [decisão] — ratificada: [spec | design | entrevista do plano] — rejeitada: [alternativa] — porquê: [motivo em uma linha]
+2. [decisão] — ratificada: [spec | design | entrevista do plano] — rejeitada: [alternativa] — porquê: [motivo em uma linha]
+```
+
+O Gate de setup pós-plano apresenta esta lista: as já ratificadas (spec/design/entrevista) como recap de uma linha, e qualquer decisão sem origem de ratificação vira pergunta com 2–3 opções e recomendação ali mesmo — nunca um carimbo em bloco. Na execução vale o teste operacional de desvio — se a decisão não está escrita no plano nem na spec, ela não está aprovada — apresente antes de implementar.
+
 ## Estrutura de cada tarefa
 
 ````markdown

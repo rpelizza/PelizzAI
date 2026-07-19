@@ -66,6 +66,45 @@ mesma decisão sobre a vizinha; um plano de uma tarefa é válido.
 - Tarefa durável/assíncrona privilegia contrato e aceite; não congele número de linha perecível.
 ```
 
+## Decisões técnicas deste plano
+
+Todo plano carrega a seção obrigatória `## Decisões técnicas deste plano`: a lista **numerada** das
+decisões técnicas materiais que aparecem ao transformar a spec/design em plano — biblioteca ou padrão
+escolhido, formato de dado, contrato de interface, estratégia de migração, trade-off de arquitetura
+local. Cada item traz, em uma linha: **o quê** foi decidido, **onde foi ratificado**, a **alternativa
+rejeitada** e o **porquê**.
+
+**Uma decisão técnica material que o harness resolveu sozinho não entra na lista como fato consumado
+— vira pergunta.** Enquanto monta o plano, separe:
+
+- **Já ratificada** (fixada na spec, no design ou numa entrevista anterior): registre-a com a origem
+  (`ratificada na spec` / `no design` / `na entrevista de <data>`) — e a origem tem de ser
+  localizável no artefato citado, não um rótulo de conveniência. No gate ela é só recap — não se
+  re-pergunta o que o usuário já decidiu.
+- **Ainda aberta** (emergiu agora, ao decompor): **não escreva a escolha como decidida.** Antes de
+  fechar o plano, leve-a ao usuário por `pelizzai-interview-me`, uma pergunta por vez, com **2–3
+  opções reais + a recomendada marcada e o porquê em uma linha** (a inteligência está em construir as
+  opções boas e fundamentar com evidência do repo/Context7; a decisão é do usuário). Só depois de
+  ratificada ela entra na lista, com a origem `ratificada na entrevista do plano`.
+
+O plano só fecha quando **toda** decisão material está ratificada — nenhuma escolha técnica de peso
+viaja escondida no meio de um plano de N tarefas para ser carimbada junto.
+
+Quando o plano é puramente mecânico e não introduz nenhuma decisão técnica material, escreva de
+forma explícita `nenhuma decisão técnica material — plano puramente mecânico`. Nunca deixe a seção
+vazia nem a omita: a ausência de decisões é ela própria uma afirmação a ratificar.
+
+É essa lista que o Gate de setup pós-plano apresenta — as ratificadas como recap, e qualquer uma sem
+origem de ratificação como pergunta com opções ali mesmo, antes do "ok". Decisão que não cabe numa
+linha clara é sinal de que falta decisão humana (volte ao design ou a `pelizzai-interview-me`), não
+de que a linha deva crescer.
+
+Na execução vale o **teste operacional de desvio**:
+se a decisão não está escrita no plano nem na spec, ela não está aprovada — apresente antes de implementar.
+Decisão técnica emergente interrompe a tarefa e volta ao usuário **como pergunta com 2–3 opções e a
+recomendada** (com o porquê em uma linha); nunca é preenchida em silêncio nem devolvida como pergunta
+aberta sem opções. Concordar com a recomendação custa uma palavra.
+
 ## Skills aplicáveis
 
 Registre no cabeçalho e em cada tarefa:
@@ -154,6 +193,15 @@ briefing e escale ao coordenador o que exigir decisão.
 
 ## Handoff
 
+**Checagem de cobertura de domain skills (rede de segurança).** Antes de encaminhar ao Gate de
+setup, verifique: a stack do plano tem cobertura no catálogo `pelizzai/domain-skills.md`? Se não —
+ou se o catálogo está ausente —, acione o **Gate proativo de domain skills** da `pelizzai-audit`
+para propor o conjunto da stack decidida (fundamentado em Context7); a decisão é do usuário e ocorre
+**ANTES da Tarefa 1**. Isso captura fluxos que chegaram ao plano sem passar pela
+`pelizzai-brainstorming`. Em source mode não há catálogo consumidor: a checagem recai sobre as
+skills de domínio do repo-fonte e nunca cria runtime `pelizzai/`. Sob briefing fechado
+(SUBAGENT-STOP), não abra esse gate: sinalize a lacuna de cobertura ao coordenador.
+
 No consumidor, atualize o campo `plan:` no state e confirme o caminho materializado
 (`pelizzai/plans/AAAA-MM-DD-<feature>.md`). Em source mode, entregue o plano nativo/execution
 record a `pelizzai-execution-plans` de forma discoverable. A branch/base já estão definidas;
@@ -186,6 +234,10 @@ pedido externo.
 - Team/worktree por preferência do harness, sem ganho concreto.
 - Usar Context7 para decidir requisitos ou critérios de aceite.
 - Plano gigante cobrindo subsistemas que deveriam ser tarefas/projetos separados.
+- Omitir a seção `## Decisões técnicas deste plano` ou deixá-la vazia em vez de declarar
+  `nenhuma decisão técnica material — plano puramente mecânico`.
+- Encaminhar ao Gate de setup com a stack sem cobertura no catálogo, sem acionar o Gate proativo de
+  domain skills da `pelizzai-audit`.
 ```
 
 ## Integração
