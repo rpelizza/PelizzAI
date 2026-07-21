@@ -559,8 +559,9 @@ Técnica principal:
 Técnicas auxiliares:
 - Constraint Satisfaction.
 - Tree of Thoughts.
-- Evidence Synthesis (3ª auxiliar OPCIONAL — só se houver dados/documentação de
-  infraestrutura relevante; permitida porque decisão arquitetural é alto impacto).
+- Evidence Synthesis (auxiliar OPCIONAL — só se houver dados/documentação de
+  infraestrutura relevante para comparar; entra por fechar essa lacuna, nunca por a
+  decisão ser de alto impacto).
 
 Próxima ação:
 - Definir critérios, eliminar opções incompatíveis

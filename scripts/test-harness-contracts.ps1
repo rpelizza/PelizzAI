@@ -533,6 +533,43 @@ try {
     Check-Match 'CLAUDE.md' 'modelo e effort não' 'CLAUDE.md: modelo e effort não variam com risco'
     Check-Match 'README.md' 'modelo mais capaz disponível e effort máximo' 'README: review final no topo de capacidade'
 
+    # -- F7: debugging reenxerta os sinais e táticas perdidos no pivô (restauração pré-11/07/2026) --
+    # O pivô proporcional FICA inteiro (triagem em 4 classes, Passo 0 de contenção, seletor por
+    # efeito, sem cota de hipóteses). O que volta do BASE são as peças que ele derrubou sem
+    # substituir: frases-gatilho na description, minimização do loop, causa na mensagem de commit,
+    # escalada nomeada dos três fixes e a tabela de sinais do parceiro humano.
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'description:[^\n]*para de chutar' 'debugging: a description volta a citar as frases-gatilho do usuário'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'description:[^\n]*teste quebrar no meio de outra tarefa' 'debugging: a description aciona com teste quebrado no meio de outra tarefa'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'corte UM elemento por vez' 'debugging restaura a minimização (um elemento por vez)'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Minimize o loop[^\n]*determinístico incerto[^\n]*flaky' 'debugging: a minimização é condicionada às duas classes incertas'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'todo elemento restante é load-bearing' 'debugging define o critério de parada da minimização'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Numa causa direta isso é desperdício' 'debugging: minimizar causa direta é desperdício (proporcionalidade preservada)'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'contenção do Passo 0 vem antes de qualquer corte' 'debugging: a contenção continua precedendo a minimização'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'registrada na MENSAGEM DE COMMIT do fix' 'debugging: a causa confirmada volta para a mensagem de commit'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Três fixes definitivos falhos param o track' 'debugging: três fixes falhos param o track'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Três fixes que não resolvem \*\*são\*\* uma lacuna material' 'debugging liga o circuit breaker ao contrato da lacuna material'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Acione .pelizzai-interview-me.[\s\S]{0,240}pelizzai-brainstorming' 'debugging nomeia a escalada interview-me -> brainstorming'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Sem essa\s+discussão não existe fix nº 4' 'debugging: não há fix nº 4 sem a discussão com o usuário'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Tentar o fix nº 4 depois de três falhas' 'debugging: red flag torna o circuit breaker observável'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' '## Sinais do parceiro humano' 'debugging tem a tabela de sinais do parceiro humano'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' '"Para de chutar"[^\n]*predição falsificável' 'debugging decodifica "para de chutar" (hipótese sem predição)'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' '"A gente tá travado\?"[^\n]*thrashing' 'debugging decodifica "a gente tá travado?" (thrashing)'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Usa condicionalmente:[^\n]*pelizzai-interview-me' 'debugging: interview-me está no wiring da Integração'
+    # As peças voltaram traduzidas, não coladas: vocabulário do HEAD (Passo/oráculo) e nenhuma das
+    # absolutizações do BASE de volta junto com elas.
+    Check-NotMatch '.claude/skills/pelizzai-debugging/SKILL.md' '\bfases?\s+[1-4]\b' 'debugging não recola o vocabulário morto de fases do BASE'
+    Check-NotMatch '.claude/skills/pelizzai-debugging/SKILL.md' 'Gere 3.5 hipóteses' 'debugging não reintroduz a cota de 3-5 hipóteses'
+    Check-NotMatch '.claude/skills/pelizzai-debugging/SKILL.md' 'NENHUM FIX SEM INVESTIGAÇÃO DA CAUSA RAIZ' 'debugging mantém o invariante proporcional (contenção pode preceder a causa)'
+    Check-NotMatch '.claude/skills/pelizzai-debugging/SKILL.md' 'questione hipótese/arquitetura antes de tentar outro' 'debugging não volta ao circuit breaker anônimo (sem destino nomeado)'
+
+    # -- F7: a quota de técnicas sai também dos carriers do reasoning --
+    # `Não há quota fixa` (Carregamento progressivo) tinha dois contraditores órfãos: o teto por fase
+    # nas Composições e a auxiliar numerada/justificada por impacto no eval R-14.
+    Check-Match '.claude/skills/pelizzai-reasoning/SKILL.md' 'Não há teto numérico' 'reasoning: composições carregam por fase, sem teto numérico'
+    Check-NotMatch '.claude/skills/pelizzai-reasoning/SKILL.md' 'teto de carregamento por fase' 'reasoning não mantém o teto órfão que contradizia "não há quota fixa"'
+    Check-Match '.claude/skills/pelizzai-reasoning/evals/routing.md' 'entra por fechar essa lacuna, nunca por a\s+decisão ser de alto impacto' 'routing: técnica auxiliar entra por lacuna, não por impacto'
+    Check-NotMatch '.claude/skills/pelizzai-reasoning/evals/routing.md' '\d. auxiliar OPCIONAL' 'routing não numera as auxiliares (resíduo de quota)'
+
     # -- Envelope de segurança dos hooks: cadence/session-start fail-open, nunca bloqueiam --
     $failOpenMjs = @('.claude/hooks/pelizzai-cadence.mjs', '.claude/hooks/pelizzai-session-start.mjs')
     $failOpenPs1 = @('.claude/hooks/pelizzai-cadence.ps1', '.claude/hooks/pelizzai-session-start.ps1')
