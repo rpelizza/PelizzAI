@@ -534,6 +534,20 @@ Ubuntu e macOS; os contratos rodam em Windows e Ubuntu.
 
 ---
 
+## Licença e participação
+
+Distribuído sob a **Licença Apache 2.0** — veja [LICENSE](LICENSE). Você pode usar, modificar e
+embutir o harness em produtos próprios, inclusive comerciais, preservando o aviso de copyright e a
+licença. A Apache-2.0 também concede expressamente os direitos de patente dos contribuidores, o que
+importa para quem vai embutir isso em produto.
+
+- **Contribuir:** [CONTRIBUTING.md](CONTRIBUTING.md) — leia antes do primeiro PR; este repositório
+  tem regras próprias (edite só `.claude/`, comportamento novo exige asserção nova).
+- **Reportar vulnerabilidade:** [SECURITY.md](SECURITY.md) — em canal privado, nunca em issue
+  pública.
+
+---
+
 ## Princípio operacional
 
 Use o menor fluxo que preserve os invariantes. Leia antes de perguntar, não escreva em pedido
