@@ -570,6 +570,68 @@ try {
     Check-Match '.claude/skills/pelizzai-reasoning/evals/routing.md' 'entra por fechar essa lacuna, nunca por a\s+decisão ser de alto impacto' 'routing: técnica auxiliar entra por lacuna, não por impacto'
     Check-NotMatch '.claude/skills/pelizzai-reasoning/evals/routing.md' '\d. auxiliar OPCIONAL' 'routing não numera as auxiliares (resíduo de quota)'
 
+    # =====================================================================
+    # F8 — Resíduos da restauração pré-11/07/2026.
+    # As peças que o pivô derrubou sem substituir e as contradições que ele
+    # deixou para trás: detecção de workspace, cadência proativa da revisão
+    # arquitetural, commit próprio da doc, definição do protótipo, reancoragem
+    # do handoff e a descrição honesta do writegate.
+    # =====================================================================
+
+    # -- F8: workspace multi-projeto volta a ser DETECTADO e o conjunto afetado CONFIRMADO --
+    # O BASE detectava workspace e nunca fechava sozinho o conjunto; o pivô apagou a seção inteira.
+    # Volta reconciliada com o invariante do HEAD (uma tarefa = um repositório Git): monorepo tem
+    # isolamento único, workspace multi-repo abre um por repositório.
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'description:[^\n]*Detecta workspace multi-projeto e confirma com o usuário o conjunto afetado' 'starting-branch: a description volta a anunciar a detecção de workspace'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' '^##\s+2\.\s+Detectar workspace multi-projeto' 'starting-branch tem a seção de detecção de workspace'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'pnpm-workspace\.yaml[\s\S]{0,120}go\.work' 'starting-branch checa os marcadores de workspace do BASE'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'um nível acima' 'starting-branch procura marcadores também um nível acima do cwd'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'SEMPRE confirme com o usuário o conjunto afetado' 'starting-branch: conjunto afetado é SEMPRE confirmado (âncora literal do BASE)'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'Conjunto adivinhado é lacuna\s+material[\s\S]{0,80}pelizzai-interview-me' 'starting-branch manda o conjunto adivinhado para a interview-me, não para um default'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' '`pelizzai/` é \*\*root-level do workspace\*\*' 'starting-branch: pelizzai/ é root-level do workspace, não um por pacote'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'Workspace é detectado, nunca presumido' 'starting-branch eleva a detecção de workspace a invariante'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'Pular a detecção de workspace' 'starting-branch: pular a detecção de workspace é red flag'
+    # Reconciliação: a régua do HEAD fica de pé e o "uma branch por projeto" do BASE NÃO volta.
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'Uma tarefa = um repositório Git' 'starting-branch preserva a régua do HEAD (uma tarefa = um repositório)'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'Monorepo \(um repositório Git, vários pacotes\)[\s\S]{0,80}isolamento é único' 'starting-branch: monorepo tem isolamento único, não uma branch por pacote'
+    Check-NotMatch '.claude/skills/pelizzai-starting-branch/SKILL.md' 'Uma branch por projeto afetado' 'starting-branch não recola o erro do BASE (branch por pacote dentro de monorepo)'
+    Check-NotMatch '.claude/skills/pelizzai-starting-branch/SKILL.md' 'Prioridade: develop > dev' 'starting-branch não recola a preferência histórica de base junto com o workspace'
+
+    # -- F8: a revisão de arquitetura volta a ser PROATIVA (gatilho de cadência) --
+    # O contrato read-only do HEAD fica intacto (travado acima); o que volta é o gatilho periódico.
+    Check-Match '.claude/skills/pelizzai-improving-architecture/SKILL.md' 'description:[^\n]*PROATIVA' 'improving-architecture: a description volta a declarar a revisão PROATIVA'
+    Check-Match '.claude/skills/pelizzai-improving-architecture/SKILL.md' 'description:[^\n]*periodicamente \(a cada poucos dias' 'improving-architecture: a cadência periódica volta ao gatilho'
+    Check-Match '.claude/skills/pelizzai-improving-architecture/SKILL.md' 'Arquitetura degrada em silêncio' 'improving-architecture explica por que o gatilho não é só o pedido do usuário'
+    Check-Match '.claude/skills/pelizzai-improving-architecture/SKILL.md' 'Oferecer é proativo; rodar e implementar\s+continuam sendo escolha do usuário' 'improving-architecture: proatividade é oferta, não execução sem aval'
+    Check-NotMatch '.claude/skills/pelizzai-improving-architecture/SKILL.md' 'varredura periódica sem pedido' 'improving-architecture não mantém a exclusão que contradizia a própria cadência'
+
+    # -- F8: a doc volta a ter commit próprio obrigatório (higiene de histórico, não preferência) --
+    Check-Match '.claude/skills/pelizzai-documenting-features/SKILL.md' 'entra em \*\*commit próprio\*\*[\s\S]{0,40}docs\(<feature>\)' 'documenting-features exige commit próprio da doc'
+    Check-Match '.claude/skills/pelizzai-documenting-features/SKILL.md' 'higiene de histórico, não preferência' 'documenting-features: commit próprio é regra, não gosto'
+    Check-Match '.claude/skills/pelizzai-documenting-features/SKILL.md' 'granular. é o commit definitivo da doc[\s\S]{0,120}squash-final' 'documenting-features concilia o commit próprio com as duas estratégias'
+    Check-Match '.claude/skills/pelizzai-documenting-features/SKILL.md' 'Deixar a doc sem commit próprio' 'documenting-features: doc sem commit próprio é red flag'
+    Check-NotMatch '.claude/skills/pelizzai-documenting-features/SKILL.md' 'Commit próprio é\s+opção' 'documenting-features não mantém o commit próprio como opção'
+
+    # -- F8: definição do protótipo e âncora de reancoragem do handoff --
+    Check-Match '.claude/skills/pelizzai-prototype/SKILL.md' 'código descartável que responde a uma pergunta' 'prototype recupera a definição do BASE (a pergunta decide o formato)'
+    Check-Match '.claude/skills/pelizzai-prototype/SKILL.md' 'Sem "sim", não escreva o experimento' 'prototype preserva o aval explícito do usuário (não regride com a definição)'
+    Check-Match '.claude/skills/pelizzai-handoff/SKILL.md' '\*\*âncora, não endereço\*\*' 'handoff: path/linha é âncora, não endereço'
+    Check-Match '.claude/skills/pelizzai-handoff/SKILL.md' 'reancora antes de agir' 'handoff manda a próxima sessão reancorar antes de agir'
+
+    # -- F8: o closure metadata-only não é privilégio do modo granular --
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'closure metadata-only da pelizzai-finish-task no\s+consumidor[\s\S]{0,60}nas duas estratégias de commit' 'execution-plans: o closure vale nas duas estratégias de commit'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/SKILL.md' 'commit de fechamento do cursor da pelizzai-finish-task' 'execution-plans não mantém o closure descrito como exclusivo do granular'
+
+    # -- F8: writegate descrito pelo que o hook FAZ (Regra A + Regra B), sem inventar gate --
+    # O hook nunca leu `isolation: <pending>`; e, por decisão do dono, ele NÃO enforça as etapas de
+    # aprovação do greenfield — elas continuam obrigatórias, mas vivem nas skills.
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'Regra A[\s\S]{0,200}kickoff: ratificado[\s\S]{0,80}Regra B' 'audit descreve o writegate pelas Regras A e B reais'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'NÃO enforça as etapas de aprovação do greenfield' 'audit: o writegate não é a catraca do greenfield'
+    Check-NotMatch '.claude/skills/pelizzai-audit/SKILL.md' 'enquanto o gate de isolamento continua' 'audit não descreve um gate de isolamento que o hook nunca checou'
+    Check-Match 'README.md' 'Regra A[\s\S]{0,160}kickoff: ratificado[\s\S]{0,60}Regra B' 'README descreve o writegate pelas Regras A e B reais'
+    Check-Match 'README.md' 'não enforça as etapas de aprovação do\s+greenfield' 'README: o writegate não é a catraca do greenfield'
+    Check-NotMatch 'README.md' 'enquanto o isolamento está' 'README não descreve um bloqueio por isolamento pendente'
+
     # -- Envelope de segurança dos hooks: cadence/session-start fail-open, nunca bloqueiam --
     $failOpenMjs = @('.claude/hooks/pelizzai-cadence.mjs', '.claude/hooks/pelizzai-session-start.mjs')
     $failOpenPs1 = @('.claude/hooks/pelizzai-cadence.ps1', '.claude/hooks/pelizzai-session-start.ps1')

@@ -584,8 +584,8 @@ ou doc pode mudar depois do seal.
   lacuna com 2–3 opções e a recomendada pela `pelizzai-interview-me`.
 - Fazer o subagente ler o arquivo do plano inteiro (cole o texto da tarefa).
 - Commit órfão só para mover o cursor DURANTE a execução (exceções legítimas: o registro de
-  phase: blocked do circuit breaker e o commit de fechamento do cursor da pelizzai-finish-task
-  no modo granular).
+  phase: blocked do circuit breaker e o closure metadata-only da pelizzai-finish-task no
+  consumidor — que acontece nas duas estratégias de commit).
 - Confiar no state.md sem validar contra o git ao retomar.
 - Escrita concorrente em `isolation: branch`, ou em paths que se sobrepõem dentro do worktree,
   tornando `--working-tree` impossível de escopar.

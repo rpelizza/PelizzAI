@@ -7,8 +7,9 @@ description: Overlay para construir um experimento descartável que responda uma
 
 ## Objetivo
 
-Comprar informação com o menor experimento possível. O protótipo existe para responder **uma
-pergunta**; quando a resposta aparece, ele termina.
+Um protótipo é **código descartável que responde a uma pergunta** — e a pergunta decide o formato.
+Comprar informação com o menor experimento possível: **uma** pergunta por protótipo; quando a
+resposta aparece, ele termina.
 
 **Anuncie:** "Usando PelizzAI Prototype para responder `<pergunta>` com um experimento descartável."
 

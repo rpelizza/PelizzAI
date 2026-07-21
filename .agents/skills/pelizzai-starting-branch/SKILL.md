@@ -1,6 +1,6 @@
 ---
 name: pelizzai-starting-branch
-description: Use antes do primeiro artefato de uma tarefa que poderá gerar commits. Descobre a base real do repositório, cria a branch de tarefa/planejamento e, após o plano, mantém a branch no working tree atual ou a move com segurança para um worktree. Nunca impõe develop nem trabalha em HEAD destacado/protegido.
+description: Use antes do primeiro artefato de uma tarefa que poderá gerar commits. Detecta workspace multi-projeto e confirma com o usuário o conjunto afetado, descobre a base real do repositório, cria a branch de tarefa/planejamento e, após o plano, mantém a branch no working tree atual ou a move com segurança para um worktree. Nunca impõe develop nem trabalha em HEAD destacado/protegido.
 ---
 
 # PelizzAI Starting Branch
@@ -18,6 +18,8 @@ o worktree é criado **dessa branch**, preservando os artefatos já produzidos.
 ```text
 - Uma tarefa = um repositório Git. Monorepo é um repositório; workspace multi-repo abre um
   state/registro de execução por repositório. Não esconda uma lista no campo project.
+- Workspace é detectado, nunca presumido: marcadores no cwd e um nível acima (§2). O conjunto de
+  projetos afetados é SEMPRE confirmado com o usuário; o `pelizzai/` é root-level do workspace.
 - base-ref e base-sha são resolvidos antes da primeira mudança e não mudam durante a tarefa.
 - branch é criada antes de spec/plano/código. Durante o planejamento, isolation pode ficar pending.
 - Worktree pós-plano reutiliza a branch existente; não cria uma branch vazia a partir da base.
@@ -43,7 +45,7 @@ escopo do pedido não identificar um deles sem ambiguidade, confirme **qual úni
 pertence à tarefa atual; abra tarefas separadas para os demais.
 
 HEAD vazio/destacado, rebase/merge em curso ou branch protegida (`main`, `master`, `develop`,
-`dev` **e o default real descoberto no §2**, como `trunk`) nunca é destino de commits. Se já houver mudanças, preserve-as criando a branch de tarefa a
+`dev` **e o default real descoberto no §3**, como `trunk`) nunca é destino de commits. Se já houver mudanças, preserve-as criando a branch de tarefa a
 partir do HEAD atual após confirmação. Se já houver commits indevidos na protegida, crie a branch
 de resgate e pare: entregue um handoff para o humano reconciliar a protegida. Não rode
 `reset --hard`, não force branch e não apague histórico.
@@ -53,7 +55,46 @@ quando a resposta e o registro disponível concordarem (`state.md` no consumidor
 nativo em source mode). Sem registro anterior, use a evidência de Git + titularidade explícita das
 mudanças; branch/sujeira ambígua não é adotada por palpite.
 
-## 2. Descobrir a base real
+## 2. Detectar workspace multi-projeto
+
+Uma tarefa continua pertencendo a **um** repositório Git (§1) — isso não muda. O que o harness
+precisa saber antes de criar qualquer coisa é se esse repositório vive dentro de um **workspace**:
+o workspace decide onde o `pelizzai/` mora e quais projetos o pedido realmente toca. Verifique os
+marcadores no cwd e um nível acima:
+
+```bash
+marcadores="package.json pnpm-workspace.yaml turbo.json lerna.json nx.json pyproject.toml Cargo.toml go.work"
+ls $marcadores 2>/dev/null             # cwd
+(cd .. && ls $marcadores 2>/dev/null)  # um nível acima
+find . -maxdepth 2 -name ".git"        # irmãos com repositório próprio (dir ou arquivo de worktree)
+```
+
+Havendo workspace ou múltiplos projetos:
+
+```text
+1. Infira da descrição da tarefa quais projetos são afetados (nome de diretório/pacote, menção a
+   frontend/backend/worker etc.). Inferir serve para montar a lista candidata, nunca para fechá-la.
+2. SEMPRE confirme com o usuário o conjunto afetado antes de prosseguir. O conjunto é decisão
+   dele: apresente a lista inferida com a recomendação e aguarde. Conjunto adivinhado é lacuna
+   material — vai para a `pelizzai-interview-me`, não para um default.
+3. Workspace de múltiplos repositórios Git: cada projeto afetado ganha isolamento próprio. Rode
+   §1 e §3–§8 de forma independente por repositório, e abra um registro de execução (state
+   consumidor ou execution record nativo) por repositório. Não esconda uma lista no campo `project`.
+4. Monorepo (um repositório Git, vários pacotes): o isolamento é único — uma branch cobre os
+   pacotes tocados. A confirmação do conjunto afetado continua valendo; ela delimita o escopo do
+   diff, não o número de branches.
+```
+
+O `pelizzai/` é **root-level do workspace**, não um por pacote: `domain-skills.md`, `profile.md` e
+`data/` vivem na raiz declarada dona dos artefatos — é essa raiz que a `pelizzai-audit` mapeia e é
+por ela que o hook de cadência localiza o ledger (ele resolve pelo `cwd` assumindo `pelizzai/` na
+raiz). Em workspace com múltiplos repositórios, um state escalar não cobre todos: ou se faz
+bootstrap por repo, ou se declara explicitamente a raiz dona.
+
+Nomes: use o mesmo `<tipo>/<slug>` em todos os projetos afetados, a menos que o usuário peça nomes
+específicos por projeto.
+
+## 3. Descobrir a base real
 
 Não use a preferência histórica `develop > dev > main`. Descubra o default do repositório:
 
@@ -106,7 +147,7 @@ base_sha=$(git rev-parse "$base_ref^{commit}")
 `base-ref` registra a ref efetivamente usada e `base-sha` registra o SHA completo. Se o fetch
 falhar, apresente a idade/limitação da ref local e peça confirmação; não finja que ela está atual.
 
-## 3. Nomear a branch de tarefa/planejamento
+## 4. Nomear a branch de tarefa/planejamento
 
 Depois de ratificar a base, derive `<tipo>/<slug-kebab>` (ASCII, minúsculo, até 50 caracteres).
 Apresente o nome recomendado com motivo e faça uma única pergunta: "Confirma este nome?". Só crie
@@ -122,7 +163,7 @@ a branch após resposta afirmativa. Não trave nome/base em silêncio. O tipo ve
 | tooling/config/deps | `chore`, `build` ou `ci` |
 | performance | `perf` |
 
-## 4. Abrir a branch antes do planejamento
+## 5. Abrir a branch antes do planejamento
 
 Para tracks com spec/plano, após base e nome ratificados, crie a branch no working tree atual
 **antes** de escrever esses artefatos. A escolha de manter branch ou mover para worktree continua
@@ -149,7 +190,7 @@ da entrega — se aparecer no pacote de review da Tarefa 1, é ruído conhecido,
 commit extra. Em source mode, não há state nem commit de setup; branch/worktree + execution record
 bastam.
 
-## 5. Aplicar o isolamento escolhido após o plano
+## 6. Aplicar o isolamento escolhido após o plano
 
 O nome e a base já foram ratificados antes da branch de planejamento. Se o usuário pedir renomear
 depois, use `git branch -m <novo-nome>` após confirmação; nunca `-M`. A base não é reescrita aqui.
@@ -193,14 +234,14 @@ git worktree add <caminho-fora-do-repo> <tipo>/<slug>
 O caminho fica fora da árvore do repositório. Se o ambiente bloquear a criação, informe e peça
 confirmação para permanecer em branch; não degrade em silêncio.
 
-## 6. Baseline proporcional
+## 7. Baseline proporcional
 
 Antes da implementação, rode a evidência de baseline apropriada ao artefato e ao perfil do projeto:
 suíte/teste focal para comportamento, characterization para legado, parser/dry-run para config,
 render/lint para docs e aplicação rodando para UI. Baseline falho é reportado antes da mudança; o
 usuário decide investigar ou prosseguir com a falha registrada.
 
-## 7. Estado e reporte
+## 8. Estado e reporte
 
 Em consumidor, o `state.md` final do setup contém:
 
@@ -226,6 +267,8 @@ material chama `pelizzai-recovery`, não heurística.
 - Escrever spec/plano na base e só depois criar uma branch vazia/worktree da base.
 - Criar worktree pós-plano com `-b` a partir da base, perdendo a branch de planejamento.
 - Recalcular base-sha no fechamento; ele é um snapshot do início.
+- Pular a detecção de workspace, ou fechar sozinho o conjunto de projetos afetados sem confirmar.
+- Espalhar um `pelizzai/` por pacote em vez de mantê-lo na raiz do workspace.
 - Misturar vários repositórios em um único state.
 - `git add -A`, stash, reset, force-delete ou limpeza automática para liberar o worktree.
 - Criar a branch antes de o usuário ratificar base e nome recomendados.

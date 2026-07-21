@@ -1,6 +1,6 @@
 ---
 name: pelizzai-improving-architecture
-description: Head skill read-only para revisão codebase-wide de arquitetura, dívida técnica e seams ausentes. Use quando o usuário pedir análise arquitetural ampla, o que vale refatorar ou quando debugging registrar uma lacuna estrutural. Entrega candidatos priorizados por evidência; não edita código, relatório, ADR ou out-of-scope. Review de diff/branch/PR usa pelizzai-review.
+description: Head skill read-only para revisão PROATIVA codebase-wide de arquitetura, dívida técnica e seams ausentes. Use periodicamente (a cada poucos dias de trabalho intenso no projeto), quando o usuário pedir análise arquitetural ampla ou o que vale refatorar, e quando debugging registrar uma lacuna estrutural. Entrega candidatos priorizados por evidência; não edita código, relatório, ADR ou out-of-scope. Review de diff/branch/PR usa pelizzai-review.
 ---
 
 # PelizzAI Improving Architecture
@@ -29,9 +29,14 @@ Consumidor usa os paths do harness; source mode usa paths nativos do repo e nunc
 
 ## Escopo
 
+Arquitetura degrada em silêncio: cada tarefa olha o próprio diff e ninguém olha o todo. Por isso o
+gatilho não é só o pedido do usuário — é também a **cadência**: a cada poucos dias de trabalho
+intenso no projeto, o harness oferece esta revisão. Oferecer é proativo; rodar e implementar
+continuam sendo escolha do usuário.
+
 Use para:
 
-- revisão ampla de arquitetura/dívida/seams;
+- revisão periódica ampla de arquitetura/dívida/seams;
 - fricção recorrente sustentada por bugs, mudanças ou navegação reais;
 - seam ausente que impediu uma regressão útil.
 
@@ -40,7 +45,7 @@ Não use para:
 - bug ativo (`pelizzai-debugging`);
 - review de diff, working tree, branch ou PR (`pelizzai-review`);
 - implementar um refactor já decidido (lane/plano do router);
-- varredura periódica sem pedido ou sinal concreto.
+- interromper uma tarefa em andamento: a oferta periódica espera a tarefa fechar.
 
 ## Processo adaptativo
 

@@ -46,8 +46,15 @@ Pré-condições, erros relevantes e como observar/corrigir.
 ## Validação e lifecycle
 
 Valide links, exemplos, snippets e build/render aplicáveis. A doc é conteúdo da entrega: consolide
-pela commit-strategy da head skill **antes** do review final e de `validated-head`. Commit próprio é
-opção quando melhora o histórico, não obrigação. Qualquer correção reabre as provas afetadas.
+pela commit-strategy da head skill **antes** do review final e de `validated-head`. Qualquer
+correção reabre as provas afetadas.
+
+A doc entra em **commit próprio** — `docs(<feature>): <descrição>` —, nunca misturada ao commit de
+código: separar doc de código é higiene de histórico, não preferência. Em `commit-strategy:
+granular` é o commit definitivo da doc; em `squash-final` é o WIP `docs(...)` que a head skill
+consolida junto aos demais **antes** do review final. Vale o gate de branch protegida de
+`pelizzai-starting-branch`: nunca commite em `main`/`master`/`develop`/`dev` nem no default real
+descoberto.
 
 Finish-task nunca gera nem corrige documentação: depois do seal é tarde para escrever ali. O que ela
 faz é a checagem-rede — se uma superfície documentável passou sem esta skill, ela oferece **uma vez**
@@ -62,7 +69,8 @@ normal, que é rodar aqui antes do review final.
 - Criar docs humanas dentro de pelizzai/.
 - Exemplo que não foi validado.
 - Duplicar documentação canônica já existente.
-- Deixar doc dangling ou criá-la depois do seal.
+- Deixar a doc sem commit próprio: dangling na working tree, ou diluída no commit de código.
+- Criá-la depois do seal.
 ```
 
 ## Integração

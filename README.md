@@ -474,10 +474,12 @@ PelizzAI/
 Os hooks são redes de segurança, não o cérebro do harness. Os arquivos `.mjs` rodam com Node em
 Windows, macOS e Linux; os `.ps1` ficam como fallback Windows. Guardrails bloqueiam comandos Git
 destrutivos conhecidos; o writegate opt-in é um `PreToolUse` fail-closed que barra escrita de produto
-em branch protegida/destacada ou enquanto o isolamento está `<pending>`, movendo o invariante "isolar
-antes da primeira escrita" da obediência do modelo para enforcement executável. Erros internos de
-qualquer hook são fail-open para não sequestrar a ferramenta. Cadence e SessionStart apenas lembram
-contexto quando instalados com consentimento.
+em branch protegida/destacada (Regra A) e, no consumidor, enquanto `kickoff: ratificado` não estiver
+gravado no `state.md` (Regra B), movendo o invariante "isolar antes da primeira escrita" da
+obediência do modelo para enforcement executável. O hook não enforça as etapas de aprovação do
+greenfield — esse gate é conduzido pelas skills, com o usuário. Erros internos de qualquer hook são
+fail-open para não sequestrar a ferramenta. Cadence e SessionStart apenas lembram contexto quando
+instalados com consentimento.
 
 ## Desenvolvimento do harness
 

@@ -247,7 +247,7 @@ efeito de cada um. Não reabra a oferta quando o check passar:
   ativa no `state.md` e recapitula a política de execução já ratificada — valor maior no `clear` e
   em plataformas que não re-injetam a entrada sempre-carregada.
 - **Writegate** (`pelizzai-writegate.mjs`/`.ps1`, `PreToolUse` nos matchers
-  `Write|Edit|MultiEdit|NotebookEdit` **e** `Bash`): rede de segurança fail-closed que bloqueia escrita de produto em branch protegida/destacada ou enquanto o gate de isolamento continua `<pending>` em `pelizzai/data/state.md` — move o invariante "isolamento antes da primeira escrita" da obediência do modelo para enforcement executável; fail-open em qualquer erro do próprio hook (sempre exit 0 quando não pode decidir).
+  `Write|Edit|MultiEdit|NotebookEdit` **e** `Bash`): rede de segurança fail-closed que bloqueia escrita de produto em branch protegida/destacada (Regra A) e, no consumidor, enquanto `kickoff: ratificado` não estiver gravado em `pelizzai/data/state.md` (Regra B — pulada em source mode, onde o marcador vive no execution record nativo) — move o invariante "isolamento antes da primeira escrita" da obediência do modelo para enforcement executável. Ele NÃO enforça as etapas de aprovação do greenfield: o menu de kickoff continua sendo do harness, não do hook. Fail-open em qualquer erro do próprio hook (sempre exit 0 quando não pode decidir).
 
 Só edite settings depois da confirmação, e respeite a granularidade da resposta:
 `node scripts/install-hooks.mjs` registra o conjunto PelizzAI inteiro (e `--remove` tira o conjunto
