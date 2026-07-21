@@ -1,6 +1,6 @@
 ---
 name: pelizzai-finish-task
-description: Use depois que overlays, consolidação e validação final selaram o conteúdo em validated-head. No consumidor, encerra a tarefa em phase delivered com um commit metadata-only de state.md (done é constatação posterior, não aqui); no repo-fonte, valida o seal sem criar runtime/closure. Mantém local por default ou publica/abre PR com autorização. Nunca altera conteúdo ou histórico depois do seal.
+description: Use depois que overlays, consolidação e validação final selaram o conteúdo em validated-head. Antes do destino, checa como rede de segurança se segurança, UI ou documentação ficaram descobertas e oferece — sem bloquear — devolver a entrega ao ciclo. No consumidor, encerra a tarefa em phase delivered com um commit metadata-only de state.md (done é constatação posterior, não aqui); no repo-fonte, valida o seal sem criar runtime/closure. Mantém local por default ou publica/abre PR com autorização. Nunca altera conteúdo ou histórico depois do seal.
 ---
 
 # PelizzAI Finish Task
@@ -8,7 +8,10 @@ description: Use depois que overlays, consolidação e validação final selaram
 ## Objetivo
 
 Integrar **o conteúdo que foi validado**, sem uma última rodada oculta de mutações. Squash,
-security, frontend, documentação, fixes e testes pertencem ao fluxo anterior. Esta skill encerra em
+security, frontend, documentação, fixes e testes pertencem ao fluxo anterior e esta skill não
+executa nenhum deles. O que ela faz antes de qualquer destino é uma **checagem-rede** (§1.5): se a
+superfície tocada passou sem o overlay correspondente, ela oferece uma vez devolver a entrega ao
+ciclo — sem bloquear e sem remendar depois do seal. Esta skill encerra em
 `phase: delivered` (conteúdo selado + destino executado) e grava `confirmar:`; `done` é constatação
 posterior, na próxima abertura/retomada — nunca declarado aqui. Esta skill:
 
@@ -42,6 +45,8 @@ As seções de state/closure abaixo são exclusivas do projeto consumidor.
 - A única sujeira permitida é pelizzai/data/state.md com o seal ainda não commitado.
 - Depois do seal, não roda squash/rebase/reset, overlay, formatter, codegen, teste que escreva
   snapshot, doc generator nem fix.
+- Lacuna de cobertura (segurança, UI, documentação) vira oferta explícita no §1.5, nunca silêncio;
+  aceitá-la devolve a tarefa ao ciclo de validação, nunca vira patch pós-seal.
 - O único commit novo toca somente pelizzai/data/state.md.
 - Manter local é a recomendação padrão, mas também exige resposta no gate. Push/PR, remover
   worktree e descarte exigem decisão explícita por tarefa: nunca são aplicados a partir de um
@@ -71,7 +76,9 @@ Pare e volte ao fluxo que valida quando qualquer item falhar:
 - mudança staged;
 - arquivo alterado/untracked diferente de `pelizzai/data/state.md`;
 - evidência de review/checklist/verification anterior ao último fix;
-- overlay aplicável ainda pendente.
+- overlay registrado em `overlays:` que nunca rodou — o plano prometeu e não cumpriu; volte e
+  execute lá. Superfície tocada que ninguém chegou a registrar **não** para aqui: ela cai na rede
+  do §1.5, que oferece em vez de bloquear.
 
 Se `commit-strategy: squash-final`, confirme que a consolidação ocorreu **antes** do seal (em
 geral, um commit de conteúdo no range `base-sha..validated-head`). Não tente corrigir o histórico
@@ -79,6 +86,59 @@ aqui; volte à `pelizzai-execution-plans` e revalide o novo candidato.
 
 Se houver commits indevidos numa branch protegida, preserve-os criando uma branch de resgate e
 pare. Entregue instruções manuais para reconciliar a protegida; não faça reset automático.
+
+## 1.5. Rede de segurança de cobertura (oferta — não bloqueia)
+
+Overlay é responsabilidade do router e do plano e roda **na execução**, antes do review final e de
+`validated-head`; esta seção não o traz para cá. Ela é a **última rede**: pega a superfície que
+escapou da classificação lá atrás. Rode-a uma vez, com o gate do §1 verde e antes de oferecer o
+destino.
+
+Cruze o diff fechado com a cobertura registrada — `overlays:` no state (em source mode, no execution
+record) mais a evidência da validação final:
+
+```bash
+git diff --name-only <base-sha>..<validated-head>
+```
+
+Classifique cada superfície como COBERTA ou DESCOBERTA:
+
+```text
+- Segurança     → pelizzai-oswap: auth/autorização, input não confiável, SQL/query, segredo, dado
+                  sensível, upload, desserialização, CORS/SSRF, header, dependência nova.
+- UI            → pelizzai-frontend: componente, página, rota de tela, estilo, estado visual.
+- Documentação  → pelizzai-documenting-features: nova superfície estável para humanos — rota,
+                  comando, API pública, tela.
+```
+
+**Coberta: não pergunte.** Overlay registrado e com evidência na validação final está resolvido;
+repetir a pergunta no fechamento é ruído e desautoriza o trabalho já feito.
+
+**Descoberta: ofereça UMA vez**, uma pergunta por superfície, na ordem segurança → UI →
+documentação, com o custo na mesa:
+
+```text
+O diff toca <superfície concreta> e nenhum overlay de <área> cobriu esta entrega.
+
+Rodar `<skill>` agora é tardio: o seal cai e o conteúdo volta ao ciclo (overlay →
+consolidação → review final → novo validated-head), o que atrasa a entrega. Ainda assim
+é melhor tarde do que entregar descoberto.
+
+Rodar agora, ou seguir para o destino assumindo a lacuna?
+```
+
+- **Aceito:** não rode o overlay aqui nem crie commit corretivo depois do seal. Grave
+  `validated-head: <none>` (source mode: no execution record, sem criar `pelizzai/`), anote a
+  superfície em `## Progresso` → `pending` e devolva a tarefa à
+  `pelizzai-execution-plans` → **Validação final da entrega**, passo 1 (rodar overlays). O conteúdo
+  corrigido é reconsolidado, revisado e selado de novo, e só então volta a esta skill. "O conteúdo
+  entregue é exatamente o conteúdo validado" não se negocia por pressa.
+- **Recusado:** siga para o §2a sem insistir. Registre a lacuna assumida em uma linha (`pending`) e
+  repita-a no relatório do destino — recusa informada é decisão do usuário; silêncio seria falha do
+  harness.
+
+Sob briefing fechado (SUBAGENT-STOP), não abra a oferta: reporte a superfície descoberta ao
+coordenador e siga o briefing.
 
 ## 2. Resolver o destino e selar o closure (`delivered`)
 
@@ -230,8 +290,13 @@ reconcilia (`done` + `history/`) antes de sobrescrever.
 No consumidor, após o destino, sem bloquear nem alterar a entrega — tudo aqui é propor-confirmar e
 ação do coordenador; um membro de time apenas sinaliza a lacuna no relatório:
 
-- **Cadência vencida:** verifique o ledger de domain skills. Se os limiares documentados em
-  `pelizzai-writing-skills` estiverem vencidos, sugira a revisão uma vez.
+- **Cadência vencida:** este é o **disparo primário** da cadência de skills de domínio — o hook do
+  Claude Code é só rede de segurança. Verifique no ledger `pelizzai/data/review-domain-skills.md` os
+  **dois** gatilhos: (a) revisão — commits desde `last-review` ou dias decorridos; (b) repo-scan
+  completo desde `last-full-scan`. Limiares em `pelizzai-writing-skills` →
+  `references/domain-skill-maintenance.md`. Qualquer um vencido → sugira **uma vez** acionar a
+  `pelizzai-writing-skills` em modo manutenção, dizendo qual gatilho venceu. Abaixo dos limiares,
+  não diga nada; se o usuário adiar, não repita na mesma sessão.
 - **Adoção de stack nova (adoption-driven):** cheque no range fechado desta tarefa
   (`git diff <base-sha>..<validated-head>` sobre manifests/lockfiles) se uma dependência ou serviço
   significativo foi adotado sem domain skill cobrindo. Se sim, proponha UMA vez criar a skill,
@@ -251,7 +316,9 @@ Source mode, ou sem hook e sem ledger: no-op silencioso.
 ## Red flags
 
 ```text
-- Oferecer OWASP/frontend/docs aqui; já é tarde, volte e revalide.
+- Entregar superfície sensível, de UI ou documentável sem overlay e sem a oferta do §1.5.
+- Rodar aqui o overlay aceito, ou remendar com fix/doc depois do seal, em vez de devolver ao ciclo.
+- Repetir no fechamento a oferta de um overlay que já rodou na execução.
 - Declarar `phase: done` aqui (finish-task encerra em `delivered`; `done` é constatação posterior).
 - Squash/reset/rebase/amend depois de validated-head.
 - `git add -A` no closure commit.
@@ -267,4 +334,6 @@ Source mode, ou sem hook e sem ledger: no-op silencioso.
 depois de seus overlays e validação gravarem `validated-head`.
 
 **Combina com:** `pelizzai-starting-branch`, `pelizzai-verification-before-completion`,
-`pelizzai-review`, `pelizzai-recovery` e `pelizzai-resolving-merge-conflicts`.
+`pelizzai-review`, `pelizzai-recovery` e `pelizzai-resolving-merge-conflicts`. A rede do §1.5 aponta
+para `pelizzai-oswap`, `pelizzai-frontend` e `pelizzai-documenting-features` — sempre pelo retorno à
+`pelizzai-execution-plans`, nunca executando o overlay dentro desta skill.

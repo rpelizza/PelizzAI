@@ -1,8 +1,10 @@
 # Manutenção de skills de domínio — mecânica detalhada
 
 Como o PelizzAI mantém as skills de domínio vivas conforme o projeto evolui, com hook opt-in
-somente quando o projeto o autorizou. Este documento descreve a manutenção **proativa**; uma edição
-pedida explicitamente pelo usuário já tem autorização local e segue o fluxo direto da SKILL.md.
+somente quando o projeto o autorizou. Este documento descreve a manutenção **proativa**: a detecção
+e a proposta. Uma edição pedida explicitamente pelo usuário dispensa a proposta de cadência, mas
+**não** dispensa a trava anti-sobrescrita — ler a skill atual, mudar só o necessário e mostrar o
+diff antes de gravar vale nos dois casos.
 
 ## Os três eixos de manutenção
 
@@ -10,7 +12,7 @@ Dois eixos **atualizam** skills que já existem; um eixo **cria** a primeira ski
 
 | Eixo                | Disparo                                                              | Ação                                                              |
 | ------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| **Version-driven**  | A versão maior de um item do Stack baseline mudou nos manifests      | Reler a documentação oficial atual e **atualizar** a skill existente (refresh) |
+| **Version-driven**  | A versão maior de um item do Stack baseline mudou nos manifests      | Reler a doc da versão atual (`context7`) e **atualizar** a skill existente (refresh) |
 | **Rework-driven**   | O mesmo ajuste foi feito à mão várias vezes no histórico do git      | O padrão repetido vira uma **regra** dentro da skill existente    |
 | **Adoption-driven** | A tarefa adotou dependência/serviço significativo AINDA NÃO coberto por skill do catálogo (top-level novo nos manifests/lockfiles, ausente do Stack baseline de `pelizzai/profile.md` E do catálogo) | **PROPOR CRIAR** a primeira skill dessa stack, fundamentada em context7 ou documentação oficial atual da versão travada — não apenas atualizar |
 
@@ -20,20 +22,21 @@ Os três são **opt-in**: o harness detecta, **propõe**, o usuário decide. Nun
 
 ```text
 1. Detecte o drift: compare as versões atuais (manifests, lockfiles) com as registradas no ledger/skill e com o **Stack baseline** de `pelizzai/profile.md` (gravado no bootstrap pela `pelizzai-audit`).
-2. Releia a documentação oficial da versão atual pela ferramenta disponível.
+2. Releia a doc da versão atual via `context7` (sem ele, documentação oficial atual — nunca memória).
 3. Atualize a skill afetada em modo refresh (ver "Refresh nunca sobrescreve às cegas").
 4. Registre no ledger (eixo = version-driven, novo commit/ref, data).
 ```
 
 ### Adoption-driven (criar do manifest)
 
-Version-driven e rework-driven só **atualizam** o que já existe. Adoption-driven é o único eixo que **cria** — restaura a criação incremental que acompanha a evolução real da stack, sem voltar ao "máximo" do bootstrap antigo (que mirava criar o máximo de skills). Ele só dispara quando uma stack nova, significativa e não coberta entra no projeto.
+Version-driven e rework-driven só **atualizam** o que já existe. Adoption-driven é o único eixo que **cria** fora do bootstrap: ele acompanha a evolução real da stack entre um repo-scan e outro, criando a primeira skill de uma tecnologia que entrou depois. Só dispara quando uma stack nova, significativa e não coberta entra no projeto.
 
 ```text
 1. Detecte a adoção: o diff dos manifests/lockfiles desde `last-review` mostra um top-level novo,
    ausente do **Stack baseline** de `pelizzai/profile.md` E do catálogo `pelizzai/domain-skills.md`.
 2. Filtre por alavancagem: só proponha para tecnologia externa significativa (framework, ORM/dados,
-   auth, pagamentos, fila/infra sensível). Utilitário trivial não vira skill (mantém "menor conjunto").
+   auth, pagamentos, fila/infra sensível). Utilitário trivial não vira skill — o filtro aqui é
+   alavancagem real, não escassez.
 3. No FECHAMENTO da tarefa (nudge read-only da `pelizzai-finish-task`), apresente UMA proposta
    agrupada — nunca um gate por tarefa: "A tarefa adotou <lib@versão do lockfile>, sem domain skill
    cobrindo. Criar uma agora, fundamentada em context7 ou documentação oficial atual?
@@ -65,13 +68,15 @@ Regra inegociável ao atualizar uma skill **existente**:
 - LEIA a skill atual antes de qualquer mudança.
 - Mude SÓ o que a nova versão/padrão exige.
 - PRESERVE as customizações que o projeto adicionou (não recrie do zero por cima).
-- MOSTRE a proposta/diff ao usuário antes de aplicar a atualização proativa.
-- Aprovação é POR skill. Sem confirmação, não grava.
+- MOSTRE o diff ao usuário ANTES de gravar.
+- Aprovação é POR skill — nunca em lote, nunca herdada do "sim" dado a outra skill.
+  Sem confirmação, não grava.
 ```
 
-Recriar uma skill do zero por cima de uma existente apaga customizações e é proibido. Neste fluxo
-proativo: **propor → confirmar → aplicar → registrar**. Em pedido explícito, inspecione → edite no
-escopo → valide → mostre o diff, sem pedir novamente a mesma autorização.
+Recriar uma skill do zero por cima de uma existente apaga customizações e é proibido. O fluxo é
+sempre **propor → confirmar → aplicar → registrar**. Não existe modo "mãos livres" (foi tentado no
+harness anterior e reprovou em campo). Numa edição que o usuário já pediu, a proposta É o diff:
+mostre-o antes de gravar, no escopo pedido, sem reabrir a autorização que ele acabou de dar.
 
 ## Cadência (gatilhos)
 
@@ -79,8 +84,9 @@ Modelo **híbrido**: núcleo portável na skill + hook de reforço no Claude Cod
 
 ### Núcleo portável (ao fechar a tarefa)
 
-Vale nos roots de skill ativos (`.claude`/`.agents`); Cursor é apenas adaptador. Este bloco é
-referenciado pela `pelizzai-finish-task` no nudge read-only e não bloqueia o fechamento. O hook
+Vale nos roots de skill ativos (`.claude`/`.agents`); Cursor é apenas adaptador. Este bloco é o
+**disparo primário** da cadência: a `pelizzai-finish-task` o consome no nudge read-only do
+fechamento (§5), um marco natural que não interrompe o fluxo nem bloqueia a entrega. O hook
 (Claude Code) é apenas rede de segurança, a cada 10 interações. Ao concluir uma tarefa que mexeu
 em código:
 

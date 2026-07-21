@@ -362,6 +362,27 @@ try {
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'ANTES da Tarefa 1' 'writing-plans: a cobertura de domain skills é decidida antes da Tarefa 1'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'Quem invoca este gate' 'audit nomeia quem invoca o Gate proativo (brainstorming + writing-plans)'
 
+    # -- F3: capacidade máxima — modelo/effort são invariantes, nunca variável de economia --
+    # Restauração do estado pré-11/07 (decisão do usuário, 2026-07-21): proporcionalidade governa a
+    # profundidade do PROCESSO (entrevista, TDD, perfil de review, overlays), jamais a capacidade do
+    # modelo. Arquitetura, as duas lentes, o review final e a validação final da entrega são o topo.
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'modelo mais capaz[\s\S]{0,60}effort máximo' 'review final exige modelo mais capaz e effort máximo'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'passo 1 da[\s\S]{0,40}validação final da entrega' 'review final é o passo 1 da validação final da entrega'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Rebaixar modelo ou effort num review' 'review: anti-padrão nomeia o rebaixamento de modelo/effort'
+    Check-NotMatch '.claude/skills/pelizzai-review/SKILL.md' 'não force effort máximo|capacidade/effort proporcionais' 'review não reintroduz capacidade proporcional'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'modelo mais capaz disponível e effort máximo' 'validação final da entrega roda no topo de capacidade'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'rebaixar modelo/effort para economizar' 'execution-plans: o anti-padrão é rebaixar, não maximizar'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/SKILL.md' 'forçar effort máximo numa tarefa mecânica|capacidade proporcional ao risco' 'execution-plans não trata effort máximo como excesso'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Seleção de modelo por papel' 'task-cycle §8 é seleção de modelo por papel (não capacidade por risco)'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'modelo mais capaz disponível[\s\S]{0,60}effort/reasoning no nível máximo' 'task-cycle §8 fixa modelo e effort no topo'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'nunca rebaixe modelo nem effort' 'task-cycle §8 proíbe rebaixar modelo ou effort'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Arquitetura, os reviews[\s\S]{0,120}inegociavelmente o topo' 'task-cycle §8: arquitetura, reviews e validação final são o topo'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'nunca em capacidade do modelo' 'task-cycle §8: proporcionalidade é de processo, não de capacidade'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'o modelo já é o topo' 'task-cycle: escalada do BLOCKED não passa por subir modelo'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Capacidade por risco e papel|capacidade e effort \*\*proporcionais\*\*|aumente capacidade' 'task-cycle §8 não volta a ser capacidade proporcional'
+    Check-Match 'CLAUDE.md' 'modelo e effort não' 'CLAUDE.md: modelo e effort não variam com risco'
+    Check-Match 'README.md' 'modelo mais capaz disponível e effort máximo' 'README: review final no topo de capacidade'
+
     # -- Envelope de segurança dos hooks: cadence/session-start fail-open, nunca bloqueiam --
     $failOpenMjs = @('.claude/hooks/pelizzai-cadence.mjs', '.claude/hooks/pelizzai-session-start.mjs')
     $failOpenPs1 = @('.claude/hooks/pelizzai-cadence.ps1', '.claude/hooks/pelizzai-session-start.ps1')
@@ -633,8 +654,11 @@ try {
         }
     }
 
-    $sessionHooks = (Text '.claude/hooks/pelizzai-session-start.mjs') + (Text '.claude/hooks/pelizzai-session-start.ps1')
-    Check (-not [regex]::IsMatch($sessionHooks, 'regra do 1%')) 'hook de sessão não reintroduz regra do 1%'
+    # Regra do 1% restaurada por decisão do usuário (2026-07-21): o hook de sessão a reafirma no
+    # startup, nas duas variantes, junto com o bloco EXTREMELY-IMPORTANT da pelizzai-core.
+    foreach ($sh in @('.claude/hooks/pelizzai-session-start.mjs', '.claude/hooks/pelizzai-session-start.ps1')) {
+        Check-Match $sh 'regra do 1%' "hook de sessão reafirma a regra do 1% ($(Split-Path -Leaf $sh))"
+    }
 
     # Guardrails equivalentes: somente classificam strings, nenhum comando Git é executado.
     $hooks = @(
@@ -642,17 +666,25 @@ try {
         (Join-Path $root '.claude/hooks/pelizzai-guardrails.ps1')
     )
     $safe = @('git status', 'Git push --force-with-lease origin topic', 'git restore --staged .', 'git restore -S file.txt', 'git branch -d merged', 'git branch -m old new')
+    # Fora do escopo ESTREITO do hook — passam DE PROPÓSITO. O hook mira o punhado de comandos que
+    # apagam trabalho de forma irrecuperável; regra larga trava trabalho legítimo e ensina o agente a
+    # contornar a rede de segurança. Estas fixtures existem para que o estreitamento seja deliberado
+    # e visível: se alguém voltar a alargar o matcher, elas quebram e a decisão volta ao usuário.
+    $safeByDesign = @(
+        'git push origin +HEAD:main', 'git push origin +main', 'git push origin --delete topic',
+        'git push origin :topic', 'git checkout -f topic', 'git checkout -B topic main',
+        'git checkout -- file.txt', 'git branch --delete --force topic', 'git branch -M main',
+        'git restore file.txt', 'git restore -SW file.txt',
+        'git commit -m "fix: restore layout"', 'git add src/restore.ts', 'git log --grep=restore'
+    )
     $blocked = @(
-        'git push -f origin topic', 'Git reset --hard', 'git push origin +HEAD:main',
-        'git push origin +main', 'git push origin --delete topic', 'git push origin :topic',
-        'git checkout -f topic', 'git checkout -B topic main', 'git checkout -- file.txt',
-        'git switch -C topic', 'git branch --delete --force topic', 'git branch -M old new',
-        'git clean -fd', 'git restore .', 'git restore file.txt', 'git restore -SW file.txt',
-        'git worktree remove --force ../topic'
+        'git push -f origin topic', 'Git reset --hard', 'git switch -C topic',
+        'git clean -fd', 'git restore .', 'git checkout .', 'git checkout -- .',
+        'git branch -D topic', 'git worktree remove --force ../topic'
     )
     foreach ($hook in $hooks) {
         $label = Split-Path -Leaf $hook
-        foreach ($command in $safe) {
+        foreach ($command in ($safe + $safeByDesign)) {
             $exit = Invoke-Guardrail $hook $command
             Check ($exit -eq 0) "$label permite: $command" "exit $exit"
         }

@@ -1,13 +1,27 @@
 ---
 name: pelizzai-audit
-description: Mapeia um projeto para o harness PelizzAI em dois modos. Use `scan-only` para análises/reviews read-only sem criar arquivos; use `bootstrap-write` quando o usuário pedir bootstrap/remapeamento persistente ou autorizar preparar catálogo, profile e skills de domínio. Não execute bootstrap consumidor no repo-fonte do próprio PelizzAI.
+description: Bootstrap do harness e mapeamento do projeto, em dois modos. É ela que inicializa o PelizzAI num projeto ou workspace — acione-a no PRIMEIRO contato do usuário com o harness, quando ele digitar "bootstrap", "remapear", "reescanear" ou "reinicializar", e sempre que o harness ainda não tiver sido inicializado aqui (sem `pelizzai/domain-skills.md`). Use `scan-only` para análises/reviews read-only sem criar arquivos; use `bootstrap-write` quando o usuário autorizar preparar catálogo, profile e skills de domínio. Pergunta puramente conceitual não a dispara. Não execute bootstrap consumidor no repo-fonte do próprio PelizzAI.
 ---
 
 # PelizzAI Audit
 
+<FIRST-TIME-USING-PELIZZAI>
+Na **primeira vez** que o usuário interagir com o harness PelizzAI neste projeto, ou sempre que ele
+digitar **"bootstrap"**, esta skill **PRECISA** ser invocada antes de qualquer trabalho — no mínimo
+em `scan-only`. Sem este mapeamento, o harness atua às cegas.
+
+O harness está inicializado neste projeto quando existe o arquivo `pelizzai/domain-skills.md`. Se
+ele **não** existe, trate como primeira vez: mapeie e PROPONHA o bootstrap ativamente, sem esperar o
+usuário descobrir que ele existe. Invocar é obrigatório; **escrever continua dependendo da resposta
+do usuário** (ver *Escolher o modo*).
+</FIRST-TIME-USING-PELIZZAI>
+
 ## Objetivo
 
-Descobrir apenas o contexto que muda decisões do agente e, quando autorizado, materializá-lo num bootstrap pequeno, versionável e portátil.
+Mapear o contexto de trabalho para que o harness atue com precisão — o que é o projeto (único ou
+workspace, novo ou existente), com que é construído, o que já existe de infraestrutura — e, quando
+autorizado, converter cada descoberta em artefato útil: as skills de domínio e a documentação que
+tornam o agente assertivo. Bootstrap versionável e portátil, nunca relatório por si só.
 
 **Anuncie:** "Usando a skill PelizzAI Audit em modo `<scan-only|bootstrap-write>` para mapear o projeto proporcionalmente."
 
@@ -64,7 +78,7 @@ encher o inventário.
 Ao terminar scan-only:
 
 - entregue a análise solicitada;
-- nas bordas design→plano e plano→execução, PUXE proativamente a proposta do menor conjunto de domain skills (não espere o usuário digitar `bootstrap`) — ver **Gate proativo de domain skills**; peça consentimento uma vez;
+- nas bordas design→plano e plano→execução, PUXE proativamente a proposta de domain skills (não espere o usuário digitar `bootstrap`) — ver **Gate proativo de domain skills**; peça consentimento uma vez;
 - não crie placeholders para "preparar depois".
 
 ## Gate proativo de domain skills (bordas design→plano e plano→execução)
@@ -76,7 +90,7 @@ usuário digitar `bootstrap`:
 - **design→plano (projeto novo):** após spec/design aprovados, detecte a stack escolhida; proponha
   domain skills fundamentadas em `context7`/doc oficial antes do plano. O plano não começa enquanto
   o usuário não escolher criar, reduzir, adiar ou registrar zero skills.
-- **plano→execução (projeto existente):** antes de fixar a lane de build, se a stack de uma tarefa mutável não está coberta pelo catálogo (ausente, OU presente mas sem cobrir aquela stack), proponha o conjunto mínimo que evitaria erro do agente.
+- **plano→execução (projeto existente):** antes de fixar a lane de build, se a stack de uma tarefa mutável não está coberta pelo catálogo (ausente, OU presente mas sem cobrir aquela stack), proponha todas as domain skills que cobririam essa lacuna e evitariam erro do agente.
 
 **Quem invoca este gate (não é só auto-serviço da audit):** `pelizzai-brainstorming` o aciona na
 borda design→plano, como passo numerado do fechamento da borda de design; `pelizzai-writing-plans` o
@@ -106,6 +120,26 @@ Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra ga
 
 **Source mode** (repo-fonte PelizzAI): este gate NÃO roda; regras de domínio, se houver, ficam no execution record nativo.
 
+## Fluxo lógico do bootstrap
+
+```mermaid
+flowchart TD
+    Start([Primeiro contato OU bootstrap]) --> Mode{O pedido muta arquivos?}
+    Mode -- Nao --> Scan[scan-only: inventario do contexto\nteam/subagents so quando compensar]
+    Scan --> Gate[Gate proativo de domain skills:\nrecomenda; o usuario ratifica]
+    Mode -- Sim, autorizado --> Iso[pelizzai-starting-branch:\nisola antes da primeira escrita]
+    Gate -- ratificado --> Iso
+    Iso --> Inv[Inventario: estrutura, stacks,\nMCPs, git/host, skills, convencoes]
+    Inv --> New{Projeto novo ou existente?}
+    New -- Novo --> Bra[pelizzai-interview-me + pelizzai-brainstorming:\ndescoberta, spec, stress, aprovacao]
+    Bra --> Wri
+    New -- Existente / Workspace --> Rep[Repo-scan completo:\npadroes, stacks, frameworks, convencoes]
+    Rep --> Wri[pelizzai-writing-skills:\ncria o maximo de skills de dominio\ncom context7 + regras Anthropic]
+    Wri --> Doc[Artefatos do harness: domain-skills.md\ncatalogo + ledger + profile.md]
+    Doc --> Rec[Recomendacoes: git init, remoto,\nMCPs da stack, context7, hooks opt-in]
+    Rec --> End([Harness pronto para atuar])
+```
+
 ## Bootstrap-write
 
 ### 1. Isolar antes de escrever
@@ -130,20 +164,34 @@ canonical-skill-root: <root ativo>
 
 `pelizzai-writing-skills` escreve domain skills no root ativo; se ambos estiverem instalados, mantém cópias byte a byte e verifica paridade.
 
-### 3. Selecionar o menor conjunto de domain skills
+### 3. Propor o máximo de domain skills úteis
 
-Crie uma candidata somente quando todos forem verdadeiros:
+Em projeto existente ou workspace, faça antes o **repo-scan completo** — padrões, stacks, frameworks,
+linguagens, convenções e pontos de extensão. Dos padrões observados sai a proposta:
+o **máximo de skills de domínio úteis** para o agente trabalhar corretamente neste projeto.
+Cobertura ampla é o alvo; o filtro é "útil", não "pouco". `pelizzai-writing-skills` redige cada
+candidata fundamentada no MCP `context7` (documentação real das libs/frameworks na versão travada no
+manifest) e nas regras de criação de skills da Anthropic.
+
+Sinais que aumentam a confiança numa candidata — critérios de qualidade, para ordenar a proposta e
+guiar a redação, **nunca uma porta conjuntiva** que veta candidatas:
 
 ```text
 - existe padrão/invariante recorrente e específico deste projeto;
-- ele não está suficientemente coberto por instruções/skill existentes;
 - carregá-lo mudaria uma decisão ou evitaria erro real do agente;
-- há evidência no repo, design aprovado ou documentação oficial.
+- há evidência no repo, design aprovado ou documentação oficial que a fundamente;
+- ainda não está coberto por instruções/skill existentes — cobertura parcial vira recorte
+  complementar, não motivo para descartar.
 ```
 
-Zero domain skills é um resultado possível QUANDO ratificado pelo usuário diante da proposta — a decisão de não criar é do usuário, não do classificador. Em muitos projetos, 1–3 bastam. Não crie uma skill por pasta, ferramenta ou responsabilidade genérica.
+Candidata com poucos sinais entra mais abaixo na ordem, com o motivo em uma linha — não é descartada
+em silêncio. O que evita ruído é o valor de cada skill, não um teto de quantidade: skill por pasta,
+arquivo ou ferramenta genérica não é cobertura. A proposta cresce com os padrões reais do projeto,
+não com a árvore de diretórios.
 
-Apresente SEMPRE as candidatas (nome + erro que evitam) e aguarde confirmação antes de redigi-las — a proposta é apresentada mesmo quando o conjunto recomendado é pequeno ou vazio. Para stack/lib externa, a skill deve ser fundamentada em `context7` ou documentação oficial atual da versão travada; para regras internas observadas no repo, `context7` é preferencial, não um bloqueio.
+Zero domain skills é um resultado possível QUANDO ratificado pelo usuário diante da proposta — a decisão de não criar é do usuário, não do classificador.
+
+Apresente SEMPRE as candidatas (nome + erro que evitam) e aguarde confirmação antes de redigi-las — a proposta é apresentada por inteiro, inclusive quando o conjunto recomendado é pequeno ou vazio, e o usuário pode criar todas, reduzir, adiar ou recusar. Para stack/lib externa, a skill deve ser fundamentada em `context7` ou documentação oficial atual da versão travada; para regras internas observadas no repo, `context7` é preferencial, não um bloqueio.
 
 ### 4. Criar os artefatos
 
@@ -183,24 +231,46 @@ apenas bootstrap/design, pare no escopo aprovado.
 ### 6. Hooks e integrações
 
 Hooks Claude são opt-in e separados. Na primeira interação mutável de um consumidor, verifique
-`node scripts/install-hooks.mjs --check` em modo read-only. Se estiverem ausentes, recomende a
-instalação e faça uma única pergunta; após o usuário confirmar, rode
-`node scripts/install-hooks.mjs`. Não reabra a pergunta quando o check passar:
+`node scripts/install-hooks.mjs --check` em modo read-only. Se estiverem ausentes, ofereça instalar
+os **hooks opt-in do Claude Code** — **um a um, com confirmação; nunca imponha** —, explicando o
+efeito de cada um. Não reabra a oferta quando o check passar:
 
-- cadence: lembrete não bloqueante;
-- guardrails: rede de segurança Git;
-- SessionStart: entrada + tarefa ativa;
-- writegate: rede de segurança fail-closed (`PreToolUse`) que bloqueia escrita de produto em branch protegida/destacada ou enquanto o gate de isolamento continua `<pending>` em `pelizzai/data/state.md` — move o invariante "isolamento antes da primeira escrita" da obediência do modelo para enforcement executável; fail-open em qualquer erro do próprio hook (sempre exit 0 quando não pode decidir).
+- **Hook de cadência** (`pelizzai-cadence.mjs`/`.ps1`, `UserPromptSubmit`): lembrete não bloqueante
+  para revisar as skills de domínio (ver `pelizzai-writing-skills` →
+  `references/domain-skill-maintenance.md`); sem ledger é no-op.
+- **Hook de guarda git** (`pelizzai-guardrails.mjs`/`.ps1`, `PreToolUse` matcher `Bash`): bloqueia,
+  antes de rodarem, `push --force` (exceto `--force-with-lease`), `reset --hard`, `clean -f`,
+  `branch -D`, `checkout .` e `restore .` — enforcement executável dos gates fail-closed que, sem
+  ele, dependem só da obediência do modelo.
+- **Hook de SessionStart** (`pelizzai-session-start.mjs`/`.ps1`, matcher
+  `startup|resume|clear|compact`): re-injeta a entrada do harness (core → router), avisa de tarefa
+  ativa no `state.md` e recapitula a política de execução já ratificada — valor maior no `clear` e
+  em plataformas que não re-injetam a entrada sempre-carregada.
+- **Writegate** (`pelizzai-writegate.mjs`/`.ps1`, `PreToolUse` nos matchers
+  `Write|Edit|MultiEdit|NotebookEdit` **e** `Bash`): rede de segurança fail-closed que bloqueia escrita de produto em branch protegida/destacada ou enquanto o gate de isolamento continua `<pending>` em `pelizzai/data/state.md` — move o invariante "isolamento antes da primeira escrita" da obediência do modelo para enforcement executável; fail-open em qualquer erro do próprio hook (sempre exit 0 quando não pode decidir).
 
-Explique o efeito de cada um e só edite settings após confirmação. O instalador mescla
-`.claude/settings.json` sem sobrescrever hooks/permissões existentes, é idempotente e pode remover
-somente os hooks PelizzAI com `--remove`. A exportação pode registrá-los imediatamente apenas quando
-o usuário escolher explicitamente `--install-hooks`:
+Só edite settings depois da confirmação, e respeite a granularidade da resposta:
+`node scripts/install-hooks.mjs` registra o conjunto PelizzAI inteiro (e `--remove` tira o conjunto
+inteiro), então use-o quando o usuário aceitar todos; se ele aceitar apenas um subconjunto, registre
+à mão em `.claude/settings.json` só os handlers escolhidos — nunca instale em lote o que não foi
+aceito. O instalador mescla `.claude/settings.json` sem sobrescrever hooks/permissões existentes e é
+idempotente. A exportação pode registrá-los imediatamente apenas quando o usuário escolher
+explicitamente `--install-hooks`.
+
+`PreToolUse` tem **dois** grupos: o writegate roda também em `Bash`, senão escrita por
+redirecionamento/heredoc passa por fora do gate. É assim que `scripts/install-hooks.mjs` grava:
 
 ```json
 {
   "hooks": {
     "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-guardrails.mjs\"" },
+          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-writegate.mjs\"" }
+        ]
+      },
       {
         "matcher": "Write|Edit|MultiEdit|NotebookEdit",
         "hooks": [
@@ -212,10 +282,24 @@ o usuário escolher explicitamente `--install-hooks`:
 }
 ```
 
+Cadência e SessionStart ficam nos seus próprios eventos (`UserPromptSubmit` e `SessionStart` com
+matcher `startup|resume|clear|compact`).
+
 Os hooks `.mjs` e o instalador Node são portáteis entre Windows, macOS e Linux; as variantes `.ps1`
 permanecem como fallback Windows. Context7 é a integração técnica preferencial: verifique sua
 disponibilidade no bootstrap e use-o sempre que stack/API/versão externa importar. Se ausente,
 recomende configurá-lo para a plataforma; documentação oficial atual é o fallback, não memória.
+
+Feche o bootstrap com as recomendações de ambiente — recomende, não imponha; qualquer ação que
+altere o ambiente espera confirmação:
+
+```text
+- Git ausente → sugerir `git init` (o harness atua melhor com histórico).
+- Sem remoto → sugerir integração com GitHub ou GitLab.
+- MCPs → pesquisar os mais relevantes para a stack identificada e sugerir.
+- context7 ausente → sugerir a instalação: é ele que fundamenta skills e respostas na
+  documentação real, em vez de adivinhar.
+```
 
 ### 7. Validar e fechar
 
@@ -272,7 +356,8 @@ Em workspace com múltiplos repositórios, não finja que um state escalar cobre
 - Começar scaffolding de projeto novo antes de descoberta, spec e plano aprovados.
 - Usar Context7 como substituto de decisões de produto ou do gate de domain skills.
 - Reexecutar bootstrap em toda nova sessão.
-- Criar o "máximo" de domain skills.
+- Pular o bootstrap no primeiro contato e começar a trabalhar às cegas.
+- Cortar a proposta de domain skills por teto de quantidade, em vez de por utilidade.
 - Usar team num repo que uma inspeção focada resolve.
 - Criar profile com comandos chutados.
 - Gravar skill apenas em .claude quando a plataforma ativa usa .agents (ou vice-versa).
@@ -282,4 +367,4 @@ Em workspace com múltiplos repositórios, não finja que um state escalar cobre
 
 ## Integração
 
-Usa `pelizzai-starting-branch` e `pelizzai-finish-task` somente em `bootstrap-write`; `pelizzai-writing-skills` cria o conjunto mínimo de domain skills; `pelizzai-brainstorming` entra apenas no ramo de projeto novo/incerto.
+Usa `pelizzai-starting-branch` e `pelizzai-finish-task` somente em `bootstrap-write`; `pelizzai-writing-skills` redige as domain skills ratificadas — o alvo é o máximo de skills úteis, fundamentadas em `context7`; `pelizzai-team`/`pelizzai-subagents` paralelizam o repo-scan quando as frentes são independentes; `pelizzai-brainstorming` entra apenas no ramo de projeto novo/incerto.

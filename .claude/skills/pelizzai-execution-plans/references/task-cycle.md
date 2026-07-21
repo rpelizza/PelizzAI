@@ -113,7 +113,7 @@ O membro reporta um destes status:
 | `DONE`               | Trabalho completo                             | Segue para o review                                            |
 | `DONE_WITH_CONCERNS` | Completo, mas com ressalvas                   | Leia as ressalvas antes de prosseguir; lacuna de domain skill vai ao registro e é acumulada para o eixo adoption-driven no fechamento (não vira gate por tarefa) |
 | `NEEDS_CONTEXT`      | Falta informação                              | Forneça o contexto e re-despache                               |
-| `BLOCKED`            | Não consegue concluir                         | Avalie: dar contexto → mudar abordagem/quebrar tarefa → escalar ao humano |
+| `BLOCKED`            | Não consegue concluir                         | Avalie: dar contexto → mudar abordagem/quebrar tarefa → escalar ao humano (o modelo já é o topo — ver §8) |
 
 Todo relatório de tarefa — em qualquer status — inclui o campo obrigatório **`Desvios do plano:`**
 (ou `nenhum`): decisões técnicas, de escopo ou de abordagem que saíram do que o plano/spec
@@ -176,10 +176,18 @@ carrega o cursor. Ao concluir o plano e selar o conteúdo, a `pelizzai-finish-ta
 
 Em source mode, avance o execution record nativo após o commit e não crie state/closure.
 
-## 8. Capacidade por risco e papel
+## 8. Seleção de modelo por papel
 
-Use capacidade e effort **proporcionais** a risco, ambiguidade e irreversibilidade. Tarefa mecânica
-e bem delimitada não exige effort máximo; arquitetura, segurança, migração de dados e review final
-complexo justificam mais profundidade e um reviewer independente. Escalada não significa apenas
-“subir modelo”: primeiro corrija contexto, ferramenta ou decomposição; depois aumente capacidade se
-isso atacar a causa; por fim escale ao humano. O coordenador registra preocupações, não finge certeza.
+Política do harness: membros, revisores e o coordenador usam o **modelo mais capaz disponível, com
+effort/reasoning no nível máximo** — nunca rebaixe modelo nem effort para economizar, em nenhum
+papel e em nenhuma tarefa. **Arquitetura, os reviews (as duas lentes e o review final) e a validação
+final da entrega são inegociavelmente o topo.** Especifique o modelo e o effort explicitamente para
+não herdar um default menor da sessão.
+
+Proporcionalidade continua valendo — só que em profundidade de processo (entrevista, brainstorming,
+TDD, perfil de review, overlays), nunca em capacidade do modelo. Tarefa mecânica se resolve rodando
+menos processo no topo, não rodando um modelo menor.
+
+Como já se parte do topo, “subir o modelo” não é um degrau de escalada: os degraus do BLOCKED são
+dar mais contexto → mudar a abordagem/quebrar a tarefa → escalar ao humano. Corrija primeiro
+contexto, ferramenta ou decomposição. O coordenador registra preocupações, não finge certeza.

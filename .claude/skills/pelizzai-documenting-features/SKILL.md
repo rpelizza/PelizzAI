@@ -1,6 +1,6 @@
 ---
 name: pelizzai-documenting-features
-description: Overlay de documentação HUMANA do contrato estável de uma feature, como rotas, comandos, APIs e telas. Use quando docs fazem parte do escopo, o diff cria uma superfície estável que precisa ser explicada ou o usuário pede documentação de uso. Entra antes do review final e de validated-head; não é oferta tardia da finish-task nem se aplica a specs/planos/ADRs do harness.
+description: Overlay de documentação HUMANA do contrato estável de uma feature, como rotas, comandos, APIs e telas. Use quando docs fazem parte do escopo, o diff cria uma superfície estável que precisa ser explicada ou o usuário pede documentação de uso. Entra antes do review final e de validated-head; a finish-task não a executa (só sinaliza a lacuna como rede de segurança) e ela não se aplica a specs/planos/ADRs do harness.
 ---
 
 # PelizzAI Documenting Features
@@ -49,7 +49,11 @@ Valide links, exemplos, snippets e build/render aplicáveis. A doc é conteúdo 
 pela commit-strategy da head skill **antes** do review final e de `validated-head`. Commit próprio é
 opção quando melhora o histórico, não obrigação. Qualquer correção reabre as provas afetadas.
 
-Finish-task nunca oferece, gera ou corrige documentação; depois do seal é tarde.
+Finish-task nunca gera nem corrige documentação: depois do seal é tarde para escrever ali. O que ela
+faz é a checagem-rede — se uma superfície documentável passou sem esta skill, ela oferece **uma vez**
+devolver a entrega ao ciclo (o seal cai e a doc volta a ser conteúdo validado, com review final
+refeito). Recusa informada entrega sem doc; a rede não bloqueia, e também não substitui o caminho
+normal, que é rodar aqui antes do review final.
 
 ## Red flags
 

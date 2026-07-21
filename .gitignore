@@ -12,6 +12,13 @@ pelizzai/data/reports/
 # Logs de debug de editores/agentes
 .cursor/debug-*.log
 
+# Relatorios de trabalho gerados na raiz durante manutencao do harness (reposcans,
+# auditorias, dossies). Sao insumo de sessao, nunca conteudo do harness: podem citar
+# projetos consumidores privados e este repositorio e publico.
+/pelizzai-reposcan-*.md
+/pelizzai-auditoria-*.md
+/*-relatorio.md
+
 # Lixo de SO
 Thumbs.db
 .DS_Store

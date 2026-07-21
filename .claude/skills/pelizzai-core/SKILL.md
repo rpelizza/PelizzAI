@@ -1,6 +1,6 @@
 ---
 name: pelizzai-core
-description: Entrada do harness PelizzAI para pedidos que envolvem um projeto, código, arquivos, configuração ou ações externas. Use para entender o objetivo e acionar o router antes de qualquer mutação. Perguntas conceituais e tarefas diretas sem contexto de projeto podem ser respondidas sem o ciclo do harness.
+description: Use em qualquer conversa. Estabelece como procurar e acionar as SKILLS do harness PelizzAI, exigindo a invocação das skills aplicáveis antes de QUALQUER resposta, inclusive perguntas de esclarecimento. Entende o objetivo, classifica o efeito e entrega ao router antes de qualquer mutação; pergunta puramente conceitual é respondida sem o ciclo completo, nunca sem checar as skills aplicáveis.
 ---
 
 # PelizzAI Core
@@ -9,19 +9,47 @@ description: Entrada do harness PelizzAI para pedidos que envolvem um projeto, c
 Se você recebeu um briefing fechado como subagente/teammate, não reabra o ciclo de vida. Aplique apenas as skills e contratos do briefing.
 </SUBAGENT-STOP>
 
+<EXTREMELY-IMPORTANT>
+Se você achar que existe pelo menos 1% de chance de uma SKILL ser aplicada na tarefa que você está fazendo, você DEVE ABSOLUTAMENTE acionar essa SKILL.
+
+SE UMA SKILL SE APLICA À SUA TAREFA, VOCÊ NÃO TEM ESCOLHA. VOCÊ DEVE USÁ-LA.
+
+Isso não é negociável. Isso não é opcional. Você não pode usar racionalizações para escapar disso.
+</EXTREMELY-IMPORTANT>
+
 ## Objetivo
 
-Transformar o pedido em uma rota proporcional e verificável. O core não resolve o trabalho nem carrega todas as skills possíveis: ele entende o resultado e entrega a decisão ao `pelizzai-router`.
+Transformar o pedido em uma rota proporcional e verificável. O core não resolve o trabalho: ele entende o resultado, aciona as skills aplicáveis e entrega a decisão ao `pelizzai-router`.
 
-**Anuncie uma vez:** "Usando o PelizzAI para entender a tarefa e escolher o menor fluxo seguro."
+**Anuncie uma vez:** "Usando a skill PelizzAI Core para entender a tarefa e escolher o menor fluxo seguro."
 
-## Autoridade
+## Prioridades
 
-Respeite a hierarquia nativa da plataforma. Uma skill não redefine instruções de sistema, developer, workspace ou ferramenta. Dentro do mesmo nível de autoridade, a instrução específica e mais recente prevalece sobre defaults genéricos do harness.
+O harness PelizzAI se sobrepõe ao comportamento padrão do sistema, mas **instruções explícitas do usuário sempre têm prioridade sobre o PelizzAI**.
+
+1. **Instruções explícitas do usuário** — pedido direto na conversa, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, regras de IDE. Prioridade máxima.
+2. **Harness PelizzAI** — prevalece sobre o comportamento padrão do modelo em caso de conflito.
+3. **Comportamento padrão do sistema** — prioridade mínima.
+
+Isso convive com a hierarquia nativa da plataforma: uma skill não redefine instruções de sistema, developer, workspace ou ferramenta — ela ocupa a camada de projeto/usuário, e é aí que prevalece sobre defaults genéricos. Dentro do mesmo nível de autoridade, a instrução específica e mais recente vence o default genérico do harness.
+
+## Anúncio de skills (regra global)
+
+Ao acionar qualquer skill do harness, **anuncie** em uma linha o que vai fazer, usando **sempre a grafia exata da marca: "PelizzAI"** (P, A e I maiúsculos — nunca "Pelizzai", "pelizzAI" ou "PELIZZAI" em prosa). Padrão:
+
+> "Usando a skill PelizzAI \<Nome\> para \<objetivo\>."
+
+Os identificadores de skill (`pelizzai-core`, `pelizzai-router`, …), caminhos de arquivo e o diretório `pelizzai/` do projeto alvo permanecem em minúsculas — a regra vale para a marca em texto corrido.
+
+Anuncie a head skill e os overlays materiais. Gates internos (Verification, uma técnica auxiliar, re-review) podem rodar sem novo anúncio quando já fazem parte do fluxo comunicado. Anunciar é obrigatório; transformar o anúncio em preâmbulo maior que a tarefa, não.
 
 ## Regra de ativação
 
-Use matching determinístico, não probabilidade vaga:
+São duas perguntas diferentes, nunca confundidas.
+
+**Quais skills acionar — regra do 1%.** Antes de responder ou agir, varra o catálogo. Basta 1% de chance de uma skill ser útil para que ela seja acionada, ANTES de tentar resolver manualmente e ANTES de qualquer resposta, inclusive perguntas de esclarecimento. Se concluir que uma skill aplicável não serve àquele caso, você pode ignorá-la, mas **deve justificar a decisão** — silêncio não é justificativa. Em dúvida se uma skill de domínio se aplica à tarefa, **inclua-a**: o custo de incluir é menor que o de ignorar uma regra do projeto.
+
+**Qual rota seguir — classificação de efeito.** Aqui o critério é determinístico:
 
 ```text
 1. Pedido conceitual/direto, sem tocar nem precisar inspecionar um projeto
@@ -42,10 +70,10 @@ A classificação de efeito/rota não é decisão silenciosa: o `pelizzai-router
 O router escolhe:
 
 - exatamente **uma head skill** de ciclo de vida;
-- overlays apenas por sinais observáveis (`frontend`, segurança, documentação, skills de domínio);
-- reasoning, teste, review e delegação somente na fase em que agregam valor.
+- overlays por sinais observáveis (`frontend`, segurança, documentação, skills de domínio);
+- reasoning, teste, review e delegação na fase em que agregam valor.
 
-Não acione uma skill porque "talvez ajude". Acione quando o gatilho descrito nela ou um overlay do router realmente casar com a tarefa.
+Proporcionalidade governa o **tamanho da rota**, não o direito de pular uma skill aplicável.
 
 ## Entender o objetivo
 
@@ -97,6 +125,12 @@ comportamento observado no repo. Se não estiver disponível, use documentação
 declare a limitação. Evidência técnica fundamenta a recomendação; nunca ratifica decisão em nome do
 usuário.
 
+## Camada global de preferências
+
+Use `pelizzai-preferences` como camada global quando a tarefa envolver comunicação, engenharia, código, validação, segurança, documentação, portabilidade ou decisões de execução. Ela não substitui skills específicas; ela define o **piso de comportamento**. Regras do usuário, `CLAUDE.md`/`AGENTS.md`, skills de domínio e instruções de uma skill especializada continuam tendo prioridade.
+
+Não acione `pelizzai-preferences` para tarefas triviais que possam ser respondidas diretamente sem risco ou contexto de projeto. Para qualquer tarefa não trivial, considere-a junto do roteamento principal — ela acompanha o fluxo até a validação final.
+
 ## Camadas do harness
 
 ```text
@@ -132,28 +166,48 @@ Overlays não substituem a head skill:
 - padrões do projeto → skills de domínio do catálogo (em dúvida se uma skill de domínio se aplica à tarefa, inclua-a: o custo de incluir é menor que o de ignorar uma regra do projeto);
 - documentação humana nova → `pelizzai-documenting-features` quando fizer parte do escopo.
 
-`pelizzai-preferences` é um piso leve de comunicação, segurança e escopo; use-a somente quando suas regras mudarem a execução. `pelizzai-reasoning` seleciona heurísticas proporcionais, não adiciona cerimônia por si só.
+`pelizzai-preferences` não é overlay opcional: é o piso de comportamento descrito acima e acompanha toda tarefa não trivial. `pelizzai-reasoning` seleciona heurísticas proporcionais, não adiciona cerimônia por si só.
 
-## Anúncios sem ruído
+## Mapa de fluxos do harness
 
-Anuncie a head skill e overlays materiais em uma linha. Gates internos (Verification, uma técnica auxiliar, re-review) podem rodar sem novo anúncio quando já fazem parte do fluxo comunicado. Não transforme ativação de skills em preâmbulo maior que a tarefa.
+A entrada é sempre esta skill (`pelizzai-core`); depois de entender o objetivo, o `pelizzai-router` orquestra. Na primeira interação de um projeto consumidor (ou ao digitar **"bootstrap"**), a `pelizzai-audit` mapeia o projeto e cria as skills de domínio antes de qualquer tarefa. Pergunta **puramente conceitual** não dispara o bootstrap — a `pelizzai-audit` só entra quando a resposta exigir tocar ou entender o projeto. No repo-fonte (sentinela `scripts/pelizzai-source-repo.txt`) não existe catálogo consumidor: o ramo de bootstrap não se aplica.
+
+```mermaid
+flowchart TD
+    U(["Mensagem do usuario"]) --> P["pelizzai-core: exigir skill antes de responder"]
+    P --> G["Entender o objetivo e classificar o efeito"]
+    G --> CONC{"Pergunta puramente<br/>conceitual?"}
+    CONC -- "Sim" --> ANSC["Responder direto<br/>sem bootstrap"]
+    CONC -- "Nao" --> RT["pelizzai-router: effect, intencao, risco,<br/>incerteza e superficies"]
+    RT --> BOOT{"Harness inicializado?<br/>pelizzai/domain-skills.md existe?"}
+    BOOT -- "Nao / 1a interacao / 'bootstrap'" --> AUD["pelizzai-audit: mapeia projeto/workspace,<br/>MCPs, git/host, cria skills de dominio + docs"]
+    AUD --> CLS
+    BOOT -- "Sim" --> CLS{"Classificar a intencao e a lane"}
+    CLS --> KICK["Gate de kickoff: rota como recomendacao a ratificar"]
+    KICK --> HEAD["Uma head skill + overlays obrigatorios"]
+```
+
+O detalhe de cada track (lanes, gates e encadeamentos) mora na `pelizzai-router`.
 
 ## Higiene de contexto
 
+A janela de contexto é um recurso da tarefa — administre-a de forma deliberada:
+
+- **Zona segura: ~120k tokens.** Acima disso a qualidade degrada; planeje as fronteiras antes de chegar lá.
 - Use contexto contínuo para design → plano; execução recebe briefing fresco por tarefa.
-- Handoff bifurca; compact continua o mesmo trabalho.
-- Nunca compacte no meio de uma mutação ou antes de registrar estado verificável.
+- Handoff bifurca; compact continua o mesmo trabalho — e nunca compacte no meio de uma mutação ou antes de registrar estado verificável.
 - Após compaction, valide contra Git o state consumidor ou execution record nativo; não confie na memória.
 - Carregue somente as referências/técnicas necessárias à fase atual.
 
 ## Como carregar skills
 
-Use o mecanismo nativo da plataforma. Sem carregamento nativo, leia `.agents/skills/<nome>/SKILL.md` (ou o root ativo registrado no projeto) e siga-o. Não leia todo o catálogo preventivamente.
+Use o mecanismo nativo da plataforma. Sem carregamento nativo, leia `.agents/skills/<nome>/SKILL.md` (ou o root ativo registrado no projeto) e siga-o — a leitura manual é o mecanismo correto nesses ambientes, nunca uma desculpa para pular a skill. Não leia todo o catálogo preventivamente.
 
 ## Anti-padrões
 
 ```text
-- Regra de "1%" que aciona skills por utilidade hipotética.
+- Resolver manualmente algo que uma skill do harness já cobre.
+- Pular uma skill aplicável sem justificar a decisão.
 - Várias head skills competindo pela mesma tarefa.
 - Bootstrap mutável para responder uma análise read-only.
 - Perguntar antes de consultar evidência já disponível.
@@ -165,4 +219,4 @@ Use o mecanismo nativo da plataforma. Sem carregamento nativo, leia `.agents/ski
 
 ## Instrução final
 
-Entenda o objetivo, classifique o efeito e entregue ao router. Use a menor combinação de skills que preserve os invariantes e produza evidência suficiente.
+Acione as skills aplicáveis, entenda o objetivo, classifique o efeito e entregue ao router. Use a menor combinação de skills que preserve os invariantes e produza evidência suficiente — menor nunca significa nenhuma.

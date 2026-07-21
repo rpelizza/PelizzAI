@@ -197,10 +197,12 @@ Categorize pela severidade REAL — nem tudo é Critical; um nitpick não é Cri
 
 Ao concluir todas as tarefas, revise a **branch inteira** no range commitado
 `<base-sha>..<HEAD>` — depois da consolidação `squash-final`, quando escolhida — e não só por
-tarefa. Use um reviewer independente e capacidade/effort proporcionais à complexidade e ao
-risco; não force effort máximo para toda mudança. Este review acontece **depois** dos overlays
-que podem escrever (segurança, frontend e documentação) e antes da suíte completa, checklist e
-`pelizzai-verification-before-completion`. Critical/Important abertos bloqueiam a conclusão.
+tarefa. Use um reviewer independente, com o **modelo mais capaz** disponível e **effort máximo**:
+review final é o último filtro antes do seal, não lugar de economizar capacidade. É o passo 1 da
+**validação final da entrega** do coordenador (`pelizzai-execution-plans` → "Validação final da
+entrega") e acontece **depois** dos overlays que podem escrever (segurança, frontend e documentação)
+e antes da suíte completa, checklist e `pelizzai-verification-before-completion`. Critical/Important
+abertos bloqueiam a conclusão.
 
 Exceção de reutilização: plano de **uma única tarefa bounded**, perfil `combined`, sem findings nem
 mutação de conteúdo posterior pode tratar o review da tarefa como review final quando o tree SHA
@@ -283,6 +285,7 @@ Em PR no GitHub, responda no THREAD do comentário inline (não como comentário
 
 ```text
 - Pular um review exigido pela lane/perfil ou rebaixar o perfil apesar de risco novo.
+- Rebaixar modelo ou effort num review (por tarefa ou final) para economizar — review é topo.
 - Ignorar Critical, ou seguir com Important em aberto.
 - Dar feedback sobre código que não leu de fato.
 - Marcar nitpick como Critical, ou ser vago ("melhorar o tratamento de erro").

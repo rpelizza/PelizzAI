@@ -25,7 +25,9 @@ quando houver mirrors, sincronizadas e verificadas; nunca assuma `.claude/skills
 > Política de PROJETO explicitamente ratificada pelo usuário — NÃO é herança da tarefa anterior.
 > O gate pós-plano usa estes valores como recomendações nas perguntas sequenciais. Eles não
 > auto-confirmam uma tarefa nova, salvo quando o usuário delegar explicitamente aplicar a política.
-> No bootstrap nascem todos `<unset>`.
+> No bootstrap nascem todos `<unset>`: grave o valor **literalmente entre `<>`**. Qualquer valor
+> entre `<>` (o menu abaixo, `<unset>`) é lido como NÃO ratificado; o recap do hook de SessionStart
+> só dispara em valor cru — `worktree`, `team`, `granular`.
 
 - isolation-default: <branch|worktree|unset>
 - execution-mode-default: <inline|subagents|team|unset>

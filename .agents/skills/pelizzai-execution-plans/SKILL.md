@@ -463,10 +463,10 @@ Depois desta etapa, `git status --porcelain` deve estar vazio e `validated-head`
 ```text
 1. Capture candidate-head = `git rev-parse HEAD`.
 2. REVIEW FINAL via pelizzai-review no range exato `base-sha..candidate-head`. Use reviewer
-   independente e capacidade proporcional ao risco. Exceção: uma única tarefa `bounded`, perfil
-   `combined`, sem mutação posterior pode reutilizar o review da tarefa se
-   `reviewed-tree == candidate-head^{tree}`; qualquer ausência de prova exige review normal.
-   Critical/Important bloqueiam.
+   independente, com o modelo mais capaz disponível e effort máximo (ver task-cycle §8).
+   Exceção: uma única tarefa `bounded`, perfil `combined`, sem mutação posterior pode reutilizar
+   o review da tarefa se `reviewed-tree == candidate-head^{tree}`; qualquer ausência de prova
+   exige review normal. Critical/Important bloqueiam.
 3. Rode pelo próprio coordenador todos os checks aplicáveis do perfil (test/lint/build/render/
    dry-run/visual etc.), do zero, com saída e exit code. Não invente suíte para artefato estático.
 4. Releia plano/spec requisito a requisito e aponte onde cada um foi entregue.
@@ -502,7 +502,8 @@ closure. Nenhum código, config ou doc pode mudar depois do seal.
 - Executar sem plano aprovado, sem o gate de setup pós-plano, ou sem isolamento (em branch protegida).
 - Aplicar isolamento/modo/commit sem ratificação sequencial do usuário ou omitir team.
 - Pular skills de domínio/overlays — ou não colá-las nos briefings de executor e reviewer.
-- Escolher team por preferência universal, ou forçar effort máximo numa tarefa mecânica.
+- Escolher team por preferência universal, ou rebaixar modelo/effort para economizar (arquitetura,
+  review e validação final da entrega são inegociavelmente o topo — ver task-cycle §8).
 - Deixar o membro/subagente commitar (o commit é gate do coordenador, após as duas lentes de review).
 - Aceitar "testes passam" inferido, sem evidência fresca colada.
 - Corrigir à mão o trabalho reprovado de um membro (re-despache — corrigir à mão polui o contexto).

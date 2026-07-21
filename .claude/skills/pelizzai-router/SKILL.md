@@ -1,6 +1,6 @@
 ---
 name: pelizzai-router
-description: Orquestrador de qualquer pedido que precise inspecionar ou alterar um projeto. Classifica efeito, intenção, risco, incerteza e superfícies; recomenda uma head skill e overlays; garante ratificação e isolamento antes da escrita. Todo produto/projeto greenfield entra em discovery, spec e plano aprovados mesmo com stack definida. Use após `pelizzai-core`; não use em conversa puramente conceitual sem projeto.
+description: Orquestrador de qualquer pedido que precise inspecionar ou alterar um projeto. Classifica efeito, intenção, risco, incerteza e superfícies; recomenda uma head skill e overlays; garante ratificação e isolamento antes da escrita. Na primeira interação com um projeto consumidor, com o harness não inicializado (sem `pelizzai/domain-skills.md`) ou quando o usuário disser "bootstrap", propõe o bootstrap por `pelizzai-audit` antes de rotear. Todo produto/projeto greenfield entra em discovery, spec e plano aprovados mesmo com stack definida. Use após `pelizzai-core`; não use em conversa puramente conceitual sem projeto.
 ---
 
 # PelizzAI Router
@@ -101,16 +101,31 @@ isolamento, decisões de execução, progresso, overlays, `validated-head`, `del
 destino (`local | pushed | pr-open | partial`). Termine em `phase: done` ou `phase: blocked`;
 `phase: delivered` é estado de repouso que ainda exige constatação de `done` (ver Estado e retomada).
 
-Em projeto consumidor:
+Em projeto consumidor, **antes de classificar o pedido**, verifique: o harness está inicializado?
+Se `pelizzai/domain-skills.md` NÃO existir — ou for a primeira interação com este projeto, ou o
+usuário tiver digitado `bootstrap` —, **proponha** o bootstrap por `pelizzai-audit` (mapeia o
+projeto, cria as skills de domínio e os docs) como a primeira coisa do turno e aguarde a resposta.
+O router não espera o usuário lembrar de pedir: catálogo ausente é sinal suficiente para levantar a
+proposta, em uma linha, com o motivo.
+
+Propor não é executar. O bootstrap só escreve depois do "sim" explícito — aceito, o efeito passa a
+`write-local` e vale o Gate de primeira escrita. Se o usuário recusar ou adiar, o pedido original
+segue como estava: read-only continua read-only, nenhum arquivo é criado, e você registra a
+limitação em uma linha ("sigo sem catálogo de domínio; o mapeamento fica para depois"). Pergunta
+puramente conceitual, que não exige tocar nem entender ESTE projeto, não dispara a proposta —
+responda direto. Em source mode não há gatilho: não existe catálogo consumidor a criar.
 
 | Situação | Rota |
 | --- | --- |
-| `effect: read-only`, catálogo ausente | `pelizzai-audit` em `scan-only`; nenhum arquivo é criado. |
+| Catálogo ausente, primeira interação com o projeto | Invoque `pelizzai-audit` (no mínimo `scan-only`) e proponha o bootstrap antes do Gate de kickoff; a recusa não bloqueia o pedido. |
+| Catálogo ausente, `effect: read-only` | Mapeie em `scan-only`, proponha e aguarde. Sim → `pelizzai-audit` em `bootstrap-write`; não/depois → segue em `scan-only`, nenhum arquivo é criado. |
 | Usuário disse `bootstrap`/`reinicializar` | `pelizzai-audit` em `bootstrap-write`. |
 | Tarefa mutável, catálogo ausente | Faça scan-only, apresente o conjunto mínimo de artefatos proposto e obtenha consentimento para `bootstrap-write`. |
 | Catálogo existe, ledger ausente | Em tarefa mutável autorizada, repare somente o ledger; read-only apenas reporta. |
 
-"Primeira interação" não é gatilho suficiente para reexecutar bootstrap. O sinal é o estado real do projeto ou um pedido explícito.
+Com catálogo **existente**, reexecutar bootstrap (remap) continua exigindo pedido explícito ou drift
+observado: a proatividade vale para o harness não inicializado, não para reescrever o que já foi
+ratificado.
 
 ## Estado e retomada
 
@@ -166,8 +181,8 @@ Nunca crie worktree da base limpa depois de escrever spec/plano em outro working
 
 | Pedido | Track/head |
 | --- | --- |
-| Bootstrap/remap autorizado | `pelizzai-audit` (`bootstrap-write`) |
-| Algo quebrado/erro/falha/comportamento inesperado | `bug` → `pelizzai-debugging` |
+| Bootstrap/remap autorizado, ou proposta de bootstrap aceita | `pelizzai-audit` (`bootstrap-write`) |
+| Algo quebrado/erro/falha/comportamento inesperado; "não funciona", "deu erro", "tá com bug", "para de chutar" | `bug` → `pelizzai-debugging` |
 | Mudança local sem nova regra/contrato/superfície | `ajuste` → `pelizzai-quick-fix` |
 | Refactor local preservando comportamento | `ajuste` → `pelizzai-quick-fix` |
 | Review de diff, working tree, branch ou PR | `review` → `pelizzai-review` |
@@ -297,7 +312,8 @@ Uma tarefa nova nunca herda decisões da anterior. O fechamento pertence a `peli
 ## Red flags
 
 ```text
-- Bootstrap mutável para responder pedido read-only.
+- Bootstrap mutável para responder pedido read-only sem propor e obter o "sim" do usuário.
+- Encontrar catálogo ausente e seguir em silêncio, sem propor o bootstrap.
 - Escrever state/spec/plano antes do isolamento.
 - Forçar brainstorming completo numa feature bounded.
 - Classificar produto/projeto greenfield como bounded porque a stack foi informada.
@@ -320,6 +336,10 @@ Depois de montar envelope → Análise da proposta → lane → head skill → o
 **Quando informa e segue:** somente `read-only` de review/análise/explicação, porque não existe
 mutação a autorizar. Toda rota mutável para no kickoff, inclusive `bounded`, ajuste e bug; a
 profundidade do bloco pode ser uma única linha, mas a resposta afirmativa é obrigatória.
+
+**Antes do kickoff:** em projeto consumidor sem catálogo, a proposta de bootstrap (§Source mode e
+bootstrap) vem primeiro e vale também em `read-only`. Ela não é o kickoff — é uma pergunta de uma
+linha sobre inicializar o harness; o "não" devolve o pedido à rota original sem criar nada.
 
 **Para toda tarefa mutável:** pare e aguarde ratificação. Faça uma única pergunta sobre a rota;
 mostre detalhes como contexto, não como várias perguntas simultâneas:

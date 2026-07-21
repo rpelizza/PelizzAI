@@ -17,7 +17,7 @@ sentinela junto e promoveria o consumidor a repo-fonte por engano).
 
 Diretrizes para reduzir erros comuns de codificação cometidos por LLMs. Combine com instruções específicas do projeto conforme necessário.
 
-**Trade-off:** preserve invariantes; adapte heurísticas. Segurança, autoridade do usuário, isolamento antes da primeira escrita e evidência antes de conclusão não são opcionais. Brainstorming, TDD, OODA, team, número de reviews e effort variam com efeito, risco e incerteza. O harness pode escolher como raciocinar, investigar e recomendar; não pode escolher pelo usuário requisitos, escopo, UX, arquitetura, dados, risco aceito ou critérios de aceite.
+**Trade-off:** preserve invariantes; adapte heurísticas. Segurança, autoridade do usuário, isolamento antes da primeira escrita e evidência antes de conclusão não são opcionais. Brainstorming, TDD, OODA, team e número de reviews variam com efeito, risco e incerteza; modelo e effort não — são sempre o mais capaz disponível e o máximo, em todo papel (`pelizzai-execution-plans` → `references/task-cycle.md` §8). O harness pode escolher como raciocinar, investigar e recomendar; não pode escolher pelo usuário requisitos, escopo, UX, arquitetura, dados, risco aceito ou critérios de aceite.
 
 **Context7 é a fonte técnica preferencial do harness.** Sempre que biblioteca, framework, API,
 serviço, ferramenta, versão ou capacidade externa puder mudar a solução, primeiro identifique no
