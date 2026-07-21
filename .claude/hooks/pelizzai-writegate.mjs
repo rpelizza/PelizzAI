@@ -12,7 +12,9 @@
  *  - Write | Edit | MultiEdit | NotebookEdit  → lê tool_input.file_path / .notebook_path;
  *  - Bash                                     → detecta redirecionamento de escrita no
  *    tool_input.command (>, >>, &>, tee, sed -i, Set-Content/Add-Content/Out-File) para
- *    caminhos DENTRO da raiz do projeto. Mesma regra dos dois lados.
+ *    caminhos DENTRO da raiz do projeto. Mesma regra dos dois lados. Sinks nulos (NUL, $null,
+ *    /dev/null) e alvos que resolvem para FORA da raiz (incl. $env:TEMP, %TEMP%, absolutos)
+ *    nunca são escrita de produto e nunca bloqueiam.
  *
  * REGRA A (invariante, ambos os modos) — isolamento antes da primeira escrita:
  *   escrever caminho de PRODUTO (fora de pelizzai/) dentro da raiz do repo estando em branch
@@ -23,9 +25,13 @@
  *
  * REGRA B (só consumidor: existe pelizzai/ e NÃO é o repo-fonte) — nada de código antes do gate:
  *   escrever caminho de PRODUTO (fora de pelizzai/) enquanto pelizzai/data/state.md NÃO
- *   contém o marcador "kickoff: ratificado" → BLOQUEIA. Quando o state usa os campos de
- *   aprovação greenfield, qualquer campo ainda pending também bloqueia. Escritas em pelizzai/ (state, plano,
+ *   contém o marcador "kickoff: ratificado" → BLOQUEIA. Escritas em pelizzai/ (state, plano,
  *   spec) são sempre liberadas: são os artefatos que registram o próprio gate.
+ *   ESCOPO DELIBERADO: o hook trava UM marcador — o kickoff. As etapas de greenfield
+ *   (descoberta → spec → stress → aprovação → plano → stress → aprovação) continuam
+ *   obrigatórias, mas vivem nas skills, NÃO em enforcement de runtime: transformá-las em
+ *   catraca de arquivo travava trabalho legítimo sempre que o state ficava um passo atrás
+ *   da conversa. Doutrina nas skills; no hook, só o invariante.
  *   Em SOURCE MODE (repo-fonte PelizzAI: sentinela pelizzai-source-repo.txt) a Regra B é PULADA — ali o
  *   marcador vive no execution record nativo, não em arquivo, e só a Regra A vale.
  *
@@ -64,7 +70,6 @@ const PROTECTED = ['main', 'master', 'develop', 'dev'];
 // Marcadores máquina-legíveis dos gates sequenciais no state.md (kickoff/pós-plano ratificado
 // pelo usuário: conteúdo + isolamento + modo + commit). O writegate e a retomada dependem dele.
 const KICKOFF_RATIFIED = /kickoff:\s*ratificado/i;
-const PENDING_USER_APPROVAL = /^\s*-?\s*(discovery|spec-approval|domain-skills-decision|plan-approval):\s*<?pending>?\s*$/im;
 // Sentinela DEDICADA do repo-fonte PelizzAI (source mode): presente, a Regra B é pulada.
 // Critério único e inequívoco: manifesto e sync-harness existem também nos consumidores
 // instalados via -ExportConsumer e NÃO indicam source mode.
@@ -161,6 +166,40 @@ function parseSegment(seg) {
   return { tokens, redirects };
 }
 
+// Sinks que NÃO são arquivo do repositório: dispositivos nulos do Windows (NUL, NUL:), do
+// PowerShell ($null) e do POSIX (/dev/null e o restante de /dev/). Redirecionar para eles é
+// DESCARTAR saída, não escrever produto — `node x.js > NUL` resolvia para um caminho relativo
+// dentro da raiz e bloqueava indevidamente.
+const NULL_SINKS = new Set(['nul', 'nul:', '$null', 'con', 'con:', '/dev/null']);
+function isNullSink(target) {
+  const t = String(target).trim().replace(/\\/g, '/').toLowerCase();
+  return NULL_SINKS.has(t) || t.startsWith('/dev/');
+}
+
+// Expande referências de variável de ambiente no alvo: $env:NOME (PowerShell), %NOME% (cmd),
+// ${NOME} e $NOME (POSIX). Sem isso, `> $env:TEMP/build.log` era lido como caminho RELATIVO
+// dentro da raiz e bloqueava — quando o arquivo nem sequer nasce no repositório.
+// Referência que não resolve → alvo indecidível → devolve null e o hook não bloqueia
+// (fail-open, a mesma honestidade do resto do matcher: o que não dá para parsear com
+// segurança, não vira invariante).
+function expandVars(target) {
+  let unresolved = false;
+  const lookup = (name) => {
+    const value = process.env[name]; // no Windows, process.env já é case-insensitive
+    if (value === undefined || value === '') {
+      unresolved = true;
+      return '';
+    }
+    return value;
+  };
+  const expanded = String(target)
+    .replace(/\$env:([A-Za-z_][A-Za-z0-9_]*)/gi, (_, n) => lookup(n))
+    .replace(/%([A-Za-z_][A-Za-z0-9_]*)%/g, (_, n) => lookup(n))
+    .replace(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g, (_, n) => lookup(n))
+    .replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, (_, n) => lookup(n));
+  return unresolved ? null : expanded;
+}
+
 // Alvos de escrita de um comando shell (matcher irmão de Bash). Best-effort e honesto:
 // cobre os casos comuns; o que não conseguir parsear com segurança, não bloqueia.
 function extractShellTargets(command) {
@@ -212,7 +251,12 @@ function extractShellTargets(command) {
       }
     }
   }
-  return targets.filter((p) => p && !p.startsWith('-'));
+  // Descarta flags, sinks nulos e alvos com variável irresolvível; expande o que sobrar para
+  // que a comparação com a raiz do repo (em main) veja o caminho REAL, não o literal do shell.
+  return targets
+    .filter((p) => p && !p.startsWith('-') && !isNullSink(p))
+    .map(expandVars)
+    .filter((p) => p && !isNullSink(p));
 }
 
 function block(reason) {
@@ -337,14 +381,7 @@ function main() {
   } catch {
     return 0; // não conseguiu ler o marcador → fail-open
   }
-  if (KICKOFF_RATIFIED.test(state) && !PENDING_USER_APPROVAL.test(state)) return 0;
-
-  if (PENDING_USER_APPROVAL.test(state)) {
-    return block(
-      'há aprovação humana pendente no lifecycle (discovery/spec/domain skills/plano). ' +
-        'Resolva uma decisão por vez com o usuário e atualize o state antes de escrever produto.'
-    );
-  }
+  if (KICKOFF_RATIFIED.test(state)) return 0;
 
   return block(
     'o kickoff ainda não foi ratificado (falta "kickoff: ratificado" em pelizzai/data/state.md). ' +

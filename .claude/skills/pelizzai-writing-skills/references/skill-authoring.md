@@ -374,7 +374,7 @@ Antes de qualquer eval caro, valide o wording barato:
 
 O micro-teste de wording (seção acima) vem primeiro; a eval é o passo caro. Evals são indicados quando existe saída objetivamente verificável ou uma fronteira de routing importante. Cada caso deve conter contexto mínimo e entrada, comportamento esperado, comportamento proibido relevante, critério objetivo de aprovação e o motivo pelo qual o caso protege uma regressão plausível.
 
-Estrutura em `evals/evals.json`:
+Estrutura do arquivo que **você cria** dentro da skill, em evals/evals.json (nenhuma skill deste repositório usa esse formato hoje — as evals do harness são os cenários em Markdown descritos abaixo):
 
 ```json
 {
@@ -391,7 +391,7 @@ Estrutura em `evals/evals.json`:
 }
 ```
 
-O campo `expectations` (afirmações objetivamente verificáveis) é o que o **grader** checa — é o que torna a eval "verificável". Adicione-o ao redigir as asserções. Esquema completo de `evals.json`/`grading.json`: ver o skill-creator de origem (`references/schemas.md`); confirme o nome exato do campo na versão instalada.
+O campo `expectations` (afirmações objetivamente verificáveis) é o que o **grader** checa — é o que torna a eval "verificável". Adicione-o ao redigir as asserções. O esquema completo de `evals.json`/`grading.json` **não vive neste repositório**: ele vem do `skill-creator` da Anthropic, no arquivo references/schemas.md **do pacote daquela skill**. Confirme o nome exato do campo na versão que você tiver instalada, em vez de assumir o que está escrito aqui.
 
 Quando o critério é de **roteamento** e não de saída literal, o harness usa cenários em Markdown dentro de `evals/` (ex.: `.claude/skills/pelizzai-router/evals/adaptive-user-control.md`, `.claude/skills/pelizzai-reasoning/evals/`). Mesma exigência: cada caso nomeia a rota esperada, a rota proibida e a regressão que protege.
 

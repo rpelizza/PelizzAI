@@ -122,8 +122,10 @@ Antes da primeira tarefa, confirme:
 [ ] Plano ratificado na borda: plano gerado pelo harness recebeu aprovação explícita do CONTEÚDO;
     PRD/issues fornecidos pelo próprio usuário já contam como
     ratificados. Sem plano → volte a pelizzai-writing-plans.
-[ ] Greenfield: discovery, spec-approval, domain-skills-decision e plan-approval estão ratificados
-    ou possuem dispensa explícita registrada; nenhum campo permanece <pending>.
+[ ] Greenfield: as oito etapas aconteceram nesta ordem — descoberta → spec → stress da spec →
+    aprovação → plano → stress do plano → aprovação → setup — ou houve dispensa explícita do
+    usuário. As ratificações (data + o que foi aprovado) ficam no CABEÇALHO DO PLANO, não em campos
+    do cursor: este gate é de leitura do artefato, não de campo carimbado por hook.
 [ ] Consumidor: catálogo existe (zero domain skills é válido) e state foi preparado.
     Source mode: NÃO crie catálogo/state consumidor; use as regras do repo-fonte e execution record.
 [ ] As skills de domínio relevantes foram selecionadas quando o consumidor as possui.
@@ -136,9 +138,8 @@ Antes da primeira tarefa, confirme:
 [ ] NÃO está em branch protegida (default real/base-ref, main/master/develop/dev, ou HEAD vazio).
 [ ] Em consumidor, o estado existe em pelizzai/data/state.md (se não, instancie a partir do template e preencha
     slug/track/lane/phase/project/branch/base-ref/base-sha/kickoff/isolation/execution-mode/
-    commit-strategy/overlays/discovery/spec/spec-approval/domain-skills-decision/plan/plan-approval
-    antes da Tarefa 1; `validated-head: <none>`, `kickoff: pendente`
-    até a ratificação) e
+    commit-strategy/overlays/spec/plan antes da Tarefa 1; `validated-head: <none>`,
+    `kickoff: pendente` até a ratificação; gravar o arquivo basta — não existe commit só de setup) e
     foi validado contra o git (branch: `git branch --show-current`; worktree: `git worktree list`
     ou o comando rodado DENTRO do worktree-path).
 ```
@@ -339,9 +340,21 @@ Invariantes comuns:
 ```
 
 **Consumidor:** o cursor vive em `pelizzai/data/state.md` (template em
-[templates/state.md](templates/state.md)). Avance-o no mesmo commit da tarefa; os únicos commits
-só de cursor são `phase: blocked` e o closure final. Após compaction, reconstrua pelo state, arquivo
-`plan:` e Git.
+[templates/state.md](templates/state.md)) — o template carrega os campos; a doutrina é esta seção.
+Avance-o no mesmo commit da tarefa; os únicos commits só de cursor são `phase: blocked` e o closure
+final. Após compaction, confie no state + `git log` (nunca na memória pós-compaction, que
+re-despacha tarefa já concluída) e reconstrua pelo state, arquivo `plan:` e Git.
+
+**Quem escreve o cursor.** Cria o arquivo o primeiro entre `pelizzai-router` /
+`pelizzai-starting-branch` / esta skill que precisar gravar — gravar basta, **não existe commit só
+para inicializá-lo**: ele viaja no primeiro commit de conteúdo da tarefa. Depois: `pelizzai-router`
+(decisões iniciais da rota), `pelizzai-starting-branch` (branch/base-ref/base-sha/isolation/
+worktree-path), esta skill (`kickoff: ratificado`, cursor/progresso e a reconciliação
+`delivered`→`done`) e `pelizzai-finish-task` (selo `delivered` + `confirmar:`). Tarefa nova nunca
+herda as decisões da anterior: reconcilie a entrega anterior e então sobrescreva
+lane/kickoff/audience/spec/plan/isolation/execution-mode/commit-strategy/overlays/confirmar com os
+placeholders. A política ratificada em `pelizzai/profile.md` não é herança — ela pré-seleciona a
+recomendação que a tarefa nova re-exibe.
 
 **Source mode:** o cursor vive no plano/execution record nativo. Avance-o após cada commit, leia o
 plano nativo para tarefas pendentes e reconstrua pelo record + Git; não procure/crie state, arquivo
@@ -350,35 +363,48 @@ de plano consumidor nem commit de cursor. State ausente é o contrato, não uma 
 **Higiene do progresso (consumidor).** Registre **uma linha por tarefa** do plano em `## Progresso`
 (`T<n> ✅ <sha|data> — nota curta se houver`); relatórios longos (QA, review, investigação, decisões
 de rodada) vão para `pelizzai/data/reports/<AAAA-MM-DD>-<slug>-<tema>.md` (ignorado) com o link no
-state, nunca colados no corpo do cursor. Quando `state.md` passar de ~150 linhas, proponha compactar
-uma vez (advisory, mesmo modelo da cadência; nunca bloqueia). Fora a migração de bloco íntegro para
-`history/` (sem perda), qualquer condensação de conteúdo é propor-confirmar.
+state, nunca colados no corpo do cursor. Quando `state.md` passar de ~60 linhas, proponha compactar
+uma vez (advisory, mesmo modelo da cadência; nunca bloqueia): o template inteiro tem ~50 linhas, então
+esse limiar já denuncia cursor inchado. Fora a migração de bloco íntegro para `history/` (sem perda),
+qualquer condensação de conteúdo é propor-confirmar.
+
+**Migração no selo `delivered` (o cursor desincha no fechamento, não na abertura seguinte).** Quem
+executa é a `pelizzai-finish-task`; a fronteira é definida aqui. Ao gravar `phase: delivered`, o
+**bloco íntegro** da tarefa migra para `pelizzai/data/history/<AAAA-MM-DD>-<slug>.md` (VERSIONADO) e
+o state volta ao tamanho do template, com UMA linha de índice no `## Histórico`. Bloco íntegro
+(**fronteira da migração**, idêntica para `done` e `abandoned`) = todos os campos de `## Tarefa ativa`
+desta tarefa + suas linhas `T<n>`/`next`/`pending` de `## Progresso`, com os links de `data/reports/`
+copiados verbatim. Ordem das operações (sem perda → verificável):
+
+```text
+1. Copie o bloco íntegro para data/history/<AAAA-MM-DD>-<slug>.md — cópia fiel, nada reescrito.
+2. Devolva `## Tarefa ativa` aos placeholders do template, PRESERVANDO os campos que o destino e a
+   constatação posterior ainda leem: slug, phase: delivered, branch, base-ref, base-sha,
+   validated-head, commit-strategy, worktree-path e confirmar.
+3. Remova de `## Progresso` as linhas T<n>/next/pending migradas (voltam aos placeholders).
+4. Insira em `## Histórico`: `- <data> <slug> — delivered — <resultado ≤10 palavras> →
+   data/history/<arquivo>`.
+```
+
+A migração só está completa após (1)–(4) e é sem perda → automática; CONDENSAR conteúdo do bloco (em
+vez de copiá-lo fielmente) é destrutivo, sai da regra automática → só propor-confirmar.
 
 **Reconciliação da entrega anterior (`delivered` → `done`).** Ao abrir a próxima tarefa (aqui) ou ao
 retomar (`pelizzai-recovery`/session-start), se o state trouxer `phase: delivered`, constate a
-entrega ANTES de sobrescrever o cursor:
+entrega ANTES de sobrescrever o cursor. O bloco já está em `history/`; a reconciliação só carimba o
+desfecho:
 
 ```text
 - Leia `confirmar:` e verifique-a contra o git (read-only): a `base-ref` já contém `validated-head`?
   O PR foi mergeado/fechado? A branch foi integrada? (Entrega local: o usuário aceita?)
-- Constatada → grave `phase: done` + data + evidência de 1 linha e migre o bloco íntegro da tarefa
-  para `pelizzai/data/history/<AAAA-MM-DD>-<slug>.md` (VERSIONADO), deixando no state só a linha de
-  índice `- <data> <slug> — done — <resultado ≤10 palavras> → data/history/<arquivo>`. A migração de
-  bloco íntegro é sem perda → automática; CONDENSAR conteúdo é destrutivo → só propor-confirmar.
-- Falhou (PR fechado sem merge, branch descartada) → NÃO grave `done`. Informe e proponha retomar a
+- Constatada → carimbe a linha de índice do `## Histórico` (`— done <AAAA-MM-DD> — <evidência de 1
+  linha>`), grave `phase: done` e acrescente a mesma constatação ao arquivo de `data/history/`
+  correspondente. Só então libere slug/branch/base-*/validated-head/confirmar para a tarefa nova.
+- Falhou (PR fechado sem merge, branch descartada) → NÃO carimbe `done`. Informe e proponha retomar a
   branch da entrega ou arquivá-la como `abandoned` — a decisão é do usuário. Arquivar como `abandoned`
-  usa a MESMA migração sem perda: o bloco íntegro vai para `data/history/<AAAA-MM-DD>-<slug>.md` e no
-  state fica a linha de índice `- <data> <slug> — abandoned — <motivo ≤10 palavras> → data/history/<arquivo>`.
+  usa a MESMA migração sem perda: o bloco já migrou no selo, e a linha de índice recebe
+  `— abandoned <AAAA-MM-DD> — <motivo ≤10 palavras>`.
 ```
-
-O **bloco íntegro** (fronteira da migração, idêntica para `done` e `abandoned`) = todos os campos de
-`## Tarefa ativa` desta tarefa + suas linhas `T<n>`/`next`/`pending` de `## Progresso`, com os links
-de `data/reports/` copiados verbatim. Ordem das operações (sem perda → verificável): (1) copie o bloco
-íntegro para `data/history/<AAAA-MM-DD>-<slug>.md` — cópia fiel, nada reescrito; (2) substitua os
-campos de `## Tarefa ativa` pelos placeholders da tarefa nova; (3) remova as linhas
-`T<n>`/`next`/`pending` da tarefa migrada em `## Progresso`; (4) insira a linha de índice em
-`## Histórico`. A migração só está completa após (1)–(4); condensar qualquer conteúdo do bloco (em vez
-de copiá-lo fielmente) é destrutivo e sai da regra automática → só propor-confirmar.
 
 Escrita de metadata em `pelizzai/` é permitida em qualquer branch; o commit continua exigindo branch
 de tarefa. Por isso a reconciliação **lê** na branch atual (mesmo protegida) e **escreve** a metadata
@@ -482,8 +508,9 @@ for squash-final e **reabra o review final**. Aplique o circuit breaker do task-
 Com tudo aprovado e HEAD ainda igual a `candidate-head`, em consumidor escreva no state
 `validated-head: <SHA completo de candidate-head>`, sem commitar; essa é a única sujeira permitida.
 Em source mode, grave o SHA no execution record e mantenha a working tree limpa. Chame
-`pelizzai-finish-task`: consumidor fecha com um commit metadata-only de state; source mode não cria
-closure. Nenhum código, config ou doc pode mudar depois do seal.
+`pelizzai-finish-task`: consumidor fecha com um commit metadata-only (state + o arquivo de
+`data/history/` gerado pela migração do selo); source mode não cria closure. Nenhum código, config
+ou doc pode mudar depois do seal.
 
 ---
 

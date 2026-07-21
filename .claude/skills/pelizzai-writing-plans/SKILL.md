@@ -7,8 +7,13 @@ description: Transforma requisitos ratificados, spec, PRD ou design aprovado em 
 
 ## Objetivo
 
-Produzir o menor plano que permite a um executor fresco implementar sem adivinhar contratos,
-escopo ou prova. O plano descreve decisões e critérios; não antecipa a implementação inteira.
+Produzir o plano que um executor com **zero contexto** deste repositório executa sem precisar fazer
+uma única pergunta: os arquivos de cada tarefa, os contratos a honrar, a prova do resultado e os
+comandos exatos. Assuma um bom engenheiro que conhece pouco deste toolset, deste domínio e das
+convenções da casa — o que faltar no plano ele preenche adivinhando.
+
+Zero contexto é sobre **contexto completo**, não sobre transcrever o código futuro: o plano fixa
+decisões, contratos e critérios (ver *Profundidade do plano*) e não antecipa a implementação inteira.
 
 **Anuncie:** "Usando a skill PelizzAI Writing Plans para transformar os requisitos num plano executável."
 
@@ -107,10 +112,10 @@ aberta sem opções. Concordar com a recomendação custa uma palavra.
 
 ## Skills aplicáveis
 
-Registre no cabeçalho e em cada tarefa:
-
-- skills de domínio selecionadas do catálogo, ou `nenhuma`;
-- **Skills transversais do harness**, ou `nenhuma`.
+- No cabeçalho: as skills de domínio do catálogo que valem para o plano inteiro, ou `nenhuma`.
+- Em cada tarefa: as skills de domínio daquela fatia e as **Skills transversais do harness** que ela
+  exige, ou `nenhuma`. É esse bloco por tarefa que chega ao executor no briefing — o overlay não
+  fica só no cabeçalho.
 
 Overlays obrigatórios por superfície:
 
@@ -147,7 +152,10 @@ Ambos cobrem spec e qualidade; muda a quantidade de despachos, não o critério 
 
 ## Documento
 
-Use [templates/plan.md](templates/plan.md) e mantenha apenas campos aplicáveis. Cada tarefa contém:
+Use [templates/plan.md](templates/plan.md) e mantenha apenas campos aplicáveis. O cabeçalho carrega o
+bloco **Aprovações** — descoberta, spec, domain skills e o próprio plano, uma linha cada com a data de
+ratificação: é o registro histórico da decisão humana, e o `state.md` guarda só o cursor da tarefa.
+Nenhum marcador é preenchido por inferência. Cada tarefa contém:
 
 ```text
 resultado + fora de escopo
@@ -172,8 +180,9 @@ Antes do handoff:
 2. Confirme interfaces/nomenclatura entre tarefas e dependências.
 3. Confirme overlays e estratégia de prova por artefato.
 4. Procure placeholders e comandos chutados.
-5. Confirme que a lane não recebeu cerimônia maior que seu risco.
-6. **Estresse e exponha as lacunas materiais** do plano: caça ativa por casos não tratados, validação
+5. Releia o plano como quem nunca viu este repositório: sobrou pergunta que o artefato não responde?
+6. Confirme que a lane não recebeu cerimônia maior que seu risco.
+7. **Estresse e exponha as lacunas materiais** do plano: caça ativa por casos não tratados, validação
    ausente, estado/erro indefinido, autorização faltante e contradições spec↔plano↔tarefa.
 
 Liste premissas residuais **novas do plano**, sem re-litigar o design aprovado. Cada lacuna material
@@ -203,8 +212,10 @@ skills de domínio do repo-fonte e nunca cria runtime `pelizzai/`. Sob briefing 
 (SUBAGENT-STOP), não abra esse gate: sinalize a lacuna de cobertura ao coordenador.
 
 No consumidor, atualize o campo `plan:` no state e confirme o caminho materializado
-(`pelizzai/plans/AAAA-MM-DD-<feature>.md`). Em source mode, entregue o plano nativo/execution
-record a `pelizzai-execution-plans` de forma discoverable. A branch/base já estão definidas;
+(`pelizzai/plans/AAAA-MM-DD-<feature>.md`); a aprovação do conteúdo é registrada no cabeçalho do
+próprio plano (`Plano: aprovado em AAAA-MM-DD`), não no state. Em source mode, entregue o plano
+nativo/execution record a `pelizzai-execution-plans` de forma discoverable. A branch/base já estão
+definidas;
 **encaminhe ao Gate de setup pós-plano** da `pelizzai-execution-plans` somente após aprovação do
 conteúdo. O gate ratifica o **como** em decisões sequenciais — isolamento, branch, modo (as três
 opções sempre visíveis), commits e review. A `pelizzai-writing-plans` leva recomendações, não

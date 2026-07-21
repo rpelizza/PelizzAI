@@ -1,6 +1,6 @@
 # Template de plano de implementação — PelizzAI
 
-Copie para `pelizzai/plans/AAAA-MM-DD-<feature>.md` e substitua todo texto entre colchetes por conteúdo real. Cada tarefa é uma fatia vertical verificável; a estratégia varia conforme o efeito.
+Copie para `pelizzai/plans/AAAA-MM-DD-<feature>.md` e substitua todo texto entre colchetes por conteúdo real. Cada tarefa é uma fatia vertical verificável; a estratégia varia conforme o efeito. Escreva para quem abre o plano com zero contexto do repositório: contexto completo sim, transcrição do código futuro não.
 
 ---
 
@@ -11,12 +11,6 @@ Copie para `pelizzai/plans/AAAA-MM-DD-<feature>.md` e substitua todo texto entre
 
 > **Para quem executa:** SUB-SKILL OBRIGATÓRIA — use `pelizzai-execution-plans`.
 
-**Lane ratificada:** [`bounded` | `standard` | `exploratory` — recomendada pelo router e ratificada pelo usuário]
-
-**Status:** [rascunho | aprovado em AAAA-MM-DD]
-
-**Spec aprovada:** [caminho ou dispensa explícita registrada]
-
 **Objetivo:** [resultado em uma frase]
 
 **Arquitetura:** [abordagem e fronteiras em 2–3 frases]
@@ -25,18 +19,23 @@ Copie para `pelizzai/plans/AAAA-MM-DD-<feature>.md` e substitua todo texto entre
 
 **Skills de domínio aplicáveis:** [nomes de `pelizzai/domain-skills.md` ou `nenhuma`]
 
-**Decisão sobre domain skills:** [ratificada em AAAA-MM-DD — conjunto escolhido ou nenhuma]
-
-**Skills transversais do harness:** [ex.: `pelizzai-frontend`, `pelizzai-oswap`, `pelizzai-documenting-features` ou `nenhuma`]
-
 **Global Constraints (copiadas VERBATIM da spec):**
 
 - [constraint projeto-wide; se não houver, escreva `nenhuma`]
 
+**Aprovações** (uma linha cada; marcador sem resposta explícita do usuário fica `pendente`):
+
+- Descoberta: [ratificada em AAAA-MM-DD | dispensada em AAAA-MM-DD | não se aplica]
+- Spec: [`caminho` aprovada em AAAA-MM-DD | dispensa explícita em AAAA-MM-DD | não se aplica]
+- Domain skills: [conjunto escolhido, ou `nenhuma` — ratificada em AAAA-MM-DD]
+- Plano: [rascunho | aprovado em AAAA-MM-DD]
+
 ---
 ```
 
-O coordenador inclui Global Constraints e skills transversais aplicáveis no briefing de cada executor. Não liste overlay por possibilidade remota: UI exige `pelizzai-frontend`; superfície sensível exige `pelizzai-oswap`.
+As aprovações são o **registro histórico da decisão humana** e vivem só aqui — o `state.md` guarda o cursor da tarefa (`lane`, `phase`, `spec:`, `plan:`), não os carimbos. `Plano: rascunho` até a resposta explícita do usuário na borda de aprovação do conteúdo; silêncio não vira data.
+
+O coordenador inclui as Global Constraints e as skills transversais registradas na tarefa no briefing de cada executor. Não liste overlay por possibilidade remota: UI exige `pelizzai-frontend`; superfície sensível exige `pelizzai-oswap`.
 
 ## Lacunas materiais expostas
 
@@ -96,7 +95,8 @@ _Se autocontida, escreva `nenhuma`._
 - [ ] **Passo 2: Aplique a menor mudança da fatia** → verifique: [critério local]
 
 ```language
-[código/config/conteúdo completo]
+[conteúdo completo somente quando ele próprio é o contrato frágil — schema, formato, template,
+chamada pouco óbvia; caso contrário, nomeie interface, invariante e um exemplo curto]
 ```
 
 - [ ] **Passo 3: Execute a prova da estratégia** → verifique: [saída exata]
@@ -120,6 +120,7 @@ Adapte a ordem sem perder a prova:
 ## Gates de qualidade do plano
 
 ```text
+- Um executor sem nenhum contexto do repositório completa cada tarefa sem fazer uma única pergunta.
 - Paths, interfaces, conteúdo, comandos e saídas são concretos.
 - Todo passo possui `→ verifique:`.
 - Cada tarefa registra skills transversais, estratégia de implementação/validação e perfil de review.

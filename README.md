@@ -265,13 +265,15 @@ validated-head = SHA exato do último commit de conteúdo validado
 ```
 
 `pelizzai-finish-task` exige `HEAD == validated-head`; a única sujeira permitida é
-`pelizzai/data/state.md` contendo o seal pendente. Então cria exatamente um commit metadata-only,
-tocando apenas esse arquivo, para selar a tarefa em `phase: delivered` (conteúdo selado + destino
-executado) e gravar `confirmar:`, a condição observável que virará `done`.
-Antes de publicar, prova que `validated-head..closure-head` contém somente esse state e que nenhum
+`pelizzai/data/state.md` contendo o seal pendente. Então cria exatamente um commit metadata-only —
+o state e o arquivo de história que o próprio selo gera — para selar a tarefa em `phase: delivered`
+(conteúdo selado + destino executado) e gravar `confirmar:`, a condição observável que virará `done`.
+É nesse selo que o bloco íntegro da tarefa migra para `pelizzai/data/history/` (versionado) e o
+cursor volta ao tamanho do template, deixando uma linha de índice.
+Antes de publicar, prova que `validated-head..closure-head` contém somente essa metadata e que nenhum
 conteúdo do produto mudou. Push, PR, descarte e remoção de worktree continuam opt-in. `done` nunca é
 declarado aqui: é **constatado** na abertura da próxima tarefa ou na retomada — o harness confere
-`confirmar:` contra o Git e migra o bloco concluído para `pelizzai/data/history/` (versionado).
+`confirmar:` contra o Git e carimba o desfecho na linha de índice.
 
 ```mermaid
 flowchart LR
@@ -279,7 +281,7 @@ flowchart LR
     T --> R["review"]
     R --> V["Verification"]
     V --> S["validated-head"]
-    S --> M["commit metadata-only<br/>state.md → delivered"]
+    S --> M["commit metadata-only<br/>state.md + history/ → delivered"]
     M --> X["destino confirmado<br/>done constatado depois"]
 ```
 
@@ -310,13 +312,14 @@ pelizzai/
     ├── handoffs/               ignorado
     ├── mockups/                ignorado
     ├── reports/                ignorado
-    └── history/                versionado (entregas constatadas em done)
+    └── history/                versionado (bloco íntegro migrado no selo delivered)
 ```
 
-O `state.md` é escalar por repositório e registra, entre outros campos, `effect`, `risk`, `lane`,
-`overlays`, `audience`, `base-ref`, `base-sha`, `branch`, `isolation`, `execution-mode`,
-  `commit-strategy`, `kickoff`, `discovery`, `spec-approval`, `domain-skills-decision`, `plan`,
-  `plan-approval`, `validated-head` e `confirmar`. Isolamento, modo e commit nascem
+O `state.md` é escalar por repositório e é **cursor, não arquivo de carimbos**: registra, entre
+outros campos, `effect`, `risk`, `lane`, `overlays`, `audience`, `base-ref`, `base-sha`, `branch`,
+`isolation`, `execution-mode`, `commit-strategy`, `kickoff`, `spec`, `plan`, `validated-head` e
+`confirmar` — as aprovações de descoberta/spec/domain skills/plano ficam no cabeçalho do plano, com
+data. Isolamento, modo e commit nascem
 `<pending>` e só deixam de sê-lo quando o usuário ratifica o gate; `kickoff: ratificado` marca a
 rota confirmada. A `pelizzai-finish-task` encerra a tarefa em `phase: delivered` e grava `confirmar:`;
 `done` é constatado depois, contra o Git, na abertura da próxima tarefa ou na retomada. A política de execução ratificada do projeto vive à parte, em `pelizzai/profile.md`,

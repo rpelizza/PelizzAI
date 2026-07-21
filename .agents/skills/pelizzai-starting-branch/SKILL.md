@@ -142,10 +142,12 @@ Para um fluxo direto sem planejamento, aplique já a escolha de isolamento:
 - Branch: use o comando acima e registre `isolation: branch`.
 - Worktree: `git worktree add -b <branch> <caminho-fora-do-repo> <base-ref>` e registre o caminho.
 
-Em consumidor, antes da primeira mutação do produto, estagie somente `state.md`, inspecione e faça
-um commit metadata de setup (`chore: inicia tarefa <slug>`). Exija working tree limpa. Isso impede
-que o state inicial contamine o review do bug/ajuste/bootstrap. Em source mode, não há state nem
-commit de setup; branch/worktree + execution record bastam.
+Em consumidor, **grave** o `state.md` com suas ferramentas de arquivo e siga — gravar basta. **Não
+crie commit só de metadata** (`chore: inicia tarefa <slug>`): o cursor viaja no primeiro commit de
+conteúdo da tarefa, junto aos paths exatos que ele descreve. Ele é metadata do harness, não conteúdo
+da entrega — se aparecer no pacote de review da Tarefa 1, é ruído conhecido, nunca motivo para um
+commit extra. Em source mode, não há state nem commit de setup; branch/worktree + execution record
+bastam.
 
 ## 5. Aplicar o isolamento escolhido após o plano
 
@@ -183,9 +185,10 @@ git worktree add <caminho-fora-do-repo> <tipo>/<slug>
 
 6. Dentro dele, confirme branch, `HEAD == checkpoint-sha` e presença dos artefatos persistentes,
    quando existirem.
-7. Em consumidor, grave `isolation: worktree` e `worktree-path`, estagie somente `state.md`,
-   inspecione e faça um commit metadata de setup. Exija working tree limpa antes da Tarefa 1.
-   Em source mode, atualize apenas o execution record nativo; não crie state.
+7. Em consumidor, grave `isolation: worktree` e `worktree-path` no `state.md` dentro do worktree —
+   sem commit de metadata; esse toque entra no primeiro commit de conteúdo. Antes da Tarefa 1, exija
+   que nada além dele esteja sujo. Em source mode, atualize apenas o execution record nativo; não
+   crie state.
 
 O caminho fica fora da árvore do repositório. Se o ambiente bloquear a criação, informe e peça
 confirmação para permanecer em branch; não degrade em silêncio.

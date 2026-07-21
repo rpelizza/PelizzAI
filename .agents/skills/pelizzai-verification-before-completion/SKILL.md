@@ -208,8 +208,9 @@ Na entrada da finish-task em consumidor:
 - nenhuma evidência é anterior ao último fix/overlay.
 
 A finish-task cria exatamente um closure commit metadata-only. Antes de push/PR, ela prova que
-`validated-head..closure-head` contém somente `pelizzai/data/state.md`. Esse commit não muda o
-conteúdo validado.
+`validated-head..closure-head` contém somente metadata do harness: `pelizzai/data/state.md` e o
+arquivo `pelizzai/data/history/<AAAA-MM-DD>-<slug>.md` gerado pela migração do selo. Esse commit não
+muda o conteúdo validado.
 
 Em source mode, finish-task recebe `validated-head` do execution record, exige HEAD igual e working
 tree limpa e **não** cria state/closure commit.

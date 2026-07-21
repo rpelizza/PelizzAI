@@ -294,13 +294,14 @@ nativo em source mode, sem criar arquivo. Campos lógicos:
 slug, track, lane, phase, effect, risk, overlays,
 base-ref, base-sha, branch, isolation, worktree-path,
 execution-mode, commit-strategy, audience, kickoff,
-discovery, spec, spec-approval, domain-skills-decision, plan, plan-approval, project,
+spec, plan, project, confirmar,
 validated-head (somente após validação final).
 ```
 
-Em greenfield, `discovery`, `spec-approval`, `domain-skills-decision` e `plan-approval` começam
-`pending`. O gate de setup não pode gravar `kickoff: ratificado` enquanto algum deles continuar
-pendente, salvo dispensa explícita registrada no campo correspondente.
+O registro é o **cursor** da tarefa, não o arquivo de carimbos das aprovações. Em greenfield, as oito
+etapas (descoberta → spec → stress → aprovação → plano → stress → aprovação → setup) continuam
+obrigatórias e suas ratificações ficam no **cabeçalho do plano**, com data; o gate de setup só grava
+`kickoff: ratificado` depois de conferi-las ali ou de registrar a dispensa explícita do usuário.
 
 Ao ratificar o Gate de kickoff, registre a `lane`/`audience`/overlays da rota, mas deixe `kickoff:
 pendente`: o marcador `kickoff: ratificado <AAAA-MM-DD>` pertence ao Gate de setup pós-plano ou ao

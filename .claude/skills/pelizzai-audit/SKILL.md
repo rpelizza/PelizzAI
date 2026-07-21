@@ -213,7 +213,7 @@ data/reports/
 
 `data/state.md`, `data/review-domain-skills.md` e `data/history/` são **versionados** — registro
 durável; nunca entram no ignore (um `data/*` amplo com exceções silenciaria `history/` e quebraria a
-durabilidade do registro de tarefas done/abandoned). Verifique com `git check-ignore` usando arquivos
+durabilidade do registro das tarefas seladas). Verifique com `git check-ignore` usando arquivos
 de prova temporários; remova as provas depois.
 
 Crie sob demanda, não no bootstrap: `context.md`, `adr/`, `out-of-scope/`, `specs/`, `plans/` e diretórios efêmeros.
@@ -340,7 +340,7 @@ pelizzai/
 └── data/
     ├── state.md                    versionado
     ├── review-domain-skills.md     versionado
-    ├── history/                    versionado (registro durável de tarefas done/abandoned)
+    ├── history/                    versionado (bloco íntegro de cada tarefa, migrado no selo)
     ├── .cadence-state.json         ignorado
     ├── handoffs/                   ignorado
     ├── mockups/                    ignorado

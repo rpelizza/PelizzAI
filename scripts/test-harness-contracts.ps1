@@ -251,7 +251,15 @@ try {
     # -- Marcadores máquina-legíveis do state.md (schema do writegate/retomada) --
     Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'kickoff: <pendente \| ratificado' 'state.md tem marcador kickoff (pendente|ratificado)'
     Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'isolation: <pending[\s\S]*execution-mode: <pending[\s\S]*commit-strategy: <pending' 'state.md: isolation/execution-mode/commit-strategy nascem <pending>'
-    Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'discovery:[\s\S]*spec-approval:[\s\S]*domain-skills-decision:[\s\S]*plan-approval:' 'state.md registra aprovações greenfield'
+    # Restauração pré-11/07 (2026-07-21): o cursor voltou a ser CURSOR. As oito etapas de greenfield
+    # continuam obrigatórias, mas suas ratificações são registro histórico no CABEÇALHO DO PLANO —
+    # nunca campo do state carimbado/lido por hook. Anti-regressão nas duas pontas (sai do state,
+    # entra no plano) para que a remoção não seja desfeita por engano na próxima rodada.
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/templates/state.md' '^\s*-?\s*(discovery|spec-approval|domain-skills-decision|plan-approval):' 'state.md NÃO reintroduz campo de aprovação greenfield (cursor, não carimbo)'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'oito etapas[\s\S]{0,260}CABEÇALHO DO PLANO' 'execution-plans lê as oito etapas greenfield no cabeçalho do plano'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'oito\s+etapas[\s\S]{0,260}cabeçalho do plano' 'router: greenfield ratifica no cabeçalho do plano, não em campo do state'
+    Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' '\*\*Aprovações\*\*[\s\S]{0,300}Descoberta:[\s\S]{0,200}Spec:[\s\S]{0,200}Domain skills:[\s\S]{0,200}Plano:' 'plano carrega o bloco Aprovações (registro histórico das quatro ratificações)'
+    Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'silêncio não vira data' 'plano: marcador de aprovação nunca é preenchido por inferência'
 
     # -- Seção Defaults de execução ratificados no profile.md (memória de decisão) --
     Check-Match '.claude/skills/pelizzai-audit/templates/profile.md' '## Defaults de execução ratificados' 'profile.md tem seção Defaults de execução ratificados'
@@ -306,16 +314,51 @@ try {
     Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'Uma linha por tarefa' 'state.md: progresso é uma linha por tarefa'
     Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'data/reports/' 'state.md: relatório longo vai para data/reports/ (efêmero)'
     Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'data/history/[\s\S]{0,40}VERSIONADO' 'state.md: history/ é o registro durável versionado'
-    Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' '~150 linhas' 'state.md: nudge de compactação em ~150 linhas'
+    Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' '~60 linhas' 'state.md: nudge de compactação em ~60 linhas (template desinflado)'
     Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Higiene do progresso' 'execution-plans tem a seção Higiene do progresso'
     Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'uma linha por tarefa' 'execution-plans: uma linha por tarefa no progresso'
-    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' '~150 linhas' 'execution-plans: nudge de compactação em ~150 linhas'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' '~60 linhas' 'execution-plans: nudge de compactação em ~60 linhas'
     Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'data/history/[\s\S]{0,40}VERSIONADO' 'execution-plans: migração de bloco íntegro para history/ versionado'
-    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' '~150 linhas' 'finish-task: nudge de state volumoso (~150 linhas)'
+    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' '~60 linhas' 'finish-task: nudge de state volumoso (~60 linhas)'
     Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'data/history/' 'finish-task cita a migração para history/ na constatação de done'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' '^data/reports/\s*$' 'audit: reports/ permanece ignorado (efêmero)'
     Check-NotMatch '.claude/skills/pelizzai-audit/SKILL.md' '^data/history/\s*$' 'audit: history/ NÃO é ignorado no template (registro durável versionado)'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'history/\s+versionado' 'audit: history/ no Layout canônico marcado como versionado (durável, fora do ignore)'
+
+    # =====================================================================
+    # Restauração pré-11/07 (2026-07-21) — F4: o state volta a ser CURSOR.
+    # A regressão que esta seção trava: o template de dados foi virando
+    # manual de processo (85 linhas, 39 delas de instrução), o setup passou
+    # a custar um commit só de metadata e o cursor só desinchava na abertura
+    # SEGUINTE. O que fica travado aqui: tamanho do template, prosa na skill
+    # (não no dado), migração no selo `delivered` e zero commit de setup.
+    # =====================================================================
+
+    # -- Template é dado, não manual: teto de tamanho e ponteiro para a doutrina --
+    $stateTemplateLines = (Text '.claude/skills/pelizzai-execution-plans/templates/state.md') -split "`r?`n"
+    Check ($stateTemplateLines.Count -le 60) 'state.md: template cabe em 60 linhas (cursor desinflado)' "linhas=$($stateTemplateLines.Count)"
+    Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'Referencie, não duplique' 'state.md aponta para a doutrina em vez de duplicá-la'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' '\*\*Quem escreve o cursor' 'execution-plans hospeda a autoria do cursor (prosa saiu do template)'
+    Check-Match '.claude/skills/pelizzai-handoff/SKILL.md' 'artefato que tem path é referenciado, nunca colado' 'handoff: regra de referenciar em vez de colar (fundamento da desduplicação)'
+
+    # -- Setup não paga commit de metadata: o cursor viaja no primeiro commit de conteúdo --
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'crie commit só de metadata' 'starting-branch: setup grava o state e segue, sem commit de metadata'
+    Check-NotMatch '.claude/skills/pelizzai-starting-branch/SKILL.md' 'faça\s+um commit metadata de setup' 'starting-branch NÃO reintroduz o commit de setup'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'não existe commit só de metadata para iniciar a tarefa' 'task-cycle: Tarefa 1 leva o state do setup no commit de conteúdo'
+
+    # -- O cursor desincha no FECHAMENTO (selo delivered), não na abertura seguinte --
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Migração no selo .delivered' 'execution-plans: a migração para history/ acontece no selo delivered'
+    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'Migre o bloco íntegro e desinfle o cursor' 'finish-task executa a migração ao selar delivered'
+    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'git add -- pelizzai/data/state\.md pelizzai/data/history/' 'finish-task estagia state + history no mesmo closure'
+    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' ":\(exclude\)pelizzai/data/history/" 'finish-task: guarda de produto exclui a metadata de history/'
+    Check-Match '.claude/skills/pelizzai-verification-before-completion/SKILL.md' 'somente metadata do harness' 'verification: closure contém state + history, não só state'
+    Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'já migrou para .pelizzai/data/history/' 'recovery: na retomada só carimba o desfecho (o bloco já migrou)'
+
+    # -- Plano executável por quem tem zero contexto (exigência do BASE restaurada) --
+    Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'zero contexto\*\*[\s\S]{0,80}uma única pergunta' 'writing-plans: objetivo é o plano que um executor com zero contexto executa sem perguntar'
+    Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'sem fazer uma única pergunta' 'plano: gate de qualidade exige executor sem perguntas'
+    Check-NotMatch '.claude/skills/pelizzai-writing-plans/templates/plan.md' '\*\*Lane ratificada:\*\*' 'plano não duplica a lane (cursor é do state)'
+    Check-NotMatch '.claude/skills/pelizzai-writing-plans/templates/plan.md' '\*\*Status:\*\*' 'plano não mantém Status solto além do bloco Aprovações'
 
     # -- D5: plano anti-carimbo — Decisões técnicas, ratificação não-carimbo, Desvios + teste de desvio --
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' '## Decisões técnicas deste plano' 'writing-plans exige a seção Decisões técnicas deste plano'
@@ -437,7 +480,12 @@ try {
             $leaf = Split-Path -Leaf $wgRel
             Check-Match $wgRel 'main[\s\S]{0,40}master[\s\S]{0,40}develop[\s\S]{0,40}dev' "writegate conhece as branches protegidas ($leaf)"
             Check-Match $wgRel 'kickoff[\s\S]{0,20}ratificado' "writegate chaveia no marcador kickoff: ratificado ($leaf)"
-            Check-Match $wgRel 'discovery[\s\S]{0,80}spec-approval[\s\S]{0,80}domain-skills-decision[\s\S]{0,80}plan-approval' "writegate protege aprovações greenfield ($leaf)"
+            # Restauração 2026-07-21: o enforcement das aprovações greenfield SAIU do hook. As oito
+            # etapas continuam obrigatórias por texto de skill; o hook trava um único marcador (o
+            # kickoff), porque catraca de arquivo travava trabalho legítimo sempre que o state ficava
+            # um passo atrás da conversa. Anti-regressão: nem a constante, nem o escopo documentado.
+            Check-NotMatch $wgRel 'spec-approval|domain-skills-decision|plan-approval' "writegate NÃO reintroduz enforcement das aprovações greenfield ($leaf)"
+            Check-Match $wgRel 'ESCOPO DELIBERADO' "writegate documenta por que trava só o kickoff ($leaf)"
             # D2: carve-out de metadata documentado + nota de segurança (paridade das duas pernas).
             Check-Match $wgRel 'CARVE-OUT DE METADATA' "writegate documenta o carve-out de metadata do harness ($leaf)"
             Check-Match $wgRel 'de escrita de ARQUIVO' "writegate: nota de segurança — carve-out é só de escrita de arquivo, não de commit ($leaf)"
@@ -470,6 +518,24 @@ try {
                 Check ((Invoke-Writegate $wg @{ file_path = 'pelizzai/data/state.md' } $wgTemp) -eq 0) "writegate: carve-out D2 libera metadata pelizzai/ em branch protegida ($leaf)"
                 # Fora da raiz do repo permite (exit 0), mesmo em branch protegida.
                 Check ((Invoke-Writegate $wg @{ file_path = $wgOutside } $wgTemp) -eq 0) "writegate permite escrita fora da raiz ($leaf)"
+
+                # -- Matcher Bash: falsos positivos corrigidos (restauração 2026-07-21) --
+                # Controle positivo primeiro: redirecionamento REAL para dentro da raiz continua
+                # bloqueando. Sem ele, os checks abaixo passariam com um matcher que virou no-op.
+                Check ((Invoke-Writegate $wg @{ command = 'npm test > build.log' } $wgTemp) -eq 2) "writegate bloqueia redirecionamento real para dentro da raiz ($leaf)"
+                # Sinks nulos DESCARTAM saída — não são escrita de produto. `> NUL` resolvia como
+                # caminho relativo dentro da raiz e travava comando legítimo.
+                Check ((Invoke-Writegate $wg @{ command = 'node x.js > NUL' } $wgTemp) -eq 0) "writegate: sink nulo NUL não é escrita de produto ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'node x.js 2> $null' } $wgTemp) -eq 0) "writegate: sink nulo `$null não é escrita de produto ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'node x.js > /dev/null' } $wgTemp) -eq 0) "writegate: sink nulo /dev/null não é escrita de produto ($leaf)"
+                # Alvo com variável de ambiente é EXPANDIDO antes de comparar com a raiz: o arquivo
+                # nasce fora do repositório, logo não é produto.
+                Check ((Invoke-Writegate $wg @{ command = 'npm test > $env:TEMP/build.log' } $wgTemp) -eq 0) "writegate expande `$env:VAR antes de decidir ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'npm test > %TEMP%\build.log' } $wgTemp) -eq 0) "writegate expande %VAR% antes de decidir ($leaf)"
+                # Variável irresolvível → alvo indecidível → fail-open (mesma honestidade do matcher).
+                Check ((Invoke-Writegate $wg @{ command = 'npm test > $env:PELIZZAI_NAO_EXISTE_XYZ/f.log' } $wgTemp) -eq 0) "writegate não bloqueia alvo com variável irresolvível ($leaf)"
+                # Não-regressão: `>` dentro de aspas é texto, não redirecionamento.
+                Check ((Invoke-Writegate $wg @{ command = 'git commit -m "a > b"' } $wgTemp) -eq 0) "writegate não confunde texto entre aspas com redirecionamento ($leaf)"
             }
 
             git -C $wgTemp checkout -q -b feat/x  # branch de tarefa (nao protegida)
@@ -490,6 +556,9 @@ try {
                 Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 0) "writegate libera produto após kickoff ratificado ($leaf)"
             }
 
+            # Fixture INVERTIDA (restauração 2026-07-21): um state legado que ainda traga os quatro
+            # campos de aprovação em `pending` NÃO bloqueia mais — quem libera é o kickoff sozinho.
+            # Ela reprova se o enforcement por campo voltar ao hook.
             Set-Content -LiteralPath (Join-Path $wgTemp 'pelizzai/data/state.md') -Value @"
 - kickoff: ratificado 2026-07-12
 - discovery: pending
@@ -499,19 +568,7 @@ try {
 "@ -Encoding utf8
             foreach ($wg in @($wgMjs, $wgPs1)) {
                 $leaf = Split-Path -Leaf $wg
-                Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 2) "writegate bloqueia produto com aprovação greenfield pendente ($leaf)"
-            }
-
-            Set-Content -LiteralPath (Join-Path $wgTemp 'pelizzai/data/state.md') -Value @"
-- kickoff: ratificado 2026-07-12
-- discovery: ratificada 2026-07-12
-- spec-approval: ratificada 2026-07-12
-- domain-skills-decision: ratificada 2026-07-12
-- plan-approval: ratificado 2026-07-12
-"@ -Encoding utf8
-            foreach ($wg in @($wgMjs, $wgPs1)) {
-                $leaf = Split-Path -Leaf $wg
-                Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 0) "writegate libera produto após aprovações greenfield ($leaf)"
+                Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 0) "writegate ignora campos de aprovação greenfield no state ($leaf)"
             }
 
             # Consumidor instalado via -ExportConsumer tem manifesto+sync+skills core: isso NÃO é
@@ -583,6 +640,22 @@ try {
         $removedSettings = Get-Content -LiteralPath $settingsPath -Raw -Encoding utf8
         Check ($removedSettings -notmatch 'pelizzai-(?:guardrails|writegate|cadence|session-start)\.mjs') 'remoção elimina handlers PelizzAI'
         Check ($removedSettings -match 'echo custom' -and $removedSettings -match 'Bash\(rm -rf:\*\)') 'remoção preserva configurações alheias'
+
+        # Restauração 2026-07-21: hook é OPT-IN, um a um e com confirmação — nunca imposto em bloco.
+        # `--only` torna a doutrina operável e `--check` vira INVENTÁRIO: instalação parcial é
+        # escolha legítima do usuário, não defeito. Sem esta rede, o instalador volta a tratar
+        # "faltou hook" como falha e o bootstrap volta a empurrar os quatro de uma vez.
+        Run-Native { node scripts/install-hooks.mjs --project $hooksTemp --only cadence } 'instalador --only registra apenas o hook pedido'
+        Run-Native { node scripts/install-hooks.mjs --project $hooksTemp --check } 'check tolera instalação parcial deliberada (opt-in não é falha)'
+        $null = & node scripts/install-hooks.mjs --project $hooksTemp --check --only writegate 2>&1
+        Check ($LASTEXITCODE -eq 1) 'check --only reprova hook explicitamente pedido e ausente'
+        Run-Native { node scripts/install-hooks.mjs --project $hooksTemp --only guardrails,writegate } 'instalador --only é aditivo (não derruba hook já aceito)'
+        $partialSettings = Get-Content -LiteralPath $settingsPath -Raw -Encoding utf8
+        Check ($partialSettings -match 'pelizzai-cadence\.mjs' -and $partialSettings -match 'pelizzai-guardrails\.mjs' -and [regex]::Matches($partialSettings, 'pelizzai-writegate\.mjs').Count -eq 2) 'instalador --only preserva o hook anterior e registra os dois matchers do writegate'
+        Check ($partialSettings -notmatch 'pelizzai-session-start\.mjs') 'instalador --only não instala hook fora da lista'
+        $null = & node scripts/install-hooks.mjs --project $hooksTemp --only inexistente 2>&1
+        Check ($LASTEXITCODE -eq 1) 'instalador rejeita id desconhecido em --only'
+        Run-Native { node scripts/install-hooks.mjs --project $hooksTemp --remove } 'instalador limpa o estado parcial ao final'
     } finally {
         if (Test-Path -LiteralPath $hooksTemp) { Remove-Item -LiteralPath $hooksTemp -Recurse -Force }
     }

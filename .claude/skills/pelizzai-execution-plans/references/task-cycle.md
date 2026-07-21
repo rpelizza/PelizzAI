@@ -168,11 +168,15 @@ Nunca ignore uma escalação nem re-despache sem mudar nada.
 
 ## 7. Avançar o cursor
 
-No consumidor, antes do commit da tarefa atualize `pelizzai/data/state.md` (na seção
-`## Progresso`, atualize `delivered`, ajuste `next` e `pending`, mantenha `phase: exec`) e inclua-o
-no stage junto aos paths exatos da tarefa. O commit definitivo (granular) ou wip (squash-final)
-carrega o cursor. Ao concluir o plano e selar o conteúdo, a `pelizzai-finish-task` fecha
-`phase: done` no único closure commit metadata-only.
+No consumidor, antes do commit da tarefa atualize `pelizzai/data/state.md` (em `## Progresso`,
+acrescente **uma linha** `T<n> ✅ <sha|data> — <nota ≤1 linha>` — relatório longo vai para
+`pelizzai/data/reports/` com só o link —, ajuste `next` e `pending`, mantenha `phase: exec`) e
+inclua-o no stage junto aos paths exatos da tarefa. O commit definitivo (granular) ou wip
+(squash-final) carrega o cursor — inclusive na Tarefa 1, que leva junto o state gravado no setup:
+**não existe commit só de metadata para iniciar a tarefa**. Ao concluir o plano e selar o conteúdo, a
+`pelizzai-finish-task` sela `phase: delivered` no único closure commit metadata-only, migrando o
+bloco íntegro da tarefa para `data/history/` — o cursor volta ao tamanho do template e `done` é
+constatado depois.
 
 Em source mode, avance o execution record nativo após o commit e não crie state/closure.
 

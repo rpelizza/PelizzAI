@@ -1,6 +1,6 @@
 ---
 name: pelizzai-finish-task
-description: Use depois que overlays, consolidação e validação final selaram o conteúdo em validated-head. Antes do destino, checa como rede de segurança se segurança, UI ou documentação ficaram descobertas e oferece — sem bloquear — devolver a entrega ao ciclo. No consumidor, encerra a tarefa em phase delivered com um commit metadata-only de state.md (done é constatação posterior, não aqui); no repo-fonte, valida o seal sem criar runtime/closure. Mantém local por default ou publica/abre PR com autorização. Nunca altera conteúdo ou histórico depois do seal.
+description: Use depois que overlays, consolidação e validação final selaram o conteúdo em validated-head. Antes do destino, checa como rede de segurança se segurança, UI ou documentação ficaram descobertas e oferece — sem bloquear — devolver a entrega ao ciclo. No consumidor, encerra a tarefa em phase delivered com um commit metadata-only de state.md + o arquivo de data/history/ da migração (done é constatação posterior, não aqui); no repo-fonte, valida o seal sem criar runtime/closure. Mantém local por default ou publica/abre PR com autorização. Nunca altera conteúdo ou histórico depois do seal.
 ---
 
 # PelizzAI Finish Task
@@ -16,7 +16,7 @@ ciclo — sem bloquear e sem remendar depois do seal. Esta skill encerra em
 posterior, na próxima abertura/retomada — nunca declarado aqui. Esta skill:
 
 ```text
-consumer: validated-head → closure `delivered` (só state.md) → delivery-head
+consumer: validated-head → closure `delivered` (state.md + history/ da migração) → delivery-head
 source:   validated-head ──────────────────────────────────→ delivery-head
                                      (done constatado depois, fora desta skill)
 ```
@@ -47,7 +47,8 @@ As seções de state/closure abaixo são exclusivas do projeto consumidor.
   snapshot, doc generator nem fix.
 - Lacuna de cobertura (segurança, UI, documentação) vira oferta explícita no §1.5, nunca silêncio;
   aceitá-la devolve a tarefa ao ciclo de validação, nunca vira patch pós-seal.
-- O único commit novo toca somente pelizzai/data/state.md.
+- O único commit novo toca somente metadata do harness: pelizzai/data/state.md e o
+  pelizzai/data/history/<AAAA-MM-DD>-<slug>.md que a migração do selo acabou de gerar.
 - Manter local é a recomendação padrão, mas também exige resposta no gate. Push/PR, remover
   worktree e descarte exigem decisão explícita por tarefa: nunca são aplicados a partir de um
   default de profile nem herdados de outra tarefa.
@@ -170,21 +171,29 @@ e escale ao coordenador o que exigir decisão.
 `delivered` = conteúdo selado + destino executado; grava-se ANTES de sair da branch de tarefa (sobe
 junto no PR). No `pelizzai/data/state.md` já modificado pelo seal:
 
-1. Preserve `validated-head`, `base-ref`, `base-sha`, branch, `slug`, o progresso e as decisões da
-   tarefa — NÃO limpe para placeholders (isso é da reconciliação `delivered`→`done` na próxima
-   abertura, que também migra o bloco íntegro para `data/history/`).
+1. **Migre o bloco íntegro e desinfle o cursor** pela fronteira definida em `pelizzai-execution-plans`
+   → §Estado e retomada: copie fielmente os campos da tarefa + as linhas `T<n>`/`next`/`pending` para
+   `pelizzai/data/history/<AAAA-MM-DD>-<slug>.md` (VERSIONADO), devolva `## Tarefa ativa` e
+   `## Progresso` aos placeholders do template e deixe no `## Histórico` **uma** linha de índice
+   (`- <data> <slug> — delivered — <resultado ≤10 palavras> → data/history/<arquivo>`). O cursor volta
+   ao tamanho do template AQUI, no fechamento — não fica inchado durante toda a janela `delivered`.
+   Preserve `slug`, `phase`, `branch`, `base-ref`, `base-sha`, `validated-head`, `commit-strategy`,
+   `worktree-path` e `confirmar:`: o destino (Passo 3) e a constatação posterior ainda os leem.
 2. Defina `phase: delivered` e grave `confirmar:` com a condição observável que vira `done`, derivada
    do destino escolhido em 2a: publicar/PR → `base-ref contém validated-head (PR/branch integrada)`;
    manter local → `entrega local aceita pelo usuário`; descarte/arquivamento (opção 4) → `arquivada
    localmente, sem merge esperado` (não é entrega numa base: o §3d define arquivar ou descartar; a
    constatação vira `done` quando o arquivo é aceito, ou `abandoned` se descartado).
-3. Acrescente ao Histórico uma linha datada de `delivered`, sem prometer merge/`done` ainda.
+3. Confira que a linha de índice do `## Histórico` (passo 1) está datada como `delivered`, sem
+   prometer merge/`done` ainda — o carimbo vem da constatação posterior.
 4. Atualize a data.
 
-Estagie **somente** o state:
+Estagie **somente** a metadata do harness — o cursor e o arquivo de história que ele acabou de
+gerar (a migração do passo 1 cria um arquivo versionado; ele viaja neste mesmo closure, nunca num
+commit extra):
 
 ```bash
-git add -- pelizzai/data/state.md
+git add -- pelizzai/data/state.md pelizzai/data/history/<AAAA-MM-DD>-<slug>.md
 git diff --cached --name-only
 git commit -m "chore: sela tarefa em delivered"
 ```
@@ -192,11 +201,11 @@ git commit -m "chore: sela tarefa em delivered"
 Antes de executar o destino, prove as três guardas:
 
 ```bash
-# deve listar exatamente pelizzai/data/state.md
+# deve listar exatamente esses dois arquivos de metadata, nada mais
 git diff --name-only <validated-head>..HEAD
 
-# nenhuma diferença de produto fora do state
-git diff --quiet <validated-head>..HEAD -- . ':(exclude)pelizzai/data/state.md'
+# nenhuma diferença de produto fora da metadata do harness
+git diff --quiet <validated-head>..HEAD -- . ':(exclude)pelizzai/data/state.md' ':(exclude)pelizzai/data/history/*'
 
 # deve estar vazio
 git status --porcelain --untracked-files=all
@@ -282,8 +291,8 @@ git worktree remove <caminho>
 ```
 
 Falha significa parar e reportar. Não use `--force`. Não crie outro commit para limpar
-`worktree-path`; o state selado em `delivered` é histórico da execução e a próxima abertura o
-reconcilia (`done` + `history/`) antes de sobrescrever.
+`worktree-path`; o state selado em `delivered` já está enxuto (o bloco íntegro foi para `history/`) e
+a próxima abertura carimba `done` no índice antes de sobrescrever.
 
 ## 5. Nudge de manutenção (read-only)
 
@@ -307,9 +316,9 @@ ação do coordenador; um membro de time apenas sinaliza a lacuna no relatório:
 - **Manutenção não armada:** se o hook de cadência está instalado mas o ledger está ausente, informe
   UMA vez ("cadência inativa: sem ledger; rode a inicialização mínima da `pelizzai-audit` para
   ativar") para distinguir "desligado" de "quebrado".
-- **State volumoso:** se `pelizzai/data/state.md` passou de ~150 linhas, sugira compactar uma vez
-  (advisory). A migração do bloco íntegro para `data/history/` na constatação de `done` já enxuga o
-  state; condensar conteúdo remanescente é propor-confirmar.
+- **State volumoso:** se `pelizzai/data/state.md` passou de ~60 linhas, sugira compactar uma vez
+  (advisory) — o template inteiro tem ~50. A migração do bloco íntegro para `data/history/` no selo
+  `delivered` já enxuga o state; condensar conteúdo remanescente é propor-confirmar.
 
 Source mode, ou sem hook e sem ledger: no-op silencioso.
 

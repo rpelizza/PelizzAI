@@ -12,7 +12,9 @@
 #  - Write | Edit | MultiEdit | NotebookEdit  -> le tool_input.file_path / .notebook_path;
 #  - Bash                                     -> detecta redirecionamento de escrita no
 #    tool_input.command (>, >>, &>, tee, sed -i, Set-Content/Add-Content/Out-File) para
-#    caminhos DENTRO da raiz do projeto. Mesma regra dos dois lados.
+#    caminhos DENTRO da raiz do projeto. Mesma regra dos dois lados. Sinks nulos (NUL, $null,
+#    /dev/null) e alvos que resolvem para FORA da raiz (incl. $env:TEMP, %TEMP%, absolutos)
+#    nunca sao escrita de produto e nunca bloqueiam.
 #
 # REGRA A (invariante, ambos os modos) - isolamento antes da primeira escrita:
 #   escrever caminho de PRODUTO (fora de pelizzai/) dentro da raiz estando em branch protegida
@@ -22,10 +24,15 @@
 #
 # REGRA B (so consumidor: existe pelizzai/ e NAO e o repo-fonte) - nada de codigo antes do gate:
 #   escrever caminho de PRODUTO (fora de pelizzai/) enquanto pelizzai/data/state.md NAO
-#   contem "kickoff: ratificado" -> BLOQUEIA. Quando o state usa campos de aprovacao
-#   greenfield, qualquer campo pending tambem bloqueia. Escritas em pelizzai/ sao sempre liberadas
-#   (sao os artefatos que registram o proprio gate). Em SOURCE MODE (repo-fonte PelizzAI:
-#   sentinela pelizzai-source-repo.txt) a Regra B e PULADA - ali o marcador vive no execution record nativo.
+#   contem "kickoff: ratificado" -> BLOQUEIA. Escritas em pelizzai/ sao sempre liberadas
+#   (sao os artefatos que registram o proprio gate).
+#   ESCOPO DELIBERADO: o hook trava UM marcador - o kickoff. As etapas de greenfield
+#   (descoberta -> spec -> stress -> aprovacao -> plano -> stress -> aprovacao) continuam
+#   obrigatorias, mas vivem nas skills, NAO em enforcement de runtime: transforma-las em
+#   catraca de arquivo travava trabalho legitimo sempre que o state ficava um passo atras da
+#   conversa. Doutrina nas skills; no hook, so o invariante.
+#   Em SOURCE MODE (repo-fonte PelizzAI: sentinela pelizzai-source-repo.txt) a Regra B e
+#   PULADA - ali o marcador vive no execution record nativo.
 #
 # Bloqueio: exit 2 + motivo e caminho seguro no stderr. Erros do PROPRIO hook e casos em que
 # NAO da para decidir com seguranca: exit 0 (fail-open - bug ou falso positivo nunca trava o
@@ -55,7 +62,6 @@ $PROTECTED = @('main', 'master', 'develop', 'dev')
 # Marcadores maquina-legiveis dos gates sequenciais no state.md (kickoff/pos-plano ratificado
 # pelo usuario: conteudo + isolamento + modo + commit). writegate e retomada dependem dele.
 $KICKOFF_RATIFIED = 'kickoff:\s*ratificado'
-$PENDING_USER_APPROVAL = '^\s*-?\s*(discovery|spec-approval|domain-skills-decision|plan-approval):\s*<?pending>?\s*$'
 # Sentinela DEDICADA do repo-fonte PelizzAI (source mode): presente, a Regra B e pulada.
 # Criterio unico e inequivoco: manifesto e sync-harness existem tambem nos consumidores
 # instalados via -ExportConsumer e NAO indicam source mode.
@@ -132,6 +138,45 @@ function Get-ParsedSegment([string]$seg) {
   return @{ Tokens = $tokens; Redirects = $redirects }
 }
 
+# Sinks que NAO sao arquivo do repositorio: dispositivos nulos do Windows (NUL, NUL:), do
+# PowerShell ($null) e do POSIX (/dev/null e o restante de /dev/). Redirecionar para eles e
+# DESCARTAR saida, nao escrever produto - `node x.js > NUL` resolvia para um caminho relativo
+# dentro da raiz e bloqueava indevidamente.
+$NULL_SINKS = @('nul', 'nul:', '$null', 'con', 'con:', '/dev/null')
+function Test-NullSink([string]$target) {
+  $t = ((([string]$target).Trim()) -replace '\\', '/').ToLowerInvariant()
+  return ($NULL_SINKS -contains $t) -or $t.StartsWith('/dev/')
+}
+
+# Expande referencias de variavel de ambiente no alvo: $env:NOME (PowerShell), %NOME% (cmd),
+# ${NOME} e $NOME (POSIX). Sem isso, `> $env:TEMP/build.log` era lido como caminho RELATIVO
+# dentro da raiz e bloqueava - quando o arquivo nem sequer nasce no repositorio.
+# Referencia que nao resolve -> alvo indecidivel -> devolve $null e o hook nao bloqueia
+# (fail-open, a mesma honestidade do resto do matcher: o que nao da para parsear com
+# seguranca, nao vira invariante). O valor expandido nao e reexpandido (sem laco infinito).
+function Expand-ShellVars([string]$target) {
+  $patterns = @(
+    '\$env:([A-Za-z_][A-Za-z0-9_]*)',
+    '%([A-Za-z_][A-Za-z0-9_]*)%',
+    '\$\{([A-Za-z_][A-Za-z0-9_]*)\}',
+    '\$([A-Za-z_][A-Za-z0-9_]*)'
+  )
+  $out = $target
+  foreach ($pattern in $patterns) {
+    $rx = [regex]::new($pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    $startAt = 0
+    while ($startAt -le $out.Length) {
+      $m = $rx.Match($out, $startAt)
+      if (-not $m.Success) { break }
+      $value = [System.Environment]::GetEnvironmentVariable($m.Groups[1].Value)
+      if ([string]::IsNullOrEmpty($value)) { return $null }
+      $out = $out.Substring(0, $m.Index) + $value + $out.Substring($m.Index + $m.Length)
+      $startAt = $m.Index + $value.Length
+    }
+  }
+  return $out
+}
+
 # Alvos de escrita de um comando shell (matcher irmao de Bash). Best-effort e honesto:
 # cobre os casos comuns; o que nao conseguir parsear com seguranca, nao bloqueia.
 function Get-ShellTargets([string]$command) {
@@ -179,7 +224,19 @@ function Get-ShellTargets([string]$command) {
       }
     }
   }
-  return @($targets | Where-Object { $_ -and (-not $_.StartsWith('-')) })
+  # Descarta flags, sinks nulos e alvos com variavel irresolvivel; expande o que sobrar para
+  # que a comparacao com a raiz do repo veja o caminho REAL, nao o literal do shell.
+  $clean = [System.Collections.Generic.List[string]]::new()
+  foreach ($t in $targets) {
+    if (-not $t) { continue }
+    if ($t.StartsWith('-')) { continue }
+    if (Test-NullSink $t) { continue }
+    $expanded = Expand-ShellVars $t
+    if (-not $expanded) { continue }
+    if (Test-NullSink $expanded) { continue }
+    [void]$clean.Add($expanded)
+  }
+  return @($clean)
 }
 
 # Bloqueia: motivo + caminho seguro no stderr e exit 2.
@@ -288,12 +345,7 @@ try {
   }
   $state = ''
   try { $state = Get-Content -LiteralPath $statePath -Raw } catch { exit 0 } # nao leu o marcador -> fail-open
-  $kickoffRatified = [regex]::IsMatch($state, $KICKOFF_RATIFIED, 'IgnoreCase')
-  $approvalPending = [regex]::IsMatch($state, $PENDING_USER_APPROVAL, 'IgnoreCase, Multiline')
-  if ($kickoffRatified -and -not $approvalPending) { exit 0 }
-  if ($approvalPending) {
-    Invoke-Block 'ha aprovacao humana pendente no lifecycle (discovery/spec/domain skills/plano). Resolva uma decisao por vez com o usuario e atualize o state antes de escrever produto.'
-  }
+  if ([regex]::IsMatch($state, $KICKOFF_RATIFIED, 'IgnoreCase')) { exit 0 }
 
   Invoke-Block 'o kickoff ainda nao foi ratificado (falta "kickoff: ratificado" em pelizzai/data/state.md). Conduza o gate de kickoff/pos-plano COM o usuario - isolamento, modo de execucao e estrategia de commit -, grave "kickoff: ratificado" em pelizzai/data/state.md e entao escreva o codigo.'
 } catch {
