@@ -4,6 +4,36 @@ O protocolo que cada tarefa segue na execução de um plano, válido nos três m
 inline). A prova e a forma do review variam por artefato e risco; os gates de escopo, qualidade e
 evidência permanecem observáveis.
 
+## 0. Autonomia entre as tarefas e a parada por lacuna material
+
+O coordenador roda o ciclo abaixo de ponta a ponta **sem pedir licença a cada passo**: dentro de um
+plano ratificado, passo mecânico e verificável se executa — não se pergunta "sigo?" ao fim de cada
+tarefa nem se pede permissão para comando local reversível. A autonomia é de **execução**; a decisão
+continua sendo do humano.
+
+Fora de `BLOCKED` e do circuit breaker (§5), a única coisa que interrompe uma frente no meio é a
+**lacuna material**: requisito, escopo, UX, arquitetura, dados, segurança, custo, risco aceito ou
+critério de aceite que a spec e o plano não decidiram. Ela tem caminho fixo, não é uma pausa vaga:
+
+```text
+1. O membro PARA a sua tarefa e NOMEIA a lacuna: o que não está decidido, o que ela muda na entrega
+   e as 2–3 opções que enxerga, com a que recomenda. Devolve NEEDS_CONTEXT. Nunca preenche por
+   convenção, default, Context7 ou "inferência razoável", e nunca fala direto com o usuário.
+2. O coordenador NÃO decide no lugar dele nem por si. Confere se a resposta já está no plano/spec:
+   se estiver, era falta de contexto — ele fornece e re-despacha. Se não, é lacuna material.
+3. O coordenador CONSOLIDA as lacunas materiais abertas — consolidar é agrupar e ordenar por
+   dependência, NUNCA decidir — e as leva ao humano por `pelizzai-interview-me` no modo lacuna:
+   uma pergunta por vez, com opções reais e a recomendada (porquê em uma linha).
+4. A decisão ratificada é registrada no plano (`## Decisões técnicas deste plano`, origem:
+   entrevista de execução; a lacuna sai de `## Lacunas materiais expostas` resolvida) e a frente
+   retoma de onde parou, com o briefing atualizado.
+```
+
+**Lacuna de DOMAIN SKILL é outra coisa e segue outro caminho:** o membro sinaliza
+(`DONE_WITH_CONCERNS`), a execução **não** para, e o coordenador acumula as lacunas para uma
+proposta única no fechamento (§4). Uma é decisão do usuário e para a frente; a outra é manutenção do
+catálogo e nunca vira gate por tarefa.
+
 ## 1. Briefing autossuficiente (por arquivo quando os scripts existem; senão por colagem)
 
 O membro (teammate/subagente) **nunca lê o arquivo do plano** — isso evita poluição de contexto e mantém o foco. Quem entrega o contexto é o coordenador, por um destes dois canais:
@@ -38,9 +68,10 @@ O briefing de cada tarefa inclui:
 - Teste operacional de desvio (frase canônica, no TEXTO do briefing):
   "se a decisão não está escrita no plano nem na spec, ela não está aprovada — apresente antes de implementar".
   Decisão técnica, de escopo ou de abordagem que surja durante a implementação e não esteja no
-  plano/spec interrompe a tarefa e volta ao coordenador/usuário **como pergunta com 2–3 opções e a
-  recomendada** (porquê em uma linha); nunca é preenchida em silêncio nem devolvida como pergunta
-  aberta sem opções.
+  plano/spec interrompe a tarefa: o membro NOMEIA a lacuna e devolve `NEEDS_CONTEXT` **com 2–3
+  opções e a recomendada** (porquê em uma linha); nunca é preenchida em silêncio nem devolvida como
+  pergunta aberta sem opções. Quem leva a lacuna ao humano é o coordenador, por
+  `pelizzai-interview-me` no modo lacuna (§0) — o membro não conversa com o usuário.
 - Salvo-conduto de escalada (frase canônica, no TEXTO do briefing): "É sempre OK parar e dizer
   'isso é difícil demais para mim'. Trabalho ruim é pior que trabalho nenhum. Você não será
   penalizado por escalar (reporte BLOCKED)."
@@ -112,14 +143,15 @@ O membro reporta um destes status:
 | -------------------- | --------------------------------------------- | -------------------------------------------------------------- |
 | `DONE`               | Trabalho completo                             | Segue para o review                                            |
 | `DONE_WITH_CONCERNS` | Completo, mas com ressalvas                   | Leia as ressalvas antes de prosseguir; lacuna de domain skill vai ao registro e é acumulada para o eixo adoption-driven no fechamento (não vira gate por tarefa) |
-| `NEEDS_CONTEXT`      | Falta informação                              | Forneça o contexto e re-despache                               |
+| `NEEDS_CONTEXT`      | Falta informação **ou** lacuna material nomeada | Contexto que você tem (está no plano/spec): forneça e re-despache. Lacuna material (decisão do usuário): consolide e leve ao humano por `pelizzai-interview-me` antes de a frente continuar — consolidar não é decidir (§0) |
 | `BLOCKED`            | Não consegue concluir                         | Avalie: dar contexto → mudar abordagem/quebrar tarefa → escalar ao humano (o modelo já é o topo — ver §8) |
 
 Todo relatório de tarefa — em qualquer status — inclui o campo obrigatório **`Desvios do plano:`**
 (ou `nenhum`): decisões técnicas, de escopo ou de abordagem que saíram do que o plano/spec
 escreveram, com a justificativa de cada uma. O coordenador **confere esse campo antes de aceitar
 `DONE`**: desvio material não ratificado não vira concluído — pelo teste operacional de desvio, volta
-ao usuário antes do review, nunca é absorvido em silêncio.
+ao usuário pela `pelizzai-interview-me` (modo lacuna, §0) antes do review, nunca é absorvido em
+silêncio e nunca é ratificado pelo próprio coordenador.
 
 Nunca ignore uma escalação nem re-despache sem mudar nada.
 

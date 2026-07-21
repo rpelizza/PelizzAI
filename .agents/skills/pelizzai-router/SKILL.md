@@ -70,7 +70,8 @@ Depois de derivar o envelope e ANTES de escolher a head skill, faça uma passada
 - alternativas materialmente diferentes, quando existirem.
 
 A Análise da proposta é diagnóstico, não autorização. Ela alimenta a linha de **Descoberta** do
-Gate de kickoff; cada lacuna que pertença ao usuário será resolvida depois, uma pergunta por vez.
+Gate de kickoff; cada lacuna que pertença ao usuário será resolvida depois pela
+`pelizzai-interview-me`, uma pergunta por vez, com recomendação.
 
 Proporcionalidade não remove autoridade. Em `read-only` puro e ajuste/bug trivial cujo contrato foi
 explicitado, a análise pode colapsar a zero. Em `bounded`, colapsa numa linha: "Sem lacunas
@@ -211,12 +212,12 @@ em cada artefato, é:
 
 ```text
 entendimento ratificado
-→ descoberta com uma pergunta por vez e recomendação
-→ design/spec
-→ stress da spec + aprovação
+→ descoberta com `pelizzai-interview-me`: uma pergunta por vez, com recomendação
+→ design/spec (`pelizzai-brainstorming`)
+→ stress da spec com `pelizzai-interview-me` + aprovação
 → proposta e ratificação de domain skills
 → plano de implementação
-→ stress do plano + aprovação
+→ stress do plano com `pelizzai-interview-me` + aprovação
 → setup ratificado
 → execução
 ```
@@ -272,6 +273,22 @@ O router não aplica esses defaults — calcula a recomendação e encaminha par
 
 `worktree` e `squash-final` nunca são aplicados sem escolha do usuário. Use subagents/time para independência real, diversidade de hipóteses ou ganho mensurável; não os trate como hierarquicamente melhores que inline.
 
+## Lacuna material durante a execução
+
+Ratificar a rota não encerra a autoridade do usuário. Depois do kickoff — em spec, plano,
+implementação, debugging, review ou fechamento — **toda lacuna material interrompe o trabalho e volta
+ao usuário pela `pelizzai-interview-me`**, uma pergunta por vez, com recomendação. Conta como lacuna
+material: requisito ambíguo; decisão de escopo, UX, arquitetura, dados ou segurança que a spec/o
+plano não cobre; contrato de interface indefinido.
+
+Preencher a lacuna por default, convenção do ecossistema, Context7 ou “inferência razoável” é
+violação — inclusive quando a escolha parece óbvia e reversível. Context7 e documentação oficial
+eliminam dúvida **factual**; nunca ratificam decisão que pertence ao usuário.
+
+A autonomia entre gates continua valendo para o passo **mecânico e verificável** dentro de
+fronteiras já ratificadas (spec e plano aprovados, setup ratificado). Se a resposta muda produto,
+escopo, UX, arquitetura, dados, segurança, custo ou aceite, ela não é mecânica: pare e pergunte.
+
 ## Sync & delta
 
 Para tarefa mutável em Git, observe a realidade antes de decidir:
@@ -324,6 +341,8 @@ Uma tarefa nova nunca herda decisões da anterior. O fechamento pertence a `peli
 - Pulverizar a rota ou o setup em várias micro-perguntas em vez de um bloco agrupado.
 - Assumir em silêncio decisão que muda escopo/UX/arquitetura sem apresentá-la na Análise da proposta nem no Gate de kickoff.
 - Usar Context7, convenção ou “default seguro” como voto do usuário.
+- Preencher com default/convenção/inferência uma lacuna material que apareceu DEPOIS do kickoff, em
+  vez de parar o trabalho e levá-la à `pelizzai-interview-me`.
 - Fazer várias perguntas de descoberta no mesmo turno quando a resposta anterior muda a próxima.
 - Paralelizar escrita numa working tree compartilhada como se worktree isolasse agentes.
 - Herdar `lane`/base/branch/strategy de state de uma tarefa ANTERIOR como carryover acidental — a política de projeto explicitamente ratificada no `profile.md` é a única exceção.
@@ -387,5 +406,7 @@ local para impedir tanto autonomia quanto sobreajuste a um prompt ou stack.
 
 Classifique efeito, intenção, risco, incerteza e superfícies. Apresente a Análise da proposta e a
 rota recomendada; em tarefa mutável, só invoque a head skill após ratificação explícita. Greenfield
-sempre descobre, especifica, estressa e planeja antes de implementar. Selecione reasoning/test/review
+sempre descobre, especifica, estressa e planeja antes de implementar, com a `pelizzai-interview-me`
+na descoberta e nos dois stress. Lacuna material que aparecer depois — inclusive no meio da
+execução — para o trabalho e volta ao usuário pela mesma skill. Selecione reasoning/test/review
 proporcionalmente, sem transformar inteligência de processo em autoridade sobre o produto.

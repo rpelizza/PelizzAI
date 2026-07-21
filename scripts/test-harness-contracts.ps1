@@ -160,7 +160,9 @@ try {
     Check-Match '.cursor/rules/pelizzai.mdc' 'pelizzai-router/SKILL.md' 'Cursor aponta para router'
     Check-Match '.github/workflows/check-harness.yml' '-Check -SourceMode' 'CI valida source mode'
     Check-Match '.github/workflows/check-harness.yml' 'test-harness-contracts.ps1' 'CI executa contratos'
-    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'worktree.*não isola agentes|um writer por vez' 'team não paraleliza writers na mesma working tree'
+    # A serialização é regra do harness, não propriedade do Git — o que o isolamento ratificado
+    # libera (paralelo em caminhos disjuntos) é travado no bloco F5, abaixo.
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'worktree.*não isola agentes|um writer por vez' 'team: worktree não isola agentes entre si'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'codebase-wide.*pelizzai-improving-architecture' 'router separa review arquitetural de code review'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'risco eleva prova e gates, não cria incerteza artificial' 'router desacopla risco de discovery'
     Check-Match '.claude/skills/pelizzai-improving-architecture/SKILL.md' 'não cria branch, state, HTML, ADR, spec, out-of-scope ou qualquer arquivo' 'arquitetura read-only não escreve'
@@ -225,6 +227,59 @@ try {
     Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'sem a seção de lacunas está incompleto' 'interview-me: resumo sem seção de lacunas é incompleto'
     Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'exatamente uma pergunta por turno' 'interview-me faz exatamente uma pergunta por turno'
     Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'Recomendado:' 'interview-me destaca a melhor opção'
+
+    # -- F5: interview-me é o mecanismo canônico de tampar lacunas (restauração pré-11/07/2026) --
+    # A skill volta a ser OBRIGATÓRIA nos três pontos do BASE (pré-design, pós-design, pós-plano) e
+    # ganha o quarto: a lacuna que aparece no meio da execução. O anti-cerimônia ("o que NÃO é
+    # lacuna") existe para que a obrigatoriedade não degenere em questionário.
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'Esta skill é o \*\*mecanismo canônico de tampar\s+lacunas\*\*' 'interview-me: o corpo declara o mecanismo canônico de tampar lacunas'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'description:[^\n]*mecanismo canônico de tampar lacunas' 'interview-me: a description aciona pelo mecanismo canônico (gatilho)'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'default,\s+convenção, Context7 ou .inferência razoável. é violação' 'interview-me: preencher por default/convenção/Context7/inferência é violação'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' '## Onde é obrigatória[\s\S]{0,400}não é oferta' 'interview-me: obrigatoriedade restaurada (não é oferta)'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'Antes do design[\s\S]{0,900}Depois do plano, antes da execução' 'interview-me obrigatória antes do design, pós-design e pós-plano'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'realmente identificadas e\s+resolvidas' 'interview-me só encerra cedo com as lacunas resolvidas ou aceitas'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' '## Modo lacuna' 'interview-me tem o modo lacuna (parada durante a execução)'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'nunca dispensa o item 4' 'interview-me: bounded dispensa o stress, nunca a parada por lacuna'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'NÃO é lacuna' 'interview-me delimita o que NÃO é lacuna (anti-cerimônia)'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'passo mecânico dentro de fronteira já ratificada' 'interview-me: passo mecânico ratificado não vira pergunta'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'SUBAGENT-STOP[\s\S]{0,400}NEEDS_CONTEXT' 'interview-me: sob briefing fechado o executor devolve NEEDS_CONTEXT'
+    Check-NotMatch '.claude/skills/pelizzai-interview-me/SKILL.md' 'bounded. costuma dispensar esta skill' 'interview-me: bounded não desliga a skill inteira, só o stress de design/plano'
+
+    # -- F5: autonomia entre as tarefas restaurada (execução contínua, parada só por lacuna) --
+    # Contraparte do Check-NotMatch 'autonomia entre tarefas' acima: a autonomia é de EXECUÇÃO
+    # (não perguntar "sigo?" a cada tarefa), nunca de DECISÃO.
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'AUTONOMIA \(sem perguntar a cada passo\)' 'execution-plans restaura a autonomia entre as tarefas'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'não pergunte .sigo\?.' 'execution-plans não pergunta "sigo?" ao fim de cada tarefa'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Pare apenas por: BLOCKED real[^\n]*LACUNA MATERIAL' 'execution-plans: parada por BLOCKED, lacuna material, invalidação ou fim'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'autonomia é de execução, nunca de' 'execution-plans: autonomia é de execução, nunca de decisão'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'LACUNA MATERIAL não é uma parada vaga' 'execution-plans: lacuna material tem caminho concreto, não pausa vaga'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/SKILL.md' 'EXECUÇÃO CONTROLADA' 'execution-plans não reintroduz a pausa a cada tarefa'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' '## 0\. Autonomia entre as tarefas e a parada por lacuna material' 'task-cycle abre com autonomia + parada por lacuna material'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'consolidar é agrupar e ordenar por\s+dependência, NUNCA decidir' 'task-cycle: coordenador consolida as lacunas, não as decide'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Lacuna de DOMAIN SKILL[\s\S]{0,200}a execução \*\*não\*\* para' 'task-cycle preserva: lacuna de domain skill não para a execução'
+
+    # -- F5: membro nomeia a lacuna, coordenador leva ao humano (consolidar não é decidir) --
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'não decide lacuna de produto' 'team: membro nomeia a lacuna e não a decide'
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'consolidar não é decidir' 'team: coordenador consolida as lacunas mas não decide por si'
+    Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'não decide lacuna de produto' 'subagents: o subagente nomeia a lacuna e não a decide'
+    Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'Lacuna material é a outra via, e essa para a frente' 'subagents separa lacuna material (para) de domain skill (não para)'
+
+    # -- F5: escrita paralela em worktree com caminhos disjuntos (reverte 44df87c) --
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'isolation: worktree[\s\S]{0,300}caminhos disjuntos' 'team: worktree permite escrita paralela em caminhos disjuntos'
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'A disjunção é a \*\*condição\*\*' 'team: a disjunção de caminhos é condição, não conselho'
+    Check-NotMatch '.claude/skills/pelizzai-team/SKILL.md' 'Mantenha um writer por vez' 'team não reimpõe writer único quando o isolamento é worktree'
+    Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'CAMINHOS DISJUNTOS' 'subagents: escrita paralela em worktree exige caminhos disjuntos'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Nunca um worktree por agente' 'execution-plans: worktree é um por tarefa, não um por agente'
+
+    # -- F5: callers reconectados (a obrigatoriedade não vive só dentro da skill) --
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' '## Lacuna material durante a execução' 'router tem a seção Lacuna material durante a execução'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'lacuna material interrompe o trabalho e volta\s+ao usuário pela .pelizzai-interview-me' 'router: lacuna pós-kickoff interrompe e volta pela interview-me'
+    Check-Match '.claude/skills/pelizzai-core/SKILL.md' 'tampada com a .pelizzai-interview-me' 'core: lacuna do usuário é tampada com a interview-me'
+    Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'aplica a TODOS os\s+projetos, independentemente da simplicidade aparente' 'brainstorming: o hard-gate de design vale para TODOS os projetos'
+    Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'stress com .pelizzai-interview-me. é \*\*OBRIGATÓRIO\*\*' 'brainstorming: stress do design é obrigatório em greenfield/completo'
+    Check-Match 'CLAUDE.md' 'A LLM não decide nada sozinha' 'CLAUDE.md fixa o contrato: a LLM não decide nada sozinha'
+    Check-Match 'CLAUDE.md' 'tampada com a .pelizzai-interview-me' 'CLAUDE.md: toda lacuna é tampada com a interview-me'
+    Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'entrevista de execução' 'plano prevê a origem entrevista de execução (lacuna tampada na execução)'
 
     # -- audit: gate proativo de domain skills nas bordas (propor-confirmar) --
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'Gate proativo de domain skills' 'audit tem Gate proativo de domain skills'

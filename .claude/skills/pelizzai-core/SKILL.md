@@ -90,11 +90,12 @@ Ambiguidade: falta algo que mudaria materialmente o resultado?
 
 Use contexto, código e documentação antes de perguntar para eliminar dúvidas factuais. Não use essa
 evidência para decidir intenção de produto. Pergunte quando a resposta muda requisito, escopo, UX,
-arquitetura, dados, segurança, custo, autoridade, aceite ou solução. Faça **uma pergunta por vez**,
-na ordem de dependência; ofereça 2–3 opções reais quando isso ajudar e marque a melhor recomendação
-com motivo curto. Não adote uma suposição de produto para “destravar” o trabalho. Uma escolha
-reversível só pode ser aplicada mecanicamente quando já está contida em spec/plano ratificado ou foi
-explicitamente delegada pelo usuário. A linha `Ambiguidade` acima alimenta a análise do router.
+arquitetura, dados, segurança, custo, autoridade, aceite ou solução — o instrumento dessa pergunta é
+a `pelizzai-interview-me`. Faça **uma pergunta por vez**, na ordem de dependência; ofereça 2–3 opções
+reais quando isso ajudar e marque a melhor recomendação com motivo curto. Não adote uma suposição de
+produto para “destravar” o trabalho. Uma escolha reversível só pode ser aplicada mecanicamente quando
+já está contida em spec/plano ratificado ou foi explicitamente delegada pelo usuário. A linha
+`Ambiguidade` acima alimenta a análise do router.
 
 Quando o usuário parecer não-técnico, ou a intenção admitir ≥2 leituras materialmente diferentes,
 **sinalize** isso ao router (`audience` e leituras em aberto). O router reapresenta o entendimento no
@@ -115,6 +116,11 @@ O usuário decide:
 O executor decide sozinho apenas:
 - passos mecânicos, locais e reversíveis já cobertos por uma decisão ratificada.
 ```
+
+Lacuna que cai no bloco do usuário é **tampada com a `pelizzai-interview-me`** — no design, no plano
+e também no meio da execução, quando o trabalho revela uma decisão que a spec ou o plano não cobre.
+Preenchê-la por default, convenção, Context7 ou “inferência razoável” é violação, mesmo quando a
+escolha parece óbvia e reversível.
 
 Context7 é a fonte técnica preferencial quando biblioteca, framework, API, serviço, ferramenta,
 versão ou capacidade externa influencia a tarefa. Inspecione primeiro manifests, lockfiles,
@@ -141,6 +147,8 @@ core
 → execução e quality gates proporcionais
 → Verification sela o resultado
 → Finish integra sem alterá-lo
+
+em qualquer ponto, lacuna material → pelizzai-interview-me (uma pergunta por vez) → retoma a fase
 ```
 
 ### Head skills
@@ -185,6 +193,10 @@ flowchart TD
     BOOT -- "Sim" --> CLS{"Classificar a intencao e a lane"}
     CLS --> KICK["Gate de kickoff: rota como recomendacao a ratificar"]
     KICK --> HEAD["Uma head skill + overlays obrigatorios"]
+    HEAD --> GAP{"Lacuna material<br/>em qualquer fase?"}
+    GAP -- "Sim" --> IV["pelizzai-interview-me:<br/>uma pergunta por vez, com recomendacao"]
+    IV --> HEAD
+    GAP -- "Nao" --> GO["Passo mecanico dentro<br/>do que ja foi ratificado"]
 ```
 
 O detalhe de cada track (lanes, gates e encadeamentos) mora na `pelizzai-router`.
@@ -211,7 +223,8 @@ Use o mecanismo nativo da plataforma. Sem carregamento nativo, leia `.agents/ski
 - Várias head skills competindo pela mesma tarefa.
 - Bootstrap mutável para responder uma análise read-only.
 - Perguntar antes de consultar evidência já disponível.
-- Usar Context7 ou convenção para responder uma decisão de produto pelo usuário.
+- Tampar lacuna do usuário com Context7, convenção, default ou “inferência razoável” em vez de parar
+  na `pelizzai-interview-me`.
 - Tratar stack informada como requisitos/aceite suficientes para um projeto greenfield.
 - Confundir heurística (OODA/TDD/team) com invariante universal.
 - Começar a escrever antes do router e do gate de primeira escrita.

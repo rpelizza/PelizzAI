@@ -20,16 +20,21 @@ do que foi validado.
 Se você é um **membro** (teammate/subagente) encarregado de **uma tarefa**, implemente apenas a
 sua: siga a estratégia de teste declarada, as skills de domínio e as skills transversais/overlays
 coladas no briefing; respeite `pelizzai-preferences` e devolva `DONE`, `DONE_WITH_CONCERNS`,
-`BLOCKED` ou `NEEDS_CONTEXT`. Não orquestre nem commite. Ver `references/task-cycle.md`.
+`BLOCKED` ou `NEEDS_CONTEXT`. Decisão que não está no briefing/plano/spec você **não preenche**:
+nomeie a lacuna e devolva `NEEDS_CONTEXT`. Não orquestre nem commite. Ver
+`references/task-cycle.md`.
 </MEMBRO-DO-TIME-STOP>
 
 ---
 
 ## Princípio central
 
-> Execute somente o plano aprovado. Entre gates, tome decisões mecânicas cobertas pela spec/plano;
-> qualquer decisão emergente de requisito, escopo, UX, arquitetura, dados, segurança, custo ou
-> aceite pausa a execução e volta ao usuário. Nenhuma tarefa é consolidada sem evidência e review.
+> Execute somente o plano aprovado, com gates humanos nas **bordas** (setup pós-plano, destino,
+> conclusão) e autonomia **entre as tarefas**: passo mecânico já coberto pela spec/plano não pede
+> licença — não pare para perguntar "sigo?" a cada tarefa. A autonomia é de execução, nunca de
+> decisão: lacuna material de requisito, escopo, UX, arquitetura, dados, segurança, custo ou aceite
+> para o trabalho e vai ao humano por `pelizzai-interview-me`, nunca a um default. Nenhuma tarefa é
+> consolidada sem evidência e review.
 
 ---
 
@@ -194,10 +199,21 @@ Não há ranking universal; use a menor coordenação que preserve qualidade.
 | **inline**           | —                  | Plano pequeno/sequencial em que delegar custaria mais que executar |
 
 ```text
-Branch e worktree desta tarefa têm UMA working tree de integração. Apenas o coordenador aplica
-escritas nela, em série. Agentes podem investigar/revisar em paralelo ou devolver patches; não
-mantêm WIP concorrente no diretório compartilhado. Antes do review por tarefa, quiesça writers e
-gere `review-package --working-tree`, que deve representar somente a tarefa em revisão.
+Isolamento e paralelismo (conforme o que o usuário ratificou no gate). A working tree compartilhada
+NÃO isola agentes entre si — quem serializa é esta regra, não o Git:
+- isolation: branch → UMA working tree de integração, UM writer por vez. O coordenador aplica as
+  escritas em série; o paralelismo fica com o que não escreve (investigação, leitura, review,
+  decomposição). Antes do review por tarefa, quiesça writers e gere
+  `review-package --working-tree`, que deve representar somente a tarefa em revisão.
+- isolation: worktree → frentes escrevem em paralelo DENTRO do worktree único da tarefa, desde que
+  toquem CAMINHOS DISJUNTOS. A disjunção é a CONDIÇÃO, não um conselho: conflito real prova que o
+  par não era disjunto — replaneje a decomposição em vez de forçar. Nunca um worktree por agente.
+- Review com escrita paralela em curso (worktree): a working tree contém WIP de OUTRAS frentes.
+  (a) escope o pacote aos paths da frente em revisão; (b) instrua o revisor a IGNORAR mudanças fora
+  deles (não são "extra" desta tarefa — pertencem a outra frente); (c) para a evidência de teste,
+  rode o subconjunto da frente ou quiesça as demais antes da suíte completa — um RED intencional de
+  outra frente não reprova esta tarefa.
+- Em qualquer isolamento, review, stage, commit e cursor são serializados pelo coordenador.
 ```
 
 **Desempate:** team quando membros precisam conversar/negociar dependências; subagents quando cada
@@ -268,8 +284,11 @@ com duas lentes, circuit breaker e commit como gate — está em
    Responda perguntas ANTES de o trabalho começar.
 2. Aplicar TDD, characterization, validate, visual ou static/scenario conforme o artefato. O
    membro NÃO commita.
-   Se surgir decisão não coberta pela spec/plano, devolva `NEEDS_CONTEXT`; o coordenador pausa e
-   pergunta ao usuário. Não escolha requisito, UX, arquitetura, dados, segurança ou aceite.
+   Se surgir decisão não coberta pela spec/plano, o membro NOMEIA a lacuna (o que falta, o que ela
+   muda e 2–3 opções que enxerga) e devolve `NEEDS_CONTEXT` — não escolhe requisito, UX,
+   arquitetura, dados, segurança nem aceite. O coordenador também não decide por ele nem por si:
+   consolida as lacunas e as leva ao humano por `pelizzai-interview-me` no modo lacuna antes de a
+   frente continuar.
 3. Review com duas lentes: (a) conformidade com a spec; (b) qualidade + evidência FRESCA.
    `combined` aplica ambas em um despacho/relatório para tarefa bounded/low-risk; `split` usa
    estágios sequenciais quando risco, contrato, dados, segurança ou complexidade pedirem.
@@ -288,8 +307,10 @@ com duas lentes, circuit breaker e commit como gate — está em
 ## Modo Team
 
 Use `pelizzai-team` quando frentes precisam coordenar dependências. O lead delega briefings com
-domínio + overlays e sintetiza. Investigação pode ser paralela; aplicação na working tree, review,
-cursor e commit são serializados pelo coordenador.
+domínio + overlays e sintetiza. Investigação é sempre paralelizável; a escrita segue o isolamento
+ratificado (em `branch`, aplicação em série pelo coordenador; em `worktree`, frentes com caminhos
+disjuntos escrevem em paralelo dentro do worktree único da tarefa). Review, cursor e commit são
+serializados pelo coordenador em qualquer caso.
 
 ## Modo Subagents
 
@@ -300,9 +321,11 @@ Use `pelizzai-subagents`. Um subagente **fresco por tarefa**, despachado pelo co
 Para plano pequeno e sequencial, o coordenador executa na própria sessão seguindo o mesmo ciclo.
 Inline é uma escolha adequada, não um fallback inferior.
 
-Em qualquer modo, “seguir até o fim” autoriza executar o plano ratificado; não autoriza completar
-lacunas de produto. Decisão emergente interrompe o loop, registra `phase: blocked`/pendência e volta
-ao usuário com uma pergunta e a melhor recomendação.
+Em qualquer modo, “seguir até o fim” autoriza executar o plano ratificado **sem pedir licença a cada
+tarefa**; não autoriza completar lacunas de produto. Lacuna material interrompe o loop e vai ao
+humano por `pelizzai-interview-me` (modo lacuna): nomeie a lacuna, ofereça 2–3 opções com a
+recomendada e faça uma pergunta por vez. Registre `phase: blocked`/pendência quando a frente não
+puder continuar sem a resposta.
 
 ---
 
@@ -421,12 +444,14 @@ Em ambos os modos, valide branch com `git branch --show-current` e worktree por
 ## Loop até a entrega (controle adaptativo)
 
 O loop usa evidência e Definition of Done. OODA pode coordenar o macro-loop, mas o reasoning local
-é selecionado pela situação. Em dúvida material, pare e use `pelizzai-interview-me`; não transforme
-incerteza em mais uma volta automática.
+é selecionado pela situação. Enquanto a próxima ação for mecânica e coberta pelo plano, itere sem
+perguntar. Em dúvida material, pare e use `pelizzai-interview-me` no modo lacuna — nomeando a
+lacuna, com 2–3 opções e a recomendada; não transforme incerteza em mais uma volta automática, nem
+a parada numa pergunta aberta do tipo “o que você prefere?”.
 
 ---
 
-## Gates humanos e execução controlada
+## Gates humanos (bordas) e autonomia mecânica entre as tarefas
 
 ```text
 GATES (recomendar-e-ratificar; nunca aplicar decisão estrutural em silêncio):
@@ -440,12 +465,21 @@ GATES (recomendar-e-ratificar; nunca aplicar decisão estrutural em silêncio):
   externo, finish-task mantém local por default. `destination` nunca é herdado de política do profile.
 - Conclusão.
 
-EXECUÇÃO CONTROLADA:
-- Entre tarefas de plano aprovado, execute continuamente apenas passos mecânicos cobertos pelo
-  contrato ratificado; não peça permissão para cada comando local reversível.
-- Pare diante de qualquer escolha nova de requisito, escopo, UX, arquitetura, dados, segurança,
-  custo, risco aceito ou critério de aceite. Faça uma pergunta com recomendação e aguarde.
-- Pare também por BLOCKED real, evidência que invalida o plano ou plano concluído.
+AUTONOMIA (sem perguntar a cada passo):
+- Entre as tarefas de um plano JÁ APROVADO, execute de forma contínua os passos mecânicos e
+  verificáveis cobertos pelo contrato ratificado: não pergunte "sigo?" ao fim de cada tarefa nem
+  peça permissão para cada comando local reversível.
+- Pare apenas por: BLOCKED real que você não resolve, LACUNA MATERIAL, evidência que invalida o
+  plano, ou plano concluído.
+- LACUNA MATERIAL não é uma parada vaga nem "perguntar alguma coisa": é o caminho concreto da
+  `pelizzai-interview-me` no modo lacuna — pare, NOMEIE a lacuna (o que a spec/plano não decidiu e
+  o que ela muda na entrega), ofereça 2–3 opções reais com a recomendada e o porquê em uma linha,
+  faça UMA pergunta por vez, registre a decisão no plano (`## Decisões técnicas deste plano`,
+  origem: entrevista de execução; a lacuna sai de `## Lacunas materiais expostas` resolvida) e
+  retome de onde parou.
+- Vale para requisito, escopo, UX, arquitetura, dados, segurança, custo, risco aceito e critério de
+  aceite. Preencher por convenção, default, Context7 ou "inferência razoável" é violação — mesmo
+  quando a escolha parece óbvia e reversível.
 
 Sob briefing fechado (SUBAGENT-STOP / MEMBRO-DO-TIME-STOP), não abra gates nem recaps de política:
 aplique o briefing e escale ao coordenador o que exigir decisão.
@@ -538,14 +572,19 @@ ou doc pode mudar depois do seal.
 - Loop infinito de fix→re-review (ignorar o circuit breaker de 3 ciclos).
 - Declarar entregue sem overlays aplicáveis + review final (ou reutilização bounded comprovada) +
   checks + checklist + seal.
-- Pedir permissão para cada comando mecânico já coberto pelo plano — ou, no extremo oposto,
-  escolher uma decisão emergente de produto para manter o loop rodando.
+- Pausar a cada tarefa de um plano já aprovado, ou pedir permissão para cada comando mecânico já
+  coberto por ele — ou, no extremo oposto, escolher uma decisão emergente de produto para manter o
+  loop rodando.
+- Parar por lacuna material e devolver pergunta aberta ("o que você prefere?") em vez de nomear a
+  lacuna com 2–3 opções e a recomendada pela `pelizzai-interview-me`.
 - Fazer o subagente ler o arquivo do plano inteiro (cole o texto da tarefa).
 - Commit órfão só para mover o cursor DURANTE a execução (exceções legítimas: o registro de
   phase: blocked do circuit breaker e o commit de fechamento do cursor da pelizzai-finish-task
   no modo granular).
 - Confiar no state.md sem validar contra o git ao retomar.
-- Writers concorrentes na mesma working tree, tornando `--working-tree` impossível de escopar.
+- Escrita concorrente em `isolation: branch`, ou em paths que se sobrepõem dentro do worktree,
+  tornando `--working-tree` impossível de escopar.
+- Um worktree por agente (é um por tarefa, com paths disjuntos por frente).
 - Rodar security/frontend/docs depois da validação final, ou não reabrir review após fix.
 - Executar squash/reset/rebase na finish-task depois de `validated-head`.
 ```
@@ -562,6 +601,7 @@ ou doc pode mudar depois do seal.
 - `pelizzai-team` / `pelizzai-subagents` — modos usados conforme a topologia; inline é par legítimo.
 - `pelizzai-review` — review por tarefa (spec + qualidade) e review final da branch.
 - `pelizzai-loop` — OODA quando houver loop real, Definition of Done e parada por dúvida.
+- `pelizzai-interview-me` — destino obrigatório da parada por lacuna material durante a execução.
 - `pelizzai-reasoning` — ordenação, diagnóstico e verificação.
 - `pelizzai-verification-before-completion` / `pelizzai-finish-task` — conclusão com gates.
 - `pelizzai-audit` — padrão de diretório `pelizzai/` e catálogo de skills de domínio.
@@ -579,7 +619,8 @@ Crie a branch antes de spec/plano; aprove conteúdo e stress do plano; depois ra
 decisão por turno, com recomendação, antes da Tarefa 1.
 Escolha inline/subagents/team pela topologia, sem ranking universal.
 Propague domínio + overlays para executor e reviewers; sinalize lacuna de domain skill no relatório.
-Execute mecanicamente dentro do plano; devolva qualquer decisão nova ao usuário.
+Execute continuamente os passos mecânicos dentro do plano; não pergunte "sigo?" a cada tarefa.
+Lacuna material para o trabalho e é tampada pela pelizzai-interview-me, nunca por um default.
 Consolide só após spec ✅ e qualidade ✅ com evidência fresca.
 Rode overlays antes de congelar/validar; qualquer fix reabre o review final.
 Grave validated-head só após aprovação; finish cria closure só no consumidor.

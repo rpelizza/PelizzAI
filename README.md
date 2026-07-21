@@ -145,6 +145,11 @@ turno e `pelizzai-brainstorming` produz a spec. Pular descoberta/spec/plano exig
 Context7 entra cedo para responder fatos técnicos e melhorar recomendações; nunca responde pelo
 usuário decisões de produto.
 
+Ratificar a rota também não encerra a autoridade do usuário: **lacuna material que apareça depois —
+na spec, no plano ou no meio da execução — para o trabalho e volta pela `pelizzai-interview-me`**,
+uma pergunta por vez. Default, convenção, Context7 ou "inferência razoável" não substituem essa
+resposta, mesmo quando a escolha parece óbvia e reversível.
+
 ### Uma head skill, overlays transversais
 
 Uma tarefa tem exatamente uma **head skill** responsável pelo ciclo de vida. Skills transversais
@@ -298,33 +303,86 @@ projeto consumidor:
   `bootstrap`; nada é escrito sem um "sim" e zero skills é um resultado válido quando ratificado;
 - `pelizzai/.gitignore` é criado e verificado com `git check-ignore` para os efêmeros.
 
+## Estado e artefatos no projeto alvo
+
+`pelizzai/` é a memória operacional do harness dentro do projeto alvo. Regra única: a **raiz** guarda
+conhecimento versionado; `data/` guarda estado e efêmeros. Tudo que o harness gera AO TRABALHAR num
+projeto — estado, specs, planos, ADRs, mockups, relatórios, handoffs — fica dentro de `pelizzai/`,
+nunca em `.pelizzai/`, no temp do SO ou espalhado por outras pastas. (Os adaptadores de distribuição
+do próprio harness — `AGENTS.md`, `GEMINI.md` e `.agents/skills/`, gerados pelo sync, mais o
+`.cursor/rules/pelizzai.mdc` manual — vivem na raiz do repositório do harness, por definição.)
+
 ```text
 pelizzai/
 ├── .gitignore
-├── domain-skills.md
-├── profile.md
-├── context.md | context/       sob demanda
-├── adr/ | specs/ | plans/      sob demanda
+├── domain-skills.md              catálogo de domínio; marca o bootstrap concluído
+├── profile.md                    comandos test/build/lint, stack baseline, defaults ratificados
+├── context.md | context/         glossário de domínio, sob demanda
+├── adr/ | specs/ | plans/        sob demanda
 └── data/
-    ├── state.md
-    ├── review-domain-skills.md
-    ├── .cadence-state.json     ignorado
-    ├── handoffs/               ignorado
-    ├── mockups/                ignorado
-    ├── reports/                ignorado
-    └── history/                versionado (bloco íntegro migrado no selo delivered)
+    ├── state.md                  cursor da tarefa ativa                        (versionado)
+    ├── review-domain-skills.md   ledger de manutenção das skills de domínio    (versionado)
+    ├── history/                  bloco íntegro migrado no selo delivered       (versionado)
+    ├── .cadence-state.json       contador local do hook de cadência            (ignorado)
+    ├── handoffs/                 briefs de tarefa e pacotes de review          (ignorado)
+    ├── mockups/                  telas do visual companion                     (ignorado)
+    └── reports/                  relatórios longos de QA, review e arquitetura (ignorado)
 ```
 
-O `state.md` é escalar por repositório e é **cursor, não arquivo de carimbos**: registra, entre
-outros campos, `effect`, `risk`, `lane`, `overlays`, `audience`, `base-ref`, `base-sha`, `branch`,
-`isolation`, `execution-mode`, `commit-strategy`, `kickoff`, `spec`, `plan`, `validated-head` e
-`confirmar` — as aprovações de descoberta/spec/domain skills/plano ficam no cabeçalho do plano, com
-data. Isolamento, modo e commit nascem
-`<pending>` e só deixam de sê-lo quando o usuário ratifica o gate; `kickoff: ratificado` marca a
-rota confirmada. A `pelizzai-finish-task` encerra a tarefa em `phase: delivered` e grava `confirmar:`;
-`done` é constatado depois, contra o Git, na abertura da próxima tarefa ou na retomada. A política de execução ratificada do projeto vive à parte, em `pelizzai/profile.md`,
-e não é herança de tarefa. Na retomada, esses dados são confrontados com Git; divergências perigosas
-vão para `pelizzai-recovery`.
+O `state.md` é escalar por repositório e é **cursor, não arquivo de carimbos**: as aprovações de
+descoberta/spec/domain skills/plano ficam no cabeçalho do plano, com data. Campos:
+
+| Campo | Uso |
+| --- | --- |
+| `slug` | Identidade da tarefa ativa; `<none>` significa sem tarefa ativa. |
+| `track` | `feature`, `bug`, `ajuste`, `refactor`, `infra` ou `review`. |
+| `lane` | `bounded`, `standard`, `exploratory` ou `high-risk` — profundidade classificada pelo router, ratificada no kickoff. |
+| `phase` | `brainstorm`, `plan`, `exec`, `review`, `delivered`, `done`, `abandoned` ou `blocked`. |
+| `branch` | Branch de trabalho, validada contra o Git ao retomar. |
+| `base-ref` · `base-sha` | Ref exata da base e SHA resolvido antes da primeira mudança; delimitam o review final. |
+| `validated-head` | SHA do último commit de conteúdo aprovado na validação final; `<none>` antes dela. |
+| `confirmar` | Condição observável que vira `done` depois — constatada contra o Git, nunca declarada no fechamento. |
+| `kickoff` | `pendente` até o gate consolidado ser ratificado; depois `ratificado AAAA-MM-DD`. |
+| `isolation` · `worktree-path` | `pending` até a ratificação; depois `branch` ou `worktree` + caminho. |
+| `execution-mode` | `pending`, `team`, `subagents` ou `inline` — as três opções sempre visíveis no gate. |
+| `commit-strategy` | `pending`, `granular` ou `squash-final`; `squash-final` só a pedido explícito. |
+| `effect` · `risk` | `read-only`/`write-local`/`external` e `low`/`medium`/`high`, derivados pelo router. |
+| `overlays` | Skills transversais exigidas (ex.: `pelizzai-frontend`, `pelizzai-oswap`). |
+| `audience` | `technical` ou `layperson` — modula a linguagem dos gates. |
+| `spec` · `plan` | Caminho do artefato, `pending`, dispensa explícita datada ou `not-applicable`. |
+| `project` | Caminho do único repositório Git desta tarefa, em workspace. |
+
+Abaixo do cursor ficam apenas `## Progresso` (uma linha por tarefa do plano; relatório longo vai para
+`data/reports/` e sobra o link) e `## Histórico` (índice durável). Isolamento, modo e commit nascem
+`<pending>` e só deixam de sê-lo quando o usuário ratifica o gate. A `pelizzai-finish-task` encerra a
+tarefa em `phase: delivered` e grava `confirmar:`; nesse selo o bloco íntegro migra para
+`data/history/` e o cursor volta ao tamanho do template. `done` é constatado depois, contra o Git, na
+abertura da próxima tarefa ou na retomada. A política de execução ratificada do projeto vive à parte,
+em `pelizzai/profile.md`, e não é herança de tarefa. Na retomada, esses dados são confrontados com o
+Git; divergências perigosas vão para `pelizzai-recovery`.
+
+## Manutenção das skills de domínio
+
+Skills de domínio não são estáticas. A `pelizzai-writing-skills` é o motor de autoria e manutenção,
+em três eixos — dois atualizam o que já existe, um cria:
+
+| Eixo | Gatilho | Efeito |
+| --- | --- | --- |
+| version-driven | a stack mudou de versão maior ou ganhou dependência significativa (drift contra o Stack baseline do `profile.md`) | atualiza a skill afetada pela doc da versão real |
+| rework-driven | o mesmo ajuste manual se repete no histórico do Git | o padrão vira regra na skill existente |
+| adoption-driven | dependência ou serviço significativo adotado e ainda sem cobertura no catálogo | propõe **criar** a primeira skill dessa stack |
+
+O disparo primário é o nudge de fechamento (`pelizzai-finish-task`, Passo 5), que lê o ledger
+`pelizzai/data/review-domain-skills.md`: ≥10 commits **ou** >10 dias desde `last-review` propõem a
+revisão; >15 dias desde `last-full-scan` propõem o repo-scan amplo. O eixo de dias é a âncora; os
+commits só antecipam num burst real. No Claude Code, o hook opt-in `pelizzai-cadence` é a rede de
+segurança: checa o ledger a cada 10 interações, com supressão de 7 dias depois de avisar.
+
+**Regra do nudge: avisa uma vez, nunca bloqueia.** E refresh nunca sobrescreve às cegas — a skill
+atual é lida, muda só o que a nova versão ou o padrão exige, as customizações do projeto são
+preservadas e o diff vai ao usuário ANTES de gravar, com aprovação **por skill**, nunca em lote. A
+manutenção proativa atua somente sobre skills de domínio; as skills do harness (`pelizzai-*`) só
+mudam a pedido explícito do usuário.
 
 ## Fonte, distribuição e compatibilidade
 
@@ -374,6 +432,21 @@ promoveria o consumidor a repo-fonte por engano (writegate sem Regra B, bootstra
 `pelizzai/` desativado). O `-ExportConsumer` exclui a sentinela por contrato — e a remove do
 destino se encontrá-la.
 
+## Catálogo de skills do harness
+
+| Grupo | Skills | Responsabilidade |
+| --- | --- | --- |
+| Entrada e orquestração | `pelizzai-core`, `pelizzai-router`, `pelizzai-audit`, `pelizzai-preferences` | Entrada obrigatória, classificação da rota e Gate de kickoff, bootstrap consumidor e piso global de comportamento. |
+| Raciocínio e conversa | `pelizzai-reasoning`, `pelizzai-interview-me`, `pelizzai-writing-clearly-and-concisely` | Técnicas proporcionais de raciocínio (inclui OODA), entrevista que resolve toda lacuna material — uma pergunta por vez — e escrita clara. |
+| Design, plano e execução | `pelizzai-brainstorming`, `pelizzai-writing-plans`, `pelizzai-execution-plans` | Design ratificado com spec, plano executável e stress, gate de setup pós-plano e execução tarefa a tarefa. |
+| Execução por tarefa | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop`, `pelizzai-handoff` | Estratégia de prova por artefato, delegação e times, o laço OODA até a Definition of Done e a bifurcação para sessão nova. |
+| Tracks dedicados | `pelizzai-debugging`, `pelizzai-quick-fix` | Bug com triagem e causa raiz; ajuste local sem perder isolamento, prova e fechamento. |
+| Design e exploração | `pelizzai-codebase-design`, `pelizzai-domain-modeling`, `pelizzai-prototype`, `pelizzai-improving-architecture` | Módulos profundos e seams, vocabulário de domínio e ADR, protótipo descartável e revisão arquitetural read-only. |
+| Isolamento e integração | `pelizzai-starting-branch`, `pelizzai-finish-task`, `pelizzai-resolving-merge-conflicts`, `pelizzai-recovery`, `pelizzai-documenting-features` | Branch/worktree antes da primeira escrita, selo `delivered` metadata-only, conflitos, recuperação de estado divergente e doc humana da feature. |
+| Qualidade e segurança | `pelizzai-review`, `pelizzai-oswap`, `pelizzai-verification-before-completion` | Review por tarefa e review final em `base-sha..HEAD`, OWASP na superfície sensível e evidência fresca antes de qualquer conclusão. |
+| Frontend | `pelizzai-frontend` | Overlay de produto, design, implementação e QA visual — desde o design, não como QA tardio. |
+| Autoria de skills | `pelizzai-writing-skills` | Autoria e manutenção das skills de domínio, fundamentadas em Context7/documentação oficial da versão real. |
+
 ## Estrutura do repositório
 
 ```text
@@ -422,6 +495,25 @@ O CI executa o núcleo portátil e os wrappers em Windows, Ubuntu e macOS; os te
 rodam em Windows e Ubuntu. Os contratos
 cobrem composição do kernel, roteamento, manifest, guardrails, helpers, Visual Companion e paridade
 dos alvos gerados.
+
+## Limites conhecidos
+
+- O carregamento **nativo** de skills por diretório varia por ferramenta: `.agents/skills/` cobre
+  Codex, Gemini CLI (alias) e Warp; ferramentas que só leem o próprio diretório recebem a entrada
+  via `AGENTS.md` e podem ganhar espelho nativo acrescentando o alvo ao `sync-harness.mjs`.
+- `.cursor/rules/pelizzai.mdc` é adaptador **manual**: o sync não o gera, e ele precisa ser revisado
+  à mão quando os entrypoints mudarem.
+- O núcleo portátil exige Node.js 18+; os wrappers `.ps1` exigem PowerShell 7+ (encoding UTF-8).
+- Os hooks (cadência, guardrails, writegate, SessionStart) são específicos do Claude Code e opt-in.
+  Nas demais plataformas os mesmos invariantes valem, mas só pelas skills — sem enforcement
+  executável.
+- Agent Teams é experimental no Claude Code; sem ele, a `pelizzai-team` degrada para subagents. No
+  Windows, teammates devem usar visualização `in-process`.
+- Escrita paralela exige `isolation: worktree` com caminhos disjuntos dentro do worktree único da
+  tarefa; em `branch`, o coordenador integra em série.
+- Context7 é o MCP preferencial, mas a instalação/configuração depende do host — a `pelizzai-audit`
+  recomenda no bootstrap; sem ele, o fallback é documentação oficial atual, com a limitação
+  declarada.
 
 ## Princípio operacional
 
