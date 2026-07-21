@@ -315,6 +315,12 @@ migra para `pelizzai/data/history/` e o cursor volta ao tamanho do template.
 retomada, conferindo `confirmar:` contra o Git. Se a constatação falhar — PR fechado sem merge, por
 exemplo — o harness avisa e pergunta o que fazer.
 
+Tudo nesta seção descreve o **seu projeto consumidor**. No repo-fonte do PelizzAI — o repositório
+marcado pela sentinela `scripts/pelizzai-source-repo.txt` — não existe runtime `pelizzai/`: o
+`validated-head` e o `phase: delivered` ficam no registro nativo da execução, o fechamento não cria
+commit metadata-only nem migra bloco para `data/history/`, e `done` continua sendo constatado
+depois, contra o Git.
+
 ---
 
 ## Estado e artefatos no seu projeto

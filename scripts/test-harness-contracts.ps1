@@ -1099,6 +1099,46 @@ try {
     }
 }
 
+# -- Correções do review do PR #4 (CodeRabbit, 2026-07-21) --
+# Cada asserção trava uma contradição real encontrada no review. São adições: nenhuma
+# asserção anterior foi enfraquecida para acomodá-las.
+
+# Regra do 1%: os 1% disparam CARREGAR e avaliar; só a candidata já lida e não aplicável
+# pode ser dispensada. A antiga redação permitia ignorar uma skill "aplicável".
+Check-Match '.claude/skills/pelizzai-core/SKILL.md' 'carregar e avaliar' 'core: os 1% disparam carregar e avaliar, não dispensar de longe'
+Check-NotMatch '.claude/skills/pelizzai-core/SKILL.md' 'skill aplicável não serve àquele caso, você pode ignorá-la' 'core: não há rota para ignorar skill aplicável'
+
+# Escrita paralela em worktree: a condição é caminhos disjuntos, não proibição chapada.
+Check-NotMatch '.claude/skills/pelizzai-execution-plans/SKILL.md' 'vários writers concorrentes no mesmo' 'execution-plans não reimpõe writer único quando o isolamento é worktree'
+Check-Match '.claude/skills/pelizzai-preferences/SKILL.md' 'caminhos disjuntos' 'preferences: o piso não nega a escrita paralela em caminhos disjuntos'
+Check-Match '.claude/skills/pelizzai-preferences/SKILL.md' 'nunca um worktree por agente' 'preferences: o piso repete a proibição de um worktree por agente'
+
+# Closure é de DOIS arquivos de metadata: state.md + o bloco migrado para history/.
+Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'os dois arquivos de metadata do closure' 'finish-task: a guarda pré-destino exige state + history, não só state'
+
+# Lacuna do plano vai à entrevista; adivinhar deixou de ser comportamento esperado.
+Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'o que faltar no plano[\s\S]{0,140}pelizzai-interview-me' 'writing-plans: lacuna do plano vai à interview-me, nunca à adivinhação'
+Check-NotMatch '.claude/skills/pelizzai-writing-plans/SKILL.md' 'preenche adivinhando' 'writing-plans não descreve adivinhação como comportamento do executor'
+
+# A ratificação é lida nos dois modos (consumidor e source).
+Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'state consumidor ou execution record nativo' 'interview-me lê a ratificação nos dois modos'
+
+# Saída colada só vale de quem executou o check — nunca do próprio autor.
+Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'quem rodou o check' 'team: saída colada só vale de quem rodou o check, nunca do autor'
+Check-NotMatch '.claude/skills/pelizzai-team/SKILL.md' 'ou exija a saída \+ exit code colados' 'team: paste do membro não substitui a verificação'
+
+# O recap do SessionStart dispara em qualquer valor cru, não num enum fechado.
+Check-Match '.claude/skills/pelizzai-audit/templates/profile.md' 'QUALQUER valor cru fora de' 'profile.md descreve o gatilho do recap como qualquer valor cru'
+
+# O adaptador Cursor é manual: chamá-lo de mirror gerado faz o autor nunca atualizá-lo.
+Check-NotMatch '.claude/skills/pelizzai-writing-skills/references/skill-authoring.md' '`\.cursor/` como mirrors gerados' 'skill-authoring não chama o adaptador Cursor de mirror gerado'
+
+# README: o fluxo de fechamento descrito é o do consumidor; source mode tem ressalva.
+Check-Match 'README.md' 'repo-fonte do PelizzAI[\s\S]{0,260}não cria\s*\r?\ncommit metadata-only' 'README: fechamento traz a ressalva de source mode'
+
+# CLAUDE.md: modelo e effort nunca são rebaixados — dito sem zeugma.
+Check-Match 'CLAUDE.md' 'nunca rebaixe nenhum dos dois para economizar' 'CLAUDE.md nomeia o anti-padrão de rebaixar modelo/effort'
+
 Write-Host "`nResultado: $passes PASS; $($failures.Count) FAIL."
 if ($failures.Count -gt 0) {
     foreach ($failure in $failures) { Write-Host " - $failure" }

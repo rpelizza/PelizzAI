@@ -47,7 +47,7 @@ Anuncie a head skill e os overlays materiais. Gates internos (Verification, uma 
 
 São duas perguntas diferentes, nunca confundidas.
 
-**Quais skills acionar — regra do 1%.** Antes de responder ou agir, varra o catálogo. Basta 1% de chance de uma skill ser útil para que ela seja acionada, ANTES de tentar resolver manualmente e ANTES de qualquer resposta, inclusive perguntas de esclarecimento. Se concluir que uma skill aplicável não serve àquele caso, você pode ignorá-la, mas **deve justificar a decisão** — silêncio não é justificativa. Em dúvida se uma skill de domínio se aplica à tarefa, **inclua-a**: o custo de incluir é menor que o de ignorar uma regra do projeto.
+**Quais skills acionar — regra do 1%.** Antes de responder ou agir, varra o catálogo. Basta 1% de chance de uma skill ser útil para que ela seja acionada, ANTES de tentar resolver manualmente e ANTES de qualquer resposta, inclusive perguntas de esclarecimento. Os 1% disparam **carregar e avaliar** a candidata, nunca dispensá-la de longe. Depois de lida: se ela se aplica ao caso, o uso é **obrigatório** — a proporcionalidade vive dentro dela. Só a candidata que, já lida, se mostrou não aplicável pode ser dispensada, e **com justificativa explícita** — silêncio não é justificativa. Em dúvida se uma skill de domínio se aplica à tarefa, **inclua-a**: o custo de incluir é menor que o de ignorar uma regra do projeto.
 
 **Qual rota seguir — classificação de efeito.** Aqui o critério é determinístico:
 
@@ -219,7 +219,7 @@ Use o mecanismo nativo da plataforma. Sem carregamento nativo, leia `.agents/ski
 
 ```text
 - Resolver manualmente algo que uma skill do harness já cobre.
-- Pular uma skill aplicável sem justificar a decisão.
+- Pular uma skill que, já carregada, se aplica ao caso — ou dispensar uma candidata sem justificar a decisão.
 - Várias head skills competindo pela mesma tarefa.
 - Bootstrap mutável para responder uma análise read-only.
 - Perguntar antes de consultar evidência já disponível.

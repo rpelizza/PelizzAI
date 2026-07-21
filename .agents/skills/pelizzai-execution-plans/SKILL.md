@@ -109,8 +109,9 @@ execution record nativo como memória da tarefa, nunca como autorização herdad
 branch faz checkpoint do setup persistente quando existir e mantém a branch atual; worktree captura
 `checkpoint-sha` após o checkpoint opcional, libera a branch no working tree principal, adiciona o
 worktree com a **branch existente** e registra o novo path antes da Tarefa 1. Ambos começam a
-implementação com working tree limpa. Worktree não autoriza vários writers concorrentes no mesmo
-diretório. Qualquer `squash-final` ocorre **antes** de review final/testes/`validated-head`;
+implementação com working tree limpa. Worktree não autoriza writers concorrentes em paths que se
+sobrepõem — a escrita paralela dentro do worktree único exige CAMINHOS DISJUNTOS (regra canônica em
+"Isolamento e paralelismo"). Qualquer `squash-final` ocorre **antes** de review final/testes/`validated-head`;
 `pelizzai-finish-task` nunca reescreve conteúdo ou histórico após o seal.
 
 **Registrar (só após concluir o gate).** Grave isolation/execution-mode/commit-strategy e o marcador

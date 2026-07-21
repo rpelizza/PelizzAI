@@ -70,7 +70,7 @@ Não repita aqui o processo de skills que já têm dono: frontend (`pelizzai-fro
 ## 6. Concorrência, assincronismo e resiliência
 
 - Use paralelismo ou concorrência somente quando as operações forem independentes, houver ganho real e os riscos de ordenação, consumo de recursos e falha parcial estiverem controlados.
-- Working tree/worktree compartilhado não isola agentes entre si; escrita concorrente exige isolamento real ou serialização.
+- Working tree/worktree compartilhado não isola agentes entre si; escrita concorrente exige caminhos disjuntos ou serialização — nunca um worktree por agente. O regime canônico (`isolation: branch` / `isolation: worktree`) é o de `pelizzai-execution-plans` e `pelizzai-team`.
 - Evite operação bloqueante desnecessária, especialmente em servidor, API e interface. Para tarefa pesada ou desacoplável, use fila, job assíncrono ou processamento em background quando a arquitetura suportar.
 - Timers só quando fazem parte do comportamento (debounce, retry com backoff, polling controlado, expiração, rate limiting); nunca como substituto de sincronização correta, confirmação de estado ou tratamento de evento.
 - Não crie fallback silencioso que esconda falha, reduza segurança ou altere resultado sem observabilidade. Fallback e degradação graciosa são permitidos quando explícitos, seguros, documentados e monitoráveis.

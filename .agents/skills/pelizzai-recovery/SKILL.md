@@ -48,6 +48,8 @@ já migrou para `pelizzai/data/history/<AAAA-MM-DD>-<slug>.md` no selo `delivere
 bloco a mover; a escrita de metadata em `pelizzai/` vale em qualquer branch, mas o commit espera a task
 branch nova (nunca em protegida). Falhou (PR fechado sem merge) → não grave `done`; informe e proponha
 retomar a branch ou arquivar como `abandoned`. Nenhum arquivo de trabalho é movido nesta constatação.
+Source mode: a mesma constatação vale no execution record nativo, sem criar `pelizzai/` nem
+`history/`.
 
 ## 2. Inventariar o WIP
 

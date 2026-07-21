@@ -10,7 +10,9 @@ description: Transforma requisitos ratificados, spec, PRD ou design aprovado em 
 Produzir o plano que um executor com **zero contexto** deste repositório executa sem precisar fazer
 uma única pergunta: os arquivos de cada tarefa, os contratos a honrar, a prova do resultado e os
 comandos exatos. Assuma um bom engenheiro que conhece pouco deste toolset, deste domínio e das
-convenções da casa — o que faltar no plano ele preenche adivinhando.
+convenções da casa — o que faltar no plano vira lacuna material que PARA a execução e volta ao
+usuário pela `pelizzai-interview-me`. Toda pergunta que a execução precisar fazer é falha do plano,
+nunca licença para adivinhar.
 
 Zero contexto é sobre **contexto completo**, não sobre transcrever o código futuro: o plano fixa
 decisões, contratos e critérios (ver *Profundidade do plano*) e não antecipa a implementação inteira.

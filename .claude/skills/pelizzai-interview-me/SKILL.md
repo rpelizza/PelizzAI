@@ -81,7 +81,7 @@ fundamentam opções; nunca ratificam uma decisão que pertence ao usuário.
 
 ## Antes de perguntar
 
-1. Leia pedido, spec/plano, state e somente o código/documentação relevantes.
+1. Leia pedido, spec/plano, o registro da tarefa (state consumidor ou execution record nativo) e somente o código/documentação relevantes.
 2. Separe fatos observados, inferências e decisões que pertencem ao usuário.
 3. Remova perguntas factuais cuja resposta já está no projeto. Não remova decisão de produto porque
    existe um default comum, seguro ou reversível; transforme-o na recomendação da pergunta.
@@ -110,7 +110,8 @@ semântica deste contrato.
 
 Gatilho: implementando uma tarefa — inline, como subagente ou como membro de time — você esbarra numa
 decisão que spec e plano não cobrem. Vale o teste operacional de desvio: **se a decisão não está
-escrita no plano nem na spec, ela não está aprovada — apresente antes de implementar.**
+escrita na spec, no plano nem no registro da tarefa (state consumidor ou execution record nativo),
+ela não está aprovada — apresente antes de implementar.**
 
 1. **PARE a tarefa.** Não implemente "a leitura mais provável" para mostrar depois, não deixe TODO,
    flag ou parâmetro configurável para adiar a decisão, e não continue por outro arquivo enquanto

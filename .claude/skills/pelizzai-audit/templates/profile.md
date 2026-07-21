@@ -27,7 +27,9 @@ quando houver mirrors, sincronizadas e verificadas; nunca assuma `.claude/skills
 > auto-confirmam uma tarefa nova, salvo quando o usuário delegar explicitamente aplicar a política.
 > No bootstrap nascem todos `<unset>`: grave o valor **literalmente entre `<>`**. Qualquer valor
 > entre `<>` (o menu abaixo, `<unset>`) é lido como NÃO ratificado; o recap do hook de SessionStart
-> só dispara em valor cru — `worktree`, `team`, `granular`.
+> dispara em QUALQUER valor cru fora de `<...>` e de `unset` — inclusive `branch`, `inline` ou
+> `squash-final`. O hook lê só `isolation-default`, `execution-mode-default` e
+> `commit-strategy-default`; `review-policy-default` fica fora do recap.
 
 - isolation-default: <branch|worktree|unset>
 - execution-mode-default: <inline|subagents|team|unset>

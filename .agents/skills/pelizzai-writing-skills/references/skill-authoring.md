@@ -264,7 +264,7 @@ nome-da-skill/
 No repo-fonte do PelizzAI:
 
 - edite `.claude/skills/<nome>/`;
-- trate `.agents/skills/` e `.cursor/` como mirrors gerados;
+- trate `.agents/skills/` como mirror gerado; `.cursor/rules/pelizzai.mdc` é adaptador **manual** — o sync não o gera, atualize-o à mão quando os entrypoints mudarem;
 - depois de uma edição autorizada, rode automaticamente `node scripts/sync-harness.mjs` e valide
   com `node scripts/sync-harness.mjs --check --source-mode`; `.ps1` e `.sh` são wrappers.
 

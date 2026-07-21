@@ -228,7 +228,9 @@ git status --porcelain --untracked-files=all
 ```
 
 No consumidor, repita também `git diff --name-only <validated-head>..<delivery-head>` e exija
-somente `pelizzai/data/state.md`. No source mode, exija `delivery-head == validated-head`.
+somente os dois arquivos de metadata do closure: `pelizzai/data/state.md` e o
+`pelizzai/data/history/<AAAA-MM-DD>-<slug>.md` gerado pela migração do selo — nada mais.
+No source mode, exija `delivery-head == validated-head`.
 Divergiu? Pare; não publique.
 
 ### 3a. Publicar sem PR
