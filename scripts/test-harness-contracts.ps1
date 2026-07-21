@@ -951,15 +951,28 @@ try {
     # e visível: se alguém voltar a alargar o matcher, elas quebram e a decisão volta ao usuário.
     $safeByDesign = @(
         'git push origin +HEAD:main', 'git push origin +main', 'git push origin --delete topic',
-        'git push origin :topic', 'git checkout -f topic', 'git checkout -B topic main',
-        'git checkout -- file.txt', 'git branch --delete --force topic', 'git branch -M main',
+        'git push origin :topic', 'git checkout -- file.txt', 'git branch -M main',
         'git restore file.txt', 'git restore -SW file.txt',
         'git commit -m "fix: restore layout"', 'git add src/restore.ts', 'git log --grep=restore'
+    )
+    # Guardas contra falso positivo das regras de checkout/branch: criar não é destruir.
+    $safeByDesign += @(
+        'git checkout -b feature/nova', 'git checkout feature/foo', 'git checkout main',
+        'git branch --delete merged', 'git branch --list'
     )
     $blocked = @(
         'git push -f origin topic', 'Git reset --hard', 'git switch -C topic',
         'git clean -fd', 'git restore .', 'git checkout .', 'git checkout -- .',
         'git branch -D topic', 'git worktree remove --force ../topic'
+    )
+    # Ratificado pelo usuário em 2026-07-21: estas três grafias NÃO são "escopo estreito", são a
+    # MESMA destruição já bloqueada escrita de outro jeito — liberá-las deixaria no hook um bypass
+    # trivial. `checkout -f` == `checkout .`; `checkout -B` == `switch -C`; `branch --delete --force`
+    # == `branch -D`. Os demais comandos acima seguem liberados, como no estado pré-11/07.
+    $blocked += @(
+        'git checkout -f topic', 'git checkout --force', 'git checkout -B topic main',
+        'git branch --delete --force topic', 'git branch --force --delete topic',
+        'git branch --delete -f topic'
     )
     foreach ($hook in $hooks) {
         $label = Split-Path -Leaf $hook

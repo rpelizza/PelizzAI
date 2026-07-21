@@ -8,8 +8,9 @@
  *  - git push --force / -f          (exceto --force-with-lease)
  *  - git reset --hard
  *  - git clean -f / -fd / --force
- *  - git branch -D
+ *  - git branch -D / --delete --force
  *  - git checkout . / checkout -- .
+ *  - git checkout -f / --force / -B
  *  - git switch -C / --force-create
  *  - git restore .                  (sem --staged — perda da working tree)
  *  - git worktree remove --force
@@ -78,10 +79,16 @@ const RULES = [
     safe: 'liste antes com git clean -n e confirme com o usuário o que será apagado.',
   },
   {
-    name: 'git branch -D',
+    name: 'git branch -D / --delete --force',
     // -D case-sensitive (-d é seguro); pode vir agrupada (git branch -qD nome).
+    // A forma longa `--delete --force` (em qualquer ordem) é a MESMA operação que -D:
+    // sem ela, o hook teria um bypass trivial por simples troca de grafia.
     // -M NÃO entra: renomear branch é o passo canônico de git init (git branch -M main).
-    test: (s) => /\bgit\b.*\bbranch\b/i.test(s) && /(^|\s)-[a-zA-Z]*D[a-zA-Z]*(\s|$)/.test(s),
+    test: (s) =>
+      /\bgit\b.*\bbranch\b/i.test(s) &&
+      (/(^|\s)-[a-zA-Z]*D[a-zA-Z]*(\s|$)/.test(s) ||
+        (/(^|\s)--delete(\s|$)/.test(s) &&
+          (/(^|\s)--force(\s|$)/.test(s) || /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s)))),
     why: 'força a remoção de uma branch NÃO mesclada — os commits dela podem se perder.',
     safe: 'use -d (só remove branch já mesclada) ou confirme o descarte com o usuário (a pelizzai-finish-task exige o texto "descartar").',
   },
@@ -94,6 +101,21 @@ const RULES = [
       /\bgit\b.*\bcheckout\b\s+\S+\s+--\s+\.\/?(\s|$)/i.test(s),
     why: 'sobrescreve TODAS as mudanças não commitadas da working tree.',
     safe: 'crie um ponto de retorno primeiro (git stash push -u -m "<motivo>") ou restaure só arquivos específicos.',
+  },
+  {
+    name: 'git checkout -f / -B',
+    // Mesmas duas destruições que o hook já bloqueia em outra grafia:
+    //  -f/--force  == `git checkout .`      (sobrescreve a working tree inteira)
+    //  -B          == `git switch -C`       (sobrescreve uma branch existente)
+    // Bloquear uma grafia e liberar a outra deixaria o gate com um furo do seu próprio tamanho.
+    // -b minúsculo (criar branch nova) e `checkout -- <arquivo>` NÃO entram: nenhum dos dois destrói.
+    test: (s) =>
+      /\bgit\b.*\bcheckout\b/i.test(s) &&
+      (/(^|\s)--force(\s|$)/.test(s) ||
+        /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s) ||
+        /(^|\s)-[a-zA-Z]*B[a-zA-Z]*(\s|$)/.test(s)),
+    why: '-f descarta TODAS as mudanças não commitadas; -B sobrescreve uma branch existente e os commits que só existiam nela.',
+    safe: 'crie um ponto de retorno primeiro (git stash push -u -m "<motivo>"); para criar branch use -b, que falha se ela já existir.',
   },
   {
     name: 'git switch -C / --force-create',

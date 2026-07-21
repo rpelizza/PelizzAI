@@ -10,6 +10,7 @@
 #  - git clean -f / -fd / --force
 #  - git branch -D
 #  - git checkout . / checkout -- .
+#  - git checkout -f / --force / -B
 #  - git switch -C / --force-create
 #  - git restore .                  (sem --staged - perda da working tree)
 #  - git worktree remove --force
@@ -69,10 +70,12 @@ try {
        Test = { param($s) ($s -match '\bgit\b.*\bclean\b') -and (($s -cmatch '(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)') -or ($s -cmatch '(^|\s)--force\b')) }
        Why  = 'apaga arquivos nao rastreados de forma irreversivel (nao ha stash nem reflog para eles).'
        Safe = 'liste antes com git clean -n e confirme com o usuario o que sera apagado.' },
-    @{ Name = 'git branch -D'
+    @{ Name = 'git branch -D / --delete --force'
        # -D case-sensitive (-d e seguro); pode vir agrupada (git branch -qD nome).
+       # A forma longa `--delete --force` (em qualquer ordem) e a MESMA operacao que -D:
+       # sem ela, o hook teria um bypass trivial por simples troca de grafia.
        # -M NAO entra: renomear branch e o passo canonico de git init (git branch -M main).
-       Test = { param($s) ($s -match '\bgit\b.*\bbranch\b') -and ($s -cmatch '(^|\s)-[a-zA-Z]*D[a-zA-Z]*(\s|$)') }
+       Test = { param($s) ($s -match '\bgit\b.*\bbranch\b') -and (($s -cmatch '(^|\s)-[a-zA-Z]*D[a-zA-Z]*(\s|$)') -or (($s -cmatch '(^|\s)--delete(\s|$)') -and (($s -cmatch '(^|\s)--force(\s|$)') -or ($s -cmatch '(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)')))) }
        Why  = 'forca a remocao de uma branch NAO mesclada - os commits dela podem se perder.'
        Safe = 'use -d (so remove branch ja mesclada) ou confirme o descarte com o usuario (a pelizzai-finish-task exige o texto "descartar").' },
     @{ Name = 'git checkout . / checkout [<ref>] -- .'
@@ -81,6 +84,15 @@ try {
        Test = { param($s) ($s -match '\bgit\b.*\bcheckout\b(\s+--)?\s+\.\/?(\s|$)') -or ($s -match '\bgit\b.*\bcheckout\b\s+\S+\s+--\s+\.\/?(\s|$)') }
        Why  = 'sobrescreve TODAS as mudancas nao commitadas da working tree.'
        Safe = 'crie um ponto de retorno primeiro (git stash push -u -m "<motivo>") ou restaure so arquivos especificos.' },
+    @{ Name = 'git checkout -f / -B'
+       # Mesmas duas destruicoes que o hook ja bloqueia em outra grafia:
+       #  -f/--force == `git checkout .`  (sobrescreve a working tree inteira)
+       #  -B         == `git switch -C`   (sobrescreve uma branch existente)
+       # Bloquear uma grafia e liberar a outra deixaria o gate com um furo do seu proprio tamanho.
+       # -b minusculo e `checkout -- <arquivo>` NAO entram: nenhum dos dois destroi.
+       Test = { param($s) ($s -match '\bgit\b.*\bcheckout\b') -and (($s -cmatch '(^|\s)--force(\s|$)') -or ($s -cmatch '(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)') -or ($s -cmatch '(^|\s)-[a-zA-Z]*B[a-zA-Z]*(\s|$)')) }
+       Why  = '-f descarta TODAS as mudancas nao commitadas; -B sobrescreve uma branch existente e os commits que so existiam nela.'
+       Safe = 'crie um ponto de retorno primeiro (git stash push -u -m "<motivo>"); para criar branch use -b, que falha se ela ja existir.' },
     @{ Name = 'git switch -C / --force-create'
        # -C case-sensitive (-c/--create e seguro: falha se a branch ja existir).
        Test = { param($s) ($s -match '\bgit\b.*\bswitch\b') -and (($s -cmatch '(^|\s)--force-create(\s|$)') -or ($s -cmatch '(^|\s)-[a-zA-Z]*C[a-zA-Z]*(\s|$)')) }
