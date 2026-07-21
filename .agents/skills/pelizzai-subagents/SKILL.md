@@ -60,8 +60,9 @@ O handoff dir é gitignored no consumidor e temp em source mode (ver task-cycle 
 - Contexto necessário: caminhos, contratos, decisões já tomadas, convenções (o subagente não viu a conversa).
 - Regras/skills locais relevantes: monte um ESPECIALISTA — quando o subagente encarna um papel de
   área (ex.: implementador-backend), nomeie-o pela área e cole o pacote **COMPLETO** de skills de
-  domínio dessa área (consumidor usa o catálogo; source mode usa o repo-fonte), não só as que parecem
-  aplicar à tarefa específica. Em dúvida se uma skill de domínio do catálogo pertence à área,
+  domínio dessa área (consumidor: catálogo `pelizzai/domain-skills.md`; source mode: regras/skills
+  do repo-fonte), não só as que parecem aplicar à tarefa específica. Em dúvida se uma skill de
+  domínio do catálogo pertence à área,
   inclua-a: o custo de incluir é menor que o de ignorar uma regra do projeto. Cole os pontos
   operacionais — o subagente deve aplicá-los em vez de padrões genéricos. Se a área não tem skill
   cobrindo, diga isso e peça que o subagente sinalize a lacuna no retorno.
@@ -83,8 +84,9 @@ O handoff dir é gitignored no consumidor e temp em source mode (ver task-cycle 
 ## Verificação e integração
 
 O resultado de um subagente **não** é verdade até ser conferido. Para implementação, passe pelas
-duas lentes do `pelizzai-review` no perfil proporcional (`combined` ou `split`). No `split`, a
-cegueira é assimétrica: a **lente spec cega** recebe só diff + spec/plano + domain skills da área e
+duas lentes do `pelizzai-review` no perfil registrado (`split` por padrão; `combined` só quando o
+usuário ratificou o rebaixamento no gate de setup). No `split`, a cegueira é assimétrica: a
+**lente spec cega** recebe só diff + spec/plano + domain skills da área e
 **NÃO recebe o relatório** do subagente (julga o código contra o contrato, sem a narrativa); a
 **lente qualidade/evidência** recebe o relatório e verifica as alegações com prova fresca. O
 coordenador (a sessão principal) cruza as lentes e **nunca** é a lente cega. Depois, aplique

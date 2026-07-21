@@ -86,7 +86,7 @@ _Se autocontida, escreva `nenhuma`._
 - Comando(s): `[comandos canônicos completos]`
 - Evidência esperada: [exit code, delta, estado visual ou saída exata]
 - Rollback: [quando aplicável; caso contrário, `não aplicável`]
-- Perfil de review: [combined | split] — [justificativa por risco/superfície]
+- Perfil de review: [split (default) | combined (só com rebaixamento ratificado)] — [justificativa por risco/superfície]
 
 - [ ] **Passo 1: Estabeleça o baseline/oráculo** → verifique: [resultado exato]
 

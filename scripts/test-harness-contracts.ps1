@@ -140,7 +140,9 @@ try {
     Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Não invente um número de hipóteses|não.*quantidade fixa' 'debugging não fixa hipóteses'
     Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Estratégia de teste/validação|Estratégia primária' 'task-cycle escolhe prova por artefato'
     Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'Skills transversais do harness' 'plano propaga overlays'
-    Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'combined[\s\S]*split' 'plano escolhe perfil de review'
+    # A ordem combined→split era o default antigo; o que importa é o plano REGISTRAR o perfil com
+    # os dois valores nomeados (o default vive no bloco F6, abaixo).
+    Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'Perfil de review[\s\S]{0,400}split[\s\S]{0,400}combined' 'plano registra o perfil de review com os dois valores'
     Check-NotMatch '.claude/skills/pelizzai-writing-plans/SKILL.md' 'interview-me[^\n]*(OBRIGATÓRIO|obrigatório)' 'plano bounded não força entrevista'
     Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'overlay obrigatório' 'frontend é overlay obrigatório para UI'
     Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'spec/Figma aprovado.*design system' 'frontend respeita especificação e design system'
@@ -438,7 +440,7 @@ try {
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'cegueira assimétrica' 'review nomeia a cegueira assimétrica das duas lentes'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'nunca[\s\S]{0,4}é a lente cega' 'review: o coordenador nunca é a lente cega'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'lente que recebe o relatório' 'review: a lente evidência recebe e verifica o relatório do autor'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'cegueira assimétrica das duas lentes entra no' 'review: proporcionalidade — combined trivial, cegueira entra no split'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'cegueira assimétrica das duas lentes entra no' 'review: a cegueira assimétrica das duas lentes vive no split'
     Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'lente spec NÃO recebe o relatório do implementador' 'spec-reviewer é a lente cega (não recebe o relatório)'
     Check-NotMatch '.claude/skills/pelizzai-review/references/spec-reviewer.md' '\{RELATÓRIO_DO_IMPLEMENTADOR\}' 'spec-reviewer (lente cega) não injeta mais o placeholder do relatório'
     Check-Match '.claude/skills/pelizzai-review/references/code-reviewer.md' '\{RELATÓRIO_DO_IMPLEMENTADOR\}' 'code-reviewer (lente evidência) recebe o placeholder do relatório'
@@ -450,6 +452,56 @@ try {
     Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'monte um ESPECIALISTA' 'subagents: monta o subagente como especialista da área'
     Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' '\*\*COMPLETO\*\* de skills' 'subagents: pacote COMPLETO de domain skills da área'
     Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'lente spec cega' 'subagents: review usa a lente spec cega; coordenador nunca é ela'
+
+    # =====================================================================
+    # Restauração pré-11/07 (2026-07-21) — F6: o revisor volta a ser cego
+    # por PADRÃO. No BASE não existia perfil: toda tarefa passava por
+    # spec → qualidade em estágios separados, e o review era obrigatório
+    # após CADA tarefa. O `combined` (pós-BASE) fica, mas rebaixado a
+    # exceção que o usuário ratifica no passo 4 do gate — porque num único
+    # despacho a cegueira vira mera ordem de leitura. A outra metade da
+    # correção: a lente cega passa a receber as domain skills, já que
+    # cegueira é não ver a NARRATIVA do autor, não ficar sem o CONTRATO
+    # do projeto.
+    # =====================================================================
+
+    # -- O review volta a ser obrigatório após CADA tarefa (âncoras do BASE) --
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Revise cedo e sempre' 'review: princípio central do BASE restaurado'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'description:[^\n]*após CADA tarefa' 'review: a description dispara após CADA tarefa (gatilho do BASE)'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Após CADA tarefa na execução de um plano[\s\S]{0,60}sem exceção por' 'review obrigatório após cada tarefa, sem exceção por "é simples"'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'profundidade é proporcional ao risco, a existência do review não' 'review: proporcional é a profundidade, nunca a existência do review'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Pular o review porque .é simples' 'review: anti-padrão do BASE (pular porque "é simples") restaurado'
+
+    # -- split é o default; combined é exceção ratificada (e não o contrário) --
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'padrão recomendado[\s\S]{0,20}é .split.' 'review: split é o perfil recomendado por padrão'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' '.combined. é[\s\S]{0,20}\*\*exceção\*\*' 'review: combined é exceção, não o caso normal'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'rebaixar para .combined. sempre exige' 'review: rebaixar para combined exige escolha explícita do usuário'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Usar .combined. por conta própria' 'review: anti-padrão de assumir combined sem ratificação'
+    Check-NotMatch '.claude/skills/pelizzai-review/SKILL.md' 'tarefa trivial/bounded segue com .combined.' 'review não volta a mandar tarefa bounded para combined por default'
+
+    # -- A lente cega recebe as domain skills (cegueira ≠ falta de contexto do projeto) --
+    Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' '\{SKILLS_DE_DOMÍNIO\}' 'spec-reviewer (lente cega) recebe o slot de domain skills'
+    Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'Cegueira \*\*não\*\* é falta de contexto do projeto' 'spec-reviewer: cegueira é não ver a narrativa, não ficar sem o contrato'
+    Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'Skills de domínio: a mudança respeita as regras' 'spec-reviewer: domain skill entra na checklist da lente cega'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'slot .\{SKILLS_DE_DOMÍNIO\}. \*\*dos dois\s+templates\*\*' 'review: o briefing cola as domain skills nos DOIS templates'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'pelizzai/domain-skills\.md' 'review nomeia o catálogo de domain skills (não só "o catálogo")'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'slot .\{SKILLS_DE_DOMÍNIO\}.\s+vazio' 'review: anti-padrão de despachar briefing com o slot de domain skills vazio'
+
+    # -- Exceção de reutilização do review final: restringida, não removida --
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Exceção de reutilização \(estreita, e nunca o caminho padrão\)' 'review: a exceção de reutilização é declarada estreita'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'efeito .read-only. ou .write-local., risco baixo' 'review: a exceção exige efeito local e risco baixo'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'não para dispensar a validação final' 'review: a exceção não dispensa a validação final'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Exceção estreita:[\s\S]{0,200}read-only.*write-local' 'execution-plans espelha os limites da exceção de reutilização'
+
+    # -- O default propagado: gate, plano, task-cycle, team e subagents ensinam o MESMO --
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Recomendado: split — é o default' 'gate passo 4 recomenda split por padrão'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Rebaixar para combined exige[\s\S]{0,80}sua escolha' 'gate passo 4: combined exige a escolha explícita do usuário'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' '\| .split. \(default\)' 'task-cycle: a tabela de perfis abre com split (default)'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'tarefas triviais/bounded seguem com review \*\*combinado\*\*' 'task-cycle não volta a mandar tarefa bounded para combined'
+    Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'O default é .split., inclusive em bounded' 'writing-plans registra split como default do perfil de review'
+    Check-NotMatch '.claude/skills/pelizzai-writing-plans/SKILL.md' 'review split universal' 'writing-plans não trata mais o split universal como red flag'
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'perfil cego/duplo \(.split.\) é o default' 'team: split é o default do review por tarefa'
+    Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' '.split. por padrão' 'subagents: o perfil registrado é split por padrão'
 
     # -- D7: fio do gate proativo de domain skills — três pontos de captura + a audit nomeia quem invoca --
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'domain skills da stack \(proposta na borda do design\)' 'router (D7.1): kickoff lista domain skills da stack nos Artefatos'

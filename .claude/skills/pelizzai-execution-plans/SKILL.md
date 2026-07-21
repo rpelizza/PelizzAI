@@ -81,8 +81,10 @@ push/PR/publicação são decididos por tarefa na `pelizzai-finish-task`.
    Pergunta: qual estratégia você escolhe?
 
 4. Review (somente depois de 3)
-   Recomendado: <combined|split> — <porquê conforme risco/superfície>.
-   Pergunta: confirma este perfil?
+   Opções: split · combined.
+   Recomendado: split — é o default, inclusive em tarefa bounded: só com dois despachos a lente
+   spec é cega de fato. Rebaixar para combined exige tarefa bounded/low-risk E sua escolha aqui.
+   Pergunta: confirma split, ou prefere combined?
 ```
 
 Regras: o modo mantém **as três opções sempre visíveis** — **team nunca é omitido**. Não existe
@@ -275,7 +277,7 @@ com duas lentes, circuit breaker e commit como gate — está em
 
 ```text
 1. Briefing: COLE o texto completo + skills de domínio + overlays + estratégia de evidência e
-   perfil de review (`combined` ou `split`)
+   perfil de review (`split` por padrão; `combined` só se ratificado)
    (o membro nunca lê o arquivo inteiro do plano; use scripts/task-brief.* somente quando houver
    plano Markdown persistente compatível. Plano nativo usa colagem/brief construído — ver §1,
    incluindo
@@ -290,8 +292,9 @@ com duas lentes, circuit breaker e commit como gate — está em
    consolida as lacunas e as leva ao humano por `pelizzai-interview-me` no modo lacuna antes de a
    frente continuar.
 3. Review com duas lentes: (a) conformidade com a spec; (b) qualidade + evidência FRESCA.
-   `combined` aplica ambas em um despacho/relatório para tarefa bounded/low-risk; `split` usa
-   estágios sequenciais quando risco, contrato, dados, segurança ou complexidade pedirem.
+   `split` — o default, inclusive em tarefa bounded — usa estágios sequenciais e é onde a
+   cegueira existe de fato; `combined` aplica ambas em um despacho/relatório e só vale para
+   tarefa bounded/low-risk cujo perfil o usuário ratificou no passo 4 do gate.
 4. Reprovou? Corrija (re-despachando ao implementador — não corrija à mão, polui o contexto) e
    RE-REVISE na mesma lente. Circuit breaker: 3 ciclos por lente por tarefa; mesma issue 2x
    escala na 2ª; rejeição estrutural escala de imediato; ao estourar → registra phase: blocked
@@ -524,9 +527,11 @@ Depois desta etapa, `git status --porcelain` deve estar vazio e `validated-head`
 1. Capture candidate-head = `git rev-parse HEAD`.
 2. REVIEW FINAL via pelizzai-review no range exato `base-sha..candidate-head`. Use reviewer
    independente, com o modelo mais capaz disponível e effort máximo (ver task-cycle §8).
-   Exceção: uma única tarefa `bounded`, perfil `combined`, sem mutação posterior pode reutilizar
-   o review da tarefa se `reviewed-tree == candidate-head^{tree}`; qualquer ausência de prova
-   exige review normal. Critical/Important bloqueiam.
+   Exceção estreita: uma única tarefa `bounded`, efeito `read-only`/`write-local`, risco baixo,
+   perfil `combined` ratificado, zero findings e sem mutação posterior pode reutilizar o review da
+   tarefa se `reviewed-tree == candidate-head^{tree}`. Faltando um item — efeito `write-shared`,
+   risco médio/alto, superfície sensível ou perfil `split` (o default) — exige review normal
+   (ver `pelizzai-review` → "Review final da branch"). Critical/Important bloqueiam.
 3. Rode pelo próprio coordenador todos os checks aplicáveis do perfil (test/lint/build/render/
    dry-run/visual etc.), do zero, com saída e exit code. Não invente suíte para artefato estático.
 4. Releia plano/spec requisito a requisito e aponte onde cada um foi entregue.

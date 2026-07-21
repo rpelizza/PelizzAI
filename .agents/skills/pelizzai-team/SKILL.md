@@ -283,9 +283,10 @@ Briefing de [nome do membro] — papel: [papel nomeado pela ÁREA, ex.: implemen
 - Contexto necessário: [caminhos, contratos, decisões já tomadas, links de spec,
   convenções do projeto — tudo, porque o membro não viu esta conversa]
 - Regras/skills locais relevantes: monte um ESPECIALISTA — cole o pacote **COMPLETO** de skills de
-  domínio da **ÁREA** do papel [catálogo consumidor ou repo-fonte em source mode; cole os
-  pontos-chave], não só as que parecem aplicar à tarefa específica, mas a área inteira. Em dúvida se
-  uma skill de domínio do catálogo pertence à área, inclua-a: o custo de incluir é menor que o de
+  domínio da **ÁREA** do papel [catálogo `pelizzai/domain-skills.md` no consumidor, ou regras/skills
+  do repo-fonte em source mode; cole os pontos operacionais, não só os nomes], não só as que parecem
+  aplicar à tarefa específica, mas a área inteira. Em dúvida se uma skill de domínio do catálogo
+  pertence à área, inclua-a: o custo de incluir é menor que o de
   ignorar uma regra do projeto. Se a área da frente não tem skill cobrindo, diga isso e instrua o
   membro a sinalizar a lacuna no retorno
 - Camada global: aplique `pelizzai-preferences` e raciocine via `pelizzai-reasoning`; em
@@ -413,7 +414,7 @@ Resultados de membros **não** são verdade até serem cruzados.
 - **Cross-check:** confronte entregáveis que se sobrepõem; achados em conflito disparam uma rodada de refutação (Modo Subagents) ou um debate via `SendMessage` (Modo Teammates).
 - **Verificação adversarial:** prefira que **outro** membro (ou um verificador dedicado) tente derrubar uma conclusão, em vez de o próprio autor confirmá-la.
 - **Self-Consistency:** quando vários membros chegam ao mesmo resultado por caminhos independentes, a convergência aumenta a confiança — mas não substitui teste/fonte real.
-- **Review por tarefa (duas lentes com cegueira assimétrica):** todo entregável de implementação passa pela `pelizzai-review` — a **lente spec cega** (recebe só diff + spec/plano + domain skills da área, NUNCA o relatório do autor: julga o código contra o contrato, sem a narrativa) e a **lente qualidade/evidência** (recebe o relatório e verifica as alegações com prova fresca). O coordenador despacha revisores independentes — **nunca é a lente cega** —, cruza os dois verdicts e, em conflito, decide com evidência própria ou escala. Proporcional: `combined` numa passada para trivial/bounded; o perfil cego/duplo (`split`) entra em standard/exploratory ou por ratificação no gate de setup.
+- **Review por tarefa (duas lentes com cegueira assimétrica):** todo entregável de implementação passa pela `pelizzai-review` — a **lente spec cega** (recebe só diff + spec/plano + domain skills da área, NUNCA o relatório do autor: julga o código contra o contrato, sem a narrativa) e a **lente qualidade/evidência** (recebe o relatório e verifica as alegações com prova fresca). O coordenador despacha revisores independentes — **nunca é a lente cega** —, cruza os dois verdicts e, em conflito, decide com evidência própria ou escala. O perfil cego/duplo (`split`) é o default em qualquer lane, inclusive bounded — só com dois despachos a lente spec desconhece a narrativa do autor; `combined` numa passada é exceção que o usuário ratifica no passo 4 do gate de setup. Proporcional é a **profundidade** de cada lente, não a existência do review nem a cegueira.
 - **Gate de evidência:** antes de aceitar um entregável de **implementação**, aplique `pelizzai-verification-before-completion` — confira o **diff do git** e rode os comandos de teste você mesmo (ou exija a saída + exit code colados); o relatório do membro nunca é evidência.
 - **Síntese:** cruze os entregáveis com `Evidence Synthesis` e produza **uma** entrega, deixando claro o que é consenso, o que foi divergência resolvida e o que permanece em aberto.
 - **Impasse:** se o confronto **não** converge, o coordenador **não** força um consenso artificial: decide pelo critério dominante da tarefa (acionando `Decision Making`) e, quando a escolha pertence ao usuário ou o impacto é alto, **escala por `pelizzai-interview-me`** — nomeando a lacuna, com as posições viradas em 2–3 opções reais, a recomendada e o trade-off de cada uma.

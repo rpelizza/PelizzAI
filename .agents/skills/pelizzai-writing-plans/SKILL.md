@@ -143,12 +143,15 @@ Preencha **Estratégia de implementação e validação**:
 Tarefas mistas combinam estratégias. Não fabrique RED para CSS, Markdown ou configuração só para
 uniformizar o plano.
 
-Registre também **Perfil de review**:
+Registre também **Perfil de review**. O default é `split`, inclusive em bounded:
 
-- `combined`: bounded, risco baixo, escopo coeso, sem segurança/dados/migração/contrato público;
-- `split`: risco médio/alto, superfície sensível, contrato público, dados, migração ou múltiplas partes.
+- `split` (default): o caso normal; obrigatório em risco médio/alto, superfície sensível, contrato
+  público, dados, migração ou múltiplas partes;
+- `combined`: exceção para bounded, risco baixo e escopo coeso, sem segurança/dados/migração/
+  contrato público — e só depois de o usuário ratificar o rebaixamento no passo 4 do Gate de setup.
 
-Ambos cobrem spec e qualidade; muda a quantidade de despachos, não o critério de aprovação.
+Ambos cobrem spec e qualidade; muda a quantidade de despachos, não o critério de aprovação. Só o
+`split` torna a lente spec cega de fato, então o plano nunca recomenda `combined` por conta própria.
 
 ## Documento
 
@@ -236,12 +239,12 @@ pedido externo.
 
 ```text
 - Escrever plano antes da task branch.
-- Forçar brainstorming/interview/reviewer independente em lane bounded clara.
+- Forçar brainstorming/interview em lane bounded clara.
 - Planejar greenfield sem spec aprovada ou dispensa explícita.
 - Pular stress e aprovação do plano para começar a implementar.
 - Duplicar no plano todo o código que a execução deve escrever.
 - Omitir overlay frontend/security detectável.
-- TDD universal ou review split universal.
+- TDD universal — ou registrar `combined` como perfil sem o usuário ter ratificado o rebaixamento.
 - Team/worktree por preferência do harness, sem ganho concreto.
 - Usar Context7 para decidir requisitos ou critérios de aceite.
 - Plano gigante cobrindo subsistemas que deveriam ser tarefas/projetos separados.

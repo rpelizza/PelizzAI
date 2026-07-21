@@ -62,7 +62,8 @@ O briefing de cada tarefa inclui:
 - Raciocínio: quando a tarefa envolve incerteza, decisão ou diagnóstico, a técnica dominante
   sugerida de `pelizzai-reasoning` (decomposição, RCA, comparação, verification — ver a matriz da
   skill); omita para tarefa mecânica de contrato claro — não imponha técnica sem gatilho.
-- Perfil de review escolhido no plano: `combined` ou `split`, com a justificativa de risco.
+- Perfil de review registrado no plano: `split` (default) ou `combined` ratificado, com a
+  justificativa de risco.
 - O formato de retorno esperado e o status (ver abaixo), incluindo o campo obrigatório
   `Desvios do plano:` (ou `nenhum`).
 - Teste operacional de desvio (frase canônica, no TEXTO do briefing):
@@ -104,13 +105,14 @@ e recebe o relatório do autor para verificá-lo. O perfil decide se elas usam u
 
 | Perfil | Quando | Execução |
 | --- | --- | --- |
-| `combined` | lane bounded, risco baixo, escopo coeso, sem segurança/dados/migração/contrato público | um reviewer e um relatório, primeiro spec e depois qualidade |
-| `split` | risco médio/alto, contrato público, segurança, dados, migração, múltiplas partes ou rejeição estrutural | estágio spec aprova antes de despachar qualidade; independência proporcional |
+| `split` (default) | o caso normal, inclusive lane bounded; **obrigatório** em risco médio/alto, contrato público, segurança, dados, migração, múltiplas partes ou rejeição estrutural | estágio spec aprova antes de despachar qualidade; despachos independentes |
+| `combined` (exceção ratificada) | lane bounded, risco baixo, escopo coeso, sem segurança/dados/migração/contrato público — **e** o usuário ratificou o perfil no passo 4 do Gate de setup | um reviewer e um relatório, primeiro spec e depois qualidade |
 
-Proporcionalidade: tarefas triviais/bounded seguem com review **combinado** (uma passada); o perfil
-de **lentes separadas com cegueira** entra em `standard`/`exploratory` ou quando o Gate de setup
-ratificar review reforçado. Se o diff revelar superfície que muda o risco, promova `combined` para
-`split`; nunca rebaixe só para economizar uma rodada.
+Proporcionalidade: o que varia com o risco é a **profundidade** de cada lente, não a existência do
+review nem a cegueira. O perfil de **lentes separadas com cegueira** é o default em qualquer lane —
+só com dois despachos a lente spec desconhece a narrativa do autor. Se o diff revelar superfície que
+muda o risco, promova `combined` para `split` sem nova ratificação; rebaixar para `combined` é
+sempre escolha explícita do usuário, nunca economia de uma rodada.
 
 ```text
 (0) Material: gere `review-package --working-tree`; o mesmo pacote cobre staged, unstaged e

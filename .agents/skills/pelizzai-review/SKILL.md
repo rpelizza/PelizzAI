@@ -1,6 +1,6 @@
 ---
 name: pelizzai-review
-description: Skill de code review proporcional do harness PelizzAI. Use no gate de uma tarefa de plano, antes de integrar uma entrega ou quando o usuário pedir review de working tree, branch ou PR. Aplica as lentes spec e qualidade em perfil combinado ou separado conforme risco e orienta como receber feedback com rigor técnico. Para segurança/OWASP, componha `pelizzai-oswap`.
+description: Skill de code review do harness PelizzAI. Use após CADA tarefa na execução de um plano, ao concluir uma feature relevante, antes de integrar uma entrega ou quando o usuário pedir review de working tree, branch ou PR. Aplica as lentes spec (cega) e qualidade/evidência — por padrão em dois despachos (`split`) — e orienta como receber feedback com rigor técnico. Para segurança/OWASP, componha `pelizzai-oswap`.
 ---
 
 # PelizzAI Review
@@ -15,8 +15,10 @@ Pegar problemas antes que eles se propaguem. O reviewer recebe **contexto fabric
 
 ## Princípio central
 
-> Revise com profundidade proporcional. Leia o produto de fato, não confie no relatório de quem
-> implementou e dê um veredito claro com evidência — nunca um "parece bom".
+> Revise cedo e sempre. Um review é uma verificação independente do produto: leia o código de fato,
+> não confie no relatório de quem implementou e dê um veredito claro com evidência — nunca um
+> "parece bom". A **profundidade** de cada lente é proporcional ao risco; a **existência** do review
+> não é.
 
 ---
 
@@ -24,8 +26,11 @@ Pegar problemas antes que eles se propaguem. O reviewer recebe **contexto fabric
 
 ```text
 Obrigatório:
-- No gate de cada tarefa de plano, pelo perfil registrado (`combined` ou `split`).
-- No candidato final de uma entrega planejada, antes de `validated-head`.
+- Após CADA tarefa na execução de um plano (pelizzai-execution-plans) — sem exceção por "é simples".
+  O perfil registrado (`split` por padrão, `combined` só por ratificação) muda a FORMA do review,
+  nunca se ele acontece.
+- Ao concluir uma feature relevante.
+- No candidato final de uma entrega planejada, antes de `validated-head` — e antes de integrar à base.
 - Quando o usuário pede review.
 
 Opcional, mas valioso:
@@ -51,18 +56,23 @@ está na working tree. A assimetria é deliberada:
   declarados? Roda de fato os checks aplicáveis para confirmar ou derrubar o que o relatório afirma,
   além de avaliar a qualidade do código.
 
-O plano escolhe o perfil, que decide se as lentes usam um ou dois despachos:
+O plano escolhe o perfil, que decide se as lentes usam um ou dois despachos. **O padrão recomendado
+é `split`** — só com dois despachos a cegueira existe de fato; num despacho só ela vira mera ordem
+de leitura, e um revisor que já leu o relatório não desconhece a narrativa do autor. `combined` é
+**exceção**, e o usuário a ratifica explicitamente no passo 4 do gate de setup
+(`pelizzai-execution-plans`).
 
 | Perfil | Predicado | Forma |
 | --- | --- | --- |
-| `combined` | bounded, low-risk, coesa, sem segurança/dados/migração/contrato público | um despacho e um relatório; spec primeiro, qualidade/evidência depois — a cegueira **não** se aplica (uma passada, o revisor vê tudo) |
-| `split` | risco médio/alto, superfície sensível, contrato público, dados, migração, múltiplas partes | a lente spec **cega** aprova antes de despachar a lente qualidade/evidência; despachos independentes |
+| `split` (**recomendado por padrão**) | o caso normal, inclusive tarefa bounded; **obrigatório** em risco médio/alto, superfície sensível, contrato público, dados, migração, múltiplas partes | a lente spec **cega** aprova antes de despachar a lente qualidade/evidência; despachos independentes |
+| `combined` (exceção ratificada) | tarefa bounded, low-risk, coesa, sem segurança/dados/migração/contrato público — **e** o usuário ratificou o perfil no gate | um despacho e um relatório; spec primeiro, qualidade/evidência depois — a cegueira aqui é só lógica (uma passada, o revisor vê tudo) |
 
-**Proporcionalidade:** tarefa trivial/bounded segue com `combined` — um único revisor faz uma passada
-e enxerga tudo (inclusive o relatório); a cegueira assimétrica das duas lentes entra no `split`, ou
-seja, em standard/exploratory ou quando o gate de setup ratifica review reforçado. O perfil reduz
-handoffs, não critérios. Se o diff revelar risco maior ou o combined sofrer rejeição estrutural,
-promova para `split`.
+**Proporcionalidade sem afrouxar a cegueira:** a cegueira assimétrica das duas lentes entra no
+`split`, que é o perfil **recomendado por padrão** — inclusive para tarefa bounded, em qualquer lane.
+O que a proporcionalidade regula é a **profundidade** de cada lente (quanto se investiga, quantos
+checks se roda), não se o review acontece nem se ele é cego. O perfil reduz handoffs, não critérios.
+Se o diff revelar risco maior ou o `combined` sofrer rejeição estrutural, promova para `split` sem
+pedir nova ratificação; rebaixar para `combined` sempre exige uma escolha explícita do usuário.
 
 **Consolidação e conflito são do coordenador:** ele cruza os verdicts das duas lentes e, quando elas
 divergem, decide com evidência própria (rodando ele mesmo o check em disputa) ou escala ao usuário.
@@ -72,10 +82,10 @@ pode julgar às cegas; a lente spec cega é sempre um revisor independente.
 ### Estágio 1 — Lente spec (conformidade, cega)
 
 Verifique que o implementador construiu **exatamente** o que foi pedido — nada a mais, nada a menos.
-No `split`, esta lente é **cega**: você não recebe o relatório do implementador — julga o diff contra
-o contrato, sem a narrativa do autor. No `combined`, o único revisor enxerga o relatório, mas aplica
-esta rubrica **primeiro**, medindo o código contra o pedido antes de ler qualquer alegação. Em ambos:
-**leia o código de fato**, não aceite alegações.
+No `split` (o padrão), esta lente é **cega**: você não recebe o relatório do implementador — julga o
+diff contra o contrato, sem a narrativa do autor. No `combined` ratificado, o único revisor enxerga o
+relatório, mas aplica esta rubrica **primeiro**, medindo o código contra o pedido antes de ler
+qualquer alegação. Em ambos: **leia o código de fato**, não aceite alegações.
 
 ```text
 - Faltando: implementou tudo o que foi pedido? Pulou ou esqueceu algum requisito?
@@ -103,8 +113,9 @@ conseguiu confirmar rodando o check é **UNVERIFIED**, nunca ✅. Use a rubrica 
 - A implementação segue a estrutura de arquivos do plano?
 - Esta mudança criou arquivos já grandes, ou inchou demais arquivos existentes?
   (Não aponte tamanho pré-existente — foque no que ESTA mudança contribuiu.)
-- Julgue a mudança também contra as regras/skills locais aplicáveis: catálogo no consumidor;
-  regras/skills do repo-fonte em source mode.
+- Julgue a mudança também contra as SKILLS DE DOMÍNIO do projeto (`pelizzai/domain-skills.md` no
+  consumidor; em source mode, as regras/skills do próprio repo-fonte). Em conflito com padrões
+  genéricos, as skills de domínio e as regras do projeto PREVALECEM.
 ```
 
 Se o reviewer sinalizar **superfície sensível** (auth, input do usuário, query/SQL, segredos, upload, novas dependências), acione `pelizzai-oswap` (OWASP) antes de concluir — não deixe a segurança só como item de lista.
@@ -123,8 +134,9 @@ passa/falha lendo o diff. Check relevante que não pôde rodar é **UNVERIFIED �
 
 ## Como despachar o reviewer
 
-Use um reviewer independente quando risco/complexidade justificarem; para tarefa bounded, o
-coordenador pode aplicar o perfil `combined` inline. A lente spec usa
+Use um **reviewer independente** — é o default: no `split` a lente spec cega precisa ser outro
+agente, e o coordenador nunca a encarna. Só com `combined` ratificado o coordenador pode aplicar as
+duas rubricas inline, e ainda assim na ordem spec → qualidade. A lente spec usa
 **[references/spec-reviewer.md](references/spec-reviewer.md)**; qualidade/evidência e review final usam
 **[references/code-reviewer.md](references/code-reviewer.md)**. Em `combined`, incorpore as duas
 rubricas num único briefing, mantendo a ordem. Preencha com:
@@ -141,7 +153,12 @@ rubricas num único briefing, mantendo a ordem. Preencha com:
     a tarefa ainda não foi commitada e um range vazio esconderia todo o trabalho.
   - Review final → gere `review-package <base-sha> <HEAD_SHA>` e use o range commitado.
     `base-sha` vem do `state.md` consumidor ou execution record nativo; não redescubra a base.
-- Regras/skills locais relevantes (coladas) — o reviewer julga a mudança contra elas.
+- SKILLS DE DOMÍNIO da área (coladas) — do catálogo `pelizzai/domain-skills.md` no consumidor, ou
+  das regras/skills do repo-fonte em source mode. Preenchem o slot `{SKILLS_DE_DOMÍNIO}` **dos dois
+  templates**: a lente spec cega recebe diff + spec/plano + domain skills; a lente qualidade/evidência
+  recebe as mesmas skills além do relatório. Skill de domínio prometida e não colada é lente cega sem
+  contrato — cole os pontos operacionais, não só os nomes. Sem cobertura na área, escreva "nenhuma"
+  e peça que o reviewer sinalize a lacuna.
 - Skills transversais/overlays registradas no state/execution record (coladas) — frontend, segurança,
   documentação ou outra restrição aplicável também fazem parte do contrato de review.
 ```
@@ -204,11 +221,15 @@ entrega") e acontece **depois** dos overlays que podem escrever (segurança, fro
 e antes da suíte completa, checklist e `pelizzai-verification-before-completion`. Critical/Important
 abertos bloqueiam a conclusão.
 
-Exceção de reutilização: plano de **uma única tarefa bounded**, perfil `combined`, sem findings nem
-mutação de conteúdo posterior pode tratar o review da tarefa como review final quando o tree SHA
-pós-commit é exatamente o tree SHA candidato revisado. Continue checks, checklist e Verification.
-Na ausência dessa prova — múltiplas tarefas, overlay/fix posterior, risco promovido, compaction sem
-evidência ou qualquer dúvida — faça o review final normal.
+Exceção de reutilização (estreita, e nunca o caminho padrão): plano de **uma única tarefa bounded**,
+com efeito `read-only` ou `write-local`, risco baixo, perfil `combined` ratificado pelo usuário, sem
+findings e sem mutação de conteúdo posterior pode tratar o review da tarefa como review final quando
+o tree SHA pós-commit é exatamente o tree SHA candidato revisado. Continue checks, checklist e
+Verification. Basta **um** desses itens faltar — efeito `write-shared`/produção, risco médio/alto,
+superfície sensível (segurança, dados, migração, contrato público), perfil `split` (o padrão),
+múltiplas tarefas, overlay/fix posterior, compaction sem evidência ou qualquer dúvida — e o review
+final normal volta a ser obrigatório. A exceção existe para não duplicar um review comprovadamente
+idêntico, não para dispensar a validação final.
 
 Qualquer fix — de finding, overlay, teste, checklist ou verificação visual — altera o candidato:
 invalide `validated-head`, consolide o fix, rode novamente os overlays afetados e **reabra o
@@ -284,7 +305,12 @@ Em PR no GitHub, responda no THREAD do comentário inline (não como comentário
 ## Anti-padrões / red flags
 
 ```text
+- Pular o review porque "é simples" — a profundidade é proporcional; a existência do review não é.
 - Pular um review exigido pela lane/perfil ou rebaixar o perfil apesar de risco novo.
+- Usar `combined` por conta própria: o padrão é `split`, e o downgrade exige ratificação explícita
+  do usuário no gate.
+- Prometer skills de domínio ao reviewer e despachar o briefing com o slot `{SKILLS_DE_DOMÍNIO}`
+  vazio — a lente cega fica sem o contrato do projeto contra o qual deveria julgar.
 - Rebaixar modelo ou effort num review (por tarefa ou final) para economizar — review é topo.
 - Ignorar Critical, ou seguir com Important em aberto.
 - Dar feedback sobre código que não leu de fato.
@@ -329,7 +355,8 @@ Prefira:
 - severidade real a marcar tudo como Critical;
 - rigor técnico a concordância performática ao receber feedback.
 
-Spec primeiro, qualidade/evidência depois — em um ou dois despachos conforme risco. Critical/Important antes de seguir; Minor para o final.
-No split, a lente spec é cega (sem o relatório); a lente qualidade/evidência recebe e verifica o relatório. O coordenador cruza as lentes e nunca é a lente cega.
+Revise cedo e sempre: a profundidade é proporcional ao risco, a existência do review não.
+Spec primeiro, qualidade/evidência depois — em DOIS despachos por padrão (`split`); um só despacho (`combined`) apenas com ratificação explícita do usuário. Critical/Important antes de seguir; Minor para o final.
+No split, a lente spec é cega (sem o relatório) e recebe diff + spec/plano + skills de domínio da área; a lente qualidade/evidência recebe e verifica o relatório. O coordenador cruza as lentes e nunca é a lente cega.
 Nunca passe o histórico da sessão ao reviewer. Para segurança, use pelizzai-oswap.
 ```
