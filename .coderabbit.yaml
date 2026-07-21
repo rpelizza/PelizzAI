@@ -16,9 +16,11 @@ reviews:
   request_changes_workflow: false
 
   path_filters:
-    # Espelhos gerados — nunca revisar (achado duplicado da fonte em .claude/).
+    # Espelhos gerados por sync-harness.mjs — nunca revisar (achado duplicado da fonte
+    # em .claude/). ATENÇÃO: .cursor/rules/pelizzai.mdc NÃO entra aqui — ele é adaptador
+    # MANUAL, o sync não o gera, e por isso é justamente o arquivo que mais precisa de
+    # revisão humana quando os entrypoints mudam.
     - "!.agents/**"
-    - "!.cursor/**"
     - "!AGENTS.md"
     - "!GEMINI.md"
     - "!scripts/pelizzai-core-skills.txt"
@@ -79,6 +81,16 @@ reviews:
         - `scripts/pelizzai-source-repo.txt` é a sentinela de repo-fonte: precisa ser
           removida no export para consumidor, nunca copiada.
         - Portabilidade Windows/Linux/macOS e tratamento de caminho com espaço.
+
+    - path: ".cursor/rules/pelizzai.mdc"
+      instructions: |
+        Adaptador MANUAL para o Cursor — o `sync-harness.mjs` não o gera. Sua única função é
+        encaminhar aos entrypoints (`AGENTS.md`, `.agents/skills/`) e às regras compartilhadas.
+
+        Verifique se ele continua coerente com o que a fonte diz depois desta mudança: nome de
+        skill que deixou de existir, entrypoint renomeado, instrução que contradiz `CLAUDE.md`.
+        Como nenhum job de CI compara este arquivo com a fonte, a divergência aqui só é pega
+        por revisão — sinalize qualquer defasagem.
 
     - path: "**/*.md"
       instructions: |
