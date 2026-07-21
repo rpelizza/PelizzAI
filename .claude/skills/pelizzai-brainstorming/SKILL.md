@@ -12,6 +12,18 @@ expõe alternativas e recomenda; nunca preenche uma decisão de produto para gan
 
 **Anuncie:** "Usando a skill PelizzAI Brainstorming em modo `<compacto|completo>` para resolver as decisões de design antes de implementar."
 
+<HARD-GATE>
+NÃO acione skill de implementação, não escreva código, não crie scaffold e não tome nenhuma ação de
+implementação até ter apresentado o design e o usuário tê-lo aprovado. **Isso se aplica a TODOS os
+projetos, independentemente da simplicidade aparente** — o design pode ser curto (algumas frases num
+escopo realmente simples), mas precisa ser apresentado e aprovado.
+
+A única saída é anterior a esta skill: correção pontual e lane `bounded` já especificada pelo usuário
+são resolvidas pelo `pelizzai-router` ANTES do brainstorming (ver Pré-condições). Uma vez dentro
+desta fase, a regra vale integralmente — "é simples demais para precisar de design" não é
+justificativa, é o antipadrão que a regra existe para barrar.
+</HARD-GATE>
+
 ## Pré-condições
 
 - O router já classificou efeito, risco, incerteza e overlays.
@@ -140,9 +152,11 @@ premissa de escala ou integração não confirmada
 contradição entre spec, plano e código
 ```
 
-Modo completo/greenfield: use `pelizzai-interview-me` para estressar o design. Toda nova decisão que
-pertence ao usuário volta como uma pergunta por vez, com recomendação. Cada lacuna é resolvida,
-explicitamente aceita ou convertida em tarefa de investigação antes de sair da borda de design.
+Modo completo/greenfield: o stress com `pelizzai-interview-me` é **OBRIGATÓRIO**, não uma oferta.
+Anuncie na linguagem do usuário ("vou te entrevistar para estressar este design e expor os pontos
+fracos antes de seguir") e conduza a entrevista. Toda nova decisão que pertence ao usuário volta como
+uma pergunta por vez, com recomendação. Cada lacuna é resolvida, explicitamente aceita ou convertida
+em tarefa de investigação antes de sair da borda de design.
 
 Modo compacto: faça uma passada curta de contraexemplos. Escale para entrevista somente se encontrar ambiguidade material.
 
@@ -220,6 +234,8 @@ Se aceitar, leia [visual-companion.md](visual-companion.md), use apenas flags do
 - Fazer várias perguntas de descoberta no mesmo turno.
 - Oferecer uma recomendação e tratá-la como escolha do usuário.
 - Interview obrigatório em design de baixa incerteza.
+- Tratar o stress com `pelizzai-interview-me` como oferta opcional em greenfield/modo completo.
+- Implementar, scaffoldar ou "só adiantar" código antes da aprovação do design, alegando simplicidade.
 - Escrever spec/protótipo antes da task branch.
 - Usar frontend só como QA tardio em vez de overlay de design.
 - Reabrir decisão aprovada sem evidência nova.
@@ -233,6 +249,8 @@ Se aceitar, leia [visual-companion.md](visual-companion.md), use apenas flags do
 
 ```text
 [ ] lacunas materiais foram expostas e cada uma está resolvida ou explicitamente aceita;
+[ ] modo completo/greenfield: o stress com `pelizzai-interview-me` aconteceu e o design foi aprovado
+    pelo usuário antes de qualquer ação de implementação;
 [ ] critérios de aceite e fora de escopo são verificáveis;
 [ ] overlays e estratégia de validação estão identificados;
 [ ] standard/exploratory: a spec proporcional foi produzida por default e apresentada na borda, ou

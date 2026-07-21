@@ -59,7 +59,13 @@ pendente do plano nativo — não invente path.
 - Redija tokens, senhas, dados pessoais e URLs internas sensíveis; diga onde obtê-los.
 - Use paths estáveis apenas quando existem. Linhas de código podem ser incluídas como evidência
   atual, marcadas como potencialmente voláteis; não esconda achado acionável por medo de drift.
-- Não replique specs/ADRs inteiros quando a próxima sessão consegue acessá-los.
+  Toda referência a path/linha de código é **âncora, não endereço**: escreva junto o comportamento
+  ou o símbolo que ela aponta, e a próxima sessão **reancora antes de agir** (relê/regrep o
+  símbolo, confere o SHA em que a evidência foi colhida). Linha que não bate no consumo é drift
+  esperado — reancore, não confie no número.
+- **Não duplique o conteúdo; artefato que tem path é referenciado, nunca colado.** Vale para specs,
+  ADRs, planos, `state.md` e os templates do próprio harness: cópia envelhece e passa a contradizer a
+  fonte. Aponte o path — e a seção, quando o arquivo for grande.
 - Um handoff carrega uma missão; frentes independentes recebem handoffs separados.
 
 ## Definition of Done

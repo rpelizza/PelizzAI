@@ -69,7 +69,8 @@ aplique o briefing e escale ao coordenador o que exigir decisão.
    squash para a finish-task.
 4. Sele e feche — rode `pelizzai-verification-before-completion` contra esse HEAD, grave
    `validated-head` somente após sucesso e invoque `pelizzai-finish-task`: consumidor acrescenta
-   apenas o closure de state; source mode fecha o execution record sem arquivo/commit de closure.
+   apenas o closure de metadata (state + history da tarefa);
+   source mode fecha o execution record sem arquivo/commit de closure.
 ```
 
 > O track de ajuste pula review formal somente enquanto permanecer low-risk, coeso e sem nova

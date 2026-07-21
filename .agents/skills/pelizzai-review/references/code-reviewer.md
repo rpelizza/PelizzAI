@@ -17,7 +17,11 @@ e identificar problemas antes que se propaguem.
 
 ## Skills de domínio a aplicar
 
-{SKILLS_DE_DOMÍNIO}   # colar as relevantes de pelizzai/domain-skills.md, ou "nenhuma"
+{SKILLS_DE_DOMÍNIO}   # colar as relevantes do catálogo pelizzai/domain-skills.md (consumidor) ou
+                      # das regras/skills do repo-fonte (source mode), ou "nenhuma"
+
+Estas são as regras deste projeto. Em conflito com padrões genéricos ou com o seu repertório, as
+skills de domínio coladas aqui PREVALECEM.
 
 ## Relatório do implementador — alegações a verificar
 
@@ -46,6 +50,8 @@ B) Working tree (não commitada) — review por tarefa na pelizzai-execution-pla
 Alinhamento com o plano:
 - A implementação bate com o plano/requisitos? Desvios são melhorias justificadas ou problemas?
 - Toda a funcionalidade planejada está presente?
+- A mudança respeita as SKILLS DE DOMÍNIO coladas acima? Violação de regra do projeto é achado de
+  primeira classe, não nitpick de estilo.
 
 Qualidade do código:
 - Separação de responsabilidades limpa? Tratamento de erro adequado? Segurança de tipos?

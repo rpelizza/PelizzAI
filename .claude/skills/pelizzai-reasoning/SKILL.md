@@ -198,7 +198,7 @@ Use estas distinções quando duas técnicas parecerem candidatas à principal:
 
 ## Composições recomendadas
 
-Cada seta é uma **transição de fase**: a técnica seguinte assume quando a anterior cumpre seu papel. Respeite o teto de carregamento por fase.
+Cada seta é uma **transição de fase**: a técnica seguinte assume quando a anterior cumpre seu papel. Carregue uma fase por vez — a técnica entra quando a pergunta dela domina e sai quando a responde. Não há teto numérico; há a exigência de que cada técnica justifique uma decisão ou uma prova observável.
 
 ### Implementação de feature
 

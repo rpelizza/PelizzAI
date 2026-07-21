@@ -1,13 +1,100 @@
 # Configuração do CodeRabbit para o repo-fonte do harness PelizzAI.
-# Os alvos GERADOS pelo scripts/sync-harness.ps1 (.agents/, AGENTS.md, GEMINI.md,
-# manifesto) são cópias 1:1 da fonte .claude/ — revisá-los duplica cada achado.
-# Revise só a fonte; a CI (check-harness) garante que os espelhos estão em sincronia.
+#
+# O que este repositório é: um harness de skills para agentes de código (Claude Code,
+# Cursor, Gemini CLI e afins). O "produto" é prosa instrucional em markdown — as skills —
+# mais alguns hooks e scripts de distribuição. Não há aplicação rodando: uma regressão
+# aqui é uma instrução ambígua, contraditória ou que se perdeu, não um stack trace.
+#
+# Fonte única: .claude/. Os alvos GERADOS por scripts/sync-harness.mjs (.agents/,
+# .cursor/, AGENTS.md, GEMINI.md, manifesto) são cópias 1:1 da fonte — revisá-los
+# duplica cada achado. Revise só a fonte; o job sync-check da CI garante a sincronia.
+
 language: pt-BR
+
 reviews:
   profile: assertive
   request_changes_workflow: false
+
   path_filters:
+    # Espelhos gerados por sync-harness.mjs — nunca revisar (achado duplicado da fonte
+    # em .claude/). ATENÇÃO: .cursor/rules/pelizzai.mdc NÃO entra aqui — ele é adaptador
+    # MANUAL, o sync não o gera, e por isso é justamente o arquivo que mais precisa de
+    # revisão humana quando os entrypoints mudam.
     - "!.agents/**"
     - "!AGENTS.md"
     - "!GEMINI.md"
     - "!scripts/pelizzai-core-skills.txt"
+
+  path_instructions:
+    - path: ".claude/skills/**/SKILL.md"
+      instructions: |
+        Isto é uma SKILL: prosa instrucional lida por um agente de código em tempo de
+        execução, não documentação para humano. Avalie como instrução executável.
+
+        Verifique:
+        - Frontmatter YAML válido com `name` e `description`. O `name` deve bater com o
+          nome do diretório. A `description` é o que faz a skill ser ENCONTRADA — deve
+          conter os gatilhos reais de uso (inclusive frases coloquiais), não um resumo
+          bonito. Apenas SKILL.md tem frontmatter; arquivos em references/, templates/,
+          evals/ e techniques/ não têm.
+        - Instrução ambígua ou contraditória DENTRO do arquivo ou contra outra skill
+          citada. Contradição entre duas seções do mesmo arquivo é o defeito mais comum
+          e mais caro aqui.
+        - Ponteiro morto: todo `references/...`, `templates/...` e todo nome `pelizzai-*`
+          citado em prosa precisa existir de fato.
+        - Autoridade do usuário: o harness RECOMENDA e o usuário RATIFICA. Sinalize
+          qualquer texto que autorize o agente a decidir sozinho escopo, UX, arquitetura,
+          dados, risco aceito ou critérios de aceite. Lacuna material encontrada durante o
+          desenvolvimento deve levar a `pelizzai-interview-me`, nunca a um default.
+        - Este repositório é PÚBLICO e clonável para qualquer projeto: não pode haver
+          caminho local, nome de projeto privado ou convenção pessoal do autor.
+
+    - path: ".claude/hooks/**"
+      instructions: |
+        Hooks executados pelo agente na máquina de quem instalou o harness. Cada hook
+        existe em par `.mjs` (Node) e `.ps1` (PowerShell) e os dois PRECISAM ter
+        comportamento idêntico — divergência entre as duas pernas é bug, mesmo que cada
+        uma esteja correta isoladamente.
+
+        Verifique com rigor:
+        - FALSO POSITIVO de matcher é o defeito mais grave aqui: este repo é público, um
+          bloqueio indevido trava o trabalho de terceiros. Preste atenção a caminhos de
+          sink nulo (NUL, nul, $null, /dev/null), redirecionamento para fora da raiz do
+          repositório ($env:TEMP, %TEMP%, caminhos absolutos) e a comandos git que apenas
+          CONTÊM uma palavra perigosa sem serem destrutivos (ex.: `git add src/restore.ts`,
+          `git commit -m "fix: restore ..."`, `git branch -M main`).
+        - Código que bloqueia (exit 2) deve falhar fechado por motivo claro e imprimir
+          mensagem acionável dizendo o que fazer.
+        - Parsing de shell e de argumentos: aspas, escape, caminhos com espaço.
+
+    - path: "scripts/**"
+      instructions: |
+        Scripts de sincronização e distribuição, multiplataforma (Node canônico em .mjs;
+        .ps1/.sh são wrappers finos). `scripts/test-harness-contracts.ps1` é a suíte de
+        contratos: cada asserção trava um comportamento do harness.
+
+        Verifique:
+        - Asserção enfraquecida: regex que passou a casar quase tudo, ou `Check-NotMatch`
+          transformado em no-op. Uma asserção que não pode falhar é pior que asserção
+          nenhuma, porque simula cobertura.
+        - Comportamento novo ou restaurado sem asserção correspondente.
+        - `scripts/pelizzai-source-repo.txt` é a sentinela de repo-fonte: precisa ser
+          removida no export para consumidor, nunca copiada.
+        - Portabilidade Windows/Linux/macOS e tratamento de caminho com espaço.
+
+    - path: ".cursor/rules/pelizzai.mdc"
+      instructions: |
+        Adaptador MANUAL para o Cursor — o `sync-harness.mjs` não o gera. Sua única função é
+        encaminhar aos entrypoints (`AGENTS.md`, `.agents/skills/`) e às regras compartilhadas.
+
+        Verifique se ele continua coerente com o que a fonte diz depois desta mudança: nome de
+        skill que deixou de existir, entrypoint renomeado, instrução que contradiz `CLAUDE.md`.
+        Como nenhum job de CI compara este arquivo com a fonte, a divergência aqui só é pega
+        por revisão — sinalize qualquer defasagem.
+
+    - path: "**/*.md"
+      instructions: |
+        Escreva a revisão em português do Brasil, com acentuação correta. O repositório
+        inteiro é em pt-BR: sinalize texto em inglês que tenha escapado, e também erro de
+        acentuação ou grafia. A marca se escreve exatamente "PelizzAI" em prosa — nunca
+        "Pelizzai", "pelizzAI" ou "PELIZZAI".

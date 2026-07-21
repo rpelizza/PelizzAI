@@ -5,13 +5,28 @@
  * Bloqueia, ANTES de rodarem, comandos git destrutivos que os gates do harness já
  * proíbem em prosa — aqui a proibição vira enforcement executável (o único ponto do
  * harness onde a obediência do modelo deixa de ser single point of failure):
- *  - git push forçado ou destrutivo (--force/-f/+refspec/--delete/--mirror/:ref)
+ *  - git push --force / -f          (exceto --force-with-lease)
  *  - git reset --hard
  *  - git clean -f / -fd / --force
- *  - git branch -D/-M/-f/--force
- *  - git checkout de paths ou checkout -f/-B; switch -C/--force-create
- *  - git restore de working tree (restore apenas --staged continua permitido)
+ *  - git branch -D / --delete --force
+ *  - git checkout . / checkout -- .
+ *  - git checkout -f / --force / -B
+ *  - git switch -C / --force-create
+ *  - git restore .                  (sem --staged — perda da working tree)
  *  - git worktree remove --force
+ *
+ * ESTAS REGRAS SÃO DELIBERADAMENTE ESTREITAS. O hook mira o punhado de comandos que
+ * apagam trabalho de forma irrecuperável; ele NÃO tenta cobrir todo git perigoso. Por
+ * isso passam sem bloqueio, de propósito: git restore <arquivo>, git checkout -- <arquivo>,
+ * git branch -M <nome> (passo canônico do git init), git push --delete/+refspec e
+ * qualquer menção a "restore"/"reset" dentro de um path, de uma mensagem de commit ou de
+ * um filtro (git add src/restore.ts, git log --grep=restore). Regra larga aqui custa caro:
+ * ela trava trabalho legítimo, o agente aprende a contornar o hook e a rede de segurança
+ * perde valor. Ao mexer, prefira falso negativo a falso positivo — e teste os dois lados.
+ *
+ * O nome do comando é reconhecido sem distinção de maiúsculas ("Git reset --hard" também
+ * é bloqueado); as FLAGS continuam case-sensitive, porque -D/-C/-S/-W destroem e
+ * -d/-c/-s/-w não.
  *
  * Bloqueio: exit 2 + motivo e caminho seguro no stderr (o agente lê e corrige a rota).
  * Qualquer outro comando: exit 0 silencioso. Erros do PRÓPRIO hook: exit 0 (fail-open —
@@ -32,25 +47,22 @@
  * é bloqueado. Saída: reformule a mensagem ou rode o commit manualmente.
  *
  * Em frota sem Node, use a variante PowerShell pelizzai-guardrails.ps1 (mesmo matcher).
+ * As duas variantes devem bloquear e liberar exatamente os mesmos comandos — a paridade
+ * é verificada pelo scripts/test-harness-contracts.ps1.
  */
 
 import { readFileSync } from 'node:fs';
 
 const RULES = [
   {
-    name: 'git push forçado/destrutivo',
+    name: 'git push --force / -f',
     // --force-with-lease NÃO casa com "--force(\s|$)" — a exceção é automática.
     // Flags curtas podem vir agrupadas (git push -uf origin main) — casar o f dentro do bundle.
     test: (s) =>
       /\bgit\b.*\bpush\b/i.test(s) &&
-      (/(^|\s)--force(\s|$)/.test(s) ||
-        /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s) ||
-        /(^|\s)\+\S+(\s|$)/.test(s) ||
-        /(^|\s)(--delete|--mirror|--prune)(\s|$)/.test(s) ||
-        /(^|\s)-[a-zA-Z]*d[a-zA-Z]*(\s|$)/.test(s) ||
-        /(^|\s):\S+(\s|$)/.test(s)),
-    why: 'pode reescrever ou apagar refs remotas e commits de outras pessoas.',
-    safe: 'use push normal; se reescrita for indispensável, use --force-with-lease e obtenha autorização explícita. Exclusão remota deve ser executada conscientemente pelo usuário.',
+      (/(^|\s)--force(\s|$)/.test(s) || /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s)),
+    why: 'push forçado reescreve o histórico remoto e pode apagar commits de outras pessoas.',
+    safe: 'use --force-with-lease (só sobrescreve se o remoto estiver onde você espera) — e somente com pedido explícito do usuário.',
   },
   {
     name: 'git reset --hard',
@@ -67,57 +79,73 @@ const RULES = [
     safe: 'liste antes com git clean -n e confirme com o usuário o que será apagado.',
   },
   {
-    name: 'git branch force-delete/force-rename',
-    // -D/-M são case-sensitive (-d/-m são as variantes não forçadas).
+    name: 'git branch -D / --delete --force',
+    // -D case-sensitive (-d é seguro); pode vir agrupada (git branch -qD nome).
+    // A forma longa `--delete --force` (em qualquer ordem) é a MESMA operação que -D:
+    // sem ela, o hook teria um bypass trivial por simples troca de grafia.
+    // -M NÃO entra: renomear branch é o passo canônico de git init (git branch -M main).
     test: (s) =>
       /\bgit\b.*\bbranch\b/i.test(s) &&
-      (/(^|\s)-[a-zA-Z]*[DM][a-zA-Z]*(\s|$)/.test(s) ||
-        /(^|\s)--force(\s|$)/.test(s) ||
-        /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s)),
-    why: 'pode remover branch não mesclada ou sobrescrever um nome de branch existente.',
-    safe: 'use -d/-m sem força; descarte ou sobrescrita exige decisão explícita e operação manual.',
+      (/(^|\s)-[a-zA-Z]*D[a-zA-Z]*(\s|$)/.test(s) ||
+        (/(^|\s)--delete(\s|$)/.test(s) &&
+          (/(^|\s)--force(\s|$)/.test(s) || /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s)))),
+    why: 'força a remoção de uma branch NÃO mesclada — os commits dela podem se perder.',
+    safe: 'use -d (só remove branch já mesclada) ou confirme o descarte com o usuário (a pelizzai-finish-task exige o texto "descartar").',
   },
   {
-    name: 'git checkout de paths',
-    // Cobre checkout . e qualquer forma checkout [<ref>] -- <path>.
+    name: 'git checkout . / checkout [<ref>] -- .',
+    // Cobre "checkout .", "checkout -- .", "checkout <ref> -- ." e a forma "./" (todas descartam a working tree).
+    // checkout -- <arquivo> NÃO entra: descartar um arquivo nomeado é operação rotineira e reversível na prática.
     test: (s) =>
       /\bgit\b.*\bcheckout\b(\s+--)?\s+\.\/?(\s|$)/i.test(s) ||
-      /\bgit\b.*\bcheckout\b.*\s--\s+\S+/i.test(s),
-    why: 'sobrescreve mudanças não commitadas nos paths selecionados.',
-    safe: 'crie um ponto de retorno primeiro e confirme os paths; para stage, use git restore --staged.',
+      /\bgit\b.*\bcheckout\b\s+\S+\s+--\s+\.\/?(\s|$)/i.test(s),
+    why: 'sobrescreve TODAS as mudanças não commitadas da working tree.',
+    safe: 'crie um ponto de retorno primeiro (git stash push -u -m "<motivo>") ou restaure só arquivos específicos.',
   },
   {
-    name: 'git checkout/switch force-create',
+    name: 'git checkout -f / -B',
+    // Mesmas duas destruições que o hook já bloqueia em outra grafia:
+    //  -f/--force  == `git checkout .`      (sobrescreve a working tree inteira)
+    //  -B          == `git switch -C`       (sobrescreve uma branch existente)
+    // Bloquear uma grafia e liberar a outra deixaria o gate com um furo do seu próprio tamanho.
+    // -b minúsculo (criar branch nova) e `checkout -- <arquivo>` NÃO entram: nenhum dos dois destrói.
     test: (s) =>
-      (/\bgit\b.*\bcheckout\b/i.test(s) &&
-        (/(^|\s)--force(\s|$)/.test(s) ||
-          /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s) ||
-          /(^|\s)-[a-zA-Z]*B[a-zA-Z]*(\s|$)/.test(s))) ||
-      (/\bgit\b.*\bswitch\b/i.test(s) &&
-        (/(^|\s)--force-create(\s|$)/.test(s) ||
-          /(^|\s)--discard-changes(\s|$)/.test(s) ||
-          /(^|\s)-[a-zA-Z]*C[a-zA-Z]*(\s|$)/.test(s) ||
-          /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s))),
-    why: 'pode sobrescrever a branch alvo ou descartar mudanças locais ao trocar de branch.',
-    safe: 'preserve a working tree primeiro e use switch/checkout sem flags de força; para recuperação, siga pelizzai-recovery.',
+      /\bgit\b.*\bcheckout\b/i.test(s) &&
+      (/(^|\s)--force(\s|$)/.test(s) ||
+        /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s) ||
+        /(^|\s)-[a-zA-Z]*B[a-zA-Z]*(\s|$)/.test(s)),
+    why: '-f descarta TODAS as mudanças não commitadas; -B sobrescreve uma branch existente e os commits que só existiam nela.',
+    safe: 'crie um ponto de retorno primeiro (git stash push -u -m "<motivo>"); para criar branch use -b, que falha se ela já existir.',
   },
   {
-    name: 'git restore de working tree',
-    test: (s) => {
-      if (!/\bgit\b.*\brestore\b/i.test(s)) return false;
-      const staged = /--staged\b/.test(s) || /(^|\s)-[a-zA-Z]*S[a-zA-Z]*(\s|$)/.test(s);
-      const worktree = /--worktree\b/.test(s) || /(^|\s)-[a-zA-Z]*W[a-zA-Z]*(\s|$)/.test(s);
-      return !staged || worktree;
-    },
-    why: 'restore sem modo exclusivamente staged descarta mudanças da working tree.',
-    safe: 'git restore --staged <paths> apenas tira do stage; para descartar conteúdo, crie um ponto de retorno e obtenha confirmação.',
+    name: 'git switch -C / --force-create',
+    // -C case-sensitive (-c/--create é seguro: falha se a branch já existir).
+    test: (s) =>
+      /\bgit\b.*\bswitch\b/i.test(s) &&
+      (/(^|\s)--force-create(\s|$)/.test(s) || /(^|\s)-[a-zA-Z]*C[a-zA-Z]*(\s|$)/.test(s)),
+    why: 'sobrescreve uma branch existente com o ponto de partida atual — os commits que só existiam nela se perdem.',
+    safe: 'use -c/--create (falha se a branch já existir); sobrescrever exige decisão explícita do usuário.',
+  },
+  {
+    name: 'git restore . (working tree)',
+    // Sem --staged/-S (ou com --worktree/-W explícito), restore descarta a working tree. "./" == ".".
+    // O alvo "." é obrigatório: git restore <arquivo> é rotina, e exigir o "." mantém o hook
+    // cego para "restore" que aparece em paths, mensagens e filtros (git add src/restore.ts).
+    test: (s) =>
+      /\bgit\b.*\brestore\b/i.test(s) &&
+      /(^|\s)\.\/?(\s|$)/.test(s) &&
+      (!(/--staged\b/.test(s) || /(^|\s)-S(\s|$)/.test(s)) ||
+        /--worktree\b/.test(s) ||
+        /(^|\s)-W(\s|$)/.test(s)),
+    why: 'sem --staged, restore descarta as mudanças da working tree sem volta.',
+    safe: 'git restore --staged . apenas tira do stage (seguro); para descartar de verdade, crie um ponto de retorno (stash) e confirme com o usuário.',
   },
   {
     name: 'git worktree remove --force',
     test: (s) =>
       /\bgit\b.*\bworktree\b.*\bremove\b/i.test(s) &&
       (/(^|\s)--force(\s|$)/.test(s) || /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s)),
-    why: 'pode remover um worktree sujo e apagar mudanças não commitadas.',
+    why: 'remove um worktree sujo e apaga com ele as mudanças não commitadas que estavam lá.',
     safe: 'inspecione o worktree, preserve o conteúdo e use git worktree remove sem --force.',
   },
 ];

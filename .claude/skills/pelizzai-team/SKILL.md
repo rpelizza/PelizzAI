@@ -24,6 +24,13 @@ Se você foi designado como **membro** de um time (teammate ou subagente executa
 Um membro **produz artefatos** (spec, relatório, diff) como **entregável para o coordenador** — não conduz por conta própria fluxos que exijam aprovação do usuário (`pelizzai-brainstorming`, `pelizzai-writing-plans`). Esses fluxos pertencem ao coordenador / à sessão principal.
 
 Sob briefing fechado (MEMBRO-DO-TIME-STOP/SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing, **sinalize no retorno** (`DONE_WITH_CONCERNS`/`NEEDS_CONTEXT`) se faltou skill de domínio cobrindo a stack da sua tarefa, e escale ao coordenador o que exigir decisão.
+
+Você **não decide lacuna de produto**. Se requisito, escopo, UX, arquitetura, dados, segurança,
+custo ou critério de aceite não estiver escrito no briefing, no plano ou na spec, **nomeie a
+lacuna** — o que falta, o que ela muda na entrega e 2–3 opções que você enxerga, com a que
+recomenda — e devolva `NEEDS_CONTEXT`. Não preencha por convenção, default, Context7 ou "inferência
+razoável", mesmo que a escolha pareça óbvia e reversível, e não fale direto com o usuário: quem
+leva a lacuna ao humano é o coordenador.
 </MEMBRO-DO-TIME-STOP>
 
 ---
@@ -157,11 +164,20 @@ Se você não consegue responder a esses cinco itens para um membro, **a decompo
 Os cinco itens do HARD-GATE têm lar permanente: cada um corresponde a um campo do briefing e a uma coluna do roster (ver mapeamento abaixo). Se a célula do roster está vazia, a decomposição daquele membro ainda não está pronta.
 
 **Regra de escrita — vale para teammates e subagents:** branch ou worktree da tarefa possui uma
-única working tree de integração. Worktree isola a tarefa do repo principal, **não isola agentes
-entre si**. Mantenha um writer por vez; membros podem investigar/revisar em paralelo e devolver
-achados/patches, mas o coordenador aplica escrita, review, stage, commit e cursor em série. Membros
-não commitam. Paralelismo real de writers exigiria branches/worktrees independentes e um fluxo de
-integração explícito, fora do default deste harness.
+única working tree de integração. Worktree isola a tarefa do repo principal e **não isola agentes
+entre si** — quem serializa a escrita é esta regra, não o Git. O que a escrita concorrente pode
+fazer depende do isolamento ratificado no gate de setup:
+
+- `isolation: branch` — **um writer por vez**. O coordenador integra as contribuições em série;
+  implementadores escrevendo ao mesmo tempo na mesma working tree colidem. O paralelismo fica com o
+  que não escreve: investigação, leitura, review e decomposição.
+- `isolation: worktree` — frentes escrevem em paralelo **dentro do worktree único da tarefa**, desde
+  que toquem **caminhos disjuntos**. A disjunção é a **condição**, não um conselho: se aparecer
+  conflito real, o par não era disjunto — replaneje a decomposição em vez de forçar. Nunca um
+  worktree por membro; é um por tarefa.
+
+Em ambos os casos, review, stage, commit e cursor continuam serializados pelo coordenador, e membros
+**não commitam**.
 
 **Responsabilidades do coordenador:**
 
@@ -173,7 +189,12 @@ integração explícito, fora do default deste harness.
 - Tratar **falhas de membro** (ver seção própria).
 - Verificar os resultados de forma adversarial (cross-check, refutação).
 - Sintetizar tudo em uma entrega única, resolvendo divergências.
-- Coletar as lacunas de skill de domínio sinalizadas pelos membros e consolidá-las numa **única** proposta no fechamento (alimenta o eixo adoption-driven de `pelizzai-finish-task`); nunca criar skill no meio da tarefa.
+- Receber as **lacunas materiais** que os membros nomearem e levá-las ao humano por
+  `pelizzai-interview-me` (modo lacuna) **antes de a frente continuar** — uma pergunta por vez, com
+  2–3 opções e a recomendada. O coordenador agrupa e ordena as lacunas por dependência, mas
+  **consolidar não é decidir**: ele não escolhe nem por si nem pelo membro. A decisão ratificada
+  volta ao plano e ao briefing antes do re-despacho.
+- Coletar as lacunas de skill de domínio sinalizadas pelos membros e consolidá-las numa **única** proposta no fechamento (alimenta o eixo adoption-driven de `pelizzai-finish-task`); nunca criar skill no meio da tarefa. Essa é outra via: lacuna de domain skill **não** para a frente; lacuna material para.
 - Decidir a conclusão e encerrar os membros.
 
 ### Quantos membros
@@ -262,9 +283,10 @@ Briefing de [nome do membro] — papel: [papel nomeado pela ÁREA, ex.: implemen
 - Contexto necessário: [caminhos, contratos, decisões já tomadas, links de spec,
   convenções do projeto — tudo, porque o membro não viu esta conversa]
 - Regras/skills locais relevantes: monte um ESPECIALISTA — cole o pacote **COMPLETO** de skills de
-  domínio da **ÁREA** do papel [catálogo consumidor ou repo-fonte em source mode; cole os
-  pontos-chave], não só as que parecem aplicar à tarefa específica, mas a área inteira. Em dúvida se
-  uma skill de domínio do catálogo pertence à área, inclua-a: o custo de incluir é menor que o de
+  domínio da **ÁREA** do papel [catálogo `pelizzai/domain-skills.md` no consumidor, ou regras/skills
+  do repo-fonte em source mode; cole os pontos operacionais, não só os nomes], não só as que parecem
+  aplicar à tarefa específica, mas a área inteira. Em dúvida se uma skill de domínio do catálogo
+  pertence à área, inclua-a: o custo de incluir é menor que o de
   ignorar uma regra do projeto. Se a área da frente não tem skill cobrindo, diga isso e instrua o
   membro a sinalizar a lacuna no retorno
 - Camada global: aplique `pelizzai-preferences` e raciocine via `pelizzai-reasoning`; em
@@ -280,6 +302,11 @@ Briefing de [nome do membro] — papel: [papel nomeado pela ÁREA, ex.: implemen
   o coordenador consolida após os reviews
 - Salvo-conduto: é sempre OK parar e dizer "isso é difícil demais para mim" — trabalho ruim é
   pior que trabalho nenhum; você não será penalizado por escalar (reporte BLOCKED)
+- Lacuna material (frase canônica, no TEXTO do briefing): se requisito, escopo, UX, arquitetura,
+  dados, segurança ou aceite não estiver escrito neste briefing, no plano ou na spec, PARE, NOMEIE
+  a lacuna (o que falta + o que ela muda + 2–3 opções com a recomendada), devolva `NEEDS_CONTEXT` e
+  declare-a também em `Desvios do plano:`. Você não preenche por default nem fala com o usuário —
+  quem leva a decisão ao humano é o coordenador, pela `pelizzai-interview-me` (modo lacuna)
 - Restrições/proibições: [não tocar em X; não rodar Y; não publicar; só leitura]
 ```
 
@@ -348,10 +375,13 @@ o orçamento de esforço de `pelizzai-reasoning`: mais rodadas só se reduzirem 
 ```
 
 - **Cross-check adversarial:** spawnar **verificadores céticos** cujo único trabalho é tentar **refutar** os achados/implementações. Como o verificador é stateless, **cole no prompt dele o artefato a refutar**. Mantenha um achado só se ele sobrevive.
-- **Evitar conflito de arquivos:** uma working tree de integração tem um writer por vez, seja
-  `isolation: branch` ou `worktree`. Use paralelo para investigação/leitura/review; o coordenador
-  aplica contribuições em série. Paths disjuntos reduzem conflito lógico, mas não tornam Git/index,
-  review-package ou o diretório compartilhado transacionais.
+- **Evitar conflito de arquivos:** atribua **arquivos disjuntos** por membro. O que a escrita
+  paralela pode fazer depende do isolamento ratificado no gate: em `isolation: branch`, um writer
+  por vez e o coordenador aplica as contribuições em série (o paralelismo fica com
+  investigação/leitura/review); em `isolation: worktree`, frentes com **caminhos disjuntos** podem
+  escrever em paralelo dentro do worktree único da tarefa. Em nenhum dos dois o Git/index, o
+  review-package ou o diretório compartilhado ficam transacionais — por isso review, stage, commit
+  e cursor continuam serializados pelo coordenador.
 - **Lista de tarefas:** é o **seu** roster (não há lista compartilhada nativa) — atualize-o a cada rodada.
 - **Síntese:** o coordenador integra os entregáveis e cruza as divergências com `pelizzai-reasoning` (`Evidence Synthesis`, com `Verification` auxiliar).
 
@@ -384,10 +414,10 @@ Resultados de membros **não** são verdade até serem cruzados.
 - **Cross-check:** confronte entregáveis que se sobrepõem; achados em conflito disparam uma rodada de refutação (Modo Subagents) ou um debate via `SendMessage` (Modo Teammates).
 - **Verificação adversarial:** prefira que **outro** membro (ou um verificador dedicado) tente derrubar uma conclusão, em vez de o próprio autor confirmá-la.
 - **Self-Consistency:** quando vários membros chegam ao mesmo resultado por caminhos independentes, a convergência aumenta a confiança — mas não substitui teste/fonte real.
-- **Review por tarefa (duas lentes com cegueira assimétrica):** todo entregável de implementação passa pela `pelizzai-review` — a **lente spec cega** (recebe só diff + spec/plano + domain skills da área, NUNCA o relatório do autor: julga o código contra o contrato, sem a narrativa) e a **lente qualidade/evidência** (recebe o relatório e verifica as alegações com prova fresca). O coordenador despacha revisores independentes — **nunca é a lente cega** —, cruza os dois verdicts e, em conflito, decide com evidência própria ou escala. Proporcional: `combined` numa passada para trivial/bounded; o perfil cego/duplo (`split`) entra em standard/exploratory ou por ratificação no gate de setup.
-- **Gate de evidência:** antes de aceitar um entregável de **implementação**, aplique `pelizzai-verification-before-completion` — confira o **diff do git** e rode os comandos de teste você mesmo (ou exija a saída + exit code colados); o relatório do membro nunca é evidência.
+- **Review por tarefa (duas lentes com cegueira assimétrica):** todo entregável de implementação passa pela `pelizzai-review` — a **lente spec cega** (recebe só diff + spec/plano + domain skills da área, NUNCA o relatório do autor: julga o código contra o contrato, sem a narrativa) e a **lente qualidade/evidência** (recebe o relatório e verifica as alegações com prova fresca). O coordenador despacha revisores independentes — **nunca é a lente cega** —, cruza os dois verdicts e, em conflito, decide com evidência própria ou escala. O perfil cego/duplo (`split`) é o default em qualquer lane, inclusive bounded — só com dois despachos a lente spec desconhece a narrativa do autor; `combined` numa passada é exceção que o usuário ratifica no passo 4 do gate de setup. Proporcional é a **profundidade** de cada lente, não a existência do review nem a cegueira.
+- **Gate de evidência:** antes de aceitar um entregável de **implementação**, aplique `pelizzai-verification-before-completion` — confira o **diff do git** e rode os comandos de teste você mesmo, ou aceite saída + exit code de **quem rodou o check** (a lente qualidade/evidência, revisor independente — nunca o autor); o relatório do membro, inclusive a saída que ele mesmo colou, nunca é evidência.
 - **Síntese:** cruze os entregáveis com `Evidence Synthesis` e produza **uma** entrega, deixando claro o que é consenso, o que foi divergência resolvida e o que permanece em aberto.
-- **Impasse:** se o confronto **não** converge, o coordenador **não** força um consenso artificial: decide pelo critério dominante da tarefa (acionando `Decision Making`) e, quando a escolha pertence ao usuário ou o impacto é alto, **escala** apresentando as posições e seus trade-offs.
+- **Impasse:** se o confronto **não** converge, o coordenador **não** força um consenso artificial: decide pelo critério dominante da tarefa (acionando `Decision Making`) e, quando a escolha pertence ao usuário ou o impacto é alto, **escala por `pelizzai-interview-me`** — nomeando a lacuna, com as posições viradas em 2–3 opções reais, a recomendada e o trade-off de cada uma.
 
 Aplique o **orçamento de esforço** de `pelizzai-reasoning`: a profundidade da verificação é proporcional ao risco da mudança.
 
@@ -416,6 +446,8 @@ Aplique o **orçamento de esforço** de `pelizzai-reasoning`: a profundidade da 
 - O coordenador começar a implementar em vez de delegar, esperar e sintetizar.
 - O coordenador se despachar como a lente spec cega (ele já viu o relatório) — a lente cega é sempre um revisor independente.
 - Entregar o relatório do implementador à lente spec cega, ou montar um membro sem o pacote completo de domain skills da sua área.
+- Membro preencher por default, convenção ou "inferência razoável" uma decisão de produto que não está no briefing/plano/spec, em vez de nomear a lacuna e devolver `NEEDS_CONTEXT`.
+- O coordenador decidir a lacuna material (por si ou pelo membro) em vez de levá-la ao humano pela `pelizzai-interview-me` — consolidar as lacunas não é decidi-las.
 - Aceitar achados sem verificação adversarial.
 - No Modo Subagents, esperar que os membros se coordenem sozinhos (eles não se falam).
 - Usar split-panes no Windows / Windows Terminal / terminal do VS Code / Ghostty.
@@ -432,6 +464,7 @@ Aplique o **orçamento de esforço** de `pelizzai-reasoning`: a profundidade da 
 - Delegue sem saber responder os cinco itens do `<HARD-GATE>` para cada membro.
 - Habilite o Agent Teams no `settings.json` do usuário sem confirmação.
 - Trate o resultado de um membro como verdade antes de cruzá-lo/refutá-lo.
+- Decida no lugar do usuário uma lacuna material que os membros nomearam (consolidar não é decidir).
 - Seja você mesmo (coordenador) a lente spec cega, ou passe o relatório do autor a ela.
 - Conclua silenciosamente com uma frente falha ou em aberto.
 - Encerre o time antes de validar os critérios de conclusão.
@@ -463,6 +496,7 @@ Aplique o **orçamento de esforço** de `pelizzai-reasoning`: a profundidade da 
 - `pelizzai-preferences` — camada global instruída no briefing de cada membro (skills de domínio prevalecem).
 - `pelizzai-subagents` — delegação leve a **um** subagente isolado (sem time).
 - `pelizzai-router` / `pelizzai-execution-plans` — de onde o modo `team` chega (gate de setup); a execution-plans define o ciclo por tarefa que cada frente segue.
+- `pelizzai-interview-me` — destino das lacunas materiais nomeadas pelos membros: o coordenador as consolida e leva ao humano antes de a frente continuar.
 - `pelizzai-verification-before-completion` — gate de evidência antes de aceitar entregável de implementação.
 - `pelizzai-brainstorming` / `pelizzai-writing-plans` — de onde a tarefa do time normalmente chega.
 
@@ -484,6 +518,8 @@ Prefira:
 - Modo Subagents barato quando os membros não precisam conversar.
 
 Não delegue sem responder os cinco itens do HARD-GATE.
+Não deixe o membro preencher decisão de produto — ele nomeia a lacuna e devolve NEEDS_CONTEXT.
+Não decida a lacuna material no lugar do usuário: consolide e leve à pelizzai-interview-me.
 Não mande um papel de escrita a um agentType read-only.
 Não trate rodadas de subagentes como conversa contínua — cada rodada é um spawn novo.
 Não habilite o Agent Teams sem confirmação do usuário.

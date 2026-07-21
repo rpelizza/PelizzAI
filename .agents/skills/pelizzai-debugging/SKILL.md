@@ -1,6 +1,6 @@
 ---
 name: pelizzai-debugging
-description: Head skill do track de bug. Use ao encontrar bug, falha de teste, incidente ou comportamento inesperado. Faz triagem entre causa direta, bug determinístico incerto, falha flaky/distribuída e incidente com dano ativo; escolhe reasoning e validação proporcionais, contém dano reversivelmente antes de investigar e não obriga RCA, OODA ou quantidade fixa de hipóteses.
+description: Head skill do track de bug. Use ao encontrar bug, falha de teste, incidente ou comportamento inesperado — inclusive quando o usuário disser "não funciona", "tá com bug", "deu erro", "comportamento estranho" ou "para de chutar", e quando um teste quebrar no meio de outra tarefa. Faz triagem entre causa direta, bug determinístico incerto, falha flaky/distribuída e incidente com dano ativo; escolhe reasoning e validação proporcionais, contém dano reversivelmente antes de investigar e não obriga RCA, OODA ou quantidade fixa de hipóteses.
 ---
 
 # PelizzAI Debugging
@@ -82,6 +82,12 @@ passa por `pelizzai-starting-branch` **antes** da edição; eventual deploy pass
 `external`. Se adicionar instrumentação temporária, crie um prefixo único `[DEBUG-<id>]`, use-o em
 todo log novo e remova-a antes da implementação definitiva.
 
+**Minimize o loop — só nas classes "determinístico incerto" e "flaky".** Com o oráculo vermelho na
+mão, corte UM elemento por vez (fixture, flag, passo, camada, campo do input) e re-rode o oráculo
+depois de cada corte. Está minimizado quando todo elemento restante é load-bearing: remover qualquer
+um faz o bug sumir ou o oráculo quebrar. Numa causa direta isso é desperdício — o stack trace já
+isolou o elemento; num incidente com dano ativo, a contenção do Passo 0 vem antes de qualquer corte.
+
 ---
 
 ## Passo 3 — teste hipóteses proporcionalmente
@@ -96,7 +102,14 @@ Uma causa direta comprovável não precisa de brainstorming causal. Quando houve
 5. Evidência refutou a hipótese → descarte-a e reoriente.
 ```
 
-Apresente o ranking de hipóteses ao usuário sempre que restar mais de uma hipótese materialmente plausível — o conhecimento operacional dele frequentemente reordena as prioridades; não interrompa um bug local de causa única ou óbvia com cerimônia. Use `pelizzai-team` para investigação read-only somente quando hipóteses independentes puderem ser testadas em paralelo ou após thrashing real. Três fixes definitivos falhos são circuit breaker: pare, resuma evidência e questione hipótese/arquitetura antes de tentar outro.
+Apresente o ranking de hipóteses ao usuário sempre que restar mais de uma hipótese materialmente plausível — o conhecimento operacional dele frequentemente reordena as prioridades; não interrompa um bug local de causa única ou óbvia com cerimônia. Use `pelizzai-team` para investigação read-only somente quando hipóteses independentes puderem ser testadas em paralelo ou após thrashing real.
+
+**Três fixes definitivos falhos param o track — não viram um quarto fix.** Pare, conte as tentativas
+e resuma a evidência acumulada. Três fixes que não resolvem **são** uma lacuna material: o modelo do
+problema está errado e a próxima escolha não é sua. Acione `pelizzai-interview-me` para estressar
+hipótese e arquitetura com o usuário, uma pergunta por vez, com recomendação. Se a conversa revelar
+problema estrutural ou de design, escale para `pelizzai-brainstorming` (track feature). Sem essa
+discussão não existe fix nº 4.
 
 ---
 
@@ -172,9 +185,21 @@ Sempre:
 [ ] `rg "\[DEBUG-"` não encontra instrumentação desta sessão.
 [ ] Protótipos e mudanças experimentais removidos.
 [ ] Diff contém somente o fix e sua prova.
+[ ] Causa confirmada — a hipótese vencedora — registrada na MENSAGEM DE COMMIT do fix.
 ```
 
 Para falha recorrente, distribuída, de segurança ou incidente, registre também: causa confirmada, fatores contribuintes, contenção, prevenção/detecção e "o que teria evitado isto?". Para um import incorreto evidente, não invente post-mortem.
+
+## Sinais do parceiro humano
+
+Frases do usuário que carregam diagnóstico — decodifique e aja, não argumente:
+
+| Sinal | Diagnóstico | Ação |
+| --- | --- | --- |
+| "Isso não está acontecendo?" | você assumiu algo sem verificar | verifique agora, contra o oráculo |
+| "Para de chutar" | suas hipóteses não têm predição falsificável | volte ao oráculo (Passo 2) e re-derive as hipóteses com predição |
+| "A gente tá travado?" | thrashing — fixes empilhados sem avanço | pare; resuma o que sabe, o que falta e o próximo passo |
+| "Já tentamos isso" | você perdeu o fio do que foi testado | releia hipóteses e resultados antes de repetir |
 
 ## Red flags
 
@@ -186,6 +211,7 @@ Para falha recorrente, distribuída, de segurança ou incidente, registre també
 - Corrigir duplicidade apenas com debounce/delay no frontend.
 - Aumentar timeout, desativar segurança ou esconder sintoma como solução definitiva.
 - Empilhar mudanças e depois perguntar qual funcionou.
+- Tentar o fix nº 4 depois de três falhas sem devolver a decisão ao usuário.
 - Escrever teste artificial só para dizer que usou TDD.
 ```
 
@@ -193,7 +219,7 @@ Para falha recorrente, distribuída, de segurança ou incidente, registre també
 
 **Roteada por:** `pelizzai-router` (track `bug`).
 
-**Usa condicionalmente:** `pelizzai-reasoning` (seleção acima), `pelizzai-loop` (somente macro-loop em rodadas), [feedback-loops.md](references/feedback-loops.md), skills de domínio, `pelizzai-starting-branch`, `pelizzai-tdd` (bug comportamental automatizável), `pelizzai-frontend` (UI), `pelizzai-verification-before-completion`, `pelizzai-review` e `pelizzai-finish-task`.
+**Usa condicionalmente:** `pelizzai-reasoning` (seleção acima), `pelizzai-loop` (somente macro-loop em rodadas), [feedback-loops.md](references/feedback-loops.md), skills de domínio, `pelizzai-starting-branch`, `pelizzai-tdd` (bug comportamental automatizável), `pelizzai-frontend` (UI), `pelizzai-team` (investigação read-only de hipóteses independentes), `pelizzai-interview-me` (circuit breaker dos três fixes e qualquer outra lacuna material), `pelizzai-brainstorming` (quando a entrevista revela problema estrutural), `pelizzai-verification-before-completion`, `pelizzai-review` e `pelizzai-finish-task`.
 
 Para APIs/libs externas, derive a versão dos manifests/lockfiles e consulte Context7 antes de fixar
 a hipótese; documentação oficial atual é fallback. Para seam ausente, use

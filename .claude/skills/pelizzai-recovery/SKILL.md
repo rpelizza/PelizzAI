@@ -42,11 +42,14 @@ Se for falso alarme de diretório, corrija o contexto e retorne ao router sem to
 seu destino executado, faltando só constatar `done` — isto **não** é divergência de WIP. Aplique a
 mesma reconciliação da `pelizzai-execution-plans` (§Reconciliação da entrega anterior): verifique
 `confirmar:` contra o git (read-only) — `base-ref` contém `validated-head`? PR mergeado? branch
-integrada? (entrega local: o usuário aceita?). Constatada → grave `phase: done` + evidência de 1 linha
-e migre o bloco íntegro para `pelizzai/data/history/<AAAA-MM-DD>-<slug>.md`, deixando a linha de
-índice; a escrita de metadata em `pelizzai/` vale em qualquer branch, mas o commit espera a task
+integrada? (entrega local: o usuário aceita?). Constatada → carimbe a linha de índice do
+`## Histórico` com `done <AAAA-MM-DD>` + evidência de 1 linha e grave `phase: done` — o bloco íntegro
+já migrou para `pelizzai/data/history/<AAAA-MM-DD>-<slug>.md` no selo `delivered`, então aqui não há
+bloco a mover; a escrita de metadata em `pelizzai/` vale em qualquer branch, mas o commit espera a task
 branch nova (nunca em protegida). Falhou (PR fechado sem merge) → não grave `done`; informe e proponha
 retomar a branch ou arquivar como `abandoned`. Nenhum arquivo de trabalho é movido nesta constatação.
+Source mode: a mesma constatação vale no execution record nativo, sem criar `pelizzai/` nem
+`history/`.
 
 ## 2. Inventariar o WIP
 

@@ -140,7 +140,9 @@ try {
     Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Não invente um número de hipóteses|não.*quantidade fixa' 'debugging não fixa hipóteses'
     Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Estratégia de teste/validação|Estratégia primária' 'task-cycle escolhe prova por artefato'
     Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'Skills transversais do harness' 'plano propaga overlays'
-    Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'combined[\s\S]*split' 'plano escolhe perfil de review'
+    # A ordem combined→split era o default antigo; o que importa é o plano REGISTRAR o perfil com
+    # os dois valores nomeados (o default vive no bloco F6, abaixo).
+    Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'Perfil de review[\s\S]{0,400}split[\s\S]{0,400}combined' 'plano registra o perfil de review com os dois valores'
     Check-NotMatch '.claude/skills/pelizzai-writing-plans/SKILL.md' 'interview-me[^\n]*(OBRIGATÓRIO|obrigatório)' 'plano bounded não força entrevista'
     Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'overlay obrigatório' 'frontend é overlay obrigatório para UI'
     Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'spec/Figma aprovado.*design system' 'frontend respeita especificação e design system'
@@ -160,7 +162,9 @@ try {
     Check-Match '.cursor/rules/pelizzai.mdc' 'pelizzai-router/SKILL.md' 'Cursor aponta para router'
     Check-Match '.github/workflows/check-harness.yml' '-Check -SourceMode' 'CI valida source mode'
     Check-Match '.github/workflows/check-harness.yml' 'test-harness-contracts.ps1' 'CI executa contratos'
-    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'worktree.*não isola agentes|um writer por vez' 'team não paraleliza writers na mesma working tree'
+    # A serialização é regra do harness, não propriedade do Git — o que o isolamento ratificado
+    # libera (paralelo em caminhos disjuntos) é travado no bloco F5, abaixo.
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'worktree.*não isola agentes|um writer por vez' 'team: worktree não isola agentes entre si'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'codebase-wide.*pelizzai-improving-architecture' 'router separa review arquitetural de code review'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'risco eleva prova e gates, não cria incerteza artificial' 'router desacopla risco de discovery'
     Check-Match '.claude/skills/pelizzai-improving-architecture/SKILL.md' 'não cria branch, state, HTML, ADR, spec, out-of-scope ou qualquer arquivo' 'arquitetura read-only não escreve'
@@ -226,6 +230,59 @@ try {
     Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'exatamente uma pergunta por turno' 'interview-me faz exatamente uma pergunta por turno'
     Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'Recomendado:' 'interview-me destaca a melhor opção'
 
+    # -- F5: interview-me é o mecanismo canônico de tampar lacunas (restauração pré-11/07/2026) --
+    # A skill volta a ser OBRIGATÓRIA nos três pontos do BASE (pré-design, pós-design, pós-plano) e
+    # ganha o quarto: a lacuna que aparece no meio da execução. O anti-cerimônia ("o que NÃO é
+    # lacuna") existe para que a obrigatoriedade não degenere em questionário.
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'Esta skill é o \*\*mecanismo canônico de tampar\s+lacunas\*\*' 'interview-me: o corpo declara o mecanismo canônico de tampar lacunas'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'description:[^\n]*mecanismo canônico de tampar lacunas' 'interview-me: a description aciona pelo mecanismo canônico (gatilho)'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'default,\s+convenção, Context7 ou .inferência razoável. é violação' 'interview-me: preencher por default/convenção/Context7/inferência é violação'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' '## Onde é obrigatória[\s\S]{0,400}não é oferta' 'interview-me: obrigatoriedade restaurada (não é oferta)'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'Antes do design[\s\S]{0,900}Depois do plano, antes da execução' 'interview-me obrigatória antes do design, pós-design e pós-plano'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'realmente identificadas e\s+resolvidas' 'interview-me só encerra cedo com as lacunas resolvidas ou aceitas'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' '## Modo lacuna' 'interview-me tem o modo lacuna (parada durante a execução)'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'nunca dispensa o item 4' 'interview-me: bounded dispensa o stress, nunca a parada por lacuna'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'NÃO é lacuna' 'interview-me delimita o que NÃO é lacuna (anti-cerimônia)'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'passo mecânico dentro de fronteira já ratificada' 'interview-me: passo mecânico ratificado não vira pergunta'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'SUBAGENT-STOP[\s\S]{0,400}NEEDS_CONTEXT' 'interview-me: sob briefing fechado o executor devolve NEEDS_CONTEXT'
+    Check-NotMatch '.claude/skills/pelizzai-interview-me/SKILL.md' 'bounded. costuma dispensar esta skill' 'interview-me: bounded não desliga a skill inteira, só o stress de design/plano'
+
+    # -- F5: autonomia entre as tarefas restaurada (execução contínua, parada só por lacuna) --
+    # Contraparte do Check-NotMatch 'autonomia entre tarefas' acima: a autonomia é de EXECUÇÃO
+    # (não perguntar "sigo?" a cada tarefa), nunca de DECISÃO.
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'AUTONOMIA \(sem perguntar a cada passo\)' 'execution-plans restaura a autonomia entre as tarefas'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'não pergunte .sigo\?.' 'execution-plans não pergunta "sigo?" ao fim de cada tarefa'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Pare apenas por: BLOCKED real[^\n]*LACUNA MATERIAL' 'execution-plans: parada por BLOCKED, lacuna material, invalidação ou fim'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'autonomia é de execução, nunca de' 'execution-plans: autonomia é de execução, nunca de decisão'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'LACUNA MATERIAL não é uma parada vaga' 'execution-plans: lacuna material tem caminho concreto, não pausa vaga'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/SKILL.md' 'EXECUÇÃO CONTROLADA' 'execution-plans não reintroduz a pausa a cada tarefa'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' '## 0\. Autonomia entre as tarefas e a parada por lacuna material' 'task-cycle abre com autonomia + parada por lacuna material'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'consolidar é agrupar e ordenar por\s+dependência, NUNCA decidir' 'task-cycle: coordenador consolida as lacunas, não as decide'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Lacuna de DOMAIN SKILL[\s\S]{0,200}a execução \*\*não\*\* para' 'task-cycle preserva: lacuna de domain skill não para a execução'
+
+    # -- F5: membro nomeia a lacuna, coordenador leva ao humano (consolidar não é decidir) --
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'não decide lacuna de produto' 'team: membro nomeia a lacuna e não a decide'
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'consolidar não é decidir' 'team: coordenador consolida as lacunas mas não decide por si'
+    Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'não decide lacuna de produto' 'subagents: o subagente nomeia a lacuna e não a decide'
+    Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'Lacuna material é a outra via, e essa para a frente' 'subagents separa lacuna material (para) de domain skill (não para)'
+
+    # -- F5: escrita paralela em worktree com caminhos disjuntos (reverte 44df87c) --
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'isolation: worktree[\s\S]{0,300}caminhos disjuntos' 'team: worktree permite escrita paralela em caminhos disjuntos'
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'A disjunção é a \*\*condição\*\*' 'team: a disjunção de caminhos é condição, não conselho'
+    Check-NotMatch '.claude/skills/pelizzai-team/SKILL.md' 'Mantenha um writer por vez' 'team não reimpõe writer único quando o isolamento é worktree'
+    Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'CAMINHOS DISJUNTOS' 'subagents: escrita paralela em worktree exige caminhos disjuntos'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Nunca um worktree por agente' 'execution-plans: worktree é um por tarefa, não um por agente'
+
+    # -- F5: callers reconectados (a obrigatoriedade não vive só dentro da skill) --
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' '## Lacuna material durante a execução' 'router tem a seção Lacuna material durante a execução'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'lacuna material interrompe o trabalho e volta\s+ao usuário pela .pelizzai-interview-me' 'router: lacuna pós-kickoff interrompe e volta pela interview-me'
+    Check-Match '.claude/skills/pelizzai-core/SKILL.md' 'tampada com a .pelizzai-interview-me' 'core: lacuna do usuário é tampada com a interview-me'
+    Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'aplica a TODOS os\s+projetos, independentemente da simplicidade aparente' 'brainstorming: o hard-gate de design vale para TODOS os projetos'
+    Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'stress com .pelizzai-interview-me. é \*\*OBRIGATÓRIO\*\*' 'brainstorming: stress do design é obrigatório em greenfield/completo'
+    Check-Match 'CLAUDE.md' 'A LLM não decide nada sozinha' 'CLAUDE.md fixa o contrato: a LLM não decide nada sozinha'
+    Check-Match 'CLAUDE.md' 'tampada com a .pelizzai-interview-me' 'CLAUDE.md: toda lacuna é tampada com a interview-me'
+    Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'entrevista de execução' 'plano prevê a origem entrevista de execução (lacuna tampada na execução)'
+
     # -- audit: gate proativo de domain skills nas bordas (propor-confirmar) --
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'Gate proativo de domain skills' 'audit tem Gate proativo de domain skills'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'bordas design.plano e plano.execução' 'audit: gate nas bordas design->plano e plano->execução'
@@ -251,7 +308,15 @@ try {
     # -- Marcadores máquina-legíveis do state.md (schema do writegate/retomada) --
     Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'kickoff: <pendente \| ratificado' 'state.md tem marcador kickoff (pendente|ratificado)'
     Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'isolation: <pending[\s\S]*execution-mode: <pending[\s\S]*commit-strategy: <pending' 'state.md: isolation/execution-mode/commit-strategy nascem <pending>'
-    Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'discovery:[\s\S]*spec-approval:[\s\S]*domain-skills-decision:[\s\S]*plan-approval:' 'state.md registra aprovações greenfield'
+    # Restauração pré-11/07 (2026-07-21): o cursor voltou a ser CURSOR. As oito etapas de greenfield
+    # continuam obrigatórias, mas suas ratificações são registro histórico no CABEÇALHO DO PLANO —
+    # nunca campo do state carimbado/lido por hook. Anti-regressão nas duas pontas (sai do state,
+    # entra no plano) para que a remoção não seja desfeita por engano na próxima rodada.
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/templates/state.md' '^\s*-?\s*(discovery|spec-approval|domain-skills-decision|plan-approval):' 'state.md NÃO reintroduz campo de aprovação greenfield (cursor, não carimbo)'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'oito etapas[\s\S]{0,260}CABEÇALHO DO PLANO' 'execution-plans lê as oito etapas greenfield no cabeçalho do plano'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'oito\s+etapas[\s\S]{0,260}cabeçalho do plano' 'router: greenfield ratifica no cabeçalho do plano, não em campo do state'
+    Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' '\*\*Aprovações\*\*[\s\S]{0,300}Descoberta:[\s\S]{0,200}Spec:[\s\S]{0,200}Domain skills:[\s\S]{0,200}Plano:' 'plano carrega o bloco Aprovações (registro histórico das quatro ratificações)'
+    Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'silêncio não vira data' 'plano: marcador de aprovação nunca é preenchido por inferência'
 
     # -- Seção Defaults de execução ratificados no profile.md (memória de decisão) --
     Check-Match '.claude/skills/pelizzai-audit/templates/profile.md' '## Defaults de execução ratificados' 'profile.md tem seção Defaults de execução ratificados'
@@ -306,16 +371,51 @@ try {
     Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'Uma linha por tarefa' 'state.md: progresso é uma linha por tarefa'
     Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'data/reports/' 'state.md: relatório longo vai para data/reports/ (efêmero)'
     Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'data/history/[\s\S]{0,40}VERSIONADO' 'state.md: history/ é o registro durável versionado'
-    Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' '~150 linhas' 'state.md: nudge de compactação em ~150 linhas'
+    Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' '~60 linhas' 'state.md: nudge de compactação em ~60 linhas (template desinflado)'
     Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Higiene do progresso' 'execution-plans tem a seção Higiene do progresso'
     Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'uma linha por tarefa' 'execution-plans: uma linha por tarefa no progresso'
-    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' '~150 linhas' 'execution-plans: nudge de compactação em ~150 linhas'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' '~60 linhas' 'execution-plans: nudge de compactação em ~60 linhas'
     Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'data/history/[\s\S]{0,40}VERSIONADO' 'execution-plans: migração de bloco íntegro para history/ versionado'
-    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' '~150 linhas' 'finish-task: nudge de state volumoso (~150 linhas)'
+    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' '~60 linhas' 'finish-task: nudge de state volumoso (~60 linhas)'
     Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'data/history/' 'finish-task cita a migração para history/ na constatação de done'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' '^data/reports/\s*$' 'audit: reports/ permanece ignorado (efêmero)'
     Check-NotMatch '.claude/skills/pelizzai-audit/SKILL.md' '^data/history/\s*$' 'audit: history/ NÃO é ignorado no template (registro durável versionado)'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'history/\s+versionado' 'audit: history/ no Layout canônico marcado como versionado (durável, fora do ignore)'
+
+    # =====================================================================
+    # Restauração pré-11/07 (2026-07-21) — F4: o state volta a ser CURSOR.
+    # A regressão que esta seção trava: o template de dados foi virando
+    # manual de processo (85 linhas, 39 delas de instrução), o setup passou
+    # a custar um commit só de metadata e o cursor só desinchava na abertura
+    # SEGUINTE. O que fica travado aqui: tamanho do template, prosa na skill
+    # (não no dado), migração no selo `delivered` e zero commit de setup.
+    # =====================================================================
+
+    # -- Template é dado, não manual: teto de tamanho e ponteiro para a doutrina --
+    $stateTemplateLines = (Text '.claude/skills/pelizzai-execution-plans/templates/state.md') -split "`r?`n"
+    Check ($stateTemplateLines.Count -le 60) 'state.md: template cabe em 60 linhas (cursor desinflado)' "linhas=$($stateTemplateLines.Count)"
+    Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'Referencie, não duplique' 'state.md aponta para a doutrina em vez de duplicá-la'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' '\*\*Quem escreve o cursor' 'execution-plans hospeda a autoria do cursor (prosa saiu do template)'
+    Check-Match '.claude/skills/pelizzai-handoff/SKILL.md' 'artefato que tem path é referenciado, nunca colado' 'handoff: regra de referenciar em vez de colar (fundamento da desduplicação)'
+
+    # -- Setup não paga commit de metadata: o cursor viaja no primeiro commit de conteúdo --
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'crie commit só de metadata' 'starting-branch: setup grava o state e segue, sem commit de metadata'
+    Check-NotMatch '.claude/skills/pelizzai-starting-branch/SKILL.md' 'faça\s+um commit metadata de setup' 'starting-branch NÃO reintroduz o commit de setup'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'não existe commit só de metadata para iniciar a tarefa' 'task-cycle: Tarefa 1 leva o state do setup no commit de conteúdo'
+
+    # -- O cursor desincha no FECHAMENTO (selo delivered), não na abertura seguinte --
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Migração no selo .delivered' 'execution-plans: a migração para history/ acontece no selo delivered'
+    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'Migre o bloco íntegro e desinfle o cursor' 'finish-task executa a migração ao selar delivered'
+    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'git add -- pelizzai/data/state\.md pelizzai/data/history/' 'finish-task estagia state + history no mesmo closure'
+    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' ":\(exclude\)pelizzai/data/history/" 'finish-task: guarda de produto exclui a metadata de history/'
+    Check-Match '.claude/skills/pelizzai-verification-before-completion/SKILL.md' 'somente metadata do harness' 'verification: closure contém state + history, não só state'
+    Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'já migrou para .pelizzai/data/history/' 'recovery: na retomada só carimba o desfecho (o bloco já migrou)'
+
+    # -- Plano executável por quem tem zero contexto (exigência do BASE restaurada) --
+    Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'zero contexto\*\*[\s\S]{0,80}uma única pergunta' 'writing-plans: objetivo é o plano que um executor com zero contexto executa sem perguntar'
+    Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'sem fazer uma única pergunta' 'plano: gate de qualidade exige executor sem perguntas'
+    Check-NotMatch '.claude/skills/pelizzai-writing-plans/templates/plan.md' '\*\*Lane ratificada:\*\*' 'plano não duplica a lane (cursor é do state)'
+    Check-NotMatch '.claude/skills/pelizzai-writing-plans/templates/plan.md' '\*\*Status:\*\*' 'plano não mantém Status solto além do bloco Aprovações'
 
     # -- D5: plano anti-carimbo — Decisões técnicas, ratificação não-carimbo, Desvios + teste de desvio --
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' '## Decisões técnicas deste plano' 'writing-plans exige a seção Decisões técnicas deste plano'
@@ -340,7 +440,7 @@ try {
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'cegueira assimétrica' 'review nomeia a cegueira assimétrica das duas lentes'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'nunca[\s\S]{0,4}é a lente cega' 'review: o coordenador nunca é a lente cega'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'lente que recebe o relatório' 'review: a lente evidência recebe e verifica o relatório do autor'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'cegueira assimétrica das duas lentes entra no' 'review: proporcionalidade — combined trivial, cegueira entra no split'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'cegueira assimétrica das duas lentes entra no' 'review: a cegueira assimétrica das duas lentes vive no split'
     Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'lente spec NÃO recebe o relatório do implementador' 'spec-reviewer é a lente cega (não recebe o relatório)'
     Check-NotMatch '.claude/skills/pelizzai-review/references/spec-reviewer.md' '\{RELATÓRIO_DO_IMPLEMENTADOR\}' 'spec-reviewer (lente cega) não injeta mais o placeholder do relatório'
     Check-Match '.claude/skills/pelizzai-review/references/code-reviewer.md' '\{RELATÓRIO_DO_IMPLEMENTADOR\}' 'code-reviewer (lente evidência) recebe o placeholder do relatório'
@@ -353,6 +453,56 @@ try {
     Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' '\*\*COMPLETO\*\* de skills' 'subagents: pacote COMPLETO de domain skills da área'
     Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'lente spec cega' 'subagents: review usa a lente spec cega; coordenador nunca é ela'
 
+    # =====================================================================
+    # Restauração pré-11/07 (2026-07-21) — F6: o revisor volta a ser cego
+    # por PADRÃO. No BASE não existia perfil: toda tarefa passava por
+    # spec → qualidade em estágios separados, e o review era obrigatório
+    # após CADA tarefa. O `combined` (pós-BASE) fica, mas rebaixado a
+    # exceção que o usuário ratifica no passo 4 do gate — porque num único
+    # despacho a cegueira vira mera ordem de leitura. A outra metade da
+    # correção: a lente cega passa a receber as domain skills, já que
+    # cegueira é não ver a NARRATIVA do autor, não ficar sem o CONTRATO
+    # do projeto.
+    # =====================================================================
+
+    # -- O review volta a ser obrigatório após CADA tarefa (âncoras do BASE) --
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Revise cedo e sempre' 'review: princípio central do BASE restaurado'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'description:[^\n]*após CADA tarefa' 'review: a description dispara após CADA tarefa (gatilho do BASE)'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Após CADA tarefa na execução de um plano[\s\S]{0,60}sem exceção por' 'review obrigatório após cada tarefa, sem exceção por "é simples"'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'profundidade é proporcional ao risco, a existência do review não' 'review: proporcional é a profundidade, nunca a existência do review'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Pular o review porque .é simples' 'review: anti-padrão do BASE (pular porque "é simples") restaurado'
+
+    # -- split é o default; combined é exceção ratificada (e não o contrário) --
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'padrão recomendado[\s\S]{0,20}é .split.' 'review: split é o perfil recomendado por padrão'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' '.combined. é[\s\S]{0,20}\*\*exceção\*\*' 'review: combined é exceção, não o caso normal'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'rebaixar para .combined. sempre exige' 'review: rebaixar para combined exige escolha explícita do usuário'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Usar .combined. por conta própria' 'review: anti-padrão de assumir combined sem ratificação'
+    Check-NotMatch '.claude/skills/pelizzai-review/SKILL.md' 'tarefa trivial/bounded segue com .combined.' 'review não volta a mandar tarefa bounded para combined por default'
+
+    # -- A lente cega recebe as domain skills (cegueira ≠ falta de contexto do projeto) --
+    Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' '\{SKILLS_DE_DOMÍNIO\}' 'spec-reviewer (lente cega) recebe o slot de domain skills'
+    Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'Cegueira \*\*não\*\* é falta de contexto do projeto' 'spec-reviewer: cegueira é não ver a narrativa, não ficar sem o contrato'
+    Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'Skills de domínio: a mudança respeita as regras' 'spec-reviewer: domain skill entra na checklist da lente cega'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'slot .\{SKILLS_DE_DOMÍNIO\}. \*\*dos dois\s+templates\*\*' 'review: o briefing cola as domain skills nos DOIS templates'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'pelizzai/domain-skills\.md' 'review nomeia o catálogo de domain skills (não só "o catálogo")'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'slot .\{SKILLS_DE_DOMÍNIO\}.\s+vazio' 'review: anti-padrão de despachar briefing com o slot de domain skills vazio'
+
+    # -- Exceção de reutilização do review final: restringida, não removida --
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Exceção de reutilização \(estreita, e nunca o caminho padrão\)' 'review: a exceção de reutilização é declarada estreita'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'efeito .read-only. ou .write-local., risco baixo' 'review: a exceção exige efeito local e risco baixo'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'não para dispensar a validação final' 'review: a exceção não dispensa a validação final'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Exceção estreita:[\s\S]{0,200}read-only.*write-local' 'execution-plans espelha os limites da exceção de reutilização'
+
+    # -- O default propagado: gate, plano, task-cycle, team e subagents ensinam o MESMO --
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Recomendado: split — é o default' 'gate passo 4 recomenda split por padrão'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'Rebaixar para combined exige[\s\S]{0,80}sua escolha' 'gate passo 4: combined exige a escolha explícita do usuário'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' '\| .split. \(default\)' 'task-cycle: a tabela de perfis abre com split (default)'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'tarefas triviais/bounded seguem com review \*\*combinado\*\*' 'task-cycle não volta a mandar tarefa bounded para combined'
+    Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'O default é .split., inclusive em bounded' 'writing-plans registra split como default do perfil de review'
+    Check-NotMatch '.claude/skills/pelizzai-writing-plans/SKILL.md' 'review split universal' 'writing-plans não trata mais o split universal como red flag'
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'perfil cego/duplo \(.split.\) é o default' 'team: split é o default do review por tarefa'
+    Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' '.split. por padrão' 'subagents: o perfil registrado é split por padrão'
+
     # -- D7: fio do gate proativo de domain skills — três pontos de captura + a audit nomeia quem invoca --
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'domain skills da stack \(proposta na borda do design\)' 'router (D7.1): kickoff lista domain skills da stack nos Artefatos'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Gate proativo de[\s\S]{0,4}domain skills' 'router aponta ao Gate proativo na borda design→plano'
@@ -361,6 +511,126 @@ try {
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'Checagem de cobertura de domain skills' 'writing-plans (D7.3): rede de segurança de cobertura de domain skills'
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'ANTES da Tarefa 1' 'writing-plans: a cobertura de domain skills é decidida antes da Tarefa 1'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'Quem invoca este gate' 'audit nomeia quem invoca o Gate proativo (brainstorming + writing-plans)'
+
+    # -- F3: capacidade máxima — modelo/effort são invariantes, nunca variável de economia --
+    # Restauração do estado pré-11/07 (decisão do usuário, 2026-07-21): proporcionalidade governa a
+    # profundidade do PROCESSO (entrevista, TDD, perfil de review, overlays), jamais a capacidade do
+    # modelo. Arquitetura, as duas lentes, o review final e a validação final da entrega são o topo.
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'modelo mais capaz[\s\S]{0,60}effort máximo' 'review final exige modelo mais capaz e effort máximo'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'passo 1 da[\s\S]{0,40}validação final da entrega' 'review final é o passo 1 da validação final da entrega'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Rebaixar modelo ou effort num review' 'review: anti-padrão nomeia o rebaixamento de modelo/effort'
+    Check-NotMatch '.claude/skills/pelizzai-review/SKILL.md' 'não force effort máximo|capacidade/effort proporcionais' 'review não reintroduz capacidade proporcional'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'modelo mais capaz disponível e effort máximo' 'validação final da entrega roda no topo de capacidade'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'rebaixar modelo/effort para economizar' 'execution-plans: o anti-padrão é rebaixar, não maximizar'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/SKILL.md' 'forçar effort máximo numa tarefa mecânica|capacidade proporcional ao risco' 'execution-plans não trata effort máximo como excesso'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Seleção de modelo por papel' 'task-cycle §8 é seleção de modelo por papel (não capacidade por risco)'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'modelo mais capaz disponível[\s\S]{0,60}effort/reasoning no nível máximo' 'task-cycle §8 fixa modelo e effort no topo'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'nunca rebaixe modelo nem effort' 'task-cycle §8 proíbe rebaixar modelo ou effort'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Arquitetura, os reviews[\s\S]{0,120}inegociavelmente o topo' 'task-cycle §8: arquitetura, reviews e validação final são o topo'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'nunca em capacidade do modelo' 'task-cycle §8: proporcionalidade é de processo, não de capacidade'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'o modelo já é o topo' 'task-cycle: escalada do BLOCKED não passa por subir modelo'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Capacidade por risco e papel|capacidade e effort \*\*proporcionais\*\*|aumente capacidade' 'task-cycle §8 não volta a ser capacidade proporcional'
+    Check-Match 'CLAUDE.md' 'modelo e effort não' 'CLAUDE.md: modelo e effort não variam com risco'
+    Check-Match 'README.md' 'modelo mais capaz disponível e effort máximo' 'README: review final no topo de capacidade'
+
+    # -- F7: debugging reenxerta os sinais e táticas perdidos no pivô (restauração pré-11/07/2026) --
+    # O pivô proporcional FICA inteiro (triagem em 4 classes, Passo 0 de contenção, seletor por
+    # efeito, sem cota de hipóteses). O que volta do BASE são as peças que ele derrubou sem
+    # substituir: frases-gatilho na description, minimização do loop, causa na mensagem de commit,
+    # escalada nomeada dos três fixes e a tabela de sinais do parceiro humano.
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'description:[^\n]*para de chutar' 'debugging: a description volta a citar as frases-gatilho do usuário'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'description:[^\n]*teste quebrar no meio de outra tarefa' 'debugging: a description aciona com teste quebrado no meio de outra tarefa'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'corte UM elemento por vez' 'debugging restaura a minimização (um elemento por vez)'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Minimize o loop[^\n]*determinístico incerto[^\n]*flaky' 'debugging: a minimização é condicionada às duas classes incertas'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'todo elemento restante é load-bearing' 'debugging define o critério de parada da minimização'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Numa causa direta isso é desperdício' 'debugging: minimizar causa direta é desperdício (proporcionalidade preservada)'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'contenção do Passo 0 vem antes de qualquer corte' 'debugging: a contenção continua precedendo a minimização'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'registrada na MENSAGEM DE COMMIT do fix' 'debugging: a causa confirmada volta para a mensagem de commit'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Três fixes definitivos falhos param o track' 'debugging: três fixes falhos param o track'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Três fixes que não resolvem \*\*são\*\* uma lacuna material' 'debugging liga o circuit breaker ao contrato da lacuna material'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Acione .pelizzai-interview-me.[\s\S]{0,240}pelizzai-brainstorming' 'debugging nomeia a escalada interview-me -> brainstorming'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Sem essa\s+discussão não existe fix nº 4' 'debugging: não há fix nº 4 sem a discussão com o usuário'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Tentar o fix nº 4 depois de três falhas' 'debugging: red flag torna o circuit breaker observável'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' '## Sinais do parceiro humano' 'debugging tem a tabela de sinais do parceiro humano'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' '"Para de chutar"[^\n]*predição falsificável' 'debugging decodifica "para de chutar" (hipótese sem predição)'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' '"A gente tá travado\?"[^\n]*thrashing' 'debugging decodifica "a gente tá travado?" (thrashing)'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'Usa condicionalmente:[^\n]*pelizzai-interview-me' 'debugging: interview-me está no wiring da Integração'
+    # As peças voltaram traduzidas, não coladas: vocabulário do HEAD (Passo/oráculo) e nenhuma das
+    # absolutizações do BASE de volta junto com elas.
+    Check-NotMatch '.claude/skills/pelizzai-debugging/SKILL.md' '\bfases?\s+[1-4]\b' 'debugging não recola o vocabulário morto de fases do BASE'
+    Check-NotMatch '.claude/skills/pelizzai-debugging/SKILL.md' 'Gere 3.5 hipóteses' 'debugging não reintroduz a cota de 3-5 hipóteses'
+    Check-NotMatch '.claude/skills/pelizzai-debugging/SKILL.md' 'NENHUM FIX SEM INVESTIGAÇÃO DA CAUSA RAIZ' 'debugging mantém o invariante proporcional (contenção pode preceder a causa)'
+    Check-NotMatch '.claude/skills/pelizzai-debugging/SKILL.md' 'questione hipótese/arquitetura antes de tentar outro' 'debugging não volta ao circuit breaker anônimo (sem destino nomeado)'
+
+    # -- F7: a quota de técnicas sai também dos carriers do reasoning --
+    # `Não há quota fixa` (Carregamento progressivo) tinha dois contraditores órfãos: o teto por fase
+    # nas Composições e a auxiliar numerada/justificada por impacto no eval R-14.
+    Check-Match '.claude/skills/pelizzai-reasoning/SKILL.md' 'Não há teto numérico' 'reasoning: composições carregam por fase, sem teto numérico'
+    Check-NotMatch '.claude/skills/pelizzai-reasoning/SKILL.md' 'teto de carregamento por fase' 'reasoning não mantém o teto órfão que contradizia "não há quota fixa"'
+    Check-Match '.claude/skills/pelizzai-reasoning/evals/routing.md' 'entra por fechar essa lacuna, nunca por a\s+decisão ser de alto impacto' 'routing: técnica auxiliar entra por lacuna, não por impacto'
+    Check-NotMatch '.claude/skills/pelizzai-reasoning/evals/routing.md' '\d. auxiliar OPCIONAL' 'routing não numera as auxiliares (resíduo de quota)'
+
+    # =====================================================================
+    # F8 — Resíduos da restauração pré-11/07/2026.
+    # As peças que o pivô derrubou sem substituir e as contradições que ele
+    # deixou para trás: detecção de workspace, cadência proativa da revisão
+    # arquitetural, commit próprio da doc, definição do protótipo, reancoragem
+    # do handoff e a descrição honesta do writegate.
+    # =====================================================================
+
+    # -- F8: workspace multi-projeto volta a ser DETECTADO e o conjunto afetado CONFIRMADO --
+    # O BASE detectava workspace e nunca fechava sozinho o conjunto; o pivô apagou a seção inteira.
+    # Volta reconciliada com o invariante do HEAD (uma tarefa = um repositório Git): monorepo tem
+    # isolamento único, workspace multi-repo abre um por repositório.
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'description:[^\n]*Detecta workspace multi-projeto e confirma com o usuário o conjunto afetado' 'starting-branch: a description volta a anunciar a detecção de workspace'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' '^##\s+2\.\s+Detectar workspace multi-projeto' 'starting-branch tem a seção de detecção de workspace'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'pnpm-workspace\.yaml[\s\S]{0,120}go\.work' 'starting-branch checa os marcadores de workspace do BASE'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'um nível acima' 'starting-branch procura marcadores também um nível acima do cwd'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'SEMPRE confirme com o usuário o conjunto afetado' 'starting-branch: conjunto afetado é SEMPRE confirmado (âncora literal do BASE)'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'Conjunto adivinhado é lacuna\s+material[\s\S]{0,80}pelizzai-interview-me' 'starting-branch manda o conjunto adivinhado para a interview-me, não para um default'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' '`pelizzai/` é \*\*root-level do workspace\*\*' 'starting-branch: pelizzai/ é root-level do workspace, não um por pacote'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'Workspace é detectado, nunca presumido' 'starting-branch eleva a detecção de workspace a invariante'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'Pular a detecção de workspace' 'starting-branch: pular a detecção de workspace é red flag'
+    # Reconciliação: a régua do HEAD fica de pé e o "uma branch por projeto" do BASE NÃO volta.
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'Uma tarefa = um repositório Git' 'starting-branch preserva a régua do HEAD (uma tarefa = um repositório)'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'Monorepo \(um repositório Git, vários pacotes\)[\s\S]{0,80}isolamento é único' 'starting-branch: monorepo tem isolamento único, não uma branch por pacote'
+    Check-NotMatch '.claude/skills/pelizzai-starting-branch/SKILL.md' 'Uma branch por projeto afetado' 'starting-branch não recola o erro do BASE (branch por pacote dentro de monorepo)'
+    Check-NotMatch '.claude/skills/pelizzai-starting-branch/SKILL.md' 'Prioridade: develop > dev' 'starting-branch não recola a preferência histórica de base junto com o workspace'
+
+    # -- F8: a revisão de arquitetura volta a ser PROATIVA (gatilho de cadência) --
+    # O contrato read-only do HEAD fica intacto (travado acima); o que volta é o gatilho periódico.
+    Check-Match '.claude/skills/pelizzai-improving-architecture/SKILL.md' 'description:[^\n]*PROATIVA' 'improving-architecture: a description volta a declarar a revisão PROATIVA'
+    Check-Match '.claude/skills/pelizzai-improving-architecture/SKILL.md' 'description:[^\n]*periodicamente \(a cada poucos dias' 'improving-architecture: a cadência periódica volta ao gatilho'
+    Check-Match '.claude/skills/pelizzai-improving-architecture/SKILL.md' 'Arquitetura degrada em silêncio' 'improving-architecture explica por que o gatilho não é só o pedido do usuário'
+    Check-Match '.claude/skills/pelizzai-improving-architecture/SKILL.md' 'Oferecer é proativo; rodar e implementar\s+continuam sendo escolha do usuário' 'improving-architecture: proatividade é oferta, não execução sem aval'
+    Check-NotMatch '.claude/skills/pelizzai-improving-architecture/SKILL.md' 'varredura periódica sem pedido' 'improving-architecture não mantém a exclusão que contradizia a própria cadência'
+
+    # -- F8: a doc volta a ter commit próprio obrigatório (higiene de histórico, não preferência) --
+    Check-Match '.claude/skills/pelizzai-documenting-features/SKILL.md' 'entra em \*\*commit próprio\*\*[\s\S]{0,40}docs\(<feature>\)' 'documenting-features exige commit próprio da doc'
+    Check-Match '.claude/skills/pelizzai-documenting-features/SKILL.md' 'higiene de histórico, não preferência' 'documenting-features: commit próprio é regra, não gosto'
+    Check-Match '.claude/skills/pelizzai-documenting-features/SKILL.md' 'granular. é o commit definitivo da doc[\s\S]{0,120}squash-final' 'documenting-features concilia o commit próprio com as duas estratégias'
+    Check-Match '.claude/skills/pelizzai-documenting-features/SKILL.md' 'Deixar a doc sem commit próprio' 'documenting-features: doc sem commit próprio é red flag'
+    Check-NotMatch '.claude/skills/pelizzai-documenting-features/SKILL.md' 'Commit próprio é\s+opção' 'documenting-features não mantém o commit próprio como opção'
+
+    # -- F8: definição do protótipo e âncora de reancoragem do handoff --
+    Check-Match '.claude/skills/pelizzai-prototype/SKILL.md' 'código descartável que responde a uma pergunta' 'prototype recupera a definição do BASE (a pergunta decide o formato)'
+    Check-Match '.claude/skills/pelizzai-prototype/SKILL.md' 'Sem "sim", não escreva o experimento' 'prototype preserva o aval explícito do usuário (não regride com a definição)'
+    Check-Match '.claude/skills/pelizzai-handoff/SKILL.md' '\*\*âncora, não endereço\*\*' 'handoff: path/linha é âncora, não endereço'
+    Check-Match '.claude/skills/pelizzai-handoff/SKILL.md' 'reancora antes de agir' 'handoff manda a próxima sessão reancorar antes de agir'
+
+    # -- F8: o closure metadata-only não é privilégio do modo granular --
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'closure metadata-only da pelizzai-finish-task no\s+consumidor[\s\S]{0,60}nas duas estratégias de commit' 'execution-plans: o closure vale nas duas estratégias de commit'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/SKILL.md' 'commit de fechamento do cursor da pelizzai-finish-task' 'execution-plans não mantém o closure descrito como exclusivo do granular'
+
+    # -- F8: writegate descrito pelo que o hook FAZ (Regra A + Regra B), sem inventar gate --
+    # O hook nunca leu `isolation: <pending>`; e, por decisão do dono, ele NÃO enforça as etapas de
+    # aprovação do greenfield — elas continuam obrigatórias, mas vivem nas skills.
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'Regra A[\s\S]{0,200}kickoff: ratificado[\s\S]{0,80}Regra B' 'audit descreve o writegate pelas Regras A e B reais'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'NÃO enforça as etapas de aprovação do greenfield' 'audit: o writegate não é a catraca do greenfield'
+    Check-NotMatch '.claude/skills/pelizzai-audit/SKILL.md' 'enquanto o gate de isolamento continua' 'audit não descreve um gate de isolamento que o hook nunca checou'
+    Check-Match 'README.md' 'Regra A[\s\S]{0,160}kickoff: ratificado[\s\S]{0,60}Regra B' 'README descreve o writegate pelas Regras A e B reais'
+    Check-Match 'README.md' 'não enforça as etapas de aprovação do\s+greenfield' 'README: o writegate não é a catraca do greenfield'
+    Check-NotMatch 'README.md' 'enquanto o isolamento está' 'README não descreve um bloqueio por isolamento pendente'
 
     # -- Envelope de segurança dos hooks: cadence/session-start fail-open, nunca bloqueiam --
     $failOpenMjs = @('.claude/hooks/pelizzai-cadence.mjs', '.claude/hooks/pelizzai-session-start.mjs')
@@ -416,7 +686,12 @@ try {
             $leaf = Split-Path -Leaf $wgRel
             Check-Match $wgRel 'main[\s\S]{0,40}master[\s\S]{0,40}develop[\s\S]{0,40}dev' "writegate conhece as branches protegidas ($leaf)"
             Check-Match $wgRel 'kickoff[\s\S]{0,20}ratificado' "writegate chaveia no marcador kickoff: ratificado ($leaf)"
-            Check-Match $wgRel 'discovery[\s\S]{0,80}spec-approval[\s\S]{0,80}domain-skills-decision[\s\S]{0,80}plan-approval' "writegate protege aprovações greenfield ($leaf)"
+            # Restauração 2026-07-21: o enforcement das aprovações greenfield SAIU do hook. As oito
+            # etapas continuam obrigatórias por texto de skill; o hook trava um único marcador (o
+            # kickoff), porque catraca de arquivo travava trabalho legítimo sempre que o state ficava
+            # um passo atrás da conversa. Anti-regressão: nem a constante, nem o escopo documentado.
+            Check-NotMatch $wgRel 'spec-approval|domain-skills-decision|plan-approval' "writegate NÃO reintroduz enforcement das aprovações greenfield ($leaf)"
+            Check-Match $wgRel 'ESCOPO DELIBERADO' "writegate documenta por que trava só o kickoff ($leaf)"
             # D2: carve-out de metadata documentado + nota de segurança (paridade das duas pernas).
             Check-Match $wgRel 'CARVE-OUT DE METADATA' "writegate documenta o carve-out de metadata do harness ($leaf)"
             Check-Match $wgRel 'de escrita de ARQUIVO' "writegate: nota de segurança — carve-out é só de escrita de arquivo, não de commit ($leaf)"
@@ -449,6 +724,24 @@ try {
                 Check ((Invoke-Writegate $wg @{ file_path = 'pelizzai/data/state.md' } $wgTemp) -eq 0) "writegate: carve-out D2 libera metadata pelizzai/ em branch protegida ($leaf)"
                 # Fora da raiz do repo permite (exit 0), mesmo em branch protegida.
                 Check ((Invoke-Writegate $wg @{ file_path = $wgOutside } $wgTemp) -eq 0) "writegate permite escrita fora da raiz ($leaf)"
+
+                # -- Matcher Bash: falsos positivos corrigidos (restauração 2026-07-21) --
+                # Controle positivo primeiro: redirecionamento REAL para dentro da raiz continua
+                # bloqueando. Sem ele, os checks abaixo passariam com um matcher que virou no-op.
+                Check ((Invoke-Writegate $wg @{ command = 'npm test > build.log' } $wgTemp) -eq 2) "writegate bloqueia redirecionamento real para dentro da raiz ($leaf)"
+                # Sinks nulos DESCARTAM saída — não são escrita de produto. `> NUL` resolvia como
+                # caminho relativo dentro da raiz e travava comando legítimo.
+                Check ((Invoke-Writegate $wg @{ command = 'node x.js > NUL' } $wgTemp) -eq 0) "writegate: sink nulo NUL não é escrita de produto ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'node x.js 2> $null' } $wgTemp) -eq 0) "writegate: sink nulo `$null não é escrita de produto ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'node x.js > /dev/null' } $wgTemp) -eq 0) "writegate: sink nulo /dev/null não é escrita de produto ($leaf)"
+                # Alvo com variável de ambiente é EXPANDIDO antes de comparar com a raiz: o arquivo
+                # nasce fora do repositório, logo não é produto.
+                Check ((Invoke-Writegate $wg @{ command = 'npm test > $env:TEMP/build.log' } $wgTemp) -eq 0) "writegate expande `$env:VAR antes de decidir ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'npm test > %TEMP%\build.log' } $wgTemp) -eq 0) "writegate expande %VAR% antes de decidir ($leaf)"
+                # Variável irresolvível → alvo indecidível → fail-open (mesma honestidade do matcher).
+                Check ((Invoke-Writegate $wg @{ command = 'npm test > $env:PELIZZAI_NAO_EXISTE_XYZ/f.log' } $wgTemp) -eq 0) "writegate não bloqueia alvo com variável irresolvível ($leaf)"
+                # Não-regressão: `>` dentro de aspas é texto, não redirecionamento.
+                Check ((Invoke-Writegate $wg @{ command = 'git commit -m "a > b"' } $wgTemp) -eq 0) "writegate não confunde texto entre aspas com redirecionamento ($leaf)"
             }
 
             git -C $wgTemp checkout -q -b feat/x  # branch de tarefa (nao protegida)
@@ -469,6 +762,9 @@ try {
                 Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 0) "writegate libera produto após kickoff ratificado ($leaf)"
             }
 
+            # Fixture INVERTIDA (restauração 2026-07-21): um state legado que ainda traga os quatro
+            # campos de aprovação em `pending` NÃO bloqueia mais — quem libera é o kickoff sozinho.
+            # Ela reprova se o enforcement por campo voltar ao hook.
             Set-Content -LiteralPath (Join-Path $wgTemp 'pelizzai/data/state.md') -Value @"
 - kickoff: ratificado 2026-07-12
 - discovery: pending
@@ -478,19 +774,7 @@ try {
 "@ -Encoding utf8
             foreach ($wg in @($wgMjs, $wgPs1)) {
                 $leaf = Split-Path -Leaf $wg
-                Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 2) "writegate bloqueia produto com aprovação greenfield pendente ($leaf)"
-            }
-
-            Set-Content -LiteralPath (Join-Path $wgTemp 'pelizzai/data/state.md') -Value @"
-- kickoff: ratificado 2026-07-12
-- discovery: ratificada 2026-07-12
-- spec-approval: ratificada 2026-07-12
-- domain-skills-decision: ratificada 2026-07-12
-- plan-approval: ratificado 2026-07-12
-"@ -Encoding utf8
-            foreach ($wg in @($wgMjs, $wgPs1)) {
-                $leaf = Split-Path -Leaf $wg
-                Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 0) "writegate libera produto após aprovações greenfield ($leaf)"
+                Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 0) "writegate ignora campos de aprovação greenfield no state ($leaf)"
             }
 
             # Consumidor instalado via -ExportConsumer tem manifesto+sync+skills core: isso NÃO é
@@ -562,6 +846,22 @@ try {
         $removedSettings = Get-Content -LiteralPath $settingsPath -Raw -Encoding utf8
         Check ($removedSettings -notmatch 'pelizzai-(?:guardrails|writegate|cadence|session-start)\.mjs') 'remoção elimina handlers PelizzAI'
         Check ($removedSettings -match 'echo custom' -and $removedSettings -match 'Bash\(rm -rf:\*\)') 'remoção preserva configurações alheias'
+
+        # Restauração 2026-07-21: hook é OPT-IN, um a um e com confirmação — nunca imposto em bloco.
+        # `--only` torna a doutrina operável e `--check` vira INVENTÁRIO: instalação parcial é
+        # escolha legítima do usuário, não defeito. Sem esta rede, o instalador volta a tratar
+        # "faltou hook" como falha e o bootstrap volta a empurrar os quatro de uma vez.
+        Run-Native { node scripts/install-hooks.mjs --project $hooksTemp --only cadence } 'instalador --only registra apenas o hook pedido'
+        Run-Native { node scripts/install-hooks.mjs --project $hooksTemp --check } 'check tolera instalação parcial deliberada (opt-in não é falha)'
+        $null = & node scripts/install-hooks.mjs --project $hooksTemp --check --only writegate 2>&1
+        Check ($LASTEXITCODE -eq 1) 'check --only reprova hook explicitamente pedido e ausente'
+        Run-Native { node scripts/install-hooks.mjs --project $hooksTemp --only guardrails,writegate } 'instalador --only é aditivo (não derruba hook já aceito)'
+        $partialSettings = Get-Content -LiteralPath $settingsPath -Raw -Encoding utf8
+        Check ($partialSettings -match 'pelizzai-cadence\.mjs' -and $partialSettings -match 'pelizzai-guardrails\.mjs' -and [regex]::Matches($partialSettings, 'pelizzai-writegate\.mjs').Count -eq 2) 'instalador --only preserva o hook anterior e registra os dois matchers do writegate'
+        Check ($partialSettings -notmatch 'pelizzai-session-start\.mjs') 'instalador --only não instala hook fora da lista'
+        $null = & node scripts/install-hooks.mjs --project $hooksTemp --only inexistente 2>&1
+        Check ($LASTEXITCODE -eq 1) 'instalador rejeita id desconhecido em --only'
+        Run-Native { node scripts/install-hooks.mjs --project $hooksTemp --remove } 'instalador limpa o estado parcial ao final'
     } finally {
         if (Test-Path -LiteralPath $hooksTemp) { Remove-Item -LiteralPath $hooksTemp -Recurse -Force }
     }
@@ -633,8 +933,11 @@ try {
         }
     }
 
-    $sessionHooks = (Text '.claude/hooks/pelizzai-session-start.mjs') + (Text '.claude/hooks/pelizzai-session-start.ps1')
-    Check (-not [regex]::IsMatch($sessionHooks, 'regra do 1%')) 'hook de sessão não reintroduz regra do 1%'
+    # Regra do 1% restaurada por decisão do usuário (2026-07-21): o hook de sessão a reafirma no
+    # startup, nas duas variantes, junto com o bloco EXTREMELY-IMPORTANT da pelizzai-core.
+    foreach ($sh in @('.claude/hooks/pelizzai-session-start.mjs', '.claude/hooks/pelizzai-session-start.ps1')) {
+        Check-Match $sh 'regra do 1%' "hook de sessão reafirma a regra do 1% ($(Split-Path -Leaf $sh))"
+    }
 
     # Guardrails equivalentes: somente classificam strings, nenhum comando Git é executado.
     $hooks = @(
@@ -642,17 +945,38 @@ try {
         (Join-Path $root '.claude/hooks/pelizzai-guardrails.ps1')
     )
     $safe = @('git status', 'Git push --force-with-lease origin topic', 'git restore --staged .', 'git restore -S file.txt', 'git branch -d merged', 'git branch -m old new')
+    # Fora do escopo ESTREITO do hook — passam DE PROPÓSITO. O hook mira o punhado de comandos que
+    # apagam trabalho de forma irrecuperável; regra larga trava trabalho legítimo e ensina o agente a
+    # contornar a rede de segurança. Estas fixtures existem para que o estreitamento seja deliberado
+    # e visível: se alguém voltar a alargar o matcher, elas quebram e a decisão volta ao usuário.
+    $safeByDesign = @(
+        'git push origin +HEAD:main', 'git push origin +main', 'git push origin --delete topic',
+        'git push origin :topic', 'git checkout -- file.txt', 'git branch -M main',
+        'git restore file.txt', 'git restore -SW file.txt',
+        'git commit -m "fix: restore layout"', 'git add src/restore.ts', 'git log --grep=restore'
+    )
+    # Guardas contra falso positivo das regras de checkout/branch: criar não é destruir.
+    $safeByDesign += @(
+        'git checkout -b feature/nova', 'git checkout feature/foo', 'git checkout main',
+        'git branch --delete merged', 'git branch --list'
+    )
     $blocked = @(
-        'git push -f origin topic', 'Git reset --hard', 'git push origin +HEAD:main',
-        'git push origin +main', 'git push origin --delete topic', 'git push origin :topic',
-        'git checkout -f topic', 'git checkout -B topic main', 'git checkout -- file.txt',
-        'git switch -C topic', 'git branch --delete --force topic', 'git branch -M old new',
-        'git clean -fd', 'git restore .', 'git restore file.txt', 'git restore -SW file.txt',
-        'git worktree remove --force ../topic'
+        'git push -f origin topic', 'Git reset --hard', 'git switch -C topic',
+        'git clean -fd', 'git restore .', 'git checkout .', 'git checkout -- .',
+        'git branch -D topic', 'git worktree remove --force ../topic'
+    )
+    # Ratificado pelo usuário em 2026-07-21: estas três grafias NÃO são "escopo estreito", são a
+    # MESMA destruição já bloqueada escrita de outro jeito — liberá-las deixaria no hook um bypass
+    # trivial. `checkout -f` == `checkout .`; `checkout -B` == `switch -C`; `branch --delete --force`
+    # == `branch -D`. Os demais comandos acima seguem liberados, como no estado pré-11/07.
+    $blocked += @(
+        'git checkout -f topic', 'git checkout --force', 'git checkout -B topic main',
+        'git branch --delete --force topic', 'git branch --force --delete topic',
+        'git branch --delete -f topic'
     )
     foreach ($hook in $hooks) {
         $label = Split-Path -Leaf $hook
-        foreach ($command in $safe) {
+        foreach ($command in ($safe + $safeByDesign)) {
             $exit = Invoke-Guardrail $hook $command
             Check ($exit -eq 0) "$label permite: $command" "exit $exit"
         }
@@ -773,6 +1097,54 @@ try {
             Remove-Item -LiteralPath $resolvedHandoff -Recurse -Force
         }
     }
+}
+
+# -- Correções do review do PR #4 (CodeRabbit, 2026-07-21) --
+# Cada asserção trava uma contradição real encontrada no review. São adições: nenhuma
+# asserção anterior foi enfraquecida para acomodá-las.
+#
+# O bloco tem tratamento PRÓPRIO porque roda fora do try/catch principal (que já fechou
+# acima, junto com a limpeza do diretório temporário). Sem ele, um arquivo ausente ou uma
+# regex inválida abortaria o script sem registrar FAIL nem imprimir o resumo — a suíte
+# terminaria em silêncio, que é a falha mais perigosa numa rede de segurança.
+try {
+    # Regra do 1%: os 1% disparam CARREGAR e avaliar; só a candidata já lida e não aplicável
+    # pode ser dispensada. A antiga redação permitia ignorar uma skill "aplicável".
+    Check-Match '.claude/skills/pelizzai-core/SKILL.md' 'carregar e avaliar' 'core: os 1% disparam carregar e avaliar, não dispensar de longe'
+    Check-NotMatch '.claude/skills/pelizzai-core/SKILL.md' 'skill aplicável não serve àquele caso, você pode ignorá-la' 'core: não há rota para ignorar skill aplicável'
+
+    # Escrita paralela em worktree: a condição é caminhos disjuntos, não proibição chapada.
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/SKILL.md' 'vários writers concorrentes no mesmo' 'execution-plans não reimpõe writer único quando o isolamento é worktree'
+    Check-Match '.claude/skills/pelizzai-preferences/SKILL.md' 'caminhos disjuntos' 'preferences: o piso não nega a escrita paralela em caminhos disjuntos'
+    Check-Match '.claude/skills/pelizzai-preferences/SKILL.md' 'nunca um worktree por agente' 'preferences: o piso repete a proibição de um worktree por agente'
+
+    # Closure é de DOIS arquivos de metadata: state.md + o bloco migrado para history/.
+    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'os dois arquivos de metadata do closure' 'finish-task: a guarda pré-destino exige state + history, não só state'
+
+    # Lacuna do plano vai à entrevista; adivinhar deixou de ser comportamento esperado.
+    Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'o que faltar no plano[\s\S]{0,140}pelizzai-interview-me' 'writing-plans: lacuna do plano vai à interview-me, nunca à adivinhação'
+    Check-NotMatch '.claude/skills/pelizzai-writing-plans/SKILL.md' 'preenche adivinhando' 'writing-plans não descreve adivinhação como comportamento do executor'
+
+    # A ratificação é lida nos dois modos (consumidor e source).
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'state consumidor ou execution record nativo' 'interview-me lê a ratificação nos dois modos'
+
+    # Saída colada só vale de quem executou o check — nunca do próprio autor.
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'quem rodou o check' 'team: saída colada só vale de quem rodou o check, nunca do autor'
+    Check-NotMatch '.claude/skills/pelizzai-team/SKILL.md' 'ou exija a saída \+ exit code colados' 'team: paste do membro não substitui a verificação'
+
+    # O recap do SessionStart dispara em qualquer valor cru, não num enum fechado.
+    Check-Match '.claude/skills/pelizzai-audit/templates/profile.md' 'QUALQUER valor cru fora de' 'profile.md descreve o gatilho do recap como qualquer valor cru'
+
+    # O adaptador Cursor é manual: chamá-lo de mirror gerado faz o autor nunca atualizá-lo.
+    Check-NotMatch '.claude/skills/pelizzai-writing-skills/references/skill-authoring.md' '`\.cursor/` como mirrors gerados' 'skill-authoring não chama o adaptador Cursor de mirror gerado'
+
+    # README: o fluxo de fechamento descrito é o do consumidor; source mode tem ressalva.
+    Check-Match 'README.md' 'repo-fonte do PelizzAI[\s\S]{0,260}não cria\s*\r?\ncommit metadata-only' 'README: fechamento traz a ressalva de source mode'
+
+    # CLAUDE.md: modelo e effort nunca são rebaixados — dito sem zeugma.
+    Check-Match 'CLAUDE.md' 'nunca rebaixe nenhum dos dois para economizar' 'CLAUDE.md nomeia o anti-padrão de rebaixar modelo/effort'
+} catch {
+    Check $false 'correções do review do PR #4' $_.Exception.Message
 }
 
 Write-Host "`nResultado: $passes PASS; $($failures.Count) FAIL."

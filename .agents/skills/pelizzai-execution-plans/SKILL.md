@@ -20,16 +20,21 @@ do que foi validado.
 Se você é um **membro** (teammate/subagente) encarregado de **uma tarefa**, implemente apenas a
 sua: siga a estratégia de teste declarada, as skills de domínio e as skills transversais/overlays
 coladas no briefing; respeite `pelizzai-preferences` e devolva `DONE`, `DONE_WITH_CONCERNS`,
-`BLOCKED` ou `NEEDS_CONTEXT`. Não orquestre nem commite. Ver `references/task-cycle.md`.
+`BLOCKED` ou `NEEDS_CONTEXT`. Decisão que não está no briefing/plano/spec você **não preenche**:
+nomeie a lacuna e devolva `NEEDS_CONTEXT`. Não orquestre nem commite. Ver
+`references/task-cycle.md`.
 </MEMBRO-DO-TIME-STOP>
 
 ---
 
 ## Princípio central
 
-> Execute somente o plano aprovado. Entre gates, tome decisões mecânicas cobertas pela spec/plano;
-> qualquer decisão emergente de requisito, escopo, UX, arquitetura, dados, segurança, custo ou
-> aceite pausa a execução e volta ao usuário. Nenhuma tarefa é consolidada sem evidência e review.
+> Execute somente o plano aprovado, com gates humanos nas **bordas** (setup pós-plano, destino,
+> conclusão) e autonomia **entre as tarefas**: passo mecânico já coberto pela spec/plano não pede
+> licença — não pare para perguntar "sigo?" a cada tarefa. A autonomia é de execução, nunca de
+> decisão: lacuna material de requisito, escopo, UX, arquitetura, dados, segurança, custo ou aceite
+> para o trabalho e vai ao humano por `pelizzai-interview-me`, nunca a um default. Nenhuma tarefa é
+> consolidada sem evidência e review.
 
 ---
 
@@ -76,8 +81,10 @@ push/PR/publicação são decididos por tarefa na `pelizzai-finish-task`.
    Pergunta: qual estratégia você escolhe?
 
 4. Review (somente depois de 3)
-   Recomendado: <combined|split> — <porquê conforme risco/superfície>.
-   Pergunta: confirma este perfil?
+   Opções: split · combined.
+   Recomendado: split — é o default, inclusive em tarefa bounded: só com dois despachos a lente
+   spec é cega de fato. Rebaixar para combined exige tarefa bounded/low-risk E sua escolha aqui.
+   Pergunta: confirma split, ou prefere combined?
 ```
 
 Regras: o modo mantém **as três opções sempre visíveis** — **team nunca é omitido**. Não existe
@@ -102,8 +109,9 @@ execution record nativo como memória da tarefa, nunca como autorização herdad
 branch faz checkpoint do setup persistente quando existir e mantém a branch atual; worktree captura
 `checkpoint-sha` após o checkpoint opcional, libera a branch no working tree principal, adiciona o
 worktree com a **branch existente** e registra o novo path antes da Tarefa 1. Ambos começam a
-implementação com working tree limpa. Worktree não autoriza vários writers concorrentes no mesmo
-diretório. Qualquer `squash-final` ocorre **antes** de review final/testes/`validated-head`;
+implementação com working tree limpa. Worktree não autoriza writers concorrentes em paths que se
+sobrepõem — a escrita paralela dentro do worktree único exige CAMINHOS DISJUNTOS (regra canônica em
+"Isolamento e paralelismo"). Qualquer `squash-final` ocorre **antes** de review final/testes/`validated-head`;
 `pelizzai-finish-task` nunca reescreve conteúdo ou histórico após o seal.
 
 **Registrar (só após concluir o gate).** Grave isolation/execution-mode/commit-strategy e o marcador
@@ -122,8 +130,10 @@ Antes da primeira tarefa, confirme:
 [ ] Plano ratificado na borda: plano gerado pelo harness recebeu aprovação explícita do CONTEÚDO;
     PRD/issues fornecidos pelo próprio usuário já contam como
     ratificados. Sem plano → volte a pelizzai-writing-plans.
-[ ] Greenfield: discovery, spec-approval, domain-skills-decision e plan-approval estão ratificados
-    ou possuem dispensa explícita registrada; nenhum campo permanece <pending>.
+[ ] Greenfield: as oito etapas aconteceram nesta ordem — descoberta → spec → stress da spec →
+    aprovação → plano → stress do plano → aprovação → setup — ou houve dispensa explícita do
+    usuário. As ratificações (data + o que foi aprovado) ficam no CABEÇALHO DO PLANO, não em campos
+    do cursor: este gate é de leitura do artefato, não de campo carimbado por hook.
 [ ] Consumidor: catálogo existe (zero domain skills é válido) e state foi preparado.
     Source mode: NÃO crie catálogo/state consumidor; use as regras do repo-fonte e execution record.
 [ ] As skills de domínio relevantes foram selecionadas quando o consumidor as possui.
@@ -136,9 +146,8 @@ Antes da primeira tarefa, confirme:
 [ ] NÃO está em branch protegida (default real/base-ref, main/master/develop/dev, ou HEAD vazio).
 [ ] Em consumidor, o estado existe em pelizzai/data/state.md (se não, instancie a partir do template e preencha
     slug/track/lane/phase/project/branch/base-ref/base-sha/kickoff/isolation/execution-mode/
-    commit-strategy/overlays/discovery/spec/spec-approval/domain-skills-decision/plan/plan-approval
-    antes da Tarefa 1; `validated-head: <none>`, `kickoff: pendente`
-    até a ratificação) e
+    commit-strategy/overlays/spec/plan antes da Tarefa 1; `validated-head: <none>`,
+    `kickoff: pendente` até a ratificação; gravar o arquivo basta — não existe commit só de setup) e
     foi validado contra o git (branch: `git branch --show-current`; worktree: `git worktree list`
     ou o comando rodado DENTRO do worktree-path).
 ```
@@ -193,10 +202,21 @@ Não há ranking universal; use a menor coordenação que preserve qualidade.
 | **inline**           | —                  | Plano pequeno/sequencial em que delegar custaria mais que executar |
 
 ```text
-Branch e worktree desta tarefa têm UMA working tree de integração. Apenas o coordenador aplica
-escritas nela, em série. Agentes podem investigar/revisar em paralelo ou devolver patches; não
-mantêm WIP concorrente no diretório compartilhado. Antes do review por tarefa, quiesça writers e
-gere `review-package --working-tree`, que deve representar somente a tarefa em revisão.
+Isolamento e paralelismo (conforme o que o usuário ratificou no gate). A working tree compartilhada
+NÃO isola agentes entre si — quem serializa é esta regra, não o Git:
+- isolation: branch → UMA working tree de integração, UM writer por vez. O coordenador aplica as
+  escritas em série; o paralelismo fica com o que não escreve (investigação, leitura, review,
+  decomposição). Antes do review por tarefa, quiesça writers e gere
+  `review-package --working-tree`, que deve representar somente a tarefa em revisão.
+- isolation: worktree → frentes escrevem em paralelo DENTRO do worktree único da tarefa, desde que
+  toquem CAMINHOS DISJUNTOS. A disjunção é a CONDIÇÃO, não um conselho: conflito real prova que o
+  par não era disjunto — replaneje a decomposição em vez de forçar. Nunca um worktree por agente.
+- Review com escrita paralela em curso (worktree): a working tree contém WIP de OUTRAS frentes.
+  (a) escope o pacote aos paths da frente em revisão; (b) instrua o revisor a IGNORAR mudanças fora
+  deles (não são "extra" desta tarefa — pertencem a outra frente); (c) para a evidência de teste,
+  rode o subconjunto da frente ou quiesça as demais antes da suíte completa — um RED intencional de
+  outra frente não reprova esta tarefa.
+- Em qualquer isolamento, review, stage, commit e cursor são serializados pelo coordenador.
 ```
 
 **Desempate:** team quando membros precisam conversar/negociar dependências; subagents quando cada
@@ -258,7 +278,7 @@ com duas lentes, circuit breaker e commit como gate — está em
 
 ```text
 1. Briefing: COLE o texto completo + skills de domínio + overlays + estratégia de evidência e
-   perfil de review (`combined` ou `split`)
+   perfil de review (`split` por padrão; `combined` só se ratificado)
    (o membro nunca lê o arquivo inteiro do plano; use scripts/task-brief.* somente quando houver
    plano Markdown persistente compatível. Plano nativo usa colagem/brief construído — ver §1,
    incluindo
@@ -267,11 +287,15 @@ com duas lentes, circuit breaker e commit como gate — está em
    Responda perguntas ANTES de o trabalho começar.
 2. Aplicar TDD, characterization, validate, visual ou static/scenario conforme o artefato. O
    membro NÃO commita.
-   Se surgir decisão não coberta pela spec/plano, devolva `NEEDS_CONTEXT`; o coordenador pausa e
-   pergunta ao usuário. Não escolha requisito, UX, arquitetura, dados, segurança ou aceite.
+   Se surgir decisão não coberta pela spec/plano, o membro NOMEIA a lacuna (o que falta, o que ela
+   muda e 2–3 opções que enxerga) e devolve `NEEDS_CONTEXT` — não escolhe requisito, UX,
+   arquitetura, dados, segurança nem aceite. O coordenador também não decide por ele nem por si:
+   consolida as lacunas e as leva ao humano por `pelizzai-interview-me` no modo lacuna antes de a
+   frente continuar.
 3. Review com duas lentes: (a) conformidade com a spec; (b) qualidade + evidência FRESCA.
-   `combined` aplica ambas em um despacho/relatório para tarefa bounded/low-risk; `split` usa
-   estágios sequenciais quando risco, contrato, dados, segurança ou complexidade pedirem.
+   `split` — o default, inclusive em tarefa bounded — usa estágios sequenciais e é onde a
+   cegueira existe de fato; `combined` aplica ambas em um despacho/relatório e só vale para
+   tarefa bounded/low-risk cujo perfil o usuário ratificou no passo 4 do gate.
 4. Reprovou? Corrija (re-despachando ao implementador — não corrija à mão, polui o contexto) e
    RE-REVISE na mesma lente. Circuit breaker: 3 ciclos por lente por tarefa; mesma issue 2x
    escala na 2ª; rejeição estrutural escala de imediato; ao estourar → registra phase: blocked
@@ -287,8 +311,10 @@ com duas lentes, circuit breaker e commit como gate — está em
 ## Modo Team
 
 Use `pelizzai-team` quando frentes precisam coordenar dependências. O lead delega briefings com
-domínio + overlays e sintetiza. Investigação pode ser paralela; aplicação na working tree, review,
-cursor e commit são serializados pelo coordenador.
+domínio + overlays e sintetiza. Investigação é sempre paralelizável; a escrita segue o isolamento
+ratificado (em `branch`, aplicação em série pelo coordenador; em `worktree`, frentes com caminhos
+disjuntos escrevem em paralelo dentro do worktree único da tarefa). Review, cursor e commit são
+serializados pelo coordenador em qualquer caso.
 
 ## Modo Subagents
 
@@ -299,9 +325,11 @@ Use `pelizzai-subagents`. Um subagente **fresco por tarefa**, despachado pelo co
 Para plano pequeno e sequencial, o coordenador executa na própria sessão seguindo o mesmo ciclo.
 Inline é uma escolha adequada, não um fallback inferior.
 
-Em qualquer modo, “seguir até o fim” autoriza executar o plano ratificado; não autoriza completar
-lacunas de produto. Decisão emergente interrompe o loop, registra `phase: blocked`/pendência e volta
-ao usuário com uma pergunta e a melhor recomendação.
+Em qualquer modo, “seguir até o fim” autoriza executar o plano ratificado **sem pedir licença a cada
+tarefa**; não autoriza completar lacunas de produto. Lacuna material interrompe o loop e vai ao
+humano por `pelizzai-interview-me` (modo lacuna): nomeie a lacuna, ofereça 2–3 opções com a
+recomendada e faça uma pergunta por vez. Registre `phase: blocked`/pendência quando a frente não
+puder continuar sem a resposta.
 
 ---
 
@@ -339,9 +367,21 @@ Invariantes comuns:
 ```
 
 **Consumidor:** o cursor vive em `pelizzai/data/state.md` (template em
-[templates/state.md](templates/state.md)). Avance-o no mesmo commit da tarefa; os únicos commits
-só de cursor são `phase: blocked` e o closure final. Após compaction, reconstrua pelo state, arquivo
-`plan:` e Git.
+[templates/state.md](templates/state.md)) — o template carrega os campos; a doutrina é esta seção.
+Avance-o no mesmo commit da tarefa; os únicos commits só de cursor são `phase: blocked` e o closure
+final. Após compaction, confie no state + `git log` (nunca na memória pós-compaction, que
+re-despacha tarefa já concluída) e reconstrua pelo state, arquivo `plan:` e Git.
+
+**Quem escreve o cursor.** Cria o arquivo o primeiro entre `pelizzai-router` /
+`pelizzai-starting-branch` / esta skill que precisar gravar — gravar basta, **não existe commit só
+para inicializá-lo**: ele viaja no primeiro commit de conteúdo da tarefa. Depois: `pelizzai-router`
+(decisões iniciais da rota), `pelizzai-starting-branch` (branch/base-ref/base-sha/isolation/
+worktree-path), esta skill (`kickoff: ratificado`, cursor/progresso e a reconciliação
+`delivered`→`done`) e `pelizzai-finish-task` (selo `delivered` + `confirmar:`). Tarefa nova nunca
+herda as decisões da anterior: reconcilie a entrega anterior e então sobrescreva
+lane/kickoff/audience/spec/plan/isolation/execution-mode/commit-strategy/overlays/confirmar com os
+placeholders. A política ratificada em `pelizzai/profile.md` não é herança — ela pré-seleciona a
+recomendação que a tarefa nova re-exibe.
 
 **Source mode:** o cursor vive no plano/execution record nativo. Avance-o após cada commit, leia o
 plano nativo para tarefas pendentes e reconstrua pelo record + Git; não procure/crie state, arquivo
@@ -350,35 +390,48 @@ de plano consumidor nem commit de cursor. State ausente é o contrato, não uma 
 **Higiene do progresso (consumidor).** Registre **uma linha por tarefa** do plano em `## Progresso`
 (`T<n> ✅ <sha|data> — nota curta se houver`); relatórios longos (QA, review, investigação, decisões
 de rodada) vão para `pelizzai/data/reports/<AAAA-MM-DD>-<slug>-<tema>.md` (ignorado) com o link no
-state, nunca colados no corpo do cursor. Quando `state.md` passar de ~150 linhas, proponha compactar
-uma vez (advisory, mesmo modelo da cadência; nunca bloqueia). Fora a migração de bloco íntegro para
-`history/` (sem perda), qualquer condensação de conteúdo é propor-confirmar.
+state, nunca colados no corpo do cursor. Quando `state.md` passar de ~60 linhas, proponha compactar
+uma vez (advisory, mesmo modelo da cadência; nunca bloqueia): o template inteiro tem ~50 linhas, então
+esse limiar já denuncia cursor inchado. Fora a migração de bloco íntegro para `history/` (sem perda),
+qualquer condensação de conteúdo é propor-confirmar.
+
+**Migração no selo `delivered` (o cursor desincha no fechamento, não na abertura seguinte).** Quem
+executa é a `pelizzai-finish-task`; a fronteira é definida aqui. Ao gravar `phase: delivered`, o
+**bloco íntegro** da tarefa migra para `pelizzai/data/history/<AAAA-MM-DD>-<slug>.md` (VERSIONADO) e
+o state volta ao tamanho do template, com UMA linha de índice no `## Histórico`. Bloco íntegro
+(**fronteira da migração**, idêntica para `done` e `abandoned`) = todos os campos de `## Tarefa ativa`
+desta tarefa + suas linhas `T<n>`/`next`/`pending` de `## Progresso`, com os links de `data/reports/`
+copiados verbatim. Ordem das operações (sem perda → verificável):
+
+```text
+1. Copie o bloco íntegro para data/history/<AAAA-MM-DD>-<slug>.md — cópia fiel, nada reescrito.
+2. Devolva `## Tarefa ativa` aos placeholders do template, PRESERVANDO os campos que o destino e a
+   constatação posterior ainda leem: slug, phase: delivered, branch, base-ref, base-sha,
+   validated-head, commit-strategy, worktree-path e confirmar.
+3. Remova de `## Progresso` as linhas T<n>/next/pending migradas (voltam aos placeholders).
+4. Insira em `## Histórico`: `- <data> <slug> — delivered — <resultado ≤10 palavras> →
+   data/history/<arquivo>`.
+```
+
+A migração só está completa após (1)–(4) e é sem perda → automática; CONDENSAR conteúdo do bloco (em
+vez de copiá-lo fielmente) é destrutivo, sai da regra automática → só propor-confirmar.
 
 **Reconciliação da entrega anterior (`delivered` → `done`).** Ao abrir a próxima tarefa (aqui) ou ao
 retomar (`pelizzai-recovery`/session-start), se o state trouxer `phase: delivered`, constate a
-entrega ANTES de sobrescrever o cursor:
+entrega ANTES de sobrescrever o cursor. O bloco já está em `history/`; a reconciliação só carimba o
+desfecho:
 
 ```text
 - Leia `confirmar:` e verifique-a contra o git (read-only): a `base-ref` já contém `validated-head`?
   O PR foi mergeado/fechado? A branch foi integrada? (Entrega local: o usuário aceita?)
-- Constatada → grave `phase: done` + data + evidência de 1 linha e migre o bloco íntegro da tarefa
-  para `pelizzai/data/history/<AAAA-MM-DD>-<slug>.md` (VERSIONADO), deixando no state só a linha de
-  índice `- <data> <slug> — done — <resultado ≤10 palavras> → data/history/<arquivo>`. A migração de
-  bloco íntegro é sem perda → automática; CONDENSAR conteúdo é destrutivo → só propor-confirmar.
-- Falhou (PR fechado sem merge, branch descartada) → NÃO grave `done`. Informe e proponha retomar a
+- Constatada → carimbe a linha de índice do `## Histórico` (`— done <AAAA-MM-DD> — <evidência de 1
+  linha>`), grave `phase: done` e acrescente a mesma constatação ao arquivo de `data/history/`
+  correspondente. Só então libere slug/branch/base-*/validated-head/confirmar para a tarefa nova.
+- Falhou (PR fechado sem merge, branch descartada) → NÃO carimbe `done`. Informe e proponha retomar a
   branch da entrega ou arquivá-la como `abandoned` — a decisão é do usuário. Arquivar como `abandoned`
-  usa a MESMA migração sem perda: o bloco íntegro vai para `data/history/<AAAA-MM-DD>-<slug>.md` e no
-  state fica a linha de índice `- <data> <slug> — abandoned — <motivo ≤10 palavras> → data/history/<arquivo>`.
+  usa a MESMA migração sem perda: o bloco já migrou no selo, e a linha de índice recebe
+  `— abandoned <AAAA-MM-DD> — <motivo ≤10 palavras>`.
 ```
-
-O **bloco íntegro** (fronteira da migração, idêntica para `done` e `abandoned`) = todos os campos de
-`## Tarefa ativa` desta tarefa + suas linhas `T<n>`/`next`/`pending` de `## Progresso`, com os links
-de `data/reports/` copiados verbatim. Ordem das operações (sem perda → verificável): (1) copie o bloco
-íntegro para `data/history/<AAAA-MM-DD>-<slug>.md` — cópia fiel, nada reescrito; (2) substitua os
-campos de `## Tarefa ativa` pelos placeholders da tarefa nova; (3) remova as linhas
-`T<n>`/`next`/`pending` da tarefa migrada em `## Progresso`; (4) insira a linha de índice em
-`## Histórico`. A migração só está completa após (1)–(4); condensar qualquer conteúdo do bloco (em vez
-de copiá-lo fielmente) é destrutivo e sai da regra automática → só propor-confirmar.
 
 Escrita de metadata em `pelizzai/` é permitida em qualquer branch; o commit continua exigindo branch
 de tarefa. Por isso a reconciliação **lê** na branch atual (mesmo protegida) e **escreve** a metadata
@@ -395,12 +448,14 @@ Em ambos os modos, valide branch com `git branch --show-current` e worktree por
 ## Loop até a entrega (controle adaptativo)
 
 O loop usa evidência e Definition of Done. OODA pode coordenar o macro-loop, mas o reasoning local
-é selecionado pela situação. Em dúvida material, pare e use `pelizzai-interview-me`; não transforme
-incerteza em mais uma volta automática.
+é selecionado pela situação. Enquanto a próxima ação for mecânica e coberta pelo plano, itere sem
+perguntar. Em dúvida material, pare e use `pelizzai-interview-me` no modo lacuna — nomeando a
+lacuna, com 2–3 opções e a recomendada; não transforme incerteza em mais uma volta automática, nem
+a parada numa pergunta aberta do tipo “o que você prefere?”.
 
 ---
 
-## Gates humanos e execução controlada
+## Gates humanos (bordas) e autonomia mecânica entre as tarefas
 
 ```text
 GATES (recomendar-e-ratificar; nunca aplicar decisão estrutural em silêncio):
@@ -414,12 +469,21 @@ GATES (recomendar-e-ratificar; nunca aplicar decisão estrutural em silêncio):
   externo, finish-task mantém local por default. `destination` nunca é herdado de política do profile.
 - Conclusão.
 
-EXECUÇÃO CONTROLADA:
-- Entre tarefas de plano aprovado, execute continuamente apenas passos mecânicos cobertos pelo
-  contrato ratificado; não peça permissão para cada comando local reversível.
-- Pare diante de qualquer escolha nova de requisito, escopo, UX, arquitetura, dados, segurança,
-  custo, risco aceito ou critério de aceite. Faça uma pergunta com recomendação e aguarde.
-- Pare também por BLOCKED real, evidência que invalida o plano ou plano concluído.
+AUTONOMIA (sem perguntar a cada passo):
+- Entre as tarefas de um plano JÁ APROVADO, execute de forma contínua os passos mecânicos e
+  verificáveis cobertos pelo contrato ratificado: não pergunte "sigo?" ao fim de cada tarefa nem
+  peça permissão para cada comando local reversível.
+- Pare apenas por: BLOCKED real que você não resolve, LACUNA MATERIAL, evidência que invalida o
+  plano, ou plano concluído.
+- LACUNA MATERIAL não é uma parada vaga nem "perguntar alguma coisa": é o caminho concreto da
+  `pelizzai-interview-me` no modo lacuna — pare, NOMEIE a lacuna (o que a spec/plano não decidiu e
+  o que ela muda na entrega), ofereça 2–3 opções reais com a recomendada e o porquê em uma linha,
+  faça UMA pergunta por vez, registre a decisão no plano (`## Decisões técnicas deste plano`,
+  origem: entrevista de execução; a lacuna sai de `## Lacunas materiais expostas` resolvida) e
+  retome de onde parou.
+- Vale para requisito, escopo, UX, arquitetura, dados, segurança, custo, risco aceito e critério de
+  aceite. Preencher por convenção, default, Context7 ou "inferência razoável" é violação — mesmo
+  quando a escolha parece óbvia e reversível.
 
 Sob briefing fechado (SUBAGENT-STOP / MEMBRO-DO-TIME-STOP), não abra gates nem recaps de política:
 aplique o briefing e escale ao coordenador o que exigir decisão.
@@ -463,10 +527,12 @@ Depois desta etapa, `git status --porcelain` deve estar vazio e `validated-head`
 ```text
 1. Capture candidate-head = `git rev-parse HEAD`.
 2. REVIEW FINAL via pelizzai-review no range exato `base-sha..candidate-head`. Use reviewer
-   independente e capacidade proporcional ao risco. Exceção: uma única tarefa `bounded`, perfil
-   `combined`, sem mutação posterior pode reutilizar o review da tarefa se
-   `reviewed-tree == candidate-head^{tree}`; qualquer ausência de prova exige review normal.
-   Critical/Important bloqueiam.
+   independente, com o modelo mais capaz disponível e effort máximo (ver task-cycle §8).
+   Exceção estreita: uma única tarefa `bounded`, efeito `read-only`/`write-local`, risco baixo,
+   perfil `combined` ratificado, zero findings e sem mutação posterior pode reutilizar o review da
+   tarefa se `reviewed-tree == candidate-head^{tree}`. Faltando um item — efeito `write-shared`,
+   risco médio/alto, superfície sensível ou perfil `split` (o default) — exige review normal
+   (ver `pelizzai-review` → "Review final da branch"). Critical/Important bloqueiam.
 3. Rode pelo próprio coordenador todos os checks aplicáveis do perfil (test/lint/build/render/
    dry-run/visual etc.), do zero, com saída e exit code. Não invente suíte para artefato estático.
 4. Releia plano/spec requisito a requisito e aponte onde cada um foi entregue.
@@ -482,8 +548,9 @@ for squash-final e **reabra o review final**. Aplique o circuit breaker do task-
 Com tudo aprovado e HEAD ainda igual a `candidate-head`, em consumidor escreva no state
 `validated-head: <SHA completo de candidate-head>`, sem commitar; essa é a única sujeira permitida.
 Em source mode, grave o SHA no execution record e mantenha a working tree limpa. Chame
-`pelizzai-finish-task`: consumidor fecha com um commit metadata-only de state; source mode não cria
-closure. Nenhum código, config ou doc pode mudar depois do seal.
+`pelizzai-finish-task`: consumidor fecha com um commit metadata-only (state + o arquivo de
+`data/history/` gerado pela migração do selo); source mode não cria closure. Nenhum código, config
+ou doc pode mudar depois do seal.
 
 ---
 
@@ -502,7 +569,8 @@ closure. Nenhum código, config ou doc pode mudar depois do seal.
 - Executar sem plano aprovado, sem o gate de setup pós-plano, ou sem isolamento (em branch protegida).
 - Aplicar isolamento/modo/commit sem ratificação sequencial do usuário ou omitir team.
 - Pular skills de domínio/overlays — ou não colá-las nos briefings de executor e reviewer.
-- Escolher team por preferência universal, ou forçar effort máximo numa tarefa mecânica.
+- Escolher team por preferência universal, ou rebaixar modelo/effort para economizar (arquitetura,
+  review e validação final da entrega são inegociavelmente o topo — ver task-cycle §8).
 - Deixar o membro/subagente commitar (o commit é gate do coordenador, após as duas lentes de review).
 - Aceitar "testes passam" inferido, sem evidência fresca colada.
 - Corrigir à mão o trabalho reprovado de um membro (re-despache — corrigir à mão polui o contexto).
@@ -510,14 +578,19 @@ closure. Nenhum código, config ou doc pode mudar depois do seal.
 - Loop infinito de fix→re-review (ignorar o circuit breaker de 3 ciclos).
 - Declarar entregue sem overlays aplicáveis + review final (ou reutilização bounded comprovada) +
   checks + checklist + seal.
-- Pedir permissão para cada comando mecânico já coberto pelo plano — ou, no extremo oposto,
-  escolher uma decisão emergente de produto para manter o loop rodando.
+- Pausar a cada tarefa de um plano já aprovado, ou pedir permissão para cada comando mecânico já
+  coberto por ele — ou, no extremo oposto, escolher uma decisão emergente de produto para manter o
+  loop rodando.
+- Parar por lacuna material e devolver pergunta aberta ("o que você prefere?") em vez de nomear a
+  lacuna com 2–3 opções e a recomendada pela `pelizzai-interview-me`.
 - Fazer o subagente ler o arquivo do plano inteiro (cole o texto da tarefa).
 - Commit órfão só para mover o cursor DURANTE a execução (exceções legítimas: o registro de
-  phase: blocked do circuit breaker e o commit de fechamento do cursor da pelizzai-finish-task
-  no modo granular).
+  phase: blocked do circuit breaker e o closure metadata-only da pelizzai-finish-task no
+  consumidor — que acontece nas duas estratégias de commit).
 - Confiar no state.md sem validar contra o git ao retomar.
-- Writers concorrentes na mesma working tree, tornando `--working-tree` impossível de escopar.
+- Escrita concorrente em `isolation: branch`, ou em paths que se sobrepõem dentro do worktree,
+  tornando `--working-tree` impossível de escopar.
+- Um worktree por agente (é um por tarefa, com paths disjuntos por frente).
 - Rodar security/frontend/docs depois da validação final, ou não reabrir review após fix.
 - Executar squash/reset/rebase na finish-task depois de `validated-head`.
 ```
@@ -534,6 +607,7 @@ closure. Nenhum código, config ou doc pode mudar depois do seal.
 - `pelizzai-team` / `pelizzai-subagents` — modos usados conforme a topologia; inline é par legítimo.
 - `pelizzai-review` — review por tarefa (spec + qualidade) e review final da branch.
 - `pelizzai-loop` — OODA quando houver loop real, Definition of Done e parada por dúvida.
+- `pelizzai-interview-me` — destino obrigatório da parada por lacuna material durante a execução.
 - `pelizzai-reasoning` — ordenação, diagnóstico e verificação.
 - `pelizzai-verification-before-completion` / `pelizzai-finish-task` — conclusão com gates.
 - `pelizzai-audit` — padrão de diretório `pelizzai/` e catálogo de skills de domínio.
@@ -551,7 +625,8 @@ Crie a branch antes de spec/plano; aprove conteúdo e stress do plano; depois ra
 decisão por turno, com recomendação, antes da Tarefa 1.
 Escolha inline/subagents/team pela topologia, sem ranking universal.
 Propague domínio + overlays para executor e reviewers; sinalize lacuna de domain skill no relatório.
-Execute mecanicamente dentro do plano; devolva qualquer decisão nova ao usuário.
+Execute continuamente os passos mecânicos dentro do plano; não pergunte "sigo?" a cada tarefa.
+Lacuna material para o trabalho e é tampada pela pelizzai-interview-me, nunca por um default.
 Consolide só após spec ✅ e qualidade ✅ com evidência fresca.
 Rode overlays antes de congelar/validar; qualquer fix reabre o review final.
 Grave validated-head só após aprovação; finish cria closure só no consumidor.

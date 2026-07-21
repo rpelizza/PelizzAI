@@ -3,8 +3,9 @@
 #
 # Equivalente ao pelizzai-session-start.mjs, para frota sem Node. Requer PowerShell 7+.
 #
-# Emite um lembrete CURTO no inicio da sessao: carregar core/router para tarefas de
-# projeto, classificar o efeito antes de agir e, se pelizzai/data/state.md tiver tarefa
+# Emite um lembrete CURTO no inicio da sessao: carregar a pelizzai-core antes de
+# responder qualquer coisa (regra do 1%), passar por core/router nas tarefas de projeto,
+# classificar o efeito antes de agir e, se pelizzai/data/state.md tiver tarefa
 # ativa (slug != <none> e phase != done), avisar que ha retomada via pelizzai-router.
 #
 # Nota de valor: no Claude Code o CLAUDE.md ja e re-injetado no startup e apos o
@@ -25,7 +26,8 @@ try {
   if ($raw) { try { $j = $raw | ConvertFrom-Json; if ($j.cwd) { $cwd = $j.cwd } } catch {} }
 
   $lines = @(
-    'PelizzAI: em tarefas de projeto, carregue pelizzai-core -> pelizzai-router e classifique effect, risco, incerteza e superficies antes de agir.',
+    'PelizzAI: antes de responder QUALQUER coisa, carregue a skill pelizzai-core e honre a regra do 1% - se uma skill se aplica (mesmo a um ajuste trivial), acione-a.',
+    'Toda tarefa que toca o projeto passa por pelizzai-core -> pelizzai-router: classifique effect, risco, incerteza e superficies antes de agir.',
     'Escolha uma head skill e overlays proporcionais; read-only nao inicializa estado, e qualquer escrita passa primeiro pelo gate de isolamento.'
   )
 
@@ -64,9 +66,13 @@ try {
       $mIso = [regex]::Match($profile, 'isolation-default:\s*(\S+)')
       $mMode = [regex]::Match($profile, 'execution-mode-default:\s*(\S+)')
       $mCommit = [regex]::Match($profile, 'commit-strategy-default:\s*(\S+)')
-      if ($mIso.Success -and $mIso.Groups[1].Value -ne 'unset') { $ratified += "isolamento $($mIso.Groups[1].Value)" }
-      if ($mMode.Success -and $mMode.Groups[1].Value -ne 'unset') { $ratified += "modo $($mMode.Groups[1].Value)" }
-      if ($mCommit.Success -and $mCommit.Groups[1].Value -ne 'unset') { $ratified += "commit $($mCommit.Groups[1].Value)" }
+      # Nao ratificado = `unset` cru OU qualquer placeholder entre <> (o bootstrap grava
+      # `<unset>`, e o template traz o menu `<branch|worktree|unset>`) - mesma convencao do
+      # state.md acima. Sem isto, o recap dispararia em todo consumidor recem-bootstrapado.
+      $isRatified = { param($m) $m.Success -and $m.Groups[1].Value -ne 'unset' -and -not $m.Groups[1].Value.StartsWith('<') }
+      if (& $isRatified $mIso) { $ratified += "isolamento $($mIso.Groups[1].Value)" }
+      if (& $isRatified $mMode) { $ratified += "modo $($mMode.Groups[1].Value)" }
+      if (& $isRatified $mCommit) { $ratified += "commit $($mCommit.Groups[1].Value)" }
       if ($ratified.Count -gt 0) {
         $lines += "Politica de execucao ratificada do projeto (pelizzai/profile.md): $($ratified -join ', ') - reaplique como recap de 1 linha; nao re-pergunte o que ja foi ratificado (destino continua por tarefa)."
       }

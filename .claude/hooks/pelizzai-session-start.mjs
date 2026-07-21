@@ -2,8 +2,9 @@
 /**
  * PelizzAI — hook SessionStart (matcher startup|clear|compact). OPT-IN.
  *
- * Emite um lembrete CURTO no início da sessão: carregar core/router para tarefas de
- * projeto, classificar o efeito antes de agir e, se pelizzai/data/state.md tiver tarefa
+ * Emite um lembrete CURTO no início da sessão: carregar a pelizzai-core antes de
+ * responder qualquer coisa (regra do 1%), passar por core/router nas tarefas de projeto,
+ * classificar o efeito antes de agir e, se pelizzai/data/state.md tiver tarefa
  * ativa (slug != <none> e phase != done), avisar que há retomada via pelizzai-router.
  *
  * Nota de valor: no Claude Code o CLAUDE.md já é re-injetado no startup e após o
@@ -41,7 +42,8 @@ function main() {
   }
 
   const lines = [
-    'PelizzAI: em tarefas de projeto, carregue pelizzai-core → pelizzai-router e classifique effect, risco, incerteza e superfícies antes de agir.',
+    'PelizzAI: antes de responder QUALQUER coisa, carregue a skill pelizzai-core e honre a regra do 1% — se uma skill se aplica (mesmo a um ajuste trivial), acione-a.',
+    'Toda tarefa que toca o projeto passa por pelizzai-core → pelizzai-router: classifique effect, risco, incerteza e superfícies antes de agir.',
     'Escolha uma head skill e overlays proporcionais; read-only não inicializa estado, e qualquer escrita passa primeiro pelo gate de isolamento.',
   ];
 
@@ -93,10 +95,14 @@ function main() {
       const iso = (profile.match(/isolation-default:\s*(\S+)/) || [])[1];
       const mode = (profile.match(/execution-mode-default:\s*(\S+)/) || [])[1];
       const commit = (profile.match(/commit-strategy-default:\s*(\S+)/) || [])[1];
+      // Não ratificado = `unset` cru OU qualquer placeholder entre <> (o bootstrap grava
+      // `<unset>`, e o template traz o menu `<branch|worktree|unset>`) — mesma convenção do
+      // state.md acima. Sem isto, o recap dispararia em todo consumidor recém-bootstrapado.
+      const isRatified = (value) => Boolean(value) && value !== 'unset' && !value.startsWith('<');
       const ratified = [];
-      if (iso && iso !== 'unset') ratified.push(`isolamento ${iso}`);
-      if (mode && mode !== 'unset') ratified.push(`modo ${mode}`);
-      if (commit && commit !== 'unset') ratified.push(`commit ${commit}`);
+      if (isRatified(iso)) ratified.push(`isolamento ${iso}`);
+      if (isRatified(mode)) ratified.push(`modo ${mode}`);
+      if (isRatified(commit)) ratified.push(`commit ${commit}`);
       if (ratified.length) {
         lines.push(
           `Política de execução ratificada do projeto (pelizzai/profile.md): ${ratified.join(', ')} — ` +

@@ -4,6 +4,36 @@ O protocolo que cada tarefa segue na execução de um plano, válido nos três m
 inline). A prova e a forma do review variam por artefato e risco; os gates de escopo, qualidade e
 evidência permanecem observáveis.
 
+## 0. Autonomia entre as tarefas e a parada por lacuna material
+
+O coordenador roda o ciclo abaixo de ponta a ponta **sem pedir licença a cada passo**: dentro de um
+plano ratificado, passo mecânico e verificável se executa — não se pergunta "sigo?" ao fim de cada
+tarefa nem se pede permissão para comando local reversível. A autonomia é de **execução**; a decisão
+continua sendo do humano.
+
+Fora de `BLOCKED` e do circuit breaker (§5), a única coisa que interrompe uma frente no meio é a
+**lacuna material**: requisito, escopo, UX, arquitetura, dados, segurança, custo, risco aceito ou
+critério de aceite que a spec e o plano não decidiram. Ela tem caminho fixo, não é uma pausa vaga:
+
+```text
+1. O membro PARA a sua tarefa e NOMEIA a lacuna: o que não está decidido, o que ela muda na entrega
+   e as 2–3 opções que enxerga, com a que recomenda. Devolve NEEDS_CONTEXT. Nunca preenche por
+   convenção, default, Context7 ou "inferência razoável", e nunca fala direto com o usuário.
+2. O coordenador NÃO decide no lugar dele nem por si. Confere se a resposta já está no plano/spec:
+   se estiver, era falta de contexto — ele fornece e re-despacha. Se não, é lacuna material.
+3. O coordenador CONSOLIDA as lacunas materiais abertas — consolidar é agrupar e ordenar por
+   dependência, NUNCA decidir — e as leva ao humano por `pelizzai-interview-me` no modo lacuna:
+   uma pergunta por vez, com opções reais e a recomendada (porquê em uma linha).
+4. A decisão ratificada é registrada no plano (`## Decisões técnicas deste plano`, origem:
+   entrevista de execução; a lacuna sai de `## Lacunas materiais expostas` resolvida) e a frente
+   retoma de onde parou, com o briefing atualizado.
+```
+
+**Lacuna de DOMAIN SKILL é outra coisa e segue outro caminho:** o membro sinaliza
+(`DONE_WITH_CONCERNS`), a execução **não** para, e o coordenador acumula as lacunas para uma
+proposta única no fechamento (§4). Uma é decisão do usuário e para a frente; a outra é manutenção do
+catálogo e nunca vira gate por tarefa.
+
 ## 1. Briefing autossuficiente (por arquivo quando os scripts existem; senão por colagem)
 
 O membro (teammate/subagente) **nunca lê o arquivo do plano** — isso evita poluição de contexto e mantém o foco. Quem entrega o contexto é o coordenador, por um destes dois canais:
@@ -32,15 +62,17 @@ O briefing de cada tarefa inclui:
 - Raciocínio: quando a tarefa envolve incerteza, decisão ou diagnóstico, a técnica dominante
   sugerida de `pelizzai-reasoning` (decomposição, RCA, comparação, verification — ver a matriz da
   skill); omita para tarefa mecânica de contrato claro — não imponha técnica sem gatilho.
-- Perfil de review escolhido no plano: `combined` ou `split`, com a justificativa de risco.
+- Perfil de review registrado no plano: `split` (default) ou `combined` ratificado, com a
+  justificativa de risco.
 - O formato de retorno esperado e o status (ver abaixo), incluindo o campo obrigatório
   `Desvios do plano:` (ou `nenhum`).
 - Teste operacional de desvio (frase canônica, no TEXTO do briefing):
   "se a decisão não está escrita no plano nem na spec, ela não está aprovada — apresente antes de implementar".
   Decisão técnica, de escopo ou de abordagem que surja durante a implementação e não esteja no
-  plano/spec interrompe a tarefa e volta ao coordenador/usuário **como pergunta com 2–3 opções e a
-  recomendada** (porquê em uma linha); nunca é preenchida em silêncio nem devolvida como pergunta
-  aberta sem opções.
+  plano/spec interrompe a tarefa: o membro NOMEIA a lacuna e devolve `NEEDS_CONTEXT` **com 2–3
+  opções e a recomendada** (porquê em uma linha); nunca é preenchida em silêncio nem devolvida como
+  pergunta aberta sem opções. Quem leva a lacuna ao humano é o coordenador, por
+  `pelizzai-interview-me` no modo lacuna (§0) — o membro não conversa com o usuário.
 - Salvo-conduto de escalada (frase canônica, no TEXTO do briefing): "É sempre OK parar e dizer
   'isso é difícil demais para mim'. Trabalho ruim é pior que trabalho nenhum. Você não será
   penalizado por escalar (reporte BLOCKED)."
@@ -73,13 +105,14 @@ e recebe o relatório do autor para verificá-lo. O perfil decide se elas usam u
 
 | Perfil | Quando | Execução |
 | --- | --- | --- |
-| `combined` | lane bounded, risco baixo, escopo coeso, sem segurança/dados/migração/contrato público | um reviewer e um relatório, primeiro spec e depois qualidade |
-| `split` | risco médio/alto, contrato público, segurança, dados, migração, múltiplas partes ou rejeição estrutural | estágio spec aprova antes de despachar qualidade; independência proporcional |
+| `split` (default) | o caso normal, inclusive lane bounded; **obrigatório** em risco médio/alto, contrato público, segurança, dados, migração, múltiplas partes ou rejeição estrutural | estágio spec aprova antes de despachar qualidade; despachos independentes |
+| `combined` (exceção ratificada) | lane bounded, risco baixo, escopo coeso, sem segurança/dados/migração/contrato público — **e** o usuário ratificou o perfil no passo 4 do Gate de setup | um reviewer e um relatório, primeiro spec e depois qualidade |
 
-Proporcionalidade: tarefas triviais/bounded seguem com review **combinado** (uma passada); o perfil
-de **lentes separadas com cegueira** entra em `standard`/`exploratory` ou quando o Gate de setup
-ratificar review reforçado. Se o diff revelar superfície que muda o risco, promova `combined` para
-`split`; nunca rebaixe só para economizar uma rodada.
+Proporcionalidade: o que varia com o risco é a **profundidade** de cada lente, não a existência do
+review nem a cegueira. O perfil de **lentes separadas com cegueira** é o default em qualquer lane —
+só com dois despachos a lente spec desconhece a narrativa do autor. Se o diff revelar superfície que
+muda o risco, promova `combined` para `split` sem nova ratificação; rebaixar para `combined` é
+sempre escolha explícita do usuário, nunca economia de uma rodada.
 
 ```text
 (0) Material: gere `review-package --working-tree`; o mesmo pacote cobre staged, unstaged e
@@ -112,14 +145,15 @@ O membro reporta um destes status:
 | -------------------- | --------------------------------------------- | -------------------------------------------------------------- |
 | `DONE`               | Trabalho completo                             | Segue para o review                                            |
 | `DONE_WITH_CONCERNS` | Completo, mas com ressalvas                   | Leia as ressalvas antes de prosseguir; lacuna de domain skill vai ao registro e é acumulada para o eixo adoption-driven no fechamento (não vira gate por tarefa) |
-| `NEEDS_CONTEXT`      | Falta informação                              | Forneça o contexto e re-despache                               |
-| `BLOCKED`            | Não consegue concluir                         | Avalie: dar contexto → mudar abordagem/quebrar tarefa → escalar ao humano |
+| `NEEDS_CONTEXT`      | Falta informação **ou** lacuna material nomeada | Contexto que você tem (está no plano/spec): forneça e re-despache. Lacuna material (decisão do usuário): consolide e leve ao humano por `pelizzai-interview-me` antes de a frente continuar — consolidar não é decidir (§0) |
+| `BLOCKED`            | Não consegue concluir                         | Avalie: dar contexto → mudar abordagem/quebrar tarefa → escalar ao humano (o modelo já é o topo — ver §8) |
 
 Todo relatório de tarefa — em qualquer status — inclui o campo obrigatório **`Desvios do plano:`**
 (ou `nenhum`): decisões técnicas, de escopo ou de abordagem que saíram do que o plano/spec
 escreveram, com a justificativa de cada uma. O coordenador **confere esse campo antes de aceitar
 `DONE`**: desvio material não ratificado não vira concluído — pelo teste operacional de desvio, volta
-ao usuário antes do review, nunca é absorvido em silêncio.
+ao usuário pela `pelizzai-interview-me` (modo lacuna, §0) antes do review, nunca é absorvido em
+silêncio e nunca é ratificado pelo próprio coordenador.
 
 Nunca ignore uma escalação nem re-despache sem mudar nada.
 
@@ -168,18 +202,30 @@ Nunca ignore uma escalação nem re-despache sem mudar nada.
 
 ## 7. Avançar o cursor
 
-No consumidor, antes do commit da tarefa atualize `pelizzai/data/state.md` (na seção
-`## Progresso`, atualize `delivered`, ajuste `next` e `pending`, mantenha `phase: exec`) e inclua-o
-no stage junto aos paths exatos da tarefa. O commit definitivo (granular) ou wip (squash-final)
-carrega o cursor. Ao concluir o plano e selar o conteúdo, a `pelizzai-finish-task` fecha
-`phase: done` no único closure commit metadata-only.
+No consumidor, antes do commit da tarefa atualize `pelizzai/data/state.md` (em `## Progresso`,
+acrescente **uma linha** `T<n> ✅ <sha|data> — <nota ≤1 linha>` — relatório longo vai para
+`pelizzai/data/reports/` com só o link —, ajuste `next` e `pending`, mantenha `phase: exec`) e
+inclua-o no stage junto aos paths exatos da tarefa. O commit definitivo (granular) ou wip
+(squash-final) carrega o cursor — inclusive na Tarefa 1, que leva junto o state gravado no setup:
+**não existe commit só de metadata para iniciar a tarefa**. Ao concluir o plano e selar o conteúdo, a
+`pelizzai-finish-task` sela `phase: delivered` no único closure commit metadata-only, migrando o
+bloco íntegro da tarefa para `data/history/` — o cursor volta ao tamanho do template e `done` é
+constatado depois.
 
 Em source mode, avance o execution record nativo após o commit e não crie state/closure.
 
-## 8. Capacidade por risco e papel
+## 8. Seleção de modelo por papel
 
-Use capacidade e effort **proporcionais** a risco, ambiguidade e irreversibilidade. Tarefa mecânica
-e bem delimitada não exige effort máximo; arquitetura, segurança, migração de dados e review final
-complexo justificam mais profundidade e um reviewer independente. Escalada não significa apenas
-“subir modelo”: primeiro corrija contexto, ferramenta ou decomposição; depois aumente capacidade se
-isso atacar a causa; por fim escale ao humano. O coordenador registra preocupações, não finge certeza.
+Política do harness: membros, revisores e o coordenador usam o **modelo mais capaz disponível, com
+effort/reasoning no nível máximo** — nunca rebaixe modelo nem effort para economizar, em nenhum
+papel e em nenhuma tarefa. **Arquitetura, os reviews (as duas lentes e o review final) e a validação
+final da entrega são inegociavelmente o topo.** Especifique o modelo e o effort explicitamente para
+não herdar um default menor da sessão.
+
+Proporcionalidade continua valendo — só que em profundidade de processo (entrevista, brainstorming,
+TDD, perfil de review, overlays), nunca em capacidade do modelo. Tarefa mecânica se resolve rodando
+menos processo no topo, não rodando um modelo menor.
+
+Como já se parte do topo, “subir o modelo” não é um degrau de escalada: os degraus do BLOCKED são
+dar mais contexto → mudar a abordagem/quebrar a tarefa → escalar ao humano. Corrija primeiro
+contexto, ferramenta ou decomposição. O coordenador registra preocupações, não finge certeza.
