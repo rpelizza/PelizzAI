@@ -200,7 +200,7 @@ try {
 
     # -- Análise da proposta + descoberta reconectada (router) --
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Análise da proposta' 'router sempre stressa a proposta (Análise da proposta)'
-    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'assumption-tracking' 'Análise da proposta é fundamentada em técnica documentada'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'proposal-stress\.md' 'Análise da proposta é fundamentada em técnica documentada'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'pelizzai-interview-me' 'interview-me reconectada ao roteamento (>0 menções)'
 
     # -- Gate de setup pós-plano sequencial: três opções, team, squash --
@@ -512,26 +512,29 @@ try {
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'ANTES da Tarefa 1' 'writing-plans: a cobertura de domain skills é decidida antes da Tarefa 1'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'Quem invoca este gate' 'audit nomeia quem invoca o Gate proativo (brainstorming + writing-plans)'
 
-    # -- F3: capacidade máxima — modelo/effort são invariantes, nunca variável de economia --
-    # Restauração do estado pré-11/07 (decisão do usuário, 2026-07-21): proporcionalidade governa a
-    # profundidade do PROCESSO (entrevista, TDD, perfil de review, overlays), jamais a capacidade do
-    # modelo. Arquitetura, as duas lentes, o review final e a validação final da entrega são o topo.
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'modelo mais capaz[\s\S]{0,60}effort máximo' 'review final exige modelo mais capaz e effort máximo'
+    # -- F3: soberania do modelo — o modelo é escolha do usuário; o harness nunca rebaixa nada --
+    # Decisão do usuário (2026-07-22): o harness respeita o modelo escolhido na plataforma (planos
+    # simples inclusive) e eleva o raciocínio de QUALQUER modelo via pelizzai-reasoning. O que segue
+    # proibido é rebaixar por conta própria: nenhum papel roda abaixo do modelo da sessão, o effort
+    # fica no mais alto que a plataforma oferecer, e o processo nunca é rebaixado para compensar um
+    # modelo menor. Upgrade de capacidade é recomendação ratificável, nunca troca automática.
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'modelo da sessão[\s\S]{0,120}effort mais alto que a plataforma permitir' 'review final usa o modelo da sessão com o effort mais alto da plataforma'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'passo 1 da[\s\S]{0,40}validação final da entrega' 'review final é o passo 1 da validação final da entrega'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Rebaixar modelo ou effort num review' 'review: anti-padrão nomeia o rebaixamento de modelo/effort'
-    Check-NotMatch '.claude/skills/pelizzai-review/SKILL.md' 'não force effort máximo|capacidade/effort proporcionais' 'review não reintroduz capacidade proporcional'
-    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'modelo mais capaz disponível e effort máximo' 'validação final da entrega roda no topo de capacidade'
-    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'rebaixar modelo/effort para economizar' 'execution-plans: o anti-padrão é rebaixar, não maximizar'
-    Check-NotMatch '.claude/skills/pelizzai-execution-plans/SKILL.md' 'forçar effort máximo numa tarefa mecânica|capacidade proporcional ao risco' 'execution-plans não trata effort máximo como excesso'
-    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Seleção de modelo por papel' 'task-cycle §8 é seleção de modelo por papel (não capacidade por risco)'
-    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'modelo mais capaz disponível[\s\S]{0,60}effort/reasoning no nível máximo' 'task-cycle §8 fixa modelo e effort no topo'
-    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'nunca rebaixe modelo nem effort' 'task-cycle §8 proíbe rebaixar modelo ou effort'
-    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Arquitetura, os reviews[\s\S]{0,120}inegociavelmente o topo' 'task-cycle §8: arquitetura, reviews e validação final são o topo'
-    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'nunca em capacidade do modelo' 'task-cycle §8: proporcionalidade é de processo, não de capacidade'
-    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'o modelo já é o topo' 'task-cycle: escalada do BLOCKED não passa por subir modelo'
-    Check-NotMatch '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Capacidade por risco e papel|capacidade e effort \*\*proporcionais\*\*|aumente capacidade' 'task-cycle §8 não volta a ser capacidade proporcional'
-    Check-Match 'CLAUDE.md' 'modelo e effort não' 'CLAUDE.md: modelo e effort não variam com risco'
-    Check-Match 'README.md' 'modelo mais capaz disponível e effort máximo' 'README: review final no topo de capacidade'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Rebaixar modelo ou effort abaixo do da sessão' 'review: anti-padrão nomeia o rebaixamento abaixo do modelo da sessão'
+    Check-NotMatch '.claude/skills/pelizzai-review/SKILL.md' 'modelo mais capaz|effort máximo' 'review não impõe mais modelo mais capaz/effort máximo'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'modelo da sessão[\s\S]{0,80}effort mais alto que a plataforma' 'validação final da entrega roda no modelo da sessão'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'rebaixar modelo/effort abaixo do escolhido pelo\s+usuário' 'execution-plans: o anti-padrão é rebaixar abaixo do escolhido pelo usuário'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/SKILL.md' 'modelo mais capaz disponível e effort máximo' 'execution-plans não impõe mais capacidade máxima'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Seleção de modelo por papel' 'task-cycle §8 segue sendo seleção de modelo por papel'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'o modelo é o que o usuário escolheu na plataforma dele' 'task-cycle §8: o modelo é escolha do usuário'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'nenhum\s+papel roda num modelo menor que o da sessão' 'task-cycle §8 proíbe rebaixar abaixo do modelo da sessão'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'eleva o raciocínio de \*\*qualquer\*\* modelo' 'task-cycle §8: reasoning eleva qualquer modelo'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'nunca é rebaixada para compensar um modelo menor' 'task-cycle §8: processo íntegro mesmo com modelo menor'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'recomende e ratifique' 'task-cycle §8: upgrade de capacidade é recomendação ratificável'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'modelo mais capaz disponível|effort/reasoning no nível máximo' 'task-cycle §8 não impõe mais capacidade máxima'
+    Check-Match 'CLAUDE.md' 'o modelo não é decisão do harness' 'CLAUDE.md: o modelo é do usuário, não do harness'
+    Check-Match 'CLAUDE.md' 'nunca rebaixe o processo para compensar um modelo menor' 'CLAUDE.md: processo não compensa modelo menor'
+    Check-Match 'README.md' 'o modelo que você escolheu — nunca um menor' 'README: review final respeita o modelo escolhido'
 
     # -- F7: debugging reenxerta os sinais e táticas perdidos no pivô (restauração pré-11/07/2026) --
     # O pivô proporcional FICA inteiro (triagem em 4 classes, Passo 0 de contenção, seletor por
@@ -822,6 +825,68 @@ try {
     Check-Match 'scripts/sync-harness.sh' 'sync-harness\.mjs' 'wrapper Unix delega ao núcleo portátil'
     Run-Native { node --check scripts/sync-harness.mjs } 'node parse sync portátil'
     Run-Native { node --check scripts/install-hooks.mjs } 'node parse instalador de hooks'
+
+    # Export consumidor real: adaptador Cursor incluído; sentinela e suíte de contratos excluídas.
+    Check-Match 'scripts/sync-harness.mjs' "join\(root, '\.cursor', 'rules', 'pelizzai\.mdc'\)" 'export portátil copia o adaptador Cursor'
+    Check-Match 'README.md' 'o `--export-consumer` o copia' 'README: adaptador Cursor é distribuído pelo export'
+    $exportTemp = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-export-test-" + [guid]::NewGuid().ToString('N'))
+    try {
+        # Destino pré-populado: sentinela e suíte deixadas por uma cópia manual antiga
+        # precisam ser REMOVIDAS pelo export, não apenas não-copiadas.
+        New-Item -ItemType Directory -Path (Join-Path $exportTemp 'scripts') -Force | Out-Null
+        'stale' | Set-Content -LiteralPath (Join-Path $exportTemp 'scripts/pelizzai-source-repo.txt') -Encoding utf8
+        'stale' | Set-Content -LiteralPath (Join-Path $exportTemp 'scripts/test-harness-contracts.ps1') -Encoding utf8
+        Run-Native { node scripts/sync-harness.mjs --export-consumer $exportTemp } 'export consumidor real conclui sem erro'
+        Check (Test-Path (Join-Path $exportTemp '.cursor/rules/pelizzai.mdc')) 'export leva o adaptador Cursor ao consumidor'
+        Check (-not (Test-Path (Join-Path $exportTemp 'scripts/pelizzai-source-repo.txt'))) 'export remove a sentinela de source mode preexistente no destino'
+        Check (-not (Test-Path (Join-Path $exportTemp 'scripts/test-harness-contracts.ps1'))) 'export remove a suíte de contratos preexistente no destino'
+        Check (Test-Path (Join-Path $exportTemp '.claude/skills/pelizzai-core/SKILL.md')) 'export leva as skills core'
+        Check (Test-Path (Join-Path $exportTemp '.claude/hooks/pelizzai-writegate.mjs')) 'export leva os hooks (sem registrar)'
+        Check (Test-Path (Join-Path $exportTemp 'AGENTS.md')) 'export gera AGENTS.md no consumidor'
+        Check (Test-Path (Join-Path $exportTemp 'GEMINI.md')) 'export gera GEMINI.md no consumidor'
+        $exportClaude = Get-Content -LiteralPath (Join-Path $exportTemp 'CLAUDE.md') -Raw -Encoding utf8
+        Check ($exportClaude -match 'Este repositório consome o PelizzAI') 'CLAUDE.md do consumidor é a ponte, não o do repo-fonte'
+    } finally {
+        if (Test-Path -LiteralPath $exportTemp) { Remove-Item -LiteralPath $exportTemp -Recurse -Force }
+    }
+
+    # Destino aninhado no repo-fonte é rejeitado antes de qualquer escrita (só dist/ é interno legítimo).
+    $nestedTarget = Join-Path $root '.tmp-export-nested'
+    try {
+        New-Item -ItemType Directory -Path $nestedTarget -Force | Out-Null
+        node scripts/sync-harness.mjs --export-consumer $nestedTarget 2>$null | Out-Null
+        Check ($LASTEXITCODE -ne 0) 'export rejeita destino aninhado no repo-fonte'
+        Check (-not (Test-Path (Join-Path $nestedTarget 'CLAUDE.md'))) 'destino aninhado não recebeu payload'
+    } finally {
+        if (Test-Path -LiteralPath $nestedTarget) { Remove-Item -LiteralPath $nestedTarget -Recurse -Force }
+    }
+
+    # dist/: instalação por cópia — commitada no repo-fonte, sem sentinela, skills em sincronia.
+    # O build real roda primeiro: as checagens abaixo validam o resultado FRESCO da regeneração
+    # (idempotente sobre a dist commitada), não apenas o conteúdo que já estava no repo.
+    Run-Native { node scripts/sync-harness.mjs --build-dist } 'build-dist real conclui sem erro'
+    Check-Match 'scripts/sync-harness.mjs' 'buildDist' 'sync portátil constrói a dist'
+    Check-Match 'scripts/sync-harness.ps1' 'BuildDist' 'wrapper PowerShell expõe -BuildDist'
+    Check-Match 'README.md' 'Sem linha de comando: copie a `dist/`' 'README instrui a instalação por cópia da dist'
+    Check-Match '.github/workflows/check-harness.yml' 'build-dist' 'CI valida a dist commitada em sincronia'
+    Check (Test-Path (Join-Path $root 'dist/.cursor/rules/pelizzai.mdc')) 'dist contém o adaptador Cursor'
+    Check (Test-Path (Join-Path $root 'dist/.claude/skills/pelizzai-core/SKILL.md')) 'dist contém as skills core'
+    Check (Test-Path (Join-Path $root 'dist/AGENTS.md')) 'dist contém AGENTS.md gerado'
+    Check (-not (Test-Path (Join-Path $root 'dist/scripts/pelizzai-source-repo.txt'))) 'dist não contém a sentinela de source mode'
+    Check (-not (Test-Path (Join-Path $root 'dist/scripts/test-harness-contracts.ps1'))) 'dist não contém a suíte de contratos'
+    $distClaudePath = Join-Path $root 'dist/CLAUDE.md'
+    Check (Test-Path $distClaudePath) 'dist contém CLAUDE.md'
+    if (Test-Path $distClaudePath) {
+        $distClaude = Get-Content -LiteralPath $distClaudePath -Raw -Encoding utf8
+        Check ($distClaude -match 'Este repositório consome o PelizzAI') 'CLAUDE.md da dist é a ponte consumidora'
+    }
+    if (Test-Path (Join-Path $root 'dist/.claude/skills')) {
+        $srcSkillFiles = Get-RelativeFiles (Join-Path $root '.claude/skills')
+        $distSkillFiles = Get-RelativeFiles (Join-Path $root 'dist/.claude/skills')
+        Check ((Compare-Object $srcSkillFiles $distSkillFiles | Measure-Object).Count -eq 0) 'dist/.claude/skills espelha a fonte (mesma lista de arquivos)'
+    } else {
+        Check $false 'dist/.claude/skills espelha a fonte (mesma lista de arquivos)' 'dist/.claude/skills ausente'
+    }
 
     # Instalador de hooks: merge idempotente e remoção cirúrgica.
     $hooksTemp = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-hooks-test-" + [guid]::NewGuid().ToString('N'))
@@ -1141,10 +1206,40 @@ try {
     # README: o fluxo de fechamento descrito é o do consumidor; source mode tem ressalva.
     Check-Match 'README.md' 'repo-fonte do PelizzAI[\s\S]{0,260}não cria\s*\r?\ncommit metadata-only' 'README: fechamento traz a ressalva de source mode'
 
-    # CLAUDE.md: modelo e effort nunca são rebaixados — dito sem zeugma.
-    Check-Match 'CLAUDE.md' 'nunca rebaixe nenhum dos dois para economizar' 'CLAUDE.md nomeia o anti-padrão de rebaixar modelo/effort'
+    # CLAUDE.md: modelo/effort nunca são rebaixados abaixo do da sessão — dito sem zeugma.
+    Check-Match 'CLAUDE.md' 'nunca rebaixe modelo nem effort abaixo do da sessão para economizar' 'CLAUDE.md nomeia o anti-padrão de rebaixar modelo/effort abaixo da sessão'
 } catch {
     Check $false 'correções do review do PR #4' $_.Exception.Message
+}
+
+# ---------------------------------------------------------------------------
+# Fusão de técnicas do reasoning (2026-07-22): Tree of Thoughts vira o modo de
+# busca com poda/backtracking dentro de Decision Making; Self-Consistency vira o
+# cross-check por execuções independentes dentro de Verification (reservado a
+# multi-agente). ReAct enxuto preserva a disciplina anti-fabricação. O nome
+# canônico da rotina de premortem é Proposal Stress (Assumption Tracking aplicado).
+# ---------------------------------------------------------------------------
+try {
+    Check (-not (Test-Path (Join-Path $root '.claude/skills/pelizzai-reasoning/techniques/tree-of-thoughts.md'))) 'tree-of-thoughts.md não existe mais como técnica autônoma'
+    Check (-not (Test-Path (Join-Path $root '.claude/skills/pelizzai-reasoning/techniques/self-consistency.md'))) 'self-consistency.md não existe mais como técnica autônoma'
+    Check-NotMatch '.claude/skills/pelizzai-reasoning/SKILL.md' 'tree-of-thoughts|self-consistency|Tree of Thoughts|Self-Consistency' 'catálogo do reasoning sem ToT/Self-Consistency autônomas'
+    Check-Match '.claude/skills/pelizzai-reasoning/SKILL.md' 'inclui busca com poda/backtracking para caminhos interdependentes' 'catálogo: Decision Making absorve o modo de busca com poda'
+    Check-Match '.claude/skills/pelizzai-reasoning/SKILL.md' 'inclui cross-check por execuções independentes \(multi-agente\)' 'catálogo: Verification absorve o cross-check multi-agente'
+    Check-Match '.claude/skills/pelizzai-reasoning/techniques/decision-making.md' '## Caminhos interdependentes \(busca com poda e backtracking\)' 'decision-making tem a seção de caminhos interdependentes'
+    Check-Match '.claude/skills/pelizzai-reasoning/techniques/verification.md' '## Cross-check por execuções independentes' 'verification tem a seção de cross-check'
+    Check-Match '.claude/skills/pelizzai-reasoning/techniques/verification.md' 'convergência aumenta confiança, nunca substitui validação contra a realidade externa' 'cross-check nunca substitui a realidade externa'
+    Check-Match '.claude/skills/pelizzai-reasoning/techniques/react.md' 'Nunca invente o resultado de uma ferramenta' 'react enxuto preserva a disciplina anti-fabricação'
+    Check ((Get-Content -LiteralPath (Join-Path $root '.claude/skills/pelizzai-reasoning/techniques/react.md') | Measure-Object -Line).Lines -le 250) 'react.md permanece enxuto (≤250 linhas)'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Proposal Stress\s+\(Assumption Tracking aplicado\)' 'router usa o nome canônico Proposal Stress'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'Proposal Stress\s+\(Assumption Tracking aplicado\)' 'interview-me usa o nome canônico Proposal Stress'
+    Check-NotMatch '.claude/skills/pelizzai-team/SKILL.md' 'Self-Consistency|Tree of Thoughts' 'team migrou para cross-check (Verification) e Decision Making'
+    Check-NotMatch '.claude/skills/pelizzai-codebase-design/SKILL.md' 'Tree of Thoughts|(?-i:\bToT\b)' 'codebase-design migrou para Decision Making (busca com poda)'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/SKILL.md' 'comparação/ToT' 'execution-plans não cita mais ToT'
+    $reasoningResidue = Get-ChildItem -LiteralPath (Join-Path $root '.claude/skills') -Recurse -File -Filter '*.md' |
+        Where-Object { (Get-Content -LiteralPath $_.FullName -Raw -Encoding utf8) -cmatch '(?i:tree.of.thoughts|self.consistency)|\bToT\b' }
+    Check (@($reasoningResidue).Count -eq 0) 'nenhuma skill referencia as técnicas fundidas' (@($reasoningResidue | ForEach-Object { $_.FullName }) -join '; ')
+} catch {
+    Check $false 'fusão de técnicas do reasoning' $_.Exception.Message
 }
 
 Write-Host "`nResultado: $passes PASS; $($failures.Count) FAIL."

@@ -228,7 +228,7 @@ Structured Decomposition   (dividir em papéis coesos, contratos e dependências
 → Plan and Execute         (ordenar, atribuir, definir checkpoints)
 → [delegação aos membros]
 → Evidence Synthesis       (cruzar e conciliar entregáveis heterogêneos/conflitantes),
-                           com Verification e Self-Consistency como auxiliares
+                           com Verification (incluindo cross-check por execuções independentes) como auxiliar
 ```
 
 - Use **Constraint Satisfaction** quando houver requisitos rígidos, compatibilidade, segurança ou proibições que todos os membros devem respeitar.
@@ -257,8 +257,8 @@ o membro recebe, não amplia os arquivos que ele pode escrever.
 | Investigador / Pesquisador    | Reunir evidências, mapear o código, testar uma hipótese específica         | Root Cause Analysis                             |
 | Implementador (por frente)    | Construir um módulo/camada com arquivos próprios e bem delimitados         | Structured Decomposition                        |
 | Revisor especializado         | Auditar sob **uma** lente (segurança, performance, testes, acessibilidade) | Verification (ou Critique and Refine)           |
-| Advogado do diabo / Refutador | Tentar **derrubar** as conclusões e implementações dos outros              | Tree of Thoughts / refutação via Verification   |
-| Verificador / QA              | Reproduzir, rodar testes, conferir contratos e resultados                  | Verification (Self-Consistency auxiliar)        |
+| Advogado do diabo / Refutador | Tentar **derrubar** as conclusões e implementações dos outros              | Refutação via Verification                      |
+| Verificador / QA              | Reproduzir, rodar testes, conferir contratos e resultados                  | Verification (cross-check por execuções independentes) |
 | Documentador                  | Consolidar achados, escrever spec ou relatório final                       | Evidence Synthesis                              |
 
 Dê a cada lente/hipótese um membro distinto — um único agente tende a ancorar em uma só linha de raciocínio. A diversidade de papéis é o que um time entrega e uma sessão única não.
@@ -413,7 +413,7 @@ Resultados de membros **não** são verdade até serem cruzados.
 
 - **Cross-check:** confronte entregáveis que se sobrepõem; achados em conflito disparam uma rodada de refutação (Modo Subagents) ou um debate via `SendMessage` (Modo Teammates).
 - **Verificação adversarial:** prefira que **outro** membro (ou um verificador dedicado) tente derrubar uma conclusão, em vez de o próprio autor confirmá-la.
-- **Self-Consistency:** quando vários membros chegam ao mesmo resultado por caminhos independentes, a convergência aumenta a confiança — mas não substitui teste/fonte real.
+- **Cross-check por execuções independentes (Verification):** quando vários membros chegam ao mesmo resultado por caminhos independentes, a convergência aumenta a confiança — mas não substitui teste/fonte real.
 - **Review por tarefa (duas lentes com cegueira assimétrica):** todo entregável de implementação passa pela `pelizzai-review` — a **lente spec cega** (recebe só diff + spec/plano + domain skills da área, NUNCA o relatório do autor: julga o código contra o contrato, sem a narrativa) e a **lente qualidade/evidência** (recebe o relatório e verifica as alegações com prova fresca). O coordenador despacha revisores independentes — **nunca é a lente cega** —, cruza os dois verdicts e, em conflito, decide com evidência própria ou escala. O perfil cego/duplo (`split`) é o default em qualquer lane, inclusive bounded — só com dois despachos a lente spec desconhece a narrativa do autor; `combined` numa passada é exceção que o usuário ratifica no passo 4 do gate de setup. Proporcional é a **profundidade** de cada lente, não a existência do review nem a cegueira.
 - **Gate de evidência:** antes de aceitar um entregável de **implementação**, aplique `pelizzai-verification-before-completion` — confira o **diff do git** e rode os comandos de teste você mesmo, ou aceite saída + exit code de **quem rodou o check** (a lente qualidade/evidência, revisor independente — nunca o autor); o relatório do membro, inclusive a saída que ele mesmo colou, nunca é evidência.
 - **Síntese:** cruze os entregáveis com `Evidence Synthesis` e produza **uma** entrega, deixando claro o que é consenso, o que foi divergência resolvida e o que permanece em aberto.

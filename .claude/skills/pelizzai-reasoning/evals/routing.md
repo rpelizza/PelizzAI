@@ -28,14 +28,12 @@ O objetivo não é avaliar a qualidade completa da resposta final, do código ou
 | Evidence Synthesis       | [evidence-synthesis.md](../techniques/evidence-synthesis.md)             |
 | Verification             | [verification.md](../techniques/verification.md)                         |
 | Decision Making          | [decision-making.md](../techniques/decision-making.md)                   |
-| Tree of Thoughts         | [tree-of-thoughts.md](../techniques/tree-of-thoughts.md)                 |
-| Self-Consistency         | [self-consistency.md](../techniques/self-consistency.md)                 |
 | Root Cause Analysis      | [root-cause-analysis.md](../techniques/root-cause-analysis.md)           |
 | Critique and Refine      | [critique-and-refine.md](../techniques/critique-and-refine.md)           |
 
 > Nota: [pelizzai-interview-me](../../pelizzai-interview-me/SKILL.md) é uma skill **irmã** (entrevista para esclarecer objetivo/premissas), não uma das técnicas de raciocínio do catálogo. Quando citada num roteamento, é a ação de "pedir esclarecimento", não uma técnica auxiliar contável.
 
-> Nota: **Proposal Stress (Premortem de escopo)** é a aplicação de [Assumption Tracking](../techniques/assumption-tracking.md) a um pedido novo — produz a Análise da proposta que o `pelizzai-router` apresenta antes de rotear. Não é uma técnica separada nesta suíte: cenários de pedido novo com incerteza material (ex.: R-05) esperam Assumption Tracking como principal e a exposição das lacunas materiais como saída, não uma pergunta reflexa.
+> Nota: **Proposal Stress (Assumption Tracking aplicado)** é a aplicação de [Assumption Tracking](../techniques/assumption-tracking.md) a um pedido novo — produz a Análise da proposta que o `pelizzai-router` apresenta antes de rotear. Não é uma técnica separada nesta suíte: cenários de pedido novo com incerteza material (ex.: R-05) esperam Assumption Tracking como principal e a exposição das lacunas materiais como saída, não uma pergunta reflexa.
 
 ## Protocolo e formato de resultado
 
@@ -87,7 +85,7 @@ O cenário deve receber no máximo 3 pontos quando ocorrer qualquer uma destas s
 - Usar técnica pesada sem justificativa em tarefa simples.
 - Declarar que não precisa de evidência em tarefa factual atual ou técnica dependente de versão.
 - Fazer Root Cause Analysis para erro simples e explicitamente identificado.
-- Usar Tree of Thoughts ou Self-Consistency como padrão para toda tarefa.
+- Usar o modo de busca com poda (Decision Making) ou o cross-check multi-agente (Verification) como padrão para toda tarefa.
 - Fazer pergunta de esclarecimento quando o contexto ou uma fonte direta resolve a dúvida.
 - Carregar auxiliares que não mudam decisão, evidência ou prova, ainda que caibam numa quota.
 ```
@@ -134,8 +132,7 @@ Próxima ação:
 
 ```text
 - Plan and Execute
-- Tree of Thoughts
-- Self-Consistency
+- Decision Making (modo de busca com poda)
 - Root Cause Analysis
 - Evidence Synthesis
 - Verification formal
@@ -187,8 +184,7 @@ Próxima ação:
 
 ```text
 - Root Cause Analysis
-- Tree of Thoughts
-- Self-Consistency
+- Decision Making (modo de busca com poda)
 - Plan and Execute
 ```
 
@@ -230,8 +226,8 @@ Próxima ação:
 
 ```text
 - Root Cause Analysis
-- Self-Consistency
-- Tree of Thoughts
+- Cross-check multi-agente (Verification)
+- Decision Making no modo de busca com poda
 ```
 
 #### Critério de aprovação
@@ -301,7 +297,7 @@ Próxima ação:
 
 ```text
 - Responder apenas com memória.
-- Usar Self-Consistency em vez de consultar fontes oficiais.
+- Cruzar tentativas próprias em vez de consultar fontes oficiais.
 ```
 
 ### R-07 — Escolha entre bibliotecas
@@ -331,8 +327,8 @@ Técnicas auxiliares:
 - Evidence Synthesis.
 
 Técnica opcional:
-- Tree of Thoughts, apenas se houver alternativas materialmente diferentes
-  e trade-offs complexos que não possam ser comparados linearmente.
+- Modo de busca com poda (Decision Making), apenas se as alternativas forem interdependentes
+  e o caminho viável só aparecer construindo e podando, não por comparação linear.
 
 Próxima ação:
 - Eliminar opções incompatíveis antes de comparar preferências.
@@ -340,7 +336,7 @@ Próxima ação:
 
 #### Critério de aprovação
 
-O agente não escolhe por popularidade e não carrega Tree of Thoughts automaticamente.
+O agente não escolhe por popularidade e não carrega o modo de busca com poda automaticamente.
 
 ### R-08 — Incidente recorrente de pedidos duplicados
 
@@ -503,7 +499,7 @@ Próxima ação:
 
 ```text
 - Root Cause Analysis, salvo se o problema se mostrar recorrente, distribuído ou estrutural.
-- Tree of Thoughts.
+- Modo de busca com poda (Decision Making).
 ```
 
 ### R-13 — Cálculo crítico por duas metodologias
@@ -524,8 +520,6 @@ Técnica principal:
 - Verification.
 
 Técnicas auxiliares:
-- Self-Consistency (apoio: confirma a estabilidade do resultado por caminhos independentes;
-  não substitui o recálculo real).
 - Evidence Synthesis, se houver múltiplas fontes de dados.
 
 Próxima ação:
@@ -534,7 +528,7 @@ Próxima ação:
 
 #### Critério de aprovação
 
-O agente trata Verification como principal (o recálculo real é o que decide) e usa Self-Consistency apenas como apoio; não confia no total exibido nem deixa Self-Consistency ocupar o lugar do cálculo. Alinhado à matriz do [pelizzai-reasoning](../SKILL.md), que lista Verification como principal e Self-Consistency como auxiliar para cálculo/diagnóstico/extração crítica.
+O agente trata Verification como principal (o recálculo real é o que decide) e obtém confiança recalculando por método independente — a própria independência de validação da Verification; não confia no total exibido. Alinhado à matriz do [pelizzai-reasoning](../SKILL.md), que lista Verification como principal para cálculo/diagnóstico/extração crítica.
 
 ### R-14 — Arquitetura com alternativas materiais
 
@@ -558,7 +552,6 @@ Técnica principal:
 
 Técnicas auxiliares:
 - Constraint Satisfaction.
-- Tree of Thoughts.
 - Evidence Synthesis (auxiliar OPCIONAL — só se houver dados/documentação de
   infraestrutura relevante para comparar; entra por fechar essa lacuna, nunca por a
   decisão ser de alto impacto).
@@ -718,8 +711,8 @@ Próxima ação:
 #### Técnicas a evitar
 
 ```text
-- Tree of Thoughts.
-- Self-Consistency.
+- Decision Making no modo de busca com poda.
+- Cross-check multi-agente (Verification).
 - Plan and Execute.
 - Evidence Synthesis.
 ```
@@ -782,12 +775,12 @@ Técnicas auxiliares:
 - Structured Decomposition.
 - Verification.
 - Critique and Refine.
-- Self-Consistency.
+- Evidence Synthesis.
 ```
 
 #### Critério de aprovação
 
-O agente remove Critique and Refine e Self-Consistency quando não há feedback, cálculo crítico ou
+O agente remove Critique and Refine e Evidence Synthesis quando não há feedback, fontes em conflito nem
 evidência independente a cruzar. Carregar quatro técnicas sem função distinta é falha grave pelo
 sprawl, não pelo número em si. Uma tarefa de alto impacto pode usar mais lentes se cada uma tiver
 gatilho e saída observáveis.
@@ -854,7 +847,7 @@ Próxima ação:
 
 ```text
 - ReAct como principal (é o micro-ciclo dentro do Agir, não o laço macro de uma execução longa).
-- Tree of Thoughts (não há alternativas interdependentes a podar).
+- Decision Making no modo de busca com poda (não há caminhos interdependentes a podar).
 ```
 
 #### Critério de aprovação

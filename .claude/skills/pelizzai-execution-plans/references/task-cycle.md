@@ -216,16 +216,22 @@ Em source mode, avance o execution record nativo após o commit e não crie stat
 
 ## 8. Seleção de modelo por papel
 
-Política do harness: membros, revisores e o coordenador usam o **modelo mais capaz disponível, com
-effort/reasoning no nível máximo** — nunca rebaixe modelo nem effort para economizar, em nenhum
-papel e em nenhuma tarefa. **Arquitetura, os reviews (as duas lentes e o review final) e a validação
-final da entrega são inegociavelmente o topo.** Especifique o modelo e o effort explicitamente para
-não herdar um default menor da sessão.
+Política do harness: **o modelo é o que o usuário escolheu na plataforma dele** — por plano, custo
+ou preferência — e vale para todo papel: membros, revisores e o coordenador usam o modelo da
+sessão, sem exigir upgrade. O que o harness nunca faz é **rebaixar por conta própria**: nenhum
+papel roda num modelo menor que o da sessão para economizar, e o effort/reasoning fica no nível
+mais alto que a plataforma do usuário oferecer. Especifique o modelo e o effort explicitamente ao
+despachar membros e reviewers, para não herdar um default menor que o da sessão.
 
-Proporcionalidade continua valendo — só que em profundidade de processo (entrevista, brainstorming,
-TDD, perfil de review, overlays), nunca em capacidade do modelo. Tarefa mecânica se resolve rodando
-menos processo no topo, não rodando um modelo menor.
+O harness eleva o raciocínio de **qualquer** modelo via `pelizzai-reasoning`: técnica certa,
+protocolo verificável e evidência fresca não dependem da capacidade do modelo. Proporcionalidade
+continua valendo em profundidade de processo (entrevista, brainstorming, TDD, perfil de review,
+overlays) — e **nunca é rebaixada para compensar um modelo menor**. Em arquitetura, nas duas lentes
+de review, no review final e na validação final da entrega, modelo menor exige processo íntegro,
+não processo mais raso.
 
-Como já se parte do topo, “subir o modelo” não é um degrau de escalada: os degraus do BLOCKED são
-dar mais contexto → mudar a abordagem/quebrar a tarefa → escalar ao humano. Corrija primeiro
-contexto, ferramenta ou decomposição. O coordenador registra preocupações, não finge certeza.
+Se a plataforma permitir mais capacidade num papel crítico, **recomende e ratifique**: a conta de
+modelo é do usuário, nunca uma troca automática. Os degraus do BLOCKED continuam sendo dar mais
+contexto → mudar a abordagem/quebrar a tarefa → escalar ao humano; "trocar de modelo" só entra como
+recomendação ratificável nesse último degrau. Corrija primeiro contexto, ferramenta ou
+decomposição. O coordenador registra preocupações, não finge certeza.

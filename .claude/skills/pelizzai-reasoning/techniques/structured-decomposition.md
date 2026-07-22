@@ -80,8 +80,7 @@ Exemplos inadequados: corrigir erro de sintaxe, renomear variável, traduzir uma
 | ReAct                    | Decide a próxima ação dentro de uma parte                     |
 | Verification             | Define como validar cada parte e o resultado integrado        |
 | Critique and Refine      | Corrige partes que apresentam falhas ou lacunas               |
-| Tree of Thoughts         | Explora caminhos alternativos quando há decisões concorrentes |
-| Self-Consistency         | Compara abordagens independentes para aumentar confiança      |
+| Decision Making          | Escolhe entre abordagens, inclusive caminhos interdependentes com poda |
 
 ```mermaid
 flowchart LR
@@ -832,6 +831,6 @@ Critério global de conclusão:
 
 ## Técnicas relacionadas
 
-[Plan and Execute](plan-and-execute.md) · [ReAct](react.md) · [Verification](verification.md) · [Critique and Refine](critique-and-refine.md) · [Tree of Thoughts](tree-of-thoughts.md) · [Self-Consistency](self-consistency.md) · [Root Cause Analysis](root-cause-analysis.md) · [Constraint Satisfaction](constraint-satisfaction.md) · [Assumption Tracking](assumption-tracking.md)
+[Plan and Execute](plan-and-execute.md) · [ReAct](react.md) · [Verification](verification.md) · [Critique and Refine](critique-and-refine.md) · [Decision Making](decision-making.md) · [Root Cause Analysis](root-cause-analysis.md) · [Constraint Satisfaction](constraint-satisfaction.md) · [Assumption Tracking](assumption-tracking.md)
 
 Voltar a skill [pelizzai-reasoning](../SKILL.md).

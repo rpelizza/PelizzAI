@@ -135,7 +135,7 @@ Pare a verificação quando qualquer condição abaixo for atingida (espelha o "
 | ReAct               | Escolhe a próxima ação, observa o resultado e atualiza o estado        |
 | Verification        | Define o que precisa ser provado e qual evidência é suficiente         |
 | Critique and Refine | Melhora um resultado quando há critério objetivo ou evidência de falha |
-| Tree of Thoughts    | Explora alternativas quando há múltiplos caminhos relevantes           |
+| Decision Making     | Escolhe entre caminhos de solução, inclusive interdependentes com poda |
 
 ### Regra de integração e handoffs
 
@@ -145,7 +145,7 @@ Pare a verificação quando qualquer condição abaixo for atingida (espelha o "
 - Quando a validação **falha** ou expõe inconsistência, passe para [Critique and Refine](critique-and-refine.md) para revisar o resultado.
 - Quando há um **bug ou comportamento inesperado** cuja causa precisa ser entendida, passe para [Root Cause Analysis](root-cause-analysis.md).
 - Quando surge **conflito entre fontes** na validação de pesquisa, passe para [Evidence Synthesis](evidence-synthesis.md).
-- Quando há **múltiplos caminhos plausíveis** de validação ou solução, explore com [Tree of Thoughts](tree-of-thoughts.md).
+- Quando há **múltiplos caminhos de solução com decisões interdependentes**, use [Decision Making](decision-making.md) no modo de busca com poda e backtracking.
 
 ## Hierarquia de evidências
 
@@ -373,6 +373,30 @@ Mais forte:
 - Consultar documentação oficial, changelog ou código da versão usada.
 ```
 
+## Cross-check por execuções independentes
+
+Gerar N tentativas independentes para a mesma pergunta e medir a convergência entre elas é caro e, em
+agente único, redundante: o raciocínio estendido nativo já faz essa consistência interna antes de
+responder. Repetir a mesma pergunta "em voz alta" três vezes e contar a maioria não cria evidência —
+só custo. Não use convergência entre tentativas próprias como prova.
+
+O cross-check só agrega quando as execuções são **genuinamente independentes** porque vêm de agentes
+ou lentes distintas, não da mesma cabeça no mesmo turno:
+
+```text
+- pelizzai-team / pelizzai-subagents: vários membros chegam ao mesmo resultado por caminhos
+  diferentes (métodos, hipóteses ou fontes distintas);
+- revisores independentes e lentes cegas (ex.: a lente spec cega da pelizzai-review, que julga o
+  código sem a narrativa do autor);
+- recálculo por método ou ferramenta independente contra os mesmos dados.
+```
+
+Regra dura: convergência aumenta confiança, nunca substitui validação contra a realidade externa.
+Concordância entre execuções que compartilham a mesma premissa errada é **falsa convergência** — todas
+erram juntas. Quando execuções independentes convergem, ainda confirme com teste, contrato, fonte
+oficial ou dado real; quando divergem, investigue a premissa que as separa com
+[Evidence Synthesis](evidence-synthesis.md), sem escolher a maioria.
+
 ## Checklists
 
 ### Código (base)
@@ -503,7 +527,7 @@ Conclusão:
 - [Plan and Execute](plan-and-execute.md) — define plano, etapas e checkpoints.
 - [ReAct](react.md) — executa e observa cada etapa.
 - [Critique and Refine](critique-and-refine.md) — revisa o resultado após falha ou inconsistência.
-- [Tree of Thoughts](tree-of-thoughts.md) — explora caminhos alternativos de validação ou solução.
+- [Decision Making](decision-making.md) — escolhe entre caminhos de solução, inclusive interdependentes com poda.
 - [Evidence Synthesis](evidence-synthesis.md) — reconcilia fontes em conflito na validação de pesquisa.
 - [Assumption Tracking](assumption-tracking.md) — rastreia hipóteses e desconhecidos.
 - [Constraint Satisfaction](constraint-satisfaction.md) — garante restrições antes de ações de alto impacto.

@@ -62,7 +62,7 @@ mutável. Classificar é trabalho do harness; aceitar ou ajustar a rota é decis
 
 ## Análise da proposta (sempre que houver efeito mutável não-trivial)
 
-Depois de derivar o envelope e ANTES de escolher a head skill, faça uma passada de stress compacta do pedido — acione a técnica `assumption-tracking` da `pelizzai-reasoning` (premortem de escopo). Apresente em ≤6 bullets:
+Depois de derivar o envelope e ANTES de escolher a head skill, faça uma passada de stress compacta do pedido — acione a rotina **Proposal Stress (Assumption Tracking aplicado)** da `pelizzai-reasoning` ([proposal-stress.md](../pelizzai-reasoning/techniques/proposal-stress.md)). Apresente em ≤6 bullets:
 
 - premissas materiais que precisariam ser ratificadas para prosseguir;
 - lacunas que mudam escopo/UX/arquitetura/segurança/dados;

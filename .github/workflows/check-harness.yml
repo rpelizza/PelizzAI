@@ -31,6 +31,12 @@ jobs:
       - name: Validar wrapper Bash
         if: runner.os != 'Windows'
         run: bash scripts/sync-harness.sh --check --source-mode
+      - name: Validar dist/ commitada em sincronia
+        if: runner.os == 'Linux'
+        run: |
+          node scripts/sync-harness.mjs --build-dist
+          git add -A -- dist
+          git diff --cached --exit-code -- dist
 
   contract-tests:
     strategy:

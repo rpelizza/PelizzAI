@@ -111,8 +111,7 @@ Exemplos:
 | Constraint Satisfaction | Define o que torna uma opção válida ou inválida                     |
 | Assumption Tracking     | Registra condições ainda não confirmadas                            |
 | Evidence Synthesis      | Combina fontes e evidências para avaliar alternativas               |
-| Tree of Thoughts        | Explora caminhos concorrentes e permite poda                        |
-| Decision Making         | Seleciona, adia, condiciona ou bloqueia uma direção                 |
+| Decision Making         | Seleciona, adia, condiciona ou bloqueia uma direção; inclui busca com poda e backtracking para caminhos interdependentes |
 | Plan and Execute        | Organiza execução após a decisão                                    |
 | Verification            | Confirma que a decisão e seu resultado atendem aos critérios        |
 | Critique and Refine     | Corrige decisão ou resultado quando novas evidências revelam falhas |
@@ -163,6 +162,47 @@ Escolhe uma direção que depende de uma premissa ainda aberta.
 Exemplo:
 - Usar fila existente, desde que a capacidade de produção seja confirmada.
 ```
+
+## Caminhos interdependentes (busca com poda e backtracking)
+
+O caso padrão desta técnica compara alternativas **fechadas e independentes**: as opções já estão
+enumeradas e o trabalho é ponderar trade-offs num único passo. Há um caso menos comum em que a escolha
+não é linear — cada decisão abre ou fecha as seguintes, e o caminho viável só aparece quando você
+**constrói uma solução parcial, avalia, poda o que não se sustenta e volta atrás** para tentar outro
+ramo. É busca, não comparação: gerar caminho parcial → avaliar contra os critérios → podar ramos
+inviáveis → fazer backtracking quando uma premissa cai → aprofundar o ramo promissor.
+
+Quase sempre você NÃO precisa disso de forma externa: um modelo com raciocínio estendido já ramifica e
+poda internamente ao decidir. Se a exploração cabe no próprio raciocínio e termina numa recomendação,
+trate como decisão comum — enumere 2 a 4 alternativas, compare e escolha. Verbalizar "ramos" não
+agrega decisão.
+
+Reserve o backtracking **externo e auditável** para quando os ramos precisam existir fora da sua
+cabeça: explorar 2-3 arquiteturas parciais em arquivos ou protótipos reais antes de escolher; encadear
+migrações onde cada etapa só é validável depois de aplicar a anterior; qualquer caso em que provar um
+ramo exige artefato, teste ou medição que outro ramo não compartilha. Aí o valor é o registro
+explícito de cada poda e retorno.
+
+Disciplina mínima quando a busca externa se justifica:
+
+```text
+- Gere de 2 a 4 ramos materialmente distintos, nunca variantes superficiais do mesmo.
+- Para cada ramo promissor, escolha UMA ação que gere evidência (ler contrato, prototipar, medir),
+  não mais hipótese.
+- Pode um ramo assim que ele violar requisito obrigatório, for dominado ou for refutado por
+  evidência — poda não é fracasso, é o que reduz custo.
+- Faça backtracking só por evidência concreta (premissa crítica caiu, dependência ausente),
+  nunca por estética ou insegurança.
+- Pare quando um ramo satisfaz os requisitos obrigatórios e domina os demais, ou quando o orçamento
+  de exploração se esgota e há um ramo viável aceitável.
+- O fim da busca produz uma RECOMENDAÇÃO com a evidência de cada poda. Se a escolha é material
+  (arquitetura, contrato, dados, risco), ela é ratificada pelo usuário — encerramento automático só
+  para decisão mecânica já coberta por spec/contrato ratificado.
+```
+
+Se todos os ramos forem podados, não force escolha entre inviáveis: reexamine se algum requisito
+"obrigatório" é negociável, busque evidência que reabilite um ramo podado, ou escale o conflito de
+requisitos ao usuário com o trade-off explícito.
 
 ## Critérios de decisão
 
@@ -605,7 +645,6 @@ Próximo passo:
 - [Constraint Satisfaction](constraint-satisfaction.md) — define o que torna uma opção válida ou inválida.
 - [Assumption Tracking](assumption-tracking.md) — registra premissas e condições ainda não confirmadas.
 - [Evidence Synthesis](evidence-synthesis.md) — combina fontes para avaliar alternativas.
-- [Tree of Thoughts](tree-of-thoughts.md) — explora caminhos concorrentes e permite poda.
 - [Plan and Execute](plan-and-execute.md) — organiza a execução após a decisão.
 - [Verification](verification.md) — confirma que a decisão e seu resultado atendem aos critérios.
 - [Critique and Refine](critique-and-refine.md) — corrige decisão ou resultado quando novas evidências revelam falhas.

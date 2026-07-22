@@ -1,4 +1,4 @@
-# Proposal Stress (Premortem de escopo)
+# Proposal Stress (Assumption Tracking aplicado)
 
 ## Objetivo
 
