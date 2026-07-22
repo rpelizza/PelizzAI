@@ -547,10 +547,10 @@ embutir o harness em produtos próprios, inclusive comerciais, preservando o avi
 licença. A Apache-2.0 também concede expressamente os direitos de patente dos contribuidores, o que
 importa para quem vai embutir isso em produto.
 
-- **Contribuir:** [CONTRIBUTING.md](CONTRIBUTING.md) — leia antes do primeiro PR; este repositório
-  tem regras próprias (edite só `.claude/`, comportamento novo exige asserção nova).
-- **Reportar vulnerabilidade:** [SECURITY.md](SECURITY.md) — em canal privado, nunca em issue
-  pública.
+- **Contribuir:** [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) — leia antes do primeiro PR;
+  este repositório tem regras próprias (edite só `.claude/`, comportamento novo exige asserção nova).
+- **Reportar vulnerabilidade:** [.github/SECURITY.md](.github/SECURITY.md) — em canal privado,
+  nunca em issue pública.
 
 ---
 
