@@ -831,11 +831,15 @@ try {
     Check-Match 'README.md' 'o `--export-consumer` o copia' 'README: adaptador Cursor é distribuído pelo export'
     $exportTemp = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-export-test-" + [guid]::NewGuid().ToString('N'))
     try {
-        New-Item -ItemType Directory -Path $exportTemp -Force | Out-Null
+        # Destino pré-populado: sentinela e suíte deixadas por uma cópia manual antiga
+        # precisam ser REMOVIDAS pelo export, não apenas não-copiadas.
+        New-Item -ItemType Directory -Path (Join-Path $exportTemp 'scripts') -Force | Out-Null
+        'stale' | Set-Content -LiteralPath (Join-Path $exportTemp 'scripts/pelizzai-source-repo.txt') -Encoding utf8
+        'stale' | Set-Content -LiteralPath (Join-Path $exportTemp 'scripts/test-harness-contracts.ps1') -Encoding utf8
         Run-Native { node scripts/sync-harness.mjs --export-consumer $exportTemp } 'export consumidor real conclui sem erro'
         Check (Test-Path (Join-Path $exportTemp '.cursor/rules/pelizzai.mdc')) 'export leva o adaptador Cursor ao consumidor'
-        Check (-not (Test-Path (Join-Path $exportTemp 'scripts/pelizzai-source-repo.txt'))) 'export não leva a sentinela de source mode'
-        Check (-not (Test-Path (Join-Path $exportTemp 'scripts/test-harness-contracts.ps1'))) 'export não leva a suíte de contratos'
+        Check (-not (Test-Path (Join-Path $exportTemp 'scripts/pelizzai-source-repo.txt'))) 'export remove a sentinela de source mode preexistente no destino'
+        Check (-not (Test-Path (Join-Path $exportTemp 'scripts/test-harness-contracts.ps1'))) 'export remove a suíte de contratos preexistente no destino'
         Check (Test-Path (Join-Path $exportTemp '.claude/skills/pelizzai-core/SKILL.md')) 'export leva as skills core'
         Check (Test-Path (Join-Path $exportTemp '.claude/hooks/pelizzai-writegate.mjs')) 'export leva os hooks (sem registrar)'
         Check (Test-Path (Join-Path $exportTemp 'AGENTS.md')) 'export gera AGENTS.md no consumidor'

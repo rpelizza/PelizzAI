@@ -158,7 +158,7 @@ sequencialmente e encerra quando spec/plano podem ser aprovados sem a LLM invent
 
 Quando a lacuna vier marcada pela **Análise da proposta** — saída da rotina **Proposal Stress
 (Assumption Tracking aplicado)** do `pelizzai-router`
-([proposal-stress.md](../pelizzai-reasoning/techniques/proposal-stress.md)) —, entre já em stress focal
+([proposal-stress.md](../pelizzai-reasoning/techniques/proposal-stress.md)) — entre já em stress focal
 sobre as premissas materiais que ela apontou: aquela análise é o inventário; esta entrevista é a
 resolução.
 

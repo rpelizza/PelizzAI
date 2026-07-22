@@ -96,8 +96,10 @@ decisões), **Inferido** (apresente como inferência), **Hipótese** (teste ou s
 ## As seis fases
 
 **1. Avaliar.** Entenda objetivo, escopo, contexto disponível, regras do projeto e riscos antes de
-agir. Não pergunte por reflexo: use entrevista só quando o contexto, código, documentação, arquivos ou
-observação segura não resolverem.
+agir. Não pergunte por reflexo em dúvida **factual**: contexto, código, documentação, arquivos e
+observação segura resolvem fatos. Lacuna **material** de decisão (requisito, escopo, UX, arquitetura,
+dados, segurança, aceite) não se resolve com pesquisa: vai à `pelizzai-interview-me` mesmo quando a
+documentação sugere um caminho — a evidência melhora a recomendação, nunca substitui a ratificação.
 
 **2. Decidir.** Escolha a menor ação que gere progresso real — que reduza incerteza, valide uma
 hipótese, recupere evidência, avance uma etapa, detecte regressão ou identifique bloqueio. Evite ações

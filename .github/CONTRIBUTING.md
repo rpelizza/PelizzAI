@@ -15,16 +15,19 @@ arquivo. O revisor lê procurando isso.
 
 ## A regra de ouro
 
-**Edite somente `.claude/`.** Estes caminhos são gerados por `scripts/sync-harness.mjs` e qualquer
-mudança feita neles é perdida no próximo sync:
+**Não edite os arquivos gerados.** Estes caminhos são produzidos por `scripts/sync-harness.mjs` e
+qualquer mudança feita neles é perdida no próximo sync:
 
 - `.agents/skills/`
 - `AGENTS.md`
 - `GEMINI.md`
 - `scripts/pelizzai-core-skills.txt` (manifesto)
+- `dist/` (inteira — o payload consumidor pronto para copiar)
 
-A única exceção é `.cursor/rules/pelizzai.mdc`: ele é adaptador **manual**, o sync não o gera, e
-precisa ser atualizado à mão quando os entrypoints mudarem.
+A fonte do comportamento é `.claude/` (skills e hooks). Também são autorais — e editáveis —
+`CLAUDE.md`, `README.md`, `scripts/` e `.github/`. `.cursor/rules/pelizzai.mdc` é adaptador
+**manual**: o sync o distribui, mas não o gera, e ele precisa ser atualizado à mão quando os
+entrypoints mudarem.
 
 ## O fluxo
 

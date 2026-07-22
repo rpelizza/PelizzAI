@@ -2,14 +2,15 @@
 
 ## Onde está a superfície de risco
 
-O PelizzAI é majoritariamente markdown, mas **não é só markdown**. Três coisas neste repositório
-executam na sua máquina, e é nelas que mora o risco real:
+O PelizzAI é majoritariamente markdown, mas **não é só markdown**. Os componentes executáveis
+distribuídos são estes, e é neles que mora o risco real:
 
 | O quê | Quando roda | O que faz |
 | --- | --- | --- |
 | `.claude/hooks/*.mjs` e `*.ps1` | a cada prompt ou antes de uma ferramenta, **se você instalar** | leem o comando/caminho pretendido e podem bloqueá-lo |
 | `scripts/sync-harness.mjs` e wrappers | quando você roda o sync ou exporta para um projeto | escrevem arquivos no repositório de destino |
 | `scripts/install-hooks.mjs` | quando você registra os hooks | edita o seu `.claude/settings.json` |
+| `scripts/task-brief.*` e `scripts/review-package.*` | quando você (ou o agente) despacha briefing de tarefa ou pacote de review | leem plano/diff do repositório e gravam arquivos em `pelizzai/data/handoffs/` (ou no temp do sistema) |
 
 Os hooks são **opt-in**: são copiados na instalação, mas só passam a rodar depois de registrados —
 seja com `--install-hooks`, seja respondendo "sim" à proposta da `pelizzai-audit`. Você pode ver o

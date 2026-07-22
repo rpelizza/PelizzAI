@@ -273,6 +273,7 @@ function copyConsumerPayload(target) {
     if (existsSync(source)) cpSync(source, join(targetScripts, name));
   }
   rmSync(join(targetScripts, 'pelizzai-source-repo.txt'), { force: true });
+  rmSync(join(targetScripts, 'test-harness-contracts.ps1'), { force: true });
 
   const cursorAdapter = join(root, '.cursor', 'rules', 'pelizzai.mdc');
   if (!existsSync(cursorAdapter)) {

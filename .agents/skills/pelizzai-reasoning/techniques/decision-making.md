@@ -195,6 +195,9 @@ Disciplina mínima quando a busca externa se justifica:
   nunca por estética ou insegurança.
 - Pare quando um ramo satisfaz os requisitos obrigatórios e domina os demais, ou quando o orçamento
   de exploração se esgota e há um ramo viável aceitável.
+- O fim da busca produz uma RECOMENDAÇÃO com a evidência de cada poda. Se a escolha é material
+  (arquitetura, contrato, dados, risco), ela é ratificada pelo usuário — encerramento automático só
+  para decisão mecânica já coberta por spec/contrato ratificado.
 ```
 
 Se todos os ramos forem podados, não force escolha entre inviáveis: reexamine se algum requisito
