@@ -530,8 +530,10 @@ ferramenta.
 
 ## Desenvolvimento do harness
 
-Edite **somente** `.claude/` (e o adaptador Cursor quando necessário). Tudo em `.agents/`,
-`AGENTS.md` e `GEMINI.md` é gerado — mudança feita lá é perdida no próximo sync.
+A fonte do comportamento é `.claude/` (skills e hooks); `CLAUDE.md`, `README.md`, `scripts/` e
+`.github/` também são autorais, e o adaptador Cursor é manual. **Não edite os gerados** — `.agents/`,
+`AGENTS.md`, `GEMINI.md`, o manifesto e a `dist/` inteira — mudança feita lá é perdida no próximo
+sync.
 
 ```bash
 node scripts/sync-harness.mjs                    # regenera espelhos e dist/

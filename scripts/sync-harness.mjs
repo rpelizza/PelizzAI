@@ -231,6 +231,9 @@ function runNode(script, args, cwd) {
 }
 
 function copyConsumerPayload(target) {
+  if (resolve(target) === root) {
+    throw new Error('O destino não pode ser o próprio repo-fonte.');
+  }
   const core = readCoreManifest();
   if (!core?.length) throw new Error('Manifesto de core ausente; rode --update-manifest.');
 

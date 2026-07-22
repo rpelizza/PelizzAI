@@ -851,6 +851,9 @@ try {
     }
 
     # dist/: instalação por cópia — commitada no repo-fonte, sem sentinela, skills em sincronia.
+    # O build real roda primeiro: as checagens abaixo validam o resultado FRESCO da regeneração
+    # (idempotente sobre a dist commitada), não apenas o conteúdo que já estava no repo.
+    Run-Native { node scripts/sync-harness.mjs --build-dist } 'build-dist real conclui sem erro'
     Check-Match 'scripts/sync-harness.mjs' 'buildDist' 'sync portátil constrói a dist'
     Check-Match 'scripts/sync-harness.ps1' 'BuildDist' 'wrapper PowerShell expõe -BuildDist'
     Check-Match 'README.md' 'Sem linha de comando: copie a `dist/`' 'README instrui a instalação por cópia da dist'
