@@ -284,8 +284,10 @@ onde há comportamento executável, e não vira teatro para Markdown ou configur
 
 Cada tarefa recebe briefing fresco com constraints, skills de domínio, overlays e evidência
 esperada. O review por tarefa usa o working tree inteiro — staged, unstaged e untracked. O review
-final usa o range `base-sha..HEAD`, com **o modelo mais capaz disponível e effort máximo**:
-profundidade de processo é proporcional ao risco; capacidade do modelo nunca é.
+final usa o range `base-sha..HEAD`, com **o modelo que você escolheu — nunca um menor — e o effort
+mais alto que a sua plataforma permitir**: o harness eleva o raciocínio de qualquer modelo, a conta
+de qual modelo usar é sua, e a profundidade de processo é proporcional ao risco — nunca rebaixada
+para compensar um modelo menor.
 
 ---
 

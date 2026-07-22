@@ -512,26 +512,29 @@ try {
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'ANTES da Tarefa 1' 'writing-plans: a cobertura de domain skills é decidida antes da Tarefa 1'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'Quem invoca este gate' 'audit nomeia quem invoca o Gate proativo (brainstorming + writing-plans)'
 
-    # -- F3: capacidade máxima — modelo/effort são invariantes, nunca variável de economia --
-    # Restauração do estado pré-11/07 (decisão do usuário, 2026-07-21): proporcionalidade governa a
-    # profundidade do PROCESSO (entrevista, TDD, perfil de review, overlays), jamais a capacidade do
-    # modelo. Arquitetura, as duas lentes, o review final e a validação final da entrega são o topo.
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'modelo mais capaz[\s\S]{0,60}effort máximo' 'review final exige modelo mais capaz e effort máximo'
+    # -- F3: soberania do modelo — o modelo é escolha do usuário; o harness nunca rebaixa nada --
+    # Decisão do usuário (2026-07-22): o harness respeita o modelo escolhido na plataforma (planos
+    # simples inclusive) e eleva o raciocínio de QUALQUER modelo via pelizzai-reasoning. O que segue
+    # proibido é rebaixar por conta própria: nenhum papel roda abaixo do modelo da sessão, o effort
+    # fica no mais alto que a plataforma oferecer, e o processo nunca é rebaixado para compensar um
+    # modelo menor. Upgrade de capacidade é recomendação ratificável, nunca troca automática.
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'modelo da sessão[\s\S]{0,120}effort mais alto que a plataforma permitir' 'review final usa o modelo da sessão com o effort mais alto da plataforma'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'passo 1 da[\s\S]{0,40}validação final da entrega' 'review final é o passo 1 da validação final da entrega'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Rebaixar modelo ou effort num review' 'review: anti-padrão nomeia o rebaixamento de modelo/effort'
-    Check-NotMatch '.claude/skills/pelizzai-review/SKILL.md' 'não force effort máximo|capacidade/effort proporcionais' 'review não reintroduz capacidade proporcional'
-    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'modelo mais capaz disponível e effort máximo' 'validação final da entrega roda no topo de capacidade'
-    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'rebaixar modelo/effort para economizar' 'execution-plans: o anti-padrão é rebaixar, não maximizar'
-    Check-NotMatch '.claude/skills/pelizzai-execution-plans/SKILL.md' 'forçar effort máximo numa tarefa mecânica|capacidade proporcional ao risco' 'execution-plans não trata effort máximo como excesso'
-    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Seleção de modelo por papel' 'task-cycle §8 é seleção de modelo por papel (não capacidade por risco)'
-    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'modelo mais capaz disponível[\s\S]{0,60}effort/reasoning no nível máximo' 'task-cycle §8 fixa modelo e effort no topo'
-    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'nunca rebaixe modelo nem effort' 'task-cycle §8 proíbe rebaixar modelo ou effort'
-    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Arquitetura, os reviews[\s\S]{0,120}inegociavelmente o topo' 'task-cycle §8: arquitetura, reviews e validação final são o topo'
-    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'nunca em capacidade do modelo' 'task-cycle §8: proporcionalidade é de processo, não de capacidade'
-    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'o modelo já é o topo' 'task-cycle: escalada do BLOCKED não passa por subir modelo'
-    Check-NotMatch '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Capacidade por risco e papel|capacidade e effort \*\*proporcionais\*\*|aumente capacidade' 'task-cycle §8 não volta a ser capacidade proporcional'
-    Check-Match 'CLAUDE.md' 'modelo e effort não' 'CLAUDE.md: modelo e effort não variam com risco'
-    Check-Match 'README.md' 'modelo mais capaz disponível e effort máximo' 'README: review final no topo de capacidade'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Rebaixar modelo ou effort abaixo do da sessão' 'review: anti-padrão nomeia o rebaixamento abaixo do modelo da sessão'
+    Check-NotMatch '.claude/skills/pelizzai-review/SKILL.md' 'modelo mais capaz|effort máximo' 'review não impõe mais modelo mais capaz/effort máximo'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'modelo da sessão[\s\S]{0,80}effort mais alto que a plataforma' 'validação final da entrega roda no modelo da sessão'
+    Check-Match '.claude/skills/pelizzai-execution-plans/SKILL.md' 'rebaixar modelo/effort abaixo do escolhido pelo\s+usuário' 'execution-plans: o anti-padrão é rebaixar abaixo do escolhido pelo usuário'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/SKILL.md' 'modelo mais capaz disponível e effort máximo' 'execution-plans não impõe mais capacidade máxima'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'Seleção de modelo por papel' 'task-cycle §8 segue sendo seleção de modelo por papel'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'o modelo é o que o usuário escolheu na plataforma dele' 'task-cycle §8: o modelo é escolha do usuário'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'nenhum\s+papel roda num modelo menor que o da sessão' 'task-cycle §8 proíbe rebaixar abaixo do modelo da sessão'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'eleva o raciocínio de \*\*qualquer\*\* modelo' 'task-cycle §8: reasoning eleva qualquer modelo'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'nunca é rebaixada para compensar um modelo menor' 'task-cycle §8: processo íntegro mesmo com modelo menor'
+    Check-Match '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'recomende e ratifique' 'task-cycle §8: upgrade de capacidade é recomendação ratificável'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/references/task-cycle.md' 'modelo mais capaz disponível|effort/reasoning no nível máximo' 'task-cycle §8 não impõe mais capacidade máxima'
+    Check-Match 'CLAUDE.md' 'o modelo não é decisão do harness' 'CLAUDE.md: o modelo é do usuário, não do harness'
+    Check-Match 'CLAUDE.md' 'nunca rebaixe o processo para compensar um modelo menor' 'CLAUDE.md: processo não compensa modelo menor'
+    Check-Match 'README.md' 'o modelo que você escolheu — nunca um menor' 'README: review final respeita o modelo escolhido'
 
     # -- F7: debugging reenxerta os sinais e táticas perdidos no pivô (restauração pré-11/07/2026) --
     # O pivô proporcional FICA inteiro (triagem em 4 classes, Passo 0 de contenção, seletor por
@@ -1141,8 +1144,8 @@ try {
     # README: o fluxo de fechamento descrito é o do consumidor; source mode tem ressalva.
     Check-Match 'README.md' 'repo-fonte do PelizzAI[\s\S]{0,260}não cria\s*\r?\ncommit metadata-only' 'README: fechamento traz a ressalva de source mode'
 
-    # CLAUDE.md: modelo e effort nunca são rebaixados — dito sem zeugma.
-    Check-Match 'CLAUDE.md' 'nunca rebaixe nenhum dos dois para economizar' 'CLAUDE.md nomeia o anti-padrão de rebaixar modelo/effort'
+    # CLAUDE.md: modelo/effort nunca são rebaixados abaixo do da sessão — dito sem zeugma.
+    Check-Match 'CLAUDE.md' 'nunca rebaixe modelo nem effort abaixo do da sessão para economizar' 'CLAUDE.md nomeia o anti-padrão de rebaixar modelo/effort abaixo da sessão'
 } catch {
     Check $false 'correções do review do PR #4' $_.Exception.Message
 }

@@ -214,8 +214,10 @@ Categorize pela severidade REAL — nem tudo é Critical; um nitpick não é Cri
 
 Ao concluir todas as tarefas, revise a **branch inteira** no range commitado
 `<base-sha>..<HEAD>` — depois da consolidação `squash-final`, quando escolhida — e não só por
-tarefa. Use um reviewer independente, com o **modelo mais capaz** disponível e **effort máximo**:
-review final é o último filtro antes do seal, não lugar de economizar capacidade. É o passo 1 da
+tarefa. Use um reviewer independente, com o **modelo da sessão** — o que o usuário escolheu, nunca
+um menor — e o **effort mais alto que a plataforma permitir**: review final é o último filtro antes
+do seal, não lugar de economizar por conta própria nem de afinar o processo para compensar modelo
+menor. É o passo 1 da
 **validação final da entrega** do coordenador (`pelizzai-execution-plans` → "Validação final da
 entrega") e acontece **depois** dos overlays que podem escrever (segurança, frontend e documentação)
 e antes da suíte completa, checklist e `pelizzai-verification-before-completion`. Critical/Important
@@ -311,7 +313,8 @@ Em PR no GitHub, responda no THREAD do comentário inline (não como comentário
   do usuário no gate.
 - Prometer skills de domínio ao reviewer e despachar o briefing com o slot `{SKILLS_DE_DOMÍNIO}`
   vazio — a lente cega fica sem o contrato do projeto contra o qual deveria julgar.
-- Rebaixar modelo ou effort num review (por tarefa ou final) para economizar — review é topo.
+- Rebaixar modelo ou effort abaixo do da sessão num review (por tarefa ou final) para economizar —
+  capacidade é escolha do usuário, e o harness nunca a reduz em silêncio.
 - Ignorar Critical, ou seguir com Important em aberto.
 - Dar feedback sobre código que não leu de fato.
 - Marcar nitpick como Critical, ou ser vago ("melhorar o tratamento de erro").

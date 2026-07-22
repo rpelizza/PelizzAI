@@ -527,7 +527,8 @@ Depois desta etapa, `git status --porcelain` deve estar vazio e `validated-head`
 ```text
 1. Capture candidate-head = `git rev-parse HEAD`.
 2. REVIEW FINAL via pelizzai-review no range exato `base-sha..candidate-head`. Use reviewer
-   independente, com o modelo mais capaz disponível e effort máximo (ver task-cycle §8).
+   independente, com o modelo da sessão — nunca um menor — e o effort mais alto que a plataforma
+   permitir (ver task-cycle §8).
    Exceção estreita: uma única tarefa `bounded`, efeito `read-only`/`write-local`, risco baixo,
    perfil `combined` ratificado, zero findings e sem mutação posterior pode reutilizar o review da
    tarefa se `reviewed-tree == candidate-head^{tree}`. Faltando um item — efeito `write-shared`,
@@ -569,8 +570,9 @@ ou doc pode mudar depois do seal.
 - Executar sem plano aprovado, sem o gate de setup pós-plano, ou sem isolamento (em branch protegida).
 - Aplicar isolamento/modo/commit sem ratificação sequencial do usuário ou omitir team.
 - Pular skills de domínio/overlays — ou não colá-las nos briefings de executor e reviewer.
-- Escolher team por preferência universal, ou rebaixar modelo/effort para economizar (arquitetura,
-  review e validação final da entrega são inegociavelmente o topo — ver task-cycle §8).
+- Escolher team por preferência universal, ou rebaixar modelo/effort abaixo do escolhido pelo
+  usuário para economizar (capacidade é decisão do usuário; arquitetura, review e validação final
+  nunca rodam processo mais raso para compensar modelo menor — ver task-cycle §8).
 - Deixar o membro/subagente commitar (o commit é gate do coordenador, após as duas lentes de review).
 - Aceitar "testes passam" inferido, sem evidência fresca colada.
 - Corrigir à mão o trabalho reprovado de um membro (re-despache — corrigir à mão polui o contexto).
