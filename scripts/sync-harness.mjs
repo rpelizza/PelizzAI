@@ -270,6 +270,14 @@ function exportConsumer(destination, installHooks) {
   }
   rmSync(join(targetScripts, 'pelizzai-source-repo.txt'), { force: true });
 
+  const cursorAdapter = join(root, '.cursor', 'rules', 'pelizzai.mdc');
+  if (!existsSync(cursorAdapter)) {
+    throw new Error('Adaptador Cursor ausente na fonte: .cursor/rules/pelizzai.mdc');
+  }
+  const targetCursorRules = join(target, '.cursor', 'rules');
+  mkdirSync(targetCursorRules, { recursive: true });
+  cpSync(cursorAdapter, join(targetCursorRules, 'pelizzai.mdc'));
+
   const marker = '## Diretrizes comportamentais';
   const sourceClaude = readText(claudeMd);
   const markerIndex = sourceClaude.indexOf(marker);
@@ -294,8 +302,8 @@ Este é um consumidor: não há \`scripts/pelizzai-source-repo.txt\`. O manifest
   }
 
   console.log(
-    `Export consumidor concluído: ${target} (${core.length} skills core; domínio e pelizzai/ preservados; ` +
-      `hooks ${installHooks ? 'registrados' : 'copiados, registro pendente de decisão do usuário'}).`,
+    `Export consumidor concluído: ${target} (${core.length} skills core; adaptador Cursor; domínio e ` +
+      `pelizzai/ preservados; hooks ${installHooks ? 'registrados' : 'copiados, registro pendente de decisão do usuário'}).`,
   );
 }
 

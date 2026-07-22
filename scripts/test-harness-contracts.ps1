@@ -826,6 +826,26 @@ try {
     Run-Native { node --check scripts/sync-harness.mjs } 'node parse sync portátil'
     Run-Native { node --check scripts/install-hooks.mjs } 'node parse instalador de hooks'
 
+    # Export consumidor real: adaptador Cursor incluído; sentinela e suíte de contratos excluídas.
+    Check-Match 'scripts/sync-harness.mjs' "join\(root, '\.cursor', 'rules', 'pelizzai\.mdc'\)" 'export portátil copia o adaptador Cursor'
+    Check-Match 'README.md' 'o `--export-consumer` o copia' 'README: adaptador Cursor é distribuído pelo export'
+    $exportTemp = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-export-test-" + [guid]::NewGuid().ToString('N'))
+    try {
+        New-Item -ItemType Directory -Path $exportTemp -Force | Out-Null
+        Run-Native { node scripts/sync-harness.mjs --export-consumer $exportTemp } 'export consumidor real conclui sem erro'
+        Check (Test-Path (Join-Path $exportTemp '.cursor/rules/pelizzai.mdc')) 'export leva o adaptador Cursor ao consumidor'
+        Check (-not (Test-Path (Join-Path $exportTemp 'scripts/pelizzai-source-repo.txt'))) 'export não leva a sentinela de source mode'
+        Check (-not (Test-Path (Join-Path $exportTemp 'scripts/test-harness-contracts.ps1'))) 'export não leva a suíte de contratos'
+        Check (Test-Path (Join-Path $exportTemp '.claude/skills/pelizzai-core/SKILL.md')) 'export leva as skills core'
+        Check (Test-Path (Join-Path $exportTemp '.claude/hooks/pelizzai-writegate.mjs')) 'export leva os hooks (sem registrar)'
+        Check (Test-Path (Join-Path $exportTemp 'AGENTS.md')) 'export gera AGENTS.md no consumidor'
+        Check (Test-Path (Join-Path $exportTemp 'GEMINI.md')) 'export gera GEMINI.md no consumidor'
+        $exportClaude = Get-Content -LiteralPath (Join-Path $exportTemp 'CLAUDE.md') -Raw -Encoding utf8
+        Check ($exportClaude -match 'Este repositório consome o PelizzAI') 'CLAUDE.md do consumidor é a ponte, não o do repo-fonte'
+    } finally {
+        if (Test-Path -LiteralPath $exportTemp) { Remove-Item -LiteralPath $exportTemp -Recurse -Force }
+    }
+
     # Instalador de hooks: merge idempotente e remoção cirúrgica.
     $hooksTemp = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-hooks-test-" + [guid]::NewGuid().ToString('N'))
     try {

@@ -59,9 +59,9 @@ pwsh scripts/sync-harness.ps1 -ExportConsumer C:\caminho\do\seu-projeto
 bash scripts/sync-harness.sh --export-consumer /caminho/do/seu-projeto
 ```
 
-Isso copia as skills core, os hooks e os scripts úteis, gera o `CLAUDE.md` do consumidor e valida
-os espelhos — **sem tocar** nas suas skills de domínio, no seu `pelizzai/` ou no seu
-`settings.json`.
+Isso copia as skills core, os hooks, o adaptador Cursor e os scripts úteis, gera o `CLAUDE.md` do
+consumidor e valida os espelhos — **sem tocar** nas suas skills de domínio, no seu `pelizzai/` ou
+no seu `settings.json`.
 
 > **Nunca distribua copiando o repositório à mão.** O que distingue o repo-fonte de um consumidor é
 > uma única sentinela, `scripts/pelizzai-source-repo.txt`. Uma cópia manual a levaria junto e
@@ -432,7 +432,7 @@ flowchart TD
     SYNC --> GE["GEMINI.md"]
     SYNC --> MF["manifesto<br/>com --update-manifest"]
     SYNC --> EXP["--export-consumer<br/>projeto alvo"]
-    CUR[".cursor/rules/pelizzai.mdc<br/>adaptador MANUAL"] -.->|aponta para os entrypoints| AS
+    CUR[".cursor/rules/pelizzai.mdc<br/>autoria manual, distribuído pelo export"] -.->|aponta para os entrypoints| AS
 ```
 
 | Ambiente | Entrada / skills |
@@ -440,10 +440,12 @@ flowchart TD
 | Claude Code | `CLAUDE.md` + `.claude/skills/` |
 | Codex, Copilot e compatíveis | `AGENTS.md` + `.agents/skills/` |
 | Gemini CLI | `GEMINI.md` + `.agents/skills/` |
-| Cursor | `.cursor/rules/pelizzai.mdc` manual + `AGENTS.md` + `.agents/skills/` |
+| Cursor | `.cursor/rules/pelizzai.mdc` + `AGENTS.md` + `.agents/skills/` |
 
-Arquivos gerados não são editados à mão. O adaptador Cursor é a exceção: o sync **não** o gera, e
-ele precisa ser revisado manualmente quando os entrypoints mudarem.
+Arquivos gerados não são editados à mão. O adaptador Cursor é a exceção de autoria: o sync **não**
+o gera a partir do `CLAUDE.md` — ele é escrito à mão na fonte e precisa ser revisado quando os
+entrypoints mudarem. A **distribuição**, porém, é automática: o `--export-consumer` o copia para o
+projeto consumidor junto com o resto do harness.
 
 ---
 
@@ -528,8 +530,8 @@ Ubuntu e macOS; os contratos rodam em Windows e Ubuntu.
 - O carregamento **nativo** de skills por diretório varia por ferramenta: `.agents/skills/` cobre
   Codex, Gemini CLI e Warp; as demais recebem a entrada via `AGENTS.md` e podem ganhar espelho
   nativo acrescentando o alvo ao `sync-harness.mjs`.
-- `.cursor/rules/pelizzai.mdc` é manual — o sync não o gera e nenhum job de CI o compara com a
-  fonte.
+- A autoria de `.cursor/rules/pelizzai.mdc` é manual — o sync o distribui aos consumidores, mas não
+  o gera a partir do `CLAUDE.md`, e nenhum job de CI o compara com os entrypoints.
 - O núcleo exige Node.js 18+; os wrappers `.ps1` exigem PowerShell 7+ com encoding UTF-8.
 - Os hooks são específicos do Claude Code e opt-in. Nas demais plataformas os invariantes valem
   apenas pelas skills, sem enforcement executável.
