@@ -8,7 +8,7 @@ Este arquivo avalia se a skill [pelizzai-reasoning](../SKILL.md) conduz planejam
 
 - [Plan and Execute](../techniques/plan-and-execute.md) — planejar, validar antes de executar, criar checkpoints e replanejar;
 - [Structured Decomposition](../techniques/structured-decomposition.md) — dividir problema complexo em partes, responsabilidades, contratos e dependências;
-- [Tree of Thoughts](../techniques/tree-of-thoughts.md) — explorar caminhos concorrentes com poda e backtracking quando as alternativas são materialmente diferentes.
+- [Decision Making](../techniques/decision-making.md) — no modo de busca com poda e backtracking, explorar caminhos interdependentes quando as alternativas são materialmente diferentes.
 
 O agente deve ser capaz de:
 
@@ -34,7 +34,7 @@ Este eval não mede a elegância do plano. Mede se a estrutura de execução é 
 | --------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | [Plan and Execute](../techniques/plan-and-execute.md)                 | Planejar, validar antes de executar, criar checkpoints e replanejar        |
 | [Structured Decomposition](../techniques/structured-decomposition.md) | Dividir por responsabilidade e contrato, mapear dependências e integração  |
-| [Tree of Thoughts](../techniques/tree-of-thoughts.md)                 | Explorar caminhos interdependentes com poda e backtracking                 |
+| [Decision Making](../techniques/decision-making.md)                   | No modo de busca, explorar caminhos interdependentes com poda e backtracking |
 | [ReAct](../techniques/react.md)                                       | Executar etapa, observar resultado e ajustar o próximo passo               |
 | [Verification](../techniques/verification.md)                         | Validar pré-condições, resultados e regressões em cada checkpoint          |
 | [Assumption Tracking](../techniques/assumption-tracking.md)           | Registrar premissas e dependências não confirmadas que condicionam o plano |
@@ -459,7 +459,7 @@ O agente identifica a fronteira de integração faltante (validação e autoriza
 
 ---
 
-### P-11 — Tree of Thoughts: estratégia de migração com clientes
+### P-11 — Decision Making (busca com poda): estratégia de migração com clientes
 
 ```yaml
 id: P-11
@@ -475,11 +475,10 @@ contexto: |
 
 ```text
 Técnica principal:
-- Tree of Thoughts.
+- Decision Making (modo de busca com poda e backtracking).
 
 Auxiliares:
 - Constraint Satisfaction.
-- Decision Making.
 - Verification.
 
 Ação:
@@ -537,7 +536,7 @@ Execute estes cenários após alterações em:
 ```text
 - plan-and-execute.md;
 - structured-decomposition.md;
-- tree-of-thoughts.md;
+- decision-making.md;
 - SKILL.md.
 ```
 

@@ -95,7 +95,7 @@ Não faça perguntas factuais por reflexo. Primeiro use contexto, arquivos, docu
 ferramentas. Quando restar decisão de requisito, escopo, UX, arquitetura, dados, segurança, custo,
 risco aceito ou aceite, pergunte ao usuário uma decisão por vez e recomende a melhor opção.
 
-Para um pedido novo de feature/refactor com efeito mutável e incerteza material, produza a **Análise da proposta** com [Proposal Stress](techniques/proposal-stress.md) (premortem de escopo) antes de rotear — premissas, lacunas materiais, riscos e alternativas — como resultado apresentado pelo `pelizzai-router`, não como pergunta. Read-only e ajuste trivial não a disparam; risco alto isolado eleva prova e gates, não a incerteza.
+Para um pedido novo de feature/refactor com efeito mutável e incerteza material, produza a **Análise da proposta** com [Proposal Stress (Assumption Tracking aplicado)](techniques/proposal-stress.md) antes de rotear — premissas, lacunas materiais, riscos e alternativas — como resultado apresentado pelo `pelizzai-router`, não como pergunta. Read-only e ajuste trivial não a disparam; risco alto isolado eleva prova e gates, não a incerteza.
 
 Use `pelizzai-interview-me` em todo greenfield e quando houver decisão humana material. Evidência
 resolve fatos; não resolve preferência, política ou intenção do usuário.
@@ -145,16 +145,14 @@ Leia a técnica correspondente antes de aplicá-la.
 | Constraint Satisfaction  | Garantir requisitos, proibições, compatibilidade e limites                       | [constraint-satisfaction.md](techniques/constraint-satisfaction.md)   |
 | Assumption Tracking      | Rastrear premissas, hipóteses e condições ainda não confirmadas                  | [assumption-tracking.md](techniques/assumption-tracking.md)           |
 | Evidence Synthesis       | Comparar documentos, fontes, logs, testes, dados e evidências conflitantes       | [evidence-synthesis.md](techniques/evidence-synthesis.md)             |
-| Verification             | Confirmar código, fatos, cálculos, contratos, resultados e limitações            | [verification.md](techniques/verification.md)                         |
-| Decision Making          | Escolher entre alternativas válidas, com trade-offs e reversibilidade            | [decision-making.md](techniques/decision-making.md)                   |
-| Tree of Thoughts         | Explorar caminhos concorrentes com poda e backtracking controlados               | [tree-of-thoughts.md](techniques/tree-of-thoughts.md)                 |
-| Self-Consistency         | Comparar tentativas independentes quando convergência agrega confiança           | [self-consistency.md](techniques/self-consistency.md)                 |
+| Verification             | Confirmar código, fatos, cálculos, contratos, resultados e limitações; inclui cross-check por execuções independentes (multi-agente) | [verification.md](techniques/verification.md)                         |
+| Decision Making          | Escolher entre alternativas válidas, com trade-offs e reversibilidade; inclui busca com poda/backtracking para caminhos interdependentes | [decision-making.md](techniques/decision-making.md)                   |
 | Root Cause Analysis      | Investigar causa incerta, recorrência, flakiness, incidentes e falhas entre sistemas | [root-cause-analysis.md](techniques/root-cause-analysis.md)        |
 | Critique and Refine      | Melhorar artefato após feedback, falha, inconsistência ou requisito não atendido | [critique-and-refine.md](techniques/critique-and-refine.md)           |
 
 > A skill `pelizzai-interview-me` é uma **skill irmã**, não uma das técnicas do catálogo: acione-a para resolver ambiguidade material por entrevista, conforme a Triagem inicial e a matriz.
 
-> **Proposal Stress (Premortem de escopo)** é a rotina de [Assumption Tracking](techniques/assumption-tracking.md) aplicada a um pedido novo, documentada em [proposal-stress.md](techniques/proposal-stress.md): produz a **Análise da proposta** que o `pelizzai-router` apresenta antes de rotear. Não é uma técnica extra do catálogo — é a mesma máquina de premissas com lente de premortem de escopo.
+> **Proposal Stress** é a rotina de [Assumption Tracking](techniques/assumption-tracking.md) aplicada a um pedido novo, documentada em [proposal-stress.md](techniques/proposal-stress.md): produz a **Análise da proposta** que o `pelizzai-router` apresenta antes de rotear. Não é uma técnica extra do catálogo — é a mesma máquina de premissas com lente de premortem de escopo.
 
 ---
 
@@ -171,13 +169,13 @@ Leia a técnica correspondente antes de aplicá-la.
 | Bug determinístico com causa incerta                         | Root Cause Analysis leve | ReAct, Verification                                           |
 | Bug flaky, recorrente ou distribuído                         | Root Cause Analysis      | Evidence Synthesis, Assumption Tracking, Verification         |
 | Incidente com dano ativo                                     | Constraint Satisfaction  | Decision Making, ReAct, Verification; RCA após conter         |
-| Escolha entre bibliotecas ou arquiteturas                    | Decision Making          | Constraint Satisfaction, Evidence Synthesis, Tree of Thoughts |
+| Escolha entre bibliotecas ou arquiteturas                    | Decision Making          | Constraint Satisfaction, Evidence Synthesis                   |
 | Pesquisa com várias fontes                                   | Evidence Synthesis       | Verification, Assumption Tracking                             |
 | Novo pedido de feature/refactor com incerteza material, antes de rotear | Assumption Tracking + Proposal Stress | Constraint Satisfaction, pelizzai-interview-me |
 | Requisitos ambíguos ou incompletos                           | Assumption Tracking      | Constraint Satisfaction, pelizzai-interview-me                |
 | Plano dependente de premissa não confirmada                  | Assumption Tracking      | Plan and Execute, Verification                                |
-| Múltiplas alternativas interdependentes com impacto material | Tree of Thoughts         | Decision Making, Constraint Satisfaction                      |
-| Cálculo, diagnóstico ou extração crítica                     | Verification             | Self-Consistency, Evidence Synthesis                          |
+| Múltiplas alternativas interdependentes com impacto material | Decision Making (busca com poda/backtracking) | Constraint Satisfaction, Evidence Synthesis    |
+| Cálculo, diagnóstico ou extração crítica                     | Verification             | Evidence Synthesis; cross-check multi-agente quando houver revisores independentes |
 | Resultado falhou em teste, review ou checklist               | Critique and Refine      | Verification, ReAct                                           |
 | Mudança de alto impacto                                      | Constraint Satisfaction  | Assumption Tracking, Decision Making, Verification            |
 
@@ -189,9 +187,9 @@ Use estas distinções quando duas técnicas parecerem candidatas à principal:
 
 - **OODA vs ReAct:** [ReAct](techniques/react.md) é o **micro-ciclo** de uma ação (pensar → agir com ferramenta → observar o resultado imediato). [OODA](techniques/ooda.md) é o **macro-loop** de uma execução inteira: re-**Observar** a realidade externa (git, testes, reviews, o que mudou no mundo), re-**Orientar** contra o objetivo/plano/DoD, **Decidir** a próxima iteração e **Agir** — repetindo até a Definition of Done. Um loop OODA contém muitos ciclos ReAct dentro da fase Agir.
 - **RCA vs causa direta:** use [Root Cause Analysis](techniques/root-cause-analysis.md) quando ainda houver uma pergunta causal material. Erro explícito cujo contrato, stack trace ou compilador já identifica a causa usa ReAct + Verification; não invente hipóteses concorrentes. Em incidente com dano ativo, contenção reversível e preservação mínima de evidência precedem a RCA.
-- **Tree of Thoughts vs Decision Making:** [Decision Making](techniques/decision-making.md) é a técnica padrão para escolher entre alternativas por trade-offs. Use [Tree of Thoughts](techniques/tree-of-thoughts.md) apenas quando os caminhos são **interdependentes** e exigem **poda e backtracking** — não para comparação linear de opções. As duas raramente atuam juntas.
+- **Comparação linear vs caminhos interdependentes:** [Decision Making](techniques/decision-making.md) é a técnica para escolher entre alternativas. O caso padrão compara opções fechadas por trade-offs num único passo; quando os caminhos são **interdependentes** e o viável só aparece construindo solução parcial, avaliando, podando e voltando atrás, use o **modo de busca com poda e backtracking** da própria Decision Making — e reserve-o ao backtracking externo e auditável (arquiteturas parciais em arquivos/protótipos), já que o thinking nativo ramifica internamente.
 - **Structured Decomposition vs Plan and Execute:** decomponha com [Structured Decomposition](techniques/structured-decomposition.md) quando **partes, responsabilidades ou contratos ainda são desconhecidos**; passe a [Plan and Execute](techniques/plan-and-execute.md) quando as partes já são conhecidas e o que falta é ordená-las e executá-las.
-- **Self-Consistency é auxiliar:** [Self-Consistency](techniques/self-consistency.md) cruza tentativas independentes como apoio à [Verification](techniques/verification.md); não substitui o cálculo, a fonte ou o teste real.
+- **Cross-check multi-agente é de Verification:** cruzar execuções independentes para medir convergência é caro e redundante em agente único (o thinking nativo já faz consistência interna). Reserve-o a múltiplos agentes/lentes (`pelizzai-team`, revisores independentes, lentes cegas) e trate como o modo **cross-check por execuções independentes** da [Verification](techniques/verification.md); convergência nunca substitui o cálculo, a fonte ou o teste real.
 - **Verification + Critique and Refine:** combine [Verification](techniques/verification.md) com [Critique and Refine](techniques/critique-and-refine.md) apenas quando a **causa da falha ainda não está confirmada**. Falha com causa direta usa Critique and Refine com verificação inline, sem dupla leitura ritual.
 
 ---
@@ -243,12 +241,11 @@ O número de hipóteses acompanha a incerteza: uma hipótese direta e falsificá
 
 ```text
 Constraint Satisfaction
-→ Tree of Thoughts
 → Decision Making
 → Verification
 ```
 
-Use Tree of Thoughts apenas quando as alternativas forem interdependentes e exigirem poda; caso contrário, vá direto de Constraint Satisfaction para Decision Making.
+Quando as alternativas forem interdependentes e exigirem poda e backtracking, use o modo de busca da própria Decision Making; caso contrário, compare as opções fechadas diretamente.
 
 ### Alteração de alto impacto
 
@@ -440,8 +437,8 @@ Limitações:
 Não faça isto:
 
 ```text
-- Usar Tree of Thoughts para tarefa linear.
-- Usar Self-Consistency para resposta simples.
+- Usar o modo de busca com poda/backtracking (Decision Making) para uma escolha linear entre opções fechadas.
+- Cruzar execuções independentes (cross-check de Verification) em agente único, para resposta simples.
 - Criar plano extenso para ajuste local.
 - Fazer Root Cause Analysis para erro de sintaxe evidente.
 - Impor OODA a uma sequência curta sem re-observação macro útil.

@@ -200,7 +200,7 @@ try {
 
     # -- Análise da proposta + descoberta reconectada (router) --
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Análise da proposta' 'router sempre stressa a proposta (Análise da proposta)'
-    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'assumption-tracking' 'Análise da proposta é fundamentada em técnica documentada'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'proposal-stress\.md' 'Análise da proposta é fundamentada em técnica documentada'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'pelizzai-interview-me' 'interview-me reconectada ao roteamento (>0 menções)'
 
     # -- Gate de setup pós-plano sequencial: três opções, team, squash --
@@ -1168,6 +1168,36 @@ try {
     Check-Match 'CLAUDE.md' 'nunca rebaixe modelo nem effort abaixo do da sessão para economizar' 'CLAUDE.md nomeia o anti-padrão de rebaixar modelo/effort abaixo da sessão'
 } catch {
     Check $false 'correções do review do PR #4' $_.Exception.Message
+}
+
+# ---------------------------------------------------------------------------
+# Fusão de técnicas do reasoning (2026-07-22): Tree of Thoughts vira o modo de
+# busca com poda/backtracking dentro de Decision Making; Self-Consistency vira o
+# cross-check por execuções independentes dentro de Verification (reservado a
+# multi-agente). ReAct enxuto preserva a disciplina anti-fabricação. O nome
+# canônico da rotina de premortem é Proposal Stress (Assumption Tracking aplicado).
+# ---------------------------------------------------------------------------
+try {
+    Check (-not (Test-Path (Join-Path $root '.claude/skills/pelizzai-reasoning/techniques/tree-of-thoughts.md'))) 'tree-of-thoughts.md não existe mais como técnica autônoma'
+    Check (-not (Test-Path (Join-Path $root '.claude/skills/pelizzai-reasoning/techniques/self-consistency.md'))) 'self-consistency.md não existe mais como técnica autônoma'
+    Check-NotMatch '.claude/skills/pelizzai-reasoning/SKILL.md' 'tree-of-thoughts|self-consistency|Tree of Thoughts|Self-Consistency' 'catálogo do reasoning sem ToT/Self-Consistency autônomas'
+    Check-Match '.claude/skills/pelizzai-reasoning/SKILL.md' 'inclui busca com poda/backtracking para caminhos interdependentes' 'catálogo: Decision Making absorve o modo de busca com poda'
+    Check-Match '.claude/skills/pelizzai-reasoning/SKILL.md' 'inclui cross-check por execuções independentes \(multi-agente\)' 'catálogo: Verification absorve o cross-check multi-agente'
+    Check-Match '.claude/skills/pelizzai-reasoning/techniques/decision-making.md' '## Caminhos interdependentes \(busca com poda e backtracking\)' 'decision-making tem a seção de caminhos interdependentes'
+    Check-Match '.claude/skills/pelizzai-reasoning/techniques/verification.md' '## Cross-check por execuções independentes' 'verification tem a seção de cross-check'
+    Check-Match '.claude/skills/pelizzai-reasoning/techniques/verification.md' 'convergência aumenta confiança, nunca substitui validação contra a realidade externa' 'cross-check nunca substitui a realidade externa'
+    Check-Match '.claude/skills/pelizzai-reasoning/techniques/react.md' 'Nunca invente o resultado de uma ferramenta' 'react enxuto preserva a disciplina anti-fabricação'
+    Check ((Get-Content -LiteralPath (Join-Path $root '.claude/skills/pelizzai-reasoning/techniques/react.md') | Measure-Object -Line).Lines -le 250) 'react.md permanece enxuto (≤250 linhas)'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Proposal Stress\s+\(Assumption Tracking aplicado\)' 'router usa o nome canônico Proposal Stress'
+    Check-Match '.claude/skills/pelizzai-interview-me/SKILL.md' 'Proposal Stress\s+\(Assumption Tracking aplicado\)' 'interview-me usa o nome canônico Proposal Stress'
+    Check-NotMatch '.claude/skills/pelizzai-team/SKILL.md' 'Self-Consistency|Tree of Thoughts' 'team migrou para cross-check (Verification) e Decision Making'
+    Check-NotMatch '.claude/skills/pelizzai-codebase-design/SKILL.md' 'Tree of Thoughts|(?-i:\bToT\b)' 'codebase-design migrou para Decision Making (busca com poda)'
+    Check-NotMatch '.claude/skills/pelizzai-execution-plans/SKILL.md' 'comparação/ToT' 'execution-plans não cita mais ToT'
+    $reasoningResidue = Get-ChildItem -LiteralPath (Join-Path $root '.claude/skills') -Recurse -File -Filter '*.md' |
+        Where-Object { (Get-Content -LiteralPath $_.FullName -Raw -Encoding utf8) -cmatch '(?i:tree.of.thoughts|self.consistency)|\bToT\b' }
+    Check (@($reasoningResidue).Count -eq 0) 'nenhuma skill referencia as técnicas fundidas' (@($reasoningResidue | ForEach-Object { $_.FullName }) -join '; ')
+} catch {
+    Check $false 'fusão de técnicas do reasoning' $_.Exception.Message
 }
 
 Write-Host "`nResultado: $passes PASS; $($failures.Count) FAIL."

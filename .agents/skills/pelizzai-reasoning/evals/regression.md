@@ -28,8 +28,6 @@ Esta suíte não substitui os evals especializados. Ela seleciona os cenários c
 Cenários desta suíte exercem as seguintes técnicas (links a partir de `evals/`):
 
 - [Plan and Execute](../techniques/plan-and-execute.md)
-- [Tree of Thoughts](../techniques/tree-of-thoughts.md)
-- [Self-Consistency](../techniques/self-consistency.md)
 - [Root Cause Analysis](../techniques/root-cause-analysis.md)
 - [Structured Decomposition](../techniques/structured-decomposition.md)
 - [Constraint Satisfaction](../techniques/constraint-satisfaction.md)
@@ -133,7 +131,7 @@ Classificação:
 Roteamento:
 - Técnica principal: nenhuma.
 - Técnicas auxiliares: nenhuma.
-- Técnicas evitadas: Plan and Execute, Tree of Thoughts, Self-Consistency.
+- Técnicas evitadas: Plan and Execute; modo de busca com poda (Decision Making); cross-check multi-agente (Verification).
 
 Próxima ação:
 - Traduzir diretamente.
@@ -142,8 +140,8 @@ Próxima ação:
 #### Falha
 
 - Usar Plan and Execute.
-- Usar Tree of Thoughts.
-- Usar Self-Consistency.
+- Usar o modo de busca com poda (Decision Making).
+- Cruzar execuções independentes (cross-check de Verification) em agente único.
 - Pesquisar sem necessidade.
 - Criar análise extensa.
 
@@ -174,7 +172,7 @@ Roteamento:
 - Técnica principal: Plan and Execute.
 - Técnicas auxiliares aceitáveis: Structured Decomposition; Verification;
   Constraint Satisfaction, se houver contrato ou convenção obrigatória.
-- Técnicas evitadas: Tree of Thoughts.
+- Técnicas evitadas: modo de busca com poda (Decision Making).
 
 Próxima ação:
 - Inspecionar contrato, padrões existentes e paginação antes de alterar código.
@@ -215,7 +213,7 @@ Roteamento:
 - Técnica principal: Evidence Synthesis.
 - Técnicas auxiliares: Verification;
   Assumption Tracking, se a versão da biblioteca não estiver definida.
-- Técnicas evitadas: Plan and Execute, Tree of Thoughts.
+- Técnicas evitadas: Plan and Execute; modo de busca com poda (Decision Making).
 
 Próxima ação:
 - Consultar documentação oficial, changelog e fontes primárias da versão relevante.
@@ -292,7 +290,7 @@ Roteamento:
 - Técnica principal: Root Cause Analysis.
 - Técnicas auxiliares: ReAct; Evidence Synthesis;
   Verification, devido à criticidade.
-- Técnicas evitadas: Tree of Thoughts.
+- Técnicas evitadas: modo de busca com poda (Decision Making).
 
 Ação imediata:
 - Delimitar impacto e preservar evidências.
@@ -336,7 +334,7 @@ Roteamento:
 - Fase de contenção: Constraint Satisfaction como principal; Decision Making e ReAct como auxiliares.
 - Verification confirma alvo e monitora recuperação.
 - Após estabilizar: Root Cause Analysis como principal para a correção estrutural.
-- Técnicas evitadas: Tree of Thoughts.
+- Técnicas evitadas: modo de busca com poda (Decision Making).
 
 Ação:
 - Validar rapidamente a versão-alvo.
@@ -608,7 +606,7 @@ Classificação:
 Roteamento:
 - Técnica principal: Assumption Tracking.
 - Técnicas auxiliares: Verification; Plan and Execute (versão mínima).
-- Técnicas evitadas: Tree of Thoughts.
+- Técnicas evitadas: modo de busca com poda (Decision Making).
 
 Próxima ação:
 - Marcar "Redis disponível em produção" como premissa crítica não confirmada.
@@ -646,7 +644,7 @@ Classificação:
 Roteamento:
 - Técnica principal: OODA (macro-loop; re-observar git/testes/reviews a cada iteração).
 - Técnicas auxiliares: Plan and Execute; Verification.
-- Técnicas evitadas: ReAct como principal (é o micro-ciclo dentro do Agir); Tree of Thoughts.
+- Técnicas evitadas: ReAct como principal (é o micro-ciclo dentro do Agir); modo de busca com poda (Decision Making).
 
 Próxima ação:
 - Entrar no loop: observar o delta da base, orientar contra o plano/DoD, decidir a próxima

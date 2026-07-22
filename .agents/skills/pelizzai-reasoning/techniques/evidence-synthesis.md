@@ -105,8 +105,7 @@ Exemplos inadequados:
 | Verification            | Confirma se uma afirmação específica possui evidência suficiente |
 | Assumption Tracking     | Registra premissas ainda não confirmadas                         |
 | Constraint Satisfaction | Garante respeito a requisitos e proibições                       |
-| Tree of Thoughts        | Explora alternativas concorrentes                                |
-| Self-Consistency        | Compara tentativas independentes                                 |
+| Decision Making         | Escolhe entre alternativas, inclusive caminhos interdependentes  |
 | ReAct                   | Busca, observa e atualiza o estado                               |
 | Plan and Execute        | Organiza etapas e checkpoints                                    |
 | Critique and Refine     | Corrige conclusões ou artefatos após identificar falhas          |
@@ -402,11 +401,11 @@ Síntese:
 - Há evidência forte de que o campo é suportado.
 ```
 
-A convergência é mais forte quando as fontes possuem métodos ou origens diferentes. Quando há agregação de muitas tentativas ou evidências independentes apontando para a mesma resposta, [Self-Consistency](self-consistency.md) é a técnica auxiliar para medir esse acordo.
+A convergência é mais forte quando as fontes possuem métodos ou origens diferentes. Quando há agregação de muitas evidências independentes — de fontes ou de execuções de agentes/lentes distintas — apontando para a mesma resposta, o **cross-check por execuções independentes** da [Verification](verification.md) mede esse acordo.
 
 ### 7. Tratar conflitos
 
-Quando fontes divergem, não escolha automaticamente a mais conveniente. Primeiro identifique a natureza do conflito. Em casos de agregação ou evidências conflitantes entre tentativas independentes, apoie-se em [Self-Consistency](self-consistency.md).
+Quando fontes divergem, não escolha automaticamente a mais conveniente. Primeiro identifique a natureza do conflito. Em casos de agregação ou evidências conflitantes entre execuções independentes (agentes ou lentes distintas), apoie-se no cross-check da [Verification](verification.md).
 
 | Tipo de conflito | Exemplo                                           | Tratamento                                 |
 | ---------------- | ------------------------------------------------- | ------------------------------------------ |
@@ -780,9 +779,7 @@ Lembretes que não estão cobertos pelos campos acima:
 - [Verification](verification.md) — confirma se uma afirmação crítica possui evidência suficiente.
 - [Assumption Tracking](assumption-tracking.md) — registra premissas ainda não confirmadas.
 - [Constraint Satisfaction](constraint-satisfaction.md) — garante respeito a requisitos e proibições.
-- [Tree of Thoughts](tree-of-thoughts.md) — explora alternativas concorrentes.
-- [Self-Consistency](self-consistency.md) — compara tentativas independentes; auxiliar para agregação e evidências conflitantes.
-- [Decision Making](decision-making.md) — estrutura a escolha entre opções com critérios e trade-offs.
+- [Decision Making](decision-making.md) — estrutura a escolha entre opções com critérios e trade-offs, inclusive caminhos interdependentes com poda.
 - [ReAct](react.md) — busca, observa e atualiza o estado.
 - [Plan and Execute](plan-and-execute.md) — organiza etapas e checkpoints.
 - [Critique and Refine](critique-and-refine.md) — corrige conclusões ou artefatos após identificar falhas.

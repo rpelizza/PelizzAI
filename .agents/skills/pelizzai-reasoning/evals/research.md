@@ -26,7 +26,6 @@ Este eval não mede apenas se a resposta contém links ou fontes: mede se o agen
 | [Assumption Tracking](../techniques/assumption-tracking.md)         | Registrar premissas abertas, lacunas ou dependências não verificadas  |
 | [Decision Making](../techniques/decision-making.md)                 | Escolher alternativa em recomendações com trade-offs                  |
 | [Constraint Satisfaction](../techniques/constraint-satisfaction.md) | Filtrar opções por requisitos, proibições e compatibilidade           |
-| [Self-Consistency](../techniques/self-consistency.md)               | Cruzar tentativas independentes como apoio à Verification (usada em S-13) |
 
 ## Protocolo de avaliação
 
@@ -810,7 +809,7 @@ Ação:
 
 ## Cenários de regressão obrigatória
 
-Execute estes cenários após alterações em [Evidence Synthesis](../techniques/evidence-synthesis.md), [Verification](../techniques/verification.md), [Assumption Tracking](../techniques/assumption-tracking.md), [Decision Making](../techniques/decision-making.md), [Constraint Satisfaction](../techniques/constraint-satisfaction.md), [Self-Consistency](../techniques/self-consistency.md) ou no [pelizzai-reasoning](../SKILL.md).
+Execute estes cenários após alterações em [Evidence Synthesis](../techniques/evidence-synthesis.md), [Verification](../techniques/verification.md), [Assumption Tracking](../techniques/assumption-tracking.md), [Decision Making](../techniques/decision-making.md), [Constraint Satisfaction](../techniques/constraint-satisfaction.md) ou no [pelizzai-reasoning](../SKILL.md).
 
 | ID   | Regressão a evitar                                       |
 | ---- | -------------------------------------------------------- |

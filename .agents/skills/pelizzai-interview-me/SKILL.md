@@ -156,8 +156,9 @@ de design e de plano, mas `bounded` com lacuna material continua chamando esta s
 lacuna, não a lane. Standard usa stress focal; exploratory/greenfield percorre as decisões
 sequencialmente e encerra quando spec/plano podem ser aprovados sem a LLM inventar requisitos.
 
-Quando a lacuna vier marcada pela **Análise da proposta** do `pelizzai-router`
-([proposal-stress.md](../pelizzai-reasoning/techniques/proposal-stress.md)), entre já em stress focal
+Quando a lacuna vier marcada pela **Análise da proposta** — saída da rotina **Proposal Stress
+(Assumption Tracking aplicado)** do `pelizzai-router`
+([proposal-stress.md](../pelizzai-reasoning/techniques/proposal-stress.md)) —, entre já em stress focal
 sobre as premissas materiais que ela apontou: aquela análise é o inventário; esta entrevista é a
 resolução.
 

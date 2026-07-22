@@ -126,7 +126,7 @@ Não usar:
 - Plano extenso.
 ```
 
-Também não usar [Tree of Thoughts](../techniques/tree-of-thoughts.md): o espaço de causas é determinístico e não há hipóteses concorrentes a ramificar.
+Também não usar o modo de busca com poda da [Decision Making](../techniques/decision-making.md): o espaço de causas é determinístico e não há caminhos interdependentes a ramificar.
 
 #### Critério de aprovação
 

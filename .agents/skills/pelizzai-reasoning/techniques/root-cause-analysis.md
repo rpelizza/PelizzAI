@@ -118,7 +118,7 @@ Exemplos:
 | ReAct               | Executa ações de investigação e atualiza hipóteses                   |
 | Assumption Tracking | Registra hipóteses e premissas ainda não confirmadas                 |
 | Evidence Synthesis  | Combina logs, testes, código, documentação e observações             |
-| Tree of Thoughts    | Explora hipóteses concorrentes quando há múltiplas causas plausíveis |
+| Decision Making     | Escolhe entre estratégias de correção quando os caminhos são interdependentes |
 | Verification        | Confirma ou refuta a causa identificada                              |
 | Critique and Refine | Corrige a solução quando a validação revela lacunas                  |
 | Plan and Execute    | Organiza investigação, contenção, correção e prevenção               |
@@ -900,7 +900,7 @@ Limitações:
 - [ReAct](react.md)
 - [Assumption Tracking](assumption-tracking.md)
 - [Evidence Synthesis](evidence-synthesis.md)
-- [Tree of Thoughts](tree-of-thoughts.md)
+- [Decision Making](decision-making.md)
 - [Verification](verification.md)
 - [Critique and Refine](critique-and-refine.md)
 - [Plan and Execute](plan-and-execute.md)

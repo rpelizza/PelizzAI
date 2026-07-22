@@ -66,7 +66,7 @@ Superfície pequena: menos métodos = menos testes; menos params = setup de test
 
 ## Projetar a interface duas vezes
 
-Quando a forma da interface é incerta e o impacto é alto, **projete-a de várias maneiras radicalmente diferentes** e compare por profundidade, localidade e posição do seam. Use a `pelizzai-team`/`pelizzai-subagents` para gerar as alternativas em paralelo e a `pelizzai-reasoning` (*Tree of Thoughts* / *Decision Making*) para escolher.
+Quando a forma da interface é incerta e o impacto é alto, **projete-a de várias maneiras radicalmente diferentes** e compare por profundidade, localidade e posição do seam. Use a `pelizzai-team`/`pelizzai-subagents` para gerar as alternativas em paralelo e a `pelizzai-reasoning` (*Decision Making*, no modo de busca com poda para os caminhos interdependentes) para escolher.
 
 ## Integração
 

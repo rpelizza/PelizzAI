@@ -558,7 +558,7 @@ ou doc pode mudar depois do seal.
 ## Raciocínio — `pelizzai-reasoning`
 
 - Sequência conhecida: *Plan and Execute*; dependências: *Structured Decomposition*.
-- Falha inesperada: hipótese + *Root Cause Analysis*; decisão entre alternativas: comparação/ToT.
+- Falha inesperada: hipótese + *Root Cause Analysis*; decisão entre alternativas: *Decision Making* (comparação; busca com poda e backtracking para caminhos interdependentes).
 - Feedback contínuo e realidade mutável: OODA como controlador macro, não como ritual local.
 - Antes de consolidar e selar: *Verification* com evidência do artefato.
 

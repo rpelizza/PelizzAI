@@ -97,7 +97,7 @@ Exemplos inadequados:
 | ------------------------ | ---------------------------------------------------------------- |
 | Structured Decomposition | Divide o problema em partes coesas                               |
 | Plan and Execute         | Organiza a sequência de execução                                 |
-| Tree of Thoughts         | Explora caminhos alternativos                                    |
+| Decision Making          | Escolhe entre soluções válidas, inclusive caminhos interdependentes |
 | Constraint Satisfaction  | Elimina caminhos que violam requisitos e prioriza opções válidas |
 | ReAct                    | Executa ações e atualiza o estado                                |
 | Verification             | Confirma que requisitos foram realmente atendidos                |
@@ -852,7 +852,6 @@ Pontos de execução que reforçam ou complementam o processo acima:
 | [Verification](verification.md) | Confirma que as restrições foram atendidas na prática |
 | [Critique and Refine](critique-and-refine.md) | Corrige violações ou lacunas reveladas na validação |
 | [Structured Decomposition](structured-decomposition.md) | Divide o problema em partes coesas |
-| [Tree of Thoughts](tree-of-thoughts.md) | Explora caminhos alternativos a serem filtrados |
 | [ReAct](react.md) | Executa ações e atualiza o estado |
 | [Decision Making](decision-making.md) | Escolhe entre soluções válidas por trade-offs |
 | [Assumption Tracking](assumption-tracking.md) | Rastreia e valida premissas desconhecidas |

@@ -97,7 +97,7 @@ Não use Critique and Refine como ritual automático. Evite ou simplifique quand
 | ReAct               | Executa ações, observa resultados e atualiza o estado                                 |
 | Verification        | Determina se uma afirmação ou resultado tem evidência suficiente                      |
 | Critique and Refine | Corrige problemas concretos detectados por feedback, validação ou critérios objetivos |
-| Tree of Thoughts    | Explora alternativas quando há múltiplos caminhos relevantes                          |
+| Decision Making     | Escolhe entre caminhos de solução, inclusive interdependentes com poda                |
 
 ```mermaid
 flowchart LR
@@ -561,7 +561,7 @@ Validação:
 - [Plan and Execute](plan-and-execute.md)
 - [ReAct](react.md)
 - [Verification](verification.md)
-- [Tree of Thoughts](tree-of-thoughts.md)
+- [Decision Making](decision-making.md)
 - [Root Cause Analysis](root-cause-analysis.md)
 
 Voltar ao [catálogo de técnicas](../SKILL.md).

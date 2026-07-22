@@ -118,7 +118,7 @@ Exemplos em que a técnica é desnecessária:
 | [Plan and Execute](plan-and-execute.md)              | Define etapas e checkpoints                                          |
 | [ReAct](react.md)                                    | Executa ações para reduzir incerteza                                 |
 | [Verification](verification.md)                      | Confirma, limita ou refuta premissas                                 |
-| [Tree of Thoughts](tree-of-thoughts.md)              | Explora alternativas quando premissas produzem caminhos concorrentes |
+| [Decision Making](decision-making.md)                | Escolhe entre estratégias quando premissas distintas produzem caminhos interdependentes |
 | [Critique and Refine](critique-and-refine.md)        | Corrige plano ou solução após premissa inválida                      |
 
 ### Regra de integração
@@ -127,7 +127,7 @@ Exemplos em que a técnica é desnecessária:
 - Use **Assumption Tracking** para identificar o que ainda não é fato.
 - Use **Verification** para confirmar ou refutar premissas.
 - Use **Plan and Execute** para inserir checkpoints antes de ações dependentes de premissas críticas.
-- Use **Tree of Thoughts** quando diferentes premissas levam a estratégias materialmente distintas.
+- Use **Decision Making** quando diferentes premissas levam a estratégias materialmente distintas (modo de busca com poda quando os caminhos são interdependentes).
 
 ## Categorias de informação
 
@@ -747,7 +747,7 @@ Status:
 - [Verification](verification.md)
 - [Plan and Execute](plan-and-execute.md)
 - [ReAct](react.md)
-- [Tree of Thoughts](tree-of-thoughts.md)
+- [Decision Making](decision-making.md)
 - [Critique and Refine](critique-and-refine.md)
 - [Root Cause Analysis](root-cause-analysis.md)
 
