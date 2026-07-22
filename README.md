@@ -2,9 +2,9 @@
 
 Harness de engenharia para agentes de código — Claude Code, Codex, Cursor, Gemini CLI e afins.
 
-Você clona, exporta para o seu projeto e o agente passa a trabalhar com processo: ele lê a sua
-stack de verdade, escreve regras específicas do seu projeto, isola antes de escrever, prova o que
-entrega e **para para perguntar sempre que a decisão for sua**.
+Você clona, copia a `dist/` para o seu projeto (ou roda o export) e o agente passa a trabalhar com
+processo: ele lê a sua stack de verdade, escreve regras específicas do seu projeto, isola antes de
+escrever, prova o que entrega e **para para perguntar sempre que a decisão for sua**.
 
 A regra que organiza tudo o resto:
 
@@ -14,8 +14,9 @@ A regra que organiza tudo o resto:
 > default ou "inferência razoável" não substituem a sua resposta, mesmo quando a escolha parece
 > óbvia e reversível.
 
-**Requisitos:** Node.js 18+ (obrigatório). PowerShell 7+ apenas se você quiser usar os wrappers
-`.ps1` no Windows. Nenhuma dependência é instalada: o harness é markdown, mais alguns scripts.
+**Requisitos:** nenhum para instalar copiando a `dist/`. Node.js 18+ para os scripts (export,
+sync, hooks); PowerShell 7+ apenas para os wrappers `.ps1` no Windows. Nenhuma dependência é
+instalada: o harness é markdown, mais alguns scripts.
 
 ---
 
@@ -23,7 +24,7 @@ A regra que organiza tudo o resto:
 
 ```mermaid
 flowchart TD
-    A["Exporte o harness para o seu projeto<br/>e abra o agente lá dentro"] --> B{"O projeto<br/>já existe?"}
+    A["Instale o harness no seu projeto<br/>(cópia da dist/ ou export)<br/>e abra o agente lá dentro"] --> B{"O projeto<br/>já existe?"}
     B -- "sim" --> D["você digita: bootstrap"]
     B -- "não, é do zero" --> E["descreva o produto<br/>→ descoberta → spec aprovada"]
     D --> F["lê a stack REAL: lockfiles,<br/>versões, convenções do código"]
@@ -41,8 +42,25 @@ natural; o harness classifica cada pedido e recomenda a rota.
 
 ## Instalação
 
-A partir do repo-fonte do PelizzAI, aponte para o seu projeto. **Instalar e atualizar são o mesmo
-comando** — rode de novo quando quiser a versão nova.
+### Sem linha de comando: copie a `dist/`
+
+A pasta `dist/` é o harness pronto para consumo: skills core (`.claude` e `.agents`), hooks,
+adaptador Cursor (`.cursor`), scripts e os três entrypoints (`CLAUDE.md` já na versão do
+consumidor, `AGENTS.md`, `GEMINI.md`) — sem a sentinela de repo-fonte e sem os arquivos de
+desenvolvimento do harness.
+
+1. Baixe o repositório (clone ou "Download ZIP" no GitHub).
+2. Copie **o conteúdo** de `dist/` para a raiz do seu projeto — Ctrl+C, Ctrl+V, pronto.
+3. Abra o agente no projeto e digite `bootstrap`.
+
+Para **atualizar** mais tarde, prefira o export abaixo: ele preserva as suas skills de domínio e o
+seu `pelizzai/` e valida a instalação. Copiar a `dist/` nova por cima também funciona, mas não
+remove skills core descontinuadas upstream nem roda a validação.
+
+### Com linha de comando: instalar e atualizar são o mesmo comando
+
+A partir do repo-fonte do PelizzAI, aponte para o seu projeto — rode de novo quando quiser a
+versão nova.
 
 ```bash
 # Portátil (qualquer sistema com Node.js 18+)
@@ -63,10 +81,11 @@ Isso copia as skills core, os hooks, o adaptador Cursor e os scripts úteis, ger
 consumidor e valida os espelhos — **sem tocar** nas suas skills de domínio, no seu `pelizzai/` ou
 no seu `settings.json`.
 
-> **Nunca distribua copiando o repositório à mão.** O que distingue o repo-fonte de um consumidor é
-> uma única sentinela, `scripts/pelizzai-source-repo.txt`. Uma cópia manual a levaria junto e
-> promoveria o seu projeto a repo-fonte por engano — com bootstrap mudo, runtime desativado e
-> writegate pela metade. O `--export-consumer` remove a sentinela por contrato.
+> **Nunca copie a raiz do repositório à mão** — para cópia manual existe a `dist/`. O que distingue
+> o repo-fonte de um consumidor é uma única sentinela, `scripts/pelizzai-source-repo.txt`. Copiar a
+> raiz a levaria junto e promoveria o seu projeto a repo-fonte por engano — com bootstrap mudo,
+> runtime desativado e writegate pela metade. A `dist/` e o `--export-consumer` excluem a sentinela
+> por contrato.
 
 ### Hooks: copiados, nunca ligados sem você
 
@@ -432,6 +451,7 @@ flowchart TD
     SYNC --> GE["GEMINI.md"]
     SYNC --> MF["manifesto<br/>com --update-manifest"]
     SYNC --> EXP["--export-consumer<br/>projeto alvo"]
+    SYNC --> DIST["dist/<br/>pronta para copiar"]
     CUR[".cursor/rules/pelizzai.mdc<br/>autoria manual, distribuído pelo export"] -.->|aponta para os entrypoints| AS
 ```
 
@@ -474,7 +494,8 @@ PelizzAI/
 │   ├── skills/                   fonte canônica das skills
 │   └── hooks/                    cadence, guardrails, writegate e SessionStart (opt-in)
 ├── .agents/skills/               espelho gerado
-├── .cursor/rules/pelizzai.mdc    adaptador manual
+├── .cursor/rules/pelizzai.mdc    adaptador de autoria manual, distribuído pelo export
+├── dist/                         harness pronto para copiar (gerado pelo sync; sem sentinela)
 ├── scripts/
 │   ├── sync-harness.mjs          núcleo portátil de sync + distribuição
 │   ├── sync-harness.ps1|.sh      wrappers
@@ -513,10 +534,13 @@ Edite **somente** `.claude/` (e o adaptador Cursor quando necessário). Tudo em 
 `AGENTS.md` e `GEMINI.md` é gerado — mudança feita lá é perdida no próximo sync.
 
 ```bash
-node scripts/sync-harness.mjs                    # regenera os espelhos
+node scripts/sync-harness.mjs                    # regenera espelhos e dist/
 node scripts/sync-harness.mjs --check            # valida a sincronia
 pwsh scripts/test-harness-contracts.ps1          # suíte de contratos
 ```
+
+O sync regenera a `dist/` automaticamente no repo-fonte (há também o `--build-dist` isolado); o CI
+falha se ela for commitada fora de sincronia com `.claude/`.
 
 Cada comportamento do harness é travado por uma asserção na suíte de contratos. Comportamento novo
 sem asserção nova é regressão esperando acontecer — e asserção enfraquecida a um regex que casa tudo

@@ -1,0 +1,66 @@
+---
+description: Harness PelizzAI — entrada determinística, roteamento proporcional e proteção de escrita
+alwaysApply: true
+---
+
+# Harness PelizzAI (Cursor)
+
+Este projeto usa o harness de skills **PelizzAI**. Para tarefas que precisam inspecionar ou alterar
+o projeto, leia `.agents/skills/pelizzai-core/SKILL.md` e depois
+`.agents/skills/pelizzai-router/SKILL.md`. Perguntas puramente conceituais, sem contexto de projeto,
+podem ser respondidas diretamente.
+
+## Contrato de entrada
+
+O router deriva `effect`, `intent`, `risk`, `uncertainty` e `surfaces`; escolhe exatamente uma head
+skill e acrescenta overlays apenas por sinais observáveis. A rota classificada (lane, head skill,
+overlays) é apresentada como **recomendação a ratificar** no Gate de kickoff. O harness escolhe
+como raciocinar; o usuário decide requisitos, escopo, UX, arquitetura, dados, risco e aceite.
+
+- `read-only`: inspecione sem criar branch, state, profile, catálogo, relatório ou bootstrap.
+- `write-local`: passe pelo gate de primeira escrita antes de qualquer arquivo persistente.
+- `external`: valide também autoridade, alvo, reversibilidade e confirmação no gate da ação.
+- UI/UX/CSS/componente/layout/acessibilidade: aplique `pelizzai-frontend` como overlay obrigatório,
+  incluindo design system, anti-AI-slop e QA visual.
+- Superfícies de segurança, skills de domínio e documentação acompanham o trabalho até Verification.
+
+Para feature/refactor/infra, escolha a lane pelo risco e pela incerteza:
+
+- `bounded`: plano compacto, sem brainstorming obrigatório;
+- `standard`: brainstorming compacto e plano;
+- `exploratory`: descoberta e stress proporcionais antes do plano.
+
+Produto/projeto greenfield é sempre `exploratory`, mesmo com stack definida: faça uma pergunta por
+vez, sempre recomende a melhor opção, produza e estresse spec e plano, obtenha aprovação e decida
+domain skills antes de implementar. Context7 fundamenta opções técnicas; nunca decide pelo usuário.
+
+OODA é uma técnica macro adaptativa, não um ritual universal. Debugging faz triagem e contenção
+quando necessária, usando somente as hipóteses que discriminam as causas plausíveis. TDD, team,
+subagents e entrevistas também são situacionais. A estratégia de teste depende do artefato.
+
+## Regras inegociáveis
+
+- Nunca commite em `main`, `master`, `develop`, `dev` ou HEAD destacado.
+- Para tarefas mutáveis, crie/valide a task branch antes de state, spec, plano, ADR, código,
+  configuração, teste, scaffold ou protótipo.
+- Specs e planos ficam na task branch. Um worktree posterior parte da mesma branch existente após
+  checkpoint do planejamento.
+- Base/nome da branch, isolamento, modo de execução (com `team` sempre visível) e estratégia de
+  commit são recomendados e ratificados uma pergunta por vez; nunca default silencioso.
+  `squash-final` só a pedido explícito e `destination` é confirmado por tarefa.
+- O conteúdo só está pronto quando review, overlays e Verification validam o mesmo commit e gravam
+  seu SHA em `validated-head`. Finish pode acrescentar apenas o commit metadata-only de `state.md`.
+- Push, PR, deploy, mensagem, descarte e outras ações externas exigem o gate correspondente.
+- Código em inglês; respostas ao usuário em português do Brasil.
+- Para bibliotecas, frameworks e APIs externas, fundamente-se em documentação oficial disponível.
+- No Windows, traduza exemplos POSIX para PowerShell quando necessário.
+- Siga as diretrizes completas em `AGENTS.md`.
+
+## Propriedade dos arquivos
+
+`.claude/skills/` e `CLAUDE.md` são as fontes canônicas. `.agents/skills/`, `AGENTS.md` e
+`GEMINI.md` são gerados pelo núcleo portátil `scripts/sync-harness.mjs` (wrappers `.ps1`/`.sh`) e
+não devem ser editados à mão.
+
+Este arquivo `.cursor/rules/pelizzai.mdc` é um **adaptador manual**, não um alvo gerado. Mantenha-o
+curto e alinhado aos entrypoints `pelizzai-core` e `pelizzai-router`.

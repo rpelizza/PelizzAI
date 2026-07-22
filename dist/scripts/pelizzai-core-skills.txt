@@ -1,0 +1,33 @@
+# skills core do PelizzAI — GERADO por scripts/sync-harness.mjs --update-manifest.
+# Regenere apenas no repo-fonte. Consumidores usam este manifesto para separar core de domínio.
+pelizzai-audit
+pelizzai-brainstorming
+pelizzai-codebase-design
+pelizzai-core
+pelizzai-debugging
+pelizzai-documenting-features
+pelizzai-domain-modeling
+pelizzai-execution-plans
+pelizzai-finish-task
+pelizzai-frontend
+pelizzai-handoff
+pelizzai-improving-architecture
+pelizzai-interview-me
+pelizzai-loop
+pelizzai-oswap
+pelizzai-preferences
+pelizzai-prototype
+pelizzai-quick-fix
+pelizzai-reasoning
+pelizzai-recovery
+pelizzai-resolving-merge-conflicts
+pelizzai-review
+pelizzai-router
+pelizzai-starting-branch
+pelizzai-subagents
+pelizzai-tdd
+pelizzai-team
+pelizzai-verification-before-completion
+pelizzai-writing-clearly-and-concisely
+pelizzai-writing-plans
+pelizzai-writing-skills

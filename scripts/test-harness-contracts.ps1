@@ -846,6 +846,30 @@ try {
         if (Test-Path -LiteralPath $exportTemp) { Remove-Item -LiteralPath $exportTemp -Recurse -Force }
     }
 
+    # dist/: instalação por cópia — commitada no repo-fonte, sem sentinela, skills em sincronia.
+    Check-Match 'scripts/sync-harness.mjs' 'buildDist' 'sync portátil constrói a dist'
+    Check-Match 'scripts/sync-harness.ps1' 'BuildDist' 'wrapper PowerShell expõe -BuildDist'
+    Check-Match 'README.md' 'Sem linha de comando: copie a `dist/`' 'README instrui a instalação por cópia da dist'
+    Check-Match '.github/workflows/check-harness.yml' 'build-dist' 'CI valida a dist commitada em sincronia'
+    Check (Test-Path (Join-Path $root 'dist/.cursor/rules/pelizzai.mdc')) 'dist contém o adaptador Cursor'
+    Check (Test-Path (Join-Path $root 'dist/.claude/skills/pelizzai-core/SKILL.md')) 'dist contém as skills core'
+    Check (Test-Path (Join-Path $root 'dist/AGENTS.md')) 'dist contém AGENTS.md gerado'
+    Check (-not (Test-Path (Join-Path $root 'dist/scripts/pelizzai-source-repo.txt'))) 'dist não contém a sentinela de source mode'
+    Check (-not (Test-Path (Join-Path $root 'dist/scripts/test-harness-contracts.ps1'))) 'dist não contém a suíte de contratos'
+    $distClaudePath = Join-Path $root 'dist/CLAUDE.md'
+    Check (Test-Path $distClaudePath) 'dist contém CLAUDE.md'
+    if (Test-Path $distClaudePath) {
+        $distClaude = Get-Content -LiteralPath $distClaudePath -Raw -Encoding utf8
+        Check ($distClaude -match 'Este repositório consome o PelizzAI') 'CLAUDE.md da dist é a ponte consumidora'
+    }
+    if (Test-Path (Join-Path $root 'dist/.claude/skills')) {
+        $srcSkillFiles = Get-RelativeFiles (Join-Path $root '.claude/skills')
+        $distSkillFiles = Get-RelativeFiles (Join-Path $root 'dist/.claude/skills')
+        Check ((Compare-Object $srcSkillFiles $distSkillFiles | Measure-Object).Count -eq 0) 'dist/.claude/skills espelha a fonte (mesma lista de arquivos)'
+    } else {
+        Check $false 'dist/.claude/skills espelha a fonte (mesma lista de arquivos)' 'dist/.claude/skills ausente'
+    }
+
     # Instalador de hooks: merge idempotente e remoção cirúrgica.
     $hooksTemp = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-hooks-test-" + [guid]::NewGuid().ToString('N'))
     try {
