@@ -12,7 +12,7 @@ import {
   statSync,
   writeFileSync,
 } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -231,8 +231,12 @@ function runNode(script, args, cwd) {
 }
 
 function copyConsumerPayload(target) {
-  if (resolve(target) === root) {
+  const resolved = resolve(target);
+  if (resolved === root) {
     throw new Error('O destino não pode ser o próprio repo-fonte.');
+  }
+  if (resolved !== distDir && `${resolved}${sep}`.startsWith(`${root}${sep}`)) {
+    throw new Error('O destino não pode ficar dentro do repo-fonte (exceto dist/).');
   }
   const core = readCoreManifest();
   if (!core?.length) throw new Error('Manifesto de core ausente; rode --update-manifest.');

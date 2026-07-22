@@ -850,6 +850,17 @@ try {
         if (Test-Path -LiteralPath $exportTemp) { Remove-Item -LiteralPath $exportTemp -Recurse -Force }
     }
 
+    # Destino aninhado no repo-fonte é rejeitado antes de qualquer escrita (só dist/ é interno legítimo).
+    $nestedTarget = Join-Path $root '.tmp-export-nested'
+    try {
+        New-Item -ItemType Directory -Path $nestedTarget -Force | Out-Null
+        node scripts/sync-harness.mjs --export-consumer $nestedTarget 2>$null | Out-Null
+        Check ($LASTEXITCODE -ne 0) 'export rejeita destino aninhado no repo-fonte'
+        Check (-not (Test-Path (Join-Path $nestedTarget 'CLAUDE.md'))) 'destino aninhado não recebeu payload'
+    } finally {
+        if (Test-Path -LiteralPath $nestedTarget) { Remove-Item -LiteralPath $nestedTarget -Recurse -Force }
+    }
+
     # dist/: instalação por cópia — commitada no repo-fonte, sem sentinela, skills em sincronia.
     # O build real roda primeiro: as checagens abaixo validam o resultado FRESCO da regeneração
     # (idempotente sobre a dist commitada), não apenas o conteúdo que já estava no repo.
