@@ -121,15 +121,17 @@ Antes de qualquer mutação no repositório — teste, instrumentação ou fix �
 descartáveis que não pertençam ao fix. Contenção operacional autorizada que não escreve no repo
 não espera uma branch.
 
-Depois que `pelizzai-starting-branch` ratificou base/nome e criou a branch, e antes de editar o fix,
-ratifique isolamento, modo e commits **uma pergunta por turno**. A head skill é o único emissor; o
-router não duplica, e contenção reversível/investigação read-only não esperam por ele:
+Track `bug` usa o **confirm compacto de uma linha** — não o menu de perguntas do gate pós-plano. A
+`pelizzai-starting-branch` descobre a base e propõe o nome SEM parada própria (base sem candidato
+inequívoco ainda para lá); a head skill é o único emissor, o router não duplica, e contenção
+reversível/investigação read-only não esperam por ele:
 
-1. `Isolamento recomendado: branch — <motivo>. Alternativa: worktree. Qual escolhe?`
-2. `Modo recomendado: inline — <motivo>. Alternativas: subagents · team. Qual escolhe?`
-3. `Commits recomendados: granular — <motivo>. Alternativa: squash-final. Qual escolhe?`
+`Kickoff: fix na branch fix/<slug> @ <base-ref> (<sha-curto>) — isolamento: branch · modo: inline · commits: granular. Ok? (overrides: worktree · subagents/team · squash-final · outro nome/base)`
 
-Após as três respostas, grave o marcador
+Um "ok" ratifica base, nome e as três decisões de uma vez — todas nomeadas na linha, nada foi
+silencioso; um override nomeado ajusta só aquele item e mantém os demais. Só então a branch é
+criada. Não pulverize esta linha em perguntas separadas. Após o "ok" (ou os overrides), grave o
+marcador
 `kickoff: ratificado <AAAA-MM-DD>` (com isolamento/modo/commit) — no consumidor em
 `pelizzai/data/state.md`, em source mode no execution record nativo com a mesma palavra-chave —
 ANTES da primeira escrita de produto no repositório. A head skill é o único dono deste marcador no
