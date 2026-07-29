@@ -303,7 +303,7 @@ try {
     Check-Match 'CLAUDE.md' 'Recomende e ratifique:' 'CLAUDE.md fixa a doutrina recomendar-e-ratificar'
     Check-Match 'CLAUDE.md' 'raciocinar é do harness; decidir é do usuário' 'CLAUDE.md separa reasoning de autoridade'
     Check-Match 'CLAUDE.md' 'Produto/projeto greenfield nunca é bounded' 'CLAUDE.md protege o fluxo greenfield'
-    Check-Match 'CLAUDE.md' 'decisões estruturais[\s\S]{0,180}nunca (em )?default silencioso' 'CLAUDE.md: decisões estruturais nunca usam default silencioso'
+    Check-Match 'CLAUDE.md' 'decisões estruturais[\s\S]{0,320}nunca (em )?default silencioso' 'CLAUDE.md: decisões estruturais nunca usam default silencioso'
 
     # -- Marcadores máquina-legíveis do state.md (schema do writegate/retomada) --
     Check-Match '.claude/skills/pelizzai-execution-plans/templates/state.md' 'kickoff: <pendente \| ratificado' 'state.md tem marcador kickoff (pendente|ratificado)'

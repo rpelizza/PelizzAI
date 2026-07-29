@@ -184,7 +184,7 @@ Nunca crie worktree da base limpa depois de escrever spec/plano em outro working
 | --- | --- |
 | Bootstrap/remap autorizado, ou proposta de bootstrap aceita | `pelizzai-audit` (`bootstrap-write`) |
 | Algo quebrado/erro/falha/comportamento inesperado; "não funciona", "deu erro", "tá com bug", "para de chutar" | `bug` → `pelizzai-debugging` |
-| Mudança local sem nova regra/contrato/superfície | `ajuste` → `pelizzai-quick-fix` |
+| Mudança local sem nova regra/contrato/superfície (texto, label, cor, botão/campo em tela existente; ~1 arquivo/<~50 linhas como sinal) | `ajuste` → `pelizzai-quick-fix` |
 | Refactor local preservando comportamento | `ajuste` → `pelizzai-quick-fix` |
 | Review de diff, working tree, branch ou PR | `review` → `pelizzai-review` |
 | Revisão codebase-wide de arquitetura, dívida ou seams | `review` → `pelizzai-improving-architecture` |
@@ -268,8 +268,10 @@ O router não aplica esses defaults — calcula a recomendação e encaminha par
 
 - **Tracks com plano** (bounded/standard/exploratory): defira isolamento, modo e commit ao **Gate de setup pós-plano** consolidado da `pelizzai-execution-plans` — é lá que as três opções de modo (inline · subagents · **team**) ficam sempre visíveis e a estratégia de commit é sempre mostrada.
 - **Write-local sem plano** (ajuste/bug): entregue a recomendação à head skill; a própria head skill
-  (`pelizzai-quick-fix`/`pelizzai-debugging`) emite um confirm compacto antes da primeira escrita.
-  O router não duplica a pergunta.
+  (`pelizzai-quick-fix`/`pelizzai-debugging`) emite o confirm compacto de UMA linha — base, nome,
+  isolamento, modo e commits visíveis e nomeados; um "ok" ratifica tudo, override nomeado ajusta
+  só aquele item — antes da primeira escrita. O router não duplica a pergunta; o menu
+  uma-decisão-por-turno pertence ao gate pós-plano.
 
 `worktree` e `squash-final` nunca são aplicados sem escolha do usuário. Use subagents/time para independência real, diversidade de hipóteses ou ganho mensurável; não os trate como hierarquicamente melhores que inline.
 
@@ -339,6 +341,8 @@ Uma tarefa nova nunca herda decisões da anterior. O fechamento pertence a `peli
 - Tratar frontend/security como oferta tardia.
 - Aplicar isolamento, modo de execução ou estratégia de commit sem ratificação do usuário.
 - Pulverizar a rota ou o setup em várias micro-perguntas em vez de um bloco agrupado.
+- Pulverizar o confirm compacto de ajuste/bug em perguntas separadas, ou promover um ajuste a
+  bounded/plano só porque o aceite é claro (spec/plano para trocar um botão é a falha histórica).
 - Assumir em silêncio decisão que muda escopo/UX/arquitetura sem apresentá-la na Análise da proposta nem no Gate de kickoff.
 - Usar Context7, convenção ou “default seguro” como voto do usuário.
 - Preencher com default/convenção/inferência uma lacuna material que apareceu DEPOIS do kickoff, em

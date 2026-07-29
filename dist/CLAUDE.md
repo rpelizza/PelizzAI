@@ -104,7 +104,8 @@ Sinais observáveis de que estas diretrizes e as skills estão cumprindo o papel
 - no kickoff, a rota classificada (lane, descoberta, overlays) é apresentada para o usuário ratificar ou ajustar antes de investir esforço;
 - projetos greenfield passam por descoberta → spec → stress → aprovação → plano → stress → aprovação;
 - toda lacuna material vira pergunta da `pelizzai-interview-me` — nunca é preenchida por Context7, convenção, default ou "inferência razoável", inclusive no meio da execução;
-- as decisões estruturais (base/branch, isolamento, modo com `team` visível, commits, review, destino) são recomendadas e ratificadas uma por vez, nunca em default silencioso;
+- as decisões estruturais (base/branch, isolamento, modo com `team` visível, commits, review, destino) são recomendadas e ratificadas — uma por vez nos tracks com plano; em ajuste/bug, num confirm compacto de uma linha com todas visíveis e nomeadas — nunca em default silencioso;
+- um ajuste trivial (label, botão em tela existente, config óbvia) chega à primeira escrita com no máximo DUAS paradas (Gate de kickoff + confirm compacto) e nunca gera spec/plano;
 - uma tarefa read-only não cria estado nem artefatos;
 - o conteúdo entregue é exatamente o conteúdo validado, e o histórico tem menos "fix do fix" (commits corrigindo o commit imediatamente anterior).
 

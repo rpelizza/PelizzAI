@@ -123,8 +123,11 @@ Algoritmo:
 4. Sem candidato inequívoco, mostre as refs existentes e pergunte a base. Nunca crie `develop`
    como convenção do harness.
 5. Com candidato inequívoco e atual, apresente ref + SHA com recomendação e faça uma pergunta:
-   "Confirma esta base?". Aguarde. Uma base materialmente diferente é um recomeço explícito;
-   `base-ref`/`base-sha` continuam imutáveis durante a tarefa.
+   "Confirma esta base?". Aguarde. Nos tracks leves (ajuste/bug), não abra pergunta separada:
+   entregue a base recomendada (ref + SHA) e o nome sugerido ao confirm compacto da head skill,
+   que ratifica tudo numa linha só; base sem candidato inequívoco (passo 4) continua parando aqui.
+   Uma base materialmente diferente é um recomeço explícito; `base-ref`/`base-sha` continuam
+   imutáveis durante a tarefa.
 
 O nome apontado pelo default descoberto passa a ser tratado como branch protegida pelo harness,
 mesmo que não se chame main/master/develop/dev.
@@ -150,8 +153,10 @@ falhar, apresente a idade/limitação da ref local e peça confirmação; não f
 ## 4. Nomear a branch de tarefa/planejamento
 
 Depois de ratificar a base, derive `<tipo>/<slug-kebab>` (ASCII, minúsculo, até 50 caracteres).
-Apresente o nome recomendado com motivo e faça uma única pergunta: "Confirma este nome?". Só crie
-a branch após resposta afirmativa. Não trave nome/base em silêncio. O tipo vem do efeito real:
+Apresente o nome recomendado com motivo e faça uma única pergunta: "Confirma este nome?". Nos
+tracks leves (ajuste/bug), o nome recomendado viaja no confirm compacto da head skill em vez de
+pergunta separada — o "ok" da linha É a ratificação de base + nome. Só crie a branch após resposta
+afirmativa. Não trave nome/base em silêncio. O tipo vem do efeito real:
 
 | Natureza | Tipo sugerido |
 | --- | --- |

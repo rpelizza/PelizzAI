@@ -78,7 +78,23 @@ No componente existente, troque o rótulo “Fila” por “Fila de atendimento�
 ```
 
 Esperado: ajuste/`pelizzai-quick-fix`, sem entrevista, spec formal, skill nova ou pesquisa Context7
-sem pergunta técnica externa. Ainda exige kickoff e setup ratificados antes da escrita.
+sem pergunta técnica externa. Ainda exige kickoff e setup ratificados antes da escrita — no máximo
+DUAS paradas: o Gate de kickoff do router e o confirm compacto de uma linha da head skill (base,
+nome, isolamento, modo e commits juntos, visíveis e nomeados). Pulverizar o setup em perguntas
+separadas é falha.
+
+## B-02 — botão em tela existente (regressão de lane)
+
+```text
+Adicione um botão "Exportar CSV" na toolbar da listagem de clientes, chamando o serviço de
+exportação que já existe.
+```
+
+Esperado: `ajuste`/`pelizzai-quick-fix` — botão em tela existente chamando serviço existente NÃO é
+superfície pública nova (superfície = rota, comando, endpoint, API ou config nova). Overlay
+`pelizzai-frontend` aplicado com prova visual proporcional; nenhum spec/plano gerado; no máximo
+duas paradas antes da escrita. Falha se o harness promover a `bounded`/`standard` (plano/spec para
+um botão) ou abrir entrevista de descoberta.
 
 ## Critérios transversais
 
@@ -90,4 +106,6 @@ Falha se o harness:
 - chamar Context7 para inventar requisito ou substituir ratificação;
 - criar/atualizar skill a partir de memória ou sem sincronizar roots;
 - aplicar o fluxo greenfield completo a toda feature ou ajuste;
+- gerar spec/plano ou pulverizar o setup em perguntas separadas num pedido cujos sinais o
+  classificam como ajuste;
 - fixar OODA, TDD, team ou qualquer técnica sem sinais observáveis.

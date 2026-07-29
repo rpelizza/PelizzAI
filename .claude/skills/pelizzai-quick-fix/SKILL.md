@@ -1,6 +1,6 @@
 ---
 name: pelizzai-quick-fix
-description: Head skill para ajuste local, coeso, claro e de baixo risco, sem nova superfície pública, regra de negócio ou decisão arquitetural. Use para texto, label, estilo localizado, rename/refactor mecânico ou configuração óbvia quando design/plano não agregam. Tamanho e número de arquivos são sinais, não limites rígidos. Algo quebrado usa `pelizzai-debugging`; se surgir contrato ou decisão, reclassifique pela lane do router.
+description: Head skill para ajuste local, coeso, claro e de baixo risco — texto, label, cor, botão ou campo em tela existente, constante, rename/refactor mecânico, configuração óbvia. Sinais típicos: ~1 arquivo e menos de ~50 linhas (sinais de escala, não limites rígidos). Superfície pública = rota, comando, endpoint, API ou config NOVA — ajuste não cria nenhuma delas nem muda regra de negócio. Algo quebrado usa `pelizzai-debugging`; nova superfície/contrato ou decisão de design reclassifica pela lane do router.
 ---
 
 # PelizzAI Quick Fix
@@ -20,34 +20,43 @@ Um caminho enxuto para mudanças triviais. Evita o custo de design + plano quand
 ```text
 - objetivo e aceite são inequívocos;
 - mudança é local, coesa, reversível e de baixo risco;
-- NÃO cria superfície pública, regra de negócio ou decisão de arquitetura;
+- NÃO cria superfície pública — rota, comando, endpoint, API ou config nova — nem muda regra de
+  negócio ou decide arquitetura (botão, campo ou label numa tela existente NÃO é superfície
+  pública: é ajuste);
 - prova e rollback são diretos;
-- o diff esperado é pequeno o bastante para um review formal não agregar sinal material.
+- o diff esperado é pequeno o bastante para um review formal não agregar sinal material
+  (~1 arquivo e <~50 linhas são os sinais típicos de escala, não limites rígidos).
 ```
 
-Linhas e arquivos ajudam a detectar crescimento, mas não decidem sozinhos. Se surgir contrato com
-aceite claro, promova para lane `bounded` e plano compacto; se surgir decisão/incerteza, use
-`standard`/`exploratory` e brainstorming proporcional. Algo **quebrado** usa debugging.
+Linhas e arquivos ajudam a detectar crescimento, mas não decidem sozinhos. Aceite claro é critério
+de ENTRADA do quick-fix, nunca motivo de promoção. Promova somente quando surgir coisa nova: NOVA
+superfície pública/contrato com aceite claro → lane `bounded` e plano compacto; decisão real de
+design ou incerteza → `standard`/`exploratory` e brainstorming proporcional. Na dúvida entre ajuste
+e bounded, recomende `ajuste` no kickoff — promover depois é barato; um plano para trocar um botão
+não é. Algo **quebrado** usa debugging.
 
 ## Processo
 
 A `pelizzai-router` calcula as recomendações deste ajuste; esta head skill é o único emissor do
-setup. Depois que `pelizzai-starting-branch` ratificou base/nome e criou a branch, pergunte uma
-decisão por turno antes da primeira escrita:
+setup. Ajuste usa o **confirm compacto de uma linha** — não o menu de perguntas do gate pós-plano.
+A `pelizzai-starting-branch` descobre a base e propõe o nome SEM parada própria (base sem candidato
+inequívoco ainda para lá); a head skill apresenta tudo numa linha, com as decisões visíveis e
+nomeadas, e aguarda:
 
-1. `Isolamento recomendado: branch — ajuste local. Alternativa: worktree. Qual escolhe?`
-2. `Modo recomendado: inline — tarefa curta. Alternativas: subagents · team. Qual escolhe?`
-3. `Commits recomendados: granular — checkpoint auditável. Alternativa: squash-final. Qual escolhe?`
+`Kickoff: quick-fix na branch <tipo>/<slug> @ <base-ref> (<sha-curto>) — isolamento: branch · modo: inline · commits: granular. Ok? (overrides: worktree · subagents/team · squash-final · outro nome/base)`
 
-Só grave a ratificação após as três respostas. Sob briefing fechado (SUBAGENT-STOP), não abra gates:
-aplique o briefing e escale ao coordenador o que exigir decisão.
+Um "ok" ratifica base, nome e as três decisões de uma vez — todas estão nomeadas na linha, nada foi
+silencioso; um override nomeado ajusta só aquele item e mantém os demais. Só então a branch é
+criada. Não pulverize esta linha em perguntas separadas: o menu uma-decisão-por-turno pertence ao
+gate pós-plano dos tracks com plano. Sob briefing fechado (SUBAGENT-STOP), não abra gates: aplique
+o briefing e escale ao coordenador o que exigir decisão.
 
 ```text
-1. Branch — a pelizzai-starting-branch propõe e ratifica base e `<tipo>/<slug>` antes de criar a
-   branch (nunca em branch protegida).
+1. Branch — a pelizzai-starting-branch descobre a base e propõe `<tipo>/<slug>`; a ratificação
+   acontece no confirm compacto acima e só depois dele a branch é criada (nunca em branch protegida).
 1.5. Regras locais — no consumidor, confira `pelizzai/domain-skills.md`; em source mode, use as
    regras/skills do próprio repo. Siga somente as aplicáveis à área.
-1.6. Registrar a ratificação (só após as três respostas) — grave o marcador `kickoff: ratificado <AAAA-MM-DD>`
+1.6. Registrar a ratificação (após o "ok" do confirm compacto) — grave o marcador `kickoff: ratificado <AAAA-MM-DD>`
    (com `isolation`/`execution-mode`/`commit-strategy` ratificados) no state consumidor
    `pelizzai/data/state.md` ou, em source mode, no execution record nativo com a mesma palavra-chave,
    ANTES da primeira escrita de produto. A head skill é o único dono deste marcador no track
@@ -82,8 +91,10 @@ aplique o briefing e escale ao coordenador o que exigir decisão.
 ## Red flags
 
 ```text
-Nunca: tratar como quick-fix algo que cria nova superfície ou muda regra de negócio; pular a branch
-       isolada ("é só um textinho" — o gate de branch protegida vale igual); pular a verificação;
+Nunca: tratar como quick-fix algo que cria nova superfície ou muda regra de negócio; promover a
+       bounded/plano só porque o aceite é claro (aceite claro é critério de entrada, não gatilho de
+       promoção); pulverizar o confirm compacto em perguntas separadas; pular a branch isolada
+       ("é só um textinho" — o gate de branch protegida vale igual); pular a verificação;
        insistir no caminho leve depois que a mudança cresceu (escale para feature).
 ```
 
