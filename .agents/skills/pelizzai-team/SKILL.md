@@ -97,7 +97,9 @@ Before assembling the team, determine the mode:
 2. Is Agent Teams enabled? (heuristic — confirm what you can)
    - The feature is turned on with the env var CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1.
    - Check, in this order: the env var in the environment; then the "env" block of the project's
-     settings.json (.claude/settings.json) and the user's (~/.claude/settings.json).
+     settings.json (.claude/settings.json). Never read the user's global configuration
+     (~/.claude/settings.json) to detect it — it may hold secrets/keys the skill has no reason to
+     see; if the project sources do not confirm the capability, treat detection as indeterminate.
    - Enabled → Teammates Mode is POSSIBLE.
    - Disabled → Subagents Mode.
 
@@ -401,7 +403,8 @@ Applies to both modes. The coordinator never concludes silently with a front lef
   → Teammates Mode: nudge via SendMessage, or request shutdown and recreate.
   → Subagents Mode: reissue the Agent call (a new spawn with the briefing).
 - A front proves unviable:
-  → the coordinator absorbs the front or replans the decomposition (it neither forces nor ignores).
+  → the coordinator replans the decomposition or redistributes the front to another member
+    (it neither forces nor ignores) — it never implements the front itself.
 ```
 
 Anchor the recovery in `pelizzai-reasoning`: `Critique and Refine` (fix a failed deliverable) and `Plan and Execute` (replan when the decomposition does not hold).

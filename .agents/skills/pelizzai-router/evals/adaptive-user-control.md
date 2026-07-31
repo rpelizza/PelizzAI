@@ -18,7 +18,7 @@ Expected:
 - Context7 may be consulted read-only before kickoff to confirm the stack's current capabilities,
   compatibility, and practices and to improve the questions;
 - the first response presents the analysis and a single route-ratification question;
-- afterwards, one product question per turn, spec + stress + approval, ratified domain skills,
+- afterward, one product question per turn, spec + stress + approval, ratified domain skills,
   plan + stress + approval, setup, and execution;
 - no business rule, UX, state, or acceptance is chosen by the documentation.
 

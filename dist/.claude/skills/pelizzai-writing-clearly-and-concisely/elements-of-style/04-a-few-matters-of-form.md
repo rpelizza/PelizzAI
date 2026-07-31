@@ -1,4 +1,4 @@
-## IV. A Few Matters of Form
+# IV. A Few Matters of Form
 
 **Headings.** Leave a blank line, or its equivalent in space, after the title or heading of a text. On succeeding pages, if using ruled paper, begin on the first line.
 

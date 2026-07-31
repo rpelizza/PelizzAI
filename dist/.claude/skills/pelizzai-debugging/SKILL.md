@@ -51,7 +51,7 @@ If no safe containment exists or you lack the authority, escalate immediately wi
 | **Direct cause** | compiler, stack trace, or contract points to an unambiguous local cause | ReAct + Verification | zero or one | reproduce the error → fix → run the same oracle |
 | **Uncertain deterministic** | fails every time, but the origin is not yet proven | light RCA + ReAct | one is enough if it discriminates; add others only if they compete | minimal loop → evidence → falsifiable hypothesis → fix |
 | **Flaky, recurring, or distributed** | variable rate, concurrency, network, multiple layers/retries | RCA + Evidence Synthesis; Assumption Tracking when useful | several, only while materially plausible | measure the rate → correlate boundaries → test the most informative hypothesis |
-| **Incident with active damage** | degraded production, exposure, ongoing loss/cost | Constraint Satisfaction + Decision Making for the containment; RCA afterwards | after stabilizing | contain → monitor → reclassify and investigate |
+| **Incident with active damage** | degraded production, exposure, ongoing loss/cost | Constraint Satisfaction + Decision Making for the containment; RCA afterward | after stabilizing | contain → monitor → reclassify and investigate |
 
 Use `pelizzai-loop`/OODA only when there are **multiple rounds** and each round changes evidence, hypothesis, or external reality. OODA is the control macro-loop; it is not a diagnostic technique.
 

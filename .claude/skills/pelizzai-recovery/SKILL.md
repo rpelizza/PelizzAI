@@ -92,7 +92,7 @@ Outside a mid-plan resumption, ask only when there are materially different path
 inapplicable options. Discard, stash, abort, reset, deletion, or worktree removal are never chosen
 autonomously.
 
-Under a closed briefing (SUBAGENT-STOP), do not produce route analyses or open gates: apply the briefing and escalate to the coordinator whatever requires a decision.
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce route analyses or open gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 ## 4. Return point before risk
 

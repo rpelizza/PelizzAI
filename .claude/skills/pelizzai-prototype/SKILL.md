@@ -35,7 +35,7 @@ at the skill's internal gate:
 Recommend and wait: "may I spend `<timebox>` on a throwaway spike to answer `<question>`?
 destination: `<delete|absorb|turn into a task>`". Without a "yes", do not write the experiment.
 
-Under a closed briefing (SUBAGENT-STOP), do not produce route analyses or open gates: apply the briefing and escalate to the coordinator whatever requires a decision.
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce route analyses or open gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 A prototype writes: go through `pelizzai-starting-branch` first. Use an ignored temporary path or a
 prototype path the project has already adopted. Source mode never creates `pelizzai/` runtime;

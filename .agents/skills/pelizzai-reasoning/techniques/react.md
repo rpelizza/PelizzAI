@@ -154,7 +154,7 @@ Next decision:
 
 Rules for tool use, side effects, and high-impact confirmation live in the
 [pelizzai-reasoning](../SKILL.md) skill and apply here. Cycle notes: before using a tool, know which
-question it answers; afterwards, confirm you interpreted the result and whether it changes the plan;
+question it answers; afterward, confirm you interpreted the result and whether it changes the plan;
 treat side-effecting actions (edit/delete, publish, send, transactions) with extra care, preferring
 reversible ones and validating the effect after execution.
 

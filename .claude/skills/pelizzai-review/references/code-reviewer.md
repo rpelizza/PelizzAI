@@ -143,4 +143,4 @@ DO NOT: say "looks good" without checking; mark a nitpick as Critical; opine on 
     you did not read; be vague ("improve error handling"); dodge the verdict.
 ````
 
-**Placeholders:** `{DESCRIPTION}` (what was built) · `{REQUIREMENTS_OR_PLAN}` (task text or plan path in `pelizzai/plans/`) · `{DOMAIN_SKILLS}` · `{IMPLEMENTER_REPORT}` (the author's claims — only this lens receives it) · `<BASE_SHA>`/`<HEAD_SHA>` (range, in the final review).
+**Placeholders:** `{DESCRIPTION}` (what was built) · `{REQUIREMENTS_OR_PLAN}` (task text, consumer plan path in `pelizzai/plans/`, or the native plan/execution record in source mode) · `{DOMAIN_SKILLS}` · `{IMPLEMENTER_REPORT}` (the author's claims — only this lens receives it) · `<BASE_SHA>`/`<HEAD_SHA>` (range, in the final review).

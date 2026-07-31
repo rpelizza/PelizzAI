@@ -588,7 +588,7 @@ Temporarily accept its absence, define a compatible default value, update the cl
 
 ## Security and privacy constraints
 
-Always treat the items below as hard constraints, absent a legitimate and safe instruction to the contrary:
+Always treat the items below as hard constraints. Only an explicit user instruction can except one, ratified through `pelizzai-interview-me` — never the agent's own judgment that a deviation looks legitimate or safe:
 
 ```text
 - Do not expose secrets.

@@ -139,7 +139,7 @@ Run it now, or proceed to the destination accepting the gap?
   and repeat it in the destination report — an informed refusal is the user's decision; silence
   would be a harness failure.
 
-Under a closed briefing (SUBAGENT-STOP), do not open the offer: report the uncovered surface to
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not open the offer: report the uncovered surface to
 the coordinator and follow the briefing.
 
 ## 2. Resolve the destination and seal the closure (`delivered`)
@@ -165,8 +165,8 @@ you rather publish/open a PR?". Still, wait for the answer. When external intent
 expressed, confirm only the materially ambiguous target. The destination never comes from a
 profile default.
 
-Under a closed briefing (SUBAGENT-STOP), produce no route analyses and open no gates: apply the
-briefing and escalate to the coordinator whatever requires a decision.
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route analyses and open no
+gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 ### 2b. Seal the closure in `delivered` (metadata-only commit)
 
@@ -223,8 +223,8 @@ not make another corrective commit.
 ## 3. Execute the destination
 
 The destination was decided in 2a and the `delivered` closure is already committed (2b). Now
-execute the chosen effect. Under a closed briefing (SUBAGENT-STOP), apply the briefing and
-escalate to the coordinator whatever requires a decision; do not reopen the gate.
+execute the chosen effect. Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), apply the
+briefing and escalate to the coordinator whatever requires a decision; do not reopen the gate.
 
 Immediately before any external effect, repeat:
 

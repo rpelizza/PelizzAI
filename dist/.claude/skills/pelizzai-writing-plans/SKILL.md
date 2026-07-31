@@ -18,7 +18,7 @@ Zero context is about **complete context**, not about transcribing the future co
 decisions, contracts, and criteria (see *Plan depth*) and does not anticipate the whole
 implementation.
 
-**Announce:** "Using the PelizzAI Writing Plans skill to turn the requirements into an executable plan."
+**Announce**, in the conversation's language: that you are using the PelizzAI Writing Plans skill to turn the requirements into an executable plan.
 
 In a consumer, the plan is **always materialized** at `pelizzai/plans/YYYY-MM-DD-<topic>.md`
 (unless a different location is explicitly requested); it is the durable artifact execution reads.

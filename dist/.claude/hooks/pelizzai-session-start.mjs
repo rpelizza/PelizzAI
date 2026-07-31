@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * PelizzAI — SessionStart hook (matcher startup|clear|compact). OPT-IN.
+ * PelizzAI — SessionStart hook (matcher startup|resume|clear|compact). OPT-IN.
  *
  * Emits a SHORT reminder at session start: load pelizzai-core before answering
  * anything (the 1% rule), go through core/router on project tasks, classify the
@@ -14,7 +14,7 @@
  * Guarantees: ALWAYS ends with exit 0; swallows any error; never blocks the session.
  *
  * Installation (opt-in), in the consumer project's .claude/settings.json:
- *   { "hooks": { "SessionStart": [ { "matcher": "startup|clear|compact", "hooks": [
+ *   { "hooks": { "SessionStart": [ { "matcher": "startup|resume|clear|compact", "hooks": [
  *       { "type": "command",
  *         "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-session-start.mjs\"" } ] } ] } }
  *

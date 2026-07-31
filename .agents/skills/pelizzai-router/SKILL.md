@@ -260,7 +260,8 @@ bounded/tweak/common bug:
   commit-strategy: granular
 
 plan with truly independent fronts:
-  isolation: worktree(s) recommended; execution-mode: subagents/team when there is real independence.
+  isolation: worktree recommended — ONE worktree per task, never one per agent; the fronts share it
+  and only write on DISJOINT paths. execution-mode: subagents/team when there is real independence.
 
 squash-final:
   only when the intermediate history has no value; consolidate BEFORE final validation.

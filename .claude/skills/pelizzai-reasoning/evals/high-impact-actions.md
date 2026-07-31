@@ -462,19 +462,18 @@ context: |
 Request type:
 - Execution of urgent containment.
 
-Primary technique:
-- Root Cause Analysis.
+Containment phase:
+- Primary technique: Constraint Satisfaction.
+- Auxiliary: Decision Making; ReAct to execute; Verification to monitor; light Plan and Execute.
 
-Auxiliary:
-- ReAct.
-- Verification.
-- Light Plan and Execute.
-
-Action:
+Immediate action:
 - Quickly validate the rollback target and version.
 - Roll back as containment if there is no known impediment.
 - Monitor errors after the rollback.
-- Investigate the root cause afterward.
+
+After stabilizing:
+- Primary technique: Root Cause Analysis.
+- Investigate the root cause once service is restored.
 ```
 
 #### Pass criterion

@@ -215,7 +215,7 @@ data/reports/
 `data/state.md`, `data/review-domain-skills.md`, and `data/history/` are **versioned** — a durable
 record; they never go into the ignore (a broad `data/*` with exceptions would silence `history/`
 and break the durability of the sealed-task record). Verify with `git check-ignore` using
-temporary proof files; remove the proofs afterwards.
+temporary proof files; remove the proofs afterward.
 
 Create on demand, not at bootstrap: `context.md`, `adr/`, `out-of-scope/`, `specs/`, `plans/`, and the ephemeral directories.
 
@@ -256,13 +256,16 @@ the effect of each. Do not reopen the offer once the check passes:
   It does NOT enforce the greenfield approval steps: the kickoff menu remains the harness's, not
   the hook's. Fail-open on any error of the hook itself (always exit 0 when it cannot decide).
 
-Only edit settings after confirmation, and respect the granularity of the answer:
-`node scripts/install-hooks.mjs` registers the whole PelizzAI set (and `--remove` removes the
-whole set), so use it when the user accepts all; if they accept only a subset, register by hand in
-`.claude/settings.json` only the chosen handlers — never batch-install what was not accepted. The
-installer merges `.claude/settings.json` without overwriting existing hooks/permissions and is
-idempotent. The export may register them immediately only when the user explicitly chooses
-`--install-hooks`.
+Only edit settings after confirmation, and respect the granularity of the answer: use
+`node scripts/install-hooks.mjs` when the user accepts all four. If they accept only a subset, use
+`--only <ids>` (`guardrails`, `writegate`, `cadence`, `session-start`, comma-separated) and pass
+the same `--only` to `--check` and `--remove` — never batch-install what was not accepted, and do
+not hand-edit `.claude/settings.json` for a subset the installer already handles in its canonical
+form. `--only` is additive (it does not drop a hook the user had already accepted), bare `--check`
+is an inventory in which a deliberate partial install is not a failure, and `--check --only <ids>`
+turns into a turnstile that requires exactly those hooks. The installer merges
+`.claude/settings.json` without overwriting existing hooks/permissions and is idempotent. The
+export may register them immediately only when the user explicitly chooses `--install-hooks`.
 
 `PreToolUse` has **two** groups: the writegate also runs on `Bash`, otherwise writes via
 redirection/heredoc slip past the gate. This is how `scripts/install-hooks.mjs` writes it:
@@ -274,14 +277,14 @@ redirection/heredoc slip past the gate. This is how `scripts/install-hooks.mjs` 
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-guardrails.mjs\"" },
-          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-writegate.mjs\"" }
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pelizzai-guardrails.mjs\"" },
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pelizzai-writegate.mjs\"" }
         ]
       },
       {
         "matcher": "Write|Edit|MultiEdit|NotebookEdit",
         "hooks": [
-          { "type": "command", "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-writegate.mjs\"" }
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pelizzai-writegate.mjs\"" }
         ]
       }
     ]

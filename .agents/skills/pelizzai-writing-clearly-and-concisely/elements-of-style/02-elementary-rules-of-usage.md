@@ -1,6 +1,6 @@
-## II. Elementary Rules of Usage
+# II. Elementary Rules of Usage
 
-### Rule 1. Form the possessive singular of nouns by adding 's.
+## Rule 1. Form the possessive singular of nouns by adding 's.
 
 Thus write:
 
@@ -12,7 +12,7 @@ Burns's poems
 
 Do not drop the apostrophe (*Johns car*), and do not use the apostrophe where no possessive is meant. The pronominal possessives — *hers*, *its*, *theirs*, *yours*, *ours* — take no apostrophe; *it's* is the contraction of *it is*, never a possessive.
 
-### Rule 2. In a series of three or more terms with a single conjunction, use a comma after each term except the last.
+## Rule 2. In a series of three or more terms with a single conjunction, use a comma after each term except the last.
 
 The comma before the final *and* or *or* — the serial comma — makes clear that the last two terms are separate items. Thus write:
 
@@ -38,7 +38,7 @@ He opened the letter, read it, and made a note of its contents.
 
 In these cases the comma marks a pause the sense demands; in a simple series, the comma before the final *and* is the ordinary serial comma required by the rule above.
 
-### Rule 3. Enclose parenthetic (incidental) expressions between commas.
+## Rule 3. Enclose parenthetic (incidental) expressions between commas.
 
 The best way to see a country, unless you are pressed for time, is to travel on foot.
 
@@ -102,7 +102,7 @@ Other illustrations may be found in the sentences quoted under Rules 4, 5, 6, 7,
 
 The writer must take care not to set off independent clauses with commas: see Rule 5.
 
-### Rule 4. Place a comma before a conjunction introducing a co-ordinate clause.
+## Rule 4. Place a comma before a conjunction introducing a co-ordinate clause.
 
 The early records of the city have disappeared, and the story of its first years can no longer be reconstructed.
 
@@ -144,7 +144,7 @@ I have heard his arguments, but am still unconvinced.
 
 He has had several years of experience and is thoroughly competent.
 
-### Rule 5. Do not join independent clauses with only a comma.
+## Rule 5. Do not join independent clauses with only a comma.
 
 If two or more clauses, grammatically complete and not joined by a conjunction, are to form a single compound sentence, the proper mark of punctuation is the semicolon.
 
@@ -182,7 +182,7 @@ I hardly recognized him, he was so changed,
 
 a comma, not a semicolon, is used. But this form of expression is unsuitable in writing, except in the dialogue of a story or play, or perhaps in a familiar letter.
 
-### Rule 6. Do not break sentences in two.
+## Rule 6. Do not break sentences in two.
 
 In other words, do not use periods for commas.
 
@@ -200,7 +200,7 @@ The writer must, however, be certain that the emphasis is warranted and that he 
 
 Rules 3, 4, 5, and 6 cover the most important principles in the punctuation of ordinary sentences; they should be mastered so thoroughly that their application becomes second nature.
 
-### Rule 7. A participial phrase at the beginning of a sentence must refer to the grammatical subject.
+## Rule 7. A participial phrase at the beginning of a sentence must refer to the grammatical subject.
 
 > Adaptation note: the typical offender is the dangling participle (and, less often, other dangling modifiers). When a participial phrase opens the sentence, its implied subject must be the subject of the main clause; otherwise the participle is left dangling and the sentence reads wrong or unintentionally comic.
 

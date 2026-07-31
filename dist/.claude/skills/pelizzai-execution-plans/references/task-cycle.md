@@ -197,7 +197,7 @@ Never ignore an escalation nor re-dispatch without changing anything.
   `git diff --cached` and never uses `git add -A`.
 - To allow safe reuse of the review in a single-task bounded delivery, require that no
   unstaged/untracked content of the task remains, capture `reviewed-tree = git write-tree` before
-  the commit, and compare it afterwards with `git rev-parse HEAD^{tree}`. Divergence invalidates
+  the commit, and compare it afterward with `git rev-parse HEAD^{tree}`. Divergence invalidates
   the reuse.
 - Granular: one DEFINITIVE commit per task. In the consumer, the cursor touch goes into the SAME
   commit; in source mode, the native execution record advances with no file. History is kept.
@@ -218,7 +218,7 @@ include it in the stage along with the task's exact paths. The definitive commit
 **there is no metadata-only commit to start the task**. On concluding the plan and sealing the
 content, `pelizzai-finish-task` seals `phase: delivered` in the single metadata-only closure
 commit, migrating the task's intact block to `data/history/` — the cursor returns to template size
-and `done` is observed afterwards.
+and `done` is observed afterward.
 
 In source mode, advance the native execution record after the commit and do not create
 state/closure.

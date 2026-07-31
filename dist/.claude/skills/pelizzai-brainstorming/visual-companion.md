@@ -103,10 +103,13 @@ If the URL is unreachable from the browser (common in remote/containerized envir
 scripts/start-server.sh \
   --project-dir /path/to/project \
   --host 0.0.0.0 \
-  --url-host localhost
+  --url-host <browser-reachable-host>
 ```
 
-Use `--url-host` to control which hostname is printed in the returned URL JSON.
+Use `--url-host` to control which hostname is printed in the returned URL JSON. It must be a host
+the USER's browser can reach — the remote/container hostname, a tunnel address, or the host the
+platform forwards. `localhost` only works when the browser runs on the same machine as the server;
+from a remote browser it resolves to the user's own machine and never reaches the bound port.
 
 ## The Loop
 
@@ -310,7 +313,7 @@ scripts/stop-server.sh $SESSION_DIR
 pwsh scripts/stop-server.ps1 -SessionDir $SESSION_DIR
 ```
 
-If the session used `--project-dir`, the mockup files persist in `pelizzai/data/mockups/` for later reference. Only sessions in `/tmp` are deleted on stop.
+If the session used `--project-dir`, the mockup files persist in `pelizzai/data/mockups/` for later reference. Only sessions under the system temporary directory (`/tmp` on POSIX, `$env:TEMP` on Windows) are deleted on stop.
 
 ## Reference
 

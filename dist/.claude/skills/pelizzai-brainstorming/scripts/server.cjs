@@ -93,7 +93,7 @@ const STATE_DIR = path.join(SESSION_DIR, 'state');
 let ownerPid = process.env.BRAINSTORM_OWNER_PID ? Number(process.env.BRAINSTORM_OWNER_PID) : null;
 
 // Session key promised by visual-companion.md: every HTTP request and WS
-// handshake must present it (query string on first load, cookie afterwards),
+// handshake must present it (query string on first load, cookie afterward),
 // so a stray tab or another machine on the network can't read screens or
 // inject events when binding beyond loopback.
 const SESSION_KEY = crypto.randomBytes(16).toString('hex');

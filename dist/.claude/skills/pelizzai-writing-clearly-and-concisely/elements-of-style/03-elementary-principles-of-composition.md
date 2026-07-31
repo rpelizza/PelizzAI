@@ -1,6 +1,6 @@
-## III. Elementary Principles of Composition
+# III. Elementary Principles of Composition
 
-### Rule 8. Make the paragraph the unit of composition: one paragraph to each topic.
+## Rule 8. Make the paragraph the unit of composition: one paragraph to each topic.
 
 If the subject you are writing about is of small extent, or if you intend to treat it very briefly, there may be no need to divide it into topics. Thus a brief description, a short summary of a literary work, a brief account of a single incident, a narrative that merely outlines an action, the statement of a single idea — any of these is best written in a single paragraph. Once the paragraph is written, examine it to see whether subdivision would improve it.
 
@@ -42,7 +42,7 @@ As a rule, single sentences should not be written or printed as paragraphs. An e
 
 In dialogue, each speech, even a single word, is a paragraph of its own; that is, a new paragraph begins with each change of speaker. How to apply this rule when dialogue and narrative are combined is best learned from examples in well-printed works of fiction.
 
-### Rule 9. As a rule, begin each paragraph with a topic sentence, and end it in conformity with the beginning.
+## Rule 9. As a rule, begin each paragraph with a topic sentence, and end it in conformity with the beginning.
 
 Again, the object is to help the reader. The practice recommended here lets him discover the purpose of each paragraph as he begins to read it, and hold that purpose in mind as he finishes it. For this reason, the most generally useful kind of paragraph, particularly in exposition and argument, is the one in which:
 
@@ -84,7 +84,7 @@ But this device, used too often, would become a mannerism. More commonly, the op
 
 The brief paragraphs of a lively narrative, however, often lack even this semblance of a topic sentence. The break between them works as a rhetorical pause, throwing some detail of the action into relief.
 
-### Rule 10. Use the active voice.
+## Rule 10. Use the active voice.
 
 The active voice is usually more direct and vigorous than the passive:
 
@@ -138,7 +138,7 @@ Habitual use of the active voice makes for vigorous writing. This is true not on
 | The reason he left college was that his health became impaired.  | Failing health compelled him to leave college.      |
 | It was not long before he was very sorry about what he had said. | He soon regretted his words.                        |
 
-### Rule 11. Put statements in positive form.
+## Rule 11. Put statements in positive form.
 
 Make definite assertions. Avoid weak, colorless, hesitating, evasive language. Use the word "not" as a means of denial or antithesis, never as a means of evasion.
 
@@ -172,7 +172,7 @@ Negative words other than "not" are usually strong:
 
 > The sun never sets on British territory.
 
-### Rule 12. Use definite, specific, concrete language.
+## Rule 12. Use definite, specific, concrete language.
 
 Prefer the specific to the general, the definite to the vague, the concrete to the abstract.
 
@@ -212,7 +212,7 @@ Herbert Spencer, from whose Philosophy of Style the preceding paragraph is quote
 | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | In proportion as the manners, customs, and amusements of a nation are cruel and barbarous, the regulations of their penal code will be severe. | In proportion as men delight in battles, bull-fights, and combats of gladiators, will they punish by hanging, burning, and the rack. |
 
-### Rule 13. Omit needless words.
+## Rule 13. Omit needless words.
 
 Vigorous writing is concise. A sentence should contain no unnecessary words, and a paragraph no unnecessary sentences, for the same reason that a drawing should have no unnecessary lines and a machine no unnecessary parts. This does not require the writer to make all his sentences short, or to avoid all detail and treat his subjects only in outline; it requires that every word tell.
 
@@ -257,7 +257,7 @@ A common offense against conciseness is presenting a single complex idea, step b
 | Macbeth was very ambitious. This led him to wish to become king of Scotland. The witches told him that this wish would come true. The king of Scotland at that time was Duncan. Encouraged by his wife, Macbeth murdered Duncan. He was thus able to succeed Duncan as king. (49 words.) | Encouraged by his wife, Macbeth achieved his ambition and fulfilled the witches' prophecy by murdering Duncan and becoming king of Scotland in his place. (24 words.) |
 | There were several less important courses, but these were the most important, and though they did not come every day, they came often enough to keep you in such a state of mind that you never knew what your next move would be. (43 words.)                                          | These, the most important courses of all, came, if not daily, at least often enough to keep you under constant strain. (21 words.)                                   |
 
-### Rule 14. Avoid a succession of loose sentences.
+## Rule 14. Avoid a succession of loose sentences.
 
 This rule refers especially to loose sentences of one particular type: those made up of two coordinate clauses, the second introduced by a conjunction or a relative pronoun. Isolated sentences of this kind may be blameless (see Rule 4), but a series of them soon becomes monotonous and tedious.
 
@@ -269,7 +269,7 @@ Quite apart from its triteness and emptiness, the paragraph above is weak becaus
 
 A writer who finds he has produced a series of sentences of the type described should recast enough of them to remove the monotony, replacing them with simple sentences, with sentences of two clauses joined by a semicolon, with periodic sentences of two clauses, or with sentences, loose or periodic, of three clauses — whichever best represents the real relations of the thought.
 
-### Rule 15. Express coordinate ideas in similar form.
+## Rule 15. Express coordinate ideas in similar form.
 
 This principle — parallel construction — requires that expressions of similar content and function be outwardly similar. The likeness of form lets the reader recognize more readily the likeness of content and function. Familiar instances from the Bible are the Ten Commandments, the Beatitudes, and the petitions of the Lord's Prayer.
 
@@ -301,7 +301,7 @@ See also the third example under Rule 12 and the last under Rule 13.
 
 It may be asked: what if a writer needs to express a very large number of similar ideas — say, twenty? Must he write twenty consecutive sentences on the same pattern? On closer examination he will probably find the difficulty imaginary: his twenty ideas can be sorted into groups, and the principle need only be applied within each group. Failing that, he had best avoid the difficulty by putting his statements in the form of a table.
 
-### Rule 16. Keep related words together.
+## Rule 16. Keep related words together.
 
 The position of words in a sentence is the principal means of showing their relationship. The writer must therefore, as far as possible, bring together the words and groups of words that are related in thought, and keep apart those that are not.
 
@@ -343,7 +343,7 @@ Modifiers should come, if possible, next to the word they modify. If several exp
 | He only found two mistakes.                                                                                                                                        | He found only two mistakes.                                                                                                                              |
 | Major Joaquim Reis will give a lecture on Tuesday evening in Bandeira Hall, to which the public is invited, on "My Experiences in the Backlands", at eight o'clock. | On Tuesday evening at eight o'clock, Major Joaquim Reis will give in Bandeira Hall a lecture on "My Experiences in the Backlands". The public is invited. |
 
-### Rule 17. In summaries, keep to one tense.
+## Rule 17. In summaries, keep to one tense.
 
 In summarizing the action of a drama, the writer should always use the present tense. In summarizing a poem, story, or novel, he should preferably use the present, though he may use the past if he prefers. If the summary is in the present tense, antecedent action should be expressed by the perfect; if in the past, by the past perfect.
 
@@ -361,7 +361,7 @@ In presenting the statements or the thought of someone else, as in summarizing a
 
 In notebooks, newspapers, and handbooks of literature, summaries of one kind or another may be indispensable; and for children in the early grades, retelling a story in their own words is a useful exercise. But in the criticism or interpretation of literature, the writer should take care not to slide into summary. He may find it necessary to devote a sentence or two to indicating the subject, or the opening situation, of the work he is discussing; he may cite numerous details to illustrate its qualities. But he should aim to write an orderly discussion supported by evidence, not a summary with occasional comment. Likewise, if the scope of his discussion includes several works, he will as a rule do better not to take them up one by one in chronological order, but to work from the start toward general conclusions.
 
-### Rule 18. Place the emphatic words of a sentence at the end.
+## Rule 18. Place the emphatic words of a sentence at the end.
 
 The proper place in a sentence for the word, or group of words, that the writer wants to make most prominent is usually the end.
 

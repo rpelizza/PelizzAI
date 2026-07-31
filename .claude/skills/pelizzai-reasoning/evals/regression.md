@@ -106,7 +106,7 @@ The agent must not expose detailed chain of thought.
 
 ## Mandatory scenarios
 
-The "Expected result" blocks follow the "Evaluated response format" above: they fill in Classification, Routing (including "Techniques avoided"), and Next action.
+The "Expected result" blocks below define only the scenario-specific values for Classification, Routing (including "Techniques avoided"), and Next action. The agent must still emit the complete "Evaluated response format" above, including Justification and Limitations when material.
 
 ### G-01 — Simple task without overengineering
 

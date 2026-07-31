@@ -79,8 +79,10 @@ Domain skills capture **this project's** patterns, stacks, and conventions, maki
   skill — ground it or defer (never invent from memory). A skill for an internal convention is
   grounded in the project's own code, tests, ADRs, and history, where `context7` is preferred,
   not a blocker.
-- Every domain skill created/updated enters the catalog `pelizzai/domain-skills.md` and the
-  ledger `pelizzai/data/review-domain-skills.md` (see Templates).
+- In a CONSUMER, every domain skill created/updated enters the catalog `pelizzai/domain-skills.md`
+  and the ledger `pelizzai/data/review-domain-skills.md` (see Templates). In the PelizzAI source
+  repo (sentinel `scripts/pelizzai-source-repo.txt`) that runtime does not exist: record the same
+  facts in the native execution record and create no `pelizzai/` file.
 ```
 
 ### Skill roots in the consumer project
@@ -123,13 +125,14 @@ skill and mirrors divergent, and do not hand this step off to the user.
 
 ## Bootstrap mode (called by `pelizzai-audit`)
 
-Triggered in `bootstrap-write`, after `pelizzai-audit` has mapped the context and created the task branch. Scan-only does not call this mode.
+Triggered in `bootstrap-write`, after `pelizzai-audit` has mapped the context and created the task branch. Scan-only does not call this mode. **Consumer only:** in the PelizzAI source repo there is no consumer bootstrap and no `pelizzai/` runtime — steps 4–5 below write nothing under `pelizzai/`; the equivalent record lives in the native execution record.
 
 ```text
 1. Receive the evidenced inventory from pelizzai-audit (stacks, frameworks, modules, conventions,
    MCPs) and the active skill roots. If `context7` is missing, PROPOSE installing it before
-   generating — without it, grounding falls back to web/memory exactly where the key MCP would
-   make the difference.
+   generating — without it, grounding falls back to the current official documentation exactly
+   where the key MCP would make the difference, and a stack skill with neither source available is
+   deferred, never written from memory.
 2. List the CANDIDATE domain skills — the maximum number of useful skills the patterns justify
    (one per recurring flow/responsibility: build/deploy, code generation, tests, migrations,
    integrations, UI conventions, etc.). The filter is TRUTH, not scarcity: do not invent skills
@@ -215,7 +218,8 @@ The thresholds (10 commits / 10 review days / 15 full-scan days / 10 interaction
 
 ## Ledger and catalog
 
-Two artifacts per project, created/updated by this skill:
+Two artifacts per **consumer** project, created/updated by this skill (in the source repo neither
+exists: the native execution record takes their place and no `pelizzai/` runtime is created):
 
 - **`pelizzai/domain-skills.md`** — catalog: what each domain skill does and when to use it. Template: [templates/domain-skills.md](templates/domain-skills.md).
 - **`pelizzai/data/review-domain-skills.md`** — ledger: per skill, creation date, last update, last commit/ref reviewed, the axis of the change, and the origin (repo-scan/interview); + global `last-review` and `last-full-scan`. Template: [templates/review-domain-skills.md](templates/review-domain-skills.md).

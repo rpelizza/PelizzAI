@@ -103,7 +103,7 @@ it is already contained in a ratified spec/plan or was explicitly delegated by t
 
 When the user seems non-technical, or the intent admits ≥2 materially different readings,
 **flag** it to the router (`audience` and open readings). The router re-presents the understanding
-at the kickoff gate; afterwards, discovery resolves each dependent decision one at a time.
+at the kickoff gate; afterward, discovery resolves each dependent decision one at a time.
 
 ## Authority boundary
 

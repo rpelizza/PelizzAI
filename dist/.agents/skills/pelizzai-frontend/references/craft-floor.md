@@ -24,8 +24,8 @@ Format: **Verify** (how to check, preferably measured in a rendered browser) / *
   Verify: token values. Refuse: neon-saturated large areas.
 - **Text contrast ≥4.5:1** (≥3:1 for large text); **UI component boundaries ≥3:1**.
   Verify: measured contrast in DevTools/Playwright — never by eye. Refuse: any text below floor.
-- **The two brand colors are distinguishable in role** — primary vs accent with a clear lightness/chroma gap (ratio ≥1.7 between them).
-  Verify: token comparison. Refuse: two near-identical brand colors doing the same job.
+- **The two brand colors are distinguishable in role** — primary vs accent separated on at least one OKLCH axis: `max(L)/min(L) ≥1.7` **or** `max(C)/min(C) ≥1.7`, computed on the two brand tokens converted to OKLCH. Hue difference alone does not satisfy this.
+  Verify: convert both brand tokens to OKLCH and compute both ratios; at least one must clear 1.7. Refuse: two near-identical brand colors doing the same job.
 - **White text on saturated backgrounds: measure, don't trust the eye** — saturated hues read lighter than they measure (Helmholtz–Kohlrausch); the contrast number decides.
 - **One accent doing accent work.** If everything is accented, nothing is.
 

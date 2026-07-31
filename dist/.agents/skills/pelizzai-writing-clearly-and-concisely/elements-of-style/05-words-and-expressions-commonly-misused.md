@@ -1,4 +1,4 @@
-## V. Words and Expressions Commonly Misused
+# V. Words and Expressions Commonly Misused
 
 (Some of the words treated here — *case*, *factor*, *feature*, *question* — are good in their place, but constantly intrude where they have no right to be. Others are look-alikes and sound-alikes that the ear swaps easily. If you set out from the start with the purpose of expressing your thought precisely, instead of settling for the ready-made formula that spares you the trouble of doing so, this kind of expression will give you little difficulty. But if you find that, in a careless moment, one of them has slipped in, the right procedure is usually not to patch the sentence by swapping one word for another, but to recast it entirely, as several examples below illustrate, and others under Rules 12 and 13.)
 

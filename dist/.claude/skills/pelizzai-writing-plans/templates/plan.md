@@ -61,6 +61,8 @@ The post-plan setup gate presents this list: the already-ratified ones (spec/des
 ````markdown
 ### Task N: [vertical outcome]
 
+**Out of scope:** [files, behaviors, or decisions this task must NOT change; `none` only when the task truly has no boundary to state]
+
 **Files:**
 
 - Create: `exact/path.ext`

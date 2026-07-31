@@ -12,7 +12,7 @@ task: when implementing each task of a plan and whenever a dispatched member wri
 cycle is red → green → refactor per vertical slice. When the task's effect is not behavioral, the
 gate below names the correct proof — the exception is declared, never improvised.
 
-**Announce at start:** "Using the PelizzAI TDD skill to implement this behavior red → green → refactor."
+**Announce at start**, in the language of the conversation: "Using the PelizzAI TDD skill to implement this behavior red → green → refactor." The brand spelling "PelizzAI" and the skill's name stay as written; the rest of the sentence follows the conversation.
 
 ## Suitability gate
 
@@ -61,7 +61,7 @@ It produces **bad tests**:
 
 **Correct approach**: vertical slices via _tracer bullets_ (tests that walk the system's entire real path). One test → one implementation → repeat. Each test responds to what you learned in the previous cycle. Since you just wrote the code, you know exactly which behavior matters and how to verify it.
 
-```
+```text
 WRONG (horizontal):
   RED:   test1, test2, test3, test4, test5
   GREEN: impl1, impl2, impl3, impl4, impl5

@@ -90,7 +90,7 @@ Turn tasks into verifiable goals:
 
 For response micro-plans (a few steps, within a single message), present a brief plan:
 
-```
+```text
 1. [Step] → verify: [check]
 2. [Step] → verify: [check]
 3. [Step] → verify: [check]

@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# PelizzAI - SessionStart hook (matcher startup|clear|compact), PowerShell variant. OPT-IN.
+# PelizzAI - SessionStart hook (matcher startup|resume|clear|compact), PowerShell variant. OPT-IN.
 #
 # Equivalent to pelizzai-session-start.mjs, for fleets without Node. Requires PowerShell 7+.
 #
@@ -15,7 +15,7 @@
 # Guarantees: ALWAYS exits 0; swallows any error; never blocks the session.
 #
 # Installation (opt-in), in the consumer project's .claude/settings.json:
-#   { "hooks": { "SessionStart": [ { "matcher": "startup|clear|compact", "hooks": [
+#   { "hooks": { "SessionStart": [ { "matcher": "startup|resume|clear|compact", "hooks": [
 #       { "type": "command",
 #         "command": "pwsh -NoProfile -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-session-start.ps1\"" } ] } ] } }
 
