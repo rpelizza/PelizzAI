@@ -1,268 +1,273 @@
 ---
 name: pelizzai-writing-plans
-description: Transforma requisitos ratificados, spec, PRD ou design aprovado em plano de implementação durável, estressado e aprovado antes do código. Use para features bounded, standard, exploratory e todo produto/projeto greenfield, ou quando o usuário pedir plano/decomposição. Dimensiona detalhe, validação, overlays e review por risco sem decidir requisitos pelo usuário.
+description: Turns ratified requirements, an approved spec, PRD, or design into a durable implementation plan, stress-tested and approved before code. Use for bounded, standard, and exploratory features and for every greenfield product/project, or when the user asks for a plan/decomposition. Sizes detail, validation, overlays, and review by risk without deciding requirements for the user.
 ---
 
 # PelizzAI Writing Plans
 
-## Objetivo
+## Goal
 
-Produzir o plano que um executor com **zero contexto** deste repositório executa sem precisar fazer
-uma única pergunta: os arquivos de cada tarefa, os contratos a honrar, a prova do resultado e os
-comandos exatos. Assuma um bom engenheiro que conhece pouco deste toolset, deste domínio e das
-convenções da casa — o que faltar no plano vira lacuna material que PARA a execução e volta ao
-usuário pela `pelizzai-interview-me`. Toda pergunta que a execução precisar fazer é falha do plano,
-nunca licença para adivinhar.
+Produce the plan that an executor with **zero context** on this repository executes without asking
+a single question: each task's files, the contracts to honor, the proof of the result, and the
+exact commands. Assume a good engineer who knows little of this toolset, this domain, and the
+house conventions — whatever the plan lacks becomes a material gap that STOPS execution and goes
+back to the user via `pelizzai-interview-me`. Every question execution has to ask is a failure of
+the plan, never a license to guess.
 
-Zero contexto é sobre **contexto completo**, não sobre transcrever o código futuro: o plano fixa
-decisões, contratos e critérios (ver *Profundidade do plano*) e não antecipa a implementação inteira.
+Zero context is about **complete context**, not about transcribing the future code: the plan fixes
+decisions, contracts, and criteria (see *Plan depth*) and does not anticipate the whole
+implementation.
 
-**Anuncie:** "Usando a skill PelizzAI Writing Plans para transformar os requisitos num plano executável."
+**Announce**, in the conversation's language: that you are using the PelizzAI Writing Plans skill to turn the requirements into an executable plan.
 
-Em consumidor, o plano é **sempre materializado** em `pelizzai/plans/AAAA-MM-DD-<feature>.md`
-(salvo local diferente pedido explicitamente); é o artefato durável que a execução lê. Em source
-mode, registre o plano no execution record nativo de forma **discoverable e verificável** (as
-tarefas e o mapa requisito→tarefa ficam rastreáveis, não efêmeros) e **ofereça materializar** em
-arquivo no path nativo do repo quando o usuário quiser durabilidade; nunca crie runtime `pelizzai/`
-consumidor no repo-fonte. A task/planning branch já deve existir; state é obrigatório apenas no consumidor.
+In a consumer, the plan is **always materialized** at `pelizzai/plans/YYYY-MM-DD-<topic>.md`
+(unless a different location is explicitly requested); it is the durable artifact execution reads.
+In source mode, record the plan in the native execution record in a **discoverable and verifiable**
+way (the tasks and the requirement→task map stay traceable, not ephemeral) and **offer to
+materialize** it as a file at the repo's native path when the user wants durability; never create
+consumer `pelizzai/` runtime in the source repo. The task/planning branch must already exist;
+state is mandatory only in the consumer.
 
-## Pré-condições
-
-```text
-- Objetivo e critério de aceite foram explicitados ou ratificados pelo usuário.
-- A branch foi aberta por pelizzai-starting-branch antes da spec/plano.
-- Source mode segue as regras do repo-fonte sem runtime `pelizzai/`; consumidor usa catálogo/profile.
-- Fato de biblioteca/API que pode ter mudado foi verificado no Context7 para a versão observada;
-  documentação oficial atual é fallback quando a ferramenta estiver indisponível.
-- Greenfield/standard/exploratory possui spec aprovada, ou dispensa explícita registrada.
-```
-
-Se ainda não é possível formular a pergunta técnica com precisão, volte ao brainstorming. Se a
-pergunta é precisa mas a resposta depende de evidência, crie uma tarefa curta de investigação ou
-protótipo com saída e critério de parada.
-
-## Profundidade do plano
-
-Use a lane registrada pelo router:
-
-| Lane | Forma do plano |
-| --- | --- |
-| `bounded` | 1–poucas tarefas compactas; paths, contrato, aceite, prova e comando. Não force entrevista quando o usuário já especificou a mudança. |
-| `standard` | tarefas verticais, interfaces e dependências explícitas; detalhe onde um executor poderia escolher errado. |
-| `exploratory` | riscos, decisões, migração/rollback e tarefas de descoberta delimitadas; não invente certeza nem implementação prematura. |
-
-Inclua código/config completo somente quando ele próprio é o contrato frágil (schema, formato,
-template, chamada pouco óbvia). Para implementação comum, nomes, interfaces, invariantes e exemplos
-curtos são mais duráveis que copiar o código futuro para o plano.
-
-Em greenfield, inclua uma fatia de documentação de uso/desenvolvimento (por exemplo README com
-setup, execução, testes e limites do MVP) como recomendação padrão. O usuário pode ajustar ou
-dispensar ao aprovar o plano; a LLM não remove documentação para acelerar a implementação.
-
-## Decompor em fatias verticais
-
-Cada tarefa entrega um resultado observável de ponta a ponta. Não separe “todos os testes” de
-“toda a implementação”. Uma tarefa é uma unidade que pode ser aprovada ou rejeitada sem obrigar a
-mesma decisão sobre a vizinha; um plano de uma tarefa é válido.
+## Preconditions
 
 ```text
-- Siga a estrutura existente; não use o plano para reestruturar o repo sem requisito.
-- Nomeie paths e interfaces que já são conhecidos; marque glob/pasta apenas quando a descoberta
-  do arquivo correto fizer parte explícita da tarefa.
-- Declare dependências entre tarefas e evite paralelismo falso em uma working tree compartilhada.
-- Tarefa durável/assíncrona privilegia contrato e aceite; não congele número de linha perecível.
+- Goal and acceptance criteria were made explicit or ratified by the user.
+- The branch was opened by pelizzai-starting-branch before the spec/plan.
+- Source mode follows the source repo's rules without `pelizzai/` runtime; a consumer uses catalog/profile.
+- Library/API facts that may have changed were verified in Context7 for the observed version;
+  current official documentation is the fallback when the tool is unavailable.
+- Greenfield/standard/exploratory has an approved spec, or an explicit waiver on record.
 ```
 
-## Decisões técnicas deste plano
+If the technical question still cannot be stated precisely, go back to brainstorming. If the
+question is precise but the answer depends on evidence, create a short investigation or prototype
+task with an output and a stop criterion.
 
-Todo plano carrega a seção obrigatória `## Decisões técnicas deste plano`: a lista **numerada** das
-decisões técnicas materiais que aparecem ao transformar a spec/design em plano — biblioteca ou padrão
-escolhido, formato de dado, contrato de interface, estratégia de migração, trade-off de arquitetura
-local. Cada item traz, em uma linha: **o quê** foi decidido, **onde foi ratificado**, a **alternativa
-rejeitada** e o **porquê**.
+## Plan depth
 
-**Uma decisão técnica material que o harness resolveu sozinho não entra na lista como fato consumado
-— vira pergunta.** Enquanto monta o plano, separe:
+Use the lane recorded by the router:
 
-- **Já ratificada** (fixada na spec, no design ou numa entrevista anterior): registre-a com a origem
-  (`ratificada na spec` / `no design` / `na entrevista de <data>`) — e a origem tem de ser
-  localizável no artefato citado, não um rótulo de conveniência. No gate ela é só recap — não se
-  re-pergunta o que o usuário já decidiu.
-- **Ainda aberta** (emergiu agora, ao decompor): **não escreva a escolha como decidida.** Antes de
-  fechar o plano, leve-a ao usuário por `pelizzai-interview-me`, uma pergunta por vez, com **2–3
-  opções reais + a recomendada marcada e o porquê em uma linha** (a inteligência está em construir as
-  opções boas e fundamentar com evidência do repo/Context7; a decisão é do usuário). Só depois de
-  ratificada ela entra na lista, com a origem `ratificada na entrevista do plano`.
-
-O plano só fecha quando **toda** decisão material está ratificada — nenhuma escolha técnica de peso
-viaja escondida no meio de um plano de N tarefas para ser carimbada junto.
-
-Quando o plano é puramente mecânico e não introduz nenhuma decisão técnica material, escreva de
-forma explícita `nenhuma decisão técnica material — plano puramente mecânico`. Nunca deixe a seção
-vazia nem a omita: a ausência de decisões é ela própria uma afirmação a ratificar.
-
-É essa lista que o Gate de setup pós-plano apresenta — as ratificadas como recap, e qualquer uma sem
-origem de ratificação como pergunta com opções ali mesmo, antes do "ok". Decisão que não cabe numa
-linha clara é sinal de que falta decisão humana (volte ao design ou a `pelizzai-interview-me`), não
-de que a linha deva crescer.
-
-Na execução vale o **teste operacional de desvio**:
-se a decisão não está escrita no plano nem na spec, ela não está aprovada — apresente antes de implementar.
-Decisão técnica emergente interrompe a tarefa e volta ao usuário **como pergunta com 2–3 opções e a
-recomendada** (com o porquê em uma linha); nunca é preenchida em silêncio nem devolvida como pergunta
-aberta sem opções. Concordar com a recomendação custa uma palavra.
-
-## Skills aplicáveis
-
-- No cabeçalho: as skills de domínio do catálogo que valem para o plano inteiro, ou `nenhuma`.
-- Em cada tarefa: as skills de domínio daquela fatia e as **Skills transversais do harness** que ela
-  exige, ou `nenhuma`. É esse bloco por tarefa que chega ao executor no briefing — o overlay não
-  fica só no cabeçalho.
-
-Overlays obrigatórios por superfície:
-
-| Superfície | Overlay |
+| Lane | Shape of the plan |
 | --- | --- |
-| página, componente, CSS, layout, estado visual, UX | `pelizzai-frontend` |
-| auth, autorização, input não confiável, SQL, upload, segredo, dado sensível | `pelizzai-oswap` |
-| documentação humana que faz parte da entrega | `pelizzai-documenting-features` |
+| `bounded` | 1–a few compact tasks; paths, contract, acceptance, proof, and command. Do not force an interview when the user already specified the change. |
+| `standard` | vertical tasks, explicit interfaces and dependencies; detail wherever an executor could choose wrong. |
+| `exploratory` | risks, decisions, migration/rollback, and bounded discovery tasks; do not invent certainty or premature implementation. |
 
-Não liste skill por possibilidade remota. UI nunca troca `pelizzai-frontend` por Playwright,
-browser ou screenshot; esses são apenas ferramentas do overlay.
+Include complete code/config only when it is itself the fragile contract (schema, format,
+template, non-obvious call). For ordinary implementation, names, interfaces, invariants, and short
+examples are more durable than copying the future code into the plan.
 
-## Estratégia por tarefa
+In greenfield, include a usage/development documentation slice (for example a README with setup,
+run, tests, and MVP limits) as the standard recommendation. The user may adjust or waive it when
+approving the plan; the LLM does not remove documentation to speed up implementation.
 
-Preencha **Estratégia de implementação e validação**:
+## Decompose into vertical slices
 
-| Efeito | Estratégia primária | Evidência |
+Each task delivers an observable end-to-end result. Do not split "all the tests" from "all the
+implementation". A task is a unit that can be approved or rejected without forcing the same
+decision on its neighbor; a one-task plan is valid.
+
+```text
+- Follow the existing structure; do not use the plan to restructure the repo without a requirement.
+- Name paths and interfaces that are already known; mark a glob/folder only when discovering the
+  right file is an explicit part of the task.
+- Declare dependencies between tasks and avoid false parallelism in a shared working tree.
+- A durable/asynchronous task favors contract and acceptance; do not freeze a perishable line number.
+```
+
+## Technical decisions in this plan
+
+Every plan carries the mandatory section `## Technical decisions in this plan`: the **numbered**
+list of the material technical decisions that surface when turning the spec/design into a plan —
+chosen library or pattern, data format, interface contract, migration strategy, local architecture
+trade-off. Each item states, in one line: **what** was decided, **where it was ratified**, the
+**rejected alternative**, and the **why**.
+
+**A material technical decision the harness settled on its own does not enter the list as a fait accompli
+— it becomes a question.** While assembling the plan, separate:
+
+- **Already ratified** (fixed in the spec, the design, or a previous interview): record it with its
+  origin (`ratified in the spec` / `in the design` / `in the interview of <date>`) — and the origin
+  must be locatable in the cited artifact, not a label of convenience. At the gate it is only a
+  recap — what the user already decided is not re-asked.
+- **Still open** (emerged now, while decomposing): **do not write the choice as decided.** Before
+  closing the plan, take it to the user via `pelizzai-interview-me`, one question at a time, with
+  **2–3 real options + the recommended one marked and a one-line why** (the intelligence lies in
+  building the good options and grounding them in repo/Context7 evidence; the decision is the
+  user's). Only once ratified does it enter the list, with origin `ratified in the plan interview`.
+
+The plan only closes when **every** material decision is ratified — no weighty technical choice
+travels hidden in the middle of an N-task plan to be rubber-stamped along with it.
+
+When the plan is purely mechanical and introduces no material technical decision, write explicitly
+`no material technical decision — purely mechanical plan`. Never leave the section empty or omit
+it: the absence of decisions is itself a claim to ratify.
+
+This list is what the post-plan setup gate presents — the ratified ones as a recap, and any
+decision with no ratification origin as a question with options right there, before the "ok". A
+decision that does not fit in one clear line signals a missing human decision (go back to the
+design or to `pelizzai-interview-me`), not that the line should grow.
+
+During execution the **operational deviation test** applies:
+if the decision is not written in the plan or the spec, it is not approved — present it before implementing.
+An emergent technical decision interrupts the task and returns to the user **as a question with
+2–3 options and the recommended one** (with a one-line why); it is never filled in silently or
+handed back as an open question without options. Agreeing with the recommendation costs one word.
+
+## Applicable skills
+
+- In the header: the catalog's domain skills that apply to the whole plan, or `none`.
+- In each task: that slice's domain skills and the **Cross-cutting harness skills** it requires,
+  or `none`. This per-task block is what reaches the executor in the briefing — the overlay does
+  not live only in the header.
+
+Mandatory overlays by surface:
+
+| Surface | Overlay |
+| --- | --- |
+| page, component, CSS, layout, visual state, UX | `pelizzai-frontend` |
+| auth, authorization, untrusted input, SQL, upload, secrets, sensitive data | `pelizzai-oswap` |
+| human documentation that is part of the delivery | `pelizzai-documenting-features` |
+
+Do not list a skill for a remote possibility. UI never swaps `pelizzai-frontend` for Playwright,
+browser, or screenshots; those are just tools of the overlay.
+
+## Strategy per task
+
+Fill in **Implementation and validation strategy**:
+
+| Effect | Primary strategy | Evidence |
 | --- | --- | --- |
-| comportamento/regressão automatizável | TDD red→green pelo contrato público | RED observado, GREEN, teste focal |
-| refactor preservativo/legado | characterization | mesma prova verde antes/depois |
-| config, IaC, schema, migração, script | validate | parser, fixture, plan/dry-run e rollback aplicável |
-| UI visual/interação | visual + funcional | app rodando, estados/viewports, acessibilidade |
-| docs, prompt, policy, artefato estático | static/scenario | lint, render, link/schema/grep ou consumo real |
+| automatable behavior/regression | TDD red→green on the public contract | RED observed, GREEN, focal test |
+| preserving/legacy refactor | characterization | same green proof before/after |
+| config, IaC, schema, migration, script | validate | parser, fixture, plan/dry-run, and applicable rollback |
+| visual/interaction UI | visual + functional | app running, states/viewports, accessibility |
+| docs, prompt, policy, static artifact | static/scenario | lint, render, link/schema/grep, or real consumption |
 
-Tarefas mistas combinam estratégias. Não fabrique RED para CSS, Markdown ou configuração só para
-uniformizar o plano.
+Mixed tasks combine strategies. Do not fabricate RED for CSS, Markdown, or configuration just to
+make the plan uniform.
 
-Registre também **Perfil de review**. O default é `split`, inclusive em bounded:
+Also record the **Review profile**. The default is `split`, even for bounded:
 
-- `split` (default): o caso normal; obrigatório em risco médio/alto, superfície sensível, contrato
-  público, dados, migração ou múltiplas partes;
-- `combined`: exceção para bounded, risco baixo e escopo coeso, sem segurança/dados/migração/
-  contrato público — e só depois de o usuário ratificar o rebaixamento no passo 4 do Gate de setup.
+- `split` (default): the normal case; mandatory for medium/high risk, sensitive surface, public
+  contract, data, migration, or multiple parts;
+- `combined`: an exception for bounded, low risk, and cohesive scope, with no security/data/
+  migration/public contract — and only after the user ratifies the downgrade at step 4 of the
+  setup gate.
 
-Ambos cobrem spec e qualidade; muda a quantidade de despachos, não o critério de aprovação. Só o
-`split` torna a lente spec cega de fato, então o plano nunca recomenda `combined` por conta própria.
+Both cover spec and quality; what changes is the number of dispatches, not the approval bar. Only
+`split` makes the spec lens truly blind, so the plan never recommends `combined` on its own.
 
-## Documento
+## Document
 
-Use [templates/plan.md](templates/plan.md) e mantenha apenas campos aplicáveis. O cabeçalho carrega o
-bloco **Aprovações** — descoberta, spec, domain skills e o próprio plano, uma linha cada com a data de
-ratificação: é o registro histórico da decisão humana, e o `state.md` guarda só o cursor da tarefa.
-Nenhum marcador é preenchido por inferência. Cada tarefa contém:
+Use [templates/plan.md](templates/plan.md) and keep only the applicable fields. The header carries
+the **Approvals** block — discovery, spec, domain skills, and the plan itself, one line each with
+the ratification date: it is the historical record of the human decision, and `state.md` keeps
+only the task cursor. No marker is filled by inference. Each task contains:
 
 ```text
-resultado + fora de escopo
+result + out of scope
 files/interfaces
-skills de domínio + overlays
-dependências/constraints
-estratégia de implementação e validação
-perfil de review
-passos e comandos suficientes
-critério observável de conclusão e rollback quando aplicável
+domain skills + overlays
+dependencies/constraints
+implementation and validation strategy
+review profile
+sufficient steps and commands
+observable completion criterion and rollback when applicable
 ```
 
-São defeitos: `TBD`, “tratar edge cases” sem nomeá-los, comandos inexistentes, API lembrada sem
-fonte atual, placeholders, tarefa horizontal, prova que não observa o efeito ou requisito criado
-pela LLM sem ratificação.
+Defects: `TBD`, "handle edge cases" without naming them, nonexistent commands, an API recalled
+without a current source, placeholders, a horizontal task, proof that does not observe the effect,
+or a requirement created by the LLM without ratification.
 
-## Verificar o plano
+## Verify the plan
 
-Antes do handoff:
+Before the handoff:
 
-1. Mapeie cada requisito para uma tarefa e cada tarefa para um requisito.
-2. Confirme interfaces/nomenclatura entre tarefas e dependências.
-3. Confirme overlays e estratégia de prova por artefato.
-4. Procure placeholders e comandos chutados.
-5. Releia o plano como quem nunca viu este repositório: sobrou pergunta que o artefato não responde?
-6. Confirme que a lane não recebeu cerimônia maior que seu risco.
-7. **Estresse e exponha as lacunas materiais** do plano: caça ativa por casos não tratados, validação
-   ausente, estado/erro indefinido, autorização faltante e contradições spec↔plano↔tarefa.
+1. Map every requirement to a task and every task to a requirement.
+2. Confirm interfaces/naming between tasks and dependencies.
+3. Confirm overlays and the proof strategy per artifact.
+4. Hunt for placeholders and guessed commands.
+5. Re-read the plan as someone who has never seen this repository: is there any question left the
+   artifact does not answer?
+6. Confirm the lane did not receive more ceremony than its risk.
+7. **Stress-test and expose the material gaps** of the plan: actively hunt for unhandled cases,
+   missing validation, undefined state/error, missing authorization, and spec↔plan↔task
+   contradictions.
 
-Liste premissas residuais **novas do plano**, sem re-litigar o design aprovado. Cada lacuna material
-sai da borda resolvida, aceita pelo usuário ou convertida em investigação. Quando exigir decisão
-humana, use `pelizzai-interview-me` e faça uma pergunta por vez, com recomendação. `bounded` usa
-stress compacto; `standard` usa stress focal; `exploratory`/greenfield exige uma passada completa
-de stress. Context7 pode confirmar API e versão, mas não fechar requisito, UX, regra de negócio ou
-aceite. Não reabra design aprovado sem evidência nova.
+List residual assumptions **new to the plan**, without re-litigating the approved design. Every
+material gap leaves the edge resolved, accepted by the user, or converted into an investigation.
+When it requires a human decision, use `pelizzai-interview-me` and ask one question at a time,
+with a recommendation. `bounded` uses a compact stress pass; `standard` uses a focal stress pass;
+`exploratory`/greenfield requires a full stress pass. Context7 can confirm API and version, but
+cannot close a requirement, UX, business rule, or acceptance. Do not reopen an approved design
+without new evidence.
 
-Apresente o plano e o resultado do stress na borda — `bounded`: resumo das tarefas;
-`standard`/`exploratory`: mapa requisito→tarefa. Faça **uma pergunta de aprovação do conteúdo do
-plano** e aguarde. Somente depois avance ao setup; aprovação do QUÊ e decisões de COMO não são
-comprimidas numa resposta única.
+Present the plan and the stress result at the edge — `bounded`: a summary of the tasks;
+`standard`/`exploratory`: the requirement→task map. Ask **one approval question about the plan's
+content** and wait. Only then move on to setup; approval of the WHAT and decisions about the HOW
+are not compressed into a single answer.
 
-Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o
-briefing e escale ao coordenador o que exigir decisão.
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce route analyses or open gates: apply the
+briefing and escalate to the coordinator whatever requires a decision.
 
 ## Handoff
 
-**Checagem de cobertura de domain skills (rede de segurança).** Antes de encaminhar ao Gate de
-setup, verifique: a stack do plano tem cobertura no catálogo `pelizzai/domain-skills.md`? Se não —
-ou se o catálogo está ausente —, acione o **Gate proativo de domain skills** da `pelizzai-audit`
-para propor o conjunto da stack decidida (fundamentado em Context7); a decisão é do usuário e ocorre
-**ANTES da Tarefa 1**. Isso captura fluxos que chegaram ao plano sem passar pela
-`pelizzai-brainstorming`. Em source mode não há catálogo consumidor: a checagem recai sobre as
-skills de domínio do repo-fonte e nunca cria runtime `pelizzai/`. Sob briefing fechado
-(SUBAGENT-STOP), não abra esse gate: sinalize a lacuna de cobertura ao coordenador.
+**Domain skill coverage check (safety net).** Before forwarding to the setup gate, verify: does
+the plan's stack have coverage in the `pelizzai/domain-skills.md` catalog? If not — or if the
+catalog is absent — invoke the **proactive domain skills gate** of `pelizzai-audit` to propose
+the set for the decided stack (grounded in Context7); the decision is the user's and happens
+**BEFORE Task 1**. This catches flows that reached the plan without passing through
+`pelizzai-brainstorming`. In source mode there is no consumer catalog: the check falls to the
+source repo's domain skills and never creates `pelizzai/` runtime. Under a closed briefing
+(SUBAGENT-STOP / TEAM-MEMBER-STOP), do not open this gate: flag the coverage gap to the coordinator.
 
-No consumidor, atualize o campo `plan:` no state e confirme o caminho materializado
-(`pelizzai/plans/AAAA-MM-DD-<feature>.md`); a aprovação do conteúdo é registrada no cabeçalho do
-próprio plano (`Plano: aprovado em AAAA-MM-DD`), não no state. Em source mode, entregue o plano
-nativo/execution record a `pelizzai-execution-plans` de forma discoverable. A branch/base já estão
-definidas;
-**encaminhe ao Gate de setup pós-plano** da `pelizzai-execution-plans` somente após aprovação do
-conteúdo. O gate ratifica o **como** em decisões sequenciais — isolamento, branch, modo (as três
-opções sempre visíveis), commits e review. A `pelizzai-writing-plans` leva recomendações, não
-decisões:
+In the consumer, update the `plan:` field in state and confirm the materialized path
+(`pelizzai/plans/YYYY-MM-DD-<topic>.md`); content approval is recorded in the header of the plan
+itself (`Plan: approved on YYYY-MM-DD`), not in state. In source mode, hand the native
+plan/execution record to `pelizzai-execution-plans` in a discoverable way. Branch/base are already
+set; **forward to the post-plan setup gate** of `pelizzai-execution-plans` only after content
+approval. The gate ratifies the **how** in sequential decisions — isolation, branch, mode (the
+three options always visible), commits, and review. `pelizzai-writing-plans` carries
+recommendations, not decisions:
 
 ```text
-isolation: branch recomendado; worktree apenas se pedido/justificado — levado ao gate
-execution-mode: inline recomendado; subagents/team por independência ou coordenação real — levado ao gate
-commit-strategy: granular recomendado; squash-final só com trade-off/pedido — levado ao gate
+isolation: branch recommended; worktree only if requested/justified — taken to the gate
+execution-mode: inline recommended; subagents/team for real independence or coordination — taken to the gate
+commit-strategy: granular recommended; squash-final only with a trade-off/request — taken to the gate
 ```
 
-Não aplique isolamento, modo ou commit como decisão sem ratificação do usuário no gate sequencial;
-o plano informa e o gate ratifica antes da Tarefa 1. Se o usuário pediu **apenas o plano**, não
-execute código: valide o artefato, consolide/sele a entrega de planejamento e mantenha local salvo
-pedido externo.
+Do not apply isolation, mode, or commits as a decision without the user's ratification at the
+sequential gate; the plan informs and the gate ratifies before Task 1. If the user asked for **the
+plan only**, do not execute code: validate the artifact, consolidate/seal the planning delivery,
+and keep it local unless an external destination is requested.
 
 ## Red flags
 
 ```text
-- Escrever plano antes da task branch.
-- Forçar brainstorming/interview em lane bounded clara.
-- Planejar greenfield sem spec aprovada ou dispensa explícita.
-- Pular stress e aprovação do plano para começar a implementar.
-- Duplicar no plano todo o código que a execução deve escrever.
-- Omitir overlay frontend/security detectável.
-- TDD universal — ou registrar `combined` como perfil sem o usuário ter ratificado o rebaixamento.
-- Team/worktree por preferência do harness, sem ganho concreto.
-- Usar Context7 para decidir requisitos ou critérios de aceite.
-- Plano gigante cobrindo subsistemas que deveriam ser tarefas/projetos separados.
-- Omitir a seção `## Decisões técnicas deste plano` ou deixá-la vazia em vez de declarar
-  `nenhuma decisão técnica material — plano puramente mecânico`.
-- Encaminhar ao Gate de setup com a stack sem cobertura no catálogo, sem acionar o Gate proativo de
-  domain skills da `pelizzai-audit`.
+- Writing the plan before the task branch.
+- Forcing brainstorming/interview on a clear bounded lane.
+- Planning greenfield without an approved spec or an explicit waiver.
+- Skipping stress and plan approval to start implementing.
+- Duplicating in the plan all the code execution should write.
+- Omitting a detectable frontend/security overlay.
+- Universal TDD — or recording `combined` as the profile without the user having ratified the downgrade.
+- Team/worktree out of harness preference, without concrete gain.
+- Using Context7 to decide requirements or acceptance criteria.
+- A giant plan covering subsystems that should be separate tasks/projects.
+- Omitting the `## Technical decisions in this plan` section or leaving it empty instead of
+  declaring `no material technical decision — purely mechanical plan`.
+- Forwarding to the setup gate with a stack uncovered by the catalog, without invoking the
+  proactive domain skills gate of `pelizzai-audit`.
 ```
 
-## Integração
+## Integration
 
-Combina com `pelizzai-brainstorming` quando houve design, `pelizzai-reasoning` para decomposição,
-`pelizzai-interview-me` para stress focal de premissa residual material, `pelizzai-frontend`/
-`pelizzai-oswap` como overlays e `pelizzai-execution-plans` para execução.
+Combines with `pelizzai-brainstorming` when there was design, `pelizzai-reasoning` for
+decomposition, `pelizzai-interview-me` for focal stress of a material residual assumption,
+`pelizzai-frontend`/`pelizzai-oswap` as overlays, and `pelizzai-execution-plans` for execution.
 
-## Instrução final
+## Final instruction
 
-Planeje o contrato, a prova e as fronteiras na profundidade da lane. Deixe a implementação para a
-execução e não transforme clareza em cerimônia.
+Plan the contract, the proof, and the boundaries at the lane's depth. Leave the implementation to
+execution and do not turn clarity into ceremony.

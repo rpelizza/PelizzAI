@@ -1,859 +1,859 @@
 # Constraint Satisfaction
 
-## Objetivo
+## Purpose
 
-Use Constraint Satisfaction para garantir que uma solução, plano, recomendação, implementação ou resposta respeite as condições que realmente limitam o problema.
+Use Constraint Satisfaction to ensure that a solution, plan, recommendation, implementation, or answer respects the conditions that actually constrain the problem.
 
-A técnica organiza requisitos em quatro grupos:
+The technique organizes requirements into four groups:
 
-1. **restrições obrigatórias**: não podem ser violadas;
-2. **proibições**: comportamentos ou soluções que não podem ocorrer;
-3. **preferências**: características desejáveis, mas negociáveis;
-4. **critérios de otimização**: fatores usados para escolher entre soluções válidas.
+1. **mandatory constraints**: cannot be violated;
+2. **prohibitions**: behaviors or solutions that must not occur;
+3. **preferences**: desirable but negotiable characteristics;
+4. **optimization criteria**: factors used to choose among valid solutions.
 
-O objetivo não é encontrar a solução "mais elegante".
+The goal is not to find the "most elegant" solution.
 
-O objetivo é encontrar uma solução **válida primeiro** e, entre as válidas, selecionar a mais adequada ao contexto.
+The goal is to find a **valid solution first** and, among the valid ones, select the one best suited to the context.
 
-## Princípio central
+## Core principle
 
-> Uma solução que viola uma restrição obrigatória não é uma solução aceitável, mesmo que seja rápida, barata, popular ou tecnicamente sofisticada.
+> A solution that violates a mandatory constraint is not an acceptable solution, even if it is fast, cheap, popular, or technically sophisticated.
 
 ```mermaid
 flowchart TD
-    A[Objetivo] --> B[Extrair requisitos e limites]
-    B --> C[Classificar restrições]
-    C --> D[Detectar conflitos e lacunas]
-    D --> E{Há solução viável?}
+    A[Goal] --> B[Extract requirements and limits]
+    B --> C[Classify constraints]
+    C --> D[Detect conflicts and gaps]
+    D --> E{Is there a feasible solution?}
 
-    E -- Não --> F[Explicitar bloqueio ou negociar restrições]
-    E -- Sim --> G[Gerar ou avaliar soluções]
+    E -- No --> F[Surface the blocker or negotiate constraints]
+    E -- Yes --> G[Generate or evaluate solutions]
 
-    G --> H[Eliminar soluções inválidas]
-    H --> I[Comparar soluções válidas por preferências]
-    I --> J[Selecionar solução]
-    J --> K[Validar atendimento às restrições]
-    K --> L[Concluir]
+    G --> H[Eliminate invalid solutions]
+    H --> I[Compare valid solutions by preferences]
+    I --> J[Select a solution]
+    J --> K[Validate compliance with constraints]
+    K --> L[Conclude]
 ```
 
-## Quando usar
+## When to use
 
-Use Constraint Satisfaction quando a tarefa envolver:
+Use Constraint Satisfaction when the task involves:
 
 ```text
-- requisitos explícitos do usuário;
-- regras de projeto, organização ou domínio;
-- limitações técnicas, de stack ou de infraestrutura;
-- compatibilidade com versões, contratos ou APIs;
-- segurança, privacidade, permissões ou dados sensíveis;
-- orçamento, prazo, performance ou consumo de recursos;
-- decisões com trade-offs;
-- múltiplas alternativas de implementação;
-- recomendações de ferramentas, bibliotecas ou arquitetura;
-- tarefas com proibições claras;
-- entregáveis que precisam obedecer a formato ou estrutura específica.
+- explicit user requirements;
+- project, organization, or domain rules;
+- technical, stack, or infrastructure limitations;
+- compatibility with versions, contracts, or APIs;
+- security, privacy, permissions, or sensitive data;
+- budget, deadline, performance, or resource consumption;
+- decisions with trade-offs;
+- multiple implementation alternatives;
+- recommendations of tools, libraries, or architecture;
+- tasks with clear prohibitions;
+- deliverables that must follow a specific format or structure.
 ```
 
-Exemplos adequados:
+Good examples:
 
 ```text
-- Escolher banco de dados sem introduzir serviço gerenciado pago.
-- Implementar feature preservando compatibilidade com clientes antigos.
-- Criar API que exige autenticação, paginação e formato de erro existente.
-- Recomendar biblioteca compatível com determinada versão de framework.
-- Criar componente usando Tailwind sem adicionar CSS novo.
-- Escrever documento que deve conter tópicos obrigatórios e evitar dados sensíveis.
-- Planejar migração com zero downtime e rollback possível.
+- Choosing a database without introducing a paid managed service.
+- Implementing a feature while preserving compatibility with legacy clients.
+- Building an API that requires authentication, pagination, and the existing error format.
+- Recommending a library compatible with a given framework version.
+- Building a component with Tailwind without adding new CSS.
+- Writing a document that must cover mandatory topics and avoid sensitive data.
+- Planning a migration with zero downtime and a possible rollback.
 ```
 
-## Quando evitar
+## When to avoid
 
-Não use Constraint Satisfaction como processo formal para tarefas sem limites materiais.
+Do not use Constraint Satisfaction as a formal process for tasks with no material limits.
 
-Evite ou simplifique quando:
+Avoid or simplify when:
 
 ```text
-- a tarefa possui uma única ação clara;
-- não há alternativas reais;
-- as restrições já estão implícitas e triviais;
-- a resposta é criativa e o usuário não definiu limites relevantes;
-- criar matriz de restrições custaria mais do que executar;
-- a tarefa é tradução, reescrita ou ajuste pontual simples.
+- the task has a single clear action;
+- there are no real alternatives;
+- the constraints are already implicit and trivial;
+- the answer is creative and the user set no relevant limits;
+- building a constraint matrix would cost more than executing;
+- the task is a translation, a rewrite, or a simple one-off tweak.
 ```
 
-Exemplos inadequados:
+Poor examples:
 
 ```text
-- Corrigir um typo.
-- Explicar o que é uma variável.
-- Traduzir uma frase curta.
-- Renomear uma função local.
-- Ajustar uma vírgula em um texto.
+- Fixing a typo.
+- Explaining what a variable is.
+- Translating a short sentence.
+- Renaming a local function.
+- Adjusting a comma in a text.
 ```
 
-## Relação com outras técnicas
+## Relationship to other techniques
 
-| Técnica                  | Responsabilidade                                                 |
+| Technique                | Responsibility                                                   |
 | ------------------------ | ---------------------------------------------------------------- |
-| Structured Decomposition | Divide o problema em partes coesas                               |
-| Plan and Execute         | Organiza a sequência de execução                                 |
-| Decision Making          | Escolhe entre soluções válidas, inclusive caminhos interdependentes |
-| Constraint Satisfaction  | Elimina caminhos que violam requisitos e prioriza opções válidas |
-| ReAct                    | Executa ações e atualiza o estado                                |
-| Verification             | Confirma que requisitos foram realmente atendidos                |
-| Critique and Refine      | Corrige violações, lacunas ou inconsistências detectadas         |
+| Structured Decomposition | Splits the problem into cohesive parts                           |
+| Plan and Execute         | Organizes the execution sequence                                 |
+| Decision Making          | Chooses among valid solutions, including interdependent paths    |
+| Constraint Satisfaction  | Eliminates paths that violate requirements and prioritizes valid options |
+| ReAct                    | Executes actions and updates state                               |
+| Verification             | Confirms that requirements were actually met                     |
+| Critique and Refine      | Fixes detected violations, gaps, or inconsistencies              |
 
 ```mermaid
 flowchart LR
-    A[Objetivo e contexto] --> B[Constraint Satisfaction]
-    B --> C{Soluções válidas}
+    A[Goal and context] --> B[Constraint Satisfaction]
+    B --> C{Valid solutions}
     C --> D[Plan and Execute]
     D --> E[ReAct]
     E --> F[Verification]
-    F --> G{Restrições atendidas?}
-    G -- Não --> H[Critique and Refine]
+    F --> G{Constraints met?}
+    G -- No --> H[Critique and Refine]
     H --> B
-    G -- Sim --> I[Entrega]
+    G -- Yes --> I[Delivery]
 ```
 
-### Regra de integração
+### Integration rule
 
-Use Constraint Satisfaction antes de comprometer a solução.
+Use Constraint Satisfaction before committing to a solution.
 
-Depois de escolher uma solução válida:
+After choosing a valid solution:
 
-- use **Plan and Execute** para organizar o trabalho;
-- use **ReAct** para executar cada etapa;
-- use **Verification** para confirmar que as restrições foram atendidas na prática;
-- use **Critique and Refine** caso a validação revele violação ou lacuna.
+- use **Plan and Execute** to organize the work;
+- use **ReAct** to execute each step;
+- use **Verification** to confirm the constraints were met in practice;
+- use **Critique and Refine** if validation reveals a violation or a gap.
 
-## Tipos de restrição
+## Constraint types
 
-Esta é a taxonomia canônica das restrições. As restrições **obrigatórias** e as **proibições** são restrições duras (não podem ser violadas); as **preferências** são restrições suaves (podem ser sacrificadas com justificativa).
+This is the canonical taxonomy of constraints. **Mandatory constraints** and **prohibitions** are hard constraints (they cannot be violated); **preferences** are soft constraints (they can be sacrificed with justification).
 
-### 1. Restrição obrigatória (dura)
+### 1. Mandatory constraint (hard)
 
-Uma condição que precisa ser satisfeita para que a solução seja válida.
+A condition that must be satisfied for the solution to be valid.
 
 ```text
-Exemplos:
-- Deve funcionar com Angular 20.
-- Não pode expor dados pessoais.
-- Precisa manter compatibilidade com API atual.
-- Deve usar o banco já adotado no projeto.
-- Precisa respeitar o orçamento máximo definido.
-- Deve funcionar em ambiente Windows.
+Examples:
+- Must work with Angular 20.
+- Must not expose personal data.
+- Must remain compatible with the current API.
+- Must use the database already adopted in the project.
+- Must respect the defined maximum budget.
+- Must work on Windows.
 ```
 
-Uma solução que viola uma restrição obrigatória deve ser descartada ou tratada como bloqueada.
+A solution that violates a mandatory constraint must be discarded or treated as blocked.
 
-### 2. Proibição (dura)
+### 2. Prohibition (hard)
 
-Uma ação, tecnologia, comportamento ou resultado que não pode ocorrer. Tratada como restrição obrigatória negativa.
+An action, technology, behavior, or outcome that must not occur. Treated as a negative mandatory constraint.
 
 ```text
-Exemplos:
-- Não alterar arquivos `.env`.
-- Não incluir segredos no repositório.
-- Não usar dependência sem licença compatível.
-- Não bloquear a thread principal.
-- Não usar `setTimeout` para mascarar sincronização.
-- Não quebrar clientes existentes.
+Examples:
+- Do not modify `.env` files.
+- Do not put secrets in the repository.
+- Do not use a dependency without a compatible license.
+- Do not block the main thread.
+- Do not use `setTimeout` to mask synchronization.
+- Do not break existing clients.
 ```
 
-### 3. Preferência (suave)
+### 3. Preference (soft)
 
-Uma característica desejável, mas que pode ser sacrificada para cumprir algo mais importante. Preferências não devem anular requisitos obrigatórios.
+A desirable characteristic that can be sacrificed to satisfy something more important. Preferences must not override mandatory requirements.
 
 ```text
-Exemplos:
-- Preferir solução simples.
-- Preferir reutilizar componentes existentes.
-- Preferir menor número de dependências.
-- Preferir execução mais rápida.
-- Preferir menor custo operacional.
-- Preferir biblioteca com comunidade maior.
+Examples:
+- Prefer a simple solution.
+- Prefer reusing existing components.
+- Prefer fewer dependencies.
+- Prefer faster execution.
+- Prefer lower operational cost.
+- Prefer a library with a larger community.
 ```
 
-### 4. Critério de otimização
+### 4. Optimization criterion
 
-Um fator usado para comparar soluções que já são válidas. Veja [Decision Making](decision-making.md) ao otimizar entre soluções válidas.
+A factor used to compare solutions that are already valid. See [Decision Making](decision-making.md) when optimizing among valid solutions.
 
 ```text
-Exemplos:
-- Menor complexidade.
-- Menor custo.
-- Melhor performance.
-- Menor risco operacional.
-- Maior manutenibilidade.
-- Menor prazo de implementação.
-- Melhor experiência do usuário.
+Examples:
+- Lower complexity.
+- Lower cost.
+- Better performance.
+- Lower operational risk.
+- Higher maintainability.
+- Shorter implementation time.
+- Better user experience.
 ```
 
-### 5. Premissa
+### 5. Assumption
 
-Uma condição assumida como verdadeira para viabilizar uma solução.
+A condition assumed to be true to make a solution viable.
 
 ```text
-Exemplos:
-- Redis já está disponível no ambiente.
-- A API suporta paginação.
-- O usuário possui permissão de administrador.
-- O serviço externo aceita webhooks.
+Examples:
+- Redis is already available in the environment.
+- The API supports pagination.
+- The user has administrator permission.
+- The external service accepts webhooks.
 ```
 
-Premissas não são restrições confirmadas. Devem ser verificadas antes de orientar decisões críticas. Para premissas desconhecidas ou ainda não validadas, use [Assumption Tracking](assumption-tracking.md), que é a técnica dona do rastreamento de premissas.
+Assumptions are not confirmed constraints. Verify them before they drive critical decisions. For unknown or not-yet-validated assumptions, use [Assumption Tracking](assumption-tracking.md), the technique that owns assumption tracking.
 
-## Hierarquia de restrições
+## Constraint hierarchy
 
-Quando houver conflito, aplique esta ordem padrão:
+When there is a conflict, apply this default order:
 
 ```text
-1. Segurança, privacidade, legalidade e políticas obrigatórias.
-2. Instruções explícitas do usuário.
-3. Regras obrigatórias do projeto ou organização.
-4. Contratos técnicos e compatibilidade.
-5. Requisitos funcionais.
-6. Requisitos não funcionais.
-7. Preferências do usuário.
-8. Preferências técnicas ou estéticas.
+1. Security, privacy, legality, and mandatory policies.
+2. Explicit user instructions.
+3. Mandatory project or organization rules.
+4. Technical contracts and compatibility.
+5. Functional requirements.
+6. Non-functional requirements.
+7. User preferences.
+8. Technical or aesthetic preferences.
 ```
 
 ```mermaid
 flowchart BT
-    A[Preferências estéticas]
-    B[Preferências técnicas]
-    C[Requisitos não funcionais]
-    D[Requisitos funcionais]
-    E[Contratos e compatibilidade]
-    F[Regras do projeto]
-    G[Instruções explícitas do usuário]
-    H[Segurança, privacidade e políticas]
+    A[Aesthetic preferences]
+    B[Technical preferences]
+    C[Non-functional requirements]
+    D[Functional requirements]
+    E[Contracts and compatibility]
+    F[Project rules]
+    G[Explicit user instructions]
+    H[Security, privacy, and policies]
 
     A --> B --> C --> D --> E --> F --> G --> H
 ```
 
-### Regra de conflito
+### Conflict rule
 
-> Não sacrifique uma restrição de nível superior para satisfazer uma preferência de nível inferior.
+> Do not sacrifice a higher-level constraint to satisfy a lower-level preference.
 
-Exemplo:
+Example:
 
 ```text
-Errado:
-Usar uma biblioteca mais conveniente que não suporta a versão obrigatória do framework.
+Wrong:
+Using a more convenient library that does not support the mandatory framework version.
 
-Correto:
-Eliminar a biblioteca por incompatibilidade e comparar apenas opções viáveis.
+Right:
+Eliminating the library for incompatibility and comparing only viable options.
 ```
 
-## Modelo de restrições
+## Constraint model
 
-Antes de escolher ou implementar uma solução, registre o estado mínimo no formato canônico abaixo.
+Before choosing or implementing a solution, record the minimal state in the canonical format below.
 
 ```text
-Objetivo:
-- [resultado esperado]
+Goal:
+- [expected outcome]
 
-Restrições obrigatórias:
-- [condições que não podem ser violadas]
+Mandatory constraints:
+- [conditions that cannot be violated]
 
-Proibições:
-- [ações ou resultados vedados]
+Prohibitions:
+- [forbidden actions or outcomes]
 
-Preferências:
-- [características desejáveis]
+Preferences:
+- [desirable characteristics]
 
-Critérios de otimização:
-- [como comparar soluções válidas]
+Optimization criteria:
+- [how to compare valid solutions]
 
-Premissas a validar:
-- [condições ainda não confirmadas]
+Assumptions to validate:
+- [conditions not yet confirmed]
 
-Restrições desconhecidas:
-- [informações ausentes que podem afetar a solução]
+Unknown constraints:
+- [missing information that may affect the solution]
 
-Conflitos:
-- [restrições incompatíveis ou potencialmente incompatíveis]
+Conflicts:
+- [incompatible or potentially incompatible constraints]
 
-Soluções válidas:
-- [alternativas que atendem obrigatórios]
+Valid solutions:
+- [alternatives that meet the mandatory constraints]
 
 Trade-offs:
-- [preferências sacrificadas ou custos aceitos]
+- [sacrificed preferences or accepted costs]
 
-Critério de conclusão:
-- [como confirmar que a entrega atende ao necessário]
+Completion criterion:
+- [how to confirm the delivery meets what is needed]
 ```
 
-Exemplo:
+Example:
 
 ```text
-Objetivo:
-- Implementar exportação de pedidos em CSV.
+Goal:
+- Implement order export to CSV.
 
-Restrições obrigatórias:
-- Respeitar filtros ativos.
-- Permitir somente usuários autorizados.
-- Não incluir dados sensíveis.
-- Funcionar com a API atual.
+Mandatory constraints:
+- Respect active filters.
+- Allow only authorized users.
+- Do not include sensitive data.
+- Work with the current API.
 
-Proibições:
-- Não gerar arquivo completo em memória se o volume puder ser alto.
-- Não expor dados de outros usuários.
+Prohibitions:
+- Do not build the full file in memory if the volume may be high.
+- Do not expose other users' data.
 
-Preferências:
-- Reutilizar componentes e serviços existentes.
-- Evitar nova infraestrutura.
+Preferences:
+- Reuse existing components and services.
+- Avoid new infrastructure.
 
-Critérios de otimização:
-- Menor complexidade operacional.
-- Melhor experiência de uso.
+Optimization criteria:
+- Lower operational complexity.
+- Better user experience.
 
-Premissas a validar:
-- A API atual suporta streaming ou paginação suficiente.
+Assumptions to validate:
+- The current API supports streaming or sufficient pagination.
 ```
 
-## Extração de restrições
+## Constraint extraction
 
-As restrições podem estar distribuídas em diferentes lugares.
+Constraints may be scattered across different places.
 
-Procure em:
+Look in:
 
 ```text
-- pedido explícito do usuário;
-- mensagens anteriores;
-- documentação do projeto;
-- AGENTS.md, README, CONTRIBUTING.md e regras internas;
-- código existente;
-- contratos de API;
+- the user's explicit request;
+- previous messages;
+- project documentation;
+- AGENTS.md, README, CONTRIBUTING.md, and internal rules;
+- existing code;
+- API contracts;
 - schemas;
-- testes;
-- infraestrutura;
-- configurações;
-- políticas de segurança;
-- limitações de ferramentas;
-- requisitos legais, financeiros ou operacionais.
+- tests;
+- infrastructure;
+- configuration;
+- security policies;
+- tool limitations;
+- legal, financial, or operational requirements.
 ```
 
-Não assuma que a primeira descrição do usuário contém todas as restrições relevantes.
+Do not assume the user's first description contains all relevant constraints.
 
-## Processo de Constraint Satisfaction
+## Constraint Satisfaction process
 
-### 1. Extrair
+### 1. Extract
 
-Identifique todas as condições relevantes.
+Identify every relevant condition.
 
 ```text
-Perguntas:
-- O que precisa obrigatoriamente acontecer?
-- O que não pode acontecer?
-- Quais tecnologias ou versões são obrigatórias?
-- Quais dados, contratos ou fluxos precisam ser preservados?
-- Há prazo, orçamento, ambiente ou permissão limitada?
-- Existe compatibilidade com comportamento anterior?
-- Quais preferências são negociáveis?
+Questions:
+- What absolutely must happen?
+- What must not happen?
+- Which technologies or versions are mandatory?
+- Which data, contracts, or flows must be preserved?
+- Is there a limited deadline, budget, environment, or permission?
+- Is compatibility with previous behavior required?
+- Which preferences are negotiable?
 ```
 
-### 2. Normalizar
+### 2. Normalize
 
-Reescreva requisitos vagos em forma verificável.
+Rewrite vague requirements in verifiable form.
 
 ```text
-Ruim:
-"Tem que ser rápido."
+Bad:
+"It has to be fast."
 
-Melhor:
-"A interação principal deve responder sem bloquear a interface; operações pesadas devem ocorrer fora do request principal quando necessário."
+Better:
+"The main interaction must respond without blocking the interface; heavy operations must run outside the main request when necessary."
 ```
 
 ```text
-Ruim:
-"Use uma solução barata."
+Bad:
+"Use a cheap solution."
 
-Melhor:
-"Não introduzir custo recorrente adicional sem autorização explícita."
+Better:
+"Do not introduce additional recurring cost without explicit authorization."
 ```
 
-### 3. Classificar
+### 3. Classify
 
-Classifique cada item como:
+Classify each item as:
 
 ```text
-- Obrigatório.
-- Proibição.
-- Preferência.
-- Critério de otimização.
-- Premissa.
-- Desconhecido.
+- Mandatory.
+- Prohibition.
+- Preference.
+- Optimization criterion.
+- Assumption.
+- Unknown.
 ```
 
-Não trate uma preferência como obrigatória apenas porque é conveniente.
+Do not treat a preference as mandatory just because it is convenient.
 
-Não trate uma proibição como preferência apenas porque a solução alternativa é mais fácil.
+Do not treat a prohibition as a preference just because the alternative solution is easier.
 
-### 4. Detectar conflitos
+### 4. Detect conflicts
 
-Procure condições impossíveis ou contraditórias.
+Look for impossible or contradictory conditions.
 
-Exemplos de conflito:
+Conflict examples:
 
 ```text
-- "Não usar serviços externos" + "Usar autenticação por Google OAuth".
-- "Zero downtime" + "Alterar coluna obrigatória sem estratégia de migração".
-- "Sem custo adicional" + "Usar provedor pago obrigatório".
-- "Sem alteração de backend" + "Adicionar regra que precisa de autorização no servidor".
-- "Resposta instantânea" + "Gerar relatório muito grande no mesmo request".
+- "No external services" + "Use Google OAuth authentication".
+- "Zero downtime" + "Change a required column with no migration strategy".
+- "No additional cost" + "Use a mandatory paid provider".
+- "No backend changes" + "Add a rule that requires server-side authorization".
+- "Instant response" + "Generate a very large report in the same request".
 ```
 
-### 5. Avaliar viabilidade
+### 5. Assess feasibility
 
-Antes de implementar, determine se existe caminho que atende às restrições obrigatórias.
+Before implementing, determine whether a path exists that meets the mandatory constraints.
 
 ```text
-Possíveis resultados:
-- Viável: existe ao menos uma solução válida.
-- Viável com trade-off: solução atende obrigatórios, mas sacrifica preferências.
-- Condicional: depende de premissa ainda não validada.
-- Bloqueado: não existe solução válida com as restrições atuais.
-- Inconsistente: requisitos se contradizem e precisam de decisão.
+Possible outcomes:
+- Feasible: at least one valid solution exists.
+- Feasible with trade-off: the solution meets the mandatory constraints but sacrifices preferences.
+- Conditional: depends on an assumption not yet validated.
+- Blocked: no valid solution exists under the current constraints.
+- Inconsistent: requirements contradict each other and need a decision.
 ```
 
-Não esconda inviabilidade com solução que viola requisito crítico.
+Do not hide infeasibility behind a solution that violates a critical requirement.
 
-### 6. Filtrar soluções inválidas
+### 6. Filter invalid solutions
 
-Antes de comparar custo, elegância ou popularidade, descarte soluções que violam obrigatórios.
+Before comparing cost, elegance, or popularity, discard solutions that violate mandatory constraints.
 
 ```mermaid
 flowchart TD
-    A[Alternativas] --> B{Atende obrigatórios?}
-    B -- Não --> C[Descartar]
-    B -- Sim --> D{Respeita proibições?}
-    D -- Não --> C
-    D -- Sim --> E[Comparar preferências e trade-offs]
-    E --> F[Selecionar]
+    A[Alternatives] --> B{Meets mandatory constraints?}
+    B -- No --> C[Discard]
+    B -- Yes --> D{Respects prohibitions?}
+    D -- No --> C
+    D -- Yes --> E[Compare preferences and trade-offs]
+    E --> F[Select]
 ```
 
-Exemplo:
+Example:
 
 ```text
-Alternativas:
-A. Usar biblioteca nova que exige Node incompatível.
-B. Reutilizar biblioteca existente compatível.
-C. Implementar solução customizada.
+Alternatives:
+A. Use a new library that requires an incompatible Node version.
+B. Reuse an existing compatible library.
+C. Implement a custom solution.
 
-Filtro:
-- A é descartada por incompatibilidade obrigatória.
-- B e C seguem para comparação.
+Filter:
+- A is discarded for violating mandatory compatibility.
+- B and C move on to comparison.
 ```
 
-### 7. Otimizar entre soluções válidas
+### 7. Optimize among valid solutions
 
-Somente depois de garantir validade, compare preferências. Quando a comparação envolver trade-offs relevantes, conduza a escolha com [Decision Making](decision-making.md).
+Only after ensuring validity, compare preferences. When the comparison involves relevant trade-offs, drive the choice with [Decision Making](decision-making.md).
 
 ```text
-Critérios possíveis:
-- Complexidade.
-- Custo.
-- Prazo.
+Possible criteria:
+- Complexity.
+- Cost.
+- Time.
 - Performance.
-- Segurança.
-- Manutenibilidade.
-- Observabilidade.
-- Reversibilidade.
-- Experiência do usuário.
+- Security.
+- Maintainability.
+- Observability.
+- Reversibility.
+- User experience.
 ```
 
-Não crie pontuações artificiais.
+Do not invent artificial scores.
 
 ```text
-Ruim:
-"Solução A = 9, Solução B = 7."
+Bad:
+"Solution A = 9, Solution B = 7."
 
-Melhor:
-"Solução A exige nova infraestrutura e reduz latência.
-Solução B reutiliza recursos existentes, mas tem maior custo de processamento.
-Ambas atendem os requisitos obrigatórios; a escolha depende de orçamento versus performance."
+Better:
+"Solution A requires new infrastructure and reduces latency.
+Solution B reuses existing resources but has a higher processing cost.
+Both meet the mandatory requirements; the choice depends on budget versus performance."
 ```
 
-### 8. Validar no resultado final
+### 8. Validate the final result
 
-Antes de concluir, verifique se a solução real atende as restrições, não apenas o plano.
+Before concluding, verify that the actual solution meets the constraints, not just the plan.
 
 ```text
 Checklist:
-[ ] Todos os requisitos obrigatórios foram atendidos.
-[ ] Nenhuma proibição foi violada.
-[ ] Premissas críticas foram confirmadas.
-[ ] Preferências sacrificadas foram justificadas.
-[ ] Trade-offs relevantes foram comunicados.
-[ ] Compatibilidade foi validada quando aplicável.
-[ ] Segurança e privacidade foram consideradas.
-[ ] Não há requisito oculto conhecido sem tratamento.
+[ ] Every mandatory requirement was met.
+[ ] No prohibition was violated.
+[ ] Critical assumptions were confirmed.
+[ ] Sacrificed preferences were justified.
+[ ] Relevant trade-offs were communicated.
+[ ] Compatibility was validated where applicable.
+[ ] Security and privacy were considered.
+[ ] No known hidden requirement was left unaddressed.
 ```
 
-## Restrições globais e locais
+## Global and local constraints
 
-### Restrição global
+### Global constraint
 
-Afeta toda a solução.
+Affects the whole solution.
 
 ```text
-Exemplos:
-- Não usar serviços pagos.
-- O projeto deve funcionar em Windows e Linux.
-- Nenhum segredo pode ser exposto.
-- A solução precisa manter compatibilidade com clientes existentes.
+Examples:
+- Do not use paid services.
+- The project must work on Windows and Linux.
+- No secret may be exposed.
+- The solution must remain compatible with existing clients.
 ```
 
-### Restrição local
+### Local constraint
 
-Afeta apenas uma parte.
+Affects only one part.
 
 ```text
-Exemplos:
-- O endpoint de exportação deve limitar 10 mil registros por request.
-- O componente deve usar design system existente.
-- A migração deve possuir rollback.
-- O worker deve ser idempotente.
+Examples:
+- The export endpoint must cap each request at 10,000 records.
+- The component must use the existing design system.
+- The migration must have a rollback.
+- The worker must be idempotent.
 ```
 
-Não trate uma restrição local como global sem evidência.
+Do not treat a local constraint as global without evidence.
 
-Não ignore restrição global por ela não aparecer em uma subtarefa específica.
+Do not ignore a global constraint just because it does not show up in a specific subtask.
 
-## Restrições temporais
+## Temporal constraints
 
-Algumas restrições variam por fase.
+Some constraints vary by phase.
 
 ```text
-Exemplos:
-- Durante migração, clientes antigos e novos precisam coexistir.
-- Após depreciação, contrato antigo pode ser removido.
-- Em produção, mudanças exigem rollback.
-- Em ambiente local, mocks podem ser permitidos; em produção, não.
+Examples:
+- During a migration, old and new clients must coexist.
+- After deprecation, the old contract can be removed.
+- In production, changes require rollback.
+- In a local environment, mocks may be allowed; in production, not.
 ```
 
 ```mermaid
 flowchart LR
-    A[Estado atual] --> B[Compatibilidade temporária]
-    B --> C[Migração]
-    C --> D[Depreciação]
-    D --> E[Estado final]
+    A[Current state] --> B[Temporary compatibility]
+    B --> C[Migration]
+    C --> D[Deprecation]
+    D --> E[Final state]
 ```
 
-Ao analisar restrições temporais, defina:
+When analyzing temporal constraints, define:
 
 ```text
-- qual regra vale agora;
-- quando ela muda;
-- qual evento permite a transição;
-- como evitar quebra durante coexistência.
+- which rule applies now;
+- when it changes;
+- which event allows the transition;
+- how to avoid breakage during coexistence.
 ```
 
-## Restrições de compatibilidade
+## Compatibility constraints
 
-Ao alterar sistemas existentes, verifique:
+When changing existing systems, check:
 
 ```text
-- versões de runtime;
-- versões de bibliotecas;
-- contratos de API;
+- runtime versions;
+- library versions;
+- API contracts;
 - schemas;
 - payloads;
-- banco de dados;
-- clientes existentes;
-- variáveis de ambiente;
-- browsers ou sistemas operacionais;
-- migrações e rollback;
-- integrações externas.
+- database;
+- existing clients;
+- environment variables;
+- browsers or operating systems;
+- migrations and rollback;
+- external integrations.
 ```
 
-Exemplo:
+Example:
 
 ```text
-Objetivo:
-Adicionar campo obrigatório `priority`.
+Goal:
+Add a required `priority` field.
 
-Restrição:
-Clientes antigos não enviam esse campo.
+Constraint:
+Legacy clients do not send this field.
 
-Solução inválida:
-Tornar o campo obrigatório imediatamente no endpoint público.
+Invalid solution:
+Make the field required immediately on the public endpoint.
 
-Solução viável:
-Aceitar ausência temporariamente, definir valor padrão compatível, atualizar clientes e só então tornar obrigatório em versão futura.
+Viable solution:
+Temporarily accept its absence, define a compatible default value, update the clients, and only then make it required in a future version.
 ```
 
-## Restrições de segurança e privacidade
+## Security and privacy constraints
 
-Sempre trate os itens abaixo como restrições duras, salvo instrução legítima e segura em sentido diferente:
+Always treat the items below as hard constraints. The user's ratification settles what the terms mean for this task — what counts as necessary, who is authorized, which confirmation is proper, what risk is accepted — and it is settled through `pelizzai-interview-me`. It does not switch a constraint off: a request to bypass one is escalated and recorded, never executed silently, and the relevant security overlay plus Verification still run. The agent never authorizes a deviation on its own judgment that it looks legitimate or safe:
 
 ```text
-- Não expor segredos.
-- Não registrar dados sensíveis sem necessidade.
-- Não confiar em validação apenas do cliente.
-- Não permitir acesso entre usuários sem autorização.
-- Não alterar permissões sem validar o alvo.
-- Não executar ação destrutiva sem confirmação adequada.
-- Não usar dados pessoais além do necessário.
+- Do not expose secrets.
+- Do not log sensitive data without need.
+- Do not rely on client-side validation alone.
+- Do not allow cross-user access without authorization.
+- Do not change permissions without validating the target.
+- Do not run a destructive action without proper confirmation.
+- Do not use personal data beyond what is necessary.
 ```
 
-Uma solução funcional que viola segurança não é uma solução válida.
+A working solution that violates security is not a valid solution.
 
-## Restrições de recurso
+## Resource constraints
 
-Considere limitações de:
+Consider limits on:
 
 ```text
-- tempo;
-- orçamento;
-- memória;
+- time;
+- budget;
+- memory;
 - CPU;
-- rede;
-- limite de API;
-- custo de tokens;
-- latência;
-- armazenamento;
-- equipe disponível;
-- permissões;
-- janelas de manutenção.
+- network;
+- API limits;
+- token cost;
+- latency;
+- storage;
+- available team;
+- permissions;
+- maintenance windows.
 ```
 
-Exemplo:
+Example:
 
 ```text
-Problema:
-Processar 2 milhões de registros.
+Problem:
+Process 2 million records.
 
-Restrição:
-Não pode carregar todos os registros em memória.
+Constraint:
+Cannot load all records into memory.
 
-Consequência:
-Soluções que criam lista completa em memória são inválidas.
+Consequence:
+Solutions that build the full list in memory are invalid.
 ```
 
-## Tratamento de conflito
+## Conflict handling
 
-Quando restrições entrarem em conflito:
+When constraints conflict:
 
-### 1. Confirmar o conflito
+### 1. Confirm the conflict
 
-Não assuma conflito onde existe uma solução de compromisso.
+Do not assume a conflict where a compromise solution exists.
 
 ```text
-Exemplo:
-"Sem serviço externo" e "Google OAuth" parecem conflitantes.
+Example:
+"No external service" and "Google OAuth" look conflicting.
 
-Possível resolução:
-Usar Google apenas como provedor de identidade, sem introduzir banco de dados ou serviço externo adicional além do OAuth exigido.
+Possible resolution:
+Use Google only as the identity provider, without introducing a database or any external service beyond the required OAuth.
 ```
 
-### 2. Aplicar hierarquia
+### 2. Apply the hierarchy
 
-Priorize requisitos superiores.
+Prioritize higher-level requirements.
 
 ```text
-Exemplo:
-Segurança obrigatória supera preferência por implementação mais rápida.
+Example:
+Mandatory security outweighs a preference for a faster implementation.
 ```
 
-### 3. Procurar reformulação
+### 3. Look for a reformulation
 
-Verifique se o objetivo pode ser atendido por outra abordagem.
+Check whether the goal can be met through another approach.
 
 ```text
-Exemplo:
-"Zero downtime" e alteração estrutural podem coexistir com estratégia expand-contract.
+Example:
+"Zero downtime" and a structural change can coexist with an expand-contract strategy.
 ```
 
-### 4. Declarar inviabilidade
+### 4. Declare infeasibility
 
-Quando não houver solução válida:
+When no valid solution exists:
 
 ```text
-- explique quais restrições entram em conflito;
-- mostre o impacto;
-- apresente opções de relaxamento;
-- não finja que existe solução perfeita.
+- explain which constraints conflict;
+- show the impact;
+- present relaxation options;
+- do not pretend a perfect solution exists.
 ```
 
-Formato recomendado:
+Recommended format:
 
 ```text
-Conflito:
-- [restrição A] é incompatível com [restrição B].
+Conflict:
+- [constraint A] is incompatible with [constraint B].
 
-Impacto:
-- [por que não é possível atender ambas]
+Impact:
+- [why both cannot be satisfied]
 
-Opções:
-1. [relaxar condição A]
-2. [relaxar condição B]
-3. [alterar escopo]
-4. [adiar requisito]
+Options:
+1. [relax condition A]
+2. [relax condition B]
+3. [change the scope]
+4. [defer the requirement]
 
-Recomendação:
-- [opção mais segura ou proporcional]
+Recommendation:
+- [the safest or most proportional option]
 ```
 
-## Anti-padrões
+## Anti-patterns
 
-### 1. Otimizar antes de validar
+### 1. Optimizing before validating
 
 ```text
-Ruim:
-Escolher a solução mais rápida antes de confirmar compatibilidade.
+Bad:
+Choosing the fastest solution before confirming compatibility.
 
-Melhor:
-Eliminar opções incompatíveis e comparar velocidade apenas entre soluções válidas.
+Better:
+Eliminating incompatible options and comparing speed only among valid solutions.
 ```
 
-### 2. Tratar preferência como requisito obrigatório
+### 2. Treating a preference as a mandatory requirement
 
 ```text
-Ruim:
-"Precisamos usar biblioteca X porque é popular."
+Bad:
+"We must use library X because it is popular."
 
-Melhor:
-"Biblioteca X é preferida, mas será descartada se não atender compatibilidade, segurança ou manutenção."
+Better:
+"Library X is preferred, but it will be discarded if it fails compatibility, security, or maintenance."
 ```
 
-### 3. Ignorar proibição implícita
+### 3. Ignoring an implicit prohibition
 
 ```text
-Ruim:
-Adicionar segredo no código porque a tarefa não disse explicitamente para não fazer isso.
+Bad:
+Adding a secret to the code because the task did not explicitly say not to.
 
-Melhor:
-Aplicar regras globais de segurança e configuração.
+Better:
+Applying global security and configuration rules.
 ```
 
-### 4. Assumir premissa como fato
+### 4. Assuming an assumption is a fact
 
 ```text
-Ruim:
-Planejar fila usando Redis sem verificar se Redis está disponível.
+Bad:
+Planning a queue on Redis without checking whether Redis is available.
 
-Melhor:
-Registrar Redis como premissa e confirmar infraestrutura antes da decisão.
+Better:
+Recording Redis as an assumption and confirming the infrastructure before the decision.
 ```
 
-### 5. Esconder inviabilidade
+### 5. Hiding infeasibility
 
 ```text
-Ruim:
-Prometer zero downtime sem estratégia de compatibilidade ou rollback.
+Bad:
+Promising zero downtime with no compatibility or rollback strategy.
 
-Melhor:
-Declarar que a restrição exige migração gradual, janela controlada ou mudança de requisito.
+Better:
+Declaring that the constraint requires a gradual migration, a controlled window, or a requirement change.
 ```
 
-### 6. Usar matriz decorativa
+### 6. Using a decorative matrix
 
 ```text
-Ruim:
-Criar tabela de requisitos sem usar seus resultados para eliminar ou selecionar opções.
+Bad:
+Building a requirements table without using its results to eliminate or select options.
 
-Melhor:
-Usar a matriz para descartar soluções inválidas e justificar trade-offs.
+Better:
+Using the matrix to discard invalid solutions and justify trade-offs.
 ```
 
-### 7. Ignorar restrições temporais
+### 7. Ignoring temporal constraints
 
 ```text
-Ruim:
-Remover contrato antigo antes de todos os clientes migrarem.
+Bad:
+Removing the old contract before all clients have migrated.
 
-Melhor:
-Definir coexistência, migração, monitoramento e depreciação.
+Better:
+Defining coexistence, migration, monitoring, and deprecation.
 ```
 
-## Exemplos
+## Examples
 
-### Exemplo 1 — Escolha de biblioteca
+### Example 1 — Library choice
 
 ```text
-Objetivo:
-Escolher biblioteca de autenticação.
+Goal:
+Choose an authentication library.
 
-Restrições obrigatórias:
-- Compatível com FastAPI atual.
-- Suporte a OAuth com Google.
-- Integração com PostgreSQL.
-- Manutenção ativa.
-- Sem expor credenciais.
+Mandatory constraints:
+- Compatible with the current FastAPI.
+- Supports OAuth with Google.
+- Integrates with PostgreSQL.
+- Actively maintained.
+- No credential exposure.
 
-Proibições:
-- Não criar autenticação customizada insegura.
-- Não depender de versão incompatível de Python.
+Prohibitions:
+- Do not build insecure custom authentication.
+- Do not depend on an incompatible Python version.
 
-Preferências:
-- Menor curva de adoção.
-- Boa documentação.
-- Menor quantidade de código próprio.
+Preferences:
+- Lower adoption curve.
+- Good documentation.
+- Less custom code.
 
-Processo:
-1. Eliminar bibliotecas incompatíveis com FastAPI ou OAuth.
-2. Confirmar suporte na documentação oficial.
-3. Comparar opções válidas por manutenção, integração e custo de adoção.
-4. Registrar limitações e estratégia de sessão.
+Process:
+1. Eliminate libraries incompatible with FastAPI or OAuth.
+2. Confirm support in the official documentation.
+3. Compare valid options by maintenance, integration, and adoption cost.
+4. Record limitations and the session strategy.
 ```
 
-### Exemplo 2 — Migração de banco
+### Example 2 — Database migration
 
 ```text
-Objetivo:
-Alterar coluna usada por clientes em produção.
+Goal:
+Change a column used by clients in production.
 
-Restrições obrigatórias:
+Mandatory constraints:
 - Zero downtime.
-- Clientes antigos continuam funcionando.
-- Rollback disponível.
-- Dados existentes preservados.
+- Legacy clients keep working.
+- Rollback available.
+- Existing data preserved.
 
-Proibições:
-- Não remover coluna antiga antes da migração dos consumidores.
-- Não executar alteração destrutiva sem backup.
+Prohibitions:
+- Do not remove the old column before the consumers migrate.
+- Do not run a destructive change without a backup.
 
-Preferências:
-- Menor duração de coexistência.
-- Menor custo operacional.
+Preferences:
+- Shorter coexistence period.
+- Lower operational cost.
 
-Solução viável:
-1. Adicionar estrutura nova.
-2. Manter leitura compatível.
-3. Fazer backfill.
-4. Migrar consumidores.
-5. Monitorar uso do contrato antigo.
-6. Depreciar e remover após confirmação.
+Viable solution:
+1. Add the new structure.
+2. Keep reads compatible.
+3. Backfill.
+4. Migrate the consumers.
+5. Monitor usage of the old contract.
+6. Deprecate and remove after confirmation.
 ```
 
-## Instrução resumida para o agente
+## Summary instruction for the agent
 
-Pontos de execução que reforçam ou complementam o processo acima:
+Execution points that reinforce or complement the process above:
 
 ```text
-1. Não trate premissas como fatos; valide premissas críticas (ver Assumption Tracking).
-2. Elimine soluções que violem requisitos obrigatórios ou proibições antes de comparar preferências.
-3. Compare preferências apenas entre soluções válidas (ver Decision Making).
-4. Declare inviabilidade quando não existir solução que satisfaça as restrições atuais.
-5. Registre trade-offs e preferências sacrificadas.
-6. Antes de concluir, valide que o resultado real atende às restrições, não apenas o plano.
-7. Não exponha cadeia de pensamento detalhada; comunique requisitos relevantes, conflitos, trade-offs, decisão, evidências e limitações.
+1. Do not treat assumptions as facts; validate critical assumptions (see Assumption Tracking).
+2. Eliminate solutions that violate mandatory requirements or prohibitions before comparing preferences.
+3. Compare preferences only among valid solutions (see Decision Making).
+4. Declare infeasibility when no solution satisfies the current constraints.
+5. Record trade-offs and sacrificed preferences.
+6. Before concluding, validate that the actual result meets the constraints, not just the plan.
+7. Do not expose detailed chain of thought; communicate the relevant requirements, conflicts, trade-offs, decision, evidence, and limitations.
 ```
 
-## Técnicas relacionadas
+## Related techniques
 
-| Técnica | Relação |
+| Technique | Relationship |
 | ------- | ------- |
-| [Plan and Execute](plan-and-execute.md) | Organiza a execução após escolher uma solução válida |
-| [Verification](verification.md) | Confirma que as restrições foram atendidas na prática |
-| [Critique and Refine](critique-and-refine.md) | Corrige violações ou lacunas reveladas na validação |
-| [Structured Decomposition](structured-decomposition.md) | Divide o problema em partes coesas |
-| [ReAct](react.md) | Executa ações e atualiza o estado |
-| [Decision Making](decision-making.md) | Escolhe entre soluções válidas por trade-offs |
-| [Assumption Tracking](assumption-tracking.md) | Rastreia e valida premissas desconhecidas |
+| [Plan and Execute](plan-and-execute.md) | Organizes execution after a valid solution is chosen |
+| [Verification](verification.md) | Confirms the constraints were met in practice |
+| [Critique and Refine](critique-and-refine.md) | Fixes violations or gaps revealed by validation |
+| [Structured Decomposition](structured-decomposition.md) | Splits the problem into cohesive parts |
+| [ReAct](react.md) | Executes actions and updates state |
+| [Decision Making](decision-making.md) | Chooses among valid solutions by trade-offs |
+| [Assumption Tracking](assumption-tracking.md) | Tracks and validates unknown assumptions |
 
-Voltar ao [catálogo de técnicas](../SKILL.md).
+Back to the [technique catalog](../SKILL.md).

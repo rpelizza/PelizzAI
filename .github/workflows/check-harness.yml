@@ -23,15 +23,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Validar núcleo portátil
+      - name: Validate portable core
         run: node scripts/sync-harness.mjs --check --source-mode
-      - name: Validar wrapper PowerShell
+      - name: Validate PowerShell wrapper
         if: runner.os == 'Windows'
         run: pwsh scripts/sync-harness.ps1 -Check -SourceMode
-      - name: Validar wrapper Bash
+      - name: Validate Bash wrapper
         if: runner.os != 'Windows'
         run: bash scripts/sync-harness.sh --check --source-mode
-      - name: Validar dist/ commitada em sincronia
+      - name: Validate committed dist/ in sync
         if: runner.os == 'Linux'
         run: |
           node scripts/sync-harness.mjs --build-dist
@@ -48,5 +48,5 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Executar contratos do harness
+      - name: Run harness contracts
         run: pwsh scripts/test-harness-contracts.ps1

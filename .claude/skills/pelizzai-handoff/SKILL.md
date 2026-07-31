@@ -1,79 +1,79 @@
 ---
 name: pelizzai-handoff
-description: Prepara uma nova sessão ou frente com contexto mínimo, verificável e seguro. Use quando o usuário pedir handoff/continuação em outra conversa ou quando mudar de rumo numa borda de fase. Para continuar o mesmo trabalho na mesma sessão, use compaction nativa. Respeita state consumidor e execution record source sem criar runtime indevido.
+description: Prepares a new session or workstream with minimal, verifiable, safe context. Use when the user asks for a handoff/continuation in another conversation or when changing direction at a phase edge. To continue the same work in the same session, use native compaction. Respects consumer state and the source execution record without creating improper runtime.
 ---
 
 # PelizzAI Handoff
 
-## Objetivo
+## Purpose
 
-Dar à próxima sessão tudo que ela precisa para retomar, sem copiar uma narrativa inteira nem
-inventar estado que Git pode provar.
+Give the next session everything it needs to resume, without copying an entire narrative or
+inventing state that Git can prove.
 
-**Anuncie:** "Usando PelizzAI Handoff para preparar a próxima sessão."
+**Announce**, in the conversation's language: that you are using PelizzAI Handoff to prepare the next session.
 
-## Handoff ou compaction?
-
-```text
-mesma missão + mesma direção → compaction/continuação nativa
-nova sessão, nova frente ou mudança de direção → handoff
-```
-
-Não use limiar fixo de tokens como gatilho. Use sinais da plataforma, perda de legibilidade do
-contexto e bordas reais de fase. Nunca interrompa uma mutação/review pela metade só para handoff;
-primeiro deixe Git + registro em estado verificável, ou marque explicitamente WIP/BLOCKED.
-
-## Onde entregar
-
-Prefira o recurso nativo de handoff/task da plataforma. Se for necessário um arquivo:
-
-- consumidor com runtime configurado: `pelizzai/data/handoffs/handoff-<timestamp>-<slug>.md`
-  somente se o path estiver ignorado;
-- source mode ou consumidor sem runtime seguro: diretório temporário do sistema;
-- arquivo versionado: somente por pedido explícito, via router + branch antes da escrita.
-
-Nunca crie `pelizzai/` no repo-fonte para armazenar handoff.
-
-## Conteúdo mínimo
+## Handoff or compaction?
 
 ```text
-Objetivo/aceite da próxima sessão
-Modo e efeito autorizados; ações externas ainda não autorizadas
-Rota/política ratificada a honrar: lane, isolamento, modo de execução e estratégia de commit (a próxima sessão segue sem re-perguntar; destino externo não é default — confirma-se por tarefa)
-Estado confirmado: branch, base-sha, HEAD, phase, isolation/worktree e working tree (se phase: delivered, inclua confirmar: para a próxima sessão constatar done)
-Progresso: linha por tarefa (T<n>), próximo, pendente/bloqueado
-Decisões duráveis e fora de escopo
-Plano/spec/ADR relevantes por path ou conteúdo nativo
-Skills locais + overlays que realmente se aplicam
-Evidência já válida e o que foi invalidado pela última mutação
-Próximo comando/ação segura
+same mission + same direction → native compaction/continuation
+new session, new workstream, or change of direction → handoff
 ```
 
-No consumidor, `state.md` continua sendo a fonte do cursor; em source mode, o execution record +
-Git. O handoff aponta para eles, não os substitui. Sem arquivo de plano persistente, inclua a tarefa
-pendente do plano nativo — não invente path.
+Do not use a fixed token threshold as the trigger. Use platform signals, loss of context
+legibility, and real phase edges. Never interrupt a mutation/review halfway just for a handoff;
+first leave Git + the record in a verifiable state, or explicitly mark WIP/BLOCKED.
 
-## Regras de qualidade
+## Where to deliver
 
-- Fatos vêm de Git/artefatos, não da memória da conversa.
-- Redija tokens, senhas, dados pessoais e URLs internas sensíveis; diga onde obtê-los.
-- Use paths estáveis apenas quando existem. Linhas de código podem ser incluídas como evidência
-  atual, marcadas como potencialmente voláteis; não esconda achado acionável por medo de drift.
-  Toda referência a path/linha de código é **âncora, não endereço**: escreva junto o comportamento
-  ou o símbolo que ela aponta, e a próxima sessão **reancora antes de agir** (relê/regrep o
-  símbolo, confere o SHA em que a evidência foi colhida). Linha que não bate no consumo é drift
-  esperado — reancore, não confie no número.
-- **Não duplique o conteúdo; artefato que tem path é referenciado, nunca colado.** Vale para specs,
-  ADRs, planos, `state.md` e os templates do próprio harness: cópia envelhece e passa a contradizer a
-  fonte. Aponte o path — e a seção, quando o arquivo for grande.
-- Um handoff carrega uma missão; frentes independentes recebem handoffs separados.
+Prefer the platform's native handoff/task feature. If a file is needed:
+
+- consumer with configured runtime: `pelizzai/data/handoffs/handoff-<timestamp>-<slug>.md`
+  only if the path is gitignored;
+- source mode or a consumer without safe runtime: the system's temporary directory;
+- versioned file: only by explicit request, via router + branch before the write.
+
+Never create `pelizzai/` in the source repo to store a handoff.
+
+## Minimum content
+
+```text
+Goal/acceptance of the next session
+Authorized mode and effect; external actions not yet authorized
+Ratified route/policy to honor: lane, isolation, execution mode, and commit strategy (the next session follows it without re-asking; an external destination is not the default — it is confirmed per task)
+Confirmed state: branch, base-sha, HEAD, phase, isolation/worktree, and working tree (if phase: delivered, include confirm: so the next session can observe done)
+Progress: one line per task (T<n>), next, pending/blocked
+Durable decisions and out-of-scope items
+Relevant plan/spec/ADR by path or native content
+Local skills + overlays that actually apply
+Evidence still valid and what the last mutation invalidated
+Next safe command/action
+```
+
+In the consumer, `state.md` remains the source of the cursor; in source mode, the execution record +
+Git. The handoff points to them, it does not replace them. Without a persistent plan file, include
+the pending task from the native plan — do not invent a path.
+
+## Quality rules
+
+- Facts come from Git/artifacts, not from the conversation's memory.
+- Redact tokens, passwords, personal data, and sensitive internal URLs; say where to obtain them.
+- Use stable paths only when they exist. Code lines may be included as current evidence, marked as
+  potentially volatile; do not hide an actionable finding for fear of drift.
+  Every path/code-line reference is an **anchor, not address**: write alongside it the behavior
+  or symbol it points to, and the next session **re-anchors before acting** (re-reads/re-greps the
+  symbol, checks the SHA the evidence was collected at). A line that does not match at consumption
+  time is expected drift — re-anchor, do not trust the number.
+- **Do not duplicate content; an artifact that has a path is referenced, never pasted.** This holds
+  for specs, ADRs, plans, `state.md`, and the harness's own templates: a copy ages and starts
+  contradicting the source. Point to the path — and the section, when the file is large.
+- One handoff carries one mission; independent workstreams get separate handoffs.
 
 ## Definition of Done
 
 ```text
-[ ] Git e registro concordam ou a divergência está explícita;
-[ ] nenhuma autoridade externa foi ampliada;
-[ ] próxima sessão sabe o próximo passo e como provar sucesso;
-[ ] nenhum segredo foi copiado;
-[ ] source mode não ganhou runtime consumidor.
+[ ] Git and the record agree, or the divergence is explicit;
+[ ] no external authority was expanded;
+[ ] the next session knows the next step and how to prove success;
+[ ] no secret was copied;
+[ ] source mode did not gain consumer runtime.
 ```

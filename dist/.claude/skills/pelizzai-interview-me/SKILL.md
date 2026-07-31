@@ -1,232 +1,238 @@
 ---
 name: pelizzai-interview-me
-description: Mecanismo canônico de tampar lacunas com o humano — a LLM não preenche decisão por default, convenção, Context7 ou inferência razoável. Obrigatória para abrir e para estressar design e plano (descoberta, pós-design, pós-plano) e sempre que a execução esbarrar em decisão que a spec/plano não cobrem: requisito ambíguo, contrato de interface indefinido, escolha de escopo/UX/arquitetura/dados/segurança/custo/aceite. Use também quando o usuário pedir perguntas ou stress. Pare a tarefa, faça uma pergunta por vez com 2–3 opções e a recomendada, registre a resposta no plano e só então retome.
+description: Canonical gap-closing mechanism with the human — the LLM never fills a decision by default, convention, Context7, or reasonable inference. Mandatory for opening and for stress-testing design and plan (discovery, post-design, post-plan) and whenever execution hits a decision the spec/plan does not cover: an ambiguous requirement, an undefined interface contract, a scope/UX/architecture/data/security/cost/acceptance choice. Use it also when the user asks for questions or stress. Stop the task, ask one question at a time with 2–3 options and the recommended one, record the answer in the plan, and only then resume.
 ---
 
 # PelizzAI Interview Me
 
-## Objetivo
+## Goal
 
-Obter do humano as decisões que evidência não fornece. Esta skill é o **mecanismo canônico de tampar
-lacunas** do harness: toda decisão não coberta por spec, plano ou ratificação anterior passa por
-aqui, em qualquer fase — descoberta, design, plano ou execução. Preencher lacuna por default,
-convenção, Context7 ou "inferência razoável" é violação, mesmo quando a escolha parece óbvia e
-reversível.
+Obtain from the human the decisions that evidence cannot provide. This skill is the **canonical
+gap-closing mechanism** of the harness: every decision not covered by spec, plan, or prior
+ratification passes through here, in any phase — discovery, design, plan, or execution. Filling a
+gap by default, convention, Context7, or "reasonable inference" is a violation, even when the
+choice looks obvious and reversible.
 
-Eficiência aqui significa perguntas bem ordenadas, não decisões agrupadas nem respostas presumidas.
-Entrevista não substitui leitura do projeto nem serve para fabricar lacunas.
+Efficiency here means well-ordered questions, not batched decisions or presumed answers.
+The interview does not replace reading the project, nor does it exist to fabricate gaps.
 
-**Anuncie:** "Usando a skill PelizzAI Interview Me para resolver as decisões materiais ainda abertas."
+**Announce**, in the conversation's language: that you are using the PelizzAI Interview Me skill to resolve the material decisions still open.
 
-## Modos
+## Modes
 
-| Modo | Gatilho | Saída |
+| Mode | Trigger | Output |
 | --- | --- | --- |
-| descoberta | objetivo/aceite tem interpretações materialmente diferentes | objetivo, escopo, restrições e decisão |
-| stress focal | ideia/design/plano já existe, mas há premissa ou risco concreto | decisão, risco aceito/mitigado e alteração necessária |
-| lacuna | a execução esbarrou em decisão que spec e plano não cobrem | decisão ratificada, registrada no plano, execução retomada |
-| entrevista explícita | usuário pediu perguntas/entrevista | profundidade pedida, sem prolongar além do útil |
+| discovery | the goal/acceptance has materially different interpretations | goal, scope, constraints, and decision |
+| focused stress | an idea/design/plan already exists, but there is a concrete premise or risk | decision, risk accepted/mitigated, and required change |
+| gap | execution hit a decision the spec and plan do not cover | decision ratified, recorded in the plan, execution resumed |
+| explicit interview | the user asked for questions/an interview | the depth requested, without stretching past usefulness |
 
-`pelizzai-brainstorming` cria o design. Esta skill resolve decisões humanas pendentes; se ainda não
-há design ou opções concretas, devolva ao brainstorming.
+`pelizzai-brainstorming` creates the design. This skill resolves pending human decisions; if there
+is no design or concrete options yet, hand back to brainstorming.
 
-## Onde é obrigatória
+## Where it is mandatory
 
-Nestes pontos a entrevista **não é oferta**: conduza-a até o fim e liste as lacunas antes de repassar
-o controle.
+At these points the interview is **not an offer**: run it to the end and list the gaps before
+handing control back.
 
-1. **Antes do design** — o pedido admite duas ou mais leituras materialmente diferentes: entreviste
-   para fixar objetivo, escopo, restrições e aceite antes de a `pelizzai-brainstorming` desenhar
-   qualquer coisa.
-2. **Depois do design, antes de a spec fechar** — estresse o design e **exponha as lacunas** (casos
-   não tratados, validação ausente, falha de autorização/segurança, estados indefinidos,
-   contradições). Devolva o controle ao brainstorming para ele concluir spec e aprovação.
-3. **Depois do plano, antes da execução** — estresse o plano da `pelizzai-writing-plans`: cada
-   decisão técnica material sem origem de ratificação vira pergunta aqui, nunca fato consumado.
-4. **Durante a execução, a cada lacuna** — protocolo na seção "Modo lacuna".
+1. **Before design** — the request admits two or more materially different readings: interview
+   to fix goal, scope, constraints, and acceptance before `pelizzai-brainstorming` designs
+   anything.
+2. **After design, before the spec closes** — stress-test the design and **expose the gaps**
+   (unhandled cases, missing validation, authorization/security failures, undefined states,
+   contradictions). Return control to brainstorming so it can conclude spec and approval.
+3. **After the plan, before execution** — stress-test the `pelizzai-writing-plans` plan: every
+   material technical decision without a ratification origin becomes a question here, never a fait
+   accompli.
+4. **During execution, at every gap** — protocol in the "Gap mode" section.
 
-O ciclo greenfield (descoberta → spec → stress → aprovação → plano → stress → aprovação) percorre
-1–3 sempre, mesmo com a stack já definida. Uma lane `bounded` que o próprio usuário já especificou
-(objetivo, aceite e abordagem dados) dispensa 1–3, mas **nunca dispensa o item 4**: o gatilho é a
-lacuna, não a lane.
+The greenfield cycle (discovery → spec → stress → approval → plan → stress → approval) always runs
+through 1–3, even with the stack already defined. A `bounded` lane the user has specified himself
+(goal, acceptance, and approach given) waives 1–3, but **never waives item 4**: the trigger is the
+gap, not the lane.
 
-Encerrar mais cedo só é permitido depois que as lacunas tiverem sido **realmente identificadas e
-resolvidas** — ou explicitamente aceitas pelo usuário. Nunca pule a etapa "para economizar tempo": o
-custo de descobrir a lacuna depois da implementação é sempre maior.
+Closing early is allowed only after the gaps have been **actually identified and
+resolved** — or explicitly accepted by the user. Never skip the step "to save time": the cost of
+discovering the gap after implementation is always higher.
 
-## O que é lacuna — e o que não é
+## What is a gap — and what is not
 
-Lacuna é a decisão cuja resposta muda **produto/UX, escopo, arquitetura, dados, segurança, custo ou
-aceite**. Se nada disso muda, não é lacuna, não vira pergunta e a entrevista não vira cerimônia.
+A gap is a decision whose answer changes **product/UX, scope, architecture, data, security, cost,
+or acceptance**. If none of those change, it is not a gap, it does not become a question, and the
+interview does not become ceremony.
 
 ```text
-NÃO é lacuna — resolva sozinho:
-- fato verificável no repositório (código, teste, manifest, lockfile, spec, plano, state);
-- fato externo verificável na versão em uso via Context7 ou documentação oficial;
-- passo mecânico dentro de fronteira já ratificada em spec, plano ou decisão anterior;
-- detalhe de implementação sem efeito observável (nome interno, ordem de helpers, formatação,
-  refactor local que preserva o contrato).
+NOT a gap — resolve it yourself:
+- a fact verifiable in the repository (code, tests, manifest, lockfile, spec, plan, state);
+- an external fact verifiable for the version in use via Context7 or official documentation;
+- a mechanical step inside a boundary already ratified in a spec, plan, or prior decision;
+- an implementation detail with no observable effect (internal name, helper order, formatting,
+  a local refactor that preserves the contract).
 
-É lacuna — PARE e pergunte:
-- requisito, aceite ou prioridade que admite duas leituras materialmente diferentes;
-- contrato de interface indefinido (assinatura, payload, erro, estado vazio, autorização);
-- escolha de escopo, UX, arquitetura ou modelo de dados que spec e plano não escreveram;
-- trade-off de custo, performance ou risco que ninguém aceitou explicitamente;
-- contradição entre spec, plano e código.
+A gap — STOP and ask:
+- a requirement, acceptance criterion, or priority that admits two materially different readings;
+- an undefined interface contract (signature, payload, error, empty state, authorization);
+- a scope, UX, architecture, or data-model choice the spec and plan did not write down;
+- a cost, performance, or risk trade-off nobody explicitly accepted;
+- a contradiction between spec, plan, and code.
 ```
 
-Uma decisão de produto não deixa de ser lacuna porque existe um default comum, seguro ou reversível
-— o default vira a **recomendação** da pergunta, não a resposta. Context7 e documentação oficial
-fundamentam opções; nunca ratificam uma decisão que pertence ao usuário.
+A product decision does not stop being a gap because a common, safe, or reversible default exists
+— the default becomes the question's **recommendation**, not its answer. Context7 and official
+documentation ground options; they never ratify a decision that belongs to the user.
 
-## Antes de perguntar
+## Before asking
 
-1. Leia pedido, spec/plano, o registro da tarefa (state consumidor ou execution record nativo) e somente o código/documentação relevantes.
-2. Separe fatos observados, inferências e decisões que pertencem ao usuário.
-3. Remova perguntas factuais cuja resposta já está no projeto. Não remova decisão de produto porque
-   existe um default comum, seguro ou reversível; transforme-o na recomendação da pergunta.
-4. Ordene o restante por dependência e impacto.
+1. Read the request, the spec/plan, the task record (consumer state or native execution record), and only the relevant code/documentation.
+2. Separate observed facts, inferences, and decisions that belong to the user.
+3. Remove factual questions whose answer is already in the project. Do not remove a product
+   decision because a common, safe, or reversible default exists; turn it into the question's
+   recommendation.
+4. Order the rest by dependency and impact.
 
-Não estime esforço como fato sem medir. Quando duas interpretações mudarem materialmente escopo ou
-custo, mostre a evidência disponível e a consequência de cada uma.
+Do not state effort as fact without measuring. When two interpretations materially change scope or
+cost, show the available evidence and the consequence of each.
 
-## Como perguntar
+## How to ask
 
-- Faça **exatamente uma pergunta por turno**. Ordene-a pela decisão de maior impacto que condiciona
-  as seguintes; após a resposta, recalcule o roteiro da entrevista.
-- Use 2–3 opções somente quando forem reais e suficientemente completas; destaque
-  `Recomendado: <opção> — <motivo>` antes da pergunta.
-- Use pergunta aberta para descoberta, linguagem de produto ou quando listar opções enviesaria a
-  resposta.
-- Não force “Outro”, quatro opções ou múltipla escolha por formato.
-- Explique por que a resposta muda a entrega. Corte perguntas cosméticas que não alteram o resultado;
-  escolhas reversíveis de produto continuam pertencendo ao usuário, mas podem ser explicitamente
-  delegadas por ele.
+- Ask **exactly one question per turn**. Order it by the highest-impact decision that conditions
+  the following ones; after the answer, recompute the interview script.
+- Use 2–3 options only when they are real and sufficiently complete; highlight
+  `Recommended: <option> — <reason>` before the question.
+- Use an open question for discovery, product language, or when listing options would bias the
+  answer.
+- Do not force "Other", four options, or multiple choice for the sake of format.
+- Explain why the answer changes the delivery. Cut cosmetic questions that do not alter the result;
+  reversible product choices still belong to the user, but he can explicitly delegate
+  them.
 
-Se a ferramenta da plataforma impuser um formato específico de pergunta, siga-o sem alterar a
-semântica deste contrato.
+If the platform's tool imposes a specific question format, follow it without changing this
+contract's semantics.
 
-## Modo lacuna: tampar o buraco durante a execução
+## Gap mode: closing the hole mid-execution
 
-Gatilho: implementando uma tarefa — inline, como subagente ou como membro de time — você esbarra numa
-decisão que spec e plano não cobrem. Vale o teste operacional de desvio: **se a decisão não está
-escrita na spec, no plano nem no registro da tarefa (state consumidor ou execution record nativo),
-ela não está aprovada — apresente antes de implementar.**
+Trigger: implementing a task — inline, as a subagent, or as a team member — you hit a decision the
+spec and plan do not cover. The operational deviation test applies: **if the decision is not
+written in the spec, the plan, or the task record (consumer state or native execution record),
+it is not approved — present it before implementing.**
 
-1. **PARE a tarefa.** Não implemente "a leitura mais provável" para mostrar depois, não deixe TODO,
-   flag ou parâmetro configurável para adiar a decisão, e não continue por outro arquivo enquanto
-   guarda a dúvida. Código escrito sobre lacuna preenchida sozinho é retrabalho, não progresso.
-2. **Nomeie a lacuna em uma frase**: o que está indefinido e qual dos efeitos materiais ela muda
-   (produto/UX, escopo, arquitetura, dados, segurança, custo ou aceite).
-3. **Traga 2–3 opções reais**, cada uma com a consequência em uma linha, e marque
-   `Recomendado: <opção> — <motivo>`. Opções de fachada (uma boa e duas absurdas) não são opções; a
-   inteligência está em construir alternativas boas e fundamentá-las com evidência do repo/Context7.
-4. **Uma pergunta por vez**, começando pela decisão que condiciona as demais; recalcule as opções
-   seguintes depois de cada resposta. Nunca despeje o bloco inteiro de lacunas como questionário.
-5. **Registre a resposta no plano**, em `## Decisões técnicas deste plano`, na linha canônica
-   (`decisão — ratificada: entrevista de execução — rejeitada: <alternativa> — porquê: <motivo>`); se
-   sobrou risco residual, acrescente-o a `## Lacunas materiais expostas`. Source mode ou tarefa sem
-   arquivo de plano: registre no execution record nativo, de forma verificável, sem criar
+1. **STOP the task.** Do not implement "the most likely reading" to show later, do not leave a
+   TODO, flag, or configurable parameter to postpone the decision, and do not continue in another
+   file while holding the doubt. Code written over a self-filled gap is rework, not progress.
+2. **Name the gap in one sentence**: what is undefined and which of the material effects it changes
+   (product/UX, scope, architecture, data, security, cost, or acceptance).
+3. **Bring 2–3 real options**, each with its consequence in one line, and mark
+   `Recommended: <option> — <reason>`. Facade options (one good and two absurd) are not options;
+   the intelligence lies in building good alternatives and grounding them in repo/Context7 evidence.
+4. **One question at a time**, starting with the decision that conditions the rest; recompute the
+   following options after each answer. Never dump the whole block of gaps as a questionnaire.
+5. **Record the answer in the plan**, under `## Technical decisions in this plan`, in the canonical
+   line (`decision — ratified: execution interview — rejected: <alternative> — why: <reason>`); if
+   residual risk remains, add it to `## Exposed material gaps`. Source mode or a task without a
+   plan file: record it in the native execution record, verifiably, without creating
    `pelizzai/`.
-6. **Retome a tarefa** exatamente do ponto em que parou, agora dentro de fronteira ratificada.
+6. **Resume the task** exactly where it stopped, now inside a ratified boundary.
 
-**Sob briefing fechado** (`SUBAGENT-STOP` / `MEMBRO-DO-TIME-STOP`) o executor não abre gate nem
-entrevista o usuário: pare no passo 1, monte os passos 2 e 3 e retorne `NEEDS_CONTEXT` com a lacuna
-nomeada, as opções e a recomendada, declarando-a também em `Desvios do plano:`. Quem conduz a
-entrevista é o coordenador; ele re-despacha a tarefa depois da ratificação.
+**Under a closed briefing** (`SUBAGENT-STOP` / `TEAM-MEMBER-STOP`) the executor opens no gate and
+does not interview the user: stop at step 1, build steps 2 and 3, and return `NEEDS_CONTEXT` with
+the named gap, the options, and the recommended one, also declaring it under
+`Deviations from plan:`.
+The coordinator conducts the interview; he re-dispatches the task after ratification.
 
-Se a lacuna for grande a ponto de desfazer o plano, não a tampe por entrevista pontual: devolva a
-`pelizzai-writing-plans` (replanejar) ou a `pelizzai-brainstorming` (redesenhar).
+If the gap is large enough to undo the plan, do not close it with a spot question: hand back to
+`pelizzai-writing-plans` (replan) or `pelizzai-brainstorming` (redesign).
 
-## Stress proporcional
+## Proportional stress
 
-Procure apenas falhas plausíveis para a superfície real:
+Hunt only failures plausible for the real surface:
 
 ```text
-contrato/aceite ausente
-estado de erro ou vazio relevante
-autorização/segurança/dados
-compatibilidade/migração/rollback
-premissa de escala ou integração não confirmada
-contradição entre spec, plano e código
+missing contract or acceptance
+relevant error or empty state
+authorization/security/data
+compatibility/migration/rollback
+unconfirmed scale or integration premise
+contradiction between spec, plan, and code
 ```
 
-Não invente uma lista de riscos para provar profundidade. A lane `bounded` costuma dispensar o stress
-de design e de plano, mas `bounded` com lacuna material continua chamando esta skill — o gatilho é a
-lacuna, não a lane. Standard usa stress focal; exploratory/greenfield percorre as decisões
-sequencialmente e encerra quando spec/plano podem ser aprovados sem a LLM inventar requisitos.
+Do not invent a list of risks to prove depth. The `bounded` lane usually waives the design and
+plan stress, but `bounded` with a material gap still calls this skill — the trigger is the gap,
+not the lane. Standard uses focused stress; exploratory/greenfield walks the decisions
+sequentially and stops when spec/plan can be approved without the LLM inventing requirements.
 
-Quando a lacuna vier marcada pela **Análise da proposta** — saída da rotina **Proposal Stress
-(Assumption Tracking aplicado)** do `pelizzai-router`
-([proposal-stress.md](../pelizzai-reasoning/techniques/proposal-stress.md)) — entre já em stress focal
-sobre as premissas materiais que ela apontou: aquela análise é o inventário; esta entrevista é a
-resolução.
+When the gap arrives flagged by the **Proposal analysis** — output of the **Proposal Stress
+(Assumption Tracking applied)** routine of `pelizzai-router`
+([proposal-stress.md](../pelizzai-reasoning/techniques/proposal-stress.md)) — go straight into
+focused stress on the material premises it pointed out: that analysis is the inventory; this
+interview is the resolution.
 
-## Critério de parada
+## Stop criterion
 
-Pare quando:
+Stop when:
 
-- nenhuma decisão humana aberta muda requisito, escopo, UX, arquitetura, dados, segurança, risco,
-  autoridade, aceite ou solução;
-- premissas críticas têm prova, dono ou aceitação explícita;
-- o próximo passo e seu critério de sucesso estão claros.
+- no open human decision changes requirement, scope, UX, architecture, data, security, risk,
+  authority, acceptance, or solution;
+- critical premises have proof, an owner, or explicit acceptance;
+- the next step and its success criterion are clear.
 
-Não busque “entendimento completo” de todo o sistema. Se uma resposta cria nova decisão dependente,
-continue; se cria trabalho técnico investigável, devolva-o ao fluxo como tarefa, não como pergunta.
+Do not chase "complete understanding" of the whole system. If an answer creates a new dependent
+decision, continue; if it creates investigable technical work, return it to the flow as a task,
+not as a question.
 
-## Saída e handback
+## Output and handback
 
-A entrevista **termina com a lista numerada de lacunas e como cada uma muda a solução** — caça ativa,
-não prosa: aponte cada lacuna material ainda que o usuário não a tenha citado e diga como ela foi
-resolvida, explicitamente aceita ou convertida em tarefa de investigação.
-Um resumo sem a seção de lacunas está incompleto.
+The interview **ends with the numbered list of gaps and how each one changes the solution** — active
+hunting, not prose: point out every material gap even if the user did not mention it, and say how
+it was resolved, explicitly accepted, or converted into an investigation task.
+A summary without the gaps section is incomplete.
 
-Retorne de forma compacta:
+Return compactly:
 
 ```text
-Decisões:
-- escolha — motivo/evidência
+Decisions:
+- choice — reason/evidence
 
-Lacunas (numeradas — cada uma com o que muda na solução):
-1. lacuna — muda escopo/UX/arquitetura/segurança/dados — resolvida, aceita ou vira tarefa
+Gaps (numbered — each with what it changes in the solution):
+1. gap — changes scope/UX/architecture/security/data — resolved, accepted, or becomes a task
 2. ...
 
-Premissas abertas:
-- somente as que ainda limitam a execução
+Open premises:
+- only those still constraining execution
 
-Próximo passo:
-- skill/artefato que retoma o controle
+Next step:
+- the skill/artifact that takes back control
 ```
 
-Se nenhum risco novo foi encontrado, diga isso; não fabrique um nem declare que todo projeto tem uma
-lacuna. Retorne ao chamador (`pelizzai-brainstorming`, `pelizzai-writing-plans`,
-`pelizzai-execution-plans` ou router). No modo lacuna, o handback é a tarefa interrompida: retome-a
-com a decisão já escrita no plano. Esta skill não escolhe team, subagents, branch ou commit strategy.
+If no new risk was found, say so; do not fabricate one, nor declare that every project has a
+gap. Return to the caller (`pelizzai-brainstorming`, `pelizzai-writing-plans`,
+`pelizzai-execution-plans`, or the router). In gap mode, the handback is the interrupted task:
+resume it with the decision already written in the plan. This skill does not choose team,
+subagents, branch, or commit strategy.
 
 ## Red flags
 
 ```text
-- Preencher a lacuna sozinho por default, convenção, Context7 ou "inferência razoável".
-- Implementar a leitura mais provável e apresentar a decisão como fato consumado.
-- Guardar as lacunas para perguntar em lote no fim da tarefa.
-- Perguntar o que código/spec já responde, ou fabricar lacuna onde não há efeito material.
-- Mais de uma pergunta por turno.
-- Lote de perguntas que impede recalcular opções após cada resposta.
-- Quatro opções artificiais e recomendação sem evidência.
-- Pular o stress obrigatório de design ou de plano "para economizar tempo".
-- Pular entrevista em produto/projeto greenfield porque a stack está definida.
-- Repassar o controle sem ter exposto explicitamente as lacunas — revelá-las é o objetivo.
-- Tratar documentação externa como resposta a uma decisão do usuário.
-- Continuar depois que o próximo passo não depende mais do usuário.
-- Declarar que todo projeto necessariamente tem uma lacuna.
+- Filling the gap yourself by default, convention, Context7, or "reasonable inference".
+- Implementing the most likely reading and presenting the decision as a fait accompli.
+- Hoarding the gaps to ask in a batch at the end of the task.
+- Asking what the code/spec already answers, or fabricating a gap where there is no material effect.
+- More than one question per turn.
+- A batch of questions that prevents recomputing options after each answer.
+- Four artificial options and a recommendation without evidence.
+- Skipping the mandatory design or plan stress "to save time".
+- Skipping the interview in a greenfield product/project because the stack is defined.
+- Handing control back without having explicitly exposed the gaps — revealing them is the goal.
+- Treating external documentation as the answer to a user decision.
+- Continuing after the next step no longer depends on the user.
+- Declaring that every project necessarily has a gap.
 ```
 
-## Integração
+## Integration
 
-- `pelizzai-brainstorming` — entrevista antes do design e stress obrigatório depois dele.
-- `pelizzai-writing-plans` — stress obrigatório do plano; decisão emergente vira pergunta aqui.
-- `pelizzai-execution-plans` / `pelizzai-loop` — destino da parada por dúvida material no meio da
-  execução (modo lacuna); `pelizzai-subagents` e `pelizzai-team` escalam ao coordenador.
-- `pelizzai-reasoning` — a Análise da proposta
-  ([proposal-stress.md](../pelizzai-reasoning/techniques/proposal-stress.md)) inventaria as premissas
-  materiais que esta entrevista resolve.
+- `pelizzai-brainstorming` — interview before the design and mandatory stress after it.
+- `pelizzai-writing-plans` — mandatory stress of the plan; an emergent decision becomes a question here.
+- `pelizzai-execution-plans` / `pelizzai-loop` — destination of the stop for material doubt
+  mid-execution (gap mode); `pelizzai-subagents` and `pelizzai-team` escalate to the coordinator.
+- `pelizzai-reasoning` — the Proposal analysis
+  ([proposal-stress.md](../pelizzai-reasoning/techniques/proposal-stress.md)) inventories the
+  material premises this interview resolves.

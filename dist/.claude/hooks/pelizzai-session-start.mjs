@@ -1,24 +1,24 @@
 #!/usr/bin/env node
 /**
- * PelizzAI — hook SessionStart (matcher startup|clear|compact). OPT-IN.
+ * PelizzAI — SessionStart hook (matcher startup|resume|clear|compact). OPT-IN.
  *
- * Emite um lembrete CURTO no início da sessão: carregar a pelizzai-core antes de
- * responder qualquer coisa (regra do 1%), passar por core/router nas tarefas de projeto,
- * classificar o efeito antes de agir e, se pelizzai/data/state.md tiver tarefa
- * ativa (slug != <none> e phase != done), avisar que há retomada via pelizzai-router.
+ * Emits a SHORT reminder at session start: load pelizzai-core before answering
+ * anything (the 1% rule), go through core/router on project tasks, classify the
+ * effect before acting and, if pelizzai/data/state.md has an active task
+ * (slug != <none> and phase != done), warn that there is a resumption via pelizzai-router.
  *
- * Nota de valor: no Claude Code o CLAUDE.md já é re-injetado no startup e após o
- * compact — o ganho real deste hook está no `clear` (que zera tudo) e em plataformas
- * que NÃO re-injetam a entrada sempre-carregada.
+ * Value note: in Claude Code, CLAUDE.md is already re-injected on startup and after
+ * compact — the real gain of this hook is on `clear` (which wipes everything) and on
+ * platforms that do NOT re-inject the always-loaded entry point.
  *
- * Garantias: SEMPRE termina com exit 0; engole qualquer erro; nunca bloqueia a sessão.
+ * Guarantees: ALWAYS ends with exit 0; swallows any error; never blocks the session.
  *
- * Instalação (opt-in), em .claude/settings.json do projeto consumidor:
- *   { "hooks": { "SessionStart": [ { "matcher": "startup|clear|compact", "hooks": [
+ * Installation (opt-in), in the consumer project's .claude/settings.json:
+ *   { "hooks": { "SessionStart": [ { "matcher": "startup|resume|clear|compact", "hooks": [
  *       { "type": "command",
  *         "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-session-start.mjs\"" } ] } ] } }
  *
- * Em frota sem Node, use a variante PowerShell pelizzai-session-start.ps1 (mesmo matcher).
+ * On fleets without Node, use the PowerShell variant pelizzai-session-start.ps1 (same matcher).
  */
 
 import { readFileSync, existsSync } from 'node:fs';
@@ -38,13 +38,13 @@ function main() {
     const data = JSON.parse(readStdin() || '{}');
     if (data && typeof data.cwd === 'string' && data.cwd) cwd = data.cwd;
   } catch {
-    /* usa process.cwd() */
+    /* fall back to process.cwd() */
   }
 
   const lines = [
-    'PelizzAI: antes de responder QUALQUER coisa, carregue a skill pelizzai-core e honre a regra do 1% — se uma skill se aplica (mesmo a um ajuste trivial), acione-a.',
-    'Toda tarefa que toca o projeto passa por pelizzai-core → pelizzai-router: classifique effect, risco, incerteza e superfícies antes de agir.',
-    'Escolha uma head skill e overlays proporcionais; read-only não inicializa estado, e qualquer escrita passa primeiro pelo gate de isolamento.',
+    'PelizzAI: before answering ANYTHING, load the pelizzai-core skill and honor the 1% rule — if a skill applies (even to a trivial tweak), invoke it.',
+    'Every task that touches the project goes through pelizzai-core → pelizzai-router: classify effect, risk, uncertainty and surfaces before acting.',
+    'Pick a head skill and proportional overlays; read-only initializes no state, and any write goes through the isolation gate first.',
   ];
 
   try {
@@ -58,36 +58,36 @@ function main() {
         phase && phase !== 'done' && !phase.startsWith('<');
       if (active) {
         lines.push(
-          `Há tarefa ATIVA em pelizzai/data/state.md (slug: ${slug}, phase: ${phase}) — ` +
-            'retome via pelizzai-router, validando o cursor contra o git antes de prosseguir.'
+          `There is an ACTIVE task in pelizzai/data/state.md (slug: ${slug}, phase: ${phase}) — ` +
+            'resume via pelizzai-router, validating the cursor against git before proceeding.'
         );
       }
     }
   } catch {
-    /* sem aviso de retomada — segue com o lembrete básico */
+    /* no resumption warning — carry on with the basic reminder */
   }
 
-  // Consumidor sem catálogo de skills de domínio: sugere UMA vez o caminho de bootstrap
-  // read-only (propor→confirmar; nada é criado sem consentimento). Em source mode (repo-fonte)
-  // é no-op — ali não há catálogo consumidor. Criar pelizzai/domain-skills.md (mesmo
-  // `_nenhuma por enquanto_`) silencia o nudge sem exigir skills de domínio.
+  // Consumer without a domain-skill catalog: suggests ONCE the read-only bootstrap path
+  // (propose→confirm; nothing is created without consent). In source mode (source repo)
+  // it is a no-op — there is no consumer catalog there. Creating pelizzai/domain-skills.md
+  // (even `_none for now_`) silences the nudge without requiring domain skills.
   try {
-    // Sentinela dedicada: só o repo-fonte a tem (consumidores têm manifesto/sync e NÃO são fonte).
+    // Dedicated sentinel: only the source repo has it (consumers have manifest/sync and are NOT the source).
     const sourceMode = existsSync(join(cwd, 'scripts', 'pelizzai-source-repo.txt'));
     if (!sourceMode && !existsSync(join(cwd, 'pelizzai', 'domain-skills.md'))) {
       lines.push(
-        'Projeto sem catálogo de skills de domínio (pelizzai/domain-skills.md ausente). Se for ' +
-          'trabalhar no código, considere pelizzai-audit em scan-only → propor bootstrap-write. ' +
-          'Nada é criado sem sua confirmação.'
+        'Project has no domain-skill catalog (pelizzai/domain-skills.md missing). If you are ' +
+          'going to work on the code, consider pelizzai-audit in scan-only → propose bootstrap-write. ' +
+          'Nothing is created without your confirmation.'
       );
     }
   } catch {
-    /* sem nudge de bootstrap — segue */
+    /* no bootstrap nudge — carry on */
   }
 
-  // Recap da política de execução já ratificada (anti-fadiga): quando o profile registra os
-  // Defaults de execução ratificados, o router reaplica como recap de 1 linha em vez de
-  // re-perguntar. destination NUNCA é default: push/PR/publicação seguem por tarefa.
+  // Recap of the already-ratified execution policy (anti-fatigue): when the profile records
+  // §Ratified execution defaults, the router reapplies them as a 1-line recap instead of
+  // re-asking. destination is NEVER a default: push/PR/publication remain per task.
   try {
     const profilePath = join(cwd, 'pelizzai', 'profile.md');
     if (existsSync(profilePath)) {
@@ -95,23 +95,24 @@ function main() {
       const iso = (profile.match(/isolation-default:\s*(\S+)/) || [])[1];
       const mode = (profile.match(/execution-mode-default:\s*(\S+)/) || [])[1];
       const commit = (profile.match(/commit-strategy-default:\s*(\S+)/) || [])[1];
-      // Não ratificado = `unset` cru OU qualquer placeholder entre <> (o bootstrap grava
-      // `<unset>`, e o template traz o menu `<branch|worktree|unset>`) — mesma convenção do
-      // state.md acima. Sem isto, o recap dispararia em todo consumidor recém-bootstrapado.
+      // Not ratified = raw `unset` OR any placeholder between <> (the bootstrap writes
+      // `<unset>`, and the template ships the `<branch|worktree|unset>` menu) — same
+      // convention as state.md above. Without this, the recap would fire on every freshly
+      // bootstrapped consumer.
       const isRatified = (value) => Boolean(value) && value !== 'unset' && !value.startsWith('<');
       const ratified = [];
-      if (isRatified(iso)) ratified.push(`isolamento ${iso}`);
-      if (isRatified(mode)) ratified.push(`modo ${mode}`);
+      if (isRatified(iso)) ratified.push(`isolation ${iso}`);
+      if (isRatified(mode)) ratified.push(`mode ${mode}`);
       if (isRatified(commit)) ratified.push(`commit ${commit}`);
       if (ratified.length) {
         lines.push(
-          `Política de execução ratificada do projeto (pelizzai/profile.md): ${ratified.join(', ')} — ` +
-            'reaplique como recap de 1 linha; não re-pergunte o que já foi ratificado (destino continua por tarefa).'
+          `Ratified execution policy for this project (pelizzai/profile.md): ${ratified.join(', ')} — ` +
+            'reapply it as a 1-line recap; do not re-ask what has already been ratified (destination remains per task).'
         );
       }
     }
   } catch {
-    /* sem recap de política — segue */
+    /* no policy recap — carry on */
   }
 
   process.stdout.write(
@@ -127,6 +128,6 @@ function main() {
 try {
   main();
 } catch {
-  /* nunca falhe o início da sessão */
+  /* never fail session start */
 }
 process.exit(0);

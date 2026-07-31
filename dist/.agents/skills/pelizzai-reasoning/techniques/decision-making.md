@@ -1,652 +1,653 @@
 # Decision Making
 
-## Objetivo
+## Purpose
 
-Use Decision Making quando houver mais de uma alternativa viável e for necessário escolher uma direção de forma explícita, proporcional e justificável.
+Use Decision Making when more than one viable alternative exists and a direction must be chosen explicitly, proportionally, and justifiably.
 
-A técnica responde:
+The technique answers:
 
 ```text
-- Qual decisão deve ser tomada agora?
-- Quais critérios realmente importam?
-- Quais alternativas são válidas?
-- Que trade-offs cada alternativa cria?
-- Há evidência suficiente para decidir?
-- A decisão é reversível?
-- Devemos agir, experimentar, adiar, pedir confirmação ou bloquear?
+- Which decision must be made now?
+- Which criteria actually matter?
+- Which alternatives are valid?
+- What trade-offs does each alternative create?
+- Is there enough evidence to decide?
+- Is the decision reversible?
+- Should we act, experiment, defer, ask for confirmation, or block?
 ```
 
-Decision Making não é apenas listar prós e contras.
+Decision Making is not just listing pros and cons.
 
-Ela exige:
+It requires:
 
-1. definir a decisão;
-2. separar alternativas inválidas das válidas;
-3. explicitar critérios;
-4. avaliar evidências, riscos e reversibilidade;
-5. escolher a menor decisão necessária;
-6. registrar trade-offs e condições de revisão.
+1. defining the decision;
+2. separating invalid alternatives from valid ones;
+3. making criteria explicit;
+4. weighing evidence, risks, and reversibility;
+5. choosing the smallest decision necessary;
+6. recording trade-offs and review conditions.
 
-## Princípio central
+## Core principle
 
-> Selecione e justifique a melhor **recomendação**. Execute-a somente quando a decisão for mecânica e
-> já estiver coberta por spec/plano ratificado ou quando o usuário delegar explicitamente essa
-> categoria. Reversibilidade reduz risco; não transfere autoridade sobre o produto para a LLM.
+> Select and justify the best **recommendation**. Execute it only when the decision is mechanical and
+> already covered by a ratified spec/plan, or when the user has explicitly delegated that category.
+> Reversibility reduces risk; it does not transfer authority over the product to the LLM.
 
 ```mermaid
 flowchart TD
-    A[Decisão necessária] --> B[Definir objetivo e escopo]
-    B --> C[Extrair restrições e critérios]
-    C --> D[Gerar alternativas]
-    D --> E[Eliminar alternativas inválidas]
-    E --> F{Há evidência suficiente?}
+    A[Decision needed] --> B[Define goal and scope]
+    B --> C[Extract constraints and criteria]
+    C --> D[Generate alternatives]
+    D --> E[Eliminate invalid alternatives]
+    E --> F{Enough evidence?}
 
-    F -- Não --> G{Decisão pode ser adiada ou testada?}
-    G -- Sim --> H[Buscar evidência ou executar experimento reversível]
-    G -- Não --> I[Solicitar confirmação ou declarar risco]
+    F -- No --> G{Can the decision be deferred or tested?}
+    G -- Yes --> H[Gather evidence or run a reversible experiment]
+    G -- No --> I[Ask for confirmation or state the risk]
 
-    F -- Sim --> J[Comparar trade-offs]
-    J --> K[Selecionar alternativa]
-    K --> L[Definir validação e gatilho de revisão]
-    L --> M[Executar ou comunicar decisão]
+    F -- Yes --> J[Compare trade-offs]
+    J --> K[Select an alternative]
+    K --> L[Define validation and review trigger]
+    L --> M[Execute or communicate the decision]
 ```
 
-## Quando usar
+## When to use
 
-Use Decision Making quando a tarefa envolver:
+Use Decision Making when the task involves:
 
 ```text
-- duas ou mais alternativas válidas;
-- trade-offs entre custo, prazo, segurança, simplicidade, performance ou manutenção;
-- decisão arquitetural;
-- seleção de tecnologia, biblioteca, fornecedor ou abordagem;
-- priorização de backlog;
-- escolha entre corrigir, reverter, mitigar ou investigar;
-- decisão sob incerteza;
-- ação potencialmente irreversível;
-- necessidade de justificar por que uma alternativa foi escolhida;
-- conflito entre preferências legítimas.
+- two or more valid alternatives;
+- trade-offs among cost, deadline, security, simplicity, performance, or maintenance;
+- an architectural decision;
+- selecting a technology, library, vendor, or approach;
+- backlog prioritization;
+- choosing between fixing, reverting, mitigating, or investigating;
+- a decision under uncertainty;
+- a potentially irreversible action;
+- the need to justify why one alternative was chosen;
+- a conflict between legitimate preferences.
 ```
 
-Exemplos adequados:
+Good examples:
 
 ```text
-- Escolher entre fila assíncrona, processamento síncrono otimizado ou serviço externo.
-- Decidir se uma migração pode ocorrer agora ou precisa de estratégia gradual.
-- Selecionar biblioteca de autenticação.
-- Escolher entre corrigir localmente ou refatorar estrutura.
-- Definir se um incidente exige rollback ou hotfix.
-- Priorizar segurança, prazo ou compatibilidade em uma alteração.
+- Choose between an async queue, optimized synchronous processing, or an external service.
+- Decide whether a migration can happen now or needs a gradual strategy.
+- Select an authentication library.
+- Choose between a local fix and a structural refactor.
+- Decide whether an incident requires rollback or hotfix.
+- Prioritize security, deadline, or compatibility in a change.
 ```
 
-## Quando evitar
+## When to avoid
 
-Não use Decision Making como processo formal quando existe uma única ação correta, determinada por contrato ou evidência direta.
+Do not use Decision Making as a formal process when there is a single correct action, determined by contract or direct evidence.
 
-Evite ou simplifique quando:
+Avoid or simplify when:
 
 ```text
-- há apenas uma solução compatível com as restrições;
-- a escolha é trivial, local e reversível;
-- a tarefa é pura execução de requisito claro;
-- existe fonte de verdade direta;
-- não há trade-off material;
-- criar matriz de decisão custa mais do que agir.
+- only one option is compatible with the constraints;
+- the choice is trivial, local, and reversible;
+- the task is pure execution of a clear requirement;
+- a direct source of truth exists;
+- there is no material trade-off;
+- building a decision matrix costs more than acting.
 ```
 
-Exemplos:
+Examples:
 
 ```text
-- Corrigir import inválido.
-- Aplicar campo obrigatório já definido em schema.
-- Executar teste indicado por erro de CI.
-- Traduzir texto.
-- Renomear variável local.
+- Fix an invalid import.
+- Apply a required field already defined in the schema.
+- Run the test indicated by a CI error.
+- Translate text.
+- Rename a local variable.
 ```
 
-## Relação com outras técnicas
+## Relationship to other techniques
 
-| Técnica                 | Responsabilidade                                                    |
+| Technique               | Responsibility                                                      |
 | ----------------------- | ------------------------------------------------------------------- |
-| Constraint Satisfaction | Define o que torna uma opção válida ou inválida                     |
-| Assumption Tracking     | Registra condições ainda não confirmadas                            |
-| Evidence Synthesis      | Combina fontes e evidências para avaliar alternativas               |
-| Decision Making         | Seleciona, adia, condiciona ou bloqueia uma direção; inclui busca com poda e backtracking para caminhos interdependentes |
-| Plan and Execute        | Organiza execução após a decisão                                    |
-| Verification            | Confirma que a decisão e seu resultado atendem aos critérios        |
-| Critique and Refine     | Corrige decisão ou resultado quando novas evidências revelam falhas |
+| Constraint Satisfaction | Defines what makes an option valid or invalid                       |
+| Assumption Tracking     | Records conditions not yet confirmed                                |
+| Evidence Synthesis      | Combines sources and evidence to evaluate alternatives              |
+| Decision Making         | Selects, defers, conditions, or blocks a direction; includes search with pruning and backtracking for interdependent paths |
+| Plan and Execute        | Organizes execution after the decision                              |
+| Verification            | Confirms that the decision and its outcome meet the criteria        |
+| Critique and Refine     | Corrects the decision or outcome when new evidence reveals flaws    |
 
-## Tipos de decisão
+## Decision types
 
-### 1. Decisão de execução
+### 1. Execution decision
 
-Escolhe como realizar algo.
+Chooses how to do something.
 
 ```text
-Exemplo:
-- Implementar exportação como endpoint síncrono ou job assíncrono.
+Example:
+- Implement export as a synchronous endpoint or an async job.
 ```
 
-### 2. Decisão de arquitetura
+### 2. Architecture decision
 
-Escolhe estrutura com efeitos de longo prazo.
+Chooses structure with long-term effects.
 
 ```text
-Exemplo:
-- Usar monólito modular, microserviços ou processamento orientado a eventos.
+Example:
+- Use a modular monolith, microservices, or event-driven processing.
 ```
 
-### 3. Decisão de prioridade
+### 3. Priority decision
 
-Escolhe o que fazer primeiro.
+Chooses what to do first.
 
 ```text
-Exemplo:
-- Corrigir incidente, entregar feature ou reduzir dívida técnica.
+Example:
+- Fix an incident, ship a feature, or pay down technical debt.
 ```
 
-### 4. Decisão de risco
+### 4. Risk decision
 
-Escolhe entre agir, mitigar, aceitar risco, adiar ou bloquear.
+Chooses among acting, mitigating, accepting the risk, deferring, or blocking.
 
 ```text
-Exemplo:
-- Publicar hotfix agora, reverter versão ou aguardar investigação.
+Example:
+- Ship a hotfix now, revert the release, or wait for investigation.
 ```
 
-### 5. Decisão condicional
+### 5. Conditional decision
 
-Escolhe uma direção que depende de uma premissa ainda aberta.
+Chooses a direction that depends on a still-open assumption.
 
 ```text
-Exemplo:
-- Usar fila existente, desde que a capacidade de produção seja confirmada.
+Example:
+- Use the existing queue, provided production capacity is confirmed.
 ```
 
-## Caminhos interdependentes (busca com poda e backtracking)
+## Interdependent paths (search with pruning and backtracking)
 
-O caso padrão desta técnica compara alternativas **fechadas e independentes**: as opções já estão
-enumeradas e o trabalho é ponderar trade-offs num único passo. Há um caso menos comum em que a escolha
-não é linear — cada decisão abre ou fecha as seguintes, e o caminho viável só aparece quando você
-**constrói uma solução parcial, avalia, poda o que não se sustenta e volta atrás** para tentar outro
-ramo. É busca, não comparação: gerar caminho parcial → avaliar contra os critérios → podar ramos
-inviáveis → fazer backtracking quando uma premissa cai → aprofundar o ramo promissor.
+The default case for this technique compares **closed, independent** alternatives: the options are
+already enumerated and the work is weighing trade-offs in a single pass. There is a less common case
+where the choice is not linear — each decision opens or closes the next ones, and the viable path
+only appears when you **build a partial solution, evaluate it, prune what does not hold, and
+backtrack** to try another branch. It is search, not comparison: generate a partial path → evaluate
+against the criteria → prune unviable branches → backtrack when an assumption falls → deepen the
+promising branch.
 
-Quase sempre você NÃO precisa disso de forma externa: um modelo com raciocínio estendido já ramifica e
-poda internamente ao decidir. Se a exploração cabe no próprio raciocínio e termina numa recomendação,
-trate como decisão comum — enumere 2 a 4 alternativas, compare e escolha. Verbalizar "ramos" não
-agrega decisão.
+You almost never need this externally: a model with extended reasoning already branches and prunes
+internally while deciding. If the exploration fits inside the reasoning itself and ends in a
+recommendation, treat it as an ordinary decision — enumerate 2 to 4 alternatives, compare, and
+choose. Verbalizing "branches" adds no decision value.
 
-Reserve o backtracking **externo e auditável** para quando os ramos precisam existir fora da sua
-cabeça: explorar 2-3 arquiteturas parciais em arquivos ou protótipos reais antes de escolher; encadear
-migrações onde cada etapa só é validável depois de aplicar a anterior; qualquer caso em que provar um
-ramo exige artefato, teste ou medição que outro ramo não compartilha. Aí o valor é o registro
-explícito de cada poda e retorno.
+Reserve **external, auditable** backtracking for when the branches must exist outside your head:
+exploring 2-3 partial architectures in real files or prototypes before choosing; chaining migrations
+where each step can only be validated after applying the previous one; any case where proving one
+branch requires an artifact, test, or measurement the other branches do not share. There the value
+is the explicit record of every prune and return.
 
-Disciplina mínima quando a busca externa se justifica:
+Minimum discipline when external search is justified:
 
 ```text
-- Gere de 2 a 4 ramos materialmente distintos, nunca variantes superficiais do mesmo.
-- Para cada ramo promissor, escolha UMA ação que gere evidência (ler contrato, prototipar, medir),
-  não mais hipótese.
-- Pode um ramo assim que ele violar requisito obrigatório, for dominado ou for refutado por
-  evidência — poda não é fracasso, é o que reduz custo.
-- Faça backtracking só por evidência concreta (premissa crítica caiu, dependência ausente),
-  nunca por estética ou insegurança.
-- Pare quando um ramo satisfaz os requisitos obrigatórios e domina os demais, ou quando o orçamento
-  de exploração se esgota e há um ramo viável aceitável.
-- O fim da busca produz uma RECOMENDAÇÃO com a evidência de cada poda. Se a escolha é material
-  (arquitetura, contrato, dados, risco), ela é ratificada pelo usuário — encerramento automático só
-  para decisão mecânica já coberta por spec/contrato ratificado.
+- Generate 2 to 4 materially distinct branches, never superficial variants of the same one.
+- For each promising branch, pick ONE action that produces evidence (read the contract, prototype,
+  measure), not more hypothesis.
+- Prune a branch as soon as it violates a mandatory requirement, is dominated, or is refuted by
+  evidence — pruning is not failure; it is what cuts cost.
+- Backtrack only on concrete evidence (a critical assumption fell, a dependency is missing),
+  never out of aesthetics or insecurity.
+- Stop when a branch satisfies the mandatory requirements and dominates the others, or when the
+  exploration budget runs out and an acceptable viable branch exists.
+- The end of the search produces a RECOMMENDATION with the evidence for each prune. If the choice
+  is material (architecture, contract, data, risk), the user ratifies it — automatic closure only
+  for a mechanical decision already covered by a ratified spec/contract.
 ```
 
-Se todos os ramos forem podados, não force escolha entre inviáveis: reexamine se algum requisito
-"obrigatório" é negociável, busque evidência que reabilite um ramo podado, ou escale o conflito de
-requisitos ao usuário com o trade-off explícito.
+If every branch gets pruned, do not force a choice among unviable ones: re-examine whether some
+"mandatory" requirement is negotiable, seek evidence that rehabilitates a pruned branch, or escalate
+the requirements conflict to the user with the trade-off made explicit.
 
-## Critérios de decisão
+## Decision criteria
 
-Use critérios relevantes ao contexto. Não use lista fixa como checklist automático.
+Use criteria relevant to the context. Do not use a fixed list as an automatic checklist.
 
-Critérios comuns:
+Common criteria:
 
 ```text
-- Correção.
-- Segurança.
-- Compatibilidade.
-- Custo.
-- Prazo.
-- Simplicidade.
-- Manutenibilidade.
+- Correctness.
+- Security.
+- Compatibility.
+- Cost.
+- Deadline.
+- Simplicity.
+- Maintainability.
 - Performance.
-- Escalabilidade.
-- Confiabilidade.
-- Observabilidade.
-- Reversibilidade.
-- Experiência do usuário.
-- Risco operacional.
-- Dependência de terceiros.
+- Scalability.
+- Reliability.
+- Observability.
+- Reversibility.
+- User experience.
+- Operational risk.
+- Third-party dependency.
 ```
 
-### Regra de prioridade
+### Priority rule
 
-Restrições obrigatórias vêm antes de critérios de otimização.
+Mandatory constraints come before optimization criteria.
 
 ```text
-Errado:
-Escolher alternativa mais rápida que viola segurança.
+Wrong:
+Choose the fastest alternative even though it violates security.
 
-Correto:
-Eliminar alternativas inseguras e comparar velocidade apenas entre opções válidas.
+Right:
+Eliminate insecure alternatives and compare speed only among valid options.
 ```
 
-## Evidência suficiente e desempate
+## Sufficient evidence and tie-breaking
 
-### Critério objetivo de evidência suficiente
+### Objective criterion for sufficient evidence
 
-A evidência é suficiente quando reunir mais dados não mudaria a alternativa escolhida.
+Evidence is sufficient when gathering more data would not change the chosen alternative.
 
 ```text
-Teste:
-- A evidência ainda ausente, se obtida, alteraria a alternativa selecionada?
-  - Não -> a evidência é suficiente; decida.
-  - Sim -> falta evidência crítica; busque-a, experimente ou condicione a decisão.
-  - Incerto -> trate como crítica se a decisão for irreversível ou de alto impacto;
-    caso contrário, decida com risco explicitado e gatilho de revisão.
+Test:
+- If obtained, would the still-missing evidence change the selected alternative?
+  - No -> the evidence is sufficient; decide.
+  - Yes -> critical evidence is missing; gather it, experiment, or make the decision conditional.
+  - Unsure -> treat it as critical if the decision is irreversible or high-impact;
+    otherwise, decide with the risk stated and a review trigger set.
 ```
 
-Detalhe secundário não justifica pesquisa infinita. Se a escolha pertence ao usuário, apresente a
-recomendação e pergunte mesmo quando reversível.
+Secondary detail does not justify endless research. If the choice belongs to the user, present the
+recommendation and ask even when it is reversible.
 
-### Regra de desempate
+### Tie-breaking rule
 
-Quando duas ou mais alternativas válidas empatam nos critérios, desempate nesta ordem:
+When two or more valid alternatives tie on the criteria, break the tie in this order:
 
 ```text
-1. Reversibilidade: prefira a mais fácil de desfazer.
-2. Menor decisão necessária: prefira a que preserva mais opções futuras.
-3. Menor risco operacional e menor dependência de terceiros.
-4. Simplicidade e custo de manutenção.
-5. Se ainda empatar: escolha qualquer uma válida, registre o empate como premissa
-   e defina gatilho de revisão; não escale empate de baixo impacto.
+1. Reversibility: prefer the one easiest to undo.
+2. Smallest decision necessary: prefer the one that preserves the most future options.
+3. Lowest operational risk and least third-party dependency.
+4. Simplicity and maintenance cost.
+5. If still tied: pick any valid one, record the tie as an assumption
+   and set a review trigger; do not escalate a low-impact tie.
 ```
 
-## Modelo de decisão (template canônico)
+## Decision model (canonical template)
 
-Use este template único para organizar e registrar decisões relevantes. Para decisões pequenas, preencha apenas os campos materiais; para decisões de alto impacto ou registro permanente, preencha todos.
+Use this single template to organize and record relevant decisions. For small decisions, fill in only the material fields; for high-impact decisions or permanent records, fill in all of them.
 
 ```text
-Decisão:
-- [o que precisa ser escolhido]
+Decision:
+- [what needs to be chosen]
 
-Objetivo:
-- [resultado que a decisão deve maximizar ou proteger]
+Goal:
+- [outcome the decision must maximize or protect]
 
-Escopo:
-- [o que está dentro e fora da decisão]
+Scope:
+- [what is inside and outside the decision]
 
-Restrições obrigatórias:
-- [o que nenhuma opção pode violar]
+Mandatory constraints:
+- [what no option may violate]
 
-Alternativas válidas:
-1. [opção]
-   - Benefícios: [o que melhora]
-   - Custos: [o que exige]
-   - Riscos: [o que pode falhar]
-   - Premissas: [o que precisa ser verdadeiro]
-   - Reversibilidade: [como voltar atrás]
-   - Evidências: [fatos, testes, fontes ou observações]
-   - Gatilho de descarte: [o que torna a opção inviável]
+Valid alternatives:
+1. [option]
+   - Benefits: [what improves]
+   - Costs: [what it requires]
+   - Risks: [what can fail]
+   - Assumptions: [what must be true]
+   - Reversibility: [how to back out]
+   - Evidence: [facts, tests, sources, or observations]
+   - Discard trigger: [what makes the option unviable]
 
-2. [opção]
-   - (mesmos campos)
+2. [option]
+   - (same fields)
 
-Critérios:
-- [como as opções serão comparadas]
+Criteria:
+- [how the options will be compared]
 
-Decisão tomada:
-- [opção selecionada, decisão condicional, experimento, adiamento, confirmação,
-  risco aceito, bloqueio ou escalonamento]
+Decision made:
+- [selected option, conditional decision, experiment, deferral, confirmation,
+  accepted risk, block, or escalation]
 
 Trade-offs:
-- [o que foi priorizado e o que foi sacrificado, e por que é aceitável]
+- [what was prioritized and what was sacrificed, and why that is acceptable]
 
-Premissas abertas:
-- [condições ainda não confirmadas]
+Open assumptions:
+- [conditions not yet confirmed]
 
-Risco:
-- [impacto se a decisão estiver errada]
+Risk:
+- [impact if the decision is wrong]
 
-Validação:
-- [como confirmar na prática que a decisão foi adequada]
+Validation:
+- [how to confirm in practice that the decision was adequate]
 
-Gatilho de revisão:
-- [evento que exigirá reavaliar a decisão]
+Review trigger:
+- [event that will require re-evaluating the decision]
 ```
 
-## Decisão sob incerteza
+## Decisions under uncertainty
 
-Nem toda decisão terá evidência completa.
+Not every decision will have complete evidence.
 
-A pergunta não é apenas "temos certeza?"
+The question is not just "are we certain?"
 
-A pergunta correta é:
+The right question is:
 
 ```text
-- O risco de decidir agora é menor que o custo de esperar?
-- A decisão é reversível?
-- Podemos fazer experimento pequeno?
-- Existe uma opção conservadora?
-- Falta uma evidência crítica ou apenas detalhe secundário?
-- Quem é responsável por aceitar o risco?
+- Is the risk of deciding now lower than the cost of waiting?
+- Is the decision reversible?
+- Can we run a small experiment?
+- Is there a conservative option?
+- Is critical evidence missing, or only secondary detail?
+- Who is responsible for accepting the risk?
 ```
 
 ```mermaid
 flowchart TD
-    A[Incerteza relevante] --> B{Decisão reversível?}
-    B -- Sim --> C{Decisão foi delegada ou já ratificada?}
-    C -- Sim --> G[Executar experimento pequeno/mecânico]
-    C -- Não --> H[Recomendar e perguntar ao usuário]
-    B -- Não --> D{Evidência crítica está ausente?}
-    D -- Sim --> E[Adiar, investigar ou pedir confirmação]
-    D -- Não --> F[Decidir com risco explicitado]
+    A[Relevant uncertainty] --> B{Reversible decision?}
+    B -- Yes --> C{Was the decision delegated or already ratified?}
+    C -- Yes --> G[Run a small/mechanical experiment]
+    C -- No --> H[Recommend and ask the user]
+    B -- No --> D{Is critical evidence missing?}
+    D -- Yes --> E[Defer, investigate, or ask for confirmation]
+    D -- No --> F[Decide with the risk stated]
 ```
 
-## Reversibilidade
+## Reversibility
 
-Classifique decisões pelo custo de desfazer.
+Classify decisions by the cost of undoing them.
 
-| Nível                 | Característica                                        | Estratégia                                    |
-| --------------------- | ----------------------------------------------------- | --------------------------------------------- |
-| Alta reversibilidade  | Fácil de alterar, baixo impacto e baixo custo         | Decidir rapidamente e validar                 |
-| Média reversibilidade | Exige ajuste, mas possui rollback viável              | Definir checkpoint e contingência             |
-| Baixa reversibilidade | Afeta dados, contratos, usuários ou infraestrutura    | Buscar mais evidência antes de decidir        |
-| Irreversível          | Perda de dados, custo elevado ou exposição permanente | Não avançar sem confirmação e validação forte |
+| Level                 | Characteristic                                       | Strategy                                        |
+| --------------------- | ---------------------------------------------------- | ----------------------------------------------- |
+| High reversibility    | Easy to change, low impact and low cost              | Decide quickly and validate                     |
+| Medium reversibility  | Requires adjustment but has a viable rollback        | Define a checkpoint and contingency             |
+| Low reversibility     | Affects data, contracts, users, or infrastructure    | Gather more evidence before deciding            |
+| Irreversible          | Data loss, high cost, or permanent exposure          | Do not proceed without confirmation and strong validation |
 
-Exemplos:
+Examples:
 
 ```text
-Alta reversibilidade:
-- Alterar texto de interface.
+High reversibility:
+- Change interface copy.
 
-Média reversibilidade:
-- Trocar componente de filtro com testes.
+Medium reversibility:
+- Swap a filter component covered by tests.
 
-Baixa reversibilidade:
-- Alterar contrato público de API.
+Low reversibility:
+- Change a public API contract.
 
-Irreversível:
-- Excluir dados sem backup.
+Irreversible:
+- Delete data without a backup.
 ```
 
-## Ações possíveis
+## Possible actions
 
-Uma decisão não precisa sempre resultar em "escolher uma solução".
+A decision does not always have to end in "picking a solution".
 
-Escolha entre:
+Choose among:
 
-| Ação                     | Quando usar                                                             |
+| Action                   | When to use                                                             |
 | ------------------------ | ----------------------------------------------------------------------- |
-| Decidir e executar       | Passo mecânico coberto por decisão ratificada/delegada                   |
-| Decidir condicionalmente | Depende de premissa rastreada                                           |
-| Executar experimento     | Incerteza relevante, mas decisão reversível                             |
-| Adiar                    | Falta evidência crítica e o custo de esperar é aceitável                |
-| Pedir confirmação        | A escolha pertence ao produto/usuário, mesmo quando reversível          |
-| Aceitar risco            | Usuário ratificou; incerteza não crítica, reversível e mitigada         |
-| Bloquear                 | Não há opção válida, segura ou autorizada                               |
-| Escalar                  | Decisão depende de responsável, permissão ou conhecimento externo       |
+| Decide and execute       | Mechanical step covered by a ratified/delegated decision                |
+| Decide conditionally     | Depends on a tracked assumption                                         |
+| Run an experiment        | Relevant uncertainty, but the decision is reversible                    |
+| Defer                    | Critical evidence is missing and the cost of waiting is acceptable      |
+| Ask for confirmation     | The choice belongs to the product/user, even when reversible            |
+| Accept the risk          | User has ratified; uncertainty is non-critical, reversible, and mitigated |
+| Block                    | No valid, safe, or authorized option exists                             |
+| Escalate                 | The decision depends on an owner, permission, or external knowledge     |
 
-## Decisão mínima necessária
+## Smallest decision necessary
 
-Não tome decisão maior do que a evidência permite.
+Do not make a decision bigger than the evidence allows.
 
 ```text
-Ruim:
-"Vamos migrar toda a arquitetura para microserviços."
+Bad:
+"Let's migrate the whole architecture to microservices."
 
-Melhor:
-"Vamos validar um módulo isolado como serviço separado, pois a evidência atual aponta gargalo apenas nesse domínio."
+Better:
+"Let's validate one isolated module as a separate service, since current evidence points to a bottleneck only in that domain."
 ```
 
-A decisão mínima necessária reduz risco e preserva opções futuras.
+The smallest decision necessary reduces risk and preserves future options.
 
-## Decisão conservadora e experimento
+## Conservative decision and experiment
 
-Quando há incerteza alta, prefira opção reversível ou experimento controlado.
+When uncertainty is high, prefer a reversible option or a controlled experiment.
 
 ```text
-Exemplo:
-Decisão:
-- Adicionar cache distribuído.
+Example:
+Decision:
+- Add a distributed cache.
 
-Incerteza:
-- Não foi confirmado se banco é gargalo.
+Uncertainty:
+- It has not been confirmed that the database is the bottleneck.
 
-Decisão conservadora:
-- Medir latência e plano de execução antes de adicionar cache.
+Conservative decision:
+- Measure latency and the execution plan before adding a cache.
 
-Experimento:
-- Aplicar índice ou otimização controlada em ambiente seguro e comparar métricas.
+Experiment:
+- Apply an index or a controlled optimization in a safe environment and compare metrics.
 
-Resultado:
-- Escolher cache apenas se evidência mostrar benefício proporcional.
+Outcome:
+- Choose the cache only if evidence shows a proportional benefit.
 ```
 
-## Trade-offs explícitos
+## Explicit trade-offs
 
-Toda decisão relevante sacrifica algo.
+Every relevant decision sacrifices something.
 
-Registre:
+Record:
 
 ```text
-- O que foi priorizado.
-- O que foi sacrificado.
-- Por que esse trade-off é aceitável.
-- Qual sinal indicaria que a decisão precisa ser revista.
+- What was prioritized.
+- What was sacrificed.
+- Why that trade-off is acceptable.
+- What signal would indicate the decision needs revisiting.
 ```
 
-Exemplo:
+Example:
 
 ```text
-Decisão:
-- Usar processamento assíncrono com polling.
+Decision:
+- Use asynchronous processing with polling.
 
-Priorizado:
-- Resposta rápida da API e reutilização de infraestrutura existente.
+Prioritized:
+- Fast API response and reuse of existing infrastructure.
 
-Sacrificado:
-- Experiência de resultado imediato.
+Sacrificed:
+- Immediate-result experience.
 
-Justificativa:
-- Relatórios podem demorar e não exigem resposta síncrona.
+Rationale:
+- Reports can take time and do not require a synchronous response.
 
-Gatilho de revisão:
-- Usuários exigirem acompanhamento em tempo real ou houver alto abandono durante espera.
+Review trigger:
+- Users demand real-time tracking, or abandonment during the wait becomes high.
 ```
 
-## Decisões de alto impacto
+## High-impact decisions
 
-Antes de decidir sobre ações de alto impacto, confirme:
+Before deciding on high-impact actions, confirm:
 
 ```text
-[ ] A decisão está dentro da autorização do usuário ou responsável.
-[ ] Restrições obrigatórias foram identificadas.
-[ ] Alternativas viáveis foram consideradas.
-[ ] Evidências críticas foram verificadas.
-[ ] Riscos e reversibilidade foram avaliados.
-[ ] Há plano de rollback ou contingência quando aplicável.
-[ ] O impacto sobre dados, segurança, custo e usuários foi considerado.
-[ ] Existe critério claro para validar a decisão.
+[ ] The decision is within the user's or owner's authorization.
+[ ] Mandatory constraints have been identified.
+[ ] Viable alternatives have been considered.
+[ ] Critical evidence has been verified.
+[ ] Risks and reversibility have been assessed.
+[ ] There is a rollback or contingency plan where applicable.
+[ ] The impact on data, security, cost, and users has been considered.
+[ ] There is a clear criterion to validate the decision.
 ```
 
-Exemplos de alto impacto:
+High-impact examples:
 
 ```text
-- Alterar produção.
-- Executar migração destrutiva.
-- Excluir dados.
-- Mudar contrato público.
-- Adicionar custo recorrente.
-- Alterar permissões.
-- Publicar informação sensível.
-- Escolher arquitetura difícil de reverter.
+- Change production.
+- Run a destructive migration.
+- Delete data.
+- Change a public contract.
+- Add recurring cost.
+- Change permissions.
+- Publish sensitive information.
+- Choose an architecture that is hard to reverse.
 ```
 
-A escala de impacto (Baixo/Médio/Alto/Crítico) e o orçamento de esforço por nível vêm do catálogo: ver [pelizzai-reasoning](../SKILL.md).
+The impact scale (Low/Medium/High/Critical) and the effort budget per level come from the catalog: see [pelizzai-reasoning](../SKILL.md).
 
-## Critérios de qualidade
+## Quality criteria
 
-Uma decisão de qualidade deve ser:
+A quality decision must be:
 
 ```text
-- Válida: respeita restrições obrigatórias.
-- Informada: usa evidência proporcional.
-- Proporcional: não exige certeza impossível para decisão reversível.
-- Explícita: registra critérios e trade-offs.
-- Reversível quando possível.
-- Verificável: possui sinal de sucesso ou falha.
-- Revisável: possui gatilho para reavaliação.
-- Honesta: declara premissas e incertezas.
+- Valid: respects mandatory constraints.
+- Informed: uses proportional evidence.
+- Proportional: does not demand impossible certainty for a reversible decision.
+- Explicit: records criteria and trade-offs.
+- Reversible when possible.
+- Verifiable: has a success or failure signal.
+- Reviewable: has a trigger for re-evaluation.
+- Honest: states assumptions and uncertainties.
 ```
 
-## Anti-padrões
+## Anti-patterns
 
-### 1. Decidir sem restrições ou por preferência
+### 1. Deciding without constraints or by preference
 
 ```text
-Ruim:
-Escolher melhor performance ignorando orçamento, compatibilidade ou segurança;
-ou tratar preferência ("não criar dependência nova") como regra obrigatória.
+Bad:
+Choose the best performance while ignoring budget, compatibility, or security;
+or treat a preference ("don't add a new dependency") as a mandatory rule.
 
-Melhor:
-Filtrar opções por restrições obrigatórias antes de comparar otimizações;
-reconhecer preferência como preferência e justificar exceção quando necessário.
+Better:
+Filter options by mandatory constraints before comparing optimizations;
+recognize a preference as a preference and justify exceptions when needed.
 ```
 
-### 2. Paralisia por análise
+### 2. Analysis paralysis
 
 ```text
-Ruim:
-Continuar pesquisando detalhes marginais em decisão reversível.
+Bad:
+Keep researching marginal details for a reversible decision.
 
-Melhor:
-Definir evidência mínima suficiente, decidir e validar cedo.
+Better:
+Define the minimum sufficient evidence, decide, and validate early.
 ```
 
-### 3. Tratar incerteza como impossibilidade
+### 3. Treating uncertainty as impossibility
 
 ```text
-Ruim:
-Não agir porque não existe certeza total.
+Bad:
+Refuse to act because total certainty does not exist.
 
-Melhor:
-Usar experimento reversível, decisão condicional ou mitigação proporcional.
+Better:
+Use a reversible experiment, a conditional decision, or proportional mitigation.
 ```
 
-### 4. Omitir trade-off ou condição de revisão
+### 4. Omitting the trade-off or review condition
 
 ```text
-Ruim:
-"Fila é a melhor solução." (sem trade-off, sem quando revisar)
+Bad:
+"A queue is the best solution." (no trade-off, no review point)
 
-Melhor:
-"Fila reduz bloqueio da API, mas introduz consistência eventual e operação adicional;
-reavaliar ao atingir 10 mil jobs diários ou quando a latência exceder o limite definido."
+Better:
+"A queue reduces API blocking but introduces eventual consistency and extra operations;
+re-evaluate at 10,000 daily jobs or when latency exceeds the defined limit."
 ```
 
-### 5. Escalar decisão que pode ser resolvida
+### 5. Escalating a decision that can be resolved
 
 ```text
-Ruim:
-Pedir confirmação para toda escolha técnica pequena.
+Bad:
+Ask for confirmation on every small technical choice.
 
-Melhor:
-Escalar somente quando a decisão altera escopo, custo, prioridade, risco aceito ou requisito explícito.
+Better:
+Escalate only when the decision changes scope, cost, priority, accepted risk, or an explicit requirement.
 ```
 
-## Exemplos
+## Examples
 
-### Exemplo 1 — Alteração de contrato
+### Example 1 — Contract change
 
 ```text
-Decisão:
-- Tornar campo `priority` obrigatório agora?
+Decision:
+- Make the `priority` field required now?
 
-Alternativas:
-A. Tornar obrigatório imediatamente.
-B. Tornar opcional com padrão temporário.
-C. Criar nova versão do endpoint.
+Alternatives:
+A. Make it required immediately.
+B. Make it optional with a temporary default.
+C. Create a new version of the endpoint.
 
-Restrições:
-- Clientes antigos continuam ativos.
-- Não quebrar integração pública.
-- Migração precisa ser reversível.
+Constraints:
+- Old clients remain active.
+- Do not break the public integration.
+- The migration must be reversible.
 
-Evidências:
-- Teste com cliente antigo falha sem campo.
-- Logs mostram uso de versões antigas.
+Evidence:
+- A test with an old client fails without the field.
+- Logs show old versions in use.
 
-Decisão:
-- B: campo opcional com padrão, depreciação e plano de versionamento.
+Decision:
+- B: optional field with a default, deprecation, and a versioning plan.
 
 Trade-off:
-- Mantém compatibilidade, mas aumenta período de coexistência.
+- Keeps compatibility but extends the coexistence period.
 
-Validação:
-- Monitorar adoção do novo campo e testar clientes antigos.
+Validation:
+- Monitor adoption of the new field and test old clients.
 
-Gatilho de revisão:
-- Todos os consumidores ativos migrarem ou prazo de depreciação expirar.
+Review trigger:
+- All active consumers migrate, or the deprecation deadline expires.
 ```
 
-### Exemplo 2 — Incidente de produção
+### Example 2 — Production incident
 
 ```text
-Decisão:
-- Reverter deploy ou aplicar hotfix?
+Decision:
+- Revert the deploy or apply a hotfix?
 
-Alternativas:
-A. Reverter imediatamente.
-B. Aplicar hotfix.
-C. Manter versão e investigar.
+Alternatives:
+A. Revert immediately.
+B. Apply a hotfix.
+C. Keep the version and investigate.
 
-Restrições:
-- Erros 401 afetam login em produção.
-- Não expor usuários a indisponibilidade prolongada.
-- Mudança precisa ser reversível.
+Constraints:
+- 401 errors are affecting production login.
+- Do not expose users to prolonged unavailability.
+- The change must be reversible.
 
-Evidências:
-- Aumento de erros começou imediatamente após deploy.
-- Configuração de assinatura de token mudou.
+Evidence:
+- The error spike started immediately after the deploy.
+- The token-signing configuration changed.
 
-Decisão:
-- A: reverter imediatamente como contenção.
+Decision:
+- A: revert immediately as containment.
 
-Justificativa:
-- Reversão reduz impacto mais rápido que hotfix sob incerteza.
+Rationale:
+- Under uncertainty, reverting reduces impact faster than a hotfix.
 
-Próximo passo:
-- Investigar configuração e criar validação de startup antes de novo deploy.
+Next step:
+- Investigate the configuration and add startup validation before the next deploy.
 ```
 
-## Instrução resumida para o agente
+## Summary instruction for the agent
 
 ```text
-- Não exija certeza total em decisões reversíveis, mas não avance sem evidência suficiente
-  (teste: a evidência ausente mudaria a escolha?) em decisões irreversíveis ou críticas.
-- Em empate entre alternativas válidas, desempate por reversibilidade, depois menor decisão necessária.
-- Tome a menor decisão necessária e registre trade-offs, premissas abertas, contingência e gatilho de revisão.
-- Não exponha cadeia de pensamento detalhada; comunique decisão, critérios, evidências,
-  trade-offs, riscos, limitações e próximo passo relevante.
+- Do not demand total certainty for reversible decisions, but do not proceed without sufficient
+  evidence (test: would the missing evidence change the choice?) for irreversible or critical decisions.
+- On a tie between valid alternatives, break it by reversibility, then by the smallest decision necessary.
+- Make the smallest decision necessary and record trade-offs, open assumptions, contingency, and the review trigger.
+- Do not expose detailed chain of thought; communicate the decision, criteria, evidence,
+  trade-offs, risks, limitations, and the relevant next step.
 ```
 
-## Técnicas relacionadas
+## Related techniques
 
-- [Constraint Satisfaction](constraint-satisfaction.md) — define o que torna uma opção válida ou inválida.
-- [Assumption Tracking](assumption-tracking.md) — registra premissas e condições ainda não confirmadas.
-- [Evidence Synthesis](evidence-synthesis.md) — combina fontes para avaliar alternativas.
-- [Plan and Execute](plan-and-execute.md) — organiza a execução após a decisão.
-- [Verification](verification.md) — confirma que a decisão e seu resultado atendem aos critérios.
-- [Critique and Refine](critique-and-refine.md) — corrige decisão ou resultado quando novas evidências revelam falhas.
+- [Constraint Satisfaction](constraint-satisfaction.md) — defines what makes an option valid or invalid.
+- [Assumption Tracking](assumption-tracking.md) — records assumptions and conditions not yet confirmed.
+- [Evidence Synthesis](evidence-synthesis.md) — combines sources to evaluate alternatives.
+- [Plan and Execute](plan-and-execute.md) — organizes execution after the decision.
+- [Verification](verification.md) — confirms that the decision and its outcome meet the criteria.
+- [Critique and Refine](critique-and-refine.md) — corrects the decision or outcome when new evidence reveals flaws.
 
-Voltar ao [catálogo de técnicas](../SKILL.md).
+Back to the [technique catalog](../SKILL.md).

@@ -1,431 +1,436 @@
-# Autoria de skills — regras detalhadas
+# Skill authoring — detailed rules
 
-Adaptação, para o harness PelizzAI, das regras de criação de skills da Anthropic (skill-creator) e de lições testadas em campo em harnesses de referência maduros. Leia antes de redigir uma skill.
+An adaptation, for the PelizzAI harness, of Anthropic's skill-creation rules (skill-creator) and of field-tested lessons from mature reference harnesses. Read before writing a skill.
 
-O objetivo é mudar comportamento de forma observável com o menor contexto necessário. Uma skill não fica melhor por ser mais longa, incisiva ou ritualizada; fica melhor quando aciona no contexto certo e bloqueia uma falha real, observada.
+The goal is to change behavior observably with the least context necessary. A skill does not get better by being longer, more forceful, or more ritualized; it gets better when it triggers in the right context and blocks a real, observed failure.
 
-## Sumário
+## Contents
 
-| Seção | O que cobre |
+| Section | What it covers |
 | --- | --- |
-| Fluxo de autoria | As etapas, da intenção ao empacotamento |
-| TDD de skills (RED-GREEN-REFACTOR) | A Lei de Ferro: baseline falho observado antes de escrever |
-| Evidência e validação comportamental | A escada: qual forma de evidência cada tipo de mudança exige |
-| Pressure tests versionados | Cenários de regressão comportamental junto da skill |
-| Meta-testing do fracasso | O agente que violou diagnostica a própria skill |
-| Frontmatter | A `description` como gatilho — e nunca como resumo do workflow |
-| Leading words e o teste no-op | Âncoras de pretraining; poda por sentença |
-| Divulgação progressiva / Anatomia | Estrutura física da skill |
-| Fonte e roots de skills | Onde editar; mirrors gerados; sync como parte da edição |
-| Padrões de escrita | Imperativo, porquê, exemplos |
-| Grau de liberdade | Princípios, pseudocódigo ou script — conforme a fragilidade da tarefa |
-| Match the Form to the Failure | A forma da guidance casa com o tipo de falha |
-| Persuasão calibrada | Authority/Commitment/Scarcity/Social Proof sim; Liking/Reciprocity proibidos |
-| Conclusão prematura e passos pós-conclusão | Completion criterion; fronteiras reais de contexto |
-| Scripts | Quando a operação vira código determinístico |
-| Micro-teste de wording / Evals | Validação barata antes da cara |
-| Ausência de Surpresas / Critério de conclusão / Empacotamento | Segurança, fechamento e distribuição |
+| Authoring flow | The steps, from intent to packaging |
+| Skill TDD (RED-GREEN-REFACTOR) | The Iron Law: an observed failing baseline before writing |
+| Evidence and behavioral validation | The ladder: which form of evidence each type of change requires |
+| Versioned pressure tests | Behavioral regression scenarios kept alongside the skill |
+| Meta-testing the failure | The agent that violated diagnoses its own skill |
+| Frontmatter | The `description` as trigger — and never as a workflow summary |
+| Leading words and the no-op test | Pretraining anchors; sentence-level pruning |
+| Progressive disclosure / Anatomy | The skill's physical structure |
+| Skill source and roots | Where to edit; generated mirrors; sync as part of the edit |
+| Writing patterns | Imperative, why, examples |
+| Degree of freedom | Principles, pseudocode, or script — per task fragility |
+| Match the Form to the Failure | The form of the guidance matches the type of failure |
+| Calibrated persuasion | Authority/Commitment/Scarcity/Social Proof yes; Liking/Reciprocity forbidden |
+| Premature conclusion and post-completion steps | Completion criterion; real context boundaries |
+| Scripts | When the operation becomes deterministic code |
+| Wording micro-test / Evals | Cheap validation before the expensive one |
+| Absence of Surprises / Completion criterion / Packaging | Safety, closeout, and distribution |
 
-## Fluxo de autoria
-
-```text
-1. Capturar a intenção   — o que a skill deve permitir; quando deve acionar; formato de saída; precisa de evals?
-2. Pesquisar             — Context7 (preferido) ou documentação oficial atual, na versão realmente usada.
-3. Baseline falho (RED)  — rodar o cenário SEM a skill e capturar as racionalizações verbatim
-                           (ver "TDD de skills" abaixo).
-4. Escolher a forma      — princípios, pseudocódigo/checklist ou script determinístico
-                           (ver "Grau de liberdade" e "Match the Form to the Failure").
-5. Escrever o SKILL.md   — a skill MÍNIMA contra as falhas observadas (GREEN), seguindo os padrões abaixo.
-6. Fechar loopholes      — re-rodar sob pressão, fechar cada brecha (REFACTOR) e versionar os cenários
-                           como `test-pressure-<n>.md` no diretório da skill.
-7. Evals (se aplicável)  — casos de teste para saídas verificáveis (micro-teste de wording ANTES do eval caro).
-8. Iterar                — rascunho → olhar renovado → melhorar; generalizar a partir do feedback.
-9. Otimizar a descrição  — para melhorar o acionamento (condições de disparo; nunca o resumo do processo).
-10. Fechar               — remover duplicação, sincronizar os mirrors aplicáveis, registrar limitações reais;
-                           empacotar apenas se for distribuir fora do repo.
-```
-
-Não repita uma decisão que o usuário já ratificou. Quando intenção, escopo ou formato ainda forem decisões humanas, pare e pergunte com a `pelizzai-interview-me`, uma pergunta por vez, com a melhor recomendação marcada; não os preencha com defaults. Não pesquise por reflexo quando o conhecimento necessário está no projeto. Para fatos externos que podem ter mudado, prefira Context7 ou documentação oficial — ela fundamenta opções, não decide pelo usuário.
-
-### 1. Capturar a intenção
-
-Se a conversa atual já contém o fluxo que o usuário quer capturar ("transforme isso numa skill"), extraia primeiro do histórico: ferramentas usadas, sequência de etapas, correções do usuário e formatos de entrada/saída. Peça ao usuário para preencher lacunas e confirmar antes de prosseguir.
-
-Quatro perguntas-âncora:
+## Authoring flow
 
 ```text
-1. O que essa skill deve permitir fazer?
-2. Quando deve ser acionada? (frases/contextos)
-3. Qual o formato de saída esperado?
-4. Precisa de casos de teste? Saídas objetivamente verificáveis (transformar arquivo, extrair
-   dados, gerar código, fluxo fixo) se beneficiam; saídas subjetivas (estilo, arte) geralmente não.
-   Sugira o padrão adequado, mas deixe o usuário decidir.
+1. Capture the intent    — what the skill should enable; when it should trigger; output format;
+                           does it need evals?
+2. Research              — Context7 (preferred) or current official documentation, for the
+                           version actually used.
+3. Failing baseline (RED) — run the scenario WITHOUT the skill and capture the rationalizations
+                           verbatim (see "Skill TDD" below).
+4. Choose the form       — principles, pseudocode/checklist, or deterministic script
+                           (see "Degree of freedom" and "Match the Form to the Failure").
+5. Write the SKILL.md    — the MINIMAL skill against the observed failures (GREEN), following
+                           the patterns below.
+6. Close loopholes       — re-run under pressure, close each gap (REFACTOR), and version the
+                           scenarios as `test-pressure-<n>.md` in the skill's directory.
+7. Evals (if applicable) — test cases for verifiable outputs (wording micro-test BEFORE the
+                           expensive eval).
+8. Iterate               — draft → fresh eyes → improve; generalize from feedback.
+9. Optimize the description — to improve triggering (trigger conditions; never a process summary).
+10. Close                — remove duplication, sync the applicable mirrors, record real
+                           limitations; package only if distributing outside the repo.
 ```
 
-### 2. Pesquisar
+Do not re-litigate a decision the user already ratified. When intent, scope, or format are still human decisions, stop and ask with `pelizzai-interview-me`, one question at a time, with the best recommendation marked; do not fill them with defaults. Do not research by reflex when the needed knowledge is in the project. For external facts that may have changed, prefer Context7 or official documentation — it grounds options, it does not decide for the user.
 
-Verifique os MCPs disponíveis. Se úteis (consultar doc, achar skills semelhantes, conferir boas práticas), pesquise em paralelo com a `pelizzai-team`, delegue a um único subagente com a `pelizzai-subagents`, ou faça inline. **Prefira o MCP `context7`** para fundamentar na documentação real da versão travada no lockfile; sem ele, use documentação oficial atual e declare a limitação. Traga contexto pronto para reduzir a carga do usuário.
+### 1. Capture the intent
 
-## TDD de skills (RED-GREEN-REFACTOR)
+If the current conversation already contains the flow the user wants to capture ("turn this into a skill"), extract from the history first: tools used, step sequence, user corrections, and input/output formats. Ask the user to fill gaps and confirm before proceeding.
 
-> Escrever skills **É** Test-Driven Development aplicado a documentação de processo.
-
-A Lei de Ferro da autoria: **nenhuma skill nova — e nenhuma edição comportamental de skill existente — sem um baseline falho observado.** O ciclo:
+Four anchor questions:
 
 ```text
-RED      — rode o cenário-alvo SEM a skill, em contexto fresco, e observe a falha real.
-           Capture as racionalizações VERBATIM ("os testes aqui são triviais demais para
-           valer TDD", "escrevo o teste depois para não perder o fluxo") — são ELAS que a
-           skill precisa bloquear, não as falhas que você imagina de antemão. Sem baseline
-           falho observado, você não sabe se a skill muda alguma coisa.
-GREEN    — escreva a skill MÍNIMA que bloqueia exatamente as falhas capturadas. Nada contra
-           falha hipotética: cada regra existe porque uma racionalização real a exige.
-REFACTOR — re-rode COM a skill, sob pressão. Cada loophole novo que o agente encontrar vira
-           correção dirigida (nova linha na tabela de racionalizações, um princípio mais
-           fundacional, reorganização) seguida de re-teste. Versione os cenários usados
-           (ver "Pressure tests versionados").
+1. What should this skill enable?
+2. When should it trigger? (phrases/contexts)
+3. What is the expected output format?
+4. Does it need test cases? Objectively verifiable outputs (transforming a file, extracting
+   data, generating code, fixed flow) benefit; subjective outputs (style, art) usually do not.
+   Suggest the appropriate default, but let the user decide.
 ```
 
-Escopo da lei:
+### 2. Research
+
+Check the available MCPs. If useful (consulting docs, finding similar skills, checking best practices), research in parallel with `pelizzai-team`, delegate to a single subagent with `pelizzai-subagents`, or do it inline. **Prefer the `context7` MCP** to ground in the real documentation of the version pinned in the lockfile; without it, use current official documentation and state the limitation. Bring ready context to reduce the user's load.
+
+## Skill TDD (RED-GREEN-REFACTOR)
+
+> Writing skills **IS** Test-Driven Development applied to process documentation.
+
+The Iron Law of authoring: **no new skill — and no behavioral edit to an existing skill — without an observed failing baseline.** The cycle:
 
 ```text
-- Vale para skills de DOMÍNIO e para as skills do harness (`pelizzai-*`).
-- Vale para skill NOVA e para EDIÇÃO COMPORTAMENTAL de skill existente — qualquer mudança
-  que altere o que o agente FAZ.
-- Edição puramente editorial (typo, formatação, link quebrado) NÃO é comportamental e
-  dispensa baseline.
-- No bootstrap, o padrão real observado no repo-scan/histórico cumpre o papel do baseline —
-  a falha já foi observada no campo. É a mesma regra dita de outro jeito: não invente skill
-  sem evidência de falha ou padrão real por trás.
+RED      — run the target scenario WITHOUT the skill, in fresh context, and observe the real
+           failure. Capture the rationalizations VERBATIM ("the tests here are too trivial to
+           be worth TDD", "I'll write the test afterward so I don't lose the flow") — THEY are
+           what the skill must block, not the failures you imagine ahead of time. Without an
+           observed failing baseline, you don't know whether the skill changes anything.
+GREEN    — write the MINIMAL skill that blocks exactly the captured failures. Nothing against
+           hypothetical failure: each rule exists because a real rationalization demands it.
+REFACTOR — re-run WITH the skill, under pressure. Each new loophole the agent finds becomes a
+           targeted fix (a new row in the rationalization table, a more foundational principle,
+           reorganization) followed by a re-test. Version the scenarios used
+           (see "Versioned pressure tests").
 ```
 
-Por que a lei é dura: em um harness de referência testado em campo, a skill de TDD precisou de **6 iterações** e de **mais de 10 racionalizações únicas** capturadas e bloqueadas uma a uma até atingir **100% de compliance** sob pressão. Sem o baseline RED, cada uma dessas racionalizações teria sobrevivido invisível — a skill "parecia boa" no texto e falhava em campo.
+Scope of the law:
 
-## Evidência e validação comportamental
+```text
+- Applies to DOMAIN skills and to the harness skills (`pelizzai-*`).
+- Applies to a NEW skill and to a BEHAVIORAL EDIT of an existing skill — any change that
+  alters what the agent DOES.
+- A purely editorial edit (typo, formatting, broken link) is NOT behavioral and needs no
+  baseline.
+- At bootstrap, the real pattern observed in the repo-scan/history plays the baseline's role —
+  the failure has already been observed in the field. It is the same rule said another way: do
+  not invent a skill without evidence of a failure or a real pattern behind it.
+```
 
-A Lei de Ferro exige evidência de falha real. Esta seção diz **qual forma** essa evidência assume — a escada, não um ritual único:
+Why the law is hard: in a field-tested reference harness, the TDD skill needed **6 iterations** and **more than 10 unique rationalizations** captured and blocked one by one before reaching **100% compliance** under pressure. Without the RED baseline, each of those rationalizations would have survived invisible — the skill "looked good" on paper and failed in the field.
 
-| Mudança | Evidência mínima típica |
+## Evidence and behavioral validation
+
+The Iron Law demands evidence of real failure. This section says **which form** that evidence takes — a ladder, not a single ritual:
+
+| Change | Typical minimum evidence |
 | --- | --- |
-| typo, link ou formatação | parser/link/static check |
-| script ou formato determinístico | fixture + resultado esperado + caso de erro |
-| regra de segurança ou ciclo de vida | matriz de comandos/cenários permitidos e bloqueados |
-| routing/description | positivos, *near misses* e casos ambíguos |
-| disciplina sob pressão | pressure test versionado, re-rodado antes e depois da edição |
-| orientação subjetiva | crítica por critérios e exemplos contrastantes |
+| typo, link, or formatting | parser/link/static check |
+| deterministic script or format | fixture + expected result + error case |
+| safety or lifecycle rule | matrix of allowed and blocked commands/scenarios |
+| routing/description | positives, *near misses*, and ambiguous cases |
+| discipline under pressure | versioned pressure test, re-run before and after the edit |
+| subjective guidance | criteria-based critique and contrasting examples |
 
-O baseline falho é obrigatório quando o comportamento ainda é desconhecido, a mudança é de alto impacto ou o agente costuma racionalizar exceções. Evidência já observada no repositório, em uma regressão ou no feedback do usuário cumpre esse papel — é falha real, apenas capturada em outro lugar. O que não cumpre é falha imaginada: não fabrique um cenário para preencher a tabela, nem exija arquivo de pressure test para cada ajuste de wording.
+The failing baseline is mandatory when the behavior is still unknown, the change is high-impact, or the agent tends to rationalize exceptions. Evidence already observed in the repository, in a regression, or in user feedback fulfills that role — it is real failure, just captured elsewhere. What does not qualify is imagined failure: do not fabricate a scenario to fill the table, nor demand a pressure-test file for every wording tweak.
 
-Para mudanças complexas, faça *forward testing*: dê a uma sessão fresca apenas o pedido e a skill nova, sem revelar o diagnóstico desejado. Observe a rota escolhida e corrija a instrução, não a resposta do teste.
+For complex changes, do *forward testing*: give a fresh session only the request and the new skill, without revealing the desired diagnosis. Observe the chosen route and fix the instruction, not the test's answer.
 
-## Pressure tests versionados (`test-pressure-<n>.md`)
+## Versioned pressure tests (`test-pressure-<n>.md`)
 
-Todo cenário usado para validar uma skill de disciplina é **versionado junto dela**: arquivos `test-pressure-1.md`, `test-pressure-2.md`, … no diretório da skill, ao lado do `SKILL.md`. São documentos de referência **sem frontmatter** (o frontmatter `name`/`description` é exclusivo do `SKILL.md`). Eles são o **critério de regressão**: qualquer mudança comportamental na skill re-roda os cenários antes e depois da edição.
+Every scenario used to validate a discipline skill is **versioned alongside it**: files `test-pressure-1.md`, `test-pressure-2.md`, … in the skill's directory, next to the `SKILL.md`. They are reference documents **without frontmatter** (the `name`/`description` frontmatter is exclusive to `SKILL.md`). They are the **regression criterion**: any behavioral change to the skill re-runs the scenarios before and after the edit.
 
-Anatomia de um bom cenário de pressão:
+Anatomy of a good pressure scenario:
 
 ```text
-- 3+ pressões COMBINADAS: tempo ("o deploy é em 20 minutos"), sunk cost ("você já escreveu
-  400 linhas"), autoridade ("o tech lead mandou pular"), exaustão ("é a sexta tentativa,
-  já são 23h"), social ("todo mundo do time faz assim"). Uma pressão isolada não derruba
-  o agente; a combinação sim.
-- Opções A/B/C FORÇADAS — uma correta, as demais tentadoras e defensáveis.
-- A pergunta é "o que você FAZ?", nunca "o que você deveria fazer" — o condicional convida
-  a uma resposta teórica; o presente força a decisão.
-- Sem saída fácil: "eu perguntaria ao usuário" sem escolher uma opção é resposta inválida
-  no cenário (na vida real, perguntar pode ser certo; no teste, mascara a decisão).
+- 3+ COMBINED pressures: time ("the deploy is in 20 minutes"), sunk cost ("you already wrote
+  400 lines"), authority ("the tech lead said to skip it"), exhaustion ("it's the sixth
+  attempt, it's 11 pm"), social ("everyone on the team does it this way"). One isolated
+  pressure does not break the agent; the combination does.
+- FORCED A/B/C options — one correct, the others tempting and defensible.
+- The question is "what do you DO?", never "what should you do" — the conditional invites a
+  theoretical answer; the present tense forces the decision.
+- No easy way out: "I would ask the user" without choosing an option is an invalid answer in
+  the scenario (in real life, asking may be right; in the test, it masks the decision).
 ```
 
-Cenários vivos no harness, que servem de modelo de forma e de regressão real:
+Live scenarios in the harness, which serve as models of form and as real regressions:
 
-- `.claude/skills/pelizzai-recovery/test-pressure-1.md` — "só dá um `reset --hard` que resolve" (urgência + autoridade + sunk cost + exaustão).
-- `.claude/skills/pelizzai-improving-architecture/test-pressure-1.md` — "já vai refatorando os cinco".
+- `.claude/skills/pelizzai-recovery/test-pressure-1.md` — "just do a `reset --hard` and it's fixed" (urgency + authority + sunk cost + exhaustion).
+- `.claude/skills/pelizzai-improving-architecture/test-pressure-1.md` — "go ahead and refactor all five while you're at it".
 
-Mudança comportamental nessas skills re-roda o cenário correspondente antes e depois. Os arquivos são espelhados para os roots gerados pelo `sync-harness`; edite apenas o root canônico (ver "Fonte e roots de skills").
+A behavioral change to those skills re-runs the corresponding scenario before and after. The files are mirrored to the roots generated by `sync-harness`; edit only the canonical root (see "Skill source and roots").
 
-## Meta-testing: quando o agente viola com a skill carregada
+## Meta-testing: when the agent violates with the skill loaded
 
-Falhou COM a skill no contexto? Não adivinhe o conserto: **pergunte ao próprio agente** como a skill deveria ter sido escrita para que ele não tivesse violado. Três diagnósticos:
+Failed WITH the skill in context? Don't guess the fix: **ask the agent itself** how the skill should have been written so it would not have violated. Three diagnoses:
 
-| O agente responde | Diagnóstico | Correção |
+| The agent answers | Diagnosis | Fix |
 | --- | --- | --- |
-| "eu sabia da regra, mas achei que aqui não valia" | ignorou sabendo | falta um **princípio fundacional** — o porquê que fecha a negociação |
-| "a skill deveria dizer X" | lacuna literal | adicione **X verbatim** |
-| "não vi a seção Y" | problema de organização | **reorganize** — promova a seção, encurte o que vem antes dela |
+| "I knew the rule, but thought it didn't apply here" | ignored knowingly | a **foundational principle** is missing — the why that closes the negotiation |
+| "the skill should say X" | literal gap | add **X verbatim** |
+| "I didn't see section Y" | organization problem | **reorganize** — promote the section, shorten what comes before it |
 
-Uma skill de disciplina está **bulletproof** quando o agente: (1) escolhe a opção correta sob pressão máxima; (2) **cita as seções da skill** ao justificar a escolha; (3) **admite a tentação** ("a opção B era atraente porque…") — sinal de que processou o conflito em vez de não tê-lo visto.
+A discipline skill is **bulletproof** when the agent: (1) chooses the correct option under maximum pressure; (2) **cites the skill's sections** when justifying the choice; (3) **admits the temptation** ("option B was attractive because…") — a sign it processed the conflict instead of not seeing it.
 
 ## Frontmatter
 
-Apenas dois campos, ambos obrigatórios:
+Only two fields, both required:
 
 ```yaml
 ---
-name: nome-kebab-case
-description: O que a skill faz e os contextos observáveis em que deve ser usada.
+name: kebab-case-name
+description: What the skill does and the observable contexts in which it should be used.
 ---
 ```
 
-- **name** — identificador da skill (kebab-case), igual ao nome do diretório.
-- **description** — **o gatilho**. É o mecanismo principal de acionamento. Inclua **o que a skill faz E os contextos específicos de uso**. Toda informação de "quando usar" vai aqui, não no corpo.
+- **name** — the skill's identifier (kebab-case), same as the directory name.
+- **description** — **the trigger**. It is the primary triggering mechanism. Include **what the skill does AND the specific contexts of use**. All "when to use" information goes here, not in the body.
 
-> Observação: o harness tende a **acionar de menos**. Torne as descrições "incisivas". Em vez de "Cria um dashboard de dados internos", escreva "Cria um dashboard de dados internos. Use sempre que o usuário mencionar dashboards, visualização de dados ou métricas, ou quiser exibir qualquer dado da empresa — mesmo sem pedir explicitamente um 'dashboard'."
+> Note: the harness tends to **under-trigger**. Make descriptions "incisive". Instead of "Creates an internal data dashboard", write "Creates an internal data dashboard. Use whenever the user mentions dashboards, data visualization, or metrics, or wants to display any company data — even without explicitly asking for a 'dashboard'."
 
-Incisivo não é vago. As duas falhas são reais e se corrigem juntas:
-
-```text
-- Sub-acionamento (falha dominante): a description cita só o nome canônico da tarefa e a skill
-  nunca dispara. Correção: enriquecer os GATILHOS — termos que o usuário realmente diria,
-  variações casuais e formais, sinônimos do domínio.
-- Skill storm: a description é ampla a ponto de disputar qualquer pedido com skills melhores.
-  Correção: nomear os NEAR MISSES — palavras em comum não bastam quando a intenção é outra.
-```
-
-Uma restrição curta e inegociável pode ficar na descrição quando for essencial para o routing.
-
-**Otimizar o acionamento (método verificável):** monte ~20 queries realistas — metade que **deve** acionar a skill (frasais variados, casual/formal, sem citar a skill pelo nome) e metade *near-miss* que **não** deve (compartilha palavras-chave, mas precisa de outra coisa). Meça a taxa de acionamento e prefira a descrição que melhor **generaliza**, evitando sobreajuste às queries de treino. Expanda para uma suíte maior apenas se a fronteira estiver ambígua ou já tiver regredido.
-
-(`compatibility` é opcional e raramente necessário.)
-
-### A `description` nunca resume o workflow
-
-Descoberta contra-intuitiva, testada em campo em harness de referência: quando a `description` resume o processo, o agente **segue a description e pula o corpo**. Caso real: uma skill com "code review between tasks" na description levou o agente a fazer **um** review em vez dos **dois** que o corpo do fluxo exigia — o resumo virou substituto do fluxo.
+Incisive is not vague. Both failures are real and are fixed together:
 
 ```text
-- description = O QUE a skill faz + QUANDO acioná-la (condições de disparo, frases-gatilho).
-- O PROCESSO (fases, ordem, contagens, comandos) vive no corpo — nunca na description.
-- Se a description contém uma sequência de passos ("faz A, depois B e fecha com C"),
-  reescreva: mantenha os gatilhos ricos, corte o resumo de processo.
-- Constraint inegociável curta ("NUNCA comece em main sem consentimento") pode ficar —
-  o proibido é a SEQUÊNCIA de passos, que o agente executa em versão rasa.
+- Under-triggering (dominant failure): the description cites only the task's canonical name and
+  the skill never fires. Fix: enrich the TRIGGERS — terms the user would actually say, casual
+  and formal variants, domain synonyms.
+- Skill storm: the description is broad enough to contend for any request against better skills.
+  Fix: name the NEAR MISSES — shared words are not enough when the intent is something else.
 ```
 
-## Leading words e o teste no-op
+A short, non-negotiable constraint may live in the description when it is essential for routing.
 
-**Leading word**: palavra compacta que já vive no pretraining do modelo e funciona como âncora comportamental — *seam*, *tracer bullet*, *red*, *tight*, *fog of war*. Uma leading word certa vale um parágrafo de instrução: ela puxa o comportamento inteiro associado a ela. **Front-load a leading word na `description`** — é o primeiro (às vezes o único) texto da skill que o agente vê.
+**Optimizing triggering (verifiable method):** build ~20 realistic queries — half that **should** trigger the skill (varied phrasings, casual/formal, without naming the skill) and half *near-miss* that should **not** (shares keywords, but needs something else). Measure the trigger rate and prefer the description that best **generalizes**, avoiding overfitting to the training queries. Expand to a larger suite only if the boundary is ambiguous or has already regressed.
 
-**Teste no-op**, por sentença: "esta sentença muda o comportamento do agente em relação ao default sem ela?" Decida **rodando** (contexto fresco, com e sem a sentença), **não debatendo**. A poda é por **sentença inteira**, não palavra a palavra — meia sentença podada deixa a negociação aberta.
+(`compatibility` is optional and rarely necessary.)
 
-Modos de falha nomeados:
+### The `description` never summarizes the workflow
 
-| Modo | Sintoma |
+A counter-intuitive, field-tested finding from a reference harness: when the `description` summarizes the process, the agent **follows the description and skips the body**. Real case: a skill with "code review between tasks" in the description led the agent to do **one** review instead of the **two** the body's flow required — the summary became a substitute for the flow.
+
+```text
+- description = WHAT the skill does + WHEN to trigger it (trigger conditions, trigger phrases).
+- The PROCESS (phases, order, counts, commands) lives in the body — never in the description.
+- If the description contains a sequence of steps ("does A, then B, and closes with C"),
+  rewrite it: keep the rich triggers, cut the process summary.
+- A short non-negotiable constraint ("NEVER start on main without consent") may stay —
+  what is forbidden is the SEQUENCE of steps, which the agent executes in a shallow version.
+```
+
+## Leading words and the no-op test
+
+**Leading word**: a compact word that already lives in the model's pretraining and works as a behavioral anchor — *seam*, *tracer bullet*, *red*, *tight*, *fog of war*. The right leading word is worth a paragraph of instruction: it pulls in the entire behavior associated with it. **Front-load the leading word in the `description`** — it is the first (sometimes the only) text of the skill the agent sees.
+
+**No-op test**, per sentence: "does this sentence change the agent's behavior relative to the default without it?" Decide **by running** (fresh context, with and without the sentence), **not by debating**. Pruning is by **whole sentence**, not word by word — a half-pruned sentence leaves the negotiation open.
+
+Named failure modes:
+
+| Mode | Symptom |
 | --- | --- |
-| **Sediment** | adicionar parece seguro, remover parece arriscado — a skill só cresce, camada sobre camada |
-| **Sprawl** | o comprimento em si é o custo: dilui a proeminência do que importa |
-| **Duplication** | repetir uma regra infla artificialmente a proeminência dela às custas das outras |
-| **No-op** | "seja cuidadoso" não muda comportamento nenhum; o fix de "be thorough" (no-op) foi "relentless" (leading word) |
+| **Sediment** | adding feels safe, removing feels risky — the skill only grows, layer upon layer |
+| **Sprawl** | length itself is the cost: it dilutes the prominence of what matters |
+| **Duplication** | repeating a rule artificially inflates its prominence at the expense of the others |
+| **No-op** | "be careful" changes no behavior at all; the fix for "be thorough" (no-op) was "relentless" (leading word) |
 
-## Divulgação progressiva (3 níveis)
+## Progressive disclosure (3 levels)
 
 ```text
-1. Metadados (name + description) — sempre no contexto (~100 palavras).
-2. Corpo do SKILL.md             — no contexto quando a skill é acionada (ideal < 500 linhas).
-3. Recursos agrupados            — sob demanda (ilimitado; scripts podem rodar sem carregar no contexto).
+1. Metadata (name + description) — always in context (~100 words).
+2. SKILL.md body                 — in context when the skill triggers (ideally < 500 lines).
+3. Bundled resources             — on demand (unlimited; scripts can run without loading into context).
 ```
 
-Padrões:
+Patterns:
 
-- Mantenha o `SKILL.md` < 500 linhas. Aproximando-se do limite, adicione um nível hierárquico (mova profundidade para `references/`) com ponteiros claros sobre **quando** ler cada arquivo.
-- Faça referências explícitas aos arquivos a partir do `SKILL.md`. Não crie uma cadeia profunda de referências.
-- Para arquivos de referência longos (>300 linhas), inclua um sumário no topo.
-- Mantenha o corpo focado no workflow e nos critérios de decisão; mova tabelas extensas, detalhes de fornecedor e exemplos volumosos para `references/`.
+- Keep the `SKILL.md` < 500 lines. Approaching the limit, add a hierarchy level (move depth to `references/`) with clear pointers on **when** to read each file.
+- Reference the files explicitly from the `SKILL.md`. Do not create a deep chain of references.
+- For long reference files (>300 lines), include a table of contents at the top.
+- Keep the body focused on the workflow and the decision criteria; move large tables, vendor details, and bulky examples to `references/`.
 
-Os números (~100 palavras de metadados, <500 linhas de corpo, 300 linhas para sumário) são **aproximados** — passe deles quando houver motivo. A meta é manter enxuto o que fica sempre no contexto, não cumprir uma cota.
+The numbers (~100 words of metadata, <500 body lines, 300 lines for a table of contents) are **approximate** — exceed them when there is a reason. The goal is to keep lean what is always in context, not to meet a quota.
 
-## Anatomia
+## Anatomy
 
 ```text
-nome-da-skill/
-├── SKILL.md (obrigatório)
-│   ├── frontmatter YAML (name, description) — exclusivo do SKILL.md
-│   └── instruções em Markdown
-├── test-pressure-<n>.md (skills de disciplina) — cenários de regressão, SEM frontmatter
-└── Recursos agrupados (opcional)
-    ├── scripts/    — código executável para tarefas determinísticas/repetitivas
-    ├── references/ — documentos carregados sob demanda
-    └── assets/     — arquivos usados na saída (templates, ícones, fontes)
+skill-name/
+├── SKILL.md (required)
+│   ├── YAML frontmatter (name, description) — exclusive to SKILL.md
+│   └── Markdown instructions
+├── test-pressure-<n>.md (discipline skills) — regression scenarios, NO frontmatter
+└── Bundled resources (optional)
+    ├── scripts/    — executable code for deterministic/repetitive tasks
+    ├── references/ — documents loaded on demand
+    └── assets/     — files used in the output (templates, icons, fonts)
 ```
 
-Nem toda skill precisa desses diretórios. Não crie README, changelog ou arquivos auxiliares sem função operacional.
+Not every skill needs those directories. Do not create a README, changelog, or auxiliary files without an operational function.
 
-**Organização por variante** (quando a skill cobre múltiplos domínios/frameworks):
+**Organization by variant** (when the skill covers multiple domains/frameworks):
 
 ```text
-nome-da-skill/
-├── SKILL.md           (workflow + seleção da variante)
+skill-name/
+├── SKILL.md           (workflow + variant selection)
 └── references/
     ├── aws.md
     ├── gcp.md
     └── azure.md
 ```
 
-## Fonte e roots de skills
+## Skill source and roots
 
-No repo-fonte do PelizzAI:
+In the PelizzAI source repo:
 
-- edite `.claude/skills/<nome>/`;
-- trate `.agents/skills/` como mirror gerado; `.cursor/rules/pelizzai.mdc` é adaptador **manual** — o sync não o gera, atualize-o à mão quando os entrypoints mudarem;
-- depois de uma edição autorizada, rode automaticamente `node scripts/sync-harness.mjs` e valide
-  com `node scripts/sync-harness.mjs --check --source-mode`; `.ps1` e `.sh` são wrappers.
+- edit `.claude/skills/<name>/`;
+- treat `.agents/skills/` as a generated mirror; `.cursor/rules/pelizzai.mdc` is a **manual** adapter — the sync does not generate it, update it by hand when the entrypoints change;
+- after an authorized edit, automatically run `node scripts/sync-harness.mjs` and validate
+  with `node scripts/sync-harness.mjs --check --source-mode`; `.ps1` and `.sh` are wrappers.
 
-Num projeto consumidor, detecte o root ativo antes de escrever. Use `.claude/skills/` **ou** `.agents/skills/`, conforme a plataforma e as convenções existentes; não duplique a edição nos dois roots por conta própria. Se o projeto declarar um processo de geração, edite a fonte e rode esse processo automaticamente como parte da edição já autorizada.
+In a consumer project, detect the active root before writing. Use `.claude/skills/` **or** `.agents/skills/`, per the platform and the existing conventions; do not duplicate the edit in both roots on your own. If the project declares a generation process, edit the source and run that process automatically as part of the already-authorized edit.
 
-## Padrões de escrita
+## Writing patterns
 
-- Use o **imperativo** nas instruções e critérios observáveis.
-- Explique **por que** algo importa (teoria da mente), em vez de impor regras rígidas e excessivas — mas só quando o porquê fecha uma racionalização provável. Skills abrangentes generalizam melhor que skills presas a exemplos.
-- **Defina formatos de saída** com um modelo exato quando a saída precisa ser consistente.
-- **Inclua exemplos** (entrada → saída) quando reduzirem ambiguidade.
-- Prefira uma regra central a repetições espalhadas.
-- Nomeie limites e caminhos de fallback; diga quando **não** usar a skill.
-- Comece com um rascunho; depois revise com um olhar renovado e melhore.
+- Use the **imperative** in instructions and observable criteria.
+- Explain **why** something matters (theory of mind) instead of imposing rigid, excessive rules — but only when the why closes a likely rationalization. Broad skills generalize better than skills tied to examples.
+- **Define output formats** with an exact template when the output must be consistent.
+- **Include examples** (input → output) when they reduce ambiguity.
+- Prefer one central rule to scattered repetitions.
+- Name limits and fallback paths; say when **not** to use the skill.
+- Start with a draft; then revisit with fresh eyes and improve.
 
-## Grau de liberdade
+## Degree of freedom
 
-| Situação | Forma adequada |
+| Situation | Appropriate form |
 | --- | --- |
-| Múltiplas soluções válidas; julgamento contextual | princípios e critérios de decisão |
-| Padrão preferido com variação aceitável | pseudocódigo, checklist curto ou exemplo parametrizado |
-| Operação frágil, repetitiva ou com ordem exata | script determinístico e poucos parâmetros |
+| Multiple valid solutions; contextual judgment | principles and decision criteria |
+| Preferred pattern with acceptable variation | pseudocode, a short checklist, or a parameterized example |
+| Fragile, repetitive, or exact-order operation | deterministic script with few parameters |
 
-Não transforme heurística em invariante. Segurança, autoridade e integridade podem exigir regras rígidas; estilo, decomposição, técnicas de reasoning e quantidade de testes normalmente exigem seleção contextual.
+Do not turn a heuristic into an invariant. Safety, authority, and integrity may require rigid rules; style, decomposition, reasoning techniques, and test quantity normally require contextual selection.
 
 ## Match the Form to the Failure
 
-O grau de liberdade responde à **fragilidade da tarefa**; esta seção responde ao **tipo de falha**. Errar a forma torna a skill inócua ou contraproducente:
+The degree of freedom answers to the **task's fragility**; this section answers to the **type of failure**. Getting the form wrong makes the skill inert or counterproductive:
 
-| Tipo de falha | Forma correta da guidance |
+| Failure type | Correct form of guidance |
 | --- | --- |
-| Viola a disciplina sob pressão | **Proibição explícita** + tabela de racionalizações (cada desculpa capturada, com a resposta) |
-| Output com a forma errada | **RECEITA POSITIVA** do que o output É (modelo, exemplo, esqueleto) |
-| Elemento omitido | Slot **REQUIRED** no template — a ausência fica sintaticamente visível |
-| Comportamento condicional errado | Condicional sobre **predicado observável** ("se o arquivo existir", não "se fizer sentido") |
+| Violates discipline under pressure | **Explicit prohibition** + rationalization table (each excuse captured, with its answer) |
+| Output with the wrong shape | **POSITIVE RECIPE** of what the output IS (template, example, skeleton) |
+| Omitted element | **REQUIRED** slot in the template — the absence becomes syntactically visible |
+| Wrong conditional behavior | Conditional on an **observable predicate** ("if the file exists", not "if it makes sense") |
 
-Por que receita positiva para forma de output — evidência A/B de harness maduro: o braço com proibições ("don't X") produziu **MAIS** conteúdo indesejado que o controle **sem guidance nenhuma**. A proibição chama atenção exatamente para o padrão que quer suprimir. Para shaping de output, descreva o que o output **é**; nunca liste o que ele não é.
+Why a positive recipe for output shape — A/B evidence from a mature harness: the arm with prohibitions ("don't X") produced **MORE** unwanted content than the control **with no guidance at all**. The prohibition draws attention to exactly the pattern it wants to suppress. For output shaping, describe what the output **is**; never list what it is not.
 
-Corolários:
+Corollaries:
 
 ```text
-- SEM nuance clauses: "não faça X a menos que realmente importe" reabre a negociação que a
-  regra existia para fechar — sob pressão, tudo "realmente importa".
-- Cláusulas de isenção não escopam: "isso não se aplica a Y" vira o buraco por onde tudo
-  passa. Se a regra precisa de exceção, REESTRUTURE a regra até a exceção desaparecer.
+- NO nuance clauses: "don't do X unless it really matters" reopens the negotiation the rule
+  existed to close — under pressure, everything "really matters".
+- Exemption clauses don't scope: "this doesn't apply to Y" becomes the hole everything passes
+  through. If the rule needs an exception, RESTRUCTURE the rule until the exception disappears.
 ```
 
-## Persuasão calibrada
+## Calibrated persuasion
 
-Base empírica: Meincke et al. 2025 — princípios clássicos de persuasão elevaram a compliance de LLMs de **33% para 72%**. Skills de disciplina podem (e devem) usar os princípios certos; os errados são proibidos:
+Empirical basis: Meincke et al. 2025 — classic persuasion principles raised LLM compliance from **33% to 72%**. Discipline skills can (and should) use the right principles; the wrong ones are forbidden:
 
-| Princípio | Uso em skills |
+| Principle | Use in skills |
 | --- | --- |
-| **Authority** | "VOCÊ DEVE", sem exceções nem atenuantes — o núcleo das skills de disciplina |
-| **Commitment** | fazer o agente ANUNCIAR o que vai fazer; checklists com todos; escolha forçada entre opções |
-| **Scarcity** | urgência real de sequência: "IMEDIATAMENTE após X" |
-| **Social Proof** | consequência universal: "checklist sem todo = passo pulado. Sempre." |
-| **Liking** | **PROIBIDO** — elogiar/agradar gera sycophancy, não disciplina |
-| **Reciprocity** | **PROIBIDO** — "eu fiz por você, então…" gera sycophancy, não disciplina |
+| **Authority** | "YOU MUST", with no exceptions or softeners — the core of discipline skills |
+| **Commitment** | make the agent ANNOUNCE what it will do; checklists with todos; forced choice between options |
+| **Scarcity** | real sequence urgency: "IMMEDIATELY after X" |
+| **Social Proof** | universal consequence: "checklist without a todo = skipped step. Always." |
+| **Liking** | **FORBIDDEN** — praising/pleasing produces sycophancy, not discipline |
+| **Reciprocity** | **FORBIDDEN** — "I did this for you, so…" produces sycophancy, not discipline |
 
-Teste ético antes de usar qualquer técnica: **"essa técnica serviria ao interesse genuíno do usuário se ele a entendesse por completo?"** Se a resposta for não, não use.
+Ethics test before using any technique: **"would this technique serve the user's genuine interest if they understood it completely?"** If the answer is no, don't use it.
 
-## Conclusão prematura e passos pós-conclusão
+## Premature conclusion and post-completion steps
 
-Passos futuros visíveis **puxam** o agente para concluir cedo: ele enxerga o fim do fluxo e começa a encerrar antes de cumprir o critério. Defesa **em ordem**:
+Visible future steps **pull** the agent toward concluding early: it sees the end of the flow and starts wrapping up before meeting the criterion. Defense, **in order**:
 
 ```text
-1. Afie o completion criterion PRIMEIRO. Dois eixos:
-   - clarity — o critério resiste à conclusão prematura? "Toda skill modificada contabilizada"
-     resiste; "revise as skills" não.
-   - demand  — o critério FORÇA o trabalho? "Toda skill modificada contabilizada" exige
-     verificar cada uma; "produza uma lista" aceita qualquer lista.
-2. Só se afiar não bastar, esconda os passos futuros — e esconder só funciona através de
-   uma fronteira REAL de contexto (subagent, handoff). "Esconder" inline (jogar para o fim
-   do texto, dizer "ignore por enquanto") não limpa nada: o agente já leu.
+1. Sharpen the completion criterion FIRST. Two axes:
+   - clarity — does the criterion resist premature conclusion? "Every modified skill accounted
+     for" resists; "review the skills" does not.
+   - demand  — does the criterion FORCE the work? "Every modified skill accounted for" requires
+     checking each one; "produce a list" accepts any list.
+2. Only if sharpening is not enough, hide the future steps — and hiding only works across a
+   REAL context boundary (subagent, handoff). "Hiding" inline (pushing to the end of the text,
+   saying "ignore for now") cleans nothing: the agent has already read it.
 ```
 
 ## Scripts
 
-Prefira script quando copiar comandos seria frágil ou o resultado puder ser verificado automaticamente. Um script deve:
+Prefer a script when copying commands would be fragile or the result can be verified automatically. A script must:
 
-- aceitar entradas explícitas e validar parâmetros;
-- falhar com mensagem acionável;
-- evitar efeitos destrutivos por default;
-- funcionar a partir de caminhos documentados;
-- ter ao menos uma fixture feliz e um erro representativo quando for crítico.
+- accept explicit inputs and validate parameters;
+- fail with an actionable message;
+- avoid destructive effects by default;
+- work from documented paths;
+- have at least one happy fixture and one representative error when it is critical.
 
-Teste o script executando-o. Apenas lê-lo não valida quoting, encoding, diferenças de plataforma ou códigos de saída.
+Test the script by running it. Merely reading it does not validate quoting, encoding, platform differences, or exit codes.
 
-## Micro-teste de wording
+## Wording micro-test
 
-Antes de qualquer eval caro, valide o wording barato:
+Before any expensive eval, validate the wording cheaply:
 
 ```text
-1. 5+ amostras fresh-context POR VARIANTE de wording.
-2. Sempre contra um CONTROLE sem guidance — sem controle, você não sabe se a skill mudou
-   o comportamento ou se o modelo já faria aquilo sozinho.
-3. Leia cada match MANUALMENTE: echo de template (o agente repete as palavras da skill sem
-   mudar o comportamento) mascara um falso hit.
-4. VARIÂNCIA é métrica de primeira classe: cinco interpretações diferentes em cinco reps
-   = o wording NÃO é vinculante, por melhor que "a média" pareça.
-5. PROIBIDO batching: feche o wording de uma skill antes de passar à próxima — em lote,
-   você não sabe qual mudança causou qual efeito.
+1. 5+ fresh-context samples PER wording VARIANT.
+2. Always against a CONTROL with no guidance — without a control, you don't know whether the
+   skill changed the behavior or the model would already do it on its own.
+3. Read each match MANUALLY: template echo (the agent repeats the skill's words without
+   changing behavior) masks a false hit.
+4. VARIANCE is a first-class metric: five different interpretations across five reps
+   = the wording is NOT binding, however good "the average" looks.
+5. Batching is FORBIDDEN: close one skill's wording before moving to the next — in a batch,
+   you don't know which change caused which effect.
 ```
 
-## Evals (quando a saída é verificável)
+## Evals (when the output is verifiable)
 
-O micro-teste de wording (seção acima) vem primeiro; a eval é o passo caro. Evals são indicados quando existe saída objetivamente verificável ou uma fronteira de routing importante. Cada caso deve conter contexto mínimo e entrada, comportamento esperado, comportamento proibido relevante, critério objetivo de aprovação e o motivo pelo qual o caso protege uma regressão plausível.
+The wording micro-test (section above) comes first; the eval is the expensive step. Evals are indicated when there is objectively verifiable output or an important routing boundary. Each case must contain minimal context and input, expected behavior, the relevant forbidden behavior, an objective pass criterion, and the reason the case protects against a plausible regression.
 
-Estrutura do arquivo que **você cria** dentro da skill, em evals/evals.json (nenhuma skill deste repositório usa esse formato hoje — as evals do harness são os cenários em Markdown descritos abaixo):
+Structure of the file **you create** inside the skill, at evals/evals.json (no skill in this repository uses this format today — the harness's evals are the Markdown scenarios described below):
 
 ```json
 {
-  "skill_name": "nome-da-skill",
+  "skill_name": "skill-name",
   "evals": [
     {
       "id": 1,
-      "prompt": "Tarefa do usuário",
-      "expected_output": "Resultado esperado",
-      "expectations": ["A saída inclui X", "A skill usou o script Y"],
+      "prompt": "User task",
+      "expected_output": "Expected result",
+      "expectations": ["The output includes X", "The skill used script Y"],
       "files": []
     }
   ]
 }
 ```
 
-O campo `expectations` (afirmações objetivamente verificáveis) é o que o **grader** checa — é o que torna a eval "verificável". Adicione-o ao redigir as asserções. O esquema completo de `evals.json`/`grading.json` **não vive neste repositório**: ele vem do `skill-creator` da Anthropic, no arquivo references/schemas.md **do pacote daquela skill**. Confirme o nome exato do campo na versão que você tiver instalada, em vez de assumir o que está escrito aqui.
+The `expectations` field (objectively verifiable assertions) is what the **grader** checks — it is what makes the eval "verifiable". Add it when writing the assertions. The full `evals.json`/`grading.json` schema **does not live in this repository**: it comes from Anthropic's `skill-creator`, in the references/schemas.md file **of that skill's package**. Confirm the exact field name in the version you have installed instead of assuming what is written here.
 
-Quando o critério é de **roteamento** e não de saída literal, o harness usa cenários em Markdown dentro de `evals/` (ex.: `.claude/skills/pelizzai-router/evals/adaptive-user-control.md`, `.claude/skills/pelizzai-reasoning/evals/`). Mesma exigência: cada caso nomeia a rota esperada, a rota proibida e a regressão que protege.
+When the criterion is about **routing** rather than literal output, the harness uses Markdown scenarios inside `evals/` (e.g. `.claude/skills/pelizzai-router/evals/adaptive-user-control.md`, `.claude/skills/pelizzai-reasoning/evals/`). Same requirement: each case names the expected route, the forbidden route, and the regression it protects against.
 
-Procedimento (quando há subagentes disponíveis):
+Procedure (when subagents are available):
 
 ```text
-- Rode em paralelo: uma execução COM a skill e uma SEM (baseline).
-- Enquanto rodam, redija asserções quantitativas; capture tokens e duração das notificações.
-- Avalie cada execução com um subagente "grader" contra as asserções.
-- Agregue em benchmark.json e mostre ao usuário (ex.: eval-viewer).
-- Itere a partir do feedback, GENERALIZANDO (não sobreajuste aos casos de teste).
+- Run in parallel: one execution WITH the skill and one WITHOUT (baseline).
+- While they run, write quantitative assertions; capture tokens and duration from the
+  notifications.
+- Grade each execution with a "grader" subagent against the assertions.
+- Aggregate into benchmark.json and show the user (e.g. eval-viewer).
+- Iterate from the feedback, GENERALIZING (do not overfit to the test cases).
 ```
 
-Em ambientes sem subagentes (ex.: claude.ai), rode os casos sequencialmente, sem baseline/benchmark, e apresente os resultados na conversa.
+In environments without subagents (e.g. claude.ai), run the cases sequentially, without baseline/benchmark, and present the results in the conversation.
 
-Evite transformar a redação exata da resposta em contrato, salvo quando o formato for uma API. Teste decisões e efeitos observáveis.
+Avoid turning the answer's exact wording into a contract, except when the format is an API. Test decisions and observable effects.
 
-## Princípio da Ausência de Surpresas
+## Absence of Surprises principle
 
-Skills não devem conter malware, exploit ou conteúdo que comprometa a segurança. Não atenda pedidos para criar skills enganosas ou voltadas a acesso não autorizado, exfiltração ou atividade maliciosa. Uma skill não deve surpreender o usuário quanto à finalidade declarada. (Recursos legítimos como "atue como um XYZ" são aceitáveis.)
+Skills must not contain malware, exploits, or content that compromises security. Do not fulfill requests to create deceptive skills or ones aimed at unauthorized access, exfiltration, or malicious activity. A skill must not surprise the user relative to its declared purpose. (Legitimate resources like "act as an XYZ" are acceptable.)
 
-Uma skill também não deve introduzir silenciosamente rede, credenciais, instalação global, escrita fora do escopo, publicação ou destruição de dados. Declare dependências e efeitos. Use consentimento quando uma nova autoridade for necessária. Nunca inclua segredos em examples, logs ou fixtures.
+A skill also must not silently introduce network access, credentials, global installation, out-of-scope writes, publication, or data destruction. Declare dependencies and effects. Use consent when new authority is needed. Never include secrets in examples, logs, or fixtures.
 
-## Critério de conclusão
+## Completion criterion
 
-Uma skill está pronta quando:
+A skill is ready when:
 
-- seu gatilho distingue usos válidos de *near misses*;
-- o corpo contém apenas instruções que mudam comportamento (teste no-op aplicado);
-- o grau de liberdade e a forma da guidance combinam com a fragilidade da tarefa e o tipo de falha;
-- links, frontmatter e scripts relevantes foram validados;
-- o comportamento crítico passou no baseline e nos cenários de pressão versionados, quando houver;
-- fonte, mirrors e documentação não contradizem o novo contrato.
+- its trigger distinguishes valid uses from *near misses*;
+- the body contains only instructions that change behavior (no-op test applied);
+- the degree of freedom and the form of the guidance match the task's fragility and the failure type;
+- links, frontmatter, and relevant scripts have been validated;
+- the critical behavior passed the baseline and the versioned pressure scenarios, when they exist;
+- source, mirrors, and documentation do not contradict the new contract.
 
-## Empacotamento
+## Packaging
 
-Para distribuir uma skill como artefato, empacote a pasta da skill (ex.: `python -m scripts.package_skill <pasta>` no skill-creator de origem). No PelizzAI, skills vivem em `.claude/skills/` e são versionadas com o projeto; empacotar só é necessário quando o usuário realmente precisar distribuí-la fora do repositório. Dentro do PelizzAI, versionamento e sync são suficientes.
+To distribute a skill as an artifact, package the skill folder (e.g. `python -m scripts.package_skill <folder>` in the upstream skill-creator). In PelizzAI, skills live in `.claude/skills/` and are versioned with the project; packaging is only necessary when the user actually needs to distribute the skill outside the repository. Within PelizzAI, versioning and sync are enough.

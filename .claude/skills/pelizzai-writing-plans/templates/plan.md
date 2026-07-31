@@ -1,137 +1,139 @@
-# Template de plano de implementação — PelizzAI
+# Implementation plan template — PelizzAI
 
-Copie para `pelizzai/plans/AAAA-MM-DD-<feature>.md` e substitua todo texto entre colchetes por conteúdo real. Cada tarefa é uma fatia vertical verificável; a estratégia varia conforme o efeito. Escreva para quem abre o plano com zero contexto do repositório: contexto completo sim, transcrição do código futuro não.
+Copy to `pelizzai/plans/YYYY-MM-DD-<topic>.md` and replace every bracketed text with real content. Each task is a verifiable vertical slice; the strategy varies with the effect. Write for someone who opens the plan with zero context on the repository: complete context yes, transcription of the future code no.
 
 ---
 
-## Cabeçalho obrigatório
+## Mandatory header
 
 ```markdown
-# [Nome] — Plano de implementação
+# [Name] — Implementation plan
 
-> **Para quem executa:** SUB-SKILL OBRIGATÓRIA — use `pelizzai-execution-plans`.
+> **For the executor:** MANDATORY SUB-SKILL — use `pelizzai-execution-plans`.
 
-**Objetivo:** [resultado em uma frase]
+**Goal:** [one-sentence result]
 
-**Arquitetura:** [abordagem e fronteiras em 2–3 frases]
+**Architecture:** [approach and boundaries in 2–3 sentences]
 
-**Stack técnica:** [tecnologias/bibliotecas]
+**Tech stack:** [technologies/libraries]
 
-**Skills de domínio aplicáveis:** [nomes de `pelizzai/domain-skills.md` ou `nenhuma`]
+**Applicable domain skills:** [names from `pelizzai/domain-skills.md` or `none`]
 
-**Global Constraints (copiadas VERBATIM da spec):**
+**Global Constraints (copied VERBATIM from the spec):**
 
-- [constraint projeto-wide; se não houver, escreva `nenhuma`]
+- [project-wide constraint; if there is none, write `none`]
 
-**Aprovações** (uma linha cada; marcador sem resposta explícita do usuário fica `pendente`):
+**Approvals** (one line each; a marker without an explicit user answer stays `pending`):
 
-- Descoberta: [ratificada em AAAA-MM-DD | dispensada em AAAA-MM-DD | não se aplica]
-- Spec: [`caminho` aprovada em AAAA-MM-DD | dispensa explícita em AAAA-MM-DD | não se aplica]
-- Domain skills: [conjunto escolhido, ou `nenhuma` — ratificada em AAAA-MM-DD]
-- Plano: [rascunho | aprovado em AAAA-MM-DD]
+- Discovery: [ratified on YYYY-MM-DD | waived on YYYY-MM-DD | not applicable]
+- Spec: [`path` approved on YYYY-MM-DD | explicit waiver on YYYY-MM-DD | not applicable]
+- Domain skills: [chosen set, or `none` — ratified on YYYY-MM-DD]
+- Plan: [draft | approved on YYYY-MM-DD]
 
 ---
 ```
 
-As aprovações são o **registro histórico da decisão humana** e vivem só aqui — o `state.md` guarda o cursor da tarefa (`lane`, `phase`, `spec:`, `plan:`), não os carimbos. `Plano: rascunho` até a resposta explícita do usuário na borda de aprovação do conteúdo; silêncio não vira data.
+The approvals are the **historical record of the human decision** and live only here — `state.md` keeps the task cursor (`lane`, `phase`, `spec:`, `plan:`), not the stamps. `Plan: draft` until the user's explicit answer at the content-approval edge; silence does not become a date.
 
-O coordenador inclui as Global Constraints e as skills transversais registradas na tarefa no briefing de cada executor. Não liste overlay por possibilidade remota: UI exige `pelizzai-frontend`; superfície sensível exige `pelizzai-oswap`.
+The coordinator includes the Global Constraints and the cross-cutting skills recorded on the task in each executor's briefing. Do not list an overlay for a remote possibility: UI requires `pelizzai-frontend`; a sensitive surface requires `pelizzai-oswap`.
 
-## Lacunas materiais expostas
+## Exposed material gaps
 
-Liste as premissas residuais e lacunas materiais **novas do plano** (casos não tratados, validação ausente, estado/erro indefinido, autorização faltante, contradições spec↔plano). Cada uma sai da borda resolvida, aceita explicitamente pelo usuário, ou convertida em tarefa de investigação — nunca em silêncio. Se não houver, escreva `nenhuma`.
-
-```text
-- [lacuna → resolução | aceita pelo usuário | Tarefa de investigação N]
-```
-
-## Decisões técnicas deste plano
-
-Lista **numerada** das decisões técnicas materiais deste plano — cada uma em uma linha: **o quê** foi decidido, **onde foi ratificado**, a **alternativa rejeitada** e o **porquê**. Toda decisão material tem de estar ratificada antes de o plano fechar: a que emergiu ao montar o plano vai ao usuário como pergunta com 2–3 opções e recomendação (via `pelizzai-interview-me`), não como fato consumado. Se o plano é puramente mecânico e não toma nenhuma decisão técnica material, escreva exatamente `nenhuma decisão técnica material — plano puramente mecânico`. Nunca deixe a seção vazia nem a omita.
+List the residual assumptions and material gaps **new to the plan** (unhandled cases, missing validation, undefined state/error, missing authorization, spec↔plan contradictions). Each one leaves the edge resolved, explicitly accepted by the user, or converted into an investigation task — never in silence. If there are none, write `none`.
 
 ```text
-1. [decisão] — ratificada: [spec | design | entrevista do plano | entrevista de execução] — rejeitada: [alternativa] — porquê: [motivo em uma linha]
-2. [decisão] — ratificada: [spec | design | entrevista do plano | entrevista de execução] — rejeitada: [alternativa] — porquê: [motivo em uma linha]
+- [gap → resolution | accepted by the user | Investigation task N]
 ```
 
-O Gate de setup pós-plano apresenta esta lista: as já ratificadas (spec/design/entrevista) como recap de uma linha, e qualquer decisão sem origem de ratificação vira pergunta com 2–3 opções e recomendação ali mesmo — nunca um carimbo em bloco. Na execução vale o teste operacional de desvio — se a decisão não está escrita no plano nem na spec, ela não está aprovada — apresente antes de implementar. A lacuna material que aparecer depois, no meio da execução, é tampada pela `pelizzai-interview-me` e volta para cá como uma linha nova com origem `entrevista de execução` — a lista continua viva durante a execução, não congela no gate.
+## Technical decisions in this plan
 
-## Estrutura de cada tarefa
+**Numbered** list of this plan's material technical decisions — each on one line: **what** was decided, **where it was ratified**, the **rejected alternative**, and the **why**. Every material decision must be ratified before the plan closes: one that emerged while assembling the plan goes to the user as a question with 2–3 options and a recommendation (via `pelizzai-interview-me`), not as a fait accompli. If the plan is purely mechanical and makes no material technical decision, write exactly `no material technical decision — purely mechanical plan`. Never leave the section empty or omit it.
+
+```text
+1. [decision] — ratified: [spec | design | plan interview | execution interview] — rejected: [alternative] — why: [one-line reason]
+2. [decision] — ratified: [spec | design | plan interview | execution interview] — rejected: [alternative] — why: [one-line reason]
+```
+
+The post-plan setup gate presents this list: the already-ratified ones (spec/design/interview) as a one-line recap, and any decision with no ratification origin becomes a question with 2–3 options and a recommendation right there — never a block rubber-stamp. During execution the operational deviation test applies — if the decision is not written in the plan or the spec, it is not approved — present it before implementing. A material gap that surfaces later, mid-execution, is plugged by `pelizzai-interview-me` and comes back here as a new line with origin `execution interview` — the list stays alive during execution; it does not freeze at the gate.
+
+## Structure of each task
 
 ````markdown
-### Tarefa N: [resultado vertical]
+### Task N: [vertical outcome]
+
+**Out of scope:** [files, behaviors, or decisions this task must NOT change; `none` only when the task truly has no boundary to state]
 
 **Files:**
 
-- Criar: `caminho/exato.ext`
-- Modificar: `caminho/exato.ext:123`
-- Validar: `caminho/exato/de/teste-ou-artefato.ext`
+- Create: `exact/path.ext`
+- Modify: `exact/path.ext:123`
+- Validate: `exact/path/to/test-or-artifact.ext`
 
-**Skills de domínio a aplicar:** [nomes ou `nenhuma`]
+**Domain skills to apply:** [names or `none`]
 
-**Skills transversais do harness a aplicar:** [nomes ou `nenhuma`]
+**Cross-cutting harness skills to apply:** [names or `none`]
 
 **Interfaces:**
 
-- Consome: `nomeExato(arg: Tipo): Retorno` — origem
-- Produz: `outroNome(arg: Tipo): Retorno` — consumidor
+- Consumes: `exactName(arg: Type): Return` — origin
+- Produces: `otherName(arg: Type): Return` — consumer
 
-_Se autocontida, escreva `nenhuma`._
+_If self-contained, write `none`._
 
-**Estratégia de implementação e validação:**
+**Implementation and validation strategy:**
 
-- Efeito predominante: [comportamento | refatoração | config/IaC/migração | UI visual | documentação]
-- Implementação: [TDD red→green | caracterização no verde | validate/plan/dry-run | pelizzai-frontend + QA visual | checagem estática]
-- Oráculo: [o que prova o resultado]
-- Comando(s): `[comandos canônicos completos]`
-- Evidência esperada: [exit code, delta, estado visual ou saída exata]
-- Rollback: [quando aplicável; caso contrário, `não aplicável`]
-- Perfil de review: [split (default) | combined (só com rebaixamento ratificado)] — [justificativa por risco/superfície]
+- Predominant effect: [behavior | refactoring | config/IaC/migration | visual UI | documentation]
+- Implementation: [TDD red→green | characterization on green | validate/plan/dry-run | pelizzai-frontend + visual QA | static check]
+- Oracle: [what proves the result]
+- Command(s): `[complete canonical commands]`
+- Expected evidence: [exit code, delta, visual state, or exact output]
+- Rollback: [when applicable; otherwise, `not applicable`]
+- Review profile: [split (default) | combined (only with a ratified downgrade)] — [justification by risk/surface]
 
-- [ ] **Passo 1: Estabeleça o baseline/oráculo** → verifique: [resultado exato]
+- [ ] **Step 1: Establish the baseline/oracle** → verify: [exact result]
 
-[comando, teste ou inspeção concreta]
+[concrete command, test, or inspection]
 
-- [ ] **Passo 2: Aplique a menor mudança da fatia** → verifique: [critério local]
+- [ ] **Step 2: Apply the slice's smallest change** → verify: [local criterion]
 
 ```language
-[conteúdo completo somente quando ele próprio é o contrato frágil — schema, formato, template,
-chamada pouco óbvia; caso contrário, nomeie interface, invariante e um exemplo curto]
+[complete content only when it is itself the fragile contract — schema, format, template,
+non-obvious call; otherwise, name the interface, the invariant, and one short example]
 ```
 
-- [ ] **Passo 3: Execute a prova da estratégia** → verifique: [saída exata]
+- [ ] **Step 3: Run the strategy's proof** → verify: [exact output]
 
-Rode: `[comando exato]`
-Esperado: `[resultado observável]`
+Run: `[exact command]`
+Expected: `[observable result]`
 
-- [ ] **Passo 4: Pronto para review → consolidar** — não commite no meio da tarefa; o commit é o gate do coordenador após as lentes spec ✅ + qualidade ✅ no perfil registrado. → verifique: `git status` contém somente o escopo desta tarefa
+- [ ] **Step 4: Ready for review → consolidate** — do not commit mid-task; the commit is the coordinator's gate after the spec ✅ + quality ✅ lenses in the recorded profile. → verify: `git status` contains only this task's scope
 ````
 
-Adapte a ordem sem perder a prova:
+Adapt the order without losing the proof:
 
 ```text
-- Comportamento/regressão: RED observado → implementação mínima → GREEN → refactor no verde.
-- Refatoração preservativa: caracterização verde → passo pequeno → mesma caracterização verde.
-- Config/IaC/migração: baseline → mudança → validate/plan/dry-run → inspecionar delta e rollback.
-- UI: comportamento quando houver + implementar estados → pelizzai-frontend em desktop/mobile → screenshot/navegador.
-- Docs/copy: editar → lint/links/exemplos/build-render → inspeção do resultado.
+- Behavior/regression: RED observed → minimal implementation → GREEN → refactor on green.
+- Preserving refactor: green characterization → small step → same green characterization.
+- Config/IaC/migration: baseline → change → validate/plan/dry-run → inspect delta and rollback.
+- UI: behavior when present + implement states → pelizzai-frontend on desktop/mobile → screenshot/browser.
+- Docs/copy: edit → lint/links/examples/build-render → inspect the result.
 ```
 
-## Gates de qualidade do plano
+## Plan quality gates
 
 ```text
-- Um executor sem nenhum contexto do repositório completa cada tarefa sem fazer uma única pergunta.
-- Paths, interfaces, conteúdo, comandos e saídas são concretos.
-- Todo passo possui `→ verifique:`.
-- Cada tarefa registra skills transversais, estratégia de implementação/validação e perfil de review.
-- UI nunca omite `pelizzai-frontend`; Playwright/browser é ferramenta, não overlay.
-- Não há RED artificial para refatoração, CSS, docs, config, IaC ou migração.
-- Sem TBD/TODO, "tratar edge cases", "igual à Tarefa N" ou referências indefinidas.
-- API externa está ancorada em documentação atual, não memória.
+- An executor with zero context on the repository completes each task without asking a single question.
+- Paths, interfaces, content, commands, and outputs are concrete.
+- Every step has `→ verify:`.
+- Each task records cross-cutting skills, implementation/validation strategy, and review profile.
+- UI never omits `pelizzai-frontend`; Playwright/browser is a tool, not an overlay.
+- No artificial RED for refactoring, CSS, docs, config, IaC, or migration.
+- No TBD/TODO, "handle edge cases", "same as Task N", or undefined references.
+- External APIs are anchored in current documentation, not memory.
 ```
 
-## Encaminhamento à execução
+## Forwarding to execution
 
-Plano materializado, estressado e aprovado → **encaminhe ao Gate de setup pós-plano sequencial** da
-`pelizzai-execution-plans`. O plano leva recomendações; o usuário decide isolamento, branch, modo,
-commits e review uma pergunta por vez antes da Tarefa 1.
+Plan materialized, stress-tested, and approved → **forward to the sequential post-plan setup gate**
+of `pelizzai-execution-plans`. The plan carries recommendations; the user decides isolation,
+branch, mode, commits, and review one question at a time before Task 1.

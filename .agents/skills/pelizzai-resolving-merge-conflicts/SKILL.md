@@ -1,49 +1,49 @@
 ---
 name: pelizzai-resolving-merge-conflicts
-description: Use quando houver um conflito de merge/rebase do git em andamento para resolver — o objetivo é preservar a intenção dos DOIS lados. Nunca usa `--abort` por conta própria para fugir do conflito; se a intenção original não puder ser preservada com segurança, PARA e escala ao usuário. Acione quando o usuário disser "resolver conflito", "deu merge conflict", "conflito de rebase".
+description: Use when there is a git merge/rebase conflict in progress to resolve — the goal is to preserve the intent of BOTH sides. Never uses `--abort` on its own to escape the conflict; if the original intent cannot be safely preserved, it STOPS and escalates to the user. Trigger when the user says "resolve this conflict", "there's a merge conflict", "rebase conflict".
 ---
 
 # PelizzAI Resolving Merge Conflicts
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Resolving Merge Conflicts para resolver os conflitos."
+**Announce at start**, in the conversation's language: that you are using the PelizzAI Resolving Merge Conflicts skill to resolve the conflicts.
 
-## Processo
+## Process
 
 ```text
-1. Veja o estado atual do merge/rebase. Cheque o histórico do git e os arquivos em conflito
-   (git status, git diff, git log das duas pontas).
+1. See the current state of the merge/rebase. Check the git history and the conflicted files
+   (git status, git diff, git log of both tips).
 
-2. Ache a fonte primária de cada conflito. Entenda FUNDO por que cada mudança foi feita e qual era a
-   intenção original — leia as mensagens de commit, os PRs, as issues/tickets de origem.
+2. Find the primary source of each conflict. Understand DEEPLY why each change was made and what the
+   original intent was — read the commit messages, the PRs, the originating issues/tickets.
 
-3. Resolva cada hunk. Preserve OS DOIS intuitos quando possível. Onde forem incompatíveis, escolha o que
-   bate com o objetivo declarado do merge e anote o trade-off. NÃO invente comportamento novo.
-   Sempre tente resolver. Se a intenção original NÃO puder ser preservada com segurança (lados
-   fundamentalmente incompatíveis, contexto insuficiente), NÃO invente e NÃO force: PARE e escale
-   ao usuário com as opções — incluindo abortar (`--abort`) e recomeçar com mais contexto.
-   O abort é decisão do usuário, nunca sua saída autônoma para fugir do conflito.
+3. Resolve each hunk. Preserve BOTH intents when possible. Where they are incompatible, choose the one
+   that matches the declared goal of the merge and note the trade-off. Do NOT invent new behavior.
+   Always try to resolve. If the original intent CANNOT be safely preserved (fundamentally
+   incompatible sides, insufficient context), do NOT invent and do NOT force it: STOP and escalate
+   to the user with the options — including aborting (`--abort`) and starting over with more context.
+   The abort is the user's decision, never your autonomous exit to escape the conflict.
 
-4. Reaplique skills de domínio e overlays da mudança (frontend/security/docs quando a resolução
-   tocar essas superfícies). Rode a prova adequada ao artefato: teste focal/completo, typecheck,
-   parser, dry-run, render ou QA visual. Não execute formatter/checks irrelevantes por ritual.
+4. Reapply the change's domain skills and overlays (frontend/security/docs when the resolution
+   touches those surfaces). Run the proof appropriate to the artifact: focal/full test, typecheck,
+   parser, dry-run, render, or visual QA. Do not run irrelevant formatters/checks as ritual.
 
-5. Estagie somente os paths resolvidos, confira `git diff --cached` e confirme que
-   `git diff --name-only --diff-filter=U` está vazio. Continue o merge/rebase pelo comando indicado
-   em `git status`; a cada novo conflito, volte ao passo 1. Nunca use `git add -A`.
+5. Stage only the resolved paths, check `git diff --cached`, and confirm that
+   `git diff --name-only --diff-filter=U` is empty. Continue the merge/rebase with the command
+   indicated by `git status`; on each new conflict, go back to step 1. Never use `git add -A`.
 
-6. Ao concluir, rode Verification contra o estado integrado. Se este conflito pertence a uma
-   tarefa ativa, devolva o controle ao lifecycle; não crie um fechamento paralelo.
+6. When done, run Verification against the integrated state. If this conflict belongs to an active
+   task, return control to the lifecycle; do not create a parallel closeout.
 ```
 
 ## Red flags
 
 ```text
-Nunca: dar `git merge --abort`/`git rebase --abort` por conta própria para fugir do conflito (abortar é
-       decisão do usuário, após você escalar com as opções); inventar comportamento que não estava em
-       nenhum dos lados; resolver sem entender a intenção original; `git add -A`; concluir sem
-       prova proporcional ou sem conferir conflitos não resolvidos.
+Never: run `git merge --abort`/`git rebase --abort` on your own to escape the conflict (aborting is
+       the user's decision, after you escalate with the options); invent behavior that was on
+       neither side; resolve without understanding the original intent; `git add -A`; conclude
+       without proportional proof or without checking for unresolved conflicts.
 ```
 
-## Integração
+## Integration
 
-**Combina com:** `pelizzai-starting-branch` (a base de onde o conflito surge), `pelizzai-finish-task` (integração/PR onde o conflito aparece), `pelizzai-verification-before-completion` (rodar os checks após resolver), `pelizzai-reasoning` (Evidence Synthesis para conciliar intenções conflitantes).
+**Combines with:** `pelizzai-starting-branch` (the base the conflict arises from), `pelizzai-finish-task` (the integration/PR where the conflict appears), `pelizzai-verification-before-completion` (running the checks after resolving), `pelizzai-reasoning` (Evidence Synthesis to reconcile conflicting intents).

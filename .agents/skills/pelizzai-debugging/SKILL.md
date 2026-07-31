@@ -1,228 +1,231 @@
 ---
 name: pelizzai-debugging
-description: Head skill do track de bug. Use ao encontrar bug, falha de teste, incidente ou comportamento inesperado — inclusive quando o usuário disser "não funciona", "tá com bug", "deu erro", "comportamento estranho" ou "para de chutar", e quando um teste quebrar no meio de outra tarefa. Faz triagem entre causa direta, bug determinístico incerto, falha flaky/distribuída e incidente com dano ativo; escolhe reasoning e validação proporcionais, contém dano reversivelmente antes de investigar e não obriga RCA, OODA ou quantidade fixa de hipóteses.
+description: Head skill of the bug track. Use when encountering a bug, test failure, incident, or unexpected behavior — including when the user says "it doesn't work", "it's buggy", "it broke", "strange behavior", or "stop guessing", and when a test breaks in the middle of another task. Triages between direct cause, uncertain deterministic bug, flaky/distributed failure, and incident with active damage; picks proportional reasoning and validation, contains damage reversibly before investigating, and never mandates RCA, OODA, or a fixed number of hypotheses.
 ---
 
 # PelizzAI Debugging
 
-## Objetivo
+## Goal
 
-Corrigir a causa comprovada com o menor processo que preserve evidência, segurança e regressão.
+Fix the proven cause with the least process that preserves evidence, safety, and regression coverage.
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Debugging para classificar a falha, conter impacto se necessário e corrigi-la com evidência."
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Debugging skill to classify the failure, contain impact if needed, and fix it with evidence.
 
-## Invariantes
+## Invariants
 
 ```text
-NENHUM FIX DEFINITIVO SEM EVIDÊNCIA SUFICIENTE DA CAUSA.
-CONTENÇÃO REVERSÍVEL NÃO É FIX E PODE PRECEDER A INVESTIGAÇÃO.
+NO DEFINITIVE FIX WITHOUT SUFFICIENT EVIDENCE OF THE CAUSE.
+REVERSIBLE CONTAINMENT IS NOT A FIX AND MAY PRECEDE THE INVESTIGATION.
 ```
 
-- Não confunda sintoma, hipótese, causa confirmada, contenção e prevenção.
-- Não imponha RCA a uma causa direta nem OODA a uma sequência curta.
-- Não invente um número de hipóteses. Mantenha apenas as materialmente plausíveis.
-- O fix roda inline. Delegue somente investigação read-only de hipóteses realmente independentes; a sessão principal decide e implementa.
+- Do not conflate symptom, hypothesis, confirmed cause, containment, and prevention.
+- Do not impose RCA on a direct cause or OODA on a short sequence.
+- Do not invent a hypothesis count. Keep only the materially plausible ones.
+- The fix runs inline. Delegate only read-only investigation of genuinely independent hypotheses; the main session decides and implements.
 
 ---
 
-## Passo 0 — há dano ativo?
+## Step 0 — is there active damage?
 
-Antes da reprodução, verifique se usuários, dados, segurança, disponibilidade ou custo continuam sendo afetados.
+Before reproduction, check whether users, data, security, availability, or cost are still being affected.
 
-Se **sim**:
+If **yes**:
 
 ```text
-1. Confirme alvo, alcance e autorização.
-2. Preserve a evidência mínima que a contenção apagaria (métricas, IDs, logs, versão/diff).
-3. Aplique a menor contenção reversível disponível: rollback conhecido, feature flag, pausar consumer,
-   bloquear rota vulnerável ou reduzir exposição — conforme o sistema e as permissões.
-4. Monitore o sinal de impacto e confirme se estabilizou.
-5. Só então investigue a correção estrutural.
+1. Confirm target, scope, and authorization.
+2. Preserve the minimum evidence containment would erase (metrics, IDs, logs, version/diff).
+3. Apply the smallest reversible containment available: known rollback, feature flag, pausing a consumer,
+   blocking the vulnerable route, or reducing exposure — as the system and permissions allow.
+4. Monitor the impact signal and confirm it has stabilized.
+5. Only then investigate the structural fix.
 ```
 
-Se não houver contenção segura ou faltar autoridade, escale imediatamente com alvo, impacto, opção proposta e risco. **Nunca bloqueie a contenção aguardando uma reprodução perfeita.**
+If no safe containment exists or you lack the authority, escalate immediately with target, impact, proposed option, and risk. **Never block containment waiting for a perfect reproduction.**
 
 ---
 
-## Passo 1 — classifique antes de escolher o reasoning
+## Step 1 — classify before choosing the reasoning
 
-| Classe | Sinais | Reasoning | Hipóteses | Caminho |
+| Class | Signals | Reasoning | Hypotheses | Path |
 | --- | --- | --- | --- | --- |
-| **Causa direta** | compilador, stack trace ou contrato aponta uma causa local inequívoca | ReAct + Verification | zero ou uma | reproduzir o erro → corrigir → rodar o mesmo oráculo |
-| **Determinístico incerto** | falha sempre, mas a origem ainda não está provada | RCA leve + ReAct | uma basta se discrimina; adicione outras só se competirem | loop mínimo → evidência → hipótese falsificável → fix |
-| **Flaky, recorrente ou distribuído** | taxa variável, concorrência, rede, múltiplas camadas/retries | RCA + Evidence Synthesis; Assumption Tracking quando útil | várias somente enquanto materialmente plausíveis | medir taxa → correlacionar fronteiras → testar hipótese mais informativa |
-| **Incidente com dano ativo** | produção degradada, exposição, perda/custo em curso | Constraint Satisfaction + Decision Making na contenção; RCA depois | depois de estabilizar | conter → monitorar → reclassificar e investigar |
+| **Direct cause** | compiler, stack trace, or contract points to an unambiguous local cause | ReAct + Verification | zero or one | reproduce the error → fix → run the same oracle |
+| **Uncertain deterministic** | fails every time, but the origin is not yet proven | light RCA + ReAct | one is enough if it discriminates; add others only if they compete | minimal loop → evidence → falsifiable hypothesis → fix |
+| **Flaky, recurring, or distributed** | variable rate, concurrency, network, multiple layers/retries | RCA + Evidence Synthesis; Assumption Tracking when useful | several, only while materially plausible | measure the rate → correlate boundaries → test the most informative hypothesis |
+| **Incident with active damage** | degraded production, exposure, ongoing loss/cost | Constraint Satisfaction + Decision Making for the containment; RCA afterward | after stabilizing | contain → monitor → reclassify and investigate |
 
-Use `pelizzai-loop`/OODA apenas quando houver **múltiplas rodadas** e cada rodada mudar evidência, hipótese ou realidade externa. OODA é o macro-loop de controle; não é técnica diagnóstica.
-
----
-
-## Passo 2 — construa o oráculo mais barato que prove o sintoma
-
-Prefira um comando executável e já rodado que falhe pelo sintoma exato. No consumidor, use
-`pelizzai/profile.md` quando existir; em source mode ou sem profile, descubra o comando nos
-manifests, scripts e workflows reais. Não chute nem crie profile para investigar. O menu de táticas
-vive em [references/feedback-loops.md](references/feedback-loops.md); **esta SKILL.md é canônica
-para triagem e ordem**.
-
-O oráculo pode ser teste, typecheck/build, script mínimo, query controlada, trace, métrica ou taxa de reprodução. Para falha flaky, registre condições e frequência; para incidente não reproduzível fora de produção, métricas/logs correlacionados podem ser o oráculo inicial.
-
-Colete somente a evidência que diferencia caminhos:
-
-```text
-- mensagem completa, stack trace, input e ambiente;
-- mudanças recentes e diff da área;
-- exemplo equivalente que funciona;
-- fluxo do valor até o primeiro ponto em que se torna incorreto;
-- em múltiplas camadas, entrada/saída e correlation/request ID em cada fronteira.
-```
-
-Telemetria existente pode ser lida imediatamente. Qualquer instrumentação que altere código/config
-passa por `pelizzai-starting-branch` **antes** da edição; eventual deploy passa também pelo gate
-`external`. Se adicionar instrumentação temporária, crie um prefixo único `[DEBUG-<id>]`, use-o em
-todo log novo e remova-a antes da implementação definitiva.
-
-**Minimize o loop — só nas classes "determinístico incerto" e "flaky".** Com o oráculo vermelho na
-mão, corte UM elemento por vez (fixture, flag, passo, camada, campo do input) e re-rode o oráculo
-depois de cada corte. Está minimizado quando todo elemento restante é load-bearing: remover qualquer
-um faz o bug sumir ou o oráculo quebrar. Numa causa direta isso é desperdício — o stack trace já
-isolou o elemento; num incidente com dano ativo, a contenção do Passo 0 vem antes de qualquer corte.
+Use `pelizzai-loop`/OODA only when there are **multiple rounds** and each round changes evidence, hypothesis, or external reality. OODA is the control macro-loop; it is not a diagnostic technique.
 
 ---
 
-## Passo 3 — teste hipóteses proporcionalmente
+## Step 2 — build the cheapest oracle that proves the symptom
 
-Uma causa direta comprovável não precisa de brainstorming causal. Quando houver incerteza:
+Prefer an executable, already-run command that fails on the exact symptom. In a consumer, use
+`pelizzai/profile.md` when it exists; in source mode or without a profile, discover the command in
+the real manifests, scripts, and workflows. Do not guess and do not create a profile just to
+investigate. The tactics menu lives in [references/feedback-loops.md](references/feedback-loops.md);
+**this SKILL.md is canonical for triage and order**.
+
+The oracle can be a test, typecheck/build, minimal script, controlled query, trace, metric, or reproduction rate. For a flaky failure, record conditions and frequency; for an incident that cannot be reproduced outside production, correlated metrics/logs can be the initial oracle.
+
+Collect only the evidence that discriminates between paths:
 
 ```text
-1. Registre fatos confirmados separados de hipóteses.
-2. Para cada hipótese material, escreva uma predição falsificável.
-3. Escolha a observação que mais discrimina as hipóteses com menor custo/risco.
-4. Mude uma variável por vez; não empilhe fixes.
-5. Evidência refutou a hipótese → descarte-a e reoriente.
+- full message, stack trace, input, and environment;
+- recent changes and the diff of the area;
+- an equivalent example that works;
+- the value's flow up to the first point where it becomes incorrect;
+- across multiple layers, input/output and correlation/request ID at each boundary.
 ```
 
-Apresente o ranking de hipóteses ao usuário sempre que restar mais de uma hipótese materialmente plausível — o conhecimento operacional dele frequentemente reordena as prioridades; não interrompa um bug local de causa única ou óbvia com cerimônia. Use `pelizzai-team` para investigação read-only somente quando hipóteses independentes puderem ser testadas em paralelo ou após thrashing real.
+Existing telemetry can be read immediately. Any instrumentation that changes code/config goes
+through `pelizzai-starting-branch` **before** the edit; any eventual deploy also goes through the
+`external` gate. If you add temporary instrumentation, create a unique `[DEBUG-<id>]` prefix, use it
+in every new log line, and remove it before the definitive implementation.
 
-**Três fixes definitivos falhos param o track — não viram um quarto fix.** Pare, conte as tentativas
-e resuma a evidência acumulada. Três fixes que não resolvem **são** uma lacuna material: o modelo do
-problema está errado e a próxima escolha não é sua. Acione `pelizzai-interview-me` para estressar
-hipótese e arquitetura com o usuário, uma pergunta por vez, com recomendação. Se a conversa revelar
-problema estrutural ou de design, escale para `pelizzai-brainstorming` (track feature). Sem essa
-discussão não existe fix nº 4.
+**Minimize the loop — only in the "uncertain deterministic" and "flaky" classes.** With the red
+oracle in hand, cut ONE element at a time (fixture, flag, step, layer, input field) and re-run the
+oracle after each cut. It is minimized when every remaining element is load-bearing: removing any
+one makes the bug vanish or breaks the oracle. For a direct cause this is waste — the stack trace
+has already isolated the element; in an incident with active damage,
+the Step 0 containment comes before any cut.
 
 ---
 
-## Passo 4 — implemente e prove
+## Step 3 — test hypotheses proportionally
 
-Antes de qualquer mutação no repositório — teste, instrumentação ou fix — use
-`pelizzai-starting-branch`. No consumidor, carregue as skills aplicáveis de
-`pelizzai/domain-skills.md`; em source mode, use regras/skills do próprio repo. Reverta experimentos
-descartáveis que não pertençam ao fix. Contenção operacional autorizada que não escreve no repo
-não espera uma branch.
-
-Track `bug` usa o **confirm compacto de uma linha** — não o menu de perguntas do gate pós-plano. A
-`pelizzai-starting-branch` descobre a base e propõe o nome SEM parada própria (base sem candidato
-inequívoco ainda para lá); a head skill é o único emissor, o router não duplica, e contenção
-reversível/investigação read-only não esperam por ele:
-
-`Kickoff: fix na branch fix/<slug> @ <base-ref> (<sha-curto>) — isolamento: branch · modo: inline · commits: granular. Ok? (overrides: worktree · subagents/team · squash-final · outro nome/base)`
-
-Um "ok" ratifica base, nome e as três decisões de uma vez — todas nomeadas na linha, nada foi
-silencioso; um override nomeado ajusta só aquele item e mantém os demais. Só então a branch é
-criada. Não pulverize esta linha em perguntas separadas. Após o "ok" (ou os overrides), grave o
-marcador
-`kickoff: ratificado <AAAA-MM-DD>` (com isolamento/modo/commit) — no consumidor em
-`pelizzai/data/state.md`, em source mode no execution record nativo com a mesma palavra-chave —
-ANTES da primeira escrita de produto no repositório. A head skill é o único dono deste marcador no
-track `bug`; sem ele o writegate (Regra B) bloqueia a escrita de produto e a retomada não reconhece
-o gate. Contenção reversível (Passo 0) e investigação read-only não esperam por ele; instrumentação
-temporária, teste de regressão e fix, sim — se a instrumentação do Passo 2 for a primeira mutação de
-produto, conduza o confirm e grave o marcador antes dela. Sob briefing fechado (SUBAGENT-STOP), não
-produza análises de rota nem abra gates: aplique o briefing e escale ao coordenador o que exigir decisão.
-
-Escolha a estratégia pela natureza da mudança, conforme `pelizzai-reasoning`:
+A provable direct cause needs no causal brainstorming. When there is uncertainty:
 
 ```text
-- Bug de comportamento com seam automatizável: teste de regressão red→green via pelizzai-tdd.
-- Erro estático direto (import, tipo, build): o typecheck/build que reproduz pode ser prova suficiente;
-  adicione teste somente se proteger comportamento útil.
-- Refatoração necessária ao fix: caracterização verde antes, passos pequenos, mesma suíte verde depois.
-- Config/IaC/migração: validate/plan/dry-run e rollback; teste unitário só para lógica separável.
-- UI: pelizzai-frontend é overlay obrigatório; comportamento quando aplicável + verificação visual.
-- Documentação: lint/links/exemplos/build/render ou inspeção estática proporcional.
+1. Record confirmed facts separately from hypotheses.
+2. For each material hypothesis, write a falsifiable prediction.
+3. Choose the observation that best discriminates the hypotheses at the lowest cost/risk.
+4. Change one variable at a time; do not stack fixes.
+5. Evidence refuted the hypothesis → discard it and reorient.
 ```
 
-Implemente **um** fix na origem, sem "já que estou aqui".
+Present the hypothesis ranking to the user whenever more than one materially plausible hypothesis remains — their operational knowledge often reorders the priorities; do not interrupt a local bug with a single or obvious cause with ceremony. Use `pelizzai-team` for read-only investigation only when independent hypotheses can be tested in parallel or after real thrashing.
 
-Se a causa-raiz confirmada estabelece uma decisão arquitetural durável (difícil de reverter,
-surpreendente sem contexto **e** fruto de trade-off real, os três juntos), acione
-`pelizzai-domain-modeling` para registrar o ADR **antes do seal**. Como é decisão emergente — sem
-gate de design prévio —, a domain-modeling a apresenta ao usuário na borda de conclusão antes de
-gravar; a criação do ADR é ação do coordenador. Nunca grave ADR depois de `validated-head`.
-
-Depois:
-
-```text
-1. Rode de novo o oráculo original — agora verde.
-2. Rode a validação relevante e confirme nenhuma regressão.
-3. Revise a working tree com `pelizzai-review`; aplique findings e reexecute as provas afetadas.
-4. Consolide o conteúdo em commit definitivo. Se uma estratégia squash-final explicitamente
-   autorizada produziu WIPs, consolide-a agora, antes do seal; finish-task não reescreve histórico.
-5. Rode `pelizzai-verification-before-completion` contra o HEAD consolidado, grave
-   `validated-head` e só então chame `pelizzai-finish-task`: closure metadata-only no consumidor;
-   fechamento do execution record, sem runtime/closure, em source mode.
-```
-
-Se não existir seam adequado para uma regressão importante, registre o achado arquitetural e encaminhe a `pelizzai-improving-architecture`; não escreva teste tautológico num seam errado.
+**Three failed definitive fixes stop the track — they do not become a fourth fix.** Stop, count
+the attempts and summarize the accumulated evidence. Three fixes that do not solve it **are** a material gap:
+the model of the problem is wrong and the next choice is not yours. Trigger `pelizzai-interview-me`
+to stress-test hypothesis and architecture with the user, one question at a time, with a
+recommendation. If the conversation reveals a structural or design problem, escalate to
+`pelizzai-brainstorming` (feature track). Without that discussion there is no fix #4.
 
 ---
 
-## Fechamento proporcional
+## Step 4 — implement and prove
 
-Sempre:
+Before any mutation in the repository — test, instrumentation, or fix — use
+`pelizzai-starting-branch`. In a consumer, load the applicable skills from
+`pelizzai/domain-skills.md`; in source mode, use the source repo's own rules/skills. Revert
+throwaway experiments that do not belong to the fix. Authorized operational containment that does
+not write to the repo does not wait for a branch.
+
+Track `bug` uses the **compact one-line confirm** — not the post-plan gate's question menu.
+`pelizzai-starting-branch` discovers the base and proposes the name WITHOUT a stop of its own (a
+base with no unambiguous candidate still stops there); the head skill is the sole emitter, the
+router does not duplicate it, and reversible containment/read-only investigation do not wait for
+it:
+
+`Kickoff: fix on branch fix/<slug> @ <base-ref> (<short-sha>) — isolation: branch · mode: inline · commits: granular. Ok? (overrides: worktree · subagents/team · squash-final · different name/base)`
+
+A single "ok" ratifies base, name, and the three decisions at once — all named on the line, nothing
+was silent; a named override adjusts only that item and keeps the rest. Only then is the branch
+created. Do not scatter this line into separate questions. After the "ok" (or the overrides), record
+the marker
+`kickoff: ratified <YYYY-MM-DD>` (with isolation/mode/commit) — in a consumer in
+`pelizzai/data/state.md`, in source mode in the native execution record with the same keyword —
+BEFORE the first product write to the repository. The head skill is the sole owner of this marker in
+track `bug`; without it the writegate (Rule B) blocks product writes and resumption does not
+recognize the gate. Reversible containment (Step 0) and read-only investigation do not wait for it;
+temporary instrumentation, the regression test, and the fix do — if the Step 2 instrumentation is
+the first product mutation, run the confirm and record the marker before it. Under a closed
+briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route analyses and open no gates: apply the briefing and
+escalate to the coordinator whatever requires a decision.
+
+Choose the strategy by the nature of the change, per `pelizzai-reasoning`:
 
 ```text
-[ ] Oráculo original reexecutado e verde.
-[ ] `rg "\[DEBUG-"` não encontra instrumentação desta sessão.
-[ ] Protótipos e mudanças experimentais removidos.
-[ ] Diff contém somente o fix e sua prova.
-[ ] Causa confirmada — a hipótese vencedora — registrada na MENSAGEM DE COMMIT do fix.
+- Behavioral bug with an automatable seam: red→green regression test via pelizzai-tdd.
+- Direct static error (import, type, build): the reproducing typecheck/build can be sufficient proof;
+  add a test only if it protects useful behavior.
+- Refactoring required by the fix: green characterization first, small steps, same suite green after.
+- Config/IaC/migration: validate/plan/dry-run and rollback; unit tests only for separable logic.
+- UI: pelizzai-frontend is a mandatory overlay; behavior when applicable + visual verification.
+- Documentation: lint/links/examples/build/render or proportional static inspection.
 ```
 
-Para falha recorrente, distribuída, de segurança ou incidente, registre também: causa confirmada, fatores contribuintes, contenção, prevenção/detecção e "o que teria evitado isto?". Para um import incorreto evidente, não invente post-mortem.
+Implement **one** fix at the origin, with no "while I'm here".
 
-## Sinais do parceiro humano
+If the confirmed root cause establishes a durable architectural decision (hard to reverse,
+surprising without context, **and** the product of a real trade-off — all three together), trigger
+`pelizzai-domain-modeling` to record the ADR **before the seal**. Since it is an emergent decision —
+with no prior design gate — domain-modeling presents it to the user at the completion edge before
+writing; creating the ADR is the coordinator's action. Never record an ADR after `validated-head`.
 
-Frases do usuário que carregam diagnóstico — decodifique e aja, não argumente:
+Then:
 
-| Sinal | Diagnóstico | Ação |
+```text
+1. Re-run the original oracle — now green.
+2. Run the relevant validation and confirm no regressions.
+3. Review the working tree with `pelizzai-review`; apply findings and re-run the affected proofs.
+4. Consolidate the content into a definitive commit. If an explicitly authorized squash-final
+   strategy produced WIPs, consolidate it now, before the seal; finish-task does not rewrite history.
+5. Run `pelizzai-verification-before-completion` against the consolidated HEAD, record
+   `validated-head`, and only then call `pelizzai-finish-task`: metadata-only closure in a consumer;
+   closing of the execution record, with no runtime/closure, in source mode.
+```
+
+If no adequate seam exists for an important regression, record the architectural finding and route it to `pelizzai-improving-architecture`; do not write a tautological test at the wrong seam.
+
+---
+
+## Proportional closeout
+
+Always:
+
+```text
+[ ] Original oracle re-run and green.
+[ ] `rg "\[DEBUG-"` finds no instrumentation from this session.
+[ ] Prototypes and experimental changes removed.
+[ ] Diff contains only the fix and its proof.
+[ ] Confirmed cause — the winning hypothesis — recorded in the COMMIT MESSAGE of the fix.
+```
+
+For a recurring, distributed, or security failure, or an incident, also record: confirmed cause, contributing factors, containment, prevention/detection, and "what would have prevented this?". For an obviously wrong import, do not invent a post-mortem.
+
+## Signals from the human partner
+
+User phrases that carry a diagnosis — decode and act, do not argue:
+
+| Signal | Diagnosis | Action |
 | --- | --- | --- |
-| "Isso não está acontecendo?" | você assumiu algo sem verificar | verifique agora, contra o oráculo |
-| "Para de chutar" | suas hipóteses não têm predição falsificável | volte ao oráculo (Passo 2) e re-derive as hipóteses com predição |
-| "A gente tá travado?" | thrashing — fixes empilhados sem avanço | pare; resuma o que sabe, o que falta e o próximo passo |
-| "Já tentamos isso" | você perdeu o fio do que foi testado | releia hipóteses e resultados antes de repetir |
+| "Isn't this happening?" | you assumed something without checking | check now, against the oracle |
+| "Stop guessing" | your hypotheses have no falsifiable prediction | go back to the oracle (Step 2) and re-derive the hypotheses with predictions |
+| "Are we stuck?" | thrashing — stacked fixes without progress | stop; summarize what you know, what is missing, and the next step |
+| "We already tried that" | you lost the thread of what was tested | re-read hypotheses and results before repeating |
 
 ## Red flags
 
 ```text
-- Investigar longamente enquanto o dano continua e há contenção reversível disponível.
-- Declarar causa raiz a partir de correlação temporal.
-- Exigir 3–5 hipóteses para erro direto ou aceitar uma só em sistema distribuído sem evidência.
-- Usar OODA como nome para cada comando/teste.
-- Corrigir duplicidade apenas com debounce/delay no frontend.
-- Aumentar timeout, desativar segurança ou esconder sintoma como solução definitiva.
-- Empilhar mudanças e depois perguntar qual funcionou.
-- Tentar o fix nº 4 depois de três falhas sem devolver a decisão ao usuário.
-- Escrever teste artificial só para dizer que usou TDD.
+- Investigating at length while the damage continues and reversible containment is available.
+- Declaring root cause from temporal correlation.
+- Demanding 3–5 hypotheses for a direct error, or accepting a single one in a distributed system without evidence.
+- Using OODA as a name for every command/test.
+- Fixing duplication with nothing but frontend debounce/delay.
+- Raising a timeout, disabling security, or hiding the symptom as the definitive solution.
+- Stacking changes and then asking which one worked.
+- Attempting fix #4 after three failures without returning the decision to the user.
+- Writing an artificial test just to claim TDD was used.
 ```
 
-## Integração
+## Integration
 
-**Roteada por:** `pelizzai-router` (track `bug`).
+**Routed by:** `pelizzai-router` (track `bug`).
 
-**Usa condicionalmente:** `pelizzai-reasoning` (seleção acima), `pelizzai-loop` (somente macro-loop em rodadas), [feedback-loops.md](references/feedback-loops.md), skills de domínio, `pelizzai-starting-branch`, `pelizzai-tdd` (bug comportamental automatizável), `pelizzai-frontend` (UI), `pelizzai-team` (investigação read-only de hipóteses independentes), `pelizzai-interview-me` (circuit breaker dos três fixes e qualquer outra lacuna material), `pelizzai-brainstorming` (quando a entrevista revela problema estrutural), `pelizzai-verification-before-completion`, `pelizzai-review` e `pelizzai-finish-task`.
+**Uses conditionally:** `pelizzai-reasoning` (selection above), `pelizzai-loop` (macro-loop across rounds only), [feedback-loops.md](references/feedback-loops.md), domain skills, `pelizzai-starting-branch`, `pelizzai-tdd` (automatable behavioral bug), `pelizzai-frontend` (UI), `pelizzai-team` (read-only investigation of independent hypotheses), `pelizzai-interview-me` (the three-fix circuit breaker and any other material gap), `pelizzai-brainstorming` (when the interview reveals a structural problem), `pelizzai-verification-before-completion`, `pelizzai-review`, and `pelizzai-finish-task`.
 
-Para APIs/libs externas, derive a versão dos manifests/lockfiles e consulte Context7 antes de fixar
-a hipótese; documentação oficial atual é fallback. Para seam ausente, use
-`pelizzai-improving-architecture` com o vocabulário de `pelizzai-codebase-design`.
+For external APIs/libs, derive the version from manifests/lockfiles and consult Context7 before
+committing to a hypothesis; current official documentation is the fallback. For a missing seam, use
+`pelizzai-improving-architecture` with the vocabulary of `pelizzai-codebase-design`.

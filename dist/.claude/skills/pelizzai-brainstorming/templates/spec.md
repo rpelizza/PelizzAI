@@ -1,81 +1,81 @@
-# Template de spec de design
+# Design spec template
 
-Duas escalas no mesmo arquivo. Escolha pela lane ratificada:
+Two scales in the same file. Choose by the ratified lane:
 
-- **Spec enxuta** — `bounded` (quando aceita) e `standard` de aceite claro.
-- **Spec completa** — greenfield, `exploratory` e decisões sensíveis acopladas.
+- **Lean spec** — `bounded` (when accepted) and `standard` with clear acceptance.
+- **Full spec** — greenfield, `exploratory`, and coupled sensitive decisions.
 
-Preencha apenas as seções que agregam; não force campos vazios. A spec aponta para o ADR quando
-existir (via `pelizzai-domain-modeling`) e não duplica a explicação inteira da decisão. Consumidor:
-salve em `pelizzai/specs/AAAA-MM-DD-<topico>-design.md`. Source mode: registre o conteúdo no
-execution record nativo, sem criar `pelizzai/`; materialize em arquivo só quando o usuário pedir
-durabilidade.
+Fill in only the sections that add value; do not force empty fields. The spec points to the ADR
+when one exists (via `pelizzai-domain-modeling`) and does not duplicate the decision's whole
+explanation. Consumer: save to `pelizzai/specs/YYYY-MM-DD-<topic>-design.md`. Source mode: record
+the content in the native execution record, without creating `pelizzai/`; materialize it as a file
+only when the user asks for durability.
 
-Toda spec nasce com `Status: rascunho`. Só troque para `aprovada em AAAA-MM-DD` após resposta
-explícita do usuário à borda de design.
+Every spec is born with `Status: draft`. Switch to `approved on YYYY-MM-DD` only after the user's
+explicit answer at the design edge.
 
 ---
 
-## Spec enxuta
+## Lean spec
 
 ```markdown
-# <Título> — design
+# <Title> — design
 
-**Status:** <rascunho | aprovada em AAAA-MM-DD>
+**Status:** <draft | approved on YYYY-MM-DD>
 
-## Objetivo
-- Resultado e usuário/consumidor.
+## Goal
+- Outcome and user/consumer.
 
-## Critérios de aceite
-- Observáveis e verificáveis.
+## Acceptance criteria
+- Observable and verifiable.
 
-## Design curto
-- Como a mudança se encaixa; contratos/padrões que preserva.
+## Short design
+- How the change fits; contracts/patterns it preserves.
 
-## Fora de escopo
-- O que esta mudança não faz.
+## Out of scope
+- What this change does not do.
 
-## Decisões
-- Escolha — motivo — reversível ou difícil de reverter (aponte o ADR se houver).
+## Decisions
+- Choice — reason — reversible or hard to reverse (point to the ADR if any).
 ```
 
 ---
 
-## Spec completa
+## Full spec
 
 ```markdown
-# <Título> — design
+# <Title> — design
 
-**Status:** <rascunho | aprovada em AAAA-MM-DD>
+**Status:** <draft | approved on YYYY-MM-DD>
 
-## Objetivo
-- Resultado e usuário/consumidor.
+## Goal
+- Outcome and user/consumer.
 
-## Critérios de aceite
-- Observáveis e verificáveis.
+## Acceptance criteria
+- Observable and verifiable.
 
-## Contexto e restrições
-- Prior art, constraints, compatibilidade e rejeições registradas (`out-of-scope`) relevantes.
+## Context and constraints
+- Relevant prior art, constraints, compatibility, and recorded rejections (`out-of-scope`).
 
-## Design e contratos
-- Responsabilidades e fronteiras; interfaces/contratos e fluxo de dados; seams reais de teste.
+## Design and contracts
+- Responsibilities and boundaries; interfaces/contracts and data flow; real test seams.
 
-## Estados, falhas e segurança
-- Estados e tratamento de erro; autorização/segurança/dados quando o risco exigir.
+## States, failures, and security
+- States and error handling; authorization/security/data when risk demands it.
 
-## Compatibilidade, migração e rollback
-- Estratégia quando aplicável.
+## Compatibility, migration, and rollback
+- Strategy when applicable.
 
 ## Testing & Validation Decisions
-- Seams escolhidos e por quê; como o codebase já testa coisas parecidas; prova por efeito.
+- Chosen seams and why; how the codebase already tests similar things; proof by effect.
 
-## Fora de escopo
-- O que esta mudança não faz.
+## Out of scope
+- What this change does not do.
 
-## Decisões difíceis de reverter
-- Cada decisão que passa no critério triplo (difícil de reverter + surpreendente sem contexto +
-  trade-off real) aponta para o ADR correspondente.
+## Hard-to-reverse decisions
+- Every decision that passes the triple criterion (hard to reverse + surprising without context +
+  real trade-off) points to its ADR.
 
-## Decisões e limitações ratificadas
-- Decisões escolhidas pelo usuário, dispensas explícitas e lacunas convertidas em investigação.
+## Ratified decisions and limitations
+- Decisions chosen by the user, explicit waivers, and gaps converted into investigation.
 ```

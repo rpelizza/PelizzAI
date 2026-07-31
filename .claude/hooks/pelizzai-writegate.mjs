@@ -1,48 +1,48 @@
 #!/usr/bin/env node
 /**
- * PelizzAI — hook writegate (PreToolUse). OPT-IN. Fail-CLOSED no invariante, fail-OPEN no erro.
+ * PelizzAI — writegate hook (PreToolUse). OPT-IN. Fail-CLOSED on the invariant, fail-OPEN on error.
  *
- * Rede de segurança que move da obediência do modelo para enforcement executável as DUAS
- * autonomias irreversíveis que o redesign introduziu: escrever produto sem isolamento e
- * escrever código antes de o gate ser ratificado. NÃO decide rota — apenas devolve o
- * controle ao gate humano. Espelha o espírito e o envelope de segurança do
- * pelizzai-guardrails.mjs (leia-o antes de alterar este arquivo).
+ * Safety net that moves the TWO irreversible autonomies the redesign introduced from model
+ * obedience to executable enforcement: writing product without isolation and writing code
+ * before the gate is ratified. It does NOT decide the route — it only hands control back
+ * to the human gate. Mirrors the spirit and safety envelope of pelizzai-guardrails.mjs
+ * (read it before changing this file).
  *
- * Dispara ANTES da escrita, em dois matchers irmãos que compartilham este mesmo arquivo:
- *  - Write | Edit | MultiEdit | NotebookEdit  → lê tool_input.file_path / .notebook_path;
- *  - Bash                                     → detecta redirecionamento de escrita no
- *    tool_input.command (>, >>, &>, tee, sed -i, Set-Content/Add-Content/Out-File) para
- *    caminhos DENTRO da raiz do projeto. Mesma regra dos dois lados. Sinks nulos (NUL, $null,
- *    /dev/null) e alvos que resolvem para FORA da raiz (incl. $env:TEMP, %TEMP%, absolutos)
- *    nunca são escrita de produto e nunca bloqueiam.
+ * Fires BEFORE the write, on two sibling matchers that share this same file:
+ *  - Write | Edit | MultiEdit | NotebookEdit  → reads tool_input.file_path / .notebook_path;
+ *  - Bash                                     → detects write redirection in
+ *    tool_input.command (>, >>, &>, tee, sed -i, Set-Content/Add-Content/Out-File) to
+ *    paths INSIDE the project root. Same rule on both sides. Null sinks (NUL, $null,
+ *    /dev/null) and targets that resolve OUTSIDE the root (incl. $env:TEMP, %TEMP%, absolutes)
+ *    are never product writes and never block.
  *
- * REGRA A (invariante, ambos os modos) — isolamento antes da primeira escrita:
- *   escrever caminho de PRODUTO (fora de pelizzai/) dentro da raiz do repo estando em branch
- *   protegida (main/master/develop/dev, o default do origin/HEAD) ou em HEAD destacado → BLOQUEIA.
- *   CARVE-OUT: escrita de metadata em pelizzai/** é liberada mesmo aqui (o sistema se atualizando;
- *   é só de escrita de arquivo — o commit segue no fluxo de branch de tarefa). Saída (produto):
- *   isolar via pelizzai-starting-branch.
+ * RULE A (invariant, both modes) — isolation before the first write:
+ *   writing a PRODUCT path (outside pelizzai/) inside the repo root while on a protected branch
+ *   (main/master/develop/dev, plus origin/HEAD's default) or on a detached HEAD → BLOCKS.
+ *   CARVE-OUT: metadata writes in pelizzai/** are allowed even here (the system updating itself;
+ *   it is file writes only — the commit still follows the task-branch flow). Way out (product):
+ *   isolate via pelizzai-starting-branch.
  *
- * REGRA B (só consumidor: existe pelizzai/ e NÃO é o repo-fonte) — nada de código antes do gate:
- *   escrever caminho de PRODUTO (fora de pelizzai/) enquanto pelizzai/data/state.md NÃO
- *   contém o marcador "kickoff: ratificado" → BLOQUEIA. Escritas em pelizzai/ (state, plano,
- *   spec) são sempre liberadas: são os artefatos que registram o próprio gate.
- *   ESCOPO DELIBERADO: o hook trava UM marcador — o kickoff. As etapas de greenfield
- *   (descoberta → spec → stress → aprovação → plano → stress → aprovação) continuam
- *   obrigatórias, mas vivem nas skills, NÃO em enforcement de runtime: transformá-las em
- *   catraca de arquivo travava trabalho legítimo sempre que o state ficava um passo atrás
- *   da conversa. Doutrina nas skills; no hook, só o invariante.
- *   Em SOURCE MODE (repo-fonte PelizzAI: sentinela pelizzai-source-repo.txt) a Regra B é PULADA — ali o
- *   marcador vive no execution record nativo, não em arquivo, e só a Regra A vale.
+ * RULE B (consumer only: pelizzai/ exists and this is NOT the source repo) — no code before the gate:
+ *   writing a PRODUCT path (outside pelizzai/) while pelizzai/data/state.md does NOT
+ *   contain the marker "kickoff: ratified" → BLOCKS. Writes in pelizzai/ (state, plan,
+ *   spec) are always allowed: they are the artifacts that record the gate itself.
+ *   DELIBERATE SCOPE: the hook locks ONE marker — the kickoff. The greenfield stages
+ *   (discovery → spec → stress → approval → plan → stress → approval) remain
+ *   mandatory, but they live in the skills, NOT in runtime enforcement: turning them into
+ *   a file turnstile locked out legitimate work whenever the state fell one step behind
+ *   the conversation. Doctrine in the skills; in the hook, only the invariant.
+ *   In SOURCE MODE (PelizzAI source repo: sentinel pelizzai-source-repo.txt) Rule B is SKIPPED — there the
+ *   marker lives in the native execution record, not in a file, and only Rule A applies.
  *
- * Bloqueio: exit 2 + motivo e caminho seguro no stderr (o agente lê e corrige a rota).
- * Erros do PRÓPRIO hook e casos em que NÃO dá para decidir com segurança: exit 0 (fail-open —
- * um bug ou falso positivo aqui nunca trava o usuário). Quando não consegue ler o kickoff em
- * consumidor sem state.md, permite a escrita e avisa no máximo 1x por janela (não spamma).
+ * Block: exit 2 + reason and safe path on stderr (the agent reads it and corrects the route).
+ * Errors in the hook ITSELF and cases it cannot decide safely: exit 0 (fail-open —
+ * a bug or false positive here never locks the user out). When it cannot read the kickoff in a
+ * consumer without state.md, it allows the write and warns at most once per window (no spam).
  *
- * Instalação (opt-in, recomendada pela pelizzai-audit no bootstrap, mesclada sem sobrescrever
- * hooks/permissões já existentes), em .claude/settings.json do projeto consumidor — os DOIS
- * matchers são necessários para cobrir também a escrita via shell:
+ * Install (opt-in, recommended by pelizzai-audit at bootstrap, merged without overwriting
+ * existing hooks/permissions), in the consumer project's .claude/settings.json — BOTH
+ * matchers are required to also cover writes via shell:
  *   { "hooks": { "PreToolUse": [
  *       { "matcher": "Write|Edit|MultiEdit|NotebookEdit", "hooks": [
  *           { "type": "command",
@@ -51,13 +51,13 @@
  *           { "type": "command",
  *             "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-writegate.mjs\"" } ] } ] } }
  *
- * Teste manual:
- *   echo '{"tool_input":{"file_path":"src/app.ts"},"cwd":"/caminho/do/repo"}' | node pelizzai-writegate.mjs; echo $?
- *   → em branch protegida ou sem "kickoff: ratificado" no state.md: motivo no stderr e exit 2.
- *     Em branch de tarefa com o kickoff ratificado, ou fora do repo: exit 0.
+ * Manual test:
+ *   echo '{"tool_input":{"file_path":"src/app.ts"},"cwd":"/path/to/repo"}' | node pelizzai-writegate.mjs; echo $?
+ *   → on a protected branch or without "kickoff: ratified" in state.md: reason on stderr and exit 2.
+ *     On a task branch with the kickoff ratified, or outside the repo: exit 0.
  *
- * O usuário pode desabilitar o hook em .claude/settings.json — nunca é bloqueio inescapável.
- * Em frota sem Node, use a variante PowerShell pelizzai-writegate.ps1 (comportamento idêntico).
+ * The user can disable the hook in .claude/settings.json — it is never an inescapable block.
+ * On fleets without Node, use the PowerShell variant pelizzai-writegate.ps1 (identical behavior).
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
@@ -65,18 +65,19 @@ import { join, resolve, isAbsolute } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 
-// Branches protegidas por default (Regra A). origin/HEAD enriquece a lista em runtime.
+// Default protected branches (Rule A). origin/HEAD enriches the list at runtime.
 const PROTECTED = ['main', 'master', 'develop', 'dev'];
-// Marcadores máquina-legíveis dos gates sequenciais no state.md (kickoff/pós-plano ratificado
-// pelo usuário: conteúdo + isolamento + modo + commit). O writegate e a retomada dependem dele.
-const KICKOFF_RATIFIED = /kickoff:\s*ratificado/i;
-// Sentinela DEDICADA do repo-fonte PelizzAI (source mode): presente, a Regra B é pulada.
-// Critério único e inequívoco: manifesto e sync-harness existem também nos consumidores
-// instalados via -ExportConsumer e NÃO indicam source mode.
+// Machine-readable markers for the sequential gates in state.md (kickoff/post-plan ratified
+// by the user: content + isolation + mode + commit). The writegate and resumption depend on it.
+// Also accepts "ratificado": legacy pt-BR states written before the English harness.
+const KICKOFF_RATIFIED = /kickoff:\s*rati(?:fied|ficado)/i;
+// DEDICATED sentinel of the PelizzAI source repo (source mode): when present, Rule B is skipped.
+// Single unambiguous criterion: the manifest and sync-harness also exist in consumers
+// installed via -ExportConsumer and do NOT indicate source mode.
 const SOURCE_SENTINELS = [
   ['scripts', 'pelizzai-source-repo.txt'],
 ];
-// Fail-open "não pôde decidir": avisa no máximo 1x por janela (por repo) para não spammar.
+// "Could not decide" fail-open: warns at most once per window (per repo) to avoid spam.
 const WARN_SNOOZE_MS = 86400000; // 24h
 
 function readStdin() {
@@ -87,7 +88,7 @@ function readStdin() {
   }
 }
 
-// git com o cwd do stdin; '' em QUALQUER falha (git ausente, fora de repo, ref inexistente).
+// git with the stdin cwd; '' on ANY failure (git missing, outside a repo, nonexistent ref).
 function git(cwd, args) {
   try {
     return execFileSync('git', args, {
@@ -101,15 +102,15 @@ function git(cwd, args) {
   }
 }
 
-// Barras para frente e sem barra final, para comparação de prefixo robusta a \ e /.
+// Forward slashes and no trailing slash, for prefix comparison robust to \ and /.
 function norm(p) {
   return String(p).replace(/\\/g, '/').replace(/\/+$/, '');
 }
 
-// Windows e macOS comparam caminhos sem case; Linux com case.
+// Windows and macOS compare paths case-insensitively; Linux is case-sensitive.
 const CI = process.platform === 'win32' || process.platform === 'darwin';
 
-// child é o próprio root ou está DENTRO dele.
+// child is the root itself or is INSIDE it.
 function eqOrInside(child, root) {
   let c = norm(child);
   let r = norm(root);
@@ -120,22 +121,22 @@ function eqOrInside(child, root) {
   return c === r || c.startsWith(r + '/');
 }
 
-// Parser de UM segmento de shell, ciente de aspas: separa tokens e ALVOS de redirecionamento.
-// Ciente de aspas para não confundir um '>' dentro de string (ex.: git commit -m "a > b")
-// com um redirecionamento real. Ignora dup de fd (>&N) e descarta prefixos de fd (2>, &>).
+// Parser for ONE shell segment, quote-aware: splits tokens and redirection TARGETS.
+// Quote-aware so it does not mistake a '>' inside a string (e.g. git commit -m "a > b")
+// for a real redirection. Ignores fd dup (>&N) and drops fd prefixes (2>, &>).
 function parseSegment(seg) {
   const tokens = [];
   const redirects = [];
   let cur = '';
-  let quote = null; // "'" ou '"' quando dentro de aspas
-  let expectTarget = false; // o próximo token completo é alvo de redirecionamento
+  let quote = null; // "'" or '"' when inside quotes
+  let expectTarget = false; // the next complete token is a redirection target
   const flush = () => {
     if (cur === '') return;
     if (expectTarget) {
-      if (!cur.startsWith('&')) redirects.push(cur); // '&' → dup de fd (>&2), não é arquivo
+      if (!cur.startsWith('&')) redirects.push(cur); // '&' → fd dup (>&2), not a file
       expectTarget = false;
     } else if (!/^[0-9]+$|^&$/.test(cur)) {
-      tokens.push(cur); // descarta prefixo de fd solto (o "2" de "2>")
+      tokens.push(cur); // drop a stray fd prefix (the "2" in "2>")
     }
     cur = '';
   };
@@ -151,8 +152,8 @@ function parseSegment(seg) {
       continue;
     }
     if (ch === '>') {
-      flush(); // fecha um eventual fd (2, &) antes do '>'
-      if (seg[i + 1] === '>') i++; // '>>' (append) conta como um único redirecionamento
+      flush(); // closes any pending fd (2, &) before the '>'
+      if (seg[i + 1] === '>') i++; // '>>' (append) counts as a single redirection
       expectTarget = true;
       continue;
     }
@@ -166,26 +167,26 @@ function parseSegment(seg) {
   return { tokens, redirects };
 }
 
-// Sinks que NÃO são arquivo do repositório: dispositivos nulos do Windows (NUL, NUL:), do
-// PowerShell ($null) e do POSIX (/dev/null e o restante de /dev/). Redirecionar para eles é
-// DESCARTAR saída, não escrever produto — `node x.js > NUL` resolvia para um caminho relativo
-// dentro da raiz e bloqueava indevidamente.
+// Sinks that are NOT repository files: the null devices of Windows (NUL, NUL:), of
+// PowerShell ($null) and of POSIX (/dev/null and the rest of /dev/). Redirecting to them
+// DISCARDS output, it does not write product — `node x.js > NUL` used to resolve to a relative
+// path inside the root and block wrongly.
 const NULL_SINKS = new Set(['nul', 'nul:', '$null', 'con', 'con:', '/dev/null']);
 function isNullSink(target) {
   const t = String(target).trim().replace(/\\/g, '/').toLowerCase();
   return NULL_SINKS.has(t) || t.startsWith('/dev/');
 }
 
-// Expande referências de variável de ambiente no alvo: $env:NOME (PowerShell), %NOME% (cmd),
-// ${NOME} e $NOME (POSIX). Sem isso, `> $env:TEMP/build.log` era lido como caminho RELATIVO
-// dentro da raiz e bloqueava — quando o arquivo nem sequer nasce no repositório.
-// Referência que não resolve → alvo indecidível → devolve null e o hook não bloqueia
-// (fail-open, a mesma honestidade do resto do matcher: o que não dá para parsear com
-// segurança, não vira invariante).
+// Expands environment variable references in the target: $env:NAME (PowerShell), %NAME% (cmd),
+// ${NAME} and $NAME (POSIX). Without this, `> $env:TEMP/build.log` was read as a RELATIVE path
+// inside the root and blocked — when the file is not even born in the repository.
+// A reference that does not resolve → undecidable target → returns null and the hook does not
+// block (fail-open, the same honesty as the rest of the matcher: what cannot be parsed
+// safely does not become an invariant).
 function expandVars(target) {
   let unresolved = false;
   const lookup = (name) => {
-    const value = process.env[name]; // no Windows, process.env já é case-insensitive
+    const value = process.env[name]; // on Windows, process.env is already case-insensitive
     if (value === undefined || value === '') {
       unresolved = true;
       return '';
@@ -200,8 +201,8 @@ function expandVars(target) {
   return unresolved ? null : expanded;
 }
 
-// Alvos de escrita de um comando shell (matcher irmão de Bash). Best-effort e honesto:
-// cobre os casos comuns; o que não conseguir parsear com segurança, não bloqueia.
+// Write targets of a shell command (Bash sibling matcher). Best-effort and honest:
+// covers the common cases; what it cannot parse safely does not block.
 function extractShellTargets(command) {
   const targets = [];
   for (const seg of command.split(/&&|\|\||;|\||\r?\n/)) {
@@ -209,7 +210,7 @@ function extractShellTargets(command) {
     for (const r of redirects) targets.push(r);
     for (let i = 0; i < tokens.length; i++) {
       const t = tokens[i].toLowerCase();
-      // tee [-flags] arquivo...  /  Tee-Object -FilePath arquivo
+      // tee [-flags] file...  /  Tee-Object -FilePath file
       if (t === 'tee' || t === 'tee-object') {
         for (let j = i + 1; j < tokens.length; j++) {
           const a = tokens[j];
@@ -221,7 +222,7 @@ function extractShellTargets(command) {
           if (!a.startsWith('-')) targets.push(a);
         }
       }
-      // Set-Content / Add-Content / Out-File: -Path/-LiteralPath ou primeiro posicional.
+      // Set-Content / Add-Content / Out-File: -Path/-LiteralPath or first positional.
       if (t === 'set-content' || t === 'add-content' || t === 'out-file') {
         let took = false;
         for (let j = i + 1; j < tokens.length && !took; j++) {
@@ -235,7 +236,7 @@ function extractShellTargets(command) {
           }
         }
       }
-      // sed -i / --in-place <arquivo> (último operando não-flag do segmento).
+      // sed -i / --in-place <file> (last non-flag operand of the segment).
       if (t === 'sed') {
         const inPlace = tokens
           .slice(i + 1)
@@ -251,8 +252,8 @@ function extractShellTargets(command) {
       }
     }
   }
-  // Descarta flags, sinks nulos e alvos com variável irresolvível; expande o que sobrar para
-  // que a comparação com a raiz do repo (em main) veja o caminho REAL, não o literal do shell.
+  // Drops flags, null sinks, and targets with an unresolvable variable; expands the rest so
+  // that the comparison against the repo root (in main) sees the REAL path, not the shell literal.
   return targets
     .filter((p) => p && !p.startsWith('-') && !isNullSink(p))
     .map(expandVars)
@@ -261,14 +262,14 @@ function extractShellTargets(command) {
 
 function block(reason) {
   process.stderr.write(
-    `PelizzAI writegate: escrita bloqueada — ${reason}\n` +
-      `(Hook opt-in fail-closed de isolamento/kickoff. Se a escrita for legítima fora do fluxo, ` +
-      `isole via pelizzai-starting-branch, ratifique o gate, ou desabilite o hook em .claude/settings.json.)\n`
+    `PelizzAI writegate: write blocked — ${reason}\n` +
+      `(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, ` +
+      `isolate via pelizzai-starting-branch, ratify the gate, or disable the hook in .claude/settings.json.)\n`
   );
   return 2;
 }
 
-// Aviso best-effort, no máximo 1x por janela e por repo — nunca afeta o exit code.
+// Best-effort warning, at most once per window and per repo — never affects the exit code.
 function warnOnce(gitRoot, message) {
   try {
     const key = norm(gitRoot).toLowerCase().replace(/[^a-z0-9]/g, '_').slice(-60);
@@ -278,17 +279,17 @@ function warnOnce(gitRoot, message) {
     try {
       if (existsSync(statePath)) warnUntil = JSON.parse(readFileSync(statePath, 'utf8')).warnUntil || 0;
     } catch {
-      /* estado corrompido: reavisa */
+      /* corrupt state: warn again */
     }
-    if (now < warnUntil) return; // ainda dentro da janela de silêncio
-    process.stderr.write(`PelizzAI writegate (aviso): ${message}\n`);
+    if (now < warnUntil) return; // still inside the snooze window
+    process.stderr.write(`PelizzAI writegate (warning): ${message}\n`);
     try {
       writeFileSync(statePath, JSON.stringify({ warnUntil: now + WARN_SNOOZE_MS }));
     } catch {
-      /* sem persistência — segue */
+      /* no persistence — carry on */
     }
   } catch {
-    /* aviso é opcional; jamais interfere no fluxo */
+    /* the warning is optional; never interferes with the flow */
   }
 }
 
@@ -297,53 +298,53 @@ function main() {
   try {
     data = JSON.parse(readStdin() || '{}');
   } catch {
-    return 0; // payload ilegível → não é papel do hook travar
+    return 0; // unreadable payload → not the hook's job to lock things up
   }
   let cwd = process.cwd();
   if (data && typeof data.cwd === 'string' && data.cwd) cwd = data.cwd;
   const ti = (data && data.tool_input) || {};
 
-  // Alvos: file_path (Write/Edit/MultiEdit), notebook_path (NotebookEdit), shell (Bash).
+  // Targets: file_path (Write/Edit/MultiEdit), notebook_path (NotebookEdit), shell (Bash).
   const targets = [];
   if (typeof ti.file_path === 'string' && ti.file_path) targets.push(ti.file_path);
   if (typeof ti.notebook_path === 'string' && ti.notebook_path) targets.push(ti.notebook_path);
   if (typeof ti.command === 'string' && ti.command) targets.push(...extractShellTargets(ti.command));
-  if (targets.length === 0) return 0; // nada a guardar (ex.: Bash somente leitura)
+  if (targets.length === 0) return 0; // nothing to guard (e.g. read-only Bash)
 
   const gitRoot = git(cwd, ['rev-parse', '--show-toplevel']);
-  if (!gitRoot) return 0; // fora de repo git (scratchpad/externos) ou git ausente → permite
+  if (!gitRoot) return 0; // outside a git repo (scratchpad/external) or git missing → allow
 
-  // Só interessam alvos DENTRO da raiz; scratchpad/temp fora da raiz nunca bloqueia.
+  // Only targets INSIDE the root matter; scratchpad/temp outside the root never blocks.
   const inRoot = targets
     .map((t) => (isAbsolute(t) ? t : join(cwd, t)))
     .map((t) => resolve(t))
     .filter((t) => eqOrInside(t, gitRoot));
   if (inRoot.length === 0) return 0;
 
-  // Metadata do harness (pelizzai/**) vs. PRODUTO (fora de pelizzai/). Tanto o carve-out da
-  // Regra A quanto a Regra B se apoiam nessa separação.
+  // Harness metadata (pelizzai/**) vs. PRODUCT (outside pelizzai/). Both Rule A's carve-out
+  // and Rule B rest on this separation.
   const pelizzaiDir = join(gitRoot, 'pelizzai');
   const products = inRoot.filter((t) => !eqOrInside(t, pelizzaiDir));
 
-  // ── Regra A (ambos os modos): branch protegida/destacada bloqueia escrita de PRODUTO in-root.
-  // CARVE-OUT DE METADATA: escrever dentro de pelizzai/** é LIBERADO mesmo em branch protegida ou
-  // HEAD destacado — é metadata do harness (state/plano/spec/reports), o sistema se atualizando,
-  // nunca produto. Isso destrava a reconciliação do state na própria branch protegida à qual o dev
-  // volta após o merge do PR. NOTA DE SEGURANÇA: o carve-out é SÓ de escrita de ARQUIVO e não abre
-  // brecha de produto nem de commit — produto (fora de pelizzai/) segue bloqueado por esta mesma
-  // Regra A; a metadata só é COMMITADA no primeiro commit da branch de tarefa nova (o fluxo nunca
-  // exige commit em protegida); e o pelizzai-guardrails continua barrando git destrutivo.
-  // LIMITE (symlink): a classificação metadata-vs-produto é por CAMINHO — resolve() normaliza `..`
-  // (por isso `pelizzai/../src` corretamente vira produto), mas NÃO segue symlinks. Um symlink dentro
-  // de pelizzai/ apontando para fora (ex.: `pelizzai/link -> ../src`) poderia fazer uma escrita real
-  // em produto ser lida como metadata e liberada em branch protegida. O carve-out NÃO é airtight
-  // quanto a symlink; os controles compensatórios permanecem: pelizzai-guardrails barra o git
-  // destrutivo e o review humano enxerga o alvo real.
-  const branch = git(cwd, ['branch', '--show-current']); // '' = HEAD destacado (ou sem branch)
+  // ── Rule A (both modes): protected/detached branch blocks in-root PRODUCT writes.
+  // METADATA CARVE-OUT: writing inside pelizzai/** is ALLOWED even on a protected branch or a
+  // detached HEAD — it is harness metadata (state/plan/spec/reports), the system updating itself,
+  // never product. This unblocks state reconciliation on the very protected branch the dev returns
+  // to after the PR merge. SECURITY NOTE: the carve-out is for FILE writes ONLY and opens no
+  // product or commit loophole — product (outside pelizzai/) stays blocked by this same Rule A;
+  // the metadata is only COMMITTED in the first commit of the new task branch (the flow never
+  // requires a commit on a protected branch); and pelizzai-guardrails keeps blocking destructive
+  // git. LIMIT (symlink): the metadata-vs-product classification is by PATH — resolve() normalizes
+  // `..` (which is why `pelizzai/../src` correctly counts as product) but does NOT follow symlinks.
+  // A symlink inside pelizzai/ pointing outside (e.g. `pelizzai/link -> ../src`) could make a real
+  // product write be read as metadata and allowed on a protected branch. The carve-out is NOT
+  // airtight against symlinks; the compensating controls remain: pelizzai-guardrails blocks
+  // destructive git and human review sees the real target.
+  const branch = git(cwd, ['branch', '--show-current']); // '' = detached HEAD (or no branch)
   let isProtected = branch === '' || PROTECTED.includes(branch);
   if (!isProtected) {
-    // Enriquecimento pelo default do remoto; se falhar, degrada para a lista estática
-    // (NÃO para fail-open — a Regra A precisa continuar armada sem origin/HEAD).
+    // Enrichment via the remote's default; on failure, degrades to the static list
+    // (NOT to fail-open — Rule A must stay armed without origin/HEAD).
     const originHead = git(cwd, ['symbolic-ref', '--short', 'refs/remotes/origin/HEAD']);
     if (originHead) {
       const tail = originHead.split('/').pop();
@@ -352,26 +353,26 @@ function main() {
   }
   if (isProtected && products.length > 0) {
     return block(
-      `branch protegida/destacada (${branch || 'HEAD destacado'}). Isole via pelizzai-starting-branch ` +
-        `antes de escrever produto — isolamento antes da primeira escrita é invariante ` +
-        `(escrita de metadata em pelizzai/ é liberada mesmo aqui).`
+      `protected/detached branch (${branch || 'detached HEAD'}). Isolate via pelizzai-starting-branch ` +
+        `before writing product — isolation before the first write is an invariant ` +
+        `(metadata writes in pelizzai/ are allowed even here).`
     );
   }
 
-  // Source mode (repo-fonte PelizzAI): o marcador vive no execution record → Regra B pulada.
+  // Source mode (PelizzAI source repo): the marker lives in the execution record → Rule B skipped.
   const sourceMode = SOURCE_SENTINELS.every((parts) => existsSync(join(gitRoot, ...parts)));
   if (sourceMode) return 0;
 
-  // ── Regra B (só consumidor): escrita de PRODUTO exige kickoff ratificado no state.md.
-  if (products.length === 0) return 0; // só artefatos de setup em pelizzai/ → liberado
+  // ── Rule B (consumer only): a PRODUCT write requires a ratified kickoff in state.md.
+  if (products.length === 0) return 0; // only setup artifacts in pelizzai/ → allowed
 
   const statePath = join(gitRoot, 'pelizzai', 'data', 'state.md');
   if (!existsSync(statePath)) {
-    // Consumidor sem state.md: não dá para ler o kickoff com segurança → fail-open + aviso 1x.
+    // Consumer without state.md: cannot read the kickoff safely → fail-open + warn once.
     warnOnce(
       gitRoot,
-      'sem pelizzai/data/state.md para verificar o kickoff; permitindo a escrita. Se este projeto ' +
-        'usa o harness, conduza o gate de kickoff e registre "kickoff: ratificado" antes de escrever produto.'
+      'no pelizzai/data/state.md to check the kickoff; allowing the write. If this project ' +
+        'uses the harness, run the kickoff gate and record "kickoff: ratified" before writing product.'
     );
     return 0;
   }
@@ -379,14 +380,14 @@ function main() {
   try {
     state = readFileSync(statePath, 'utf8');
   } catch {
-    return 0; // não conseguiu ler o marcador → fail-open
+    return 0; // could not read the marker → fail-open
   }
   if (KICKOFF_RATIFIED.test(state)) return 0;
 
   return block(
-    'o kickoff ainda não foi ratificado (falta "kickoff: ratificado" em pelizzai/data/state.md). ' +
-      'Conduza o gate de kickoff/pós-plano COM o usuário — isolamento, modo de execução e estratégia ' +
-      'de commit —, grave "kickoff: ratificado" em pelizzai/data/state.md e então escreva o código.'
+    'the kickoff has not been ratified yet ("kickoff: ratified" is missing from pelizzai/data/state.md). ' +
+      'Run the kickoff/post-plan gate WITH the user — isolation, execution mode, and commit ' +
+      'strategy —, record "kickoff: ratified" in pelizzai/data/state.md, and then write the code.'
   );
 }
 
@@ -394,6 +395,6 @@ let exitCode = 0;
 try {
   exitCode = main();
 } catch {
-  exitCode = 0; // fail-open: erro do PRÓPRIO hook nunca trava o usuário
+  exitCode = 0; // fail-open: an error in the hook ITSELF never locks the user out
 }
 process.exit(exitCode);

@@ -1,119 +1,121 @@
 ---
 name: pelizzai-team
-description: Use essa skill quando o usuário pedir para trabalhar com um "time" de agentes, ou quando a tarefa se beneficiar de paralelismo real — papéis independentes, hipóteses concorrentes, revisão multi-perspectiva, pesquisa ampla ou trabalho cross-layer. Cobre os dois modos de time — o "Agent Teams" nativo do Claude Code (teammates que conversam entre si) e o equivalente com subagents quando o nativo não está habilitado. NÃO use para tarefas sequenciais, triviais, com muitas dependências passo a passo ou que editem os mesmos arquivos — prefira sessão única ou um único subagente (`pelizzai-subagents`).
+description: Use this skill when the user asks to work with a "team" of agents, or when the task benefits from real parallelism — independent roles, competing hypotheses, multi-perspective review, broad research, or cross-layer work. Covers both team modes — Claude Code's native "Agent Teams" (teammates that talk to each other) and the subagents equivalent when the native feature is not enabled. Do NOT use for sequential or trivial tasks, tasks with many step-by-step dependencies, or tasks that edit the same files — prefer a single session or a single subagent (`pelizzai-subagents`).
 ---
 
 # PelizzAI Team
 
-## Objetivo
+## Goal
 
-Coordenar **vários agentes trabalhando como um time** em uma mesma tarefa, com um **coordenador** que entende o papel de cada membro, delega corretamente, acompanha o progresso, verifica os resultados e os sintetiza em uma entrega única.
+Coordinate **multiple agents working as a team** on a single task, with a **coordinator** who understands each member's role, delegates correctly, tracks progress, verifies the results, and synthesizes them into a single delivery.
 
-Esta skill funciona em **dois modos** e escolhe o adequado automaticamente:
+This skill works in **two modes** and picks the right one automatically:
 
-- **Modo Teammates** — usa o recurso nativo **Agent Teams** do Claude Code (teammates reais, independentes, que conversam entre si). Disponível apenas no Claude Code e somente quando o recurso está habilitado.
-- **Modo Subagents** — quando o Agent Teams não está disponível, monta um time equivalente com **subagents** (ferramenta `Agent`/`Task`), com o coordenador suprindo a infraestrutura de coordenação e comunicação.
+- **Teammates Mode** — uses Claude Code's native **Agent Teams** feature (real, independent teammates that talk to each other). Available only in Claude Code and only when the feature is enabled.
+- **Subagents Mode** — when Agent Teams is not available, assembles an equivalent team with **subagents** (the `Agent`/`Task` tool), with the coordinator supplying the coordination and communication infrastructure.
 
-O protocolo de coordenação e delegação é **o mesmo nos dois modos**; muda apenas a mecânica de execução.
+The coordination and delegation protocol is **the same in both modes**; only the execution mechanics change.
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Team para coordenar um time de agentes."
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Team skill to coordinate a team of agents.
 
-<MEMBRO-DO-TIME-STOP>
-Se você foi designado como **membro** de um time (teammate ou subagente executando uma subtarefa), **não acione esta skill** para criar um sub-time. Não há times aninhados. Execute sua subtarefa, acione `pelizzai-reasoning` para raciocinar sobre ela, **aplique as skills de domínio coladas no seu briefing** (elas prevalecem sobre padrões genéricos) e a camada global `pelizzai-preferences`, e devolva o entregável no formato combinado no seu briefing. **Não commite** — a consolidação (commit) é do coordenador, após os reviews; deixe o trabalho na working tree.
+<TEAM-MEMBER-STOP>
+If you were assigned as a **member** of a team (a teammate or a subagent executing a subtask), **do not invoke this skill** to create a sub-team. There are no nested teams. Execute your subtask, invoke `pelizzai-reasoning` to reason about it, **apply the domain skills pasted into your briefing** (they prevail over generic patterns) and the global layer `pelizzai-preferences`, and return the deliverable in the format agreed in your briefing. **Do not commit** — consolidation (commit) belongs to the coordinator, after the reviews; leave the work in the working tree.
 
-Um membro **produz artefatos** (spec, relatório, diff) como **entregável para o coordenador** — não conduz por conta própria fluxos que exijam aprovação do usuário (`pelizzai-brainstorming`, `pelizzai-writing-plans`). Esses fluxos pertencem ao coordenador / à sessão principal.
+A member **produces artifacts** (spec, report, diff) as a **deliverable for the coordinator** — it does not run, on its own, flows that require user approval (`pelizzai-brainstorming`, `pelizzai-writing-plans`). Those flows belong to the coordinator / the main session.
 
-Sob briefing fechado (MEMBRO-DO-TIME-STOP/SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing, **sinalize no retorno** (`DONE_WITH_CONCERNS`/`NEEDS_CONTEXT`) se faltou skill de domínio cobrindo a stack da sua tarefa, e escale ao coordenador o que exigir decisão.
+Under a closed briefing (TEAM-MEMBER-STOP/SUBAGENT-STOP), do not produce route analyses or open gates: apply the briefing, **flag in your return** (`DONE_WITH_CONCERNS`/`NEEDS_CONTEXT`) if no domain skill covered your task's stack, and escalate to the coordinator whatever requires a decision.
 
-Você **não decide lacuna de produto**. Se requisito, escopo, UX, arquitetura, dados, segurança,
-custo ou critério de aceite não estiver escrito no briefing, no plano ou na spec, **nomeie a
-lacuna** — o que falta, o que ela muda na entrega e 2–3 opções que você enxerga, com a que
-recomenda — e devolva `NEEDS_CONTEXT`. Não preencha por convenção, default, Context7 ou "inferência
-razoável", mesmo que a escolha pareça óbvia e reversível, e não fale direto com o usuário: quem
-leva a lacuna ao humano é o coordenador.
-</MEMBRO-DO-TIME-STOP>
-
----
-
-## Princípio central
-
-> Um time só se justifica quando o trabalho pode ser dividido em frentes que avançam **em paralelo**, com **baixo acoplamento** entre elas e **ganho real** de cobertura, velocidade ou diversidade de perspectivas. Caso contrário, uma sessão única ou um único subagente entrega mais rápido, mais barato e com menos risco de coordenação.
-
-Times multiplicam o custo de tokens e adicionam custo de coordenação. Use o **menor** time que resolve a tarefa, e só quando o paralelismo paga esses custos.
+You **do not decide product gaps**. If a requirement, scope, UX, architecture, data, security, cost,
+or acceptance criterion is not written in the briefing, the plan, or the spec, **name the
+gap** — what is missing, what it changes in the delivery, and 2–3 options you see, with the one you
+recommend — and return `NEEDS_CONTEXT`. Do not fill it in by convention, default, Context7, or
+"reasonable inference", even when the choice looks obvious and reversible, and do not talk to the
+user directly: the coordinator is who takes the gap to the human.
+</TEAM-MEMBER-STOP>
 
 ---
 
-## Prioridades
+## Core principle
 
-1. Instruções explícitas do usuário.
-2. Regras obrigatórias do sistema e do ambiente (permissões, segurança).
-3. Regras específicas do projeto, workspace ou repositório.
-4. Esta skill e seu protocolo de coordenação.
-5. Preferências de implementação.
+> A team is only justified when the work can be split into fronts that advance **in parallel**, with **low coupling** between them and a **real gain** in coverage, speed, or diversity of perspectives. Otherwise, a single session or a single subagent delivers faster, cheaper, and with less coordination risk.
+
+Teams multiply token cost and add coordination cost. Use the **smallest** team that solves the task, and only when the parallelism pays for those costs.
 
 ---
 
-## Quando usar / quando não usar
+## Priorities
 
-| Use um time quando…                                                            | NÃO use um time quando…                                              |
+1. Explicit user instructions.
+2. Mandatory system and environment rules (permissions, security).
+3. Project-, workspace-, or repository-specific rules.
+4. This skill and its coordination protocol.
+5. Implementation preferences.
+
+---
+
+## When to use / when not to use
+
+| Use a team when…                                                               | Do NOT use a team when…                                              |
 | ------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
-| Revisão multi-perspectiva (segurança, performance, testes) em paralelo         | A tarefa é sequencial: cada passo depende do resultado do anterior   |
-| Investigação com **hipóteses concorrentes** (debate para refutar teorias)      | Dois ou mais membros precisariam editar **o mesmo arquivo**          |
-| Módulos/features novos com **donos distintos** e fronteiras claras             | Há muitas dependências passo a passo entre as partes                 |
-| Coordenação cross-layer (frontend, backend, testes), cada camada com um dono   | A tarefa é trivial, local e reversível                               |
-| Pesquisa ampla com várias frentes independentes                                | Uma fonte/contrato direto já responde sem necessidade de paralelizar |
-| Auditorias de cobertura ampla (varrer muitos arquivos por critérios distintos) | O ganho de paralelismo não cobre o custo de tokens e coordenação     |
+| Multi-perspective review (security, performance, tests) in parallel            | The task is sequential: each step depends on the previous result     |
+| Investigation with **competing hypotheses** (debate to refute theories)        | Two or more members would need to edit **the same file**             |
+| New modules/features with **distinct owners** and clear boundaries             | There are many step-by-step dependencies between the parts           |
+| Cross-layer coordination (frontend, backend, tests), each layer with an owner  | The task is trivial, local, and reversible                           |
+| Broad research with several independent fronts                                 | One source/direct contract already answers, no need to parallelize   |
+| Broad-coverage audits (sweeping many files under distinct criteria)            | The parallelism gain does not cover the token and coordination cost  |
 
-Na coluna da direita, prefira **sessão única** (tarefa sequencial/trivial) ou **um único subagente** via `pelizzai-subagents` (trabalho isolado que só precisa reportar de volta).
+In the right-hand column, prefer a **single session** (sequential/trivial task) or a **single subagent** via `pelizzai-subagents` (isolated work that only needs to report back).
 
-**Ponte com o track de bug (`pelizzai-debugging`):** o fix de um bug roda sempre **inline** — nunca paralelize a correção. O que um time pode assumir é a **investigação** (Fases 1–3), com hipóteses concorrentes em papéis **read-only**, e apenas quando ≥3 fixes já falharam ou as hipóteses são independentes entre si; o time investiga e reporta, e a Fase 4 (teste que falha + fix) volta para a sessão principal.
-
----
-
-## Os dois modos de execução
-
-| Dimensão        | Modo Teammates (nativo)                                   | Modo Subagents (fallback)                                          |
-| --------------- | --------------------------------------------------------- | ------------------------------------------------------------------ |
-| Disponibilidade | Só no Claude Code, com Agent Teams habilitado             | Qualquer ambiente com a ferramenta `Agent`/`Task`                  |
-| Comunicação     | Teammates conversam **entre si** (`SendMessage`/mailbox)  | Subagentes **não** se falam; só reportam ao coordenador            |
-| Coordenação     | Task list compartilhada + auto-coordenação dos teammates  | O coordenador é toda a infraestrutura (lista e roteamento)         |
-| Contexto        | Cada teammate tem janela própria e **persiste** na sessão | Cada subagente tem janela própria e **encerra ao retornar**        |
-| Custo de tokens | Alto (cada teammate é um Claude completo e duradouro)     | Menor (subagente sintetiza e devolve; não fica ativo)              |
-| Melhor para     | Trabalho que exige **diálogo/debate** entre os membros    | Trabalho paralelo em que só importa o **resultado** de cada frente |
-
-**Regra de escolha em duas camadas:** primeiro a **capacidade** (o recurso existe?), depois a **necessidade** (os membros precisam mesmo conversar entre si?). Se o Agent Teams está habilitado **mas** os membros não precisam dialogar — apenas reportar — o **Modo Subagents** costuma ser a escolha mais econômica.
+**Bridge to the bug track (`pelizzai-debugging`):** a bug fix always runs **inline** — never parallelize the fix. What a team can take on is the **investigation** (Phases 1–3), with competing hypotheses in **read-only** roles, and only when ≥3 fixes have already failed or the hypotheses are independent of each other; the team investigates and reports, and Phase 4 (failing test + fix) returns to the main session.
 
 ---
 
-## Detecção de capacidade e escolha do modo
+## The two execution modes
 
-Antes de montar o time, determine o modo:
+| Dimension       | Teammates Mode (native)                                    | Subagents Mode (fallback)                                          |
+| --------------- | ---------------------------------------------------------- | ------------------------------------------------------------------ |
+| Availability    | Claude Code only, with Agent Teams enabled                 | Any environment with the `Agent`/`Task` tool                       |
+| Communication   | Teammates talk **to each other** (`SendMessage`/mailbox)   | Subagents do **not** talk; they only report to the coordinator     |
+| Coordination    | Shared task list + teammate self-coordination              | The coordinator is the entire infrastructure (list and routing)    |
+| Context         | Each teammate has its own window and **persists** in the session | Each subagent has its own window and **ends when it returns** |
+| Token cost      | High (each teammate is a full, long-lived Claude)          | Lower (a subagent synthesizes and returns; it does not stay active) |
+| Best for        | Work that requires **dialogue/debate** among the members   | Parallel work where only each front's **result** matters           |
+
+**Two-layer choice rule:** first **capability** (does the feature exist?), then **need** (do the members really need to talk to each other?). If Agent Teams is enabled **but** the members do not need to dialogue — only report — **Subagents Mode** is usually the more economical choice.
+
+---
+
+## Capability detection and mode choice
+
+Before assembling the team, determine the mode:
 
 ```text
-1. A plataforma é o Claude Code?
-   - Não (Codex, Gemini CLI, Copilot CLI, etc.) → Modo Subagents (ou o mecanismo de subagentes da plataforma).
-   - Sim → siga.
+1. Is the platform Claude Code?
+   - No (Codex, Gemini CLI, Copilot CLI, etc.) → Subagents Mode (or the platform's subagent mechanism).
+   - Yes → continue.
 
-2. O Agent Teams está habilitado? (heurística — confirme o que conseguir)
-   - O recurso liga com a env var CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1.
-   - Verifique, nesta ordem: a env var no ambiente; depois o bloco "env" do settings.json
-     do projeto (.claude/settings.json) e do usuário (~/.claude/settings.json).
-   - Habilitado → Modo Teammates é POSSÍVEL.
-   - Desabilitado → Modo Subagents.
+2. Is Agent Teams enabled? (heuristic — confirm what you can)
+   - The feature is turned on with the env var CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1.
+   - Check, in this order: the env var in the environment; then the "env" block of the project's
+     settings.json (.claude/settings.json). Never read the user's global configuration
+     (~/.claude/settings.json) to detect it — it may hold secrets/keys the skill has no reason to
+     see; if the project sources do not confirm the capability, treat detection as indeterminate.
+   - Enabled → Teammates Mode is POSSIBLE.
+   - Disabled → Subagents Mode.
 
-3. Os membros precisam conversar entre si (debate, refutação mútua, hand-off vivo)?
-   - Sim, e o recurso está habilitado → Modo Teammates.
-   - Não → Modo Subagents (mais barato), mesmo com o recurso habilitado.
+3. Do the members need to talk to each other (debate, mutual refutation, live hand-off)?
+   - Yes, and the feature is enabled → Teammates Mode.
+   - No → Subagents Mode (cheaper), even with the feature enabled.
 
-Detecção indeterminada: se a capacidade não puder ser confirmada, informe a limitação e recomende
-Subagents como fallback mais disponível/barato. Pergunte se o usuário aceita o fallback; não troque
-o modo ratificado por conta própria.
+Indeterminate detection: if the capability cannot be confirmed, state the limitation and recommend
+Subagents as the more available/cheaper fallback. Ask whether the user accepts the fallback; do not
+swap the ratified mode on your own.
 ```
 
-**Se o usuário pediu teammates explicitamente, mas o recurso está desabilitado:** informe como habilitar e ofereça o fallback. Não habilite por conta própria sem confirmação.
+**If the user explicitly asked for teammates but the feature is disabled:** explain how to enable it and offer the fallback. Do not enable it on your own without confirmation.
 
 ```json
-// .claude/settings.json (ou ~/.claude/settings.json)
+// .claude/settings.json (or ~/.claude/settings.json)
 {
 	"env": {
 		"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
@@ -121,407 +123,410 @@ o modo ratificado por conta própria.
 }
 ```
 
-> Ambiente Windows + PowerShell (caso deste usuário): mesmo com o Agent Teams habilitado, o modo **split-panes** exige tmux ou iTerm2 e **não** funciona no Windows Terminal, no terminal integrado do VS Code nem no Ghostty. No Windows, use o modo de exibição **in-process** (padrão). Isso não impede teammates — apenas a visualização em painéis.
+> Windows + PowerShell environment (this user's case): even with Agent Teams enabled, **split-panes** mode requires tmux or iTerm2 and does **not** work in Windows Terminal, the VS Code integrated terminal, or Ghostty. On Windows, use the **in-process** display mode (the default). This does not prevent teammates — only the pane visualization.
 
 ```mermaid
 flowchart TD
-    A[Tarefa que pede um time] --> B{Vale um time?}
-    B -- Nao --> Z[Sessao unica ou pelizzai-subagents]
-    B -- Sim --> C[Decompor com pelizzai-reasoning]
-    C --> D{Claude Code com Agent Teams habilitado?}
-    D -- Nao --> S[Modo Subagents]
-    D -- Sim --> E{Membros precisam conversar entre si?}
-    E -- Sim --> T[Modo Teammates]
-    E -- Nao --> S
-    T --> R[Roster + briefings + delegacao]
+    A[Task that calls for a team] --> B{Is a team worth it?}
+    B -- No --> Z[Single session or pelizzai-subagents]
+    B -- Yes --> C[Decompose with pelizzai-reasoning]
+    C --> D{Claude Code with Agent Teams enabled?}
+    D -- No --> S[Subagents Mode]
+    D -- Yes --> E{Do members need to talk to each other?}
+    E -- Yes --> T[Teammates Mode]
+    E -- No --> S
+    T --> R[Roster + briefings + delegation]
     S --> R
-    R --> V[Verificacao adversarial cruzada]
-    V --> Y[Sintese e conclusao]
+    R --> V[Adversarial cross-check]
+    V --> Y[Synthesis and conclusion]
 ```
 
 ---
 
-## O papel do coordenador
+## The coordinator's role
 
-O coordenador é o **team lead** (Modo Teammates) ou a **sessão principal** (Modo Subagents). Ele
-**orquestra**: decompõe, delega, cruza as lentes e consolida. **Nunca** implementa uma frente por
-conta própria nem se despacha como a **lente spec cega** do review — ele já viu o relatório e o
-raciocínio dos membros, então não pode julgar às cegas; a lente cega é sempre um revisor
-independente. Em ambos os modos, a regra é a mesma e inegociável:
+The coordinator is the **team lead** (Teammates Mode) or the **main session** (Subagents Mode). It
+**orchestrates**: decomposes, delegates, crosses the lenses, and consolidates. It **never** implements a front
+on its own, nor dispatches itself as the review's **blind spec lens** — it has already seen the
+members' report and reasoning, so it cannot judge blind; the blind lens is always an independent
+reviewer. In both modes, the rule is the same and non-negotiable:
 
 <HARD-GATE>
-Não delegue uma subtarefa a um membro sem antes saber responder, para **cada** membro:
+Do not delegate a subtask to a member until you can answer, for **each** member:
 
-1. **O que** ele vai fazer (objetivo único e claro).
-2. **Por que** essa frente existe e como ela contribui para o objetivo global.
-3. **De que ele depende** (outros membros, arquivos, decisões já tomadas).
-4. **O que ele entrega** (formato exato do retorno).
-5. **Como o resultado será verificado** (por quem e de que forma).
+1. **What** they will do (a single, clear objective).
+2. **Why** this front exists and how it contributes to the global goal.
+3. **What they depend on** (other members, files, decisions already made).
+4. **What they deliver** (exact format of the return).
+5. **How the result will be verified** (by whom and how).
 
-Se você não consegue responder a esses cinco itens para um membro, **a decomposição ainda não está pronta** — volte a decompor antes de delegar.
+If you cannot answer these five items for a member, **the decomposition is not ready yet** — go back and decompose further before delegating.
 </HARD-GATE>
 
-Os cinco itens do HARD-GATE têm lar permanente: cada um corresponde a um campo do briefing e a uma coluna do roster (ver mapeamento abaixo). Se a célula do roster está vazia, a decomposição daquele membro ainda não está pronta.
+The five HARD-GATE items have a permanent home: each one maps to a briefing field and a roster column (see the mapping below). If the roster cell is empty, that member's decomposition is not ready yet.
 
-**Regra de escrita — vale para teammates e subagents:** branch ou worktree da tarefa possui uma
-única working tree de integração. Worktree isola a tarefa do repo principal e **não isola agentes
-entre si** — quem serializa a escrita é esta regra, não o Git. O que a escrita concorrente pode
-fazer depende do isolamento ratificado no gate de setup:
+**Write rule — applies to teammates and subagents:** the task's branch or worktree has a single
+integration working tree. Worktree isolates the task from the main repo and does **not isolate agents
+from each other** — what serializes writes is this rule, not Git. What concurrent writing may do
+depends on the isolation ratified in the setup gate:
 
-- `isolation: branch` — **um writer por vez**. O coordenador integra as contribuições em série;
-  implementadores escrevendo ao mesmo tempo na mesma working tree colidem. O paralelismo fica com o
-  que não escreve: investigação, leitura, review e decomposição.
-- `isolation: worktree` — frentes escrevem em paralelo **dentro do worktree único da tarefa**, desde
-  que toquem **caminhos disjuntos**. A disjunção é a **condição**, não um conselho: se aparecer
-  conflito real, o par não era disjunto — replaneje a decomposição em vez de forçar. Nunca um
-  worktree por membro; é um por tarefa.
+- `isolation: branch` — **one writer at a time**. The coordinator integrates contributions serially;
+  implementers writing at the same time in the same working tree collide. Parallelism stays with
+  what does not write: investigation, reading, review, and decomposition.
+- `isolation: worktree` — fronts write in parallel **inside the task's single worktree**, as long as
+  they touch **disjoint paths**. Disjointness is the **condition**, not advice: if a real conflict
+  appears, the pair was not disjoint — replan the decomposition instead of forcing it. Never one
+  worktree per member; it is one per task.
 
-Em ambos os casos, review, stage, commit e cursor continuam serializados pelo coordenador, e membros
-**não commitam**.
+In both cases, review, stage, commit, and cursor remain serialized by the coordinator, and members
+**do not commit**.
 
-**Responsabilidades do coordenador:**
+**Coordinator responsibilities:**
 
-- Decompor a tarefa em papéis com fronteiras claras (frentes/arquivos **disjuntos** para evitar conflito).
-- Definir o **número de membros** a partir da decomposição (ver abaixo) — não por um número mágico.
-- Escrever um **briefing autossuficiente** por membro (ver protocolo abaixo).
-- Manter o **roster vivo** (quem faz o quê, por quê, estado, dependências, verificação).
-- Roteamento de comunicação: monitorar o mailbox (Teammates) ou repassar saídas entre membros em rodadas (Subagents).
-- Tratar **falhas de membro** (ver seção própria).
-- Verificar os resultados de forma adversarial (cross-check, refutação).
-- Sintetizar tudo em uma entrega única, resolvendo divergências.
-- Receber as **lacunas materiais** que os membros nomearem e levá-las ao humano por
-  `pelizzai-interview-me` (modo lacuna) **antes de a frente continuar** — uma pergunta por vez, com
-  2–3 opções e a recomendada. O coordenador agrupa e ordena as lacunas por dependência, mas
-  **consolidar não é decidir**: ele não escolhe nem por si nem pelo membro. A decisão ratificada
-  volta ao plano e ao briefing antes do re-despacho.
-- Coletar as lacunas de skill de domínio sinalizadas pelos membros e consolidá-las numa **única** proposta no fechamento (alimenta o eixo adoption-driven de `pelizzai-finish-task`); nunca criar skill no meio da tarefa. Essa é outra via: lacuna de domain skill **não** para a frente; lacuna material para.
-- Decidir a conclusão e encerrar os membros.
+- Decompose the task into roles with clear boundaries (**disjoint** fronts/files to avoid conflict).
+- Set the **number of members** from the decomposition (see below) — not from a magic number.
+- Write a **self-contained briefing** per member (see the protocol below).
+- Keep the **living roster** (who does what, why, state, dependencies, verification).
+- Communication routing: monitor the mailbox (Teammates) or relay outputs between members in rounds (Subagents).
+- Handle **member failures** (see its own section).
+- Verify the results adversarially (cross-check, refutation).
+- Synthesize everything into a single delivery, resolving divergences.
+- Receive the **material gaps** the members name and take them to the human via
+  `pelizzai-interview-me` (gap mode) **before the front continues** — one question at a time, with
+  2–3 options and the recommended one. The coordinator groups and orders the gaps by dependency, but
+  **consolidating is not deciding**: it chooses neither on its own nor for the member. The ratified
+  decision goes back into the plan and the briefing before re-dispatch.
+- Collect the domain-skill gaps flagged by the members and consolidate them into a **single** proposal at closeout (feeding the adoption-driven axis of `pelizzai-finish-task`); never create a skill mid-task. That is a different lane: a domain-skill gap does **not** stop the front; a material gap does.
+- Decide on completion and shut down the members.
 
-### Quantos membros
+### How many members
 
-O número de membros **não é arbitrário**: é o número de **frentes disjuntas** (ou lentes/hipóteses concorrentes) que sobrevivem à decomposição (`Structured Decomposition`) e que de fato avançam em paralelo, limitado pelo custo. Uma frente por membro; se duas frentes compartilham arquivos ou dependem em série, **fundem-se** em um membro. O intervalo de 3 a 5 é típico, **não** uma cota a preencher.
+The number of members is **not arbitrary**: it is the number of **disjoint fronts** (or competing lenses/hypotheses) that survive decomposition (`Structured Decomposition`) and actually advance in parallel, capped by cost. One front per member; if two fronts share files or depend on each other serially, they **merge** into one member. The 3-to-5 range is typical, **not** a quota to fill.
 
-### Roster vivo
+### Living roster
 
-Mantenha — e atualize — uma tabela do estado do time. Ela é o modelo mental do coordenador sobre **quem faz o quê** e espelha os cinco itens do HARD-GATE:
+Keep — and update — a table of the team's state. It is the coordinator's mental model of **who does what** and mirrors the five HARD-GATE items:
 
 ```text
-| Membro      | Papel              | Frente / por quê            | Arquivos próprios        | Depende de | Entregável        | Verificação           | Estado       |
-| ----------- | ------------------ | --------------------------- | ------------------------ | ---------- | ----------------- | --------------------- | ------------ |
-| pesquisador | Investigar hipótese A | causa da desconexão precoce | logs/, src/net/ (leitura) | —          | relatório de causa | cross-check c/ refutador | em progresso |
-| backend     | Endpoint /sessions | persistir sessão do usuário | src/api/sessions.*       | —          | diff + testes     | reprodução pelo QA    | pendente     |
-| revisor-sec | Auditar autenticação | risco de sessão/token       | (leitura) src/auth/      | backend    | achados c/ severidade | revisão do coordenador | bloqueado    |
+| Member       | Role                     | Front / why                   | Own files                 | Depends on | Deliverable          | Verification             | State        |
+| ------------ | ------------------------ | ----------------------------- | ------------------------- | ---------- | -------------------- | ------------------------ | ------------ |
+| researcher   | Investigate hypothesis A | cause of the early disconnect | logs/, src/net/ (read)    | —          | cause report         | cross-check w/ refuter   | in progress  |
+| backend      | /sessions endpoint       | persist the user session      | src/api/sessions.*        | —          | diff + tests         | reproduction by QA       | pending      |
+| sec-reviewer | Audit authentication     | session/token risk            | (read) src/auth/          | backend    | findings w/ severity | coordinator review       | blocked      |
 ```
 
-Mapeamento HARD-GATE → roster: item 1 → Papel/Frente; item 2 → Frente / por quê; item 3 → Depende de; item 4 → Entregável; item 5 → Verificação.
+HARD-GATE → roster mapping: item 1 → Role/Front; item 2 → Front / why; item 3 → Depends on; item 4 → Deliverable; item 5 → Verification.
 
-No Modo Teammates, esse roster espelha a **task list compartilhada** (que tem os mesmos estados: pendente, em progresso, concluído, com dependências). No Modo Subagents, o roster é a **sua** lista — não há lista compartilhada nativa.
+In Teammates Mode, this roster mirrors the **shared task list** (which has the same states: pending, in progress, completed, with dependencies). In Subagents Mode, the roster is **your** list — there is no native shared list.
 
 ---
 
-## Raciocínio do coordenador (pelizzai-reasoning)
+## Coordinator reasoning (pelizzai-reasoning)
 
-O coordenador **deve** acionar `pelizzai-reasoning` para a fase de planejamento e delegação. Pipeline recomendado:
+The coordinator **must** invoke `pelizzai-reasoning` for the planning and delegation phase. Recommended pipeline:
 
 ```text
-Structured Decomposition   (dividir em papéis coesos, contratos e dependências)
-→ Plan and Execute         (ordenar, atribuir, definir checkpoints)
-→ [delegação aos membros]
-→ Evidence Synthesis       (cruzar e conciliar entregáveis heterogêneos/conflitantes),
-                           com Verification (incluindo cross-check por execuções independentes) como auxiliar
+Structured Decomposition   (split into cohesive roles, contracts, and dependencies)
+→ Plan and Execute         (order, assign, define checkpoints)
+→ [delegation to the members]
+→ Evidence Synthesis       (cross and reconcile heterogeneous/conflicting deliverables),
+                           with Verification (including cross-check via independent runs) as auxiliary
 ```
 
-- Use **Constraint Satisfaction** quando houver requisitos rígidos, compatibilidade, segurança ou proibições que todos os membros devem respeitar.
-- Para investigação, o coordenador conduz **Root Cause Analysis** e distribui **hipóteses concorrentes** entre os membros (cada um defende/refuta uma teoria).
-- Carregue a técnica dominante e somente auxiliares que resolvam lacunas distintas, conforme
-  `pelizzai-reasoning`; não distribua técnicas por quota ou por papel decorativo.
+- Use **Constraint Satisfaction** when there are hard requirements, compatibility, security, or prohibitions that all members must respect.
+- For investigation, the coordinator runs **Root Cause Analysis** and distributes **competing hypotheses** among the members (each one defends/refutes a theory).
+- Load the dominant technique and only auxiliaries that fill distinct gaps, per
+  `pelizzai-reasoning`; do not distribute techniques by quota or as decorative roles.
 
-Cada **membro** também raciocina: o briefing instrui o membro a acionar `pelizzai-reasoning` para sua subtarefa (ver protocolo de delegação).
+Each **member** reasons too: the briefing instructs the member to invoke `pelizzai-reasoning` for their subtask (see the delegation protocol).
 
 ---
 
-## Composição do time: catálogo de papéis
+## Team composition: role catalog
 
-Escolha papéis com fronteiras que não se sobrepõem. Papéis comuns e a técnica de `pelizzai-reasoning` que normalmente os serve:
+Choose roles with boundaries that do not overlap. Common roles and the `pelizzai-reasoning` technique that usually serves them:
 
-**Papéis de implementação são ESPECIALISTAS por área.** Nomeie o papel pela área (ex.:
-`implementador-backend`, `implementador-frontend`, `implementador-dados`) e cole no briefing o pacote
-**COMPLETO** de skills de domínio daquela área do catálogo — não só as que parecem aplicar à tarefa
-específica, mas a área inteira do papel. Um especialista que carrega toda a sua área decide as
-fronteiras com o contexto que o histórico daria, em vez de reagir a um recorte estreito. As frentes
-continuam **disjuntas por arquivo** (invariante anti-conflito): a área define o pacote de skills que
-o membro recebe, não amplia os arquivos que ele pode escrever.
+**Implementation roles are SPECIALISTS by area.** Name the role by area (e.g.,
+`backend-implementer`, `frontend-implementer`, `data-implementer`) and paste into the briefing the
+**COMPLETE** package of domain skills for that area from the catalog — not just the ones that seem
+to apply to the specific task, but the role's entire area. A specialist who carries their whole area
+decides boundaries with the context the history would have given, instead of reacting to a narrow
+slice. Fronts remain **disjoint by file** (the anti-conflict invariant): the area defines the skill
+package the member receives; it does not widen the files they may write.
 
-| Papel                         | Mandato                                                                    | Técnica principal sugerida (pelizzai-reasoning) |
+| Role                          | Mandate                                                                    | Suggested primary technique (pelizzai-reasoning) |
 | ----------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------- |
-| Investigador / Pesquisador    | Reunir evidências, mapear o código, testar uma hipótese específica         | Root Cause Analysis                             |
-| Implementador (por frente)    | Construir um módulo/camada com arquivos próprios e bem delimitados         | Structured Decomposition                        |
-| Revisor especializado         | Auditar sob **uma** lente (segurança, performance, testes, acessibilidade) | Verification (ou Critique and Refine)           |
-| Advogado do diabo / Refutador | Tentar **derrubar** as conclusões e implementações dos outros              | Refutação via Verification                      |
-| Verificador / QA              | Reproduzir, rodar testes, conferir contratos e resultados                  | Verification (cross-check por execuções independentes) |
-| Documentador                  | Consolidar achados, escrever spec ou relatório final                       | Evidence Synthesis                              |
+| Investigator / Researcher     | Gather evidence, map the code, test a specific hypothesis                  | Root Cause Analysis                             |
+| Implementer (per front)       | Build a module/layer with its own, well-delimited files                    | Structured Decomposition                        |
+| Specialized reviewer          | Audit under **one** lens (security, performance, tests, accessibility)     | Verification (or Critique and Refine)           |
+| Devil's advocate / Refuter    | Try to **take down** the others' conclusions and implementations           | Refutation via Verification                     |
+| Verifier / QA                 | Reproduce, run tests, check contracts and results                          | Verification (cross-check via independent runs) |
+| Documenter                    | Consolidate findings, write the spec or final report                       | Evidence Synthesis                              |
 
-Dê a cada lente/hipótese um membro distinto — um único agente tende a ancorar em uma só linha de raciocínio. A diversidade de papéis é o que um time entrega e uma sessão única não.
+Give each lens/hypothesis its own member — a single agent tends to anchor on one line of reasoning. Role diversity is what a team delivers and a single session does not.
 
 ---
 
-## Protocolo de delegação por membro
+## Per-member delegation protocol
 
-Para cada membro, entregue um **briefing autossuficiente**. Os membros não herdam o histórico. Em
-execução de plano, use `task-brief.*` somente com plano Markdown persistente compatível; plano
-nativo usa conteúdo colado. Handoffs ficam no path gitignored consumidor ou temp em source mode.
+For each member, deliver a **self-contained briefing**. Members do not inherit the history. In
+plan execution, use `task-brief.*` only with a compatible persistent Markdown plan; a native plan
+uses pasted content. Handoffs live in the consumer's gitignored path, or in temp in source mode.
 
 ```text
-Briefing de [nome do membro] — papel: [papel nomeado pela ÁREA, ex.: implementador-backend]
+Briefing for [member name] — role: [role named by AREA, e.g., backend-implementer]
 
-- Objetivo: [um resultado único e claro]                              (HARD-GATE 1)
-- Missão global e papel desta frente: [o objetivo do time em uma frase
-  + por que esta subtarefa existe e como ela contribui]              (HARD-GATE 2)
-- Escopo incluído: [o que está dentro]
-- Escopo excluído: [o que está fora — evita sobreposição com outros membros]
-- Frentes/arquivos próprios: [conjunto disjunto; quem mais NÃO toca aqui]
-- Contexto necessário: [caminhos, contratos, decisões já tomadas, links de spec,
-  convenções do projeto — tudo, porque o membro não viu esta conversa]
-- Regras/skills locais relevantes: monte um ESPECIALISTA — cole o pacote **COMPLETO** de skills de
-  domínio da **ÁREA** do papel [catálogo `pelizzai/domain-skills.md` no consumidor, ou regras/skills
-  do repo-fonte em source mode; cole os pontos operacionais, não só os nomes], não só as que parecem
-  aplicar à tarefa específica, mas a área inteira. Em dúvida se uma skill de domínio do catálogo
-  pertence à área, inclua-a: o custo de incluir é menor que o de
-  ignorar uma regra do projeto. Se a área da frente não tem skill cobrindo, diga isso e instrua o
-  membro a sinalizar a lacuna no retorno
-- Camada global: aplique `pelizzai-preferences` e raciocine via `pelizzai-reasoning`; em
-  conflito, as SKILLS DE DOMÍNIO coladas acima e as regras do projeto PREVALECEM sobre elas
-- Dependências: [o que precisa de outro membro; o que já pode começar]  (HARD-GATE 3)
-- Raciocínio: técnica principal sugerida de `pelizzai-reasoning`: [ver catálogo de papéis]
-- Contrato de entrega: [formato EXATO do retorno — ex.: lista de achados com
-  severidade e arquivo:linha; diff + saída dos testes; relatório com seções X/Y/Z]  (HARD-GATE 4)
-- Critério de sucesso: [como o próprio membro sabe que terminou corretamente]
-- Verificação: [como e por quem o resultado será conferido — ex.: cross-check por
-  outro membro; rodada de refutação; reprodução de teste pelo QA]      (HARD-GATE 5)
-- Commit (papéis de escrita): NÃO commite; deixe o trabalho na working tree —
-  o coordenador consolida após os reviews
-- Salvo-conduto: é sempre OK parar e dizer "isso é difícil demais para mim" — trabalho ruim é
-  pior que trabalho nenhum; você não será penalizado por escalar (reporte BLOCKED)
-- Lacuna material (frase canônica, no TEXTO do briefing): se requisito, escopo, UX, arquitetura,
-  dados, segurança ou aceite não estiver escrito neste briefing, no plano ou na spec, PARE, NOMEIE
-  a lacuna (o que falta + o que ela muda + 2–3 opções com a recomendada), devolva `NEEDS_CONTEXT` e
-  declare-a também em `Desvios do plano:`. Você não preenche por default nem fala com o usuário —
-  quem leva a decisão ao humano é o coordenador, pela `pelizzai-interview-me` (modo lacuna)
-- Restrições/proibições: [não tocar em X; não rodar Y; não publicar; só leitura]
+- Objective: [a single, clear outcome]                                (HARD-GATE 1)
+- Global mission and this front's role: [the team's goal in one sentence
+  + why this subtask exists and how it contributes]                   (HARD-GATE 2)
+- In scope: [what is included]
+- Out of scope: [what is out — avoids overlap with other members]
+- Own fronts/files: [disjoint set; who else does NOT touch here]
+- Required context: [paths, contracts, decisions already made, spec links,
+  project conventions — everything, because the member has not seen this conversation]
+- Relevant local rules/skills: assemble a SPECIALIST — paste the **COMPLETE** package of domain
+  skills for the role's **AREA** [the `pelizzai/domain-skills.md` catalog in a consumer, or the
+  source repo's rules/skills in source mode; paste the operational points, not just the names], not
+  only the ones that seem to apply to the specific task, but the entire area. When in doubt
+  whether a catalog domain skill belongs to the area, include it: the cost of including is lower
+  than the cost of ignoring a project rule. If the front's area has no covering skill, say so and
+  instruct the member to flag the gap in their return
+- Global layer: apply `pelizzai-preferences` and reason via `pelizzai-reasoning`; on
+  conflict, the DOMAIN SKILLS pasted above and the project rules PREVAIL over them
+- Dependencies: [what needs another member; what can start now]        (HARD-GATE 3)
+- Reasoning: suggested primary `pelizzai-reasoning` technique: [see the role catalog]
+- Delivery contract: [EXACT format of the return — e.g., list of findings with
+  severity and file:line; diff + test output; report with sections X/Y/Z]  (HARD-GATE 4)
+- Success criterion: [how the member itself knows it finished correctly]
+- Verification: [how and by whom the result will be checked — e.g., cross-check by
+  another member; refutation round; test reproduction by QA]           (HARD-GATE 5)
+- Commit (writing roles): do NOT commit; leave the work in the working tree —
+  the coordinator consolidates after the reviews
+- Safe harbor: it is always OK to stop and say "this is too hard for me" — bad work is
+  worse than no work; you will not be penalized for escalating (report BLOCKED)
+- Material gap (canonical sentence, in the briefing TEXT): if a requirement, scope, UX,
+  architecture, data, security, or acceptance item is not written in this briefing, the plan, or
+  the spec, STOP, NAME the gap (what is missing + what it changes + 2–3 options with the
+  recommended one), return `NEEDS_CONTEXT`, and declare it also under `Deviations from plan:`.
+  You do not fill it in by default and you do not talk to the user — the coordinator is who takes
+  the decision to the human, via `pelizzai-interview-me` (gap mode)
+- Restrictions/prohibitions: [do not touch X; do not run Y; do not publish; read-only]
 ```
 
-**Por que cada campo importa:**
+**Why each field matters:**
 
-- _Missão global e papel desta frente_ dá ao membro o enquadramento que o histórico daria — sem ela, ele decide fronteiras às cegas.
-- _Frentes/arquivos próprios_ previne o anti-padrão de dois membros sobrescrevendo o mesmo arquivo.
-- _Contrato de entrega_ permite ao coordenador **sintetizar** sem reinterpretar formatos heterogêneos.
-- _Critério de sucesso_ (autocheck do membro) é distinto de _Verificação_ (como o coordenador/outro membro confere o resultado) — os dois campos não se substituem.
+- _Global mission and this front's role_ gives the member the framing the history would have given — without it, they decide boundaries blind.
+- _Own fronts/files_ prevents the anti-pattern of two members overwriting the same file.
+- _Delivery contract_ lets the coordinator **synthesize** without reinterpreting heterogeneous formats.
+- _Success criterion_ (the member's self-check) is distinct from _Verification_ (how the coordinator/another member checks the result) — the two fields do not substitute for each other.
 
 ---
 
-## Modo Teammates (nativo)
+## Teammates Mode (native)
 
-Use quando o Agent Teams está habilitado **e** os membros precisam conversar entre si.
+Use when Agent Teams is enabled **and** the members need to talk to each other.
 
-**Mecânica:**
+**Mechanics:**
 
-- **Habilitar:** `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` (env var ou `settings.json`). Experimental; só no Claude Code.
-- **Criar membros:** descreva em linguagem natural quantos e com que papéis. O usuário confirma. O lead dá um **nome** a cada teammate — peça nomes previsíveis (ex.: `pesquisador`, `backend`, `revisor-sec`) para referenciá-los depois. Em versões atuais (v2.1.178+), criar teammate **não exige setup prévio** e não há ferramentas `TeamCreate`/`TeamDelete`; um eventual campo `team_name` na ferramenta `Agent` é aceito porém **ignorado**.
-- **Papéis reutilizáveis:** é possível criar um teammate a partir de um **subagent definido** (`agentType` de project/user/plugin), ex.: "crie um teammate usando o agent type `security-reviewer`". Ele honra `tools` e `model` da definição; as ferramentas de time (`SendMessage`, gestão de tarefas) ficam sempre disponíveis.
-- **Task list compartilhada:** popule com tarefas dimensionadas (~5–6 por teammate), com **dependências** quando houver. O claim usa file-locking; tarefas dependentes desbloqueiam sozinhas quando a predecessora conclui.
-- **Comunicação:** `SendMessage` por nome; entrega via mailbox. Para falar com todos, envie uma mensagem por destinatário. Quando um teammate fica ocioso, ele notifica o lead.
-- **Aprovação de plano:** para frentes arriscadas, exija que o teammate **planeje antes de implementar** (fica em plan mode read-only até o lead aprovar). Dê critérios de aprovação no seu prompt (ex.: "só aprove planos com cobertura de testes").
-- **Modelo e esforço:** teammates **não** herdam o `/model` do lead por padrão — configure em `/config` → "Default teammate model". Herdam o **effort** do lead.
-- **Exibição:** `in-process` (padrão, qualquer terminal) ou `split-panes` (`teammateMode`/`--teammate-mode`; exige tmux ou iTerm2). **No Windows, use in-process** (ver nota acima).
-- **Quality gates por hooks:** `TeammateIdle`, `TaskCreated`, `TaskCompleted` (saída com exit code 2 envia feedback e bloqueia a ação).
-- **Encerrar:** peça o shutdown por nome; o teammate pode aceitar ou recusar com justificativa. A limpeza do time é automática ao encerrar a sessão.
+- **Enable:** `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` (env var or `settings.json`). Experimental; Claude Code only.
+- **Create members:** describe in natural language how many and with which roles. The user confirms. The lead gives each teammate a **name** — ask for predictable names (e.g., `researcher`, `backend`, `sec-reviewer`) to reference them later. In current versions (v2.1.178+), creating a teammate **requires no prior setup** and there are no `TeamCreate`/`TeamDelete` tools; an eventual `team_name` field on the `Agent` tool is accepted but **ignored**.
+- **Reusable roles:** a teammate can be created from a **defined subagent** (an `agentType` from project/user/plugin), e.g., "create a teammate using the `security-reviewer` agent type". It honors the definition's `tools` and `model`; the team tools (`SendMessage`, task management) are always available.
+- **Shared task list:** populate it with right-sized tasks (~5–6 per teammate), with **dependencies** where they exist. Claiming uses file-locking; dependent tasks unblock on their own when the predecessor completes.
+- **Communication:** `SendMessage` by name; delivery via mailbox. To address everyone, send one message per recipient. When a teammate goes idle, it notifies the lead.
+- **Plan approval:** for risky fronts, require the teammate to **plan before implementing** (it stays in read-only plan mode until the lead approves). Give approval criteria in your prompt (e.g., "only approve plans with test coverage").
+- **Model and effort:** teammates do **not** inherit the lead's `/model` by default — configure it in `/config` → "Default teammate model". They inherit the lead's **effort**.
+- **Display:** `in-process` (default, any terminal) or `split-panes` (`teammateMode`/`--teammate-mode`; requires tmux or iTerm2). **On Windows, use in-process** (see the note above).
+- **Quality gates via hooks:** `TeammateIdle`, `TaskCreated`, `TaskCompleted` (exiting with exit code 2 sends feedback and blocks the action).
+- **Shut down:** request the shutdown by name; the teammate may accept or refuse with justification. Team cleanup is automatic when the session ends.
 
-**Limitações do recurso (experimental) — o coordenador deve compensar:**
+**Feature limitations (experimental) — the coordinator must compensate:**
 
 ```text
-- /resume e /rewind NÃO restauram teammates in-process. Após retomar a sessão, recrie os membros.
-- O status de tarefa pode atrasar (um teammate esquece de marcar "concluído" e trava dependências).
-  → confirme você mesmo se o trabalho terminou e cutuque o teammate.
-- O shutdown é lento (o teammate finaliza a requisição atual antes de encerrar).
-- Uma equipe por sessão; sem times aninhados; o lead é fixo (sem transferência de liderança).
-- Teammates herdam o modo de permissão do lead no spawn (inclusive --dangerously-skip-permissions).
-- Pré-aprove operações comuns nas permissões antes de criar teammates, para reduzir interrupções.
-```
-
----
-
-## Modo Subagents (fallback)
-
-Use quando o Agent Teams não está disponível, ou quando os membros só precisam reportar (sem diálogo). Aqui **o coordenador é toda a infraestrutura** que o Agent Teams ofereceria nativamente.
-
-**Mecânica:**
-
-- **Ferramenta:** `Agent`/`Task`. Cada subagente tem janela de contexto própria e **só devolve seu texto final** ao coordenador; subagentes **não** se comunicam entre si e **encerram ao retornar** (sem memória entre chamadas).
-- **Tipos e capacidade de escrita:** papéis de **leitura/investigação** (Investigador, Revisor, Refutador, QA de inspeção) usam `Explore` ou `Plan` (read-only). Papéis que **escrevem arquivos** (Implementador) exigem `general-purpose` ou um subagent customizado com ferramentas de escrita — **`Explore` e `Plan` não editam**. Escolha o `agentType` pela necessidade do papel.
-- **Paralelismo:** para membros independentes, emita **várias chamadas `Agent` numa única mensagem** — elas rodam concorrentemente. O paralelismo **seguro por padrão** é o de **leitura** (`Explore`).
-- **Comunicação simulada (o coordenador como roteador):** como os subagentes não conversam, simule o diálogo em **rodadas**:
-
-```text
-Rodada 1 — produção:   cada membro executa sua frente e devolve o entregável.
-Rodada 2 — confronto:  o coordenador spawna um NOVO subagente com o mesmo papel e injeta,
-                       no prompt, o briefing completo MAIS as saídas relevantes dos outros,
-                       pedindo que refute, concorde ou ajuste (simula o "debate científico").
-Rodada N — convergência: pare assim que as posições estabilizarem.
-
-Atenção: em Subagents NÃO há continuidade entre rodadas. Cada rodada e cada verificador é um
-SPAWN NOVO, sem memória da rodada anterior nem acesso ao trabalho dos demais — o coordenador
-precisa re-injetar tudo no prompt. Limite as rodadas de confronto (tipicamente 1–2) e aplique
-o orçamento de esforço de `pelizzai-reasoning`: mais rodadas só se reduzirem risco real.
-```
-
-- **Cross-check adversarial:** spawnar **verificadores céticos** cujo único trabalho é tentar **refutar** os achados/implementações. Como o verificador é stateless, **cole no prompt dele o artefato a refutar**. Mantenha um achado só se ele sobrevive.
-- **Evitar conflito de arquivos:** atribua **arquivos disjuntos** por membro. O que a escrita
-  paralela pode fazer depende do isolamento ratificado no gate: em `isolation: branch`, um writer
-  por vez e o coordenador aplica as contribuições em série (o paralelismo fica com
-  investigação/leitura/review); em `isolation: worktree`, frentes com **caminhos disjuntos** podem
-  escrever em paralelo dentro do worktree único da tarefa. Em nenhum dos dois o Git/index, o
-  review-package ou o diretório compartilhado ficam transacionais — por isso review, stage, commit
-  e cursor continuam serializados pelo coordenador.
-- **Lista de tarefas:** é o **seu** roster (não há lista compartilhada nativa) — atualize-o a cada rodada.
-- **Síntese:** o coordenador integra os entregáveis e cruza as divergências com `pelizzai-reasoning` (`Evidence Synthesis`, com `Verification` auxiliar).
-
-> Para delegar a **um único** subagente isolado (não um time), use a skill irmã `pelizzai-subagents` (o lar canônico desse padrão).
-
----
-
-## Tratamento de falhas de membro
-
-Vale para os dois modos. O coordenador nunca conclui silenciosamente com uma frente em aberto.
-
-```text
-- Membro falha ou devolve fora do contrato:
-  → re-briefar com instruções mais estritas, reduzir o escopo, ou reatribuir a frente a outro membro.
-- Membro trava ou demora além do esperado:
-  → Modo Teammates: cutucar via SendMessage, ou pedir shutdown e recriar.
-  → Modo Subagents: reemitir a chamada Agent (spawn novo com o briefing).
-- Frente se mostra inviável:
-  → o coordenador absorve a frente ou replaneja a decomposição (não força nem ignora).
-```
-
-Ancore a recuperação em `pelizzai-reasoning`: `Critique and Refine` (corrigir entregável falho) e `Plan and Execute` (replanejar quando a decomposição não se sustenta).
-
----
-
-## Verificação e síntese
-
-Resultados de membros **não** são verdade até serem cruzados.
-
-- **Cross-check:** confronte entregáveis que se sobrepõem; achados em conflito disparam uma rodada de refutação (Modo Subagents) ou um debate via `SendMessage` (Modo Teammates).
-- **Verificação adversarial:** prefira que **outro** membro (ou um verificador dedicado) tente derrubar uma conclusão, em vez de o próprio autor confirmá-la.
-- **Cross-check por execuções independentes (Verification):** quando vários membros chegam ao mesmo resultado por caminhos independentes, a convergência aumenta a confiança — mas não substitui teste/fonte real.
-- **Review por tarefa (duas lentes com cegueira assimétrica):** todo entregável de implementação passa pela `pelizzai-review` — a **lente spec cega** (recebe só diff + spec/plano + domain skills da área, NUNCA o relatório do autor: julga o código contra o contrato, sem a narrativa) e a **lente qualidade/evidência** (recebe o relatório e verifica as alegações com prova fresca). O coordenador despacha revisores independentes — **nunca é a lente cega** —, cruza os dois verdicts e, em conflito, decide com evidência própria ou escala. O perfil cego/duplo (`split`) é o default em qualquer lane, inclusive bounded — só com dois despachos a lente spec desconhece a narrativa do autor; `combined` numa passada é exceção que o usuário ratifica no passo 4 do gate de setup. Proporcional é a **profundidade** de cada lente, não a existência do review nem a cegueira.
-- **Gate de evidência:** antes de aceitar um entregável de **implementação**, aplique `pelizzai-verification-before-completion` — confira o **diff do git** e rode os comandos de teste você mesmo, ou aceite saída + exit code de **quem rodou o check** (a lente qualidade/evidência, revisor independente — nunca o autor); o relatório do membro, inclusive a saída que ele mesmo colou, nunca é evidência.
-- **Síntese:** cruze os entregáveis com `Evidence Synthesis` e produza **uma** entrega, deixando claro o que é consenso, o que foi divergência resolvida e o que permanece em aberto.
-- **Impasse:** se o confronto **não** converge, o coordenador **não** força um consenso artificial: decide pelo critério dominante da tarefa (acionando `Decision Making`) e, quando a escolha pertence ao usuário ou o impacto é alto, **escala por `pelizzai-interview-me`** — nomeando a lacuna, com as posições viradas em 2–3 opções reais, a recomendada e o trade-off de cada uma.
-
-Aplique o **orçamento de esforço** de `pelizzai-reasoning`: a profundidade da verificação é proporcional ao risco da mudança.
-
----
-
-## Orçamento e dimensionamento
-
-```text
-- O número de membros é DERIVADO da decomposição (uma frente disjunta = um membro), não uma cota.
-- 3 a 5 membros cobrem a maioria dos fluxos; ~5 a 6 tarefas por membro mantém todos produtivos.
-- Custo de tokens escala de forma ~linear com o número de membros (Teammates é o mais caro).
-- Suba o tamanho do time só quando o trabalho ganha de fato com mais frentes simultâneas.
-- Três membros focados costumam render mais que cinco dispersos.
+- /resume and /rewind do NOT restore in-process teammates. After resuming the session, recreate the members.
+- Task status can lag (a teammate forgets to mark "completed" and blocks dependencies).
+  → confirm yourself that the work is done and nudge the teammate.
+- Shutdown is slow (the teammate finishes its current request before exiting).
+- One team per session; no nested teams; the lead is fixed (no leadership transfer).
+- Teammates inherit the lead's permission mode at spawn (including --dangerously-skip-permissions).
+- Pre-approve common operations in permissions before creating teammates, to reduce interruptions.
 ```
 
 ---
 
-## Anti-padrões
+## Subagents Mode (fallback)
+
+Use when Agent Teams is not available, or when the members only need to report (no dialogue). Here **the coordinator is the entire infrastructure** that Agent Teams would provide natively.
+
+**Mechanics:**
+
+- **Tool:** `Agent`/`Task`. Each subagent has its own context window and **only returns its final text** to the coordinator; subagents do **not** communicate with each other and **end when they return** (no memory across calls).
+- **Types and write capability:** **reading/investigation** roles (Investigator, Reviewer, Refuter, inspection QA) use `Explore` or `Plan` (read-only). Roles that **write files** (Implementer) require `general-purpose` or a custom subagent with write tools — **`Explore` and `Plan` do not edit**. Choose the `agentType` by the role's need.
+- **Parallelism:** for independent members, issue **several `Agent` calls in a single message** — they run concurrently. The parallelism that is **safe by default** is **read** parallelism (`Explore`).
+- **Simulated communication (the coordinator as router):** since the subagents do not talk, simulate the dialogue in **rounds**:
 
 ```text
-- Montar um time para tarefa sequencial, trivial ou de uma fonte só.
-- Dois membros editando o mesmo arquivo (sobrescrita garantida).
-- Briefing vago, ou assumir que o membro tem o histórico da conversa.
-- Delegar um papel de escrita a um agentType read-only (Explore/Plan não editam).
-- "Continuar a conversa" com um subagente entre rodadas (cada rodada é um spawn novo, sem memória).
-- O coordenador começar a implementar em vez de delegar, esperar e sintetizar.
-- O coordenador se despachar como a lente spec cega (ele já viu o relatório) — a lente cega é sempre um revisor independente.
-- Entregar o relatório do implementador à lente spec cega, ou montar um membro sem o pacote completo de domain skills da sua área.
-- Membro preencher por default, convenção ou "inferência razoável" uma decisão de produto que não está no briefing/plano/spec, em vez de nomear a lacuna e devolver `NEEDS_CONTEXT`.
-- O coordenador decidir a lacuna material (por si ou pelo membro) em vez de levá-la ao humano pela `pelizzai-interview-me` — consolidar as lacunas não é decidi-las.
-- Aceitar achados sem verificação adversarial.
-- No Modo Subagents, esperar que os membros se coordenem sozinhos (eles não se falam).
-- Usar split-panes no Windows / Windows Terminal / terminal do VS Code / Ghostty.
-- Deixar tarefa "em progresso" travando dependências, sem confirmar a conclusão (Teammates).
-- Criar mais membros do que o trabalho realmente paralelizável comporta.
+Round 1 — production:    each member executes its front and returns the deliverable.
+Round 2 — confrontation: the coordinator spawns a NEW subagent with the same role and injects,
+                         in the prompt, the full briefing PLUS the relevant outputs of the others,
+                         asking it to refute, agree, or adjust (simulates the "scientific debate").
+Round N — convergence:   stop as soon as the positions stabilize.
+
+Caution: in Subagents there is NO continuity across rounds. Each round and each verifier is a
+NEW SPAWN, with no memory of the previous round and no access to the others' work — the coordinator
+must re-inject everything into the prompt. Cap the confrontation rounds (typically 1–2) and apply
+the effort budget from `pelizzai-reasoning`: more rounds only if they reduce real risk.
+```
+
+- **Adversarial cross-check:** spawn **skeptical verifiers** whose only job is to try to **refute** the findings/implementations. Since the verifier is stateless, **paste into its prompt the artifact to refute**. Keep a finding only if it survives.
+- **Avoiding file conflicts:** assign **disjoint files** per member. What parallel writing may do
+  depends on the isolation ratified in the gate: under `isolation: branch`, one writer at a time and
+  the coordinator applies the contributions serially (parallelism stays with
+  investigation/reading/review); under `isolation: worktree`, fronts with **disjoint paths** may
+  write in parallel inside the task's single worktree. In neither case are Git/the index, the
+  review-package, or the shared directory transactional — which is why review, stage, commit,
+  and cursor remain serialized by the coordinator.
+- **Task list:** it is **your** roster (there is no native shared list) — update it every round.
+- **Synthesis:** the coordinator integrates the deliverables and crosses the divergences with `pelizzai-reasoning` (`Evidence Synthesis`, with `Verification` as auxiliary).
+
+> To delegate to a **single** isolated subagent (not a team), use the sibling skill `pelizzai-subagents` (the canonical home of that pattern).
+
+---
+
+## Handling member failures
+
+Applies to both modes. The coordinator never concludes silently with a front left open.
+
+```text
+- A member fails or returns outside the contract:
+  → re-brief with stricter instructions, reduce the scope, or reassign the front to another member.
+- A member stalls or takes longer than expected:
+  → Teammates Mode: nudge via SendMessage, or request shutdown and recreate.
+  → Subagents Mode: reissue the Agent call (a new spawn with the briefing).
+- A front proves unviable:
+  → the coordinator replans the decomposition or redistributes the front to another member
+    (it neither forces nor ignores) — it never implements the front itself.
+```
+
+Anchor the recovery in `pelizzai-reasoning`: `Critique and Refine` (fix a failed deliverable) and `Plan and Execute` (replan when the decomposition does not hold).
+
+---
+
+## Verification and synthesis
+
+Member results are **not** truth until they are cross-checked.
+
+- **Cross-check:** confront deliverables that overlap; conflicting findings trigger a refutation round (Subagents Mode) or a debate via `SendMessage` (Teammates Mode).
+- **Adversarial verification:** prefer that **another** member (or a dedicated verifier) try to take down a conclusion, rather than the author confirming it.
+- **Cross-check via independent runs (Verification):** when several members reach the same result through independent paths, the convergence increases confidence — but it does not replace a real test/source.
+- **Per-task review (two lenses with asymmetric blindness):** every implementation deliverable goes through `pelizzai-review` — the **blind spec lens** (receives only diff + spec/plan + the area's domain skills, NEVER the author's report: it judges the code against the contract, without the narrative) and the **quality/evidence lens** (receives the report and verifies the claims with fresh proof). The coordinator dispatches independent reviewers — it is **never the blind lens** —, crosses the two verdicts and, on conflict, decides with its own evidence or escalates. The blind/dual profile (`split`) is the default in any lane, including bounded — only with two dispatches does the spec lens not know the author's narrative; `combined` in a single pass is an exception the user ratifies at step 4 of the setup gate. What is proportional is each lens's **depth**, not the review's existence nor the blindness.
+- **Evidence gate:** before accepting an **implementation** deliverable, apply `pelizzai-verification-before-completion` — check the **git diff** and run the test commands yourself, or accept output + exit code from **whoever ran the check** (the quality/evidence lens, an independent reviewer — never the author); the member's report, including output the member pasted itself, is never evidence.
+- **Synthesis:** cross the deliverables with `Evidence Synthesis` and produce **one** delivery, making clear what is consensus, what was resolved divergence, and what remains open.
+- **Deadlock:** if the confrontation does **not** converge, the coordinator does **not** force an artificial consensus: it decides by the task's dominant criterion (invoking `Decision Making`) and, when the choice belongs to the user or the impact is high, **escalates via `pelizzai-interview-me`** — naming the gap, with the positions turned into 2–3 real options, the recommended one, and each one's trade-off.
+
+Apply the **effort budget** from `pelizzai-reasoning`: verification depth is proportional to the change's risk.
+
+---
+
+## Budget and sizing
+
+```text
+- The number of members is DERIVED from the decomposition (one disjoint front = one member), not a quota.
+- 3 to 5 members cover most flows; ~5 to 6 tasks per member keeps everyone productive.
+- Token cost scales ~linearly with the number of members (Teammates is the most expensive).
+- Grow the team size only when the work actually gains from more simultaneous fronts.
+- Three focused members usually outperform five scattered ones.
 ```
 
 ---
 
-## Sinais de alerta (red flags)
-
-**Nunca:**
-
-- Delegue sem saber responder os cinco itens do `<HARD-GATE>` para cada membro.
-- Habilite o Agent Teams no `settings.json` do usuário sem confirmação.
-- Trate o resultado de um membro como verdade antes de cruzá-lo/refutá-lo.
-- Decida no lugar do usuário uma lacuna material que os membros nomearam (consolidar não é decidir).
-- Seja você mesmo (coordenador) a lente spec cega, ou passe o relatório do autor a ela.
-- Conclua silenciosamente com uma frente falha ou em aberto.
-- Encerre o time antes de validar os critérios de conclusão.
-- Deixe o lead concluir que "acabou" com tarefas ainda abertas — verifique o roster.
-
----
-
-## Fluxo operacional resumido
+## Anti-patterns
 
 ```text
-1. Avalie se um time agrega valor real. Se não, use sessão única ou `pelizzai-subagents`.
-2. Decomponha com `pelizzai-reasoning` (Structured Decomposition) em papéis, contratos e frentes disjuntas.
-3. Derive o número de membros das frentes e detecte a capacidade; escolha o modo (Teammates × Subagents).
-4. Monte o roster (5 itens do HARD-GATE por membro) e escreva um briefing autossuficiente.
-5. Delegue (spawn), em paralelo quando independentes, com confirmação do usuário.
-6. Acompanhe o roster; monitore o mailbox (Teammates) ou roteie saídas em rodadas (Subagents).
-7. Trate falhas de membro; não conclua com frente em aberto.
-8. Verifique de forma adversarial (cross-check / refutação) e sintetize com Evidence Synthesis.
-9. Resolva divergências (ou escale o impasse); conclua quando os critérios forem atendidos e encerre os membros.
+- Assembling a team for a sequential, trivial, or single-source task.
+- Two members editing the same file (guaranteed overwrite).
+- A vague briefing, or assuming the member has the conversation history.
+- Delegating a writing role to a read-only agentType (Explore/Plan do not edit).
+- "Continuing the conversation" with a subagent across rounds (each round is a new spawn, no memory).
+- The coordinator starting to implement instead of delegating, waiting, and synthesizing.
+- The coordinator dispatching itself as the blind spec lens (it has already seen the report) — the blind lens is always an independent reviewer.
+- Handing the implementer's report to the blind spec lens, or assembling a member without the complete package of domain skills for its area.
+- A member filling in, by default, convention, or "reasonable inference", a product decision that is not in the briefing/plan/spec, instead of naming the gap and returning `NEEDS_CONTEXT`.
+- The coordinator deciding the material gap (on its own or for the member) instead of taking it to the human via `pelizzai-interview-me` — consolidating the gaps is not deciding them.
+- Accepting findings without adversarial verification.
+- In Subagents Mode, expecting the members to coordinate on their own (they do not talk to each other).
+- Using split-panes on Windows / Windows Terminal / the VS Code terminal / Ghostty.
+- Leaving a task "in progress" blocking dependencies, without confirming completion (Teammates).
+- Creating more members than the truly parallelizable work supports.
 ```
 
 ---
 
-## Integração
+## Red flags
 
-**Combina com:**
+**Never:**
 
-- `pelizzai-reasoning` — raciocínio do coordenador (decomposição, plano, síntese, verificação) e de cada membro; é também onde mora a técnica `Verification` para fechamento.
-- `pelizzai-preferences` — camada global instruída no briefing de cada membro (skills de domínio prevalecem).
-- `pelizzai-subagents` — delegação leve a **um** subagente isolado (sem time).
-- `pelizzai-router` / `pelizzai-execution-plans` — de onde o modo `team` chega (gate de setup); a execution-plans define o ciclo por tarefa que cada frente segue.
-- `pelizzai-interview-me` — destino das lacunas materiais nomeadas pelos membros: o coordenador as consolida e leva ao humano antes de a frente continuar.
-- `pelizzai-verification-before-completion` — gate de evidência antes de aceitar entregável de implementação.
-- `pelizzai-brainstorming` / `pelizzai-writing-plans` — de onde a tarefa do time normalmente chega.
+- Delegate without being able to answer the five `<HARD-GATE>` items for each member.
+- Enable Agent Teams in the user's `settings.json` without confirmation.
+- Treat a member's result as truth before cross-checking/refuting it.
+- Decide, in the user's place, a material gap the members named (consolidating is not deciding).
+- Act as the blind spec lens yourself (the coordinator), or hand the author's report to it.
+- Conclude silently with a failed or open front.
+- Shut the team down before validating the completion criteria.
+- Let the lead conclude "it's done" with tasks still open — check the roster.
 
 ---
 
-## Instrução final para o agente
+## Operational flow at a glance
 
 ```text
-Use PelizzAI Team para coordenar um time, não para inflar tarefas que uma sessão única resolve.
+1. Assess whether a team adds real value. If not, use a single session or `pelizzai-subagents`.
+2. Decompose with `pelizzai-reasoning` (Structured Decomposition) into roles, contracts, and disjoint fronts.
+3. Derive the number of members from the fronts and detect capability; choose the mode (Teammates vs. Subagents).
+4. Build the roster (the 5 HARD-GATE items per member) and write a self-contained briefing.
+5. Delegate (spawn), in parallel when independent, with user confirmation.
+6. Track the roster; monitor the mailbox (Teammates) or route outputs in rounds (Subagents).
+7. Handle member failures; do not conclude with an open front.
+8. Verify adversarially (cross-check / refutation) and synthesize with Evidence Synthesis.
+9. Resolve divergences (or escalate the deadlock); conclude when the criteria are met and shut down the members.
+```
 
-Monte o menor time que cobre a tarefa. Antes de delegar, entenda o que cada membro fará e
-escreva um briefing que se sustente sozinho. Lembre-se de que nenhum membro viu esta conversa.
+---
 
-Prefira:
-- proporcionalidade a paralelismo decorativo;
-- frentes disjuntas a membros disputando os mesmos arquivos;
-- verificação adversarial a confiança no autor;
-- síntese clara a um amontoado de saídas;
-- Modo Subagents barato quando os membros não precisam conversar.
+## Integration
 
-Não delegue sem responder os cinco itens do HARD-GATE.
-Não deixe o membro preencher decisão de produto — ele nomeia a lacuna e devolve NEEDS_CONTEXT.
-Não decida a lacuna material no lugar do usuário: consolide e leve à pelizzai-interview-me.
-Não mande um papel de escrita a um agentType read-only.
-Não trate rodadas de subagentes como conversa contínua — cada rodada é um spawn novo.
-Não habilite o Agent Teams sem confirmação do usuário.
-Não conclua com o roster ainda aberto.
+**Combines with:**
+
+- `pelizzai-reasoning` — the coordinator's reasoning (decomposition, plan, synthesis, verification) and each member's; it is also where the `Verification` technique for closeout lives.
+- `pelizzai-preferences` — the global layer instructed in each member's briefing (domain skills prevail).
+- `pelizzai-subagents` — lightweight delegation to **one** isolated subagent (no team).
+- `pelizzai-router` / `pelizzai-execution-plans` — where the `team` mode arrives from (setup gate); execution-plans defines the per-task cycle each front follows.
+- `pelizzai-interview-me` — destination of the material gaps named by the members: the coordinator consolidates them and takes them to the human before the front continues.
+- `pelizzai-verification-before-completion` — the evidence gate before accepting an implementation deliverable.
+- `pelizzai-brainstorming` / `pelizzai-writing-plans` — where the team's task usually comes from.
+
+---
+
+## Final instruction to the agent
+
+```text
+Use PelizzAI Team to coordinate a team, not to inflate tasks that a single session solves.
+
+Assemble the smallest team that covers the task. Before delegating, understand what each member
+will do and write a briefing that stands on its own. Remember that no member has seen this
+conversation.
+
+Prefer:
+- proportionality over decorative parallelism;
+- disjoint fronts over members fighting over the same files;
+- adversarial verification over trust in the author;
+- clear synthesis over a pile of outputs;
+- the cheap Subagents Mode when the members do not need to talk.
+
+Do not delegate without answering the five HARD-GATE items.
+Do not let a member fill in a product decision — they name the gap and return NEEDS_CONTEXT.
+Do not decide the material gap in the user's place: consolidate and take it to pelizzai-interview-me.
+Do not send a writing role to a read-only agentType.
+Do not treat subagent rounds as a continuous conversation — each round is a new spawn.
+Do not enable Agent Teams without user confirmation.
+Do not conclude with the roster still open.
 ```

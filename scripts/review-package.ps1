@@ -1,26 +1,26 @@
 #!/usr/bin/env pwsh
-# PelizzAI - review-package: empacota o material de review em arquivo.
+# PelizzAI - review-package: packages the review material into a file.
 #
-# Uso: pwsh scripts/review-package.ps1 <BASE> <HEAD>
-#      pwsh scripts/review-package.ps1 --working-tree
+# Usage: pwsh scripts/review-package.ps1 <BASE> <HEAD>
+#        pwsh scripts/review-package.ps1 --working-tree
 #
-# Grava no handoff dir seguro (gitignored no consumidor; temp em source mode):
-#  - modo range: a lista de commits do range, o `git diff --stat` e o `git diff -U10`;
-#  - modo --working-tree: status + diffs staged e unstaged + o CONTEUDO dos untracked.
-# Imprime o caminho gravado. O revisor le o ARQUIVO - o diff nunca e colado no
-# contexto do coordenador.
+# Writes to the safe handoff dir (gitignored in the consumer; temp in source mode):
+#  - range mode: the range's commit list, the `git diff --stat` and the `git diff -U10`;
+#  - --working-tree mode: status + staged and unstaged diffs + the CONTENT of untracked files.
+# Prints the written path. The reviewer reads the FILE - the diff is never pasted into
+# the coordinator's context.
 #
-# Os blocos usam fence de 4 backticks: diffs de arquivos .md contem ``` e quebrariam
-# um fence de 3.
+# Blocks use a 4-backtick fence: diffs of .md files contain ``` and would break
+# a 3-backtick fence.
 #
-# IMPORTANTE - range e exclusivo do review final. BASE e o `base-sha` persistido no
-# state quando a branch foi criada. Review por tarefa usa --working-tree. NUNCA use
-# HEAD~1: isso descartaria silenciosamente parte da entrega.
+# IMPORTANT - range is exclusive to the final review. BASE is the `base-sha` persisted in
+# the state when the branch was created. Per-task review uses --working-tree. NEVER use
+# HEAD~1: that would silently discard part of the delivery.
 #
-# Requer PowerShell 7+. Variante POSIX: scripts/review-package.sh.
+# Requires PowerShell 7+. POSIX variant: scripts/review-package.sh.
 
-# Sem bloco param(): "--working-tree" seria interpretado pelo binder do PowerShell
-# como nome de parametro. Os argumentos chegam crus em $args.
+# No param() block: "--working-tree" would be interpreted by the PowerShell binder
+# as a parameter name. The arguments arrive raw in $args.
 $Base = if ($args.Count -ge 1) { [string]$args[0] } else { '' }
 $Head = if ($args.Count -ge 2) { [string]$args[1] } else { '' }
 
@@ -49,15 +49,15 @@ function Get-HandoffDir {
 }
 
 git rev-parse --is-inside-work-tree *> $null
-if ($LASTEXITCODE -ne 0) { Fail 'nao e um repositorio git (rode a partir da raiz do projeto)' }
+if ($LASTEXITCODE -ne 0) { Fail 'not a git repository (run from the project root)' }
 
 $workingTree = ($Base -eq '--working-tree')
 if (-not $workingTree) {
-  if (-not $Base -or -not $Head) { Fail 'uso: review-package.ps1 <BASE> <HEAD> | review-package.ps1 --working-tree' }
+  if (-not $Base -or -not $Head) { Fail 'usage: review-package.ps1 <BASE> <HEAD> | review-package.ps1 --working-tree' }
   git rev-parse --verify --quiet "$Base^{commit}" *> $null
-  if ($LASTEXITCODE -ne 0) { Fail "BASE invalido: $Base" }
+  if ($LASTEXITCODE -ne 0) { Fail "invalid BASE: $Base" }
   git rev-parse --verify --quiet "$Head^{commit}" *> $null
-  if ($LASTEXITCODE -ne 0) { Fail "HEAD invalido: $Head" }
+  if ($LASTEXITCODE -ne 0) { Fail "invalid HEAD: $Head" }
 }
 
 $outDir = Get-HandoffDir
@@ -92,16 +92,16 @@ function Test-SensitiveUntracked([string]$Path) {
 
 $content = [System.Collections.Generic.List[string]]::new()
 if ($workingTree) {
-  $content.Add('# Pacote de review - working tree')
+  $content.Add('# Review package - working tree')
   $content.Add('')
-  $content.Add("> Gerado em $now. Mudancas ainda nao commitadas da working tree.")
+  $content.Add("> Generated at $now. Working-tree changes not yet committed.")
   $content.Add('')
   Add-Block $content 'git status --short' 'text' (git status --short)
   Add-Block $content 'Staged - git diff --cached -U10' 'diff' (git diff --cached -U10)
   Add-Block $content 'Unstaged - git diff -U10' 'diff' (git diff -U10)
-  $content.Add('## Arquivos novos (untracked) - conteudo')
+  $content.Add('## New files (untracked) - content')
   $content.Add('')
-  # Exclui o proprio diretorio de handoffs (o pacote em escrita nao entra no pacote).
+  # Excludes the handoff directory itself (the package being written does not go into the package).
   $untracked = @(git ls-files --others --exclude-standard | Where-Object { $_ -notlike 'pelizzai/data/handoffs/*' })
   if ($untracked.Count -gt 0) {
     foreach ($f in $untracked) {
@@ -110,17 +110,17 @@ if ($workingTree) {
       $item = $null
       try { $item = Get-Item -LiteralPath $f -Force -ErrorAction Stop } catch {}
       if ($item -and $item.LinkType) {
-        $content.Add('_link simbólico — conteúdo omitido para não ler fora do repositório._')
+        $content.Add('_symbolic link — content omitted to avoid reading outside the repository._')
         $content.Add('')
         continue
       }
       if (Test-SensitiveUntracked $f) {
-        $content.Add('_arquivo potencialmente sensível — conteúdo omitido; revise o path localmente._')
+        $content.Add('_potentially sensitive file — content omitted; review the path locally._')
         $content.Add('')
         continue
       }
       if ($item -and $item.Length -gt 262144) {
-        $content.Add("_arquivo maior que 256 KiB ($($item.Length) bytes) — conteúdo omitido._")
+        $content.Add("_file larger than 256 KiB ($($item.Length) bytes) — content omitted._")
         $content.Add('')
         continue
       }
@@ -131,17 +131,17 @@ if ($workingTree) {
         foreach ($l in ($text -split "`r?`n")) { $content.Add($l) }
         $content.Add('````')
       } else {
-        $content.Add('_binario ou ilegivel - conteudo omitido._')
+        $content.Add('_binary or unreadable - content omitted._')
       }
       $content.Add('')
     }
   } else {
-    $content.Add('_Nenhum._')
+    $content.Add('_None._')
   }
 } else {
-  $content.Add("# Pacote de review - $Base..$Head")
+  $content.Add("# Review package - $Base..$Head")
   $content.Add('')
-  $content.Add("> Gerado em $now. Range final: BASE = base-sha persistido no state - nunca HEAD~1.")
+  $content.Add("> Generated at $now. Final range: BASE = base-sha persisted in the state - never HEAD~1.")
   $content.Add('')
   Add-Block $content "Commits ($Base..$Head)" 'text' (git log --oneline "$Base..$Head")
   Add-Block $content 'git diff --stat' 'text' (git diff --stat "$Base" "$Head")

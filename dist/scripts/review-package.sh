@@ -1,23 +1,23 @@
 #!/bin/sh
-# PelizzAI — review-package: empacota o material de review em arquivo (variante POSIX).
+# PelizzAI — review-package: packages the review material into a file (POSIX variant).
 #
-# Uso: sh scripts/review-package.sh <BASE> <HEAD>
-#      sh scripts/review-package.sh --working-tree
+# Usage: sh scripts/review-package.sh <BASE> <HEAD>
+#        sh scripts/review-package.sh --working-tree
 #
-# Grava no handoff dir seguro (gitignored no consumidor; temp em source mode):
-#  - modo range: a lista de commits do range, o `git diff --stat` e o `git diff -U10`;
-#  - modo --working-tree: status + diffs staged e unstaged + o CONTEÚDO dos untracked.
-# Imprime o caminho gravado. O revisor lê o ARQUIVO — o diff nunca é colado no
-# contexto do coordenador.
+# Writes to the safe handoff dir (gitignored in the consumer; temp in source mode):
+#  - range mode: the range's commit list, the `git diff --stat` and the `git diff -U10`;
+#  - --working-tree mode: status + staged and unstaged diffs + the CONTENT of untracked files.
+# Prints the written path. The reviewer reads the FILE — the diff is never pasted into
+# the coordinator's context.
 #
-# Os blocos usam fence de 4 backticks: diffs de arquivos .md contêm ``` e quebrariam
-# um fence de 3.
+# Blocks use a 4-backtick fence: diffs of .md files contain ``` and would break
+# a 3-backtick fence.
 #
-# IMPORTANTE — range é exclusivo do review final. BASE é o `base-sha` persistido no
-# state quando a branch foi criada. Review por tarefa usa --working-tree. NUNCA use
-# HEAD~1: isso descartaria silenciosamente parte da entrega.
+# IMPORTANT — range is exclusive to the final review. BASE is the `base-sha` persisted in
+# the state when the branch was created. Per-task review uses --working-tree. NEVER use
+# HEAD~1: that would silently discard part of the delivery.
 #
-# Equivalente PowerShell: scripts/review-package.ps1.
+# PowerShell equivalent: scripts/review-package.ps1.
 
 set -u
 
@@ -44,7 +44,7 @@ is_sensitive_untracked() {
   esac
 }
 
-git rev-parse --is-inside-work-tree >/dev/null 2>&1 || fail "não é um repositório git (rode a partir da raiz do projeto)"
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || fail "not a git repository (run from the project root)"
 
 BASE=${1:-}
 HEAD=${2:-}
@@ -52,9 +52,9 @@ MODE=range
 if [ "$BASE" = "--working-tree" ]; then
   MODE=wt
 else
-  { [ -n "$BASE" ] && [ -n "$HEAD" ]; } || fail "uso: review-package.sh <BASE> <HEAD> | review-package.sh --working-tree"
-  git rev-parse --verify --quiet "$BASE^{commit}" >/dev/null || fail "BASE inválido: $BASE"
-  git rev-parse --verify --quiet "$HEAD^{commit}" >/dev/null || fail "HEAD inválido: $HEAD"
+  { [ -n "$BASE" ] && [ -n "$HEAD" ]; } || fail "usage: review-package.sh <BASE> <HEAD> | review-package.sh --working-tree"
+  git rev-parse --verify --quiet "$BASE^{commit}" >/dev/null || fail "invalid BASE: $BASE"
+  git rev-parse --verify --quiet "$HEAD^{commit}" >/dev/null || fail "invalid HEAD: $HEAD"
 fi
 
 OUT_DIR=$(handoff_dir)
@@ -70,9 +70,9 @@ NOW=$(date '+%Y-%m-%d %H:%M')
 
 {
   if [ "$MODE" = "wt" ]; then
-    echo "# Pacote de review — working tree"
+    echo "# Review package — working tree"
     echo
-    echo "> Gerado em $NOW. Mudanças ainda não commitadas da working tree."
+    echo "> Generated at $NOW. Working-tree changes not yet committed."
     echo
     echo "## git status --short"
     echo
@@ -92,7 +92,7 @@ NOW=$(date '+%Y-%m-%d %H:%M')
     git diff -U10
     echo '````'
     echo
-    echo "## Arquivos novos (untracked) — conteúdo"
+    echo "## New files (untracked) — content"
     echo
     UNTRACKED=$(git ls-files --others --exclude-standard | grep -v '^pelizzai/data/handoffs/' || true)
     if [ -n "$UNTRACKED" ]; then
@@ -100,27 +100,27 @@ NOW=$(date '+%Y-%m-%d %H:%M')
         echo "### $f"
         echo
         if [ -L "$f" ]; then
-          echo "_link simbólico — conteúdo omitido para não ler fora do repositório._"
+          echo "_symbolic link — content omitted to avoid reading outside the repository._"
         elif is_sensitive_untracked "$f"; then
-          echo "_arquivo potencialmente sensível — conteúdo omitido; revise o path localmente._"
+          echo "_potentially sensitive file — content omitted; review the path locally._"
         elif [ "$(wc -c < "$f" | tr -d ' ')" -gt 262144 ]; then
-          echo "_arquivo maior que 256 KiB — conteúdo omitido._"
+          echo "_file larger than 256 KiB — content omitted._"
         elif grep -Iq '' "$f" 2>/dev/null; then
           echo '````text'
           cat "$f"
           echo '````'
         else
-          echo "_binário — conteúdo omitido._"
+          echo "_binary — content omitted._"
         fi
         echo
       done
     else
-      echo "_Nenhum._"
+      echo "_None._"
     fi
   else
-    echo "# Pacote de review — $BASE..$HEAD"
+    echo "# Review package — $BASE..$HEAD"
     echo
-    echo "> Gerado em $NOW. Range final: BASE = base-sha persistido no state — nunca HEAD~1."
+    echo "> Generated at $NOW. Final range: BASE = base-sha persisted in the state — never HEAD~1."
     echo
     echo "## Commits ($BASE..$HEAD)"
     echo

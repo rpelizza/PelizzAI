@@ -1,27 +1,27 @@
 ---
 name: pelizzai-router
-description: Orquestrador de qualquer pedido que precise inspecionar ou alterar um projeto. Classifica efeito, intenção, risco, incerteza e superfícies; recomenda uma head skill e overlays; garante ratificação e isolamento antes da escrita. Na primeira interação com um projeto consumidor, com o harness não inicializado (sem `pelizzai/domain-skills.md`) ou quando o usuário disser "bootstrap", propõe o bootstrap por `pelizzai-audit` antes de rotear. Todo produto/projeto greenfield entra em discovery, spec e plano aprovados mesmo com stack definida. Use após `pelizzai-core`; não use em conversa puramente conceitual sem projeto.
+description: Orchestrator for any request that needs to inspect or change a project. Classifies effect, intent, risk, uncertainty, and surfaces; recommends one head skill and overlays; guarantees ratification and isolation before writing. On the first interaction with a consumer project, with the harness not initialized (no `pelizzai/domain-skills.md`), or when the user says "bootstrap", proposes the bootstrap via `pelizzai-audit` before routing. Every greenfield product/project goes through approved discovery, spec, and plan even with the stack specified. Use after `pelizzai-core`; do not use in a purely conceptual conversation without a project.
 ---
 
 # PelizzAI Router
 
 <SUBAGENT-STOP>
-Se você recebeu uma subtarefa fechada, não roteie novamente. Siga o briefing e escale se faltar contexto.
+If you received a closed subtask, do not route again. Follow the briefing and escalate if context is missing.
 </SUBAGENT-STOP>
 
-## Objetivo
+## Purpose
 
-Produzir a menor rota que resolve a tarefa com segurança. O router decide o **ciclo de vida**; `pelizzai-reasoning` decide as **heurísticas** dentro de cada fase.
+Produce the smallest route that solves the task safely. The router decides the **lifecycle**; `pelizzai-reasoning` decides the **heuristics** within each phase.
 
-**Anuncie:** "Usando a skill PelizzAI Router para classificar efeito, risco e fluxo da tarefa."
+**Announce**, in the conversation's language: that you are using the PelizzAI Router skill to classify the task's effect, risk, and flow.
 
-## Envelope de decisão
+## Decision envelope
 
-Antes de acionar outra skill, derive:
+Before triggering another skill, derive:
 
 ```text
 effect:      read-only | write-local | external
-intent:      bootstrap | feature | bug | ajuste | refactor | infra | review | conflito
+intent:      bootstrap | feature | bug | tweak | refactor | infra | review | conflict
 risk:        low | medium | high
 uncertainty: low | medium | high
 surfaces:    ui | security | data | public-contract | docs | none
@@ -29,388 +29,395 @@ surfaces:    ui | security | data | public-contract | docs | none
 
 ### Effect
 
-| Effect | Critério | Regra |
+| Effect | Criterion | Rule |
 | --- | --- | --- |
-| `read-only` | explicar, analisar, mapear, revisar ou diagnosticar sem alterar estado | Pode inspecionar; nunca cria/edita state, catálogo, profile, branch ou arquivos. |
-| `write-local` | alterar código, arquivo, configuração ou artefato versionável | Isolamento antes da primeira escrita persistente. |
-| `external` | push/PR/deploy/mensagem/custo/permissão/produção/exclusão | Valide autoridade, alvo, reversibilidade e confirmação no gate da ação. Isolamento Git só precede a ação quando ela também escreve no repositório. |
+| `read-only` | explain, analyze, map, review, or diagnose without changing state | May inspect; never creates/edits state, catalog, profile, branches, or files. |
+| `write-local` | change code, files, configuration, or a versionable artifact | Isolation before the first persistent write. |
+| `external` | push/PR/deploy/message/cost/permission/production/deletion | Validate authority, target, reversibility, and confirmation at the action's gate. Git isolation only precedes the action when it also writes to the repository. |
 
-Uma tarefa pode começar read-only (investigação) e mudar para write-local quando o usuário pedir o fix. Reclassifique **antes** da primeira mutação.
+A task may start read-only (investigation) and switch to write-local when the user asks for the fix. Reclassify **before** the first mutation.
 
 ### Risk
 
 ```text
-low    — local, reversível, sem contrato/dados/segurança.
-medium — comportamento persistente, integração limitada ou contrato público aditivo/reversível
-         com aceite claro.
-high   — dados, auth, segurança, produção, contrato público breaking ou de grande blast radius,
-         irreversibilidade ou múltiplos sistemas.
+low    — local, reversible, no contract/data/security.
+medium — persistent behavior, limited integration, or an additive/reversible public contract
+         with clear acceptance.
+high   — data, auth, security, production, a breaking or large-blast-radius public contract,
+         irreversibility, or multiple systems.
 ```
 
 ### Uncertainty
 
 ```text
-low    — objetivo, aceite e abordagem foram explicitados ou ratificados pelo usuário.
-medium — há escolhas reais, mas o espaço é limitado.
-high   — requisitos/causa/arquitetura ainda precisam ser descobertos.
+low    — goal, acceptance, and approach were stated or ratified by the user.
+medium — there are real choices, but the space is limited.
+high   — requirements/cause/architecture still need to be discovered.
 ```
 
-Não transforme essas classificações em formulário. Derive-as do pedido e da evidência, mas não
-confunda inferência do harness com decisão humana. Apresente a ROTA montada (lane, head skill,
-overlays e artefatos) como recomendação no **Gate de kickoff** e aguarde ratificação em toda tarefa
-mutável. Classificar é trabalho do harness; aceitar ou ajustar a rota é decisão do usuário.
+Do not turn these classifications into a form. Derive them from the request and the evidence, but do
+not confuse harness inference with human decision. Present the assembled ROUTE (lane, head skill,
+overlays, and artifacts) as a recommendation at the **kickoff gate** and wait for ratification on
+every mutating task. Classifying is the harness's job; accepting or adjusting the route is the
+user's decision.
 
-## Análise da proposta (sempre que houver efeito mutável não-trivial)
+## Proposal analysis (whenever there is a non-trivial mutating effect)
 
-Depois de derivar o envelope e ANTES de escolher a head skill, faça uma passada de stress compacta do pedido — acione a rotina **Proposal Stress (Assumption Tracking aplicado)** da `pelizzai-reasoning` ([proposal-stress.md](../pelizzai-reasoning/techniques/proposal-stress.md)). Apresente em ≤6 bullets:
+After deriving the envelope and BEFORE choosing the head skill, run a compact stress pass over the request — trigger the **Proposal Stress (Assumption Tracking applied)** routine from `pelizzai-reasoning` ([proposal-stress.md](../pelizzai-reasoning/techniques/proposal-stress.md)). Present in ≤6 bullets:
 
-- premissas materiais que precisariam ser ratificadas para prosseguir;
-- lacunas que mudam escopo/UX/arquitetura/segurança/dados;
-- riscos concretos;
-- alternativas materialmente diferentes, quando existirem.
+- material assumptions that would need ratification to proceed;
+- gaps that change scope/UX/architecture/security/data;
+- concrete risks;
+- materially different alternatives, when they exist.
 
-A Análise da proposta é diagnóstico, não autorização. Ela alimenta a linha de **Descoberta** do
-Gate de kickoff; cada lacuna que pertença ao usuário será resolvida depois pela
-`pelizzai-interview-me`, uma pergunta por vez, com recomendação.
+The Proposal analysis is diagnosis, not authorization. It feeds the **Discovery** line of the
+kickoff gate; each gap that belongs to the user will be resolved later by
+`pelizzai-interview-me`, one question at a time, with a recommendation.
 
-Proporcionalidade não remove autoridade. Em `read-only` puro e ajuste/bug trivial cujo contrato foi
-explicitado, a análise pode colapsar a zero. Em `bounded`, colapsa numa linha: "Sem lacunas
-materiais; contrato informado: <lista curta>". Projeto/produto greenfield nunca colapsa: stack
-informada não define usuários, fluxos, estados, políticas, UX, dados nem aceite.
+Proportionality does not remove authority. In pure `read-only` and a trivial tweak/bug whose
+contract was stated, the analysis may collapse to zero. In `bounded`, it collapses to one line: "No
+material gaps; stated contract: <short list>". A greenfield project/product never collapses: a
+specified stack does not define users, flows, states, policies, UX, data, or acceptance.
 
-Sob briefing fechado (SUBAGENT-STOP), não produza a Análise da proposta nem abra a Descoberta: aplique o briefing e escale ao coordenador o que exigir decisão.
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce the Proposal analysis or open Discovery: apply the briefing and escalate to the coordinator whatever requires a decision.
 
-## Source mode e bootstrap
+## Source mode and bootstrap
 
-Detecte o repo-fonte do próprio PelizzAI EXCLUSIVAMENTE pela sentinela:
+Detect the PelizzAI source repo EXCLUSIVELY by the sentinel:
 
 ```text
 scripts/pelizzai-source-repo.txt
 ```
 
-Manifesto (`scripts/pelizzai-core-skills.txt`) e scripts `sync-harness.*` existem também nos
-consumidores instalados via `-ExportConsumer` — a presença deles NÃO indica source mode.
+The manifest (`scripts/pelizzai-core-skills.txt`) and the `sync-harness.*` scripts also exist in
+consumers installed via `-ExportConsumer` — their presence does NOT indicate source mode.
 
-Em **source mode**, não exija `pelizzai/domain-skills.md` nem crie runtime consumidor. Trabalhe
-pelas regras do repo-fonte. Para tarefas mutáveis, ainda use task branch e prova, mas mantenha
-plano/progresso no mecanismo nativo da plataforma e o seal como SHA do execution record; não crie
-`pelizzai/data/state.md`, specs/plans consumidoras nem closure commit de state.
+In **source mode**, do not require `pelizzai/domain-skills.md` and do not create consumer runtime.
+Work by the source repo's rules. For mutating tasks, still use a task branch and proof, but keep
+plan/progress in the platform's native mechanism and the seal as the execution record's SHA; do not
+create `pelizzai/data/state.md`, consumer specs/plans, or a state closure commit.
 
-O **execution record nativo** é o estado lógico da tarefa no mecanismo de plano/task da plataforma,
-nunca um arquivo substituto no repo. Mantenha nele, quando aplicável: `phase`, branch/base,
-isolamento, decisões de execução, progresso, overlays, `validated-head`, `delivery-head` e status do
-destino (`local | pushed | pr-open | partial`). Termine em `phase: done` ou `phase: blocked`;
-`phase: delivered` é estado de repouso que ainda exige constatação de `done` (ver Estado e retomada).
+The **native execution record** is the task's logical state in the platform's plan/task mechanism,
+never a substitute file in the repo. Keep in it, when applicable: `phase`, branch/base, isolation,
+execution decisions, progress, overlays, `validated-head`, `delivery-head`, and destination status
+(`local | pushed | pr-open | partial`). End at `phase: done` or `phase: blocked`;
+`phase: delivered` is a resting state that still requires `done` to be observed (see State and resumption).
 
-Em projeto consumidor, **antes de classificar o pedido**, verifique: o harness está inicializado?
-Se `pelizzai/domain-skills.md` NÃO existir — ou for a primeira interação com este projeto, ou o
-usuário tiver digitado `bootstrap` —, **proponha** o bootstrap por `pelizzai-audit` (mapeia o
-projeto, cria as skills de domínio e os docs) como a primeira coisa do turno e aguarde a resposta.
-O router não espera o usuário lembrar de pedir: catálogo ausente é sinal suficiente para levantar a
-proposta, em uma linha, com o motivo.
+In a consumer project, **before classifying the request**, check: is the harness initialized?
+If `pelizzai/domain-skills.md` does NOT exist — or it is the first interaction with this project, or
+the user typed `bootstrap` — **propose** the bootstrap via `pelizzai-audit` (maps the project,
+creates the domain skills and docs) as the first thing in the turn and wait for the answer.
+The router does not wait for the user to remember to ask: a missing catalog is signal enough to
+raise the proposal, in one line, with the reason.
 
-Propor não é executar. O bootstrap só escreve depois do "sim" explícito — aceito, o efeito passa a
-`write-local` e vale o Gate de primeira escrita. Se o usuário recusar ou adiar, o pedido original
-segue como estava: read-only continua read-only, nenhum arquivo é criado, e você registra a
-limitação em uma linha ("sigo sem catálogo de domínio; o mapeamento fica para depois"). Pergunta
-puramente conceitual, que não exige tocar nem entender ESTE projeto, não dispara a proposta —
-responda direto. Em source mode não há gatilho: não existe catálogo consumidor a criar.
+Proposing is not executing. The bootstrap only writes after an explicit "yes" — once accepted, the
+effect becomes `write-local` and the first-write gate applies. If the user declines or defers, the
+original request proceeds as it was: read-only stays read-only, no file is created, and you record
+the limitation in one line ("proceeding without a domain catalog; the mapping stays for later"). A
+purely conceptual question, which requires neither touching nor understanding THIS project, does not
+trigger the proposal — answer directly. In source mode there is no trigger: there is no consumer
+catalog to create.
 
-| Situação | Rota |
+| Situation | Route |
 | --- | --- |
-| Catálogo ausente, primeira interação com o projeto | Invoque `pelizzai-audit` (no mínimo `scan-only`) e proponha o bootstrap antes do Gate de kickoff; a recusa não bloqueia o pedido. |
-| Catálogo ausente, `effect: read-only` | Mapeie em `scan-only`, proponha e aguarde. Sim → `pelizzai-audit` em `bootstrap-write`; não/depois → segue em `scan-only`, nenhum arquivo é criado. |
-| Usuário disse `bootstrap`/`reinicializar` | `pelizzai-audit` em `bootstrap-write`. |
-| Tarefa mutável, catálogo ausente | Faça scan-only, apresente o conjunto mínimo de artefatos proposto e obtenha consentimento para `bootstrap-write`. |
-| Catálogo existe, ledger ausente | Em tarefa mutável autorizada, repare somente o ledger; read-only apenas reporta. |
+| Catalog missing, first interaction with the project | Invoke `pelizzai-audit` (at minimum `scan-only`) and propose the bootstrap before the kickoff gate; declining does not block the request. |
+| Catalog missing, `effect: read-only` | Map in `scan-only`, propose, and wait. Yes → `pelizzai-audit` in `bootstrap-write`; no/later → continue in `scan-only`, no file is created. |
+| User said `bootstrap`/`reinitialize` | `pelizzai-audit` in `bootstrap-write`. |
+| Mutating task, catalog missing | Do scan-only, present the proposed minimum set of artifacts, and get consent for `bootstrap-write`. |
+| Catalog exists, ledger missing | In an authorized mutating task, repair only the ledger; read-only just reports. |
 
-Com catálogo **existente**, reexecutar bootstrap (remap) continua exigindo pedido explícito ou drift
-observado: a proatividade vale para o harness não inicializado, não para reescrever o que já foi
-ratificado.
+With an **existing** catalog, re-running the bootstrap (remap) still requires an explicit request or
+observed drift: the proactivity applies to an uninitialized harness, not to rewriting what was
+already ratified.
 
-## Estado e retomada
+## State and resumption
 
-Leia `pelizzai/data/state.md` quando existir, sem escrevê-lo em tarefas read-only.
+Read `pelizzai/data/state.md` when it exists, without writing it in read-only tasks.
 
 ```text
-slug: <none> ou phase: done
-→ não há tarefa ativa.
+slug: <none> or phase: done
+→ there is no active task.
 
 phase: blocked
-→ apresente o bloqueio antes de iniciar outra mutação.
+→ present the blocker before starting another mutation.
 
 phase: delivered
-→ entrega selada aguardando constatação. Aplique a §Reconciliação da entrega anterior
-  (`pelizzai-execution-plans`; retomada: `pelizzai-recovery`) ANTES de tratar como tarefa ativa ou
-  conflito: verifique `confirmar:` contra o git e constate `done` — ou proponha retomar a branch ou
-  `abandoned`. Só então classifique o pedido novo.
+→ sealed delivery awaiting observation. Apply §Reconciliation of the previous delivery
+  (`pelizzai-execution-plans`; resumption: `pelizzai-recovery`) BEFORE treating it as an active
+  task or a conflict: verify `confirm:` against git and observe `done` — or propose resuming the
+  branch or `abandoned`. Only then classify the new request.
 
-tarefa ativa que corresponde ao pedido
-→ valide state contra Git e retome sem repetir decisões confirmadas.
+active task matching the request
+→ validate state against Git and resume without repeating confirmed decisions.
 
-tarefa ativa diferente do pedido novo
-→ não sobrescreva; informe o conflito e decida com o usuário entre concluir/pausar ou abrir
-  outra frente isolada.
+active task different from the new request
+→ do not overwrite; report the conflict and decide with the user between finishing/pausing or
+  opening another isolated front.
 ```
 
-Validação:
+Validation:
 
-- branch: compare a branch registrada com `git branch --show-current`;
-- worktree: valide caminho + branch por `git worktree list` ou execute dentro do worktree;
-- base: confirme `base-ref`/`base-sha` quando registrados;
-- plano: o caminho registrado precisa existir no ambiente de execução.
+- branch: compare the recorded branch with `git branch --show-current`;
+- worktree: validate path + branch via `git worktree list` or run inside the worktree;
+- base: confirm `base-ref`/`base-sha` when recorded;
+- plan: the recorded path must exist in the execution environment.
 
-Em divergência que arrisque trabalho, use `pelizzai-recovery`; nunca reconcilie destrutivamente por palpite.
+On a divergence that risks work, use `pelizzai-recovery`; never reconcile destructively on a hunch.
 
-## Gate de primeira escrita
+## First-write gate
 
-Para `write-local`/`external`, invoque `pelizzai-starting-branch` **antes** de criar ou alterar:
+For `write-local`/`external`, invoke `pelizzai-starting-branch` **before** creating or changing:
 
 - `pelizzai/data/state.md`;
-- specs, planos ou ADRs;
-- código, config, testes, scaffolds ou protótipos;
-- catálogo/profile/skills de domínio do bootstrap.
+- specs, plans, or ADRs;
+- code, config, tests, scaffolds, or prototypes;
+- the bootstrap's catalog/profile/domain skills.
 
-Nos tracks com design/plano, abra uma **task/planning branch** normal primeiro. O gate pós-plano pode:
+In tracks with design/plan, open a normal **task/planning branch** first. The post-plan gate may:
 
-- continuar nessa branch; ou
-- após um checkpoint dos artefatos de planejamento, liberar a branch no working tree principal e montar um worktree a partir da **mesma branch existente**.
+- continue on that branch; or
+- after a checkpoint of the planning artifacts, release the branch from the main working tree and mount a worktree from the **same existing branch**.
 
-Nunca crie worktree da base limpa depois de escrever spec/plano em outro working tree.
+Never create a worktree from the clean base after writing spec/plan in another working tree.
 
-## Classificar intenção e escolher lane
+## Classify intent and choose the lane
 
-| Pedido | Track/head |
+| Request | Track/head |
 | --- | --- |
-| Bootstrap/remap autorizado, ou proposta de bootstrap aceita | `pelizzai-audit` (`bootstrap-write`) |
-| Algo quebrado/erro/falha/comportamento inesperado; "não funciona", "deu erro", "tá com bug", "para de chutar" | `bug` → `pelizzai-debugging` |
-| Mudança local sem nova regra/contrato/superfície (texto, label, cor, botão/campo em tela existente; ~1 arquivo/<~50 linhas como sinal) | `ajuste` → `pelizzai-quick-fix` |
-| Refactor local preservando comportamento | `ajuste` → `pelizzai-quick-fix` |
-| Review de diff, working tree, branch ou PR | `review` → `pelizzai-review` |
-| Revisão codebase-wide de arquitetura, dívida ou seams | `review` → `pelizzai-improving-architecture` |
-| Conflito Git em andamento | `pelizzai-resolving-merge-conflicts` |
-| Produto/projeto greenfield, mesmo com stack definida | `exploratory` → `pelizzai-brainstorming` + `pelizzai-interview-me` → spec → plano |
-| Feature/refactor/infra com design já aprovado e plano pronto | `pelizzai-execution-plans` |
-| Design/spec/Figma aprovado, aceite claro, mas sem plano | `pelizzai-writing-plans`; brainstorming/interview-me **propostos** quando a Análise da proposta sinaliza lacuna material |
-| Estressar design/plano existente, resolver lacuna material sinalizada, ou pedido de entrevista | proposto pela Análise da proposta ou pelo usuário → `pelizzai-interview-me` |
-| Feature/refactor/infra existente com requisitos ratificados, mas sem plano | use lane abaixo |
+| Authorized bootstrap/remap, or accepted bootstrap proposal | `pelizzai-audit` (`bootstrap-write`) |
+| Something broken/error/failure/unexpected behavior; "it doesn't work", "it broke", "there's a bug", "stop guessing" | `bug` → `pelizzai-debugging` |
+| Local change without a new rule/contract/surface (text, label, color, button/field on an existing screen; ~1 file/<~50 lines as a signal) | `tweak` → `pelizzai-quick-fix` |
+| Local refactor preserving behavior | `tweak` → `pelizzai-quick-fix` |
+| Review of a diff, working tree, branch, or PR | `review` → `pelizzai-review` |
+| Codebase-wide review of architecture, debt, or seams | `review` → `pelizzai-improving-architecture` |
+| Git conflict in progress | `pelizzai-resolving-merge-conflicts` |
+| Greenfield product/project, even with the stack specified | `exploratory` → `pelizzai-brainstorming` + `pelizzai-interview-me` → spec → plan |
+| Feature/refactor/infra with design already approved and a plan ready | `pelizzai-execution-plans` |
+| Approved design/spec/Figma, clear acceptance, but no plan | `pelizzai-writing-plans`; brainstorming/interview-me **proposed** when the Proposal analysis flags a material gap |
+| Stress-test an existing design/plan, resolve a flagged material gap, or an interview request | proposed by the Proposal analysis or by the user → `pelizzai-interview-me` |
+| Existing feature/refactor/infra with ratified requirements but no plan | use the lanes below |
 
-### Lanes de feature/refactor/infra
+### Feature/refactor/infra lanes
 
-| Lane | Predicado | Rota |
+| Lane | Predicate | Route |
 | --- | --- | --- |
-| `bounded` | baixa incerteza/risco; um comportamento coeso; aceite claro; sem decisão arquitetural | `pelizzai-writing-plans` em modo compacto; não force brainstorming. |
-| `standard` | risco médio e/ou algumas partes/contratos, com solução e aceite claros | `pelizzai-writing-plans`; prependa brainstorming compacto somente se restar trade-off real. |
-| `exploratory` | alta incerteza ou risco alto que exige descoberta/mitigação de design; arquitetura ou decisões sensíveis acopladas | `pelizzai-brainstorming` completo + stress proporcional → plano. |
+| `bounded` | low uncertainty/risk; one cohesive behavior; clear acceptance; no architectural decision | `pelizzai-writing-plans` in compact mode; do not force brainstorming. |
+| `standard` | medium risk and/or a few parts/contracts, with a clear solution and acceptance | `pelizzai-writing-plans`; prepend a compact brainstorming only if a real trade-off remains. |
+| `exploratory` | high uncertainty, or high risk that demands discovery/design mitigation; architecture or sensitive coupled decisions | full `pelizzai-brainstorming` + proportional stress → plan. |
 
-### Regra greenfield
+### Greenfield rule
 
-Produto/projeto greenfield é sempre `exploratory` na entrada: isso inclui criar sistema, aplicativo,
-serviço ou MVP do zero, ainda que framework, linguagem e banco já tenham sido escolhidos. A stack reduz incerteza
-técnica; não resolve decisões de produto. A rota obrigatória, salvo dispensa explícita do usuário
-em cada artefato, é:
+A greenfield product/project is always `exploratory` at entry: that includes creating a system,
+application, service, or MVP from scratch, even when framework, language, and database have already
+been chosen. The stack reduces technical uncertainty; it does not resolve product decisions. The
+mandatory route, barring the user's explicit waiver of each artifact, is:
 
 ```text
-entendimento ratificado
-→ descoberta com `pelizzai-interview-me`: uma pergunta por vez, com recomendação
+ratified understanding
+→ discovery with `pelizzai-interview-me`: one question at a time, with a recommendation
 → design/spec (`pelizzai-brainstorming`)
-→ stress da spec com `pelizzai-interview-me` + aprovação
-→ proposta e ratificação de domain skills
-→ plano de implementação
-→ stress do plano com `pelizzai-interview-me` + aprovação
-→ setup ratificado
-→ execução
+→ spec stress-test with `pelizzai-interview-me` + approval
+→ domain skills proposal and ratification
+→ implementation plan
+→ plan stress-test with `pelizzai-interview-me` + approval
+→ ratified setup
+→ execution
 ```
 
-Context7/documentação oficial é reconhecimento técnico read-only, não etapa tardia. Depois de
-identificar a stack e a versão real em manifests/lockfiles — ou a stack candidata em greenfield —,
-consulte-o antes do kickoff quando isso melhorar a classificação, revelar restrições, evitar uma
-pergunta factual ou tornar a recomendação mais precisa. Continue usando-o durante design, plano,
-implementação, debugging, upgrades e autoria/manutenção de skills. Nunca o use para inventar
-persona, regra de negócio, permissão, estado, prioridade, retenção ou critério de aceite.
+Context7/official documentation is read-only technical reconnaissance, not a late step. After
+identifying the stack and the real version in manifests/lockfiles — or the candidate stack in
+greenfield — consult it before kickoff whenever that improves classification, reveals constraints,
+avoids a factual question, or sharpens the recommendation. Keep using it through design, planning,
+implementation, debugging, upgrades, and skill authoring/maintenance. Never use it to invent a
+persona, business rule, permission, state, priority, retention, or acceptance criterion.
 
-Um endpoint pequeno, aditivo e com contrato claro pode ser `standard` com review/overlays mais
-fortes; risco eleva prova e gates, não cria incerteza artificial. Uma mudança grande e mecânica
-pode ter baixa incerteza. Linhas/arquivos são sinais, não o critério principal.
+A small, additive endpoint with a clear contract can be `standard` with stronger review/overlays;
+risk raises proof and gates, it does not create artificial uncertainty. A large, mechanical change
+can have low uncertainty. Lines/files are signals, not the main criterion.
 
-## Overlays obrigatórios
+## Mandatory overlays
 
-Derive overlays por superfície e propague-os para plano, task brief, review e Verification; registre
-no state consumidor ou execution record nativo.
+Derive overlays by surface and propagate them to the plan, task brief, review, and Verification;
+record them in the consumer state or the native execution record.
 
-| Sinal | Overlay/conduta |
+| Signal | Overlay/conduct |
 | --- | --- |
-| tela, componente, CSS, layout, UX, acessibilidade | `pelizzai-frontend` desde design/implementação até QA visual. |
-| auth, input externo, SQL, upload, segredo, CORS, SSRF, dependência | `pelizzai-oswap` antes da validação final. |
-| padrões específicos do projeto | consumidor: skills de `pelizzai/domain-skills.md`; source mode: regras/skills do repo-fonte. |
-| documentação humana parte do escopo | `pelizzai-documenting-features` antes da validação final. |
+| screen, component, CSS, layout, UX, accessibility | `pelizzai-frontend` from design/implementation through visual QA. |
+| auth, external input, SQL, upload, secret, CORS, SSRF, dependency | `pelizzai-oswap` before final validation. |
+| project-specific patterns | consumer: skills from `pelizzai/domain-skills.md`; source mode: the source repo's rules/skills. |
+| human documentation in scope | `pelizzai-documenting-features` before final validation. |
 
-`Playwright`, browser e screenshot são ferramentas do overlay frontend, não substitutos dele.
+`Playwright`, the browser, and screenshots are tools of the frontend overlay, not substitutes for it.
 
-## Defaults proporcionais de execução
+## Proportional execution defaults
 
-Compute os defaults de setup como **recomendação**, não como decisão aplicada em silêncio. Leia primeiro `pelizzai/profile.md` (seção `## Defaults de execução ratificados`, quando existir): valor preenchido é a recomendação a exibir; `<unset>` recai no default proporcional abaixo.
+Compute the setup defaults as a **recommendation**, not a decision applied silently. Read `pelizzai/profile.md` first (section `## Ratified execution defaults`, when it exists): a filled value is the recommendation to display; `<unset>` falls back to the proportional default below.
 
 ```text
-bounded/ajuste/bug comum:
+bounded/tweak/common bug:
   isolation: branch
   execution-mode: inline
   commit-strategy: granular
 
-plano com frentes realmente independentes:
-  isolation: worktree(s) recomendado; execution-mode: subagents/team quando há independência real.
+plan with truly independent fronts:
+  isolation: worktree recommended — ONE worktree per task, never one per agent; the fronts share it
+  and only write on DISJOINT paths. execution-mode: subagents/team when there is real independence.
 
 squash-final:
-  só quando o histórico intermediário não tem valor; consolida ANTES da validação final.
+  only when the intermediate history has no value; consolidate BEFORE final validation.
 ```
 
-O router não aplica esses defaults — calcula a recomendação e encaminha para ratificação:
+The router does not apply these defaults — it computes the recommendation and forwards it for ratification:
 
-- **Tracks com plano** (bounded/standard/exploratory): defira isolamento, modo e commit ao **Gate de setup pós-plano** consolidado da `pelizzai-execution-plans` — é lá que as três opções de modo (inline · subagents · **team**) ficam sempre visíveis e a estratégia de commit é sempre mostrada.
-- **Write-local sem plano** (ajuste/bug): entregue a recomendação à head skill; a própria head skill
-  (`pelizzai-quick-fix`/`pelizzai-debugging`) emite o confirm compacto de UMA linha — base, nome,
-  isolamento, modo e commits visíveis e nomeados; um "ok" ratifica tudo, override nomeado ajusta
-  só aquele item — antes da primeira escrita. O router não duplica a pergunta; o menu
-  uma-decisão-por-turno pertence ao gate pós-plano.
+- **Tracks with a plan** (bounded/standard/exploratory): defer isolation, mode, and commit to the consolidated **post-plan setup gate** of `pelizzai-execution-plans` — that is where the three mode options (inline · subagents · **team**) are always visible and the commit strategy is always shown.
+- **Write-local without a plan** (tweak/bug): hand the recommendation to the head skill; the head
+  skill itself (`pelizzai-quick-fix`/`pelizzai-debugging`) issues the compact ONE-line confirm —
+  base, name, isolation, mode, and commits visible and named; one "ok" ratifies everything, a named
+  override adjusts only that item — before the first write. The router does not duplicate the
+  question; the one-decision-per-turn menu belongs to the post-plan gate.
 
-`worktree` e `squash-final` nunca são aplicados sem escolha do usuário. Use subagents/time para independência real, diversidade de hipóteses ou ganho mensurável; não os trate como hierarquicamente melhores que inline.
+`worktree` and `squash-final` are never applied without the user's choice. Use subagents/team for real independence, hypothesis diversity, or measurable gain; do not treat them as hierarchically better than inline.
 
-## Lacuna material durante a execução
+## Material gap during execution
 
-Ratificar a rota não encerra a autoridade do usuário. Depois do kickoff — em spec, plano,
-implementação, debugging, review ou fechamento — **toda lacuna material interrompe o trabalho e volta
-ao usuário pela `pelizzai-interview-me`**, uma pergunta por vez, com recomendação. Conta como lacuna
-material: requisito ambíguo; decisão de escopo, UX, arquitetura, dados ou segurança que a spec/o
-plano não cobre; contrato de interface indefinido.
+Ratifying the route does not end the user's authority. After kickoff — in spec, plan,
+implementation, debugging, review, or closeout — **every material gap stops the work and goes back
+to the user through `pelizzai-interview-me`**, one question at a time, with a recommendation. A
+material gap includes: an ambiguous requirement; a scope, UX, architecture, data, or security
+decision that the spec/plan does not cover; an undefined interface contract.
 
-Preencher a lacuna por default, convenção do ecossistema, Context7 ou “inferência razoável” é
-violação — inclusive quando a escolha parece óbvia e reversível. Context7 e documentação oficial
-eliminam dúvida **factual**; nunca ratificam decisão que pertence ao usuário.
+Filling the gap with a default, ecosystem convention, Context7, or "reasonable inference" is a
+violation — including when the choice looks obvious and reversible. Context7 and official
+documentation eliminate **factual** doubt; they never ratify a decision that belongs to the user.
 
-A autonomia entre gates continua valendo para o passo **mecânico e verificável** dentro de
-fronteiras já ratificadas (spec e plano aprovados, setup ratificado). Se a resposta muda produto,
-escopo, UX, arquitetura, dados, segurança, custo ou aceite, ela não é mecânica: pare e pergunte.
+Autonomy between gates still holds for the **mechanical, verifiable** step within already-ratified
+boundaries (approved spec and plan, ratified setup). If the answer changes product, scope, UX,
+architecture, data, security, cost, or acceptance, it is not mechanical: stop and ask.
 
 ## Sync & delta
 
-Para tarefa mutável em Git, observe a realidade antes de decidir:
+For a mutating task in Git, observe reality before deciding:
 
 ```text
 git status --short --branch
-git fetch origin                 # somente se houver remoto e a rede estiver disponível
+git fetch origin                 # only if there is a remote and the network is available
 git log --oneline <base>..HEAD
-git log --oneline HEAD..origin/<base>  # quando o ref existir
+git log --oneline HEAD..origin/<base>  # when the ref exists
 ```
 
-Releia apenas o delta relevante. Não faça fetch em análise read-only sem necessidade, nem esconda falha de rede.
+Re-read only the relevant delta. Do not fetch in a read-only analysis without need, and do not hide a network failure.
 
-## Registro de execução
+## Execution record
 
-Somente tarefas mutáveis atualizam o registro: template de state no consumidor; execution record
-nativo em source mode, sem criar arquivo. Campos lógicos:
+Only mutating tasks update the record: the state template in a consumer; the native execution
+record in source mode, without creating a file. Logical fields:
 
 ```text
 slug, track, lane, phase, effect, risk, overlays,
 base-ref, base-sha, branch, isolation, worktree-path,
 execution-mode, commit-strategy, audience, kickoff,
-spec, plan, project, confirmar,
-validated-head (somente após validação final).
+spec, plan, project, confirm,
+validated-head (only after final validation).
 ```
 
-O registro é o **cursor** da tarefa, não o arquivo de carimbos das aprovações. Em greenfield, as oito
-etapas (descoberta → spec → stress → aprovação → plano → stress → aprovação → setup) continuam
-obrigatórias e suas ratificações ficam no **cabeçalho do plano**, com data; o gate de setup só grava
-`kickoff: ratificado` depois de conferi-las ali ou de registrar a dispensa explícita do usuário.
+The record is the task's **cursor**, not a stamp card of approvals. In greenfield, the eight
+steps (discovery → spec → stress → approval → plan → stress → approval → setup) remain mandatory
+and their ratifications live in the **plan header**, dated; the setup gate only writes
+`kickoff: ratified` after checking them there or after recording the user's explicit waiver.
 
-Ao ratificar o Gate de kickoff, registre a `lane`/`audience`/overlays da rota, mas deixe `kickoff:
-pendente`: o marcador `kickoff: ratificado <AAAA-MM-DD>` pertence ao Gate de setup pós-plano ou ao
-confirm da head skill de ajuste/bug, antes da primeira escrita de produto. A retomada honra decisões
-já ratificadas; uma tarefa nova nunca herda `lane`/`kickoff`/`audience`.
+When ratifying the kickoff gate, record the route's `lane`/`audience`/overlays, but leave
+`kickoff: pending`: the `kickoff: ratified <YYYY-MM-DD>` marker belongs to the post-plan setup gate
+or to the tweak/bug head skill's confirm, before the first product write. Resumption honors
+decisions already ratified; a new task never inherits `lane`/`kickoff`/`audience`.
 
-Uma tarefa nova nunca herda decisões da anterior. O fechamento pertence a `pelizzai-finish-task`.
+A new task never inherits decisions from the previous one. Closeout belongs to `pelizzai-finish-task`.
 
 ## Red flags
 
 ```text
-- Bootstrap mutável para responder pedido read-only sem propor e obter o "sim" do usuário.
-- Encontrar catálogo ausente e seguir em silêncio, sem propor o bootstrap.
-- Escrever state/spec/plano antes do isolamento.
-- Forçar brainstorming completo numa feature bounded.
-- Classificar produto/projeto greenfield como bounded porque a stack foi informada.
-- Usar linha/arquivo como único medidor de complexidade.
-- Tratar frontend/security como oferta tardia.
-- Aplicar isolamento, modo de execução ou estratégia de commit sem ratificação do usuário.
-- Pulverizar a rota ou o setup em várias micro-perguntas em vez de um bloco agrupado.
-- Pulverizar o confirm compacto de ajuste/bug em perguntas separadas, ou promover um ajuste a
-  bounded/plano só porque o aceite é claro (spec/plano para trocar um botão é a falha histórica).
-- Assumir em silêncio decisão que muda escopo/UX/arquitetura sem apresentá-la na Análise da proposta nem no Gate de kickoff.
-- Usar Context7, convenção ou “default seguro” como voto do usuário.
-- Preencher com default/convenção/inferência uma lacuna material que apareceu DEPOIS do kickoff, em
-  vez de parar o trabalho e levá-la à `pelizzai-interview-me`.
-- Fazer várias perguntas de descoberta no mesmo turno quando a resposta anterior muda a próxima.
-- Paralelizar escrita numa working tree compartilhada como se worktree isolasse agentes.
-- Herdar `lane`/base/branch/strategy de state de uma tarefa ANTERIOR como carryover acidental — a política de projeto explicitamente ratificada no `profile.md` é a única exceção.
-- Acionar várias head skills ao mesmo tempo.
+- A mutating bootstrap to answer a read-only request without proposing and getting the user's "yes".
+- Finding a missing catalog and proceeding in silence, without proposing the bootstrap.
+- Writing state/spec/plan before isolation.
+- Forcing full brainstorming on a bounded feature.
+- Classifying a greenfield product/project as bounded because the stack was specified.
+- Using lines/files as the only measure of complexity.
+- Treating frontend/security as a late offer.
+- Applying isolation, execution mode, or commit strategy without user ratification.
+- Scattering the route or the setup across several micro-questions instead of one grouped block.
+- Scattering the tweak/bug compact confirm across separate questions, or promoting a tweak to
+  bounded/plan just because the acceptance is clear (a spec/plan to change a button is the
+  historical failure).
+- Silently assuming a decision that changes scope/UX/architecture without presenting it in the Proposal analysis or at the kickoff gate.
+- Using Context7, convention, or a "safe default" as the user's vote.
+- Filling with a default/convention/inference a material gap that appeared AFTER kickoff, instead
+  of stopping the work and taking it to `pelizzai-interview-me`.
+- Asking several discovery questions in the same turn when the previous answer changes the next.
+- Parallelizing writes in a shared working tree as if a worktree isolated the agents.
+- Inheriting `lane`/base/branch/strategy from a PREVIOUS task's state as accidental carryover — the
+  project policy explicitly ratified in `profile.md` is the only exception.
+- Triggering several head skills at the same time.
 ```
 
-## Gate de kickoff (rota como recomendação)
+## Kickoff gate (route as a recommendation)
 
-Depois de montar envelope → Análise da proposta → lane → head skill → overlays, apresente a **rota proposta** como uma **recomendação a ratificar** antes de investir — nunca um formulário, um bloco só com o default já pré-selecionado. A classificação continua sua; segui-la ou ajustá-la é do usuário. O router é o **único** emissor do kickoff; o core apenas sinaliza intenção/audiência/ambiguidade e entrega.
+After assembling envelope → Proposal analysis → lane → head skill → overlays, present the **proposed route** as a **recommendation to ratify** before investing — never a form, a single block with the default already pre-selected. The classification remains yours; following or adjusting it is the user's. The router is the **sole** issuer of the kickoff; the core only flags intent/audience/ambiguity and hands off.
 
-**Quando informa e segue:** somente `read-only` de review/análise/explicação, porque não existe
-mutação a autorizar. Toda rota mutável para no kickoff, inclusive `bounded`, ajuste e bug; a
-profundidade do bloco pode ser uma única linha, mas a resposta afirmativa é obrigatória.
+**When it informs and proceeds:** only `read-only` review/analysis/explanation, because there is no
+mutation to authorize. Every mutating route stops at kickoff, including `bounded`, tweak, and bug;
+the block's depth can be a single line, but the affirmative answer is mandatory.
 
-**Antes do kickoff:** em projeto consumidor sem catálogo, a proposta de bootstrap (§Source mode e
-bootstrap) vem primeiro e vale também em `read-only`. Ela não é o kickoff — é uma pergunta de uma
-linha sobre inicializar o harness; o "não" devolve o pedido à rota original sem criar nada.
+**Before the kickoff:** in a consumer project without a catalog, the bootstrap proposal (§Source
+mode and bootstrap) comes first and applies even in `read-only`. It is not the kickoff — it is a
+one-line question about initializing the harness; a "no" returns the request to its original route
+without creating anything.
 
-**Para toda tarefa mutável:** pare e aguarde ratificação. Faça uma única pergunta sobre a rota;
-mostre detalhes como contexto, não como várias perguntas simultâneas:
+**For every mutating task:** stop and wait for ratification. Ask a single question about the route;
+show details as context, not as several simultaneous questions:
 
 ```text
-**Gate de kickoff — rota proposta:**
-- Entendimento: <X> como <feature|ajuste|bug|refactor>
-- Lane: <bounded|standard|exploratory|high-risk> — <justificativa em 1 linha>
-- Head + overlays: <head skill> + <overlays ou "nenhum">
-- Descoberta: <"sem lacunas materiais" | lista numerada de lacunas → recomendo <pelizzai-brainstorming compacto|completo|pelizzai-interview-me focal>>
-- Artefatos: <spec/plano/ADR previstos nesta lane | "nenhum além do plano nativo">; em greenfield/exploratory com catálogo ausente ou stack nova, liste também "domain skills da stack (proposta na borda do design)"
+**Kickoff gate — proposed route:**
+- Understanding: <X> as a <feature|tweak|bug|refactor>
+- Lane: <bounded|standard|exploratory> — <one-line justification>
+- Head + overlays: <head skill> + <overlays or "none">
+- Discovery: <"no material gaps" | numbered list of gaps → I recommend <compact|full pelizzai-brainstorming|focused pelizzai-interview-me>>
+- Artifacts: <spec/plan/ADR expected in this lane | "none beyond the native plan">; in greenfield/exploratory with a missing catalog or a new stack, also list "stack domain skills (proposed at the design edge)"
 
-Recomendação: aceitar esta rota porque <motivo>.
-Pergunta única: Posso seguir com esta rota? (sim ou ajuste)
+Recommendation: accept this route because <reason>.
+Single question: May I proceed with this route? (yes or adjust)
 ```
 
-Uma resposta afirmativa aceita a rota; o usuário pode ajustar lane, descoberta, artefatos ou overlay.
-Sem resposta afirmativa, segure o turno. Depois do kickoff, a descoberta pergunta **uma decisão por
-turno**, sempre com recomendação; não transforme o bloco de rota num questionário de requisitos.
+An affirmative answer accepts the route; the user may adjust lane, discovery, artifacts, or overlay.
+Without an affirmative answer, hold the turn. After kickoff, discovery asks **one decision per
+turn**, always with a recommendation; do not turn the route block into a requirements questionnaire.
 
-Em lane greenfield/exploratory com catálogo ausente ou stack nova, a linha Artefatos antecipa as
-"domain skills da stack (proposta na borda do design)": elas serão propostas pelo **Gate proativo de
-domain skills** da `pelizzai-audit` na borda design→plano — o usuário já vê no kickoff que virão e
-decide lá.
+In a greenfield/exploratory lane with a missing catalog or a new stack, the Artifacts line
+anticipates the "stack domain skills (proposed at the design edge)": they will be proposed by the
+**proactive domain skills gate** of `pelizzai-audit` at the design→plan edge — the user already sees
+at kickoff that they are coming and decides there.
 
-**Audiência:** quando o usuário parece não-técnico ou a intenção admite ≥2 leituras materiais, a primeira linha do bloco reapresenta o entendimento (handshake) antes de rotear; registre `audience: technical | layperson` (ver Registro de execução). Não despeje jargão; siga `pelizzai-writing-clearly-and-concisely`.
+**Audience:** when the user seems non-technical or the intent admits ≥2 material readings, the block's first line re-presents the understanding (handshake) before routing; record `audience: technical | layperson` (see Execution record). Do not dump jargon; follow `pelizzai-writing-clearly-and-concisely`.
 
-**Descoberta:** quando houver lacuna material, recomende `pelizzai-brainstorming`/`pelizzai-interview-me`.
-Aceitar inicia a entrevista sequencial. Pular descoberta exige pedido explícito e registra quais
-decisões ficaram sem validação; a LLM não preenche essas decisões por conta própria.
+**Discovery:** when there is a material gap, recommend `pelizzai-brainstorming`/`pelizzai-interview-me`.
+Accepting starts the sequential interview. Skipping discovery requires an explicit request and
+records which decisions were left unvalidated; the LLM does not fill those decisions on its own.
 
-**Setup fica fora deste bloco:** isolamento, modo (com `team` sempre visível) e commit são ratificados no Gate de setup pós-plano da `pelizzai-execution-plans` (tracks com plano) ou no confirm de uma linha da head skill (ajuste/bug). O router recomenda em silêncio e não repete a pergunta.
+**Setup stays out of this block:** isolation, mode (with `team` always visible), and commit are ratified at the post-plan setup gate of `pelizzai-execution-plans` (tracks with a plan) or in the head skill's one-line confirm (tweak/bug). The router recommends silently and does not repeat the question.
 
-Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra o Gate de kickoff: aplique o briefing e escale ao coordenador o que exigir decisão.
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce route analyses or open the kickoff gate: apply the briefing and escalate to the coordinator whatever requires a decision.
 
-## Avaliação de regressão
+## Regression evaluation
 
-Ao alterar regras de routing, Context7, discovery, spec, plano ou autoridade, valide a matriz
-[adaptive-user-control.md](evals/adaptive-user-control.md). Ela combina a falha histórica com
-greenfield em outra plataforma, feature existente, upgrade/refresh de skill, debugging e ajuste
-local para impedir tanto autonomia quanto sobreajuste a um prompt ou stack.
+When changing routing, Context7, discovery, spec, plan, or authority rules, validate the matrix
+[adaptive-user-control.md](evals/adaptive-user-control.md). It combines the historical failure with
+greenfield on another platform, an existing feature, a skill upgrade/refresh, debugging, and a
+local tweak to prevent both autonomy and overfitting to one prompt or stack.
 
-## Instrução final
+## Final instruction
 
-Classifique efeito, intenção, risco, incerteza e superfícies. Apresente a Análise da proposta e a
-rota recomendada; em tarefa mutável, só invoque a head skill após ratificação explícita. Greenfield
-sempre descobre, especifica, estressa e planeja antes de implementar, com a `pelizzai-interview-me`
-na descoberta e nos dois stress. Lacuna material que aparecer depois — inclusive no meio da
-execução — para o trabalho e volta ao usuário pela mesma skill. Selecione reasoning/test/review
-proporcionalmente, sem transformar inteligência de processo em autoridade sobre o produto.
+Classify effect, intent, risk, uncertainty, and surfaces. Present the Proposal analysis and the
+recommended route; on a mutating task, only invoke the head skill after explicit ratification.
+Greenfield always discovers, specifies, stress-tests, and plans before implementing, with
+`pelizzai-interview-me` in discovery and in both stress passes. A material gap that appears later —
+including mid-execution — stops the work and goes back to the user through the same skill. Select
+reasoning/test/review proportionally, without turning process intelligence into authority over the
+product.

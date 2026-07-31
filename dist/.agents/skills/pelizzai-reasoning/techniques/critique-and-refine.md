@@ -1,562 +1,562 @@
 # Critique and Refine
 
-## Objetivo
+## Purpose
 
-Use Critique and Refine para melhorar um artefato existente — código, plano, análise, documento, resposta, decisão ou configuração — quando houver evidência concreta de que ele está incompleto, incorreto, inconsistente, inseguro, pouco claro ou incompatível com os requisitos.
+Use Critique and Refine to improve an existing artifact — code, plan, analysis, document, answer, decision, or configuration — when there is concrete evidence that it is incomplete, incorrect, inconsistent, insecure, unclear, or incompatible with the requirements.
 
-A técnica possui quatro fases:
+The technique has four phases:
 
-1. identificar o artefato e o critério de qualidade;
-2. criticar com base em evidência;
-3. decidir se o refinamento é necessário;
-4. alterar, validar e encerrar.
+1. identify the artifact and the quality criterion;
+2. critique based on evidence;
+3. decide whether refinement is necessary;
+4. change, validate, and conclude.
 
-Critique and Refine não deve ser usado para gerar autocrítica infinita, reescrever conteúdo já adequado ou alterar algo apenas para parecer mais sofisticado.
+Critique and Refine must not be used to generate endless self-criticism, rewrite content that is already adequate, or change something just to look more sophisticated.
 
-## Princípio central
+## Core principle
 
-> Refine apenas quando existir um problema identificável, um critério objetivo ou uma oportunidade de melhoria com benefício mensurável.
+> Refine only when there is an identifiable problem, an objective criterion, or an improvement opportunity with measurable benefit.
 
-Uma crítica útil responde:
+A useful critique answers:
 
 ```text
-- O que está errado, incompleto ou frágil?
-- Qual evidência sustenta essa conclusão?
-- Qual requisito, contrato, teste, fonte ou critério foi violado?
-- Qual é a menor alteração que resolve o problema?
-- Como confirmar que o refinamento melhorou o resultado sem introduzir regressão?
+- What is wrong, incomplete, or fragile?
+- What evidence supports that conclusion?
+- Which requirement, contract, test, source, or criterion was violated?
+- What is the smallest change that fixes the problem?
+- How to confirm the refinement improved the result without introducing a regression?
 ```
 
 ```mermaid
 flowchart TD
-    A[Artefato atual] --> B[Definir critérios de qualidade]
-    B --> C[Coletar evidências]
-    C --> D[Identificar problemas concretos]
-    D --> E{Há problema material?}
+    A[Current artifact] --> B[Define quality criteria]
+    B --> C[Collect evidence]
+    C --> D[Identify concrete problems]
+    D --> E{Is there a material problem?}
 
-    E -- Não --> F[Preservar artefato e concluir]
-    E -- Sim --> G[Priorizar problemas]
-    G --> H[Aplicar refinamento mínimo necessário]
-    H --> I[Validar resultado]
-    I --> J{Problema foi resolvido sem regressão?}
+    E -- No --> F[Preserve the artifact and conclude]
+    E -- Yes --> G[Prioritize problems]
+    G --> H[Apply the minimum necessary refinement]
+    H --> I[Validate the result]
+    I --> J{Problem solved without regression?}
 
-    J -- Sim --> K[Concluir]
-    J -- Não --> L[Reavaliar crítica e hipótese]
+    J -- Yes --> K[Conclude]
+    J -- No --> L[Reassess the critique and hypothesis]
     L --> D
 ```
 
-## Quando usar
+## When to use
 
-Use Critique and Refine quando houver pelo menos um gatilho verificável.
+Use Critique and Refine when there is at least one verifiable trigger.
 
-### Gatilhos válidos
-
-```text
-- Teste, lint, build ou typecheck falhou.
-- Feedback do usuário indicou problema específico.
-- Requisito solicitado não foi atendido.
-- Código, contrato, fonte ou documentação contradiz o resultado.
-- Há inconsistência interna entre partes do artefato.
-- Uma conclusão extrapola a evidência disponível.
-- Existe risco de segurança, regressão, ambiguidade ou manutenção não tratado.
-- Uma revisão objetiva identificou problema de clareza, estrutura ou precisão.
-- Um resultado de ferramenta revelou comportamento inesperado.
-- Uma mudança de contexto tornou a solução anterior inadequada.
-```
-
-Exemplos adequados:
+### Valid triggers
 
 ```text
-- Ajustar uma implementação após teste de integração falhar.
-- Corrigir uma análise que confundiu fato confirmado com inferência.
-- Revisar uma resposta que não tratou uma restrição importante do usuário.
-- Melhorar uma Pull Request após feedback de code review.
-- Corrigir documentação incompatível com a API real.
-- Refinar um plano após descobrir dependência técnica não prevista.
+- A test, lint, build, or typecheck failed.
+- User feedback pointed to a specific problem.
+- A requested requirement was not met.
+- Code, a contract, a source, or documentation contradicts the result.
+- There is internal inconsistency between parts of the artifact.
+- A conclusion goes beyond the available evidence.
+- There is an unaddressed risk of security, regression, ambiguity, or maintenance.
+- An objective review identified a problem of clarity, structure, or accuracy.
+- A tool result revealed unexpected behavior.
+- A context change made the previous solution inadequate.
 ```
 
-## Quando evitar
-
-Não use Critique and Refine como ritual automático. Evite ou simplifique quando não há evidência de problema material — os anti-padrões abaixo detalham os casos recorrentes. Em resumo, não refine quando:
+Good examples:
 
 ```text
-- Não existe evidência de problema.
-- A alteração seria apenas estética e não agrega valor relevante.
-- O resultado já atende ao critério de conclusão.
-- O usuário solicitou apenas uma resposta direta e simples.
-- A crítica depende exclusivamente de intuição sem critério objetivo.
-- O refinamento pode introduzir mais risco do que benefício.
-- Não há como validar que a alteração melhorou o resultado.
+- Adjusting an implementation after an integration test failed.
+- Fixing an analysis that confused a confirmed fact with an inference.
+- Revising an answer that ignored an important user constraint.
+- Improving a Pull Request after code review feedback.
+- Fixing documentation incompatible with the real API.
+- Refining a plan after discovering an unforeseen technical dependency.
 ```
 
-## Relação com outras técnicas
+## When to avoid
 
-| Técnica             | Responsabilidade                                                                      |
-| ------------------- | ------------------------------------------------------------------------------------- |
-| Plan and Execute    | Define etapas, dependências e checkpoints                                             |
-| ReAct               | Executa ações, observa resultados e atualiza o estado                                 |
-| Verification        | Determina se uma afirmação ou resultado tem evidência suficiente                      |
-| Critique and Refine | Corrige problemas concretos detectados por feedback, validação ou critérios objetivos |
-| Decision Making     | Escolhe entre caminhos de solução, inclusive interdependentes com poda                |
+Do not use Critique and Refine as an automatic ritual. Avoid or simplify when there is no evidence of a material problem — the anti-patterns below detail the recurring cases. In short, do not refine when:
+
+```text
+- There is no evidence of a problem.
+- The change would be purely cosmetic and adds no relevant value.
+- The result already meets the completion criterion.
+- The user asked only for a direct, simple answer.
+- The critique rests solely on intuition with no objective criterion.
+- The refinement may introduce more risk than benefit.
+- There is no way to validate that the change improved the result.
+```
+
+## Relationship to other techniques
+
+| Technique           | Responsibility                                                                         |
+| ------------------- | -------------------------------------------------------------------------------------- |
+| Plan and Execute    | Defines steps, dependencies, and checkpoints                                           |
+| ReAct               | Executes actions, observes results, and updates state                                  |
+| Verification        | Determines whether a claim or result has sufficient evidence                           |
+| Critique and Refine | Fixes concrete problems detected by feedback, validation, or objective criteria        |
+| Decision Making     | Chooses among solution paths, including interdependent ones with pruning               |
 
 ```mermaid
 flowchart LR
-    A[Plano] --> B[Execução]
+    A[Plan] --> B[Execution]
     B --> C[Verification]
-    C --> D{Há falha, lacuna ou inconsistência?}
+    C --> D{Failure, gap, or inconsistency?}
 
-    D -- Não --> E[Concluir]
-    D -- Sim --> F[Critique and Refine]
-    F --> G[Validar refinamento]
+    D -- No --> E[Conclude]
+    D -- Yes --> F[Critique and Refine]
+    F --> G[Validate the refinement]
     G --> C
 ```
 
-### Regra de integração
+### Integration rule
 
-- Use **Verification** para descobrir se há evidência suficiente.
-- Use **Critique and Refine** somente quando essa evidência revelar um problema concreto.
-- Use **ReAct** durante a investigação e a correção local.
-- Use **Plan and Execute** quando o refinamento exigir múltiplas etapas ou afetar várias partes do sistema.
+- Use **Verification** to find out whether there is sufficient evidence.
+- Use **Critique and Refine** only when that evidence reveals a concrete problem.
+- Use **ReAct** during the investigation and the local fix.
+- Use **Plan and Execute** when the refinement requires multiple steps or affects several parts of the system.
 
-## Crítica baseada em evidência
+## Evidence-based critique
 
-Uma crítica não deve ser vaga.
+A critique must not be vague.
 
 ```text
-Ruim:
-"Esse código pode ser melhorado."
+Bad:
+"This code could be better."
 
-Melhor:
-"O método mistura validação, persistência e envio de e-mail. Isso dificulta teste isolado e viola a separação de responsabilidades adotada no projeto."
+Better:
+"The method mixes validation, persistence, and email sending. That makes isolated testing hard and violates the separation of concerns adopted in the project."
 ```
 
 ```text
-Ruim:
-"Essa resposta está incompleta."
+Bad:
+"This answer is incomplete."
 
-Melhor:
-"A resposta recomenda a biblioteca, mas não avalia compatibilidade com a versão do framework usada no projeto nem trata o requisito de OAuth."
+Better:
+"The answer recommends the library but does not assess compatibility with the framework version used in the project, nor does it address the OAuth requirement."
 ```
 
-### Schema canônico de crítica
+### Canonical critique schema
 
-Registre toda crítica relevante neste schema único. Em revisões rápidas, os campos `Artefato` e `Decisão` podem ser omitidos; em revisões formais, preencha todos.
+Record every relevant critique in this single schema. In quick reviews, the `Artifact` and `Decision` fields may be omitted; in formal reviews, fill in all of them.
 
 ```text
-Artefato:
-- [nome ou descrição]
+Artifact:
+- [name or description]
 
-Problema:
-- [o que está errado, ausente, inconsistente ou frágil]
+Problem:
+- [what is wrong, missing, inconsistent, or fragile]
 
-Evidência:
-- [teste, requisito, fonte, contrato, feedback, diff ou observação]
+Evidence:
+- [test, requirement, source, contract, feedback, diff, or observation]
 
-Impacto:
-- [o que pode quebrar, confundir, expor ou impedir]
+Impact:
+- [what may break, confuse, expose, or block]
 
-Decisão:
-- [preservar, refinar localmente, replanejar, pedir confirmação, declarar limitação ou bloquear]
+Decision:
+- [preserve, refine locally, replan, ask for confirmation, declare a limitation, or block]
 
-Refinamento proposto:
-- [menor mudança necessária]
+Proposed refinement:
+- [smallest necessary change]
 
-Validação:
-- [como confirmar a melhoria]
+Validation:
+- [how to confirm the improvement]
 ```
 
-## Critérios de qualidade
+## Quality criteria
 
-Antes de criticar, defina quais critérios realmente importam para o artefato. Os critérios gerais valem para qualquer artefato; as listas seguintes especializam-nos por tipo.
+Before critiquing, define which criteria actually matter for the artifact. The general criteria apply to any artifact; the lists that follow specialize them by type.
 
 ```text
-Gerais:
-- Correção factual e técnica.
-- Atendimento ao objetivo do usuário.
-- Completude proporcional ao escopo.
-- Clareza e ausência de ambiguidade material.
-- Consistência interna.
-- Compatibilidade com contexto, projeto e contratos.
-- Segurança e privacidade.
-- Manutenibilidade e simplicidade proporcional.
-- Validação adequada ao risco.
+General:
+- Factual and technical correctness.
+- Fulfillment of the user's goal.
+- Completeness proportional to the scope.
+- Clarity and absence of material ambiguity.
+- Internal consistency.
+- Compatibility with context, project, and contracts.
+- Security and privacy.
+- Maintainability and proportional simplicity.
+- Validation adequate to the risk.
 
-Código:
-- Comportamento correto, contratos e tipos compatíveis, erros tratados.
-- Ausência de regressão; segurança de entradas, permissões e dados.
-- Coesão, baixo acoplamento, testabilidade e conformidade com convenções.
-- Sem complexidade ou dependência injustificada.
+Code:
+- Correct behavior, compatible contracts and types, errors handled.
+- No regression; safety of inputs, permissions, and data.
+- Cohesion, low coupling, testability, and conformance to conventions.
+- No unjustified complexity or dependency.
 
-Planos:
-- Objetivo e escopo claros; etapas necessárias e suficientes.
-- Dependências corretas, riscos identificados, validações previstas.
-- Critério de conclusão objetivo; ordem adequada entre descoberta, implementação e validação.
+Plans:
+- Clear goal and scope; necessary and sufficient steps.
+- Correct dependencies, identified risks, planned validations.
+- Objective completion criterion; proper ordering of discovery, implementation, and validation.
 
-Análises e recomendações:
-- Fatos separados de inferências; fontes adequadas ao risco; premissas explícitas.
-- Contra-argumentos e alternativas plausíveis considerados; limitações declaradas.
-- Recomendação ligada ao contexto, não apenas à popularidade.
+Analyses and recommendations:
+- Facts separated from inferences; sources adequate to the risk; explicit assumptions.
+- Plausible counter-arguments and alternatives considered; limitations declared.
+- Recommendation tied to the context, not just to popularity.
 
-Documentação e respostas:
-- Objetivo atendido, estrutura compreensível, termos consistentes, exemplos corretos.
-- Sem contradição; precisão compatível com o público; instruções acionáveis e sem excesso irrelevante.
+Documentation and answers:
+- Goal met, understandable structure, consistent terms, correct examples.
+- No contradictions; precision suited to the audience; actionable instructions without irrelevant excess.
 ```
 
-## Processo de crítica
+## Critique process
 
-### 1. Congelar o objetivo
+### 1. Freeze the goal
 
-Antes de revisar, confirme o que o artefato deveria alcançar.
+Before reviewing, confirm what the artifact was supposed to achieve.
 
 ```text
-Perguntas:
-- Qual resultado esperado?
-- Quais requisitos são obrigatórios?
-- Quais restrições não podem ser violadas?
-- O que está fora do escopo?
-- Como será determinado que o resultado está correto?
+Questions:
+- What is the expected outcome?
+- Which requirements are mandatory?
+- Which constraints cannot be violated?
+- What is out of scope?
+- How will correctness be determined?
 ```
 
-Não critique com base em preferências pessoais que não fazem parte do objetivo ou das convenções do projeto.
+Do not critique based on personal preferences that are not part of the goal or the project's conventions.
 
-### 2. Coletar evidências
+### 2. Collect evidence
 
-Use evidências compatíveis com o tipo de artefato.
+Use evidence appropriate to the artifact type.
 
-| Artefato     | Evidências úteis                                                           |
-| ------------ | -------------------------------------------------------------------------- |
-| Código       | Testes, logs, lint, build, typecheck, contrato, diff e execução controlada |
-| API          | Request real, response, schema, documentação e teste de integração         |
-| Plano        | Dependências reais, requisitos, riscos, escopo e critério de conclusão     |
-| Análise      | Fontes primárias, dados, premissas, consistência lógica e contraexemplos   |
-| Documento    | Requisitos, audiência, estrutura, exemplos e coerência interna             |
-| Configuração | Arquivos reais, documentação, ambiente, logs e comportamento observado     |
+| Artifact      | Useful evidence                                                             |
+| ------------- | --------------------------------------------------------------------------- |
+| Code          | Tests, logs, lint, build, typecheck, contract, diff, and controlled execution |
+| API           | Real request, response, schema, documentation, and integration test         |
+| Plan          | Real dependencies, requirements, risks, scope, and completion criterion     |
+| Analysis      | Primary sources, data, assumptions, logical consistency, and counterexamples |
+| Document      | Requirements, audience, structure, examples, and internal coherence         |
+| Configuration | Real files, documentation, environment, logs, and observed behavior         |
 
-Não invente evidência ou trate impressão como prova.
+Do not invent evidence or treat an impression as proof.
 
-### 3. Identificar problemas materiais
+### 3. Identify material problems
 
-Priorize apenas problemas com impacto real, conforme a severidade. A severidade segue a escala de impacto do catálogo (Baixo/Médio/Alto/Crítico); o esforço de correção deve respeitar o orçamento de esforço definido em [pelizzai-reasoning](../SKILL.md).
+Prioritize only problems with real impact, by severity. Severity follows the catalog's impact scale (Low/Medium/High/Critical); the fix effort must respect the effort budget defined in [pelizzai-reasoning](../SKILL.md).
 
-| Severidade     | Descrição                                                                        | Tratamento                                                |
-| -------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| Crítico        | Pode causar perda, exposição, vulnerabilidade, violação grave ou falha sistêmica | Corrigir antes de concluir                                |
-| Alto           | Quebra requisito central, contrato ou fluxo principal                            | Corrigir antes de concluir                                |
-| Médio          | Pode causar bug secundário, manutenção ruim ou experiência inconsistente         | Corrigir quando proporcional                              |
-| Baixo          | Clareza, nomenclatura, estética ou melhoria pequena                              | Corrigir apenas se não gerar custo ou risco desnecessário |
-| Não comprovado | Não há evidência suficiente de que é problema                                    | Não alterar sem investigar                                |
+| Severity  | Description                                                                      | Treatment                                                 |
+| --------- | -------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Critical  | May cause loss, exposure, a vulnerability, a serious violation, or systemic failure | Fix before concluding                                     |
+| High      | Breaks a central requirement, contract, or main flow                             | Fix before concluding                                     |
+| Medium    | May cause a secondary bug, poor maintainability, or an inconsistent experience   | Fix when proportional                                     |
+| Low       | Clarity, naming, aesthetics, or a small improvement                              | Fix only if it adds no unnecessary cost or risk           |
+| Unproven  | There is not enough evidence that it is a problem                                | Do not change without investigating                       |
 
-## Decidir se deve refinar
+## Deciding whether to refine
 
-Após criticar, escolha uma destas decisões:
+After critiquing, pick one of these decisions:
 
-| Decisão            | Quando usar                                                                   |
-| ------------------ | ----------------------------------------------------------------------------- |
-| Preservar          | Não há problema material ou a alteração não agrega valor                      |
-| Refinar localmente | O problema é limitado e a correção é clara                                    |
-| Replanejar         | O problema afeta várias etapas, arquitetura ou premissas                      |
-| Pedir confirmação  | A correção altera escopo, comportamento esperado ou decisão do usuário        |
-| Declarar limitação | Não há acesso, evidência ou ferramenta suficiente para corrigir com segurança |
-| Bloquear           | A ação necessária é insegura, proibida ou depende de autorização              |
+| Decision             | When to use                                                                    |
+| -------------------- | ------------------------------------------------------------------------------ |
+| Preserve             | There is no material problem or the change adds no value                       |
+| Refine locally       | The problem is bounded and the fix is clear                                    |
+| Replan               | The problem affects multiple steps, the architecture, or assumptions           |
+| Ask for confirmation | The fix changes scope, expected behavior, or a user decision                   |
+| Declare a limitation | There is not enough access, evidence, or tooling to fix safely                 |
+| Block                | The necessary action is unsafe, prohibited, or requires authorization          |
 
 ```text
-Regra:
-Não refine apenas porque uma alternativa parece mais elegante.
-Refine quando o ganho é justificável por requisito, evidência, risco ou manutenção.
+Rule:
+Do not refine just because an alternative looks more elegant.
+Refine when the gain is justified by a requirement, evidence, risk, or maintenance.
 ```
 
-## Refinamento mínimo necessário
+## Minimum necessary refinement
 
-O objetivo não é reescrever tudo.
+The goal is not to rewrite everything.
 
-> Aplique a menor alteração que resolva o problema confirmado e preserve tudo que já está validado.
+> Apply the smallest change that fixes the confirmed problem and preserves everything already validated.
 
 ```text
-Ruim:
-Encontrar um campo incompatível e reescrever todo o módulo.
+Bad:
+Finding an incompatible field and rewriting the whole module.
 
-Melhor:
-Corrigir o mapeamento incompatível, adicionar teste de regressão e validar os fluxos afetados.
+Better:
+Fixing the incompatible mapping, adding a regression test, and validating the affected flows.
 ```
 
 ```text
-Ruim:
-Encontrar uma lacuna na análise e substituir toda a recomendação.
+Bad:
+Finding a gap in the analysis and replacing the entire recommendation.
 
-Melhor:
-Adicionar a limitação ausente, revisar a conclusão apenas se ela depender dessa lacuna e preservar as partes ainda sustentadas.
+Better:
+Adding the missing limitation, revising the conclusion only if it depends on that gap, and preserving the parts still supported.
 ```
 
-### Regras de preservação
+### Preservation rules
 
 ```text
-- Preserve comportamento já validado.
-- Preserve decisões do usuário e convenções do projeto.
-- Não altere escopo sem necessidade.
-- Não introduza abstrações apenas para acomodar uma correção pequena.
-- Não substitua uma solução simples por uma solução complexa sem benefício comprovado.
-- Não remova validações existentes sem evidência de que são incorretas ou redundantes.
+- Preserve behavior that is already validated.
+- Preserve the user's decisions and the project's conventions.
+- Do not change scope without need.
+- Do not introduce abstractions just to accommodate a small fix.
+- Do not replace a simple solution with a complex one without proven benefit.
+- Do not remove existing validations without evidence that they are incorrect or redundant.
 ```
 
-## Validação após refinamento
+## Validation after refinement
 
-Todo refinamento relevante deve ser validado.
+Every relevant refinement must be validated.
 
 ```mermaid
 flowchart LR
-    A[Problema detectado] --> B[Refinamento]
-    B --> C[Validar correção]
-    C --> D{Regressão detectada?}
+    A[Problem detected] --> B[Refinement]
+    B --> C[Validate the fix]
+    C --> D{Regression detected?}
 
-    D -- Não --> E[Concluir]
-    D -- Sim --> F[Reverter ou ajustar]
+    D -- No --> E[Conclude]
+    D -- Yes --> F[Revert or adjust]
     F --> B
 ```
 
-A validação deve responder:
+The validation must answer:
 
 ```text
-- O problema original foi resolvido?
-- O requisito continua atendido?
-- Houve regressão em comportamento existente?
-- A alteração introduziu novo risco?
-- A solução permanece compatível com contratos e convenções?
+- Was the original problem solved?
+- Is the requirement still met?
+- Was there a regression in existing behavior?
+- Did the change introduce a new risk?
+- Does the solution remain compatible with contracts and conventions?
 ```
 
-Não conclua que o refinamento foi bem-sucedido apenas porque a alteração parece correta.
+Do not conclude that the refinement succeeded just because the change looks correct.
 
-## Limites de iteração
+## Iteration limits
 
-Critique and Refine deve ter limites claros.
+Critique and Refine must have clear limits.
 
-### Regra padrão
+### Default rule
 
 ```text
-- Faça uma rodada inicial de crítica.
-- Refine os problemas materiais encontrados.
-- Valide o resultado.
-- Faça uma segunda crítica somente se a validação revelar nova falha, regressão ou requisito ainda não atendido.
+- Run an initial round of critique.
+- Refine the material problems found.
+- Validate the result.
+- Run a second critique only if validation reveals a new failure, a regression, or a requirement still unmet.
 ```
 
-Não continue refinando sem nova evidência.
+Do not keep refining without new evidence.
 
-### Gatilhos para nova rodada
+### Triggers for a new round
 
-Inicie uma nova rodada somente quando:
+Start a new round only when:
 
 ```text
-- O refinamento falhou na validação.
-- O refinamento introduziu regressão.
-- Foi descoberto novo requisito relevante.
-- Surgiu feedback externo específico.
-- Uma dependência ou fonte contradisse o resultado.
-- O problema original era sintoma de causa mais profunda (ver Root Cause Analysis).
+- The refinement failed validation.
+- The refinement introduced a regression.
+- A relevant new requirement was discovered.
+- Specific external feedback came in.
+- A dependency or source contradicted the result.
+- The original problem was a symptom of a deeper cause (see Root Cause Analysis).
 ```
 
-### Regras de parada
+### Stop rules
 
-Pare quando:
+Stop when:
 
 ```text
-- Os problemas materiais foram resolvidos.
-- O critério de conclusão foi atendido.
-- Não há nova evidência relevante.
-- Melhorias restantes são apenas cosméticas ou marginais.
-- O próximo refinamento teria risco ou custo maior que o benefício.
-- Falta acesso, contexto ou autorização para continuar.
+- The material problems were solved.
+- The completion criterion was met.
+- There is no relevant new evidence.
+- Remaining improvements are only cosmetic or marginal.
+- The next refinement would carry more risk or cost than benefit.
+- Access, context, or authorization to continue is missing.
 ```
 
-## Autocrítica limitada
+## Limited self-critique
 
-A crítica interna pode ajudar a detectar inconsistências óbvias, mas não substitui validação externa.
+Internal critique can help detect obvious inconsistencies, but it does not replace external validation.
 
-Use autocrítica para:
+Use self-critique to:
 
 ```text
-- Conferir se todos os requisitos explícitos foram atendidos.
-- Procurar contradições internas.
-- Identificar premissas não declaradas.
-- Avaliar se uma conclusão extrapola a evidência.
-- Verificar se a resposta segue o formato solicitado.
-- Revisar checklist objetivo.
+- Check that every explicit requirement was met.
+- Look for internal contradictions.
+- Identify undeclared assumptions.
+- Assess whether a conclusion goes beyond the evidence.
+- Verify that the answer follows the requested format.
+- Review an objective checklist.
 ```
 
-Não use autocrítica como única prova para:
+Do not use self-critique as the only proof to:
 
 ```text
-- Confirmar que código funciona.
-- Confirmar segurança.
-- Confirmar compatibilidade de API.
-- Confirmar fatos externos atuais.
-- Confirmar cálculos complexos.
-- Confirmar ausência de regressão.
+- Confirm that code works.
+- Confirm security.
+- Confirm API compatibility.
+- Confirm current external facts.
+- Confirm complex calculations.
+- Confirm the absence of regression.
 ```
 
-## Feedback externo
+## External feedback
 
-Quando houver feedback de usuário, teste, revisor, ferramenta ou fonte externa:
+When there is feedback from a user, test, reviewer, tool, or external source:
 
-1. interprete o feedback com precisão;
-2. confirme se ele se aplica ao artefato atual;
-3. identifique a causa, não apenas o sintoma;
-4. refine o mínimo necessário;
-5. valide a correção;
-6. informe o que foi alterado e o que permanece limitado.
+1. interpret the feedback precisely;
+2. confirm that it applies to the current artifact;
+3. identify the cause, not just the symptom;
+4. refine the minimum necessary;
+5. validate the fix;
+6. report what was changed and what remains limited.
 
 ```text
 Feedback:
-"O filtro não funciona quando há mais de uma página."
+"The filter does not work when there is more than one page."
 
-Crítica:
-- A implementação atual atualiza o filtro, mas não redefine a paginação.
-- A evidência é o comportamento observado e o estado atual da consulta.
+Critique:
+- The current implementation updates the filter but does not reset pagination.
+- The evidence is the observed behavior and the current state of the query.
 
-Refinamento:
-- Redefinir página para 1 ao alterar filtros.
+Refinement:
+- Reset the page to 1 when filters change.
 
-Validação:
-- Testar filtro na primeira página e em páginas posteriores.
+Validation:
+- Test the filter on the first page and on later pages.
 ```
 
-Não aceite feedback automaticamente como verdade absoluta quando ele contradizer evidência objetiva. Investigue o conflito.
+Do not automatically accept feedback as absolute truth when it contradicts objective evidence. Investigate the conflict.
 
-## Anti-padrões
+## Anti-patterns
 
-### 1. Crítica vaga
+### 1. Vague critique
 
 ```text
-Ruim:
-"Melhore o código."
+Bad:
+"Improve the code."
 
-Melhor:
-"O método contém regra de autorização duplicada em três rotas. Centralizar a regra reduz inconsistência e torna os testes mais confiáveis."
+Better:
+"The method duplicates the authorization rule across three routes. Centralizing the rule reduces inconsistency and makes the tests more reliable."
 ```
 
-### 2. Refinamento cosmético ou reescrita total sem necessidade
+### 2. Cosmetic refinement or unnecessary full rewrite
 
 ```text
-Ruim:
-Reescrever nomes, estrutura e estilo sem resolver nenhum problema material, ou refazer toda uma análise porque um dado secundário estava desatualizado.
+Bad:
+Rewriting names, structure, and style without solving any material problem, or redoing an entire analysis because a secondary data point was outdated.
 
-Melhor:
-Preservar o artefato quando ele atende ao critério e não há ganho concreto; quando houver problema localizado, atualizar apenas o dado e as conclusões que dependem dele.
+Better:
+Preserving the artifact when it meets the criterion and there is no concrete gain; when there is a localized problem, updating only the data point and the conclusions that depend on it.
 ```
 
-### 3. Corrigir sintoma e ignorar causa
+### 3. Fixing the symptom and ignoring the cause
 
 ```text
-Ruim:
-Adicionar delay para "resolver" uma condição de corrida.
+Bad:
+Adding a delay to "fix" a race condition.
 
-Melhor:
-Identificar o estado, evento ou contrato que está gerando a corrida e corrigir a sincronização real (ver [Root Cause Analysis](root-cause-analysis.md)).
+Better:
+Identifying the state, event, or contract generating the race and fixing the actual synchronization (see [Root Cause Analysis](root-cause-analysis.md)).
 ```
 
-### 4. Confiar apenas na autocrítica
+### 4. Relying on self-critique alone
 
 ```text
-Ruim:
-"Revisei mentalmente e parece correto."
+Bad:
+"I reviewed it mentally and it looks correct."
 
-Melhor:
-"Revisei requisitos e validei o comportamento com teste ou execução controlada."
+Better:
+"I reviewed the requirements and validated the behavior with a test or a controlled execution."
 ```
 
-### 5. Ignorar regressão
+### 5. Ignoring regression
 
 ```text
-Ruim:
-Corrigir o cenário novo e não verificar fluxos existentes.
+Bad:
+Fixing the new scenario without checking existing flows.
 
-Melhor:
-Validar o problema original e os fluxos diretamente afetados pela alteração.
+Better:
+Validating the original problem and the flows directly affected by the change.
 ```
 
-### 6. Iteração infinita
+### 6. Endless iteration
 
 ```text
-Ruim:
-Continuar revisando após todos os requisitos e validações terem sido atendidos.
+Bad:
+Continuing to revise after all requirements and validations have been met.
 
-Melhor:
-Encerrar quando melhorias restantes forem marginais ou não comprovadas.
+Better:
+Stopping when remaining improvements are marginal or unproven.
 ```
 
-### 7. Aceitar crítica externa sem investigar
+### 7. Accepting external critique without investigating
 
 ```text
-Ruim:
-Aplicar uma sugestão de review sem conferir contrato, contexto ou consequência.
+Bad:
+Applying a review suggestion without checking the contract, context, or consequences.
 
-Melhor:
-Validar se a crítica é aplicável e se a correção proposta não cria efeito colateral.
+Better:
+Validating whether the critique applies and whether the proposed fix creates no side effects.
 ```
 
-## Exemplos
+## Examples
 
-### Exemplo 1 — Código
+### Example 1 — Code
 
 ```text
-Artefato:
-- Endpoint de criação de pedido.
+Artifact:
+- Order creation endpoint.
 
-Problema:
-- O endpoint permite criar pedidos duplicados em retries de rede.
+Problem:
+- The endpoint allows duplicate orders on network retries.
 
-Evidência:
-- Teste de integração com duas requisições idênticas cria dois registros.
+Evidence:
+- An integration test with two identical requests creates two records.
 
-Impacto:
-- Duplicidade de dados e possível cobrança indevida.
+Impact:
+- Duplicate data and possible incorrect charges.
 
-Decisão:
-- Refinar localmente.
+Decision:
+- Refine locally.
 
-Refinamento:
-- Adicionar chave de idempotência e restrição de unicidade conforme o contrato.
+Refinement:
+- Add an idempotency key and a uniqueness constraint per the contract.
 
-Validação:
-- Reexecutar teste com requests duplicados e confirmar que apenas um pedido é persistido.
+Validation:
+- Rerun the test with duplicate requests and confirm that only one order is persisted.
 ```
 
-### Exemplo 2 — Plano
+### Example 2 — Plan
 
 ```text
-Artefato:
-- Plano para implementar autenticação OAuth.
+Artifact:
+- Plan to implement OAuth authentication.
 
-Problema:
-- O plano prevê tela de login antes de confirmar provedor, callback, escopos e persistência de sessão.
+Problem:
+- The plan schedules the login screen before confirming the provider, callback, scopes, and session persistence.
 
-Evidência:
-- Requisitos ainda não definem provedor OAuth nem estratégia de refresh token.
+Evidence:
+- The requirements do not yet define the OAuth provider or the refresh token strategy.
 
-Impacto:
-- Alto risco de retrabalho no frontend e backend.
+Impact:
+- High risk of rework on the frontend and backend.
 
-Decisão:
-- Replanejar.
+Decision:
+- Replan.
 
-Refinamento:
-- Inserir etapa de descoberta e definição de contrato antes da implementação.
+Refinement:
+- Insert a discovery and contract-definition step before implementation.
 
-Validação:
-- Confirmar requisitos e contrato de autenticação antes de iniciar código.
+Validation:
+- Confirm the requirements and the authentication contract before starting code.
 ```
 
-## Instrução resumida para o agente
+## Summary instruction for the agent
 
 ```text
-- Aplique Critique and Refine somente com evidência de falha, lacuna, inconsistência, requisito não atendido ou risco material.
-- Não trate preferência estética como defeito técnico nem refine sem critério objetivo.
-- Use o schema canônico de crítica; classifique a severidade na escala Baixo/Médio/Alto/Crítico.
-- Aplique a menor alteração que resolva o problema e preserve comportamento, decisões e partes já validadas.
-- Valide que o refinamento corrigiu o problema sem regressão; faça nova rodada apenas com nova evidência.
-- Pare quando o critério de conclusão for atendido ou não houver ganho proporcional.
-- Não exponha cadeia de pensamento detalhada; comunique problema, evidência, decisão, alteração, validação e limitações relevantes.
+- Apply Critique and Refine only with evidence of a failure, gap, inconsistency, unmet requirement, or material risk.
+- Do not treat an aesthetic preference as a technical defect, and do not refine without an objective criterion.
+- Use the canonical critique schema; classify severity on the Low/Medium/High/Critical scale.
+- Apply the smallest change that fixes the problem and preserves behavior, decisions, and already-validated parts.
+- Validate that the refinement fixed the problem without regression; run a new round only with new evidence.
+- Stop when the completion criterion is met or there is no proportional gain.
+- Do not expose detailed chain of thought; communicate the problem, evidence, decision, change, validation, and relevant limitations.
 ```
 
-## Técnicas relacionadas
+## Related techniques
 
 - [Plan and Execute](plan-and-execute.md)
 - [ReAct](react.md)
@@ -564,4 +564,4 @@ Validação:
 - [Decision Making](decision-making.md)
 - [Root Cause Analysis](root-cause-analysis.md)
 
-Voltar ao [catálogo de técnicas](../SKILL.md).
+Back to the [technique catalog](../SKILL.md).

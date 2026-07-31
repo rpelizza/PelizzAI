@@ -1,93 +1,93 @@
 ---
 name: pelizzai-writing-clearly-and-concisely
-description: Uma skill que aplica os princípios de escrita atemporais de William Strunk Jr. para produzir uma prosa mais clara, vigorosa e profissional, evitando, ao mesmo tempo, os padrões comuns de escrita de IA.
+description: A skill that applies William Strunk Jr.'s timeless writing principles to produce clearer, more vigorous, professional prose while avoiding common AI writing patterns.
 ---
 
-# Escrevendo de Forma Clara e Concisa
+# Writing Clearly and Concisely
 
-## Visão Geral
+## Overview
 
-Escreva com clareza e força. Esta skill abrange o que fazer (Strunk) e o que não fazer (padrões de IA).
+Write with clarity and force. This skill covers what to do (Strunk) and what not to do (AI patterns).
 
-## Quando Usar Esta Skill
+## When to Use This Skill
 
-Use esta skill sempre que escrever textos para humanos:
+Use this skill whenever you write text for humans:
 
-- Documentação, arquivos README, explicações técnicas
-- Mensagens de commit, descrições de pull requests
-- Mensagens de erro, textos de interface (UI), textos de ajuda, comentários
-- Relatórios, resumos ou qualquer tipo de explicação
-- Edição para melhorar a clareza
+- Documentation, README files, technical explanations
+- Commit messages, pull request descriptions
+- Error messages, UI text, help text, comments
+- Reports, summaries, or any kind of explanation
+- Editing for clarity
 
-**Se você está escrevendo frases para serem lidas por um humano, use esta skill.**
+**If you are writing sentences for a human to read, use this skill.**
 
-## Estratégia para Contexto Limitado
+## Strategy for Limited Context
 
-Quando o contexto for restrito:
+When context is tight:
 
-1. Escreva seu rascunho usando seu próprio julgamento
-2. Acione um subagente com seu rascunho e o arquivo da seção relevante
-3. Peça ao subagente para revisar o texto e devolver a versão corrigida
+1. Write your draft using your own judgment
+2. Launch a subagent with your draft and the relevant section file
+3. Ask the subagent to review the text and return the corrected version
 
-Carregar uma única seção (de ~1.350 a ~11.800 tokens, conforme a seção; o arquivo `03` é o maior) em vez de tudo economiza uma quantidade significativa de contexto.
+Loading a single section (~1,350 to ~11,800 tokens depending on the section; file `03` is the largest) instead of everything saves a significant amount of context.
 
-## Elementos de Estilo
+## Elements of Style
 
-A obra _The Elements of Style_ (1918), de William Strunk Jr., ensina a escrever com clareza e a cortar o supérfluo sem piedade.
+William Strunk Jr.'s _The Elements of Style_ (1918) teaches how to write clearly and cut the superfluous without mercy.
 
-### Regras
+### Rules
 
-**Regras Elementares de Uso (Gramática/Pontuação)**:
+**Elementary Rules of Usage (Grammar/Punctuation)**:
 
-1. Forme o possessivo com a preposição _de_ (a regra original do _'s_ é específica do inglês e não se aplica ao português)
-2. Em enumerações, separe os termos por vírgula, mas **não** use vírgula antes do _e/ou_ final (a vírgula serial do inglês é incorreta em pt-BR)
-3. Isole expressões explicativas ou incidentais entre vírgulas
-4. Use vírgula antes da conjunção que introduz uma oração coordenada
-5. Não una orações independentes apenas com vírgula
-6. Não divida frases em duas partes separadas
-7. Uma oração reduzida (gerúndio/particípio) no início deve referir-se ao sujeito gramatical
+1. Form the possessive singular of nouns by adding _'s_
+2. In a series of three or more terms with a single conjunction, use a comma after each term except the last (the serial comma)
+3. Enclose parenthetic (incidental) expressions between commas
+4. Place a comma before a conjunction introducing a co-ordinate clause
+5. Do not join independent clauses with only a comma
+6. Do not break sentences in two
+7. A participial phrase at the beginning of a sentence must refer to the grammatical subject
 
-**Princípios Elementares de Composição**:
+**Elementary Principles of Composition**:
 
-8. Um parágrafo por tópico
-9. Comece o parágrafo com a frase que apresenta o tópico principal
-10. **Use a voz ativa**
-11. **Expresse afirmações na forma positiva**
-12. **Use linguagem definida, específica e concreta**
-13. **Omita palavras desnecessárias**
-14. Evite uma sequência de frases soltas (sem conexão clara)
-15. Expresse ideias coordenadas de forma semelhante
-16. **Mantenha palavras relacionadas próximas umas das outras**
-17. Mantenha o mesmo tempo verbal em resumos
-18. **Coloque palavras enfáticas no final da frase**
+8. One paragraph per topic
+9. Begin each paragraph with a sentence that states the main topic
+10. **Use the active voice**
+11. **Put statements in positive form**
+12. **Use definite, specific, concrete language**
+13. **Omit needless words**
+14. Avoid a succession of loose sentences (with no clear connection)
+15. Express co-ordinate ideas in similar form
+16. **Keep related words together**
+17. In summaries, keep to one tense
+18. **Place the emphatic words at the end of the sentence**
 
-### Arquivos de Referência
+### Reference Files
 
-As regras acima são um resumo do texto original de Strunk. Para explicações completas com exemplos:
+The rules above summarize Strunk's original text. For full explanations with examples:
 
-| Seção | Arquivo | ~Tokens |
+| Section | File | ~Tokens |
 | --- | --- | --- |
-| Gramática, pontuação, uso da vírgula | `02-elementary-rules-of-usage.md` | ~3.900 |
-| Parágrafos, voz ativa, concisão | `03-elementary-principles-of-composition.md` | ~11.800 |
-| Títulos, citações, formatação | `04-a-few-matters-of-form.md` | ~1.350 |
-| Escolha de palavras (vícios e parônimos do pt-BR) | `05-words-and-expressions-commonly-misused.md` | ~1.800 |
+| Grammar, punctuation, comma usage | `02-elementary-rules-of-usage.md` | ~3,900 |
+| Paragraphs, active voice, concision | `03-elementary-principles-of-composition.md` | ~11,800 |
+| Headings, quotations, formatting | `04-a-few-matters-of-form.md` | ~1,350 |
+| Word choice (crutch words and commonly confused pairs) | `05-words-and-expressions-commonly-misused.md` | ~1,800 |
 
-**A maioria das tarefas exige apenas o arquivo `03-elementary-principles-of-composition.md`** — ele aborda voz ativa, forma afirmativa, linguagem concreta e a eliminação de palavras desnecessárias.
+**Most tasks need only `03-elementary-principles-of-composition.md`** — it covers active voice, positive form, concrete language, and the elimination of needless words.
 
-## Padrões de Escrita de IA a Evitar
+## AI Writing Patterns to Avoid
 
-LLMs tendem a convergir para médias estatísticas, produzindo uma prosa genérica e inflada. Evite:
+LLMs tend to converge on statistical averages, producing generic, inflated prose. Avoid:
 
-- **Termos inflados:** fundamental, crucial, vital, testemunho, legado duradouro
-- **Frases vazias com gerúndio (-ing):** garantindo confiabilidade, demonstrando recursos, destacando capacidades
-- **Adjetivos promocionais:** revolucionário, fluido/integrado, robusto, de ponta
-- **Vocabulário de IA em excesso:** aprofundar-se (_delve_), alavancar (_leverage_), multifacetado, fomentar, esfera/âmbito (_realm_), tapeçaria (_tapestry_)
-- **Excesso de formatação:** listas com marcadores em excesso, decoração com emojis, negrito mecânico em termos-chave repetidos
+- **Inflated terms:** pivotal, crucial, vital, testament, enduring legacy
+- **Empty -ing phrases:** ensuring reliability, showcasing features, highlighting capabilities
+- **Promotional adjectives:** revolutionary, seamless, robust, cutting-edge
+- **Overused AI vocabulary:** delve, leverage, multifaceted, foster, realm, tapestry
+- **Formatting excess:** too many bulleted lists, emoji decoration, mechanical bolding of repeated key terms
 
-Seja específico, não grandioso. Diga o que realmente faz.
+Be specific, not grandiose. Say what it actually does.
 
-Para uma pesquisa detalhada sobre por que esses padrões ocorrem, consulte `signs-of-ai-writing.md`. Editores da Wikipédia desenvolveram esse guia para detectar envios gerados por IA — seus padrões são bem documentados e testados na prática.
+For detailed research on why these patterns occur, see `signs-of-ai-writing.md`. Wikipedia editors developed that guide to detect AI-generated submissions — its patterns are well documented and field-tested.
 
-## Resumo
+## Summary
 
-Escrevendo para humanos? Carregue a seção relevante de `elements-of-style/` e aplique as regras. Para a maioria das tarefas, o arquivo `03-elementary-principles-of-composition.md` cobre os aspectos mais importantes.
+Writing for humans? Load the relevant section of `elements-of-style/` and apply the rules. For most tasks, `03-elementary-principles-of-composition.md` covers what matters most.

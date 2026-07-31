@@ -1,135 +1,135 @@
-# Como contribuir com o PelizzAI
+# Contributing to PelizzAI
 
-Obrigado pelo interesse. Este documento explica o que é peculiar neste repositório — porque
-contribuir aqui não se parece com contribuir num projeto de software comum.
+Thanks for your interest. This document explains what is peculiar about this repository — because
+contributing here does not look like contributing to an ordinary software project.
 
-## O que você está editando
+## What you are editing
 
-O "produto" deste repositório é **prosa instrucional em markdown**: as skills. Elas são lidas por um
-agente de código em tempo de execução e mudam o comportamento dele. Não há aplicação rodando, não há
-build.
+The "product" of this repository is **instructional prose in markdown**: the skills. They are read
+by a coding agent at runtime and change its behavior. There is no running application, and there is
+no build.
 
-A consequência prática: **uma regressão aqui é uma instrução ambígua, contraditória ou perdida** —
-não um stack trace. O defeito mais comum e mais caro é uma seção que contradiz outra seção do mesmo
-arquivo. O revisor lê procurando isso.
+The practical consequence: **a regression here is an ambiguous, contradictory, or lost
+instruction** — not a stack trace. The most common and most expensive defect is a section that
+contradicts another section of the same file. The reviewer reads looking for exactly that.
 
-## A regra de ouro
+## The golden rule
 
-**Não edite os arquivos gerados.** Estes caminhos são produzidos por `scripts/sync-harness.mjs` e
-qualquer mudança feita neles é perdida no próximo sync:
+**Do not edit the generated files.** These paths are produced by `scripts/sync-harness.mjs`, and
+any change made to them is lost on the next sync:
 
 - `.agents/skills/`
 - `AGENTS.md`
 - `GEMINI.md`
-- `scripts/pelizzai-core-skills.txt` (manifesto)
-- `dist/` (inteira — o payload consumidor pronto para copiar)
+- `scripts/pelizzai-core-skills.txt` (manifest)
+- `dist/` (all of it — the ready-to-copy consumer payload)
 
-A fonte do comportamento é `.claude/` (skills e hooks). Também são autorais — e editáveis —
-`CLAUDE.md`, `README.md`, `scripts/` e `.github/`. `.cursor/rules/pelizzai.mdc` é adaptador
-**manual**: o sync o distribui, mas não o gera, e ele precisa ser atualizado à mão quando os
-entrypoints mudarem.
+The source of behavior is `.claude/` (skills and hooks). Also authored — and editable — are
+`CLAUDE.md`, `README.md`, `scripts/`, and `.github/`. `.cursor/rules/pelizzai.mdc` is a
+**manual** adapter: the sync distributes it but does not generate it, and it must be updated by
+hand when the entrypoints change.
 
-## O fluxo
+## The flow
 
 ```bash
-# 1. edite .claude/skills/... ou .claude/hooks/...
+# 1. edit .claude/skills/... or .claude/hooks/...
 
-# 2. regenere os espelhos (sempre, antes de commitar)
+# 2. regenerate the mirrors (always, before committing)
 node scripts/sync-harness.mjs
 
-# 3. valide a sincronia e os contratos
+# 3. validate sync and contracts
 node scripts/sync-harness.mjs --check
-pwsh scripts/test-harness-contracts.ps1     # precisa fechar com 0 FAIL
+pwsh scripts/test-harness-contracts.ps1     # must finish with 0 FAIL
 
-# 4. commit e PR
+# 4. commit and PR
 ```
 
-O passo 2 não é opcional. Um commit que muda a fonte sem regenerar o espelho quebra o job
-`sync-check` da CI.
+Step 2 is not optional. A commit that changes the source without regenerating the mirror breaks
+the CI `sync-check` job.
 
-**Requisitos:** Node.js 18+ para o núcleo; PowerShell 7+ para a suíte de contratos e os wrappers
-`.ps1`.
+**Requirements:** Node.js 18+ for the core; PowerShell 7+ for the contract suite and the `.ps1`
+wrappers.
 
-## Contratos: comportamento novo exige asserção nova
+## Contracts: new behavior requires a new assertion
 
-`scripts/test-harness-contracts.ps1` é o que impede o harness de regredir em silêncio. Cada
-comportamento relevante tem uma asserção que o trava.
+`scripts/test-harness-contracts.ps1` is what keeps the harness from regressing silently. Every
+relevant behavior has an assertion that locks it in.
 
-Se o seu PR muda comportamento, ele precisa mexer nos contratos:
+If your PR changes behavior, it needs to touch the contracts:
 
-- **comportamento novo** → asserção nova que falharia sem a sua mudança;
-- **comportamento removido de propósito** → remova a asserção e explique no corpo do commit por que
-  aquilo deixou de valer;
-- **comportamento que mudou de arquivo** → reaponte a asserção.
+- **new behavior** → a new assertion that would fail without your change;
+- **behavior removed on purpose** → remove the assertion and explain in the commit body why it no
+  longer holds;
+- **behavior that moved to another file** → repoint the assertion.
 
-Um antipadrão específico, que será recusado no review: **enfraquecer uma asserção até ela passar**.
-Regex que casa quase tudo, ou `Check-NotMatch` que virou no-op, é pior que asserção nenhuma — porque
-simula cobertura que não existe. Se uma asserção está no seu caminho, ou o comportamento dela ainda
-vale (e a sua mudança está errada), ou ele deixou de valer (e ela deve ser removida com
-justificativa). Não existe terceira via.
+One specific anti-pattern will be rejected in review: **weakening an assertion until it passes**.
+A regex that matches almost anything, or a `Check-NotMatch` turned into a no-op, is worse than no
+assertion at all — because it simulates coverage that does not exist. If an assertion is in your
+way, either its behavior still holds (and your change is wrong), or it no longer holds (and the
+assertion should be removed with justification). There is no third way.
 
-## Escrevendo uma skill
+## Writing a skill
 
-Cada skill vive em `.claude/skills/<nome>/SKILL.md` e segue estas regras:
+Each skill lives in `.claude/skills/<name>/SKILL.md` and follows these rules:
 
-- **Frontmatter só no `SKILL.md`.** Precisa de `name` e `description`, e o `name` tem que ser igual
-  ao nome do diretório. Arquivos em `references/`, `templates/`, `evals/` e `techniques/` **não**
-  levam frontmatter.
-- **A `description` é o mecanismo de descoberta.** É por ela que o agente encontra a skill. Escreva
-  os gatilhos reais de uso, incluindo as frases coloquiais que uma pessoa usaria ("não funciona",
-  "deu erro"). Um resumo elegante e genérico faz a skill nunca ser acionada.
-- **Todo ponteiro precisa existir.** `references/...`, `templates/...` e todo nome `pelizzai-*`
-  citado em prosa são verificados; ponteiro morto quebra o sync.
-- **Referência cruzada se qualifica.** Ao citar um arquivo que vive em outra skill, escreva
-  `pelizzai-execution-plans` → `references/task-cycle.md`, nunca `references/task-cycle.md` solto —
-  senão quem lê procura no diretório errado.
+- **Frontmatter only in `SKILL.md`.** It needs `name` and `description`, and `name` has to equal
+  the directory name. Files under `references/`, `templates/`, `evals/`, and `techniques/` take
+  **no** frontmatter.
+- **The `description` is the discovery mechanism.** It is how the agent finds the skill. Write the
+  real usage triggers, including the colloquial phrases a person would use ("it doesn't work",
+  "it broke"). An elegant, generic summary makes the skill never fire.
+- **Every pointer must exist.** `references/...`, `templates/...`, and every `pelizzai-*` name
+  cited in prose are verified; a dead pointer breaks the sync.
+- **Cross-references are qualified.** When citing a file that lives in another skill, write
+  `pelizzai-execution-plans` → `references/task-cycle.md`, never a bare `references/task-cycle.md`
+  — otherwise the reader searches the wrong directory.
 
-Há uma skill dedicada a isso: `pelizzai-writing-skills`, com
-`references/skill-authoring.md`. Vale ler antes de escrever a primeira.
+There is a skill dedicated to this: `pelizzai-writing-skills`, with
+`references/skill-authoring.md`. Worth reading before writing your first one.
 
-## Mexendo nos hooks
+## Touching the hooks
 
-Os hooks em `.claude/hooks/` são a parte mais sensível do repositório, porque **rodam na máquina de
-quem instalou o harness**.
+The hooks in `.claude/hooks/` are the most sensitive part of the repository, because **they run on
+the machine of whoever installed the harness**.
 
-- **Paridade obrigatória.** Cada hook existe em `.mjs` (Node) e `.ps1` (PowerShell). Divergência
-  entre as duas pernas é bug, mesmo que cada uma esteja correta isoladamente.
-- **Falso positivo é o pior defeito possível.** Um bloqueio indevido trava o trabalho de um
-  desconhecido, ensina o agente a contornar a rede de segurança e faz a proteção inteira perder
-  valor. As regras do `guardrails` são **deliberadamente estreitas**: elas miram o punhado de
-  comandos que apagam trabalho de forma irrecuperável, e não tentam cobrir todo Git perigoso. Ao
-  mexer, prefira falso negativo a falso positivo.
-- **Teste os dois lados, executando.** A suíte tem fixtures de comandos que devem bloquear e de
-  comandos que devem passar. Acrescente às duas listas — um hook que você não executou não está
-  verificado.
-- **Fail-open em erro interno.** Se o próprio hook quebrar, ele sai com 0. Um bug na rede de
-  segurança nunca pode sequestrar a ferramenta de quem usa.
+- **Parity is mandatory.** Each hook exists as `.mjs` (Node) and `.ps1` (PowerShell). Divergence
+  between the two legs is a bug, even when each one is correct in isolation.
+- **A false positive is the worst possible defect.** An undue block halts a stranger's work,
+  teaches the agent to route around the safety net, and makes the whole protection lose its
+  value. The `guardrails` rules are **deliberately narrow**: they target the handful of commands
+  that erase work irrecoverably, and they do not try to cover everything dangerous in Git. When
+  touching them, prefer a false negative over a false positive.
+- **Test both legs, by executing.** The suite has fixtures of commands that must block and of
+  commands that must pass. Add to both lists — a hook you have not executed is not verified.
+- **Fail open on internal error.** If the hook itself breaks, it exits with 0. A bug in the safety
+  net must never hijack the user's tool.
 
-## Idioma e estilo
+## Language and style
 
-O repositório é inteiro em **português do Brasil**, com acentuação correta. Isso vale para skills,
-comentários de código, mensagens de commit e descrição de PR.
+The repository is written entirely in **English**. This holds for skills, code comments, commit
+messages, and PR descriptions.
 
-A marca se escreve exatamente **PelizzAI** em prosa — nunca "Pelizzai", "pelizzAI" ou "PELIZZAI".
+The brand is spelled exactly **PelizzAI** in prose — never "Pelizzai", "pelizzAI", or "PELIZZAI".
 
-Escreva instrução, não redação: frase curta, voz ativa, o critério antes do exemplo. A skill
-`pelizzai-writing-clearly-and-concisely` é o guia de estilo do projeto.
+Write instruction, not an essay: short sentences, active voice, the criterion before the example.
+The skill `pelizzai-writing-clearly-and-concisely` is the project's style guide.
 
-## Abrindo um PR
+## Opening a PR
 
-- Descreva **o que muda no comportamento do agente**, não só quais arquivos você tocou.
-- Diga como verificou. "Rodei a suíte" é o mínimo; se mexeu em hook, cole a saída dos casos testados.
-- PRs pequenos e temáticos são revisados mais rápido. Uma mudança de doutrina que atravessa 15 skills
-  provavelmente deveria ser uma discussão antes de ser um PR.
-- Para mudanças grandes ou que alteram um invariante (autoridade do usuário, isolamento antes da
-  primeira escrita, evidência antes de conclusão), **abra uma issue primeiro**. Esses pontos são
-  deliberados e mudá-los exige conversa, não só código.
+- Describe **what changes in the agent's behavior**, not just which files you touched.
+- Say how you verified it. "I ran the suite" is the minimum; if you touched a hook, paste the
+  output of the cases you tested.
+- Small, thematic PRs get reviewed faster. A doctrine change that cuts across 15 skills should
+  probably be a discussion before it is a PR.
+- For large changes or ones that alter an invariant (user authority, isolation before the first
+  write, evidence before completion), **open an issue first**. These points are deliberate, and
+  changing them requires conversation, not just code.
 
-## Um princípio que atravessa tudo
+## One principle that cuts across everything
 
-O harness classifica, raciocina, investiga e recomenda; **quem decide o produto é o usuário**. Ao
-propor uma mudança, verifique se ela não autoriza o agente a decidir sozinho escopo, UX, arquitetura,
-dados, risco aceito ou critério de aceite. Lacuna material encontrada durante o trabalho deve levar
-à `pelizzai-interview-me` — nunca a um default silencioso.
+The harness classifies, reasons, investigates, and recommends; **the user decides the product**.
+When proposing a change, check that it does not authorize the agent to decide scope, UX,
+architecture, data, accepted risk, or acceptance criteria on its own. A material gap found during
+the work must lead to `pelizzai-interview-me` — never to a silent default.
 
-Contribuição que fura esse princípio será recusada mesmo que o código esteja impecável.
+A contribution that breaks this principle will be rejected even if the code is impeccable.

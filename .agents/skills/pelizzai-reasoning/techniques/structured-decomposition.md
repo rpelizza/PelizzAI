@@ -1,493 +1,493 @@
 # Structured Decomposition
 
-## Objetivo
+## Purpose
 
-Use Structured Decomposition para transformar um problema complexo em partes menores que possam ser entendidas, investigadas, implementadas, validadas e integradas com segurança.
+Use Structured Decomposition to turn a complex problem into smaller parts that can be understood, investigated, implemented, validated, and integrated safely.
 
-A técnica evita dois extremos:
+The technique avoids two extremes:
 
 ```text
-Subdecomposição:
-- Tratar um problema grande como uma única tarefa vaga.
-- Misturar responsabilidades, riscos e decisões incompatíveis.
-- Implementar antes de entender partes essenciais do problema.
+Under-decomposition:
+- Treating a large problem as a single vague task.
+- Mixing incompatible responsibilities, risks, and decisions.
+- Implementing before understanding essential parts of the problem.
 
-Sobredecomposição:
-- Criar microtarefas artificiais.
-- Dividir trabalho que precisa permanecer coeso.
-- Aumentar coordenação, contexto e custo sem ganho real.
+Over-decomposition:
+- Creating artificial micro-tasks.
+- Splitting work that needs to stay cohesive.
+- Increasing coordination, context, and cost with no real gain.
 ```
 
-A decomposição deve produzir uma estrutura operacional clara: componentes, responsabilidades, dependências, contratos, riscos, validações e integração. Não exige expor cadeia de pensamento detalhada.
+Decomposition must produce a clear operational structure: components, responsibilities, dependencies, contracts, risks, validations, and integration. It does not require exposing detailed chain of thought.
 
-## Princípio central
+## Core principle
 
-> Divida o problema nas menores partes que possam ser compreendidas, verificadas e integradas sem perder o contexto necessário.
+> Split the problem into the smallest parts that can be understood, verified, and integrated without losing the necessary context.
 
-Uma boa decomposição preserva o objetivo global.
+A good decomposition preserves the global goal.
 
 ```mermaid
 flowchart TD
-    A[Problema complexo] --> B[Identificar objetivo e restrições]
-    B --> C[Separar responsabilidades]
-    C --> D[Definir subproblemas coesos]
-    D --> E[Mapear dependências e contratos]
-    E --> F[Definir validações locais]
-    F --> G[Integrar resultados]
-    G --> H[Validar objetivo global]
+    A[Complex problem] --> B[Identify goal and constraints]
+    B --> C[Separate responsibilities]
+    C --> D[Define cohesive subproblems]
+    D --> E[Map dependencies and contracts]
+    E --> F[Define local validations]
+    F --> G[Integrate results]
+    G --> H[Validate global goal]
 ```
 
-## Quando usar
+## When to use
 
-Use Structured Decomposition quando a tarefa envolver:
+Use Structured Decomposition when the task involves:
 
 ```text
-- Múltiplas responsabilidades ou componentes.
-- Requisitos técnicos, funcionais e operacionais misturados.
-- Frontend, backend, banco, integrações ou infraestrutura.
-- Arquivos ou documentos extensos com múltiplos tópicos.
-- Sistemas com fluxos, estados e dependências.
-- Refatoração de módulos grandes ou acoplados.
-- Análise de problema com várias causas possíveis.
-- Decisão que envolve diferentes dimensões: segurança, custo, prazo, compatibilidade e manutenção.
-- Tarefa grande demais para ser validada como uma única unidade.
-- Necessidade de delegar, paralelizar ou organizar subtarefas.
+- Multiple responsibilities or components.
+- Technical, functional, and operational requirements mixed together.
+- Frontend, backend, database, integrations, or infrastructure.
+- Long files or documents spanning multiple topics.
+- Systems with flows, states, and dependencies.
+- Refactoring large or coupled modules.
+- Analyzing a problem with several possible causes.
+- A decision spanning different dimensions: security, cost, deadline, compatibility, and maintenance.
+- A task too large to be validated as a single unit.
+- The need to delegate, parallelize, or organize subtasks.
 ```
 
-Os mesmos gatilhos servem de exemplos adequados: autenticação com login/sessão/autorização/OAuth, funcionalidade que cruza interface/API/banco/notificações, refatoração de componente grande, análise documental, migração de banco, diagnóstico distribuído, transformação de requisitos vagos em entregáveis.
+The same triggers double as fitting examples: authentication with login/session/authorization/OAuth, a feature crossing UI/API/database/notifications, refactoring a large component, document analysis, database migration, distributed diagnosis, turning vague requirements into deliverables.
 
-## Quando evitar
+## When to avoid
 
-Não use Structured Decomposition como ritual automático. Evite ou simplifique quando:
+Do not use Structured Decomposition as an automatic ritual. Avoid or simplify when:
 
 ```text
-- Há uma única ação clara e local.
-- A tarefa é pequena, reversível e facilmente verificável.
-- O problema não possui dependências relevantes.
-- O usuário pediu tradução, reescrita, resumo ou ajuste pontual.
-- A decomposição criaria mais coordenação do que valor.
-- A resposta depende apenas de consulta direta a uma fonte conhecida.
+- There is a single clear, local action.
+- The task is small, reversible, and easy to verify.
+- The problem has no relevant dependencies.
+- The user asked for a translation, rewrite, summary, or one-off tweak.
+- Decomposing would create more coordination than value.
+- The answer only requires a direct lookup in a known source.
 ```
 
-Exemplos inadequados: corrigir erro de sintaxe, renomear variável, traduzir uma frase, ajustar o texto de um botão, consultar a assinatura de uma função documentada.
+Poor fits: fixing a syntax error, renaming a variable, translating a sentence, adjusting a button label, looking up the signature of a documented function.
 
-## Relação com outras técnicas
+## Relationship to other techniques
 
-| Técnica                  | Responsabilidade                                              |
+| Technique                | Responsibility                                                |
 | ------------------------ | ------------------------------------------------------------- |
-| Structured Decomposition | Divide o problema em partes coesas, dependências e contratos  |
-| Plan and Execute         | Organiza a ordem de execução das partes                       |
-| ReAct                    | Decide a próxima ação dentro de uma parte                     |
-| Verification             | Define como validar cada parte e o resultado integrado        |
-| Critique and Refine      | Corrige partes que apresentam falhas ou lacunas               |
-| Decision Making          | Escolhe entre abordagens, inclusive caminhos interdependentes com poda |
+| Structured Decomposition | Splits the problem into cohesive parts, dependencies, and contracts |
+| Plan and Execute         | Orders the execution of the parts                             |
+| ReAct                    | Decides the next action within a part                         |
+| Verification             | Defines how to validate each part and the integrated result   |
+| Critique and Refine      | Fixes parts with flaws or gaps                                |
+| Decision Making          | Chooses between approaches, including interdependent paths with pruning |
 
 ```mermaid
 flowchart LR
-    A[Problema complexo] --> B[Structured Decomposition]
-    B --> C[Subproblemas coesos]
+    A[Complex problem] --> B[Structured Decomposition]
+    B --> C[Cohesive subproblems]
     C --> D[Plan and Execute]
     D --> E[ReAct]
     E --> F[Verification]
-    F --> G[Resultado integrado]
+    F --> G[Integrated result]
 ```
 
-### Divisão de papéis com Plan and Execute
+### Division of roles with Plan and Execute
 
-Use Structured Decomposition para responder:
+Use Structured Decomposition to answer:
 
 ```text
-- Quais partes existem?
-- Quais responsabilidades pertencem a cada parte?
-- Quais partes dependem umas das outras?
-- Quais contratos conectam essas partes?
-- Como cada parte será validada?
-- Como confirmar que a integração atende ao objetivo global?
+- Which parts exist?
+- Which responsibilities belong to each part?
+- Which parts depend on each other?
+- Which contracts connect these parts?
+- How will each part be validated?
+- How to confirm the integration meets the global goal?
 ```
 
-Use [Plan and Execute](plan-and-execute.md) para responder:
+Use [Plan and Execute](plan-and-execute.md) to answer:
 
 ```text
-- Em qual ordem essas partes devem ser executadas?
-- Quais etapas podem ocorrer em paralelo?
-- Onde devem existir checkpoints?
-- Quando é necessário replanejar?
+- In what order should these parts run?
+- Which steps can happen in parallel?
+- Where should checkpoints exist?
+- When is replanning needed?
 ```
 
-## Modelo de decomposição
+## Decomposition model
 
-Antes de dividir, defina o problema de forma mínima.
+Before splitting, define the problem minimally.
 
 ```text
-Objetivo:
-- Qual resultado final precisa existir?
+Goal:
+- What final result must exist?
 
-Escopo:
-- O que está incluído?
-- O que está explicitamente fora?
+Scope:
+- What is included?
+- What is explicitly out?
 
-Entradas:
-- Quais dados, arquivos, eventos, requisitos ou dependências existem?
+Inputs:
+- What data, files, events, requirements, or dependencies exist?
 
-Saídas:
-- Quais entregáveis, decisões, mudanças ou comportamentos devem existir?
+Outputs:
+- What deliverables, decisions, changes, or behaviors must exist?
 
-Restrições:
-- Stack, segurança, prazo, compatibilidade, orçamento, permissões e convenções.
+Constraints:
+- Stack, security, deadline, compatibility, budget, permissions, and conventions.
 
-Riscos:
-- O que pode falhar, gerar regressão, expor dados ou aumentar custo?
+Risks:
+- What could fail, cause regressions, expose data, or raise cost?
 
-Critério de conclusão:
-- Como saber que o problema foi resolvido?
+Completion criterion:
+- How to know the problem is solved?
 ```
 
-Não decomponha um objetivo vago sem antes torná-lo minimamente verificável.
+Do not decompose a vague goal without first making it minimally verifiable.
 
 ```text
-Ruim:
-"Melhorar a autenticação."
+Bad:
+"Improve authentication."
 
-Melhor:
-"Permitir login por e-mail e Google OAuth, proteger rotas por perfil, renovar sessão conforme a política definida e registrar falhas sem expor tokens."
+Better:
+"Allow login via e-mail and Google OAuth, protect routes by role, renew sessions per the defined policy, and log failures without exposing tokens."
 ```
 
-### Reenquadrar antes de decompor (step-back)
+### Reframe before decomposing (step-back)
 
-Quando o problema tiver alta incerteza ou estiver formulado de modo enviesado, dê um passo atrás e reenquadre antes de dividir. Decompor um enquadramento errado apenas multiplica o erro em subproblemas.
+When the problem carries high uncertainty or comes framed with a bias baked in, step back and reframe before splitting. Decomposing a wrong framing only multiplies the error across subproblems.
 
 ```text
-- Qual é o problema real por trás do pedido?
-- O enunciado já assume uma solução? Qual premissa está embutida?
-- Existe um nível de abstração superior em que o problema fica mais simples?
-- Que pergunta, se respondida, dissolveria boa parte da complexidade?
+- What is the real problem behind the request?
+- Does the statement already assume a solution? Which premise is baked in?
+- Is there a higher level of abstraction where the problem gets simpler?
+- What question, if answered, would dissolve most of the complexity?
 ```
 
-Para problemas de alta incerteza ou diagnóstico, combine com [Root Cause Analysis](root-cause-analysis.md) e registre premissas com [Assumption Tracking](assumption-tracking.md) antes de partir para a execução.
+For high-uncertainty or diagnostic problems, combine with [Root Cause Analysis](root-cause-analysis.md) and record premises with [Assumption Tracking](assumption-tracking.md) before moving to execution.
 
-## Unidade correta de decomposição
+## The right unit of decomposition
 
-Uma parte deve ter responsabilidade clara, resultado observável e limite suficiente para ser validada.
+A part must have a clear responsibility, an observable result, and a boundary tight enough to be validated.
 
 ```text
-Uma boa unidade de decomposição:
-- possui objetivo próprio;
-- tem entradas e saídas identificáveis;
-- pode ser validada isoladamente;
-- tem dependências explícitas;
-- reduz incerteza ou trabalho real;
-- não mistura responsabilidades incompatíveis.
+A good unit of decomposition:
+- has a goal of its own;
+- has identifiable inputs and outputs;
+- can be validated in isolation;
+- has explicit dependencies;
+- reduces real uncertainty or work;
+- does not mix incompatible responsibilities.
 
-Uma unidade ruim:
-- é vaga demais;
-- depende de tudo;
-- não possui critério de conclusão;
-- apenas repete o nome do objetivo maior;
-- existe somente para aumentar a quantidade de etapas.
+A bad unit:
+- is too vague;
+- depends on everything;
+- has no completion criterion;
+- merely restates the name of the larger goal;
+- exists only to inflate the step count.
 ```
 
-Exemplo:
+Example:
 
 ```text
-Ruim:
-1. Fazer backend.
-2. Fazer frontend.
-3. Testar tudo.
+Bad:
+1. Build backend.
+2. Build frontend.
+3. Test everything.
 
-Melhor:
-1. Confirmar contrato de criação de pedido.
-2. Implementar validação e persistência do pedido.
-3. Implementar retorno de erros previsíveis.
-4. Integrar formulário à rota.
-5. Validar fluxo de sucesso, erro e duplicidade.
+Better:
+1. Confirm the order-creation contract.
+2. Implement order validation and persistence.
+3. Implement predictable error responses.
+4. Wire the form to the route.
+5. Validate the success, error, and duplicate flows.
 ```
 
-### Decomposição recursiva e quando parar
+### Recursive decomposition and when to stop
 
-Se um subproblema continuar complexo, aplique a mesma decomposição sobre ele — recursivamente. Mas cada nível de profundidade adiciona coordenação, então pare de decompor assim que a parte atual satisfizer todos os critérios abaixo:
+If a subproblem remains complex, apply the same decomposition to it — recursively. But each level of depth adds coordination, so stop decomposing as soon as the current part satisfies all of the criteria below:
 
 ```text
-Pare de decompor quando a parte:
-- tem critério de conclusão claro e verificável;
-- pode ser validada isoladamente;
-- tem responsabilidade única e dependências explícitas;
-- pode ser implementada/investigada sem dividir de novo para ser entendida;
-- cabe no orçamento de esforço previsto (ver o catálogo em ../SKILL.md).
+Stop decomposing when the part:
+- has a clear, verifiable completion criterion;
+- can be validated in isolation;
+- has a single responsibility and explicit dependencies;
+- can be implemented/investigated without splitting again to be understood;
+- fits the planned effort budget (see the catalog in ../SKILL.md).
 
-Continue decompondo apenas enquanto pelo menos um desses critérios falhar.
+Keep decomposing only while at least one of these criteria fails.
 ```
 
-Decompor além desse ponto é sobredecomposição: gera microtarefas cujo custo de coordenação supera o trabalho.
+Decomposing past that point is over-decomposition: it yields micro-tasks whose coordination cost outweighs the work.
 
-## Tipos de decomposição
+## Types of decomposition
 
-### 1. Por responsabilidade
+### 1. By responsibility
 
-Use quando diferentes partes possuem finalidades distintas.
+Use when different parts serve distinct ends.
 
 ```text
-Problema:
-Implementar autenticação.
+Problem:
+Implement authentication.
 
-Responsabilidades:
-- Cadastro e identidade do usuário.
-- Login e validação de credenciais.
-- Emissão e renovação de sessão.
-- Autorização por papel ou permissão.
-- Logout e revogação.
-- Auditoria e tratamento de falhas.
+Responsibilities:
+- User registration and identity.
+- Login and credential validation.
+- Session issuance and renewal.
+- Authorization by role or permission.
+- Logout and revocation.
+- Auditing and failure handling.
 ```
 
-Não misture todas essas responsabilidades em uma única tarefa ou módulo sem necessidade.
+Do not mix all these responsibilities into a single task or module without need.
 
-### 2. Por fluxo
+### 2. By flow
 
-Use quando o problema é orientado a etapas de negócio ou usuário.
+Use when the problem is oriented around business or user steps.
 
 ```text
-Fluxo:
-Exportar relatório.
+Flow:
+Export a report.
 
-Partes:
-1. Usuário solicita exportação.
-2. Sistema valida permissão e filtros.
-3. Job é criado.
-4. Worker gera o arquivo.
-5. Arquivo é armazenado.
-6. Usuário recebe status ou notificação.
-7. Download é autorizado.
+Parts:
+1. User requests the export.
+2. System validates permission and filters.
+3. A job is created.
+4. A worker generates the file.
+5. The file is stored.
+6. The user receives a status or notification.
+7. Download is authorized.
 ```
 
-Cada parte deve ser clara o suficiente para identificar falhas e validações.
+Each part must be clear enough to pinpoint failures and validations.
 
-### 3. Por camada
+### 3. By layer
 
-Use quando o sistema já possui arquitetura em camadas bem definida.
+Use when the system already has a well-defined layered architecture.
 
 ```text
 Feature:
-Adicionar filtro por status.
+Add filtering by status.
 
-Camadas:
-- Interface: seletor de status e atualização de estado.
-- Aplicação: composição de query params.
-- API: validação e aplicação do filtro.
-- Persistência: consulta com condição adequada.
-- Testes: comportamento local e integrado.
+Layers:
+- UI: status selector and state update.
+- Application: query-param composition.
+- API: filter validation and application.
+- Persistence: query with the proper condition.
+- Tests: local and integrated behavior.
 ```
 
-Não force decomposição por camada quando ela piorar a coesão.
+Do not force layer-based decomposition when it hurts cohesion.
 
-### 4. Por risco
+### 4. By risk
 
-Use quando partes diferentes possuem riscos muito distintos.
+Use when different parts carry very different risks.
 
 ```text
-Exemplo:
-Migração de banco.
+Example:
+Database migration.
 
-Partes:
-- Alteração de schema.
-- Compatibilidade com aplicação atual.
-- Migração de dados existentes.
+Parts:
+- Schema change.
+- Compatibility with the current application.
+- Migration of existing data.
 - Backfill.
-- Performance de consultas.
+- Query performance.
 - Rollback.
-- Monitoramento após deploy.
+- Post-deploy monitoring.
 ```
 
-A decomposição por risco impede tratar migração como simples alteração de tabela.
+Risk-based decomposition prevents treating a migration as a simple table change.
 
-### 5. Por incerteza
+### 5. By uncertainty
 
-Use quando o problema ainda não está suficientemente compreendido. Para diagnóstico de causa, veja [Root Cause Analysis](root-cause-analysis.md).
+Use when the problem is not yet sufficiently understood. For cause diagnosis, see [Root Cause Analysis](root-cause-analysis.md).
 
 ```text
-Exemplo:
-"O sistema está lento."
+Example:
+"The system is slow."
 
-Subproblemas:
-- A lentidão ocorre no frontend, API, banco ou integração externa?
-- A lentidão é constante ou depende de volume?
-- Há regressão recente?
-- Há gargalo de CPU, I/O, consulta, serialização ou rede?
-- Existe métrica ou log para validar cada hipótese?
+Subproblems:
+- Does the slowness occur in the frontend, API, database, or an external integration?
+- Is it constant or volume-dependent?
+- Is there a recent regression?
+- Is there a CPU, I/O, query, serialization, or network bottleneck?
+- Is there a metric or log to validate each hypothesis?
 ```
 
-Nesse caso, não implemente melhorias antes de separar descoberta de execução.
+In that case, do not implement improvements before separating discovery from execution.
 
-### 6. Por entregável
+### 6. By deliverable
 
-Use quando o objetivo exige artefatos distintos.
+Use when the goal requires distinct artifacts.
 
 ```text
-Exemplo:
-Criar integração com serviço externo.
+Example:
+Build an integration with an external service.
 
-Entregáveis:
-- Cliente autenticado.
-- Contratos de request e response.
-- Tratamento de erro.
-- Observabilidade.
-- Testes.
-- Documentação de configuração.
+Deliverables:
+- Authenticated client.
+- Request and response contracts.
+- Error handling.
+- Observability.
+- Tests.
+- Configuration documentation.
 ```
 
-Útil quando os resultados precisam ser entregues, revisados ou testados separadamente.
+Useful when the results must be delivered, reviewed, or tested separately.
 
-## Como decompor
+## How to decompose
 
-### 1. Identificar o núcleo do problema
+### 1. Identify the core of the problem
 
-Pergunte:
+Ask:
 
 ```text
-- Qual é o resultado principal?
-- Qual parte é obrigatória para considerar a tarefa concluída?
-- Quais resultados são secundários?
-- Quais restrições não podem ser violadas?
+- What is the main result?
+- Which part is mandatory for the task to count as done?
+- Which results are secondary?
+- Which constraints must not be violated?
 ```
 
-Exemplo:
+Example:
 
 ```text
-Tarefa:
-"Adicionar pagamento recorrente."
+Task:
+"Add recurring payments."
 
-Núcleo:
-- Cobrar corretamente em periodicidade definida.
-- Registrar estado e resultado das cobranças.
-- Impedir duplicidade.
-- Tratar falhas e cancelamentos.
+Core:
+- Charge correctly at the defined interval.
+- Record the state and result of each charge.
+- Prevent duplicates.
+- Handle failures and cancellations.
 
-Secundário:
-- Dashboard detalhado.
-- Histórico avançado.
-- Notificações adicionais.
+Secondary:
+- Detailed dashboard.
+- Advanced history.
+- Extra notifications.
 ```
 
-Não permita que funcionalidades secundárias escondam o objetivo principal.
+Do not let secondary features hide the main goal.
 
-### 2. Identificar responsabilidades
+### 2. Identify responsibilities
 
-Separe atividades que têm razões diferentes para mudar.
+Separate activities that have different reasons to change.
 
 ```text
-Ruim:
-"Serviço de pagamento que valida entrada, calcula preço, cobra cartão,
-atualiza assinatura, envia e-mail e gera relatório."
+Bad:
+"Payment service that validates input, computes prices, charges the card,
+updates the subscription, sends e-mail, and generates reports."
 
-Melhor:
-- Validação de requisição.
-- Cálculo e regras de preço.
-- Cobrança via provedor.
-- Atualização de assinatura.
-- Notificação.
-- Auditoria e relatórios.
+Better:
+- Request validation.
+- Price calculation and rules.
+- Charging via the provider.
+- Subscription update.
+- Notification.
+- Auditing and reporting.
 ```
 
-Essa regra não exige uma classe ou serviço para cada responsabilidade. Exige apenas que responsabilidades distintas sejam reconhecidas e não sejam acopladas sem necessidade.
+This rule does not demand a class or service per responsibility. It only demands that distinct responsibilities be recognized and not coupled without need.
 
-### 3. Identificar entradas, saídas e contratos
+### 3. Identify inputs, outputs, and contracts
 
-Para cada parte, defina:
+For each part, define:
 
 ```text
-Entrada:
-- Dados, eventos, parâmetros ou recursos necessários.
+Input:
+- Data, events, parameters, or resources required.
 
-Saída:
-- Resultado produzido, estado alterado, resposta ou artefato.
+Output:
+- Result produced, state changed, response, or artifact.
 
-Contrato:
-- Formato, invariantes, permissões, erros e comportamentos esperados.
+Contract:
+- Format, invariants, permissions, errors, and expected behaviors.
 
-Dependências:
-- Serviços, dados, etapas ou decisões necessárias.
+Dependencies:
+- Services, data, steps, or decisions required.
 
-Validação:
-- Como confirmar que a parte funciona.
+Validation:
+- How to confirm the part works.
 ```
 
-Quando os contratos e requisitos não funcionais virarem o eixo do problema, trate-os com [Constraint Satisfaction](constraint-satisfaction.md).
+When contracts and non-functional requirements become the crux of the problem, handle them with [Constraint Satisfaction](constraint-satisfaction.md).
 
-Exemplo:
+Example:
 
 ```text
-Parte:
-Criar pedido.
+Part:
+Create an order.
 
-Entrada:
-- Itens, cliente, endereço, método de pagamento.
+Input:
+- Items, customer, address, payment method.
 
-Saída:
-- Pedido persistido com identificador e estado inicial.
+Output:
+- Order persisted with an identifier and initial state.
 
-Contrato:
-- Itens precisam existir.
-- Quantidades precisam ser positivas.
-- Usuário deve possuir permissão.
-- Erros devem seguir formato padronizado.
+Contract:
+- Items must exist.
+- Quantities must be positive.
+- The user must have permission.
+- Errors must follow the standard format.
 
-Dependências:
-- Catálogo, estoque, pagamento e banco.
+Dependencies:
+- Catalog, inventory, payment, and database.
 
-Validação:
-- Teste de sucesso, erro de estoque, pagamento recusado e duplicidade.
+Validation:
+- Tests for success, out-of-stock error, declined payment, and duplicates.
 ```
 
-### 4. Mapear dependências
+### 4. Map dependencies
 
-Diferencie dependência real de preferência de ordem.
+Distinguish a real dependency from an ordering preference.
 
 ```mermaid
 flowchart TD
-    A[Confirmar requisitos] --> B[Definir contrato]
-    B --> C[Implementar backend]
-    B --> D[Implementar frontend]
-    C --> E[Testar integração]
+    A[Confirm requirements] --> B[Define the contract]
+    B --> C[Implement backend]
+    B --> D[Implement frontend]
+    C --> E[Test the integration]
     D --> E
-    E --> F[Validar entrega]
+    E --> F[Validate the delivery]
 ```
 
-Uma dependência é real quando:
+A dependency is real when:
 
 ```text
-- Uma parte precisa da saída da outra.
-- Uma decisão precisa ser tomada antes.
-- Ambas alteram o mesmo recurso compartilhado.
-- Uma parte define contrato usado pela outra.
-- A execução em ordem errada gera retrabalho ou risco.
+- One part needs the other's output.
+- A decision must be made first.
+- Both change the same shared resource.
+- One part defines a contract the other uses.
+- Running in the wrong order causes rework or risk.
 ```
 
-Não crie dependência apenas porque uma etapa "parece vir antes".
+Do not create a dependency just because a step "seems to come first".
 
-### 5. Definir fronteiras de integração
+### 5. Define integration boundaries
 
-Partes independentes precisam de interfaces claras.
+Independent parts need clear interfaces.
 
 ```text
-Uma fronteira de integração deve explicitar:
-- dados trocados;
-- formato;
-- responsabilidade de cada lado;
-- tratamento de erro;
-- autenticação e autorização;
-- sincronismo ou assincronismo;
-- idempotência, quando aplicável;
-- observabilidade;
-- compatibilidade.
+An integration boundary must spell out:
+- data exchanged;
+- format;
+- each side's responsibility;
+- error handling;
+- authentication and authorization;
+- synchronous or asynchronous;
+- idempotency, when applicable;
+- observability;
+- compatibility.
 ```
 
-Exemplo:
+Example:
 
 ```text
 Frontend <-> API
 
-Entrada:
+Input:
 GET /orders?status=active&page=1
 
-Saída:
+Output:
 {
   "items": [...],
   "page": 1,
@@ -495,342 +495,342 @@ Saída:
   "total": 75
 }
 
-Erros:
-- 400 para filtro inválido.
-- 401 para ausência de autenticação.
-- 403 para ausência de permissão.
+Errors:
+- 400 for an invalid filter.
+- 401 for missing authentication.
+- 403 for missing permission.
 
-Validação:
-- Testes de contrato e fluxo de interface.
+Validation:
+- Contract tests and UI flow tests.
 ```
 
-## Granularidade
+## Granularity
 
-### Sinais de que a parte está grande demais
+### Signs the part is too large
 
 ```text
-- Possui múltiplas responsabilidades independentes.
-- Não é possível escrever critério de conclusão claro.
-- A falha pode ocorrer em muitas causas diferentes.
-- Exige muitos arquivos ou sistemas sem fronteira definida.
-- Não pode ser validada sem validar todo o sistema.
-- Mistura descoberta, decisão, implementação e validação.
+- It has multiple independent responsibilities.
+- No clear completion criterion can be written for it.
+- Its failure could stem from many different causes.
+- It spans many files or systems with no defined boundary.
+- It cannot be validated without validating the whole system.
+- It mixes discovery, decision, implementation, and validation.
 ```
 
-### Sinais de que a parte está pequena demais
+### Signs the part is too small
 
 ```text
-- Não produz resultado útil isoladamente.
-- Só existe porque uma etapa foi quebrada artificialmente.
-- Possui custo de coordenação maior que o trabalho.
-- Não pode ser validada separadamente.
-- Apenas repete uma microação mecânica.
-- Precisa sempre ocorrer junto de outra parte.
+- It produces no useful result on its own.
+- It only exists because a step was split artificially.
+- Its coordination cost exceeds the work.
+- It cannot be validated separately.
+- It merely restates a mechanical micro-action.
+- It must always happen together with another part.
 ```
 
-Parte grande demais: dividir por responsabilidade, risco ou contrato. Parte pequena demais: reagrupar por objetivo ou validação.
+Part too large: split by responsibility, risk, or contract. Part too small: regroup by goal or validation.
 
-## Decomposição e paralelismo
+## Decomposition and parallelism
 
-A decomposição pode revelar subtarefas paralelizáveis, mas não obriga paralelismo. Paralelize apenas quando as partes forem independentes.
+Decomposition can reveal parallelizable subtasks, but it does not mandate parallelism. Parallelize only when the parts are independent.
 
 ```text
-Critérios:
-- Não alteram o mesmo recurso.
-- Não dependem da saída uma da outra.
-- Não compartilham estado mutável crítico.
-- Os resultados podem ser interpretados separadamente.
-- Há ganho real em executar simultaneamente.
+Criteria:
+- They do not change the same resource.
+- They do not depend on each other's output.
+- They do not share critical mutable state.
+- Their results can be interpreted separately.
+- There is a real gain in running them simultaneously.
 ```
 
 ```mermaid
 flowchart TD
-    A[Subtarefas] --> B{Possuem dependência real?}
-    B -- Sim --> C[Executar sequencialmente]
-    B -- Não --> D{Compartilham recurso ou estado?}
-    D -- Sim --> C
-    D -- Não --> E{Há benefício real?}
-    E -- Sim --> F[Executar em paralelo]
-    E -- Não --> C
+    A[Subtasks] --> B{Real dependency between them?}
+    B -- Yes --> C[Run sequentially]
+    B -- No --> D{Shared resource or state?}
+    D -- Yes --> C
+    D -- No --> E{Real benefit?}
+    E -- Yes --> F[Run in parallel]
+    E -- No --> C
 ```
 
-Exemplo seguro (paralelizável):
+Safe example (parallelizable):
 
 ```text
-- Ler documentação oficial da API.
-- Inspecionar convenções de componentes existentes.
-- Revisar testes relacionados.
+- Read the API's official documentation.
+- Inspect existing component conventions.
+- Review related tests.
 ```
 
-Exemplo inseguro (exige ordem e checkpoint):
+Unsafe example (requires order and a checkpoint):
 
 ```text
-- Alterar schema de banco.
-- Alterar código que depende do schema novo.
-- Executar migração.
+- Change the database schema.
+- Change code that depends on the new schema.
+- Run the migration.
 ```
 
-## Decomposição orientada à validação
+## Validation-oriented decomposition
 
-Cada subproblema deve ter validação local e contribuição para validação global.
+Each subproblem must have local validation and contribute to the global validation.
 
 ```mermaid
 flowchart TD
-    A[Objetivo global] --> B[Parte A]
-    A --> C[Parte B]
-    A --> D[Parte C]
+    A[Global goal] --> B[Part A]
+    A --> C[Part B]
+    A --> D[Part C]
 
-    B --> E[Validação local A]
-    C --> F[Validação local B]
-    D --> G[Validação local C]
+    B --> E[Local validation A]
+    C --> F[Local validation B]
+    D --> G[Local validation C]
 
-    E --> H[Validação integrada]
+    E --> H[Integrated validation]
     F --> H
     G --> H
 
-    H --> I[Critério global atendido]
+    H --> I[Global criterion met]
 ```
 
-Exemplo:
+Example:
 
 ```text
-Objetivo:
-Permitir exportação de CSV.
+Goal:
+Enable CSV export.
 
-Validação local:
-- Permissão de exportação funciona.
-- Filtros são propagados.
-- Arquivo é gerado.
-- Download é autorizado.
+Local validation:
+- Export permission works.
+- Filters are propagated.
+- The file is generated.
+- Download is authorized.
 
-Validação integrada:
-- Usuário permitido exporta dados filtrados.
-- Usuário sem permissão não exporta.
-- Arquivo possui os dados esperados.
+Integrated validation:
+- A permitted user exports filtered data.
+- A user without permission cannot export.
+- The file holds the expected data.
 ```
 
-Não assuma que validar partes isoladas prova o comportamento integrado.
+Do not assume that validating isolated parts proves the integrated behavior.
 
-## Descoberta versus execução
+## Discovery versus execution
 
-Problemas com incerteza material devem ser divididos em dois grupos. Registre as premissas pendentes com [Assumption Tracking](assumption-tracking.md).
+Problems with material uncertainty must be split into two groups. Record pending premises with [Assumption Tracking](assumption-tracking.md).
 
 ```text
-Descoberta:
-- Confirmar requisitos.
-- Inspecionar contratos.
-- Reproduzir bugs.
-- Mapear arquitetura.
-- Identificar dependências.
-- Validar premissas.
+Discovery:
+- Confirm requirements.
+- Inspect contracts.
+- Reproduce bugs.
+- Map the architecture.
+- Identify dependencies.
+- Validate premises.
 
-Execução:
-- Alterar código.
-- Criar testes.
-- Atualizar configuração.
-- Implementar migração.
-- Atualizar documentação.
+Execution:
+- Change code.
+- Create tests.
+- Update configuration.
+- Implement a migration.
+- Update documentation.
 ```
 
 ```mermaid
 flowchart LR
-    A[Descoberta] --> B[Premissas confirmadas]
-    B --> C[Execução]
-    C --> D[Validação]
+    A[Discovery] --> B[Confirmed premises]
+    B --> C[Execution]
+    C --> D[Validation]
 ```
 
-Não trate descoberta como atraso. Ela reduz retrabalho quando premissas são incertas.
+Do not treat discovery as delay. It cuts rework when premises are uncertain.
 
-## Fechar lacunas de integração
+## Closing integration gaps
 
-Depois de decompor, valide se a soma das partes resolve o objetivo.
+After decomposing, validate that the sum of the parts solves the goal.
 
 ```text
-Perguntas:
-- Todas as responsabilidades necessárias foram cobertas?
-- Existe lacuna entre duas partes?
-- Há responsabilidade duplicada?
-- Os contratos são compatíveis?
-- A ordem de execução respeita dependências?
-- As validações locais cobrem o objetivo global?
-- Há comportamento não tratado entre as fronteiras?
-- Alguma parte depende de premissa ainda não confirmada?
+Questions:
+- Were all necessary responsibilities covered?
+- Is there a gap between two parts?
+- Is any responsibility duplicated?
+- Are the contracts compatible?
+- Does the execution order respect dependencies?
+- Do the local validations cover the global goal?
+- Is any behavior between the boundaries unhandled?
+- Does any part rest on a premise not yet confirmed?
 ```
 
-Exemplo de lacuna comum:
+Example of a common gap:
 
 ```text
-Problema:
-Implementar upload de arquivo.
+Problem:
+Implement file upload.
 
-Partes criadas:
-- Tela de upload.
-- Endpoint de recebimento.
-- Armazenamento.
+Parts created:
+- Upload screen.
+- Receiving endpoint.
+- Storage.
 
-Lacunas:
-- Validação de tipo e tamanho.
-- Permissão de acesso.
-- Antivírus ou inspeção, quando aplicável.
-- Persistência de metadados.
-- Download autorizado.
-- Tratamento de falha.
+Gaps:
+- Type and size validation.
+- Access permission.
+- Antivirus or inspection, when applicable.
+- Metadata persistence.
+- Authorized download.
+- Failure handling.
 ```
 
-## Anti-padrões
+## Anti-patterns
 
 ```text
-1. Dividir por arquivos em vez de responsabilidade.
-   Ruim:    Alterar arquivo A / arquivo B / arquivo C.
-   Melhor:  Confirmar contrato, implementar validação, atualizar fluxo de interface, criar testes de regressão.
-   Arquivos são consequência da implementação, não a estrutura principal do problema.
+1. Splitting by files instead of responsibility.
+   Bad:     Change file A / file B / file C.
+   Better:  Confirm the contract, implement validation, update the UI flow, create regression tests.
+   Files are a consequence of the implementation, not the problem's main structure.
 
-2. Misturar descoberta e implementação.
-   Ruim:    "Implementar OAuth e descobrir como o provedor funciona durante a codificação."
-   Melhor:  Confirmar provedor/callback/escopos/sessão, definir contrato, implementar, validar fluxo completo.
+2. Mixing discovery and implementation.
+   Bad:     "Implement OAuth and figure out how the provider works while coding."
+   Better:  Confirm provider/callback/scopes/session, define the contract, implement, validate the full flow.
 
-3. Criar subtarefas sem saída verificável.
-   Ruim:    "Pensar na arquitetura."
-   Melhor:  "Comparar alternativas com critérios de compatibilidade, custo operacional e risco de migração."
+3. Creating subtasks with no verifiable output.
+   Bad:     "Think about the architecture."
+   Better:  "Compare alternatives against criteria of compatibility, operating cost, and migration risk."
 
-4. Duplicar responsabilidade.
-   Ruim:    Frontend, backend e worker validam permissão sem propósito definido.
-   Melhor:  Frontend controla visibilidade; backend é a fonte de verdade da autorização; worker recebe tarefas já autorizadas ou valida conforme o contrato.
-   Não confunda defesa em profundidade com duplicação sem propósito.
+4. Duplicating responsibility.
+   Bad:     Frontend, backend, and worker all validate permission with no defined purpose.
+   Better:  The frontend controls visibility; the backend is the source of truth for authorization; the worker receives pre-authorized tasks or validates per the contract.
+   Do not confuse defense in depth with purposeless duplication.
 
-5. Sobredecompor.
-   Ruim:    Criar variável / criar função / criar import / adicionar teste / rodar teste.
-   Melhor:  "Implementar normalização de entrada e cobrir casos válidos e inválidos."
+5. Over-decomposing.
+   Bad:     Create variable / create function / create import / add test / run test.
+   Better:  "Implement input normalization and cover valid and invalid cases."
 
-6. Não mapear integração.
-   Ruim:    Validar frontend e backend separadamente e assumir que funcionarão juntos.
-   Melhor:  Validar request, response, erros, autenticação e comportamento ponta a ponta.
+6. Not mapping integration.
+   Bad:     Validate frontend and backend separately and assume they will work together.
+   Better:  Validate request, response, errors, authentication, and end-to-end behavior.
 
-7. Ignorar requisitos não funcionais.
-   Ruim:    Decompor apenas telas e endpoints.
-   Melhor:  Incluir segurança, performance, observabilidade, erros, compatibilidade e operação quando relevantes.
+7. Ignoring non-functional requirements.
+   Bad:     Decompose only screens and endpoints.
+   Better:  Include security, performance, observability, errors, compatibility, and operations when relevant.
 ```
 
-## Exemplos
+## Examples
 
-### Exemplo 1 — Funcionalidade completa (sistema)
+### Example 1 — Full feature (system)
 
 ```text
-Tarefa:
-Adicionar exportação de pedidos em CSV.
+Task:
+Add CSV export of orders.
 
-Objetivo:
-Permitir que usuários autorizados exportem pedidos conforme os filtros ativos.
+Goal:
+Let authorized users export orders according to the active filters.
 
-Decomposição:
+Decomposition:
 
-1. Regras e contrato
-   - Quais campos podem ser exportados?
-   - Quais permissões são necessárias?
-   - Quais filtros devem ser respeitados?
-   - Qual formato do arquivo?
+1. Rules and contract
+   - Which fields can be exported?
+   - Which permissions are required?
+   - Which filters must be honored?
+   - What is the file format?
 
 2. Backend
-   - Validar permissão.
-   - Receber e validar filtros.
-   - Consultar dados permitidos.
-   - Gerar CSV.
-   - Retornar arquivo ou job assíncrono.
+   - Validate permission.
+   - Receive and validate filters.
+   - Query permitted data.
+   - Generate the CSV.
+   - Return the file or an async job.
 
 3. Frontend
-   - Exibir ação apenas para usuários permitidos.
-   - Reutilizar filtros ativos.
-   - Exibir estado de carregamento, erro e sucesso.
+   - Show the action only to permitted users.
+   - Reuse the active filters.
+   - Show loading, error, and success states.
 
-4. Segurança e privacidade
-   - Excluir campos sensíveis.
-   - Impedir exportação sem autorização.
-   - Registrar auditoria se necessário.
+4. Security and privacy
+   - Exclude sensitive fields.
+   - Block export without authorization.
+   - Record an audit trail if needed.
 
-5. Validação
-   - Testar exportação com filtros.
-   - Testar usuário sem permissão.
-   - Conferir conteúdo e encoding do CSV.
-   - Executar integração ponta a ponta.
+5. Validation
+   - Test export with filters.
+   - Test a user without permission.
+   - Check the CSV's content and encoding.
+   - Run the end-to-end integration.
 ```
 
-### Exemplo 2 — Análise documental (documento)
+### Example 2 — Document analysis (document)
 
 ```text
-Tarefa:
-Analisar contrato extenso para identificar riscos.
+Task:
+Analyze a long contract to identify risks.
 
-Objetivo:
-Produzir relatório claro sobre obrigações, penalidades, prazos e riscos.
+Goal:
+Produce a clear report on obligations, penalties, deadlines, and risks.
 
-Decomposição:
+Decomposition:
 
-1. Identificação do documento
-   - Partes, vigência, objeto, versão e anexos.
+1. Document identification
+   - Parties, term, subject matter, version, and annexes.
 
-2. Obrigações
-   - Obrigações de cada parte, entregáveis, prazos e condições de aceite.
+2. Obligations
+   - Each party's obligations, deliverables, deadlines, and acceptance conditions.
 
-3. Financeiro
-   - Valores, reajuste, multas e forma de pagamento.
+3. Financials
+   - Amounts, adjustments, penalties, and payment terms.
 
-4. Riscos
-   - Responsabilidade e limitação de responsabilidade.
-   - Confidencialidade, dados pessoais, rescisão e foro.
+4. Risks
+   - Liability and limitation of liability.
+   - Confidentiality, personal data, termination, and jurisdiction.
 
-5. Inconsistências
-   - Cláusulas contraditórias, termos indefinidos, anexos ausentes, obrigações sem critério objetivo.
+5. Inconsistencies
+   - Contradictory clauses, undefined terms, missing annexes, obligations without objective criteria.
 
-6. Síntese
-   - Riscos prioritários, perguntas para negociação, pontos que exigem confirmação.
+6. Synthesis
+   - Priority risks, questions for negotiation, points requiring confirmation.
 ```
 
-## Formato de registro
+## Recording format
 
-Use este formato ao registrar a decomposição:
+Use this format when recording the decomposition:
 
 ```text
-Objetivo:
-- [resultado final]
+Goal:
+- [final result]
 
-Escopo:
-- Inclui:
-- Não inclui:
+Scope:
+- Includes:
+- Excludes:
 
-Subproblemas:
+Subproblems:
 
-1. [nome]
-   - Responsabilidade:
-   - Entrada:
-   - Saída:
-   - Dependências:
-   - Contrato:
-   - Risco:
-   - Validação:
+1. [name]
+   - Responsibility:
+   - Input:
+   - Output:
+   - Dependencies:
+   - Contract:
+   - Risk:
+   - Validation:
 
-(repita para cada subproblema)
+(repeat for each subproblem)
 
-Integração:
-- [como as partes se conectam]
+Integration:
+- [how the parts connect]
 
-Critério global de conclusão:
-- [condições que confirmam o objetivo]
+Global completion criterion:
+- [conditions that confirm the goal]
 ```
 
-## Lembretes para o agente
+## Reminders for the agent
 
 ```text
-- Reenquadre antes de dividir quando a incerteza for alta; não decomponha um enunciado enviesado.
-- Decomponha recursivamente, mas pare assim que a parte for verificável, isolável e coesa.
-- Separe descoberta de execução quando houver premissas relevantes não confirmadas.
-- Paralelize apenas partes independentes e sem conflito de estado ou recurso.
-- Defina validação local por parte e validação integrada para o objetivo global.
-- Verifique lacunas, duplicidades e requisitos não funcionais antes de executar.
-- Não exponha cadeia de pensamento detalhada; comunique apenas estrutura, contratos, dependências, decisões e limitações relevantes.
+- Reframe before splitting when uncertainty is high; do not decompose a biased statement.
+- Decompose recursively, but stop as soon as the part is verifiable, isolable, and cohesive.
+- Separate discovery from execution when relevant premises are unconfirmed.
+- Parallelize only independent parts with no state or resource conflicts.
+- Define local validation per part and integrated validation for the global goal.
+- Check for gaps, duplication, and non-functional requirements before executing.
+- Do not expose detailed chain of thought; communicate only the relevant structure, contracts, dependencies, decisions, and limitations.
 ```
 
-## Técnicas relacionadas
+## Related techniques
 
 [Plan and Execute](plan-and-execute.md) · [ReAct](react.md) · [Verification](verification.md) · [Critique and Refine](critique-and-refine.md) · [Decision Making](decision-making.md) · [Root Cause Analysis](root-cause-analysis.md) · [Constraint Satisfaction](constraint-satisfaction.md) · [Assumption Tracking](assumption-tracking.md)
 
-Voltar a skill [pelizzai-reasoning](../SKILL.md).
+Back to the [technique catalog](../SKILL.md).

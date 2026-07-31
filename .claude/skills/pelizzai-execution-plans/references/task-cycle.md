@@ -1,237 +1,247 @@
-# Ciclo por tarefa — protocolo detalhado
+# Per-task cycle — detailed protocol
 
-O protocolo que cada tarefa segue na execução de um plano, válido nos três modos (team, subagents,
-inline). A prova e a forma do review variam por artefato e risco; os gates de escopo, qualidade e
-evidência permanecem observáveis.
+The protocol each task follows during the execution of a plan, valid in all three modes (team,
+subagents, inline). The proof and the shape of the review vary by artifact and risk; the scope,
+quality, and evidence gates remain observable.
 
-## 0. Autonomia entre as tarefas e a parada por lacuna material
+## 0. Autonomy between tasks and the material-gap stop
 
-O coordenador roda o ciclo abaixo de ponta a ponta **sem pedir licença a cada passo**: dentro de um
-plano ratificado, passo mecânico e verificável se executa — não se pergunta "sigo?" ao fim de cada
-tarefa nem se pede permissão para comando local reversível. A autonomia é de **execução**; a decisão
-continua sendo do humano.
+The coordinator runs the cycle below end to end **without asking leave at every step**: inside a
+ratified plan, a mechanical, verifiable step gets executed — no asking "continue?" at the end of
+each task, no permission requests for reversible local commands. The autonomy is one of
+**execution**; the decision still belongs to the human.
 
-Fora de `BLOCKED` e do circuit breaker (§5), a única coisa que interrompe uma frente no meio é a
-**lacuna material**: requisito, escopo, UX, arquitetura, dados, segurança, custo, risco aceito ou
-critério de aceite que a spec e o plano não decidiram. Ela tem caminho fixo, não é uma pausa vaga:
-
-```text
-1. O membro PARA a sua tarefa e NOMEIA a lacuna: o que não está decidido, o que ela muda na entrega
-   e as 2–3 opções que enxerga, com a que recomenda. Devolve NEEDS_CONTEXT. Nunca preenche por
-   convenção, default, Context7 ou "inferência razoável", e nunca fala direto com o usuário.
-2. O coordenador NÃO decide no lugar dele nem por si. Confere se a resposta já está no plano/spec:
-   se estiver, era falta de contexto — ele fornece e re-despacha. Se não, é lacuna material.
-3. O coordenador CONSOLIDA as lacunas materiais abertas — consolidar é agrupar e ordenar por
-   dependência, NUNCA decidir — e as leva ao humano por `pelizzai-interview-me` no modo lacuna:
-   uma pergunta por vez, com opções reais e a recomendada (porquê em uma linha).
-4. A decisão ratificada é registrada no plano (`## Decisões técnicas deste plano`, origem:
-   entrevista de execução; a lacuna sai de `## Lacunas materiais expostas` resolvida) e a frente
-   retoma de onde parou, com o briefing atualizado.
-```
-
-**Lacuna de DOMAIN SKILL é outra coisa e segue outro caminho:** o membro sinaliza
-(`DONE_WITH_CONCERNS`), a execução **não** para, e o coordenador acumula as lacunas para uma
-proposta única no fechamento (§4). Uma é decisão do usuário e para a frente; a outra é manutenção do
-catálogo e nunca vira gate por tarefa.
-
-## 1. Briefing autossuficiente (por arquivo quando os scripts existem; senão por colagem)
-
-O membro (teammate/subagente) **nunca lê o arquivo do plano** — isso evita poluição de contexto e mantém o foco. Quem entrega o contexto é o coordenador, por um destes dois canais:
-
-- **Por ARQUIVO (preferido, quando o script existe **e** há plano Markdown persistente compatível):** rode `task-brief <plano> <N>` — ele extrai a Tarefa N + Global Constraints para o handoff dir seguro (gitignored no consumidor; temp em source mode), e o briefing aponta para ESSE arquivo. O relatório vai ao mesmo diretório e a resposta no chat fica em **≤15 linhas**. Para review, `review-package --working-tree` inclui staged, unstaged e untracked. O mesmo pacote atende combined/split. Range `<base-sha> <HEAD>` é só final. O princípio "contexto construído, nunca herdado" se mantém.
-- **Por colagem (fallback, sem script ou sem plano persistente):** o coordenador extrai o **texto completo** da tarefa do plano/execution record nativo e o cola no prompt do membro. Não crie arquivo consumidor só para satisfazer o helper.
-
-O briefing de cada tarefa inclui:
+Outside `BLOCKED` and the circuit breaker (§5), the only thing that interrupts a workstream
+mid-flight is a **material gap**: a requirement, scope, UX, architecture, data, security, cost,
+accepted risk, or acceptance criterion the spec and the plan did not decide. It has a fixed path;
+it is not a vague pause:
 
 ```text
-- Texto completo da tarefa (do brief em arquivo, ou colado do plano, com valores exatos a usar
-  verbatim) — incluindo as Global Constraints do cabeçalho do plano.
-- Skills de domínio aplicáveis do catálogo (coladas, ou seus pontos-chave) — o membro não herda o
-  seu contexto. Em dúvida se uma skill de domínio do catálogo se aplica à tarefa, inclua-a: o custo
-  de incluir é menor que o de ignorar uma regra do projeto. Se a superfície da tarefa toca uma stack
-  SEM domain skill cobrindo, o membro aplica o que tem e SINALIZA a lacuna no retorno
-  (`DONE_WITH_CONCERNS`); nunca cria skill no meio da tarefa.
-- Skills transversais em `overlays:` no state (frontend, segurança, documentação etc.), com os
-  gates que cada uma exige. Propague-as para implementador **e reviewers**; não basta nomeá-las.
-- Convenções e contratos necessários (caminhos, interfaces, decisões já tomadas).
-- Camada global: aplique `pelizzai-preferences` (idioma, segredos, .env, qualidade de produção) e
-  raciocine via `pelizzai-reasoning`; em conflito, as SKILLS DE DOMÍNIO coladas neste briefing e as
-  regras do projeto PREVALECEM sobre preferences/reasoning.
-- Estratégia de teste/validação escolhida pela matriz do §2. Para APIs externas, fundamente na
-  Context7 para a versão observada; documentação oficial atual é fallback, nunca memória.
-- Raciocínio: quando a tarefa envolve incerteza, decisão ou diagnóstico, a técnica dominante
-  sugerida de `pelizzai-reasoning` (decomposição, RCA, comparação, verification — ver a matriz da
-  skill); omita para tarefa mecânica de contrato claro — não imponha técnica sem gatilho.
-- Perfil de review registrado no plano: `split` (default) ou `combined` ratificado, com a
-  justificativa de risco.
-- O formato de retorno esperado e o status (ver abaixo), incluindo o campo obrigatório
-  `Desvios do plano:` (ou `nenhum`).
-- Teste operacional de desvio (frase canônica, no TEXTO do briefing):
-  "se a decisão não está escrita no plano nem na spec, ela não está aprovada — apresente antes de implementar".
-  Decisão técnica, de escopo ou de abordagem que surja durante a implementação e não esteja no
-  plano/spec interrompe a tarefa: o membro NOMEIA a lacuna e devolve `NEEDS_CONTEXT` **com 2–3
-  opções e a recomendada** (porquê em uma linha); nunca é preenchida em silêncio nem devolvida como
-  pergunta aberta sem opções. Quem leva a lacuna ao humano é o coordenador, por
-  `pelizzai-interview-me` no modo lacuna (§0) — o membro não conversa com o usuário.
-- Salvo-conduto de escalada (frase canônica, no TEXTO do briefing): "É sempre OK parar e dizer
-  'isso é difícil demais para mim'. Trabalho ruim é pior que trabalho nenhum. Você não será
-  penalizado por escalar (reporte BLOCKED)."
+1. The member STOPS their task and NAMES the gap: what is undecided, what it changes in the
+   delivery, and the 2–3 options they see, with the recommended one. They return NEEDS_CONTEXT.
+   They never fill it by convention, default, Context7, or "reasonable inference", and never talk
+   to the user directly.
+2. The coordinator does NOT decide in their place nor on their own. They check whether the answer
+   is already in the plan/spec: if it is, it was missing context — provide it and re-dispatch. If
+   not, it is a material gap.
+3. The coordinator CONSOLIDATES the open material gaps — consolidating means grouping and ordering by
+   dependency, NEVER deciding — and takes them to the human via `pelizzai-interview-me` in gap
+   mode: one question at a time, with real options and the recommended one (one-line why).
+4. The ratified decision is recorded in the plan (`## Technical decisions in this plan`, origin:
+   execution interview; the gap leaves `## Exposed material gaps` as resolved) and the workstream
+   resumes where it stopped, with the briefing updated.
 ```
 
-Responda às perguntas do membro **antes** de o trabalho começar; re-despache se faltar contexto.
+**A DOMAIN SKILL gap is a different thing and follows a different path:** the member flags it
+(`DONE_WITH_CONCERNS`), execution does **not** stop, and the coordinator accumulates the gaps for a
+single proposal at closeout (§4). One is a user decision and stops the workstream; the other is
+catalog maintenance and never becomes a per-task gate.
 
-## 2. Escolher a estratégia pelo artefato
+## 1. Self-sufficient briefing (by file when the scripts exist; by pasting otherwise)
 
-Não force TDD onde não existe comportamento executável observável. O briefing declara **uma
-estratégia primária** e a evidência esperada; tarefas mistas podem combinar linhas:
+The member (teammate/subagent) **never reads the plan file** — this avoids context pollution and keeps the focus. The coordinator is who delivers the context, through one of these two channels:
 
-| Artefato / intenção | Estratégia primária | Evidência mínima |
+- **By FILE (preferred, when the script exists **and** a compatible persistent Markdown plan exists):** run `task-brief <plan> <N>` — it extracts Task N + the Global Constraints into the safe handoff dir (gitignored in the consumer; temp in source mode), and the briefing points to THAT file. The report goes to the same directory and the chat reply stays at **≤15 lines**. For review, `review-package --working-tree` includes staged, unstaged, and untracked. The same package serves combined/split. The `<base-sha> <HEAD>` range is final-only. The principle "context is built, never inherited" holds.
+- **By pasting (fallback, no script or no persistent plan):** the coordinator extracts the **full text** of the task from the native plan/execution record and pastes it into the member's prompt. Do not create a consumer file just to satisfy the helper.
+
+Each task's briefing includes:
+
+```text
+- Full text of the task (from the file brief, or pasted from the plan, with exact values to use
+  verbatim) — including the Global Constraints from the plan header.
+- Applicable domain skills from the catalog (pasted, or their key points) — the member does not
+  inherit your context. In doubt whether a catalog domain skill applies to the task, include it:
+  the cost of including is lower than the cost of ignoring a project rule. If the task's surface
+  touches a stack with NO domain skill covering it, the member applies what they have and FLAGS
+  the gap in the return (`DONE_WITH_CONCERNS`); they never create a skill mid-task.
+- Cross-cutting skills in `overlays:` in the state (frontend, security, documentation, etc.), with
+  the gates each one requires. Propagate them to the implementer **and reviewers**; naming them is
+  not enough.
+- The necessary conventions and contracts (paths, interfaces, decisions already made).
+- Global layer: apply `pelizzai-preferences` (language, secrets, .env, production quality) and
+  reason via `pelizzai-reasoning`; on conflict, the DOMAIN SKILLS pasted into this briefing and
+  the project rules PREVAIL over preferences/reasoning.
+- Test/validation strategy chosen by the matrix in §2. For external APIs, ground it in Context7
+  for the observed version; current official documentation is the fallback, never memory.
+- Reasoning: when the task involves uncertainty, a decision, or a diagnosis, the suggested
+  dominant technique from `pelizzai-reasoning` (decomposition, RCA, comparison, verification —
+  see the skill's matrix); omit it for a mechanical task with a clear contract — do not impose a
+  technique without a trigger.
+- The review profile recorded in the plan: `split` (default) or ratified `combined`, with the
+  risk rationale.
+- The expected return format and status (see below), including the mandatory field
+  `Deviations from plan:` (or `none`).
+- Operational deviation test (canonical phrase, in the briefing TEXT):
+  "if the decision is not written in the plan or the spec, it is not approved — present it before implementing".
+  A technical, scope, or approach decision that emerges during implementation and is not in the
+  plan/spec interrupts the task: the member NAMES the gap and returns `NEEDS_CONTEXT` **with 2–3
+  options and the recommended one** (one-line why); it is never filled in silently nor returned
+  as an open question without options. The coordinator is who takes the gap to the human, via
+  `pelizzai-interview-me` in gap mode (§0) — the member does not talk to the user.
+- Escalation safe-conduct (canonical phrase, in the briefing TEXT): "It is always OK to stop and
+  say 'this is too hard for me'. Bad work is worse than no work. You will not be penalized for
+  escalating (report BLOCKED)."
+```
+
+Answer the member's questions **before** the work starts; re-dispatch if context is missing.
+
+## 2. Choosing the strategy by artifact
+
+Do not force TDD where no observable executable behavior exists. The briefing declares **one
+primary strategy** and the expected evidence; mixed tasks may combine lines:
+
+| Artifact / intent | Primary strategy | Minimum evidence |
 | --- | --- | --- |
-| Comportamento executável novo ou bug reproduzível | **TDD** (`pelizzai-tdd`) | RED observado → GREEN → refactor; teste de comportamento |
-| Refactor ou legado sem contrato seguro | **Characterization** | comportamento atual capturado e verde antes da mudança; regressão depois |
-| Config, schema, migration, script, build ou integração | **Validate** | parser/dry-run/fixture/integração real e rollback quando aplicável |
-| UI, layout, estados responsivos ou interação visual | **Visual + funcional** | teste funcional quando útil + aplicação rodando, screenshots/viewport/estados via `pelizzai-frontend` |
-| Docs, Markdown, prompts, policies ou artefato estático | **Static/scenario** | lint/render/link/schema/grep ou cenário de consumo; nunca teste fictício só para dizer “TDD” |
+| New executable behavior or reproducible bug | **TDD** (`pelizzai-tdd`) | observed RED → GREEN → refactor; behavior test |
+| Refactor or legacy without a safe contract | **Characterization** | current behavior captured and green before the change; regression after |
+| Config, schema, migration, script, build, or integration | **Validate** | parser/dry-run/fixture/real integration and rollback when applicable |
+| UI, layout, responsive states, or visual interaction | **Visual + functional** | functional test when useful + the app running, screenshots/viewport/states via `pelizzai-frontend` |
+| Docs, Markdown, prompts, policies, or static artifact | **Static/scenario** | lint/render/link/schema/grep or a consumption scenario; never a fictitious test just to say "TDD" |
 
-TDD é a estratégia primária quando o gate de adequação da skill passa; não basta conseguir escrever
-qualquer teste. Para exclusões e mudanças puramente mecânicas, use a suíte de regressão + checks
-estáticos proporcionais. O membro testa/valida, faz self-review e **não commita**.
+TDD is the primary strategy when the skill's suitability gate passes; being able to write just any
+test is not enough. For deletions and purely mechanical changes, use the regression suite +
+proportional static checks. The member tests/validates, self-reviews, and **does not commit**.
 
-## 3. Review proporcional com duas lentes
+## 3. Proportional review with two lenses
 
-Toda tarefa passa pelas lentes **spec** e **qualidade**, nesta ordem, com **cegueira assimétrica**:
-a lente spec julga o código às cegas contra o contrato; a lente qualidade é a lente de **evidência**
-e recebe o relatório do autor para verificá-lo. O perfil decide se elas usam um ou dois despachos:
+Every task passes through the **spec** and **quality** lenses, in this order, with **asymmetric
+blindness**: the spec lens judges the code blind against the contract; the quality lens is the
+**evidence** lens and receives the author's report in order to verify it. The profile decides
+whether they use one or two dispatches:
 
-| Perfil | Quando | Execução |
+| Profile | When | Execution |
 | --- | --- | --- |
-| `split` (default) | o caso normal, inclusive lane bounded; **obrigatório** em risco médio/alto, contrato público, segurança, dados, migração, múltiplas partes ou rejeição estrutural | estágio spec aprova antes de despachar qualidade; despachos independentes |
-| `combined` (exceção ratificada) | lane bounded, risco baixo, escopo coeso, sem segurança/dados/migração/contrato público — **e** o usuário ratificou o perfil no passo 4 do Gate de setup | um reviewer e um relatório, primeiro spec e depois qualidade |
+| `split` (default) | the normal case, including the bounded lane; **mandatory** for medium/high risk, public contract, security, data, migration, multiple parts, or structural rejection | the spec stage approves before quality is dispatched; independent dispatches |
+| `combined` (ratified exception) | bounded lane, low risk, cohesive scope, no security/data/migration/public contract — **and** the user ratified the profile in step 4 of the setup gate | one reviewer and one report, spec first and quality second |
 
-Proporcionalidade: o que varia com o risco é a **profundidade** de cada lente, não a existência do
-review nem a cegueira. O perfil de **lentes separadas com cegueira** é o default em qualquer lane —
-só com dois despachos a lente spec desconhece a narrativa do autor. Se o diff revelar superfície que
-muda o risco, promova `combined` para `split` sem nova ratificação; rebaixar para `combined` é
-sempre escolha explícita do usuário, nunca economia de uma rodada.
-
-```text
-(0) Material: gere `review-package --working-tree`; o mesmo pacote cobre staged, unstaged e
-    untracked. Não use range antes de a tarefa ser commitada.
-(a) Lente spec (CEGA): recebe SOMENTE o diff + a spec/plano da tarefa + as domain skills da área.
-    O revisor da lente spec NÃO recebe o relatório do implementador — julga o código contra o contrato, sem a narrativa do autor.
-    É ADVERSARIAL por instrução: compara implementação real vs requisitos LINHA A LINHA,
-    procurando faltas, extras (escopo além do pedido) e mal-entendidos.
-(b) Lente qualidade / evidência: recebe o relatório do autor e VERIFICA as alegações — testes
-    rodados? prova FRESCA? desvios declarados? — além de legibilidade, design, reuso e segurança.
-    Não confia cegamente no relatório: o revisor rodou de fato os checks aplicáveis ao artefato e
-    colou saída + exit code. "Testes passam" inferido NÃO conta como aprovado; check que não rodou
-    = UNVERIFIED, nunca ✅.
-```
-
-Aprovação exige **os dois** verdicts: spec ✅ **e** qualidade ✅, estejam no mesmo relatório ou em
-estágios separados. No perfil `combined` a assimetria é lógica: primeiro o julgamento cego contra o
-contrato, só depois a leitura do relatório para verificar a evidência — nunca o inverso. Conflito
-entre as lentes → o coordenador decide com evidência PRÓPRIA ou escala; a narrativa do autor nunca
-arbitra. Itens "⚠️ não verificável" exigem avaliação do coordenador contra o plano antes de marcar
-concluído.
-
-Anti-corrupção do pipeline (regras completas na `pelizzai-review`): não instrua o reviewer sobre o que NÃO flagrar nem pré-classifique severidade; finding causado pelo próprio plano sobe ao humano; Minors acumulam num ledger triado no review final; os findings do review final são corrigidos por UM único fixer.
-
-## 4. Status do membro
-
-O membro reporta um destes status:
-
-| Status               | Significado                                   | Conduta do coordenador                                         |
-| -------------------- | --------------------------------------------- | -------------------------------------------------------------- |
-| `DONE`               | Trabalho completo                             | Segue para o review                                            |
-| `DONE_WITH_CONCERNS` | Completo, mas com ressalvas                   | Leia as ressalvas antes de prosseguir; lacuna de domain skill vai ao registro e é acumulada para o eixo adoption-driven no fechamento (não vira gate por tarefa) |
-| `NEEDS_CONTEXT`      | Falta informação **ou** lacuna material nomeada | Contexto que você tem (está no plano/spec): forneça e re-despache. Lacuna material (decisão do usuário): consolide e leve ao humano por `pelizzai-interview-me` antes de a frente continuar — consolidar não é decidir (§0) |
-| `BLOCKED`            | Não consegue concluir                         | Avalie: dar contexto → mudar abordagem/quebrar tarefa → escalar ao humano (o modelo já é o topo — ver §8) |
-
-Todo relatório de tarefa — em qualquer status — inclui o campo obrigatório **`Desvios do plano:`**
-(ou `nenhum`): decisões técnicas, de escopo ou de abordagem que saíram do que o plano/spec
-escreveram, com a justificativa de cada uma. O coordenador **confere esse campo antes de aceitar
-`DONE`**: desvio material não ratificado não vira concluído — pelo teste operacional de desvio, volta
-ao usuário pela `pelizzai-interview-me` (modo lacuna, §0) antes do review, nunca é absorvido em
-silêncio e nunca é ratificado pelo próprio coordenador.
-
-Nunca ignore uma escalação nem re-despache sem mudar nada.
-
-## 5. Circuit breaker do loop de review
+Proportionality: what varies with risk is the **depth** of each lens, not the existence of the
+review nor the blindness. The **separate lenses with blindness** profile is the default in any
+lane — only with two dispatches does the spec lens not know the author's narrative. If the diff
+reveals a surface that changes the risk, promote `combined` to `split` without a new ratification;
+downgrading to `combined` is always the user's explicit choice, never the saving of one round.
 
 ```text
-- Limite: 3 ciclos de fix→re-review POR LENTE, POR TAREFA. No perfil `combined`, use um contador
-  compartilhado; promova para `split` se ficar incerto qual lente está falhando.
-- A mesma issue rejeitada 2x → escala na 2ª.
-- Rejeição estrutural ("a abordagem está fundamentalmente errada") → escala imediatamente.
-- Resets (não desista cedo demais): zere o contador de spec ao spec ✅, o de qualidade ao
-  qualidade ✅, e AMBOS ao iniciar uma nova tarefa — um loop na Tarefa N não afeta a N+1.
-- NÃO conta como ciclo (evita falso positivo): BLOCKED (já é escalação, nunca tally);
-  DONE_WITH_CONCERNS cujas ressalvas são observações e o review passa; implementador que
-  CONTESTA a rejeição ("o revisor diz que falta X, mas está na linha Y") → trate como
-  NEEDS_CONTEXT e reconfirme com o revisor (revisores são subagentes e erram).
-- Ao estourar o limite: pare de despachar; grave `phase: blocked` no state consumidor ou execution
-  record nativo. No consumidor, registre em `## Progresso` → `pending` o bloqueio (tarefa, estágio,
-  nº de ciclos falhos, os motivos de rejeição distintos
-  EM ORDEM, os fixes tentados e o padrão: issues independentes / mesma issue recorrente /
-  conflito estrutural); commite SÓ o cursor no consumidor (source mode não cria commit de cursor); escale ao
-  humano com uma mensagem ACIONÁVEL (o que foi feito + cada motivo + fixes + padrão + opções:
-  esclarecer a spec via pelizzai-writing-plans / quebrar a tarefa / revisar o plano);
-  deixe a working tree INTACTA (nunca git reset --hard). Se o humano mandar continuar,
-  re-despache reaproveitando o WIP — não recomece do zero.
+(0) Material: generate `review-package --working-tree`; the same package covers staged, unstaged,
+    and untracked. Do not use a range before the task is committed.
+(a) Spec lens (BLIND): receives ONLY the diff + the task's spec/plan + the area's domain skills.
+    The spec-lens reviewer does NOT receive the implementer's report — they judge the code against the contract, without the author's narrative.
+    It is ADVERSARIAL by instruction: it compares the real implementation vs the requirements LINE BY LINE,
+    hunting for omissions, extras (scope beyond what was asked), and misunderstandings.
+(b) Quality / evidence lens: receives the author's report and VERIFIES the claims — tests run?
+    FRESH proof? deviations declared? — on top of readability, design, reuse, and security.
+    It does not blindly trust the report: the reviewer actually ran the checks applicable to the
+    artifact and pasted output + exit code. An inferred "tests pass" does NOT count as approved; a
+    check that did not run = UNVERIFIED, never ✅.
 ```
 
-## 6. Commit como gate
+Approval requires **both** verdicts: spec ✅ **and** quality ✅, whether in the same report or in
+separate stages. In the `combined` profile the asymmetry is logical: first the blind judgment
+against the contract, only then the reading of the report to verify the evidence — never the
+reverse. Conflict between the lenses → the coordinator decides with their OWN evidence or
+escalates; the author's narrative never arbitrates. "⚠️ not verifiable" items require the
+coordinator's assessment against the plan before marking them complete.
+
+Pipeline anti-corruption (full rules in `pelizzai-review`): do not instruct the reviewer on what NOT to flag nor pre-classify severity; a finding caused by the plan itself goes up to the human; Minors accumulate in a ledger triaged at the final review; the final review's findings are fixed by ONE single fixer.
+
+## 4. Member status
+
+The member reports one of these statuses:
+
+| Status               | Meaning                                         | Coordinator's conduct                                          |
+| -------------------- | ----------------------------------------------- | -------------------------------------------------------------- |
+| `DONE`               | Work complete                                   | Proceed to the review                                          |
+| `DONE_WITH_CONCERNS` | Complete, but with caveats                      | Read the caveats before proceeding; a domain skill gap goes to the record and is accumulated for the adoption-driven axis at closeout (it does not become a per-task gate) |
+| `NEEDS_CONTEXT`      | Missing information **or** a named material gap | Context you have (it is in the plan/spec): provide it and re-dispatch. Material gap (user decision): consolidate it and take it to the human via `pelizzai-interview-me` before the workstream continues — consolidating is not deciding (§0) |
+| `BLOCKED`            | Cannot finish                                   | Assess: give context → change the approach/split the task → escalate to the human (the model is already the top — see §8) |
+
+Every task report — in any status — includes the mandatory field **`Deviations from plan:`**
+(or `none`): technical, scope, or approach decisions that departed from what the plan/spec wrote,
+with the rationale for each one. The coordinator **checks that field before accepting `DONE`**: an
+unratified material deviation does not become complete — by the operational deviation test, it goes
+back to the user via `pelizzai-interview-me` (gap mode, §0) before the review, is never absorbed
+silently, and is never ratified by the coordinator themselves.
+
+Never ignore an escalation nor re-dispatch without changing anything.
+
+## 5. Review-loop circuit breaker
 
 ```text
-- O membro NÃO commita. O trabalho fica na working tree até as DUAS lentes passarem.
-- Só após spec ✅ e qualidade ✅ (com fixes aplicados) o COORDENADOR consolida.
-- O coordenador estagia paths exatos da tarefa e, no consumidor, o state; inspeciona
-  `git diff --cached` e nunca usa `git add -A`.
-- Para permitir reutilização segura do review em uma entrega bounded de tarefa única, exija que não
-  reste conteúdo unstaged/untracked da tarefa, capture `reviewed-tree = git write-tree` antes do
-  commit e compare depois com `git rev-parse HEAD^{tree}`. Divergência invalida a reutilização.
-- Granular: um commit DEFINITIVO por tarefa. No consumidor, o toque do cursor entra no MESMO
-  commit; em source mode, o execution record nativo avança sem arquivo. O histórico é mantido.
-- Squash-final: um commit de TRABALHO por tarefa (`wip(<slug>): <tarefa>`) — nunca acumule a
-  working tree inteira sem commit até o fim (um crash perderia tudo). Depois das tarefas e
-  overlays, a `pelizzai-execution-plans` consolida os WIP num único commit **antes** do review
-  final e de `validated-head`. A `pelizzai-finish-task` não reescreve histórico. No consumidor o
-  cursor entra no WIP; em source mode não existe commit de cursor.
+- Limit: 3 fix→re-review cycles PER LENS, PER TASK. In the `combined` profile, use a shared
+  counter; promote to `split` if it becomes unclear which lens is failing.
+- The same issue rejected 2x → escalate on the 2nd.
+- Structural rejection ("the approach is fundamentally wrong") → escalate immediately.
+- Resets (do not give up too early): zero the spec counter on spec ✅, the quality counter on
+  quality ✅, and BOTH when starting a new task — a loop in Task N does not affect N+1.
+- Does NOT count as a cycle (avoids false positives): BLOCKED (it is already an escalation, never
+  a tally); DONE_WITH_CONCERNS whose caveats are observations and the review passes; an
+  implementer who CONTESTS the rejection ("the reviewer says X is missing, but it is on line Y")
+  → treat it as NEEDS_CONTEXT and reconfirm with the reviewer (reviewers are subagents and make
+  mistakes).
+- On blowing the limit: stop dispatching; write `phase: blocked` in the consumer state or native
+  execution record. In the consumer, log the blockage in `## Progress` → `pending` (task, stage,
+  number of failed cycles, the distinct rejection reasons
+  IN ORDER, the fixes attempted, and the pattern: independent issues / same recurring issue /
+  structural conflict); commit ONLY the cursor in the consumer (source mode creates no cursor commit); escalate to the
+  human with an ACTIONABLE message (what was done + each reason + fixes + pattern + options:
+  clarify the spec via pelizzai-writing-plans / split the task / revise the plan);
+  leave the working tree INTACT (never git reset --hard). If the human says to continue,
+  re-dispatch reusing the WIP — do not restart from scratch.
 ```
 
-## 7. Avançar o cursor
+## 6. Commit as a gate
 
-No consumidor, antes do commit da tarefa atualize `pelizzai/data/state.md` (em `## Progresso`,
-acrescente **uma linha** `T<n> ✅ <sha|data> — <nota ≤1 linha>` — relatório longo vai para
-`pelizzai/data/reports/` com só o link —, ajuste `next` e `pending`, mantenha `phase: exec`) e
-inclua-o no stage junto aos paths exatos da tarefa. O commit definitivo (granular) ou wip
-(squash-final) carrega o cursor — inclusive na Tarefa 1, que leva junto o state gravado no setup:
-**não existe commit só de metadata para iniciar a tarefa**. Ao concluir o plano e selar o conteúdo, a
-`pelizzai-finish-task` sela `phase: delivered` no único closure commit metadata-only, migrando o
-bloco íntegro da tarefa para `data/history/` — o cursor volta ao tamanho do template e `done` é
-constatado depois.
+```text
+- The member does NOT commit. The work stays in the working tree until BOTH lenses pass.
+- Only after spec ✅ and quality ✅ (with fixes applied) does the COORDINATOR consolidate.
+- The coordinator stages the task's exact paths and, in the consumer, the state; inspects
+  `git diff --cached` and never uses `git add -A`.
+- To allow safe reuse of the review in a single-task bounded delivery, require that no
+  unstaged/untracked content of the task remains, capture `reviewed-tree = git write-tree` before
+  the commit, and compare it afterward with `git rev-parse HEAD^{tree}`. Divergence invalidates
+  the reuse.
+- Granular: one DEFINITIVE commit per task. In the consumer, the cursor touch goes into the SAME
+  commit; in source mode, the native execution record advances with no file. History is kept.
+- Squash-final: one WORK commit per task (`wip(<slug>): <task>`) — never accumulate the entire
+  working tree without a commit until the end (a crash would lose everything). After the tasks and
+  overlays, `pelizzai-execution-plans` consolidates the WIPs into a single commit **before** the
+  final review and `validated-head`. `pelizzai-finish-task` does not rewrite history. In the
+  consumer the cursor goes into the WIP; in source mode there is no cursor commit.
+```
 
-Em source mode, avance o execution record nativo após o commit e não crie state/closure.
+## 7. Advancing the cursor
 
-## 8. Seleção de modelo por papel
+In the consumer, before the task's commit update `pelizzai/data/state.md` (in `## Progress`, append
+**one line** `T<n> ✅ <sha|date> — <note ≤1 line>` — a long report goes to
+`pelizzai/data/reports/` with only the link —, adjust `next` and `pending`, keep `phase: exec`) and
+include it in the stage along with the task's exact paths. The definitive commit (granular) or wip
+(squash-final) carries the cursor — including Task 1, which carries the state written at setup:
+**there is no metadata-only commit to start the task**. On concluding the plan and sealing the
+content, `pelizzai-finish-task` seals `phase: delivered` in the single metadata-only closure
+commit, migrating the task's intact block to `data/history/` — the cursor returns to template size
+and `done` is observed afterward.
 
-Política do harness: **o modelo é o que o usuário escolheu na plataforma dele** — por plano, custo
-ou preferência — e vale para todo papel: membros, revisores e o coordenador usam o modelo da
-sessão, sem exigir upgrade. O que o harness nunca faz é **rebaixar por conta própria**: nenhum
-papel roda num modelo menor que o da sessão para economizar, e o effort/reasoning fica no nível
-mais alto que a plataforma do usuário oferecer. Especifique o modelo e o effort explicitamente ao
-despachar membros e reviewers, para não herdar um default menor que o da sessão.
+In source mode, advance the native execution record after the commit and do not create
+state/closure.
 
-O harness eleva o raciocínio de **qualquer** modelo via `pelizzai-reasoning`: técnica certa,
-protocolo verificável e evidência fresca não dependem da capacidade do modelo. Proporcionalidade
-continua valendo em profundidade de processo (entrevista, brainstorming, TDD, perfil de review,
-overlays) — e **nunca é rebaixada para compensar um modelo menor**. Em arquitetura, nas duas lentes
-de review, no review final e na validação final da entrega, modelo menor exige processo íntegro,
-não processo mais raso.
+## 8. Model selection per role
 
-Se a plataforma permitir mais capacidade num papel crítico, **recomende e ratifique**: a conta de
-modelo é do usuário, nunca uma troca automática. Os degraus do BLOCKED continuam sendo dar mais
-contexto → mudar a abordagem/quebrar a tarefa → escalar ao humano; "trocar de modelo" só entra como
-recomendação ratificável nesse último degrau. Corrija primeiro contexto, ferramenta ou
-decomposição. O coordenador registra preocupações, não finge certeza.
+Harness policy: **the model is whatever the user chose on their platform** — by plan, cost, or
+preference — and it holds for every role: members, reviewers, and the coordinator use the
+session's model, with no upgrade required. What the harness never does is **downgrade on its
+own**: no role runs on a smaller model than the session's to save money, and the effort/reasoning
+stays at the highest level the user's platform offers. Specify the model and the effort explicitly
+when dispatching members and reviewers, so they do not inherit a default smaller than the
+session's.
+
+The harness elevates the reasoning of **any** model via `pelizzai-reasoning`: the right technique,
+a verifiable protocol, and fresh evidence do not depend on the model's capability. Proportionality
+still applies to the depth of the process (interview, brainstorming, TDD, review profile,
+overlays) — and it is **never lowered to compensate for a smaller model**. In architecture, in the
+two review lenses, in the final review, and in the delivery's final validation, a smaller model
+demands an intact process, not a shallower one.
+
+If the platform allows more capability in a critical role, **recommend and ratify**: the model
+bill is the user's, never an automatic swap. The BLOCKED steps are still give more context →
+change the approach/split the task → escalate to the human; "switching models" only enters as a
+ratifiable recommendation on that last step. Fix context, tooling, or decomposition first. The
+coordinator records concerns, does not feign certainty.

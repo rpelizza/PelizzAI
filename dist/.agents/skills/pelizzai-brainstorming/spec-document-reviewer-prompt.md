@@ -1,11 +1,11 @@
-# Modelo de Prompt para Revisor de Documento de Especificação
+# Spec Document Reviewer Prompt Template
 
-Use este modelo ao acionar um subagente ou teammate revisor de documentos de especificação.
+Use this template when dispatching a spec document reviewer subagent or teammate.
 
-**Objetivo:** Verificar se a especificação está completa, consistente e pronta para o planejamento da implementação.
+**Goal:** Verify the specification is complete, consistent, and ready for implementation planning.
 
-**Acionar após:** A especificação existir como arquivo no consumidor ou como conteúdo nativo no
-source mode. Não crie `pelizzai/specs/` apenas para usar este prompt.
+**Invoke after:** The specification exists as a file in the consumer or as native content in
+source mode. Do not create `pelizzai/specs/` just to use this prompt.
 
 ```
 Task tool (general-purpose):
@@ -47,4 +47,4 @@ Task tool (general-purpose):
     - [suggestions for improvement]
 ```
 
-**Retorno do revisor:** Status, Problemas (se houver), Recomendações
+**Reviewer's return:** Status, Issues (if any), Recommendations

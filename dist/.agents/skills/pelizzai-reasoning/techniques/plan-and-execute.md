@@ -1,643 +1,643 @@
 # Plan and Execute
 
-## Objetivo
+## Purpose
 
-Use Plan and Execute para transformar um objetivo complexo em um conjunto de etapas explícitas, ordenadas, verificáveis e proporcionais ao risco da tarefa.
+Use Plan and Execute to turn a complex goal into a set of explicit, ordered, verifiable steps proportional to the task's risk.
 
-A técnica possui dois níveis:
+The technique has two levels:
 
-1. **Planejamento global**: define o caminho para atingir o objetivo.
-2. **Execução local**: realiza cada etapa, usando ReAct quando houver incerteza, ferramentas, validação ou necessidade de observação.
+1. **Global planning**: defines the path to the goal.
+2. **Local execution**: performs each step, using ReAct when there is uncertainty, tooling, validation, or a need for observation.
 
-Plan and Execute não exige expor cadeia de pensamento detalhada ao usuário.
+Plan and Execute does not require exposing detailed chain of thought to the user.
 
-O plano deve ser um artefato operacional: compacto, verificável, adaptável e orientado a resultados.
+The plan must be an operational artifact: compact, verifiable, adaptable, and results-oriented.
 
-## Princípio central
+## Core principle
 
-> Planeje antes de executar quando a ordem, as dependências, os riscos ou as validações puderem afetar o resultado.
+> Plan before executing when ordering, dependencies, risks, or validations can affect the outcome.
 
-Um plano não é uma lista decorativa de tarefas.
+A plan is not a decorative task list.
 
-Cada etapa deve responder:
+Every step must answer:
 
 ```text
-- Qual resultado essa etapa produz?
-- Por que ela é necessária?
-- De que informações ou etapas ela depende?
-- Como seu resultado será validado?
-- Qual risco existe se ela falhar?
+- What result does this step produce?
+- Why is it necessary?
+- What information or steps does it depend on?
+- How will its result be validated?
+- What is the risk if it fails?
 ```
 
 ```mermaid
 flowchart TD
-    A[Objetivo do usuário] --> B{Tarefa exige múltiplas etapas, dependências ou validação?}
+    A[User goal] --> B{Task requires multiple steps, dependencies, or validation?}
 
-    B -- Não --> C[Executar diretamente]
-    C --> D[Validar proporcionalmente]
-    D --> E[Concluir]
+    B -- No --> C[Execute directly]
+    C --> D[Validate proportionally]
+    D --> E[Finish]
 
-    B -- Sim --> F[Construir plano]
-    F --> G[Validar plano]
-    G --> H[Executar próxima etapa]
-    H --> I[Observar e validar resultado]
-    I --> J{Plano continua válido?}
+    B -- Yes --> F[Build plan]
+    F --> G[Validate plan]
+    G --> H[Execute next step]
+    H --> I[Observe and validate result]
+    I --> J{Is the plan still valid?}
 
-    J -- Sim --> K{Há etapas pendentes?}
-    K -- Sim --> H
-    K -- Não --> E
+    J -- Yes --> K{Steps remaining?}
+    K -- Yes --> H
+    K -- No --> E
 
-    J -- Não --> L[Replanejar apenas as partes afetadas]
+    J -- No --> L[Replan only the affected parts]
     L --> H
 ```
 
-## Quando usar
+## When to use
 
-Use Plan and Execute quando a tarefa tiver uma ou mais das características abaixo:
+Use Plan and Execute when the task has one or more of the traits below:
 
-- possui múltiplas etapas dependentes;
-- exige investigação antes de implementação;
-- envolve arquivos, código, testes, ferramentas, APIs ou serviços externos;
-- possui risco de regressão, perda de dados, efeito colateral ou alteração irreversível;
-- exige coordenação entre frontend, backend, banco, infraestrutura ou documentação;
-- envolve decisão arquitetural, migração, integração ou refatoração relevante;
-- exige pesquisas, comparação de alternativas ou validação de fatos;
-- possui requisitos que precisam ser atendidos em sequência;
-- contém subtarefas que podem ser paralelizadas com segurança;
-- exige entregáveis intermediários antes do resultado final.
+- has multiple dependent steps;
+- requires investigation before implementation;
+- involves files, code, tests, tools, APIs, or external services;
+- carries risk of regression, data loss, side effects, or irreversible change;
+- requires coordination across frontend, backend, database, infrastructure, or documentation;
+- involves an architectural decision, migration, integration, or significant refactor;
+- requires research, comparison of alternatives, or fact validation;
+- has requirements that must be satisfied in sequence;
+- contains subtasks that can be safely parallelized;
+- requires intermediate deliverables before the final result.
 
-Exemplos adequados:
-
-```text
-- Implementar uma funcionalidade que envolve frontend, API e banco de dados.
-- Corrigir uma falha cujo ponto de origem ainda é desconhecido.
-- Migrar uma integração para uma nova API.
-- Criar um plano de execução para uma feature grande.
-- Revisar um projeto e propor melhorias priorizadas.
-- Pesquisar, comparar e recomendar uma tecnologia.
-- Criar um documento técnico baseado em múltiplas fontes ou arquivos.
-```
-
-## Quando evitar
-
-Não use Plan and Execute como ritual automático.
-
-Evite ou simplifique a técnica quando:
-
-- a tarefa possui uma única ação clara;
-- a resposta pode ser dada diretamente com contexto suficiente;
-- o usuário pediu tradução, reescrita, resumo ou ajuste pontual de texto;
-- não existem dependências relevantes;
-- não há necessidade de ferramenta, validação ou observação;
-- criar um plano custaria mais do que executar a tarefa;
-- a tarefa é criativa e não exige precisão factual ou etapas dependentes.
-
-Exemplos em que um plano completo seria exagerado:
+Good examples:
 
 ```text
-- "Explique o que é Docker."
-- "Melhore este parágrafo."
-- "Traduza esta frase para inglês."
-- "Renomeie esta variável."
-- "Crie um título para este documento."
+- Implement a feature spanning frontend, API, and database.
+- Fix a failure whose point of origin is still unknown.
+- Migrate an integration to a new API.
+- Create an execution plan for a large feature.
+- Review a project and propose prioritized improvements.
+- Research, compare, and recommend a technology.
+- Write a technical document based on multiple sources or files.
 ```
 
-## Relação com ReAct
+## When to avoid
 
-Plan and Execute e ReAct resolvem problemas diferentes.
+Do not use Plan and Execute as an automatic ritual.
 
-| Técnica             | Responsabilidade                                                                    |
-| ------------------- | ----------------------------------------------------------------------------------- |
-| Plan and Execute    | Define estratégia, etapas, dependências, checkpoints e critério de conclusão        |
-| ReAct               | Decide a próxima ação dentro de uma etapa, executa, observa e atualiza o estado     |
-| Verification        | Confirma se fatos, alterações e conclusões são sustentados por evidências           |
-| Critique and Refine | Revisa um resultado quando houver critério objetivo, feedback ou evidência de falha |
+Avoid or simplify the technique when:
+
+- the task has a single clear action;
+- the answer can be given directly with enough context;
+- the user asked for a translation, rewrite, summary, or small text tweak;
+- there are no relevant dependencies;
+- no tool, validation, or observation is needed;
+- building a plan would cost more than doing the task;
+- the task is creative and requires neither factual precision nor dependent steps.
+
+Examples where a full plan would be overkill:
+
+```text
+- "Explain what Docker is."
+- "Improve this paragraph."
+- "Translate this sentence into English."
+- "Rename this variable."
+- "Write a title for this document."
+```
+
+## Relationship with ReAct
+
+Plan and Execute and ReAct solve different problems.
+
+| Technique           | Responsibility                                                                          |
+| ------------------- | --------------------------------------------------------------------------------------- |
+| Plan and Execute    | Defines strategy, steps, dependencies, checkpoints, and the completion criterion         |
+| ReAct               | Decides the next action within a step, executes, observes, and updates state            |
+| Verification        | Confirms that facts, changes, and conclusions are backed by evidence                    |
+| Critique and Refine | Revises a result when there is an objective criterion, feedback, or evidence of failure |
 
 ```mermaid
 flowchart LR
-    A[Objetivo complexo] --> B[Plan and Execute]
-    B --> C[Etapa 1]
-    B --> D[Etapa 2]
-    B --> E[Etapa 3]
+    A[Complex goal] --> B[Plan and Execute]
+    B --> C[Step 1]
+    B --> D[Step 2]
+    B --> E[Step 3]
 
-    C --> F[ReAct local]
-    D --> G[ReAct local]
-    E --> H[ReAct local]
+    C --> F[Local ReAct]
+    D --> G[Local ReAct]
+    E --> H[Local ReAct]
 
-    F --> I[Validação]
+    F --> I[Validation]
     G --> I
     H --> I
 
-    I --> J{Objetivo concluído?}
-    J -- Não --> B
-    J -- Sim --> K[Entrega final]
+    I --> J{Goal achieved?}
+    J -- No --> B
+    J -- Yes --> K[Final delivery]
 ```
 
-### Regra de integração
+### Integration rule
 
-Use Plan and Execute para decidir **o que precisa acontecer**.
+Use Plan and Execute to decide **what needs to happen**.
 
-Use ReAct para decidir **qual é a próxima ação concreta dentro da etapa atual**.
+Use ReAct to decide **the next concrete action within the current step**.
 
-Não crie um novo plano completo após cada ação pequena. Replaneje apenas quando evidências relevantes afetarem o caminho atual.
+Do not build a whole new plan after every small action. Replan only when relevant evidence affects the current path.
 
 ### Plan and Execute vs Structured Decomposition
 
-Plan and Execute ordena e valida etapas cujas partes e contratos você já consegue enunciar. Use [Structured Decomposition](structured-decomposition.md) antes, quando as partes do problema, suas fronteiras ou seus contratos ainda são desconhecidos e precisam ser descobertos para que um plano sequer faça sentido.
+Plan and Execute orders and validates steps whose parts and contracts you can already state. Use [Structured Decomposition](structured-decomposition.md) first, when the parts of the problem, their boundaries, or their contracts are still unknown and must be discovered before a plan even makes sense.
 
-Teste operacional de fronteira:
+Operational boundary test:
 
 ```text
-- Consigo nomear as etapas, suas dependências e como validar cada uma? -> Plan and Execute.
-- Ainda não sei em quais partes o problema se divide nem onde ficam as fronteiras/contratos? -> Structured Decomposition primeiro, depois Plan and Execute.
+- Can I name the steps, their dependencies, and how to validate each one? -> Plan and Execute.
+- Do I still not know what parts the problem splits into or where the boundaries/contracts lie? -> Structured Decomposition first, then Plan and Execute.
 ```
 
-## Modelo de plano
+## Plan template
 
-Antes de criar um plano, organize o estado da tarefa e descreva cada etapa com os campos abaixo. Use este modelo único para registrar ou comunicar o plano.
+Before creating a plan, organize the task state and describe each step with the fields below. Use this single template to record or communicate the plan.
 
 ```text
-Objetivo:
-- Resultado final esperado pelo usuário.
+Goal:
+- Final result the user expects.
 
-Escopo:
-- Inclui: o que está dentro da tarefa.
-- Não inclui: o que está fora da tarefa.
+Scope:
+- Includes: what is inside the task.
+- Excludes: what is outside the task.
 
-Entregáveis:
-- Arquivos, código, análise, decisão, relatório ou ação que precisam existir ao final.
+Deliverables:
+- Files, code, analysis, decision, report, or action that must exist at the end.
 
-Fatos confirmados:
-- Informações observadas diretamente, fornecidas pelo usuário ou verificadas por fontes confiáveis.
+Confirmed facts:
+- Information directly observed, provided by the user, or verified via reliable sources.
 
-Hipóteses:
-- Possibilidades ainda não comprovadas.
+Hypotheses:
+- Possibilities not yet proven.
 
-Riscos e restrições:
-- Regressões, efeitos colaterais, dependências externas, dados sensíveis ou ações irreversíveis.
-- Regras do projeto, stack, prazo, permissões, segurança, orçamento, compatibilidade e preferências.
+Risks and constraints:
+- Regressions, side effects, external dependencies, sensitive data, or irreversible actions.
+- Project rules, stack, deadline, permissions, security, budget, compatibility, and preferences.
 
-Plano (cada etapa):
-1. [etapa]
-   - ID: identificador simples e estável.
-   - Resultado esperado: o que deve existir ou estar confirmado após a etapa.
-   - Ação: o trabalho necessário para gerar o resultado.
-   - Dependências: etapas, arquivos, decisões ou dados necessários antes da execução.
-   - Validação: como confirmar que a etapa foi concluída corretamente.
-   - Risco: impacto caso a etapa falhe.
-   - Status: pendente, em andamento, concluída, bloqueada ou descartada.
+Plan (each step):
+1. [step]
+   - ID: simple, stable identifier.
+   - Expected result: what must exist or be confirmed after the step.
+   - Action: the work needed to produce the result.
+   - Dependencies: steps, files, decisions, or data required before execution.
+   - Validation: how to confirm the step completed correctly.
+   - Risk: impact if the step fails.
+   - Status: pending, in progress, done, blocked, or dropped.
 
 Checkpoint:
-- Condição que deve ser confirmada antes de seguir.
+- Condition that must be confirmed before moving on.
 
-Critério de conclusão:
-- Condições objetivas para considerar a tarefa concluída.
+Completion criterion:
+- Objective conditions for considering the task done.
 ```
 
-Exemplo de plano compacto:
+Compact plan example:
 
 ```text
-Objetivo:
-Adicionar filtro por status à listagem de pedidos.
+Goal:
+Add a status filter to the order listing.
 
-Plano:
-1. Inspecionar o contrato atual do endpoint e o padrão de filtros existente.
-   - Resultado: parâmetros aceitos e convenções do projeto confirmados.
-   - Validação: contrato e código atual revisados.
+Plan:
+1. Inspect the endpoint's current contract and the existing filter pattern.
+   - Result: accepted parameters and project conventions confirmed.
+   - Validation: contract and current code reviewed.
 
-2. Ajustar a camada de serviço para enviar o filtro.
-   - Dependência: etapa 1.
-   - Validação: teste ou inspeção do request gerado.
+2. Adjust the service layer to send the filter.
+   - Dependency: step 1.
+   - Validation: test or inspection of the generated request.
 
-3. Adicionar o controle de filtro na interface.
-   - Dependência: etapa 1.
-   - Validação: interação atualiza a consulta corretamente.
+3. Add the filter control to the interface.
+   - Dependency: step 1.
+   - Validation: interaction updates the query correctly.
 
-4. Atualizar testes relevantes.
-   - Dependência: etapas 2 e 3.
-   - Validação: testes passam.
+4. Update relevant tests.
+   - Dependency: steps 2 and 3.
+   - Validation: tests pass.
 
-5. Executar lint, typecheck e build aplicáveis.
-   - Dependência: etapas anteriores.
-   - Validação: comandos concluídos sem erros introduzidos.
+5. Run the applicable lint, typecheck, and build.
+   - Dependency: previous steps.
+   - Validation: commands finish with no introduced errors.
 ```
 
-## Critérios de qualidade do plano
+## Plan quality criteria
 
-Antes de executar, avalie se o plano atende aos critérios abaixo.
+Before executing, check the plan against the criteria below.
 
 ```text
-[ ] Cobre todos os entregáveis necessários.
-[ ] Não possui etapas redundantes.
-[ ] A ordem respeita dependências reais.
-[ ] Cada etapa produz um resultado observável.
-[ ] Cada etapa possui forma de validação.
-[ ] Riscos relevantes foram identificados.
-[ ] Ações irreversíveis foram isoladas e protegidas.
-[ ] O plano não depende de suposições críticas não verificadas.
-[ ] O nível de detalhe é proporcional à complexidade.
-[ ] O plano pode ser ajustado sem reiniciar todo o trabalho.
+[ ] Covers every required deliverable.
+[ ] Has no redundant steps.
+[ ] The order respects real dependencies.
+[ ] Each step produces an observable result.
+[ ] Each step has a way to be validated.
+[ ] Relevant risks have been identified.
+[ ] Irreversible actions have been isolated and protected.
+[ ] The plan does not rest on unverified critical assumptions.
+[ ] The level of detail is proportional to the complexity.
+[ ] The plan can be adjusted without restarting all the work.
 ```
 
-## Como planejar
+## How to plan
 
-### 1. Definir o resultado final
+### 1. Define the final result
 
-Comece pelo que precisa estar verdadeiro ao final da tarefa.
+Start from what must be true at the end of the task.
 
-Evite objetivos vagos:
+Avoid vague goals:
 
 ```text
-Ruim:
-"Melhorar o sistema."
+Bad:
+"Improve the system."
 
-Melhor:
-"Reduzir falhas de autenticação causadas por expiração de token, preservar sessões válidas e adicionar testes de regressão."
+Better:
+"Reduce authentication failures caused by token expiration, preserve valid sessions, and add regression tests."
 ```
 
-O objetivo deve ser concreto o suficiente para permitir validação.
+The goal must be concrete enough to allow validation.
 
-### 2. Identificar entregáveis
+### 2. Identify deliverables
 
-Liste os resultados reais esperados.
+List the actual expected results.
 
-Exemplos:
+Examples:
 
 ```text
-- Código implementado.
-- Endpoint atualizado.
-- Testes adicionados.
-- Documento revisado.
-- Decisão recomendada com critérios explícitos.
-- Migração criada e validada.
-- Relatório baseado em evidências.
-- Configuração alterada com rollback definido.
+- Code implemented.
+- Endpoint updated.
+- Tests added.
+- Document revised.
+- Decision recommended with explicit criteria.
+- Migration created and validated.
+- Evidence-based report.
+- Configuration changed with a defined rollback.
 ```
 
-Não confunda atividade com entregável.
+Do not confuse activity with deliverable.
 
 ```text
-Atividade:
-"Ler documentação."
+Activity:
+"Read documentation."
 
-Entregável:
-"Confirmar o contrato de autenticação e registrar as limitações relevantes."
+Deliverable:
+"Confirm the authentication contract and record the relevant limitations."
 ```
 
-### 3. Mapear dependências
+### 3. Map dependencies
 
-Identifique o que precisa acontecer antes de cada etapa.
+Identify what must happen before each step.
 
-Uma etapa depende de outra quando:
+A step depends on another when it:
 
-- precisa do resultado técnico dela;
-- exige uma decisão anterior;
-- modifica o mesmo recurso;
-- consome um contrato produzido por outra etapa;
-- pode invalidar o trabalho realizado antes;
-- exige autorização ou informação ainda ausente.
+- needs its technical result;
+- requires a prior decision;
+- modifies the same resource;
+- consumes a contract produced by another step;
+- can invalidate work done earlier;
+- requires authorization or information still missing.
 
-Não invente dependências apenas para tornar o plano mais longo.
+Do not invent dependencies just to make the plan longer.
 
-### 4. Separar descoberta de execução
+### 4. Separate discovery from execution
 
-Quando existir incerteza material, crie primeiro uma etapa de descoberta. Se as próprias fronteiras do problema ainda forem desconhecidas, use [Structured Decomposition](structured-decomposition.md) antes de tentar ordenar etapas.
+When there is material uncertainty, create a discovery step first. If the very boundaries of the problem are still unknown, use [Structured Decomposition](structured-decomposition.md) before trying to order steps.
 
 ```text
-Descoberta:
-- Confirmar onde o problema ocorre.
-- Ler contrato da API.
-- Verificar convenções do projeto.
-- Reproduzir erro.
-- Identificar requisito ausente.
+Discovery:
+- Confirm where the problem occurs.
+- Read the API contract.
+- Check project conventions.
+- Reproduce the error.
+- Identify a missing requirement.
 
-Execução:
-- Alterar código.
-- Criar migração.
-- Ajustar configuração.
-- Atualizar testes.
-- Atualizar documentação.
+Execution:
+- Change code.
+- Create a migration.
+- Adjust configuration.
+- Update tests.
+- Update documentation.
 ```
 
-Não implemente antes de entender aspectos que podem invalidar a implementação.
+Do not implement before understanding whatever could invalidate the implementation.
 
-### 5. Definir validação antes da execução
+### 5. Define validation before executing
 
-Toda etapa importante deve possuir um método de validação definido antecipadamente.
+Every important step must have its validation method defined up front.
 
-| Tipo de tarefa        | Validação adequada                                                      |
-| --------------------- | ----------------------------------------------------------------------- |
-| Alteração de frontend | Teste, lint, typecheck, build e fluxo visual ou funcional aplicável     |
-| Alteração de backend  | Teste de unidade, integração, contrato, logs e tratamento de erro       |
-| Migração de banco     | Schema, dados de teste, rollback e impacto em consultas                 |
-| Pesquisa técnica      | Documentação primária, data da fonte, comparação e limites              |
-| Análise de arquivo    | Leitura direta, citações, consistência interna e conferência de números |
-| Decisão arquitetural  | Critérios explícitos, trade-offs, custos, riscos e compatibilidade      |
-| Automação             | Execução controlada, logs, idempotência e resultado verificável         |
+| Task type              | Appropriate validation                                                     |
+| ---------------------- | -------------------------------------------------------------------------- |
+| Frontend change        | Test, lint, typecheck, build, and the applicable visual or functional flow |
+| Backend change         | Unit, integration, and contract tests, logs, and error handling            |
+| Database migration     | Schema, test data, rollback, and impact on queries                         |
+| Technical research     | Primary documentation, source date, comparison, and limits                 |
+| File analysis          | Direct reading, quotes, internal consistency, and number checking          |
+| Architectural decision | Explicit criteria, trade-offs, costs, risks, and compatibility             |
+| Automation             | Controlled run, logs, idempotency, and a verifiable result                 |
 
-## Execução do plano
+## Executing the plan
 
-### Regra principal
+### Main rule
 
-Execute uma etapa por vez quando o resultado dela puder alterar a próxima decisão.
+Execute one step at a time when its result can change the next decision.
 
-Use paralelismo apenas para etapas realmente independentes: que não dependem do mesmo recurso ou resultado, não geram conflitos, race conditions ou efeitos colaterais, e cujo paralelismo traz ganho real.
+Use parallelism only for truly independent steps: ones that do not depend on the same resource or result, do not create conflicts, race conditions, or side effects, and where parallelism brings real gain.
 
-### Para cada etapa
+### For each step
 
-Siga este ciclo:
+Follow this cycle:
 
 ```text
-1. Confirmar o objetivo da etapa.
-2. Verificar dependências e restrições.
-3. Executar a menor ação útil.
-4. Usar ReAct se houver incerteza, ferramenta ou observação necessária.
-5. Validar o resultado.
-6. Atualizar status, fatos e riscos.
-7. Decidir se a próxima etapa continua válida.
+1. Confirm the step's goal.
+2. Check dependencies and constraints.
+3. Execute the smallest useful action.
+4. Use ReAct if uncertainty, a tool, or observation is required.
+5. Validate the result.
+6. Update status, facts, and risks.
+7. Decide whether the next step is still valid.
 ```
 
-Formato operacional recomendado:
+Recommended operational format:
 
 ```text
-Etapa:
-- Implementar validação de payload no endpoint de criação.
+Step:
+- Implement payload validation on the creation endpoint.
 
-Dependências:
-- Contrato da rota confirmado.
+Dependencies:
+- Route contract confirmed.
 
-Ação:
-- Ajustar schema e tratamento de erro.
+Action:
+- Adjust schema and error handling.
 
-Validação:
-- Executar testes de rota para payload válido, inválido e incompleto.
+Validation:
+- Run route tests for valid, invalid, and incomplete payloads.
 
-Resultado:
-- Testes passam; respostas 422 seguem o contrato definido.
+Result:
+- Tests pass; 422 responses follow the defined contract.
 
 Status:
-- Concluída.
+- Done.
 ```
 
-### Quando uma etapa fica bloqueada
+### When a step becomes blocked
 
-Uma etapa entra em status **bloqueada** quando falta dependência, permissão, contexto ou ferramenta indispensável. Diferencie bloqueio temporário de inviabilidade real e escolha uma das saídas:
+A step enters **blocked** status when it lacks an indispensable dependency, permission, context, or tool. Distinguish a temporary block from true infeasibility and choose one of the exits:
 
 ```text
-- Aguardar: se a dependência será resolvida em breve por etapa em andamento, mantenha a etapa bloqueada e siga por etapas independentes.
-- Escalar: se falta permissão, decisão ou informação que só o usuário fornece, pare nessa etapa e solicite explicitamente o que falta.
-- Contornar: se existe caminho alternativo válido que não viola escopo, segurança ou regras do projeto, replaneje a etapa afetada.
+- Wait: if the dependency will soon be resolved by a step in progress, keep the step blocked and continue through independent steps.
+- Escalate: if a permission, decision, or piece of information only the user can provide is missing, stop at that step and explicitly request what is missing.
+- Work around: if a valid alternative path exists that violates neither scope, security, nor project rules, replan the affected step.
 ```
 
-Não deixe uma etapa silenciosamente bloqueada: registre o motivo, o que destravaria e qual saída foi escolhida.
+Do not leave a step silently blocked: record the reason, what would unblock it, and which exit was chosen.
 
-## Uso de ReAct dentro de uma etapa
+## Using ReAct within a step
 
-Não use um plano detalhado como substituto de observação.
+Do not use a detailed plan as a substitute for observation.
 
-Dentro de uma etapa, use ReAct quando for necessário:
+Within a step, use ReAct when needed to:
 
 ```text
-1. Avaliar o estado atual.
-2. Escolher a menor ação que reduza incerteza.
-3. Executar a ação.
-4. Observar o resultado real.
-5. Atualizar fatos, hipóteses e pendências.
-6. Repetir até concluir ou bloquear a etapa.
+1. Assess the current state.
+2. Choose the smallest action that reduces uncertainty.
+3. Execute the action.
+4. Observe the actual result.
+5. Update facts, hypotheses, and open items.
+6. Repeat until the step is done or blocked.
 ```
 
-Exemplo:
+Example:
 
 ```text
-Etapa:
-Corrigir falha no envio do formulário.
+Step:
+Fix the form submission failure.
 
-Plano global:
-- Identificar causa.
-- Corrigir frontend ou backend.
-- Criar teste.
-- Validar fluxo completo.
+Global plan:
+- Identify the cause.
+- Fix frontend or backend.
+- Write a test.
+- Validate the full flow.
 
-ReAct local:
-- Reproduzir falha.
-- Observar HTTP 422.
-- Inspecionar payload enviado.
-- Comparar com schema da API.
-- Corrigir campo incompatível.
-- Reexecutar teste.
+Local ReAct:
+- Reproduce the failure.
+- Observe HTTP 422.
+- Inspect the submitted payload.
+- Compare against the API schema.
+- Fix the mismatched field.
+- Re-run the test.
 ```
 
 ## Checkpoints
 
-Checkpoints são pontos de validação entre grupos de etapas.
+Checkpoints are validation points between groups of steps.
 
-Use checkpoints quando:
+Use checkpoints when:
 
-- uma decisão afeta muitas etapas futuras;
-- uma alteração é difícil de reverter;
-- há integração entre sistemas;
-- existe risco de regressão;
-- uma etapa depende de fonte ou ferramenta externa;
-- o custo de continuar com premissa errada é alto.
+- a decision affects many future steps;
+- a change is hard to revert;
+- systems are being integrated;
+- there is regression risk;
+- a step depends on an external source or tool;
+- the cost of proceeding on a wrong premise is high.
 
 ```mermaid
 flowchart LR
-    A[Descoberta] --> B[Checkpoint: requisitos e contratos confirmados]
-    B --> C[Implementação]
-    C --> D[Checkpoint: testes locais passam]
-    D --> E[Integração]
-    E --> F[Checkpoint: comportamento validado]
-    F --> G[Entrega]
+    A[Discovery] --> B[Checkpoint: requirements and contracts confirmed]
+    B --> C[Implementation]
+    C --> D[Checkpoint: local tests pass]
+    D --> E[Integration]
+    E --> F[Checkpoint: behavior validated]
+    F --> G[Delivery]
 ```
 
-Exemplos de checkpoints:
+Checkpoint examples:
 
 ```text
-- Requisitos confirmados antes de alterar arquitetura.
-- Contrato de API validado antes de implementar frontend.
-- Testes locais aprovados antes de editar múltiplos módulos.
-- Migração validada em ambiente seguro antes de produção.
-- Dados e fontes revisados antes de entregar recomendação crítica.
+- Requirements confirmed before changing architecture.
+- API contract validated before implementing the frontend.
+- Local tests passing before editing multiple modules.
+- Migration validated in a safe environment before production.
+- Data and sources reviewed before delivering a critical recommendation.
 ```
 
-## Replanejamento
+## Replanning
 
-Replaneje quando houver evidência de que o plano atual deixou de ser adequado.
+Replan when there is evidence that the current plan is no longer adequate.
 
-Não replaneje apenas porque surgiu uma alternativa marginalmente diferente.
+Do not replan just because a marginally different alternative appeared.
 
-### Gatilhos válidos
+### Valid triggers
 
-Replaneje quando:
+Replan when:
 
-- uma hipótese crítica foi refutada;
-- uma dependência não existe ou não está disponível;
-- a ferramenta retornou resultado inesperado;
-- um teste revelou regressão ou comportamento incompatível;
-- o usuário alterou escopo, prioridade ou restrições;
-- uma ação revelou risco não previsto;
-- o plano exige permissão que não está disponível;
-- uma etapa anterior tornou etapas futuras desnecessárias;
-- a solução planejada viola regra do projeto, segurança ou compatibilidade;
-- surgiu uma alternativa materialmente mais segura, simples ou correta.
+- a critical hypothesis was refuted;
+- a dependency does not exist or is unavailable;
+- a tool returned an unexpected result;
+- a test revealed a regression or incompatible behavior;
+- the user changed scope, priority, or constraints;
+- an action revealed an unforeseen risk;
+- the plan requires a permission that is not available;
+- an earlier step made future steps unnecessary;
+- the planned solution violates a project rule, security, or compatibility;
+- a materially safer, simpler, or more correct alternative emerged.
 
-### Regras de replanejamento
+### Replanning rules
 
 ```text
-- Preserve etapas concluídas e validadas.
-- Não repita trabalho sem motivo concreto.
-- Atualize apenas partes afetadas do plano.
-- Registre qual premissa falhou.
-- Diferencie bloqueio temporário de inviabilidade real.
-- Comunique mudanças materiais de escopo, risco ou prazo.
-- Não entre em ciclo infinito de planejamento e replanejamento.
+- Preserve completed, validated steps.
+- Do not repeat work without a concrete reason.
+- Update only the affected parts of the plan.
+- Record which premise failed.
+- Distinguish a temporary block from true infeasibility.
+- Communicate material changes in scope, risk, or timeline.
+- Do not enter an endless plan-replan loop.
 ```
 
-## Ações de alto impacto
+## High-impact actions
 
-Etapas que podem causar efeito irreversível ou relevante (deletar arquivos, alterar banco, migrações, infraestrutura, permissões, publicação, envio de mensagens, configurações de produção, dados sensíveis ou custos financeiros) exigem cuidado especial. Consulte a lista canônica e a doutrina completa na skill [pelizzai-reasoning](../SKILL.md).
+Steps that can cause irreversible or significant effects (deleting files, changing the database, migrations, infrastructure, permissions, publishing, sending messages, production configuration, sensitive data, or financial costs) require special care. See the canonical list and the full doctrine in the [pelizzai-reasoning](../SKILL.md) skill.
 
-Antes de executar uma ação de alto impacto:
+Before executing a high-impact action:
 
 ```text
-[ ] O objetivo do usuário está claro.
-[ ] O alvo foi confirmado.
-[ ] A ação é necessária.
-[ ] Há alternativa reversível ou ambiente seguro.
-[ ] Existe backup, rollback ou plano de recuperação quando aplicável.
-[ ] O impacto foi avaliado.
-[ ] A validação posterior está definida.
+[ ] The user's goal is clear.
+[ ] The target has been confirmed.
+[ ] The action is necessary.
+[ ] There is a reversible alternative or a safe environment.
+[ ] A backup, rollback, or recovery plan exists where applicable.
+[ ] The impact has been assessed.
+[ ] Post-action validation is defined.
 ```
 
-## Regras de parada
+## Stopping rules
 
-Encerre a execução quando uma das condições abaixo for verdadeira:
+Stop executing when one of the conditions below is true:
 
 ```text
-- Todos os critérios de conclusão foram atendidos.
-- Os entregáveis solicitados foram produzidos e validados.
-- Não há pendência material conhecida.
-- A próxima ação não reduz incerteza nem melhora o resultado.
-- Falta permissão, contexto ou ferramenta indispensável.
-- A próxima ação exigiria autorização explícita do usuário.
-- O custo ou risco de continuar deixou de ser proporcional ao benefício.
+- All completion criteria have been met.
+- The requested deliverables have been produced and validated.
+- No known material items remain open.
+- The next action neither reduces uncertainty nor improves the result.
+- An indispensable permission, context, or tool is missing.
+- The next action would require the user's explicit authorization.
+- The cost or risk of continuing is no longer proportional to the benefit.
 ```
 
-Não continue criando subtarefas, buscas ou validações apenas para aparentar profundidade.
+Do not keep creating subtasks, searches, or validations just to look thorough.
 
-## Anti-padrões
+## Anti-patterns
 
-### 1. Plano genérico demais
+### 1. Overly generic plan
 
 ```text
-Ruim:
-1. Analisar.
-2. Implementar.
-3. Testar.
+Bad:
+1. Analyze.
+2. Implement.
+3. Test.
 
-Melhor:
-1. Confirmar contrato e convenções existentes.
-2. Implementar alteração no serviço responsável.
-3. Atualizar a interface consumidora.
-4. Criar testes de regressão.
-5. Executar validações configuradas no projeto.
+Better:
+1. Confirm the existing contract and conventions.
+2. Implement the change in the responsible service.
+3. Update the consuming interface.
+4. Write regression tests.
+5. Run the validations configured in the project.
 ```
 
-### 2. Plano detalhado demais
+### 2. Overly detailed plan
 
-Criar dezenas de microetapas para uma alteração simples. Melhor: agrupar ações que compartilham o mesmo objetivo e a mesma validação.
+Creating dozens of micro-steps for a simple change. Better: group actions that share the same goal and the same validation.
 
-### 3. Implementar antes de validar premissas
+### 3. Implementing before validating premises
 
-Alterar o frontend presumindo que a API aceita determinado campo. Melhor: inspecionar o contrato ou a resposta real antes da alteração.
+Changing the frontend assuming the API accepts a given field. Better: inspect the contract or the actual response before the change.
 
-### 4. Executar plano cegamente
+### 4. Executing the plan blindly
 
-Continuar implementando após um teste provar que a hipótese inicial estava errada. Melhor: atualizar o estado, identificar a premissa inválida e replanejar somente o necessário.
+Continuing to implement after a test proved the initial hypothesis wrong. Better: update the state, identify the invalid premise, and replan only what is needed.
 
-### 5. Paralelismo inseguro
+### 5. Unsafe parallelism
 
-Editar simultaneamente arquivos ou recursos compartilhados sem controle. Melhor: paralelizar apenas tarefas independentes, como leitura de documentação, inspeção de módulos distintos ou testes isolados.
+Editing shared files or resources concurrently without control. Better: parallelize only independent tasks, such as reading documentation, inspecting distinct modules, or running isolated tests.
 
-### 6. Confundir planejamento com procrastinação
+### 6. Mistaking planning for procrastination
 
-Continuar expandindo o plano sem iniciar nenhuma ação útil. Melhor: criar o menor plano suficiente e iniciar a etapa de maior valor informacional.
+Endlessly expanding the plan without starting any useful action. Better: build the smallest sufficient plan and start with the step of highest informational value.
 
-### 7. Não definir critério de conclusão
+### 7. No completion criterion
 
 ```text
-Ruim:
-"Implementar autenticação."
+Bad:
+"Implement authentication."
 
-Melhor:
-"Permitir login, proteger rotas, renovar sessão conforme a regra definida, retornar erros previsíveis e cobrir fluxos principais por testes."
+Better:
+"Allow login, protect routes, renew sessions per the defined rule, return predictable errors, and cover the main flows with tests."
 ```
 
-## Exemplos
+## Examples
 
-### Exemplo 1 — Nova funcionalidade
+### Example 1 — New feature
 
 ```text
-Tarefa:
-Adicionar exportação CSV à listagem de usuários.
+Task:
+Add CSV export to the user listing.
 
-Objetivo:
-Permitir que usuários autorizados exportem os dados visíveis conforme os filtros ativos.
+Goal:
+Allow authorized users to export the visible data according to the active filters.
 
-Plano:
-1. Confirmar regras de autorização e campos permitidos.
-2. Verificar se a API já suporta exportação ou se será necessário novo endpoint.
-3. Implementar geração ou download do CSV.
-4. Integrar o botão na interface e propagar filtros ativos.
-5. Criar ou atualizar testes.
-6. Executar lint, typecheck, testes e build.
-7. Validar fluxo manual com filtros e usuário sem permissão.
+Plan:
+1. Confirm authorization rules and allowed fields.
+2. Check whether the API already supports export or a new endpoint is needed.
+3. Implement CSV generation or download.
+4. Wire the button into the interface and propagate active filters.
+5. Create or update tests.
+6. Run lint, typecheck, tests, and build.
+7. Validate the manual flow with filters and with an unauthorized user.
 
 Checkpoints:
-- Contrato do endpoint confirmado antes da interface.
-- Autorização validada antes da entrega.
+- Endpoint contract confirmed before the interface.
+- Authorization validated before delivery.
 
-Critério de conclusão:
-- Exportação respeita filtros.
-- Campos sensíveis não aparecem.
-- Usuário sem permissão não consegue exportar.
-- Testes e build aplicáveis passam.
+Completion criterion:
+- Export respects filters.
+- Sensitive fields do not appear.
+- An unauthorized user cannot export.
+- Applicable tests and build pass.
 ```
 
-### Exemplo 2 — Correção de bug de origem desconhecida
+### Example 2 — Fixing a bug of unknown origin
 
-Quando o ponto de origem da falha ainda é desconhecido, a etapa de descoberta usa [Root Cause Analysis](root-cause-analysis.md) para localizar a causa antes de corrigir.
+When the failure's point of origin is still unknown, the discovery step uses [Root Cause Analysis](root-cause-analysis.md) to locate the cause before fixing.
 
 ```text
-Tarefa:
-Pedidos duplicados são criados ao clicar duas vezes em "Salvar".
+Task:
+Duplicate orders are created when "Save" is clicked twice.
 
-Objetivo:
-Garantir que uma solicitação de criação gere no máximo um pedido válido.
+Goal:
+Ensure a creation request produces at most one valid order.
 
-Plano:
-1. Reproduzir o problema e confirmar se a duplicidade ocorre no frontend, backend ou ambos.
-2. Inspecionar requisições, logs e comportamento de persistência.
-3. Definir proteção adequada: bloqueio de interface, idempotência no backend ou ambas.
-4. Implementar correção.
-5. Criar teste de regressão.
-6. Validar clique duplo, retry de rede e envio concorrente.
+Plan:
+1. Reproduce the problem and confirm whether the duplication happens in the frontend, the backend, or both.
+2. Inspect requests, logs, and persistence behavior.
+3. Choose the appropriate protection: interface locking, backend idempotency, or both.
+4. Implement the fix.
+5. Write a regression test.
+6. Validate double click, network retry, and concurrent submission.
 
-Risco:
-- Resolver apenas no frontend pode não proteger chamadas diretas ou retries.
+Risk:
+- Fixing only the frontend may not protect direct calls or retries.
 ```
 
-## Instrução resumida para o agente
+## Summary instruction for the agent
 
 ```text
-- Replaneje apenas quando evidências invalidarem ou alterarem materialmente o plano; preserve trabalho já validado.
-- Diferencie etapa bloqueada (aguardar/escalar/contornar) de inviabilidade real e registre o motivo.
-- Conclua somente quando o critério de conclusão for atendido; aplique as Regras de parada.
-- Use Structured Decomposition antes quando as partes/contratos do problema ainda forem desconhecidos.
-- Não exponha cadeia de pensamento detalhada; comunique apenas plano, decisões, evidências, resultados e limitações relevantes.
+- Replan only when evidence invalidates or materially changes the plan; preserve already-validated work.
+- Distinguish a blocked step (wait/escalate/work around) from true infeasibility and record the reason.
+- Finish only when the completion criterion is met; apply the Stopping rules.
+- Use Structured Decomposition first when the problem's parts/contracts are still unknown.
+- Do not expose detailed chain of thought; communicate only the plan, decisions, evidence, results, and relevant limitations.
 ```
 
-## Técnicas relacionadas
+## Related techniques
 
 - [ReAct](react.md)
 - [Verification](verification.md)
@@ -645,4 +645,4 @@ Risco:
 - [Structured Decomposition](structured-decomposition.md)
 - [Root Cause Analysis](root-cause-analysis.md)
 
-Voltar ao [catálogo de técnicas](../SKILL.md).
+Back to the [technique catalog](../SKILL.md).

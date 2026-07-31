@@ -1,197 +1,202 @@
 # ReAct
 
-## Objetivo
+## Purpose
 
-ReAct (Reasoning and Acting) conduz tarefas que exigem alternar entre pensar e agir com evidência:
-avaliar o estado, decidir a menor ação útil, executá-la, **observar o resultado real**, atualizar o
-entendimento e repetir enquanto houver incerteza relevante ou trabalho pendente.
+ReAct (Reasoning and Acting) drives tasks that require alternating between thinking and acting on
+evidence: assess the state, decide the smallest useful action, execute it, **observe the real
+result**, update your understanding, and repeat while relevant uncertainty or pending work remains.
 
-Não é convite para raciocínio longo nem para expor cadeia de pensamento. É um mecanismo de controle
-contra dois erros: agir sem evidência suficiente e continuar raciocinando sem verificar a realidade.
+It is not an invitation to long-form reasoning or to exposing chain of thought. It is a control
+mechanism against two errors: acting without sufficient evidence, and reasoning on without checking
+reality.
 
-## Princípio central
+## Core principle
 
-> Não trate uma suposição como fato quando uma ação, ferramenta, arquivo, teste, documentação ou
-> observação puder validá-la.
+> Never treat an assumption as fact when an action, tool, file, test, documentation, or
+> observation can validate it.
 
-Esta é a disciplina anti-fabricação de ReAct e o coração da técnica:
+This is ReAct's anti-fabrication discipline and the heart of the technique:
 
-- **Nunca invente o resultado de uma ferramenta.** Não afirme que um arquivo foi alterado, um teste
-  passou, um comando rodou ou uma API respondeu algo sem ter observado o resultado real.
-- **Observe antes do próximo passo.** Cada ação relevante produz uma observação que precede a próxima
-  decisão. Um erro de ferramenta, log ou teste é evidência — deve alterar o estado da tarefa, nunca
-  ser ignorado.
-- **Uma ação por vez** quando o resultado puder mudar a decisão seguinte. Só paralelize ações
-  independentes (não tocam o mesmo recurso, não dependem uma da outra, resultados interpretáveis
-  separadamente).
+- **Never fabricate the result of a tool.** Do not claim a file was changed, a test passed, a
+  command ran, or an API returned something without having observed the real result.
+- **Observe before the next step.** Every relevant action produces an observation that precedes the
+  next decision. A tool error, log, or test failure is evidence — it must change the state of the
+  task, never be ignored.
+- **One action at a time** whenever the result could change the next decision. Only parallelize
+  independent actions (they do not touch the same resource, do not depend on each other, and their
+  results are interpretable separately).
 
 ```mermaid
 flowchart TD
-    A[Avaliar estado] --> B{Evidência suficiente?}
-    B -- Não --> C[Escolher a menor ação que reduz incerteza]
-    C --> D[Executar]
-    D --> E[Observar resultado REAL]
-    E --> F[Atualizar fatos e hipóteses]
+    A[Assess state] --> B{Enough evidence?}
+    B -- No --> C[Pick the smallest action that reduces uncertainty]
+    C --> D[Execute]
+    D --> E[Observe the REAL result]
+    E --> F[Update facts and hypotheses]
     F --> B
-    B -- Sim --> G{Exige ação externa?}
-    G -- Sim --> H[Executar e validar efeito/regressões]
-    G -- Não --> I{Critério de conclusão atendido?}
+    B -- Yes --> G{External action required?}
+    G -- Yes --> H[Execute and validate effect/regressions]
+    G -- No --> I{Completion criteria met?}
     H --> I
-    I -- Não --> C
-    I -- Sim --> J[Responder com resultado, evidências e limitações]
+    I -- No --> C
+    I -- Yes --> J[Answer with result, evidence, and limitations]
 ```
 
-## Quando usar
+## When to use
 
-Use ReAct quando a tarefa tiver ao menos uma destas condições:
+Use ReAct when the task meets at least one of these conditions:
 
-- múltiplas etapas dependentes;
-- depende de ferramentas, arquivos, APIs, banco, terminal, testes ou navegador;
-- incerteza relevante que a observação pode reduzir;
-- depuração, diagnóstico ou investigação de causa raiz (ver [Root Cause Analysis](root-cause-analysis.md));
-- exige validar uma implementação antes de concluir;
-- tem efeito colateral (editar código, enviar mensagem, alterar config, criar recurso);
-- envolve fatos potencialmente atuais ou verificáveis;
-- tem risco técnico, financeiro, jurídico, operacional ou de segurança.
+- multiple dependent steps;
+- depends on tools, files, APIs, a database, a terminal, tests, or a browser;
+- relevant uncertainty that observation can reduce;
+- debugging, diagnosis, or root cause investigation (see [Root Cause Analysis](root-cause-analysis.md));
+- requires validating an implementation before concluding;
+- has side effects (editing code, sending a message, changing config, creating a resource);
+- involves potentially current or verifiable facts;
+- carries technical, financial, legal, operational, or security risk.
 
-## Quando evitar
+## When to avoid
 
-Não use ReAct como ritual em tarefa simples, direta ou puramente criativa: explicação conceitual
-estável, reescrita/tradução de texto fornecido, ou quando nenhuma ferramenta/observação agrega valor e
-a próxima ação não reduz incerteza.
+Do not use ReAct as a ritual on simple, direct, or purely creative tasks: stable conceptual
+explanation, rewriting/translating supplied text, or when no tool/observation adds value and the
+next action does not reduce uncertainty.
 
 ```text
-"Explique o que é uma função em Python."   "Traduza este texto para inglês."
-"Melhore a clareza deste parágrafo."       "Crie nomes para uma startup."
+"Explain what a function is in Python."   "Translate this text into English."
+"Improve the clarity of this paragraph."  "Come up with names for a startup."
 ```
 
-## ReAct e as outras técnicas
+## ReAct and the other techniques
 
-ReAct é o mecanismo de execução; trabalha dentro de outras técnicas, não as substitui.
+ReAct is the execution mechanism; it works inside other techniques rather than replacing them.
 
-| Técnica                                       | Relação com ReAct                                                    |
-| --------------------------------------------- | -------------------------------------------------------------------- |
-| [OODA](ooda.md)                               | Macro-loop até a DoD; ReAct é o micro-ciclo dentro do Agir           |
-| [Plan and Execute](plan-and-execute.md)       | Define as etapas; ReAct executa e ajusta cada uma                    |
-| [Verification](verification.md)               | Define a prova; ReAct interpreta o resultado e decide o próximo passo |
-| [Root Cause Analysis](root-cause-analysis.md) | Estrutura a investigação; ReAct executa as inspeções                 |
-| [Critique and Refine](critique-and-refine.md) | Identifica a falha; ReAct age antes de concluir                      |
+| Technique                                     | Relationship to ReAct                                                 |
+| --------------------------------------------- | --------------------------------------------------------------------- |
+| [OODA](ooda.md)                               | Macro-loop up to the DoD; ReAct is the micro-cycle inside Act         |
+| [Plan and Execute](plan-and-execute.md)       | Defines the steps; ReAct executes and adjusts each one                |
+| [Verification](verification.md)               | Defines the proof; ReAct interprets the result and decides next steps |
+| [Root Cause Analysis](root-cause-analysis.md) | Structures the investigation; ReAct runs the inspections              |
+| [Critique and Refine](critique-and-refine.md) | Identifies the flaw; ReAct acts before concluding                     |
 
-## Modelo mental do ciclo
+## Mental model of the cycle
 
-Cada ciclo responde, de forma compacta e interna (não para o usuário):
+Each cycle answers, compactly and internally (not to the user):
 
 ```text
-1. O que já é fato confirmado?
-2. O que ainda é hipótese ou desconhecido e precisa ser validado?
-3. Qual é a menor próxima ação útil, e que evidência espero dela?
-4. O resultado confirmou, refutou ou ajustou a hipótese?
-5. Posso concluir com segurança?
+1. What is already confirmed fact?
+2. What is still hypothesis or unknown and needs validation?
+3. What is the smallest next useful action, and what evidence do I expect from it?
+4. Did the result confirm, refute, or adjust the hypothesis?
+5. Can I safely conclude?
 ```
 
-Classifique cada informação importante como **Confirmado** (observado ou de fonte confiável — orienta
-decisões), **Inferido** (apresente como inferência), **Hipótese** (teste ou sinalize) ou
-**Desconhecido** (não invente).
+Classify each important piece of information as **Confirmed** (observed or from a reliable source —
+can drive decisions), **Inferred** (present it as inference), **Hypothesis** (test it or flag it),
+or **Unknown** (do not invent it).
 
-## As seis fases
+## The six phases
 
-**1. Avaliar.** Entenda objetivo, escopo, contexto disponível, regras do projeto e riscos antes de
-agir. Não pergunte por reflexo em dúvida **factual**: contexto, código, documentação, arquivos e
-observação segura resolvem fatos. Lacuna **material** de decisão (requisito, escopo, UX, arquitetura,
-dados, segurança, aceite) não se resolve com pesquisa: vai à `pelizzai-interview-me` mesmo quando a
-documentação sugere um caminho — a evidência melhora a recomendação, nunca substitui a ratificação.
+**1. Assess.** Understand the goal, scope, available context, project rules, and risks before
+acting. Do not ask reflexively on a **factual** doubt: context, code, documentation, files, and safe
+observation settle facts. A **material** decision gap (requirement, scope, UX, architecture, data,
+security, acceptance) is not settled by research: it goes to `pelizzai-interview-me` even when the
+documentation suggests a path — evidence improves the recommendation, it never replaces
+ratification.
 
-**2. Decidir.** Escolha a menor ação que gere progresso real — que reduza incerteza, valide uma
-hipótese, recupere evidência, avance uma etapa, detecte regressão ou identifique bloqueio. Evite ações
-que apenas parecem produtivas (pesquisar sem pergunta, rodar todos os testes sem relação com a mudança,
-ler dezenas de arquivos sem hipótese, alterar código antes de entender a causa).
+**2. Decide.** Pick the smallest action that produces real progress — one that reduces uncertainty,
+validates a hypothesis, recovers evidence, advances a step, detects a regression, or identifies a
+blocker. Avoid actions that only look productive (searching without a question, running all tests
+unrelated to the change, reading dozens of files without a hypothesis, changing code before
+understanding the cause).
 
-**3. Agir.** Execute uma ação por vez quando o resultado puder mudar a próxima decisão. Nunca afirme
-que uma ação ocorreu sem observar o resultado real.
+**3. Act.** Execute one action at a time whenever the result could change the next decision. Never
+claim an action happened without observing the real result.
 
-**4. Observar.** Após cada ação relevante, interprete antes de continuar: o que aconteceu? corresponde
-ao esperado? a hipótese foi confirmada, refutada ou enfraquecida? surgiu erro, limitação ou risco? o
-plano muda? Não ignore erro de ferramenta, mensagem de teste, log ou resultado inesperado — é
-evidência.
+**4. Observe.** After each relevant action, interpret before moving on: what happened? does it match
+expectations? was the hypothesis confirmed, refuted, or weakened? did an error, limitation, or risk
+surface? does the plan change? Do not ignore a tool error, test message, log, or unexpected result —
+it is evidence.
 
-**5. Atualizar.** Atualize o entendimento por evidência, não por desejo. Quando uma hipótese falha
-(ver [Assumption Tracking](assumption-tracking.md)): não insista sem nova evidência, identifique a
-premissa errada, formule uma alternativa, escolha uma ação que **diferencie** as hipóteses e evite
-correção cosmética que só esconde o problema.
+**5. Update.** Update your understanding based on evidence, not on wishful thinking. When a
+hypothesis fails (see [Assumption Tracking](assumption-tracking.md)): do not insist without new
+evidence, identify the wrong premise, formulate an alternative, choose an action that
+**differentiates** the hypotheses, and avoid cosmetic fixes that merely hide the problem.
 
-**6. Concluir.** Encerre só quando o critério de conclusão estiver atendido:
+**6. Conclude.** Stop only when the completion criteria are met:
 
 ```text
-[ ] Objetivo principal atendido e informações relevantes validadas.
-[ ] Resultado respeita restrições do usuário e do projeto.
-[ ] Alterações verificadas por teste, lint, build ou revisão compatível.
-[ ] Riscos, limitações e pendências comunicados.
-[ ] Nenhuma suposição crítica tratada como fato; nenhuma próxima ação obrigatória pendente.
+[ ] Main goal met and relevant information validated.
+[ ] Result respects user and project constraints.
+[ ] Changes verified by test, lint, build, or an appropriate review.
+[ ] Risks, limitations, and open items communicated.
+[ ] No critical assumption treated as fact; no mandatory next action left pending.
 ```
 
-## Formato de registro operacional
+## Operational logging format
 
-Não exponha cadeia de pensamento detalhada. Quando registrar uma etapa, use formato compacto e
-verificável — preferível a explicações longas ou especulativas:
+Do not expose detailed chain of thought. When logging a step, use a compact, verifiable format —
+preferable to long or speculative explanations:
 
 ```text
-Objetivo da ação:
-- Validar se o erro vem do contrato da API ou do mapeamento no frontend.
-Ação:
-- Inspecionar o tipo de resposta usado pelo endpoint.
-Observação:
-- O campo retornado é `created_at`, mas o frontend espera `createdAt`.
-Atualização:
-- Hipótese de incompatibilidade de contrato confirmada.
-Próxima decisão:
-- Corrigir o mapeamento e adicionar teste de regressão.
+Action goal:
+- Validate whether the error comes from the API contract or the frontend mapping.
+Action:
+- Inspect the response type used by the endpoint.
+Observation:
+- The returned field is `created_at`, but the frontend expects `createdAt`.
+Update:
+- Contract mismatch hypothesis confirmed.
+Next decision:
+- Fix the mapping and add a regression test.
 ```
 
-## Ferramentas e parada
+## Tools and stopping
 
-Regras de uso de ferramentas, efeito colateral e confirmação de alto impacto vivem na skill
-[pelizzai-reasoning](../SKILL.md) e valem aqui. Notas do ciclo: antes de usar uma ferramenta, saiba
-qual pergunta ela responde; depois, confirme que interpretou o resultado e se ele muda o plano; trate
-com mais cuidado ações com efeito colateral (editar/deletar, publicar, enviar, transações), preferindo
-reversíveis e validando o efeito após a execução.
+Rules for tool use, side effects, and high-impact confirmation live in the
+[pelizzai-reasoning](../SKILL.md) skill and apply here. Cycle notes: before using a tool, know which
+question it answers; afterward, confirm you interpreted the result and whether it changes the plan;
+treat side-effecting actions (edit/delete, publish, send, transactions) with extra care, preferring
+reversible ones and validating the effect after execution.
 
-Interrompa o ciclo quando: o objetivo foi atendido e validado; não há incerteza material; nenhuma ação
-disponível reduz incerteza ou avança o objetivo; **detecção de loop** (a mesma ação produz a mesma
-observação, ou as últimas iterações não mudaram fatos, hipóteses nem pendências); o orçamento de
-esforço estourou; faltam permissões, contexto ou ferramentas; a próxima ação exige autorização do
-usuário; ou o custo deixou de ser proporcional ao benefício. Não continue só para parecer diligente.
+Break the cycle when: the goal has been met and validated; there is no material uncertainty; no
+available action reduces uncertainty or advances the goal; **loop detection** (the same action
+produces the same observation, or the last iterations changed no facts, hypotheses, or open items);
+the effort budget is exhausted; permissions, context, or tools are missing; the next action requires
+user authorization; or the cost is no longer proportional to the benefit. Do not keep going just to
+look diligent.
 
-## Exemplo — hipótese refutada (backtracking)
+## Example — refuted hypothesis (backtracking)
 
 ```text
-Tarefa:
-- "A página fica em branco intermitentemente após o login."
+Task:
+- "The page intermittently goes blank after login."
 
-Hipótese inicial:
-- O token de sessão expira cedo e derruba a renderização.
+Initial hypothesis:
+- The session token expires early and breaks rendering.
 
-Ação:
-- Inspecionar logs de autenticação e o tempo de vida do token nas sessões afetadas.
+Action:
+- Inspect authentication logs and the token lifetime in the affected sessions.
 
-Observação:
-- O token continua válido nos casos com tela em branco; o erro real é um `TypeError`
-  ao ler um campo ausente no payload do perfil.
+Observation:
+- The token is still valid in the blank-screen cases; the real error is a `TypeError`
+  when reading a missing field in the profile payload.
 
-Atualização:
-- Hipótese do token REFUTADA. A premissa "o problema é de sessão" estava errada.
-- Nova hipótese: o payload do perfil às vezes vem sem o campo esperado.
+Update:
+- Token hypothesis REFUTED. The premise "this is a session problem" was wrong.
+- New hypothesis: the profile payload sometimes arrives without the expected field.
 
-Próxima ação (que diferencia as hipóteses):
-- Reproduzir com um perfil incompleto e confirmar o `TypeError`, em vez de "corrigir" o token,
-  o que apenas esconderia o problema.
+Next action (one that differentiates the hypotheses):
+- Reproduce with an incomplete profile and confirm the `TypeError`, instead of "fixing" the token,
+  which would only hide the problem.
 ```
 
-O exemplo mostra a disciplina central: a observação real derruba a hipótese, o estado é atualizado por
-evidência e a próxima ação é escolhida para diferenciar hipóteses — nunca para confirmar a inicial.
+The example shows the core discipline: the real observation knocks down the hypothesis, the state is
+updated by evidence, and the next action is chosen to differentiate hypotheses — never to confirm
+the initial one.
 
-## Técnicas relacionadas
+## Related techniques
 
-- [OODA](ooda.md) — macro-loop; ReAct vive dentro do Agir.
+- [OODA](ooda.md) — macro-loop; ReAct lives inside Act.
 - [Plan and Execute](plan-and-execute.md) · [Verification](verification.md) · [Critique and Refine](critique-and-refine.md) · [Assumption Tracking](assumption-tracking.md) · [Root Cause Analysis](root-cause-analysis.md)
 
-Voltar ao [catálogo de técnicas](../SKILL.md).
+Back to the [technique catalog](../SKILL.md).

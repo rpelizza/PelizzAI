@@ -1,75 +1,75 @@
-# Perfil de execução — <projeto>
+# Execution profile — <project>
 
-> Detectado pela `pelizzai-audit` no bootstrap, lendo os scripts REAIS do projeto
-> (package.json `scripts`, Makefile/Justfile, pyproject, …) — nunca chutado. A exceção é
-> a seção *Defaults de execução ratificados*, que NÃO é detectada: nasce `<unset>` e só o
-> usuário a preenche ao ratificar a política no gate pós-plano.
-> Vive em `pelizzai/profile.md`. Consumido por: `pelizzai-tdd` (comando de teste),
-> `pelizzai-execution-plans` (gate pós-plano + validação final), `pelizzai-finish-task`
-> (verificação e destino), `pelizzai-router` (recomendação dos defaults de execução),
-> `pelizzai-debugging` (loop de feedback) e `pelizzai-writing-skills` (Stack baseline
-> → eixos version/adoption-driven). Atualize quando os scripts/manifests mudarem; em
-> workspace, repita as seções por projeto.
+> Detected by `pelizzai-audit` at bootstrap, reading the project's REAL scripts
+> (package.json `scripts`, Makefile/Justfile, pyproject, …) — never guessed. The exception is
+> the *Ratified execution defaults* section, which is NOT detected: it is born `<unset>` and only
+> the user fills it in when ratifying the policy at the post-plan gate.
+> Lives at `pelizzai/profile.md`. Consumed by: `pelizzai-tdd` (test command),
+> `pelizzai-execution-plans` (post-plan gate + final validation), `pelizzai-finish-task`
+> (verification and destination), `pelizzai-router` (execution-defaults recommendation),
+> `pelizzai-debugging` (feedback loop), and `pelizzai-writing-skills` (Stack baseline
+> → version/adoption-driven axes). Update it when scripts/manifests change; in a
+> workspace, repeat the sections per project.
 
-## Harness e skill roots
+## Harness and skill roots
 
 - Source mode: `<true | false>`
-- Canonical skill root: `<.claude/skills | .agents/skills | outro root nativo>`
-- Installed mirrors: `<nenhum | lista de roots que devem permanecer byte a byte>`
+- Canonical skill root: `<.claude/skills | .agents/skills | other native root>`
+- Installed mirrors: `<none | list of roots that must stay byte-for-byte>`
 
-_Detecte pelos arquivos realmente instalados. Domain skills são gravadas no root canônico e,
-quando houver mirrors, sincronizadas e verificadas; nunca assuma `.claude/skills` em toda IDE._
+_Detect from the files actually installed. Domain skills are written to the canonical root and,
+when there are mirrors, synced and verified; never assume `.claude/skills` in every IDE._
 
-## Defaults de execução ratificados
+## Ratified execution defaults
 
-> Política de PROJETO explicitamente ratificada pelo usuário — NÃO é herança da tarefa anterior.
-> O gate pós-plano usa estes valores como recomendações nas perguntas sequenciais. Eles não
-> auto-confirmam uma tarefa nova, salvo quando o usuário delegar explicitamente aplicar a política.
-> No bootstrap nascem todos `<unset>`: grave o valor **literalmente entre `<>`**. Qualquer valor
-> entre `<>` (o menu abaixo, `<unset>`) é lido como NÃO ratificado; o recap do hook de SessionStart
-> dispara em QUALQUER valor cru fora de `<...>` e de `unset` — inclusive `branch`, `inline` ou
-> `squash-final`. O hook lê só `isolation-default`, `execution-mode-default` e
-> `commit-strategy-default`; `review-policy-default` fica fora do recap.
+> PROJECT policy explicitly ratified by the user — NOT inheritance from the previous task.
+> The post-plan gate uses these values as recommendations in its sequential questions. They do
+> not auto-confirm a new task, unless the user explicitly delegates applying the policy.
+> At bootstrap they are all born `<unset>`: write the value **literally between `<>`**. Any value
+> between `<>` (the menu below, `<unset>`) reads as NOT ratified; the SessionStart hook recap
+> fires on ANY raw value outside `<...>` and `unset` — including `branch`, `inline`, or
+> `squash-final`. The hook reads only `isolation-default`, `execution-mode-default`, and
+> `commit-strategy-default`; `review-policy-default` stays out of the recap.
 
 - isolation-default: <branch|worktree|unset>
 - execution-mode-default: <inline|subagents|team|unset>
 - commit-strategy-default: <granular|squash-final|unset>
-- review-policy-default: <combinado|split|unset>
-- Ratificado em: <AAAA-MM-DD> | Overrides desde então: <n>
-<!-- destination não é persistível: push/PR/publicação exigem confirmação por tarefa -->
+- review-policy-default: <combined|split|unset>
+- Ratified on: <YYYY-MM-DD> | Overrides since then: <n>
+<!-- destination is not persistable: push/PR/publish require per-task confirmation -->
 
-## Comandos
+## Commands
 
-| Ação   | Comando exato        | Diretório           |
+| Action | Exact command        | Directory           |
 | ------ | -------------------- | ------------------- |
-| test   | `<ex.: pnpm test>`   | `<raiz \| apps/x>`  |
+| test   | `<e.g.: pnpm test>`  | `<root \| apps/x>`  |
 | build  | `<…>`                | `<…>`               |
 | lint   | `<…>`                | `<…>`               |
 | format | `<…>`                | `<…>`               |
 | dev    | `<…>`                | `<…>`               |
 
-_Só liste o que o projeto realmente tem; ação sem script real = linha removida (não invente)._
+_List only what the project actually has; an action without a real script = row removed (do not invent)._
 
 ## Package manager
 
-- Gerenciador: `<npm | pnpm | yarn | bun | pip | poetry | uv | cargo | …>` — determinado pelo LOCKFILE (`<package-lock.json | pnpm-lock.yaml | …>`).
-- Instalação: `<comando exato, ex.: pnpm install>`. Nunca use outro gerenciador — instalar com npm num projeto pnpm corrompe o lock.
+- Manager: `<npm | pnpm | yarn | bun | pip | poetry | uv | cargo | …>` — determined by the LOCKFILE (`<package-lock.json | pnpm-lock.yaml | …>`).
+- Install: `<exact command, e.g.: pnpm install>`. Never use another manager — installing with npm in a pnpm project corrupts the lock.
 
 ## Stack baseline
 
-_Data do snapshot: AAAA-MM-DD (bootstrap ou último refresh)._
+_Snapshot date: YYYY-MM-DD (bootstrap or last refresh)._
 
-| Tecnologia        | Versão (manifest) |
-| ----------------- | ----------------- |
-| `<ex.: Node>`     | `<20.x>`          |
-| `<framework>`     | `<x.y.z>`         |
-| `<lib-chave>`     | `<x.y.z>`         |
+| Technology        | Version (manifest) |
+| ----------------- | ------------------ |
+| `<e.g.: Node>`    | `<20.x>`           |
+| `<framework>`     | `<x.y.z>`          |
+| `<key-lib>`       | `<x.y.z>`          |
 
-_Âncora dos eixos version-driven e adoption-driven da `pelizzai-writing-skills`:
-version-driven = a versão de um item deste baseline mudou nos manifests (drift de versão);
-adoption-driven = há top-level novo nos manifests, ausente deste baseline E do catálogo
-`pelizzai/domain-skills.md` → proposta de CRIAR skill da stack nova._
+_Anchor of the version-driven and adoption-driven axes of `pelizzai-writing-skills`:
+version-driven = the version of an item in this baseline changed in the manifests (version drift);
+adoption-driven = there is a new top-level entry in the manifests, absent from this baseline AND
+from the `pelizzai/domain-skills.md` catalog → proposal to CREATE a skill for the new stack._
 
-## MCPs disponíveis (opcional)
+## Available MCPs (optional)
 
-- `<ex.: context7 — documentação atual de libs/frameworks>`
+- `<e.g.: context7 — current documentation for libs/frameworks>`

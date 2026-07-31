@@ -1,60 +1,60 @@
-# Loops de feedback — menu de táticas
+# Feedback loops — tactics menu
 
-Como construir o oráculo — o comando de reprodução que o Passo 2 da `pelizzai-debugging` exige. A triagem, a ordem e a contenção de dano ativo vivem na SKILL.md, que é canônica; este menu só cataloga táticas. O menu é **ordenado**: tente as táticas de cima primeiro — produzem loops mais tight (rápidos, determinísticos, executáveis pelo agente); desça só quando a de cima não se aplicar ao bug em mãos.
+How to build the oracle — the reproduction command that Step 2 of `pelizzai-debugging` requires. Triage, order, and active-damage containment live in the SKILL.md, which is canonical; this menu only catalogs tactics. The menu is **ordered**: try the tactics at the top first — they produce tighter loops (fast, deterministic, executable by the agent); move down only when the one above does not apply to the bug at hand.
 
-## Os quatro atributos do loop
+## The four attributes of the loop
 
-| Atributo           | O que significa                                                                 | Teste rápido                                    |
+| Attribute          | What it means                                                                    | Quick test                                      |
 | ------------------ | ------------------------------------------------------------------------------- | ----------------------------------------------- |
-| **red-capable**    | o comando ASSERE o sintoma exato reportado — falha enquanto o bug existe, passa quando some | "ele ficaria vermelho agora, com o bug vivo?"   |
-| **determinístico** | mesmo resultado a cada execução                                                  | rode 3× seguidas antes de confiar               |
-| **rápido**         | segundos, não minutos                                                            | um loop de 2s permite dezenas de iterações por hipótese |
-| **agent-runnable** | você roda sozinho, sem depender de um humano clicar                              | "eu consigo executar isso agora, deste terminal?" |
+| **red-capable**    | the command ASSERTS the exact reported symptom — fails while the bug exists, passes when it is gone | "would it be red right now, with the bug alive?" |
+| **deterministic**  | same result on every run                                                         | run it 3× in a row before trusting it           |
+| **fast**           | seconds, not minutes                                                             | a 2s loop allows dozens of iterations per hypothesis |
+| **agent-runnable** | you run it yourself, without depending on a human clicking                       | "can I execute this now, from this terminal?"   |
 
-## O menu (em ordem de preferência)
+## The menu (in order of preference)
 
-1. **Failing test** — um teste automatizado no framework do projeto que assere o sintoma. O melhor loop possível: já nasce no formato que o Passo 4 vai promover a teste de regressão. Use quando o bug é alcançável pela suíte existente.
+1. **Failing test** — an automated test in the project's framework that asserts the symptom. The best possible loop: it is born in the format Step 4 will promote to a regression test. Use when the bug is reachable through the existing suite.
 
-2. **Script curl** — para bugs de API/HTTP: uma chamada com payload fixo + assert no status/corpo (`curl -sf … | grep …`). Não exige subir o front nem clicar em nada.
+2. **Curl script** — for API/HTTP bugs: one call with a fixed payload + an assert on status/body (`curl -sf … | grep …`). No need to boot the frontend or click anything.
 
-3. **CLI com fixture** — invoque o binário/entrypoint do projeto com um arquivo de entrada mínimo versionável (fixture) que dispara o bug. Bom para parsers, geradores, pipelines de dados.
+3. **CLI with fixture** — invoke the project's binary/entrypoint with a minimal, versionable input file (fixture) that triggers the bug. Good for parsers, generators, data pipelines.
 
-4. **Browser headless** — quando o sintoma só existe no navegador: um script Playwright/Puppeteer que navega, age e assere o sintoma (texto de erro, elemento ausente, console). Mais lento — mantenha o cenário mínimo.
+4. **Headless browser** — when the symptom only exists in the browser: a Playwright/Puppeteer script that navigates, acts, and asserts the symptom (error text, missing element, console). Slower — keep the scenario minimal.
 
-5. **Replay de trace capturado** — grave UMA ocorrência real (HAR, dump de request, log estruturado, gravação de sessão) e construa um replayer que a reinjeta. Transforma "aconteceu em produção" em comando local.
+5. **Captured-trace replay** — record ONE real occurrence (HAR, request dump, structured log, session recording) and build a replayer that reinjects it. Turns "it happened in production" into a local command.
 
-6. **Throwaway harness** — um script descartável que importa só o módulo suspeito e o chama com os dados do caso. Corta o resto do sistema do caminho; é deletado no post-mortem, nunca commitado.
+6. **Throwaway harness** — a disposable script that imports only the suspect module and calls it with the case's data. Cuts the rest of the system out of the path; deleted in the post-mortem, never committed.
 
-7. **Property/fuzz com ~1000 inputs** — quando o input exato que quebra é desconhecido: gere ~1000 inputs (aleatórios com seed logada, ou property-based) e assere a invariante violada. O primeiro input que falhar vira a fixture da tática 3.
+7. **Property/fuzz with ~1000 inputs** — when the exact breaking input is unknown: generate ~1000 inputs (random with a logged seed, or property-based) and assert the violated invariant. The first input that fails becomes tactic 3's fixture.
 
-8. **Bisection harness (`git bisect run`)** — quando o bug é uma REGRESSÃO e você tem um comando red-capable de qualquer tática acima: `git bisect run <comando>` encontra o commit culpado sozinho. O `<comando>` precisa ser **idempotente e sem efeitos colaterais persistentes** — o bisect o roda dezenas de vezes em commits diferentes; um comando que muta estado (grava no banco, altera arquivos versionados, publica algo) corrompe a busca e gera falsos culpados. O commit achado alimenta as hipóteses do Passo 3 (o diff do commit culpado é a lista de suspeitos).
+8. **Bisection harness (`git bisect run`)** — when the bug is a REGRESSION and you have a red-capable command from any tactic above: `git bisect run <command>` finds the guilty commit on its own. The `<command>` must be **idempotent and free of persistent side effects** — bisect runs it dozens of times across different commits; a command that mutates state (writes to the database, alters versioned files, publishes something) corrupts the search and produces false culprits. The commit found feeds Step 3's hypotheses (the guilty commit's diff is the suspect list).
 
-9. **Differential loop** — rode a versão que funcionava e a que quebra (versão velha vs nova, lib A vs B, prod vs local) com o MESMO input e faça diff da saída. O ponto onde as saídas divergem localiza a quebra sem entender o sistema inteiro.
+9. **Differential loop** — run the version that worked and the one that breaks (old vs new version, lib A vs B, prod vs local) with the SAME input and diff the output. The point where the outputs diverge locates the break without understanding the whole system.
 
-10. **Script HITL (human-in-the-loop)** — último recurso, quando só um humano pode operar (app mobile físico, SSO corporativo, hardware). NÃO converse em prosa: gere um script estruturado que **dirige** o humano com helpers `step` (instrução do que fazer) e `capture` (o que observar), devolvendo `KEY=VALUE` parseável a você. O humano vira um atuador estruturado, não um interlocutor de prosa:
+10. **HITL (human-in-the-loop) script** — last resort, when only a human can operate (physical mobile app, corporate SSO, hardware). Do NOT converse in prose: generate a structured script that **drives** the human with `step` (instruction of what to do) and `capture` (what to observe) helpers, returning parseable `KEY=VALUE` back to you. The human becomes a structured actuator, not a prose interlocutor:
 
     ```bash
-    step    "1. Abra /checkout no celular e toque em 'Pagar'"
-    capture "BANNER_STATUS"  "código exibido no banner de erro"
-    capture "SPINNER_TRAVOU" "sim/nao — o spinner passou de 10s?"
-    # retorno esperado: BANNER_STATUS=502  SPINNER_TRAVOU=sim
+    step    "1. Open /checkout on the phone and tap 'Pay'"
+    capture "BANNER_STATUS"  "code shown in the error banner"
+    capture "SPINNER_STUCK"  "yes/no — did the spinner exceed 10s?"
+    # expected return: BANNER_STATUS=502  SPINNER_STUCK=yes
     ```
 
-    Cada rodada do script é uma iteração do loop; os `KEY=VALUE` são a saída que você assere.
+    Each run of the script is one iteration of the loop; the `KEY=VALUE` pairs are the output you assert.
 
-## Bugs não-determinísticos: taxa de reprodução
+## Non-deterministic bugs: reproduction rate
 
-Com bug flaky, o objetivo é **aumentar a TAXA de reprodução**, não perseguir a repro perfeita. Um bug que reproduz 50% das vezes é debugável; 1% não é.
+With a flaky bug, the goal is to **raise the reproduction RATE**, not to chase the perfect repro. A bug that reproduces 50% of the time is debuggable; 1% is not.
 
 ```text
-- Rode o loop 100× e conte as falhas — a taxa é o seu baseline mensurável
-  (ex.: for i in $(seq 100); do <loop>; done | grep -c FAIL). O comando N× É o loop:
-  red-capable = taxa acima do limiar que você fixou.
-- Paralelize: N processos concorrentes rodando o loop — race conditions reproduzem
-  mais sob contenção.
-- Aplique stress: CPU/IO carregados, timeouts encurtados, delays injetados nas fronteiras
-  suspeitas (com o prefixo da sessão), ordem aleatória de testes com seed LOGADA.
-- Cada mudança que SOBE a taxa é informação sobre a causa: subiu com paralelismo →
-  suspeite de estado compartilhado; subiu com timeout curto → suspeite de corrida com I/O.
-- Depois do fix, o critério de verde também é estatístico: as mesmas 100 rodadas, zero falhas.
+- Run the loop 100× and count the failures — the rate is your measurable baseline
+  (e.g.: for i in $(seq 100); do <loop>; done | grep -c FAIL). The N× command IS the loop:
+  red-capable = rate above the threshold you fixed.
+- Parallelize: N concurrent processes running the loop — race conditions reproduce
+  more under contention.
+- Apply stress: loaded CPU/IO, shortened timeouts, delays injected at the suspect
+  boundaries (with the session prefix), random test order with a LOGGED seed.
+- Every change that RAISES the rate is information about the cause: rose with parallelism →
+  suspect shared state; rose with a short timeout → suspect a race with I/O.
+- After the fix, the green criterion is statistical too: the same 100 runs, zero failures.
 ```

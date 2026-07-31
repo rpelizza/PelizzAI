@@ -1,593 +1,600 @@
 # PelizzAI
 
-Harness de engenharia para agentes de código — Claude Code, Codex, Cursor, Gemini CLI e afins.
+An engineering harness for coding agents — Claude Code, Codex, Cursor, Gemini CLI, and the like.
 
-Você clona, copia a `dist/` para o seu projeto (ou roda o export) e o agente passa a trabalhar com
-processo: ele lê a sua stack de verdade, escreve regras específicas do seu projeto, isola antes de
-escrever, prova o que entrega e **para para perguntar sempre que a decisão for sua**.
+You clone it, copy `dist/` into your project (or run the export), and the agent starts working with
+process: it reads your actual stack, writes rules specific to your project, isolates before
+writing, proves what it delivers, and **stops to ask whenever the decision is yours**.
 
-A regra que organiza tudo o resto:
+The rule that organizes everything else:
 
-> **O harness classifica, raciocina, investiga e recomenda. Quem decide o produto é você.**
-> Toda lacuna que aparecer no meio do caminho — requisito ambíguo, escolha de UX, contrato de
-> interface indefinido — para o trabalho e volta para você em forma de pergunta. Convenção,
-> default ou "inferência razoável" não substituem a sua resposta, mesmo quando a escolha parece
-> óbvia e reversível.
+> **The harness classifies, reasons, investigates, and recommends. You decide the product.**
+> Every gap that appears along the way — an ambiguous requirement, a UX choice, an undefined
+> interface contract — stops the work and comes back to you as a question. Convention, defaults,
+> or "reasonable inference" do not substitute for your answer, even when the choice looks obvious
+> and reversible.
 
-**Requisitos:** nenhum para instalar copiando a `dist/`. Node.js 18+ para os scripts (export,
-sync, hooks); PowerShell 7+ apenas para os wrappers `.ps1` no Windows. Nenhuma dependência é
-instalada: o harness é markdown, mais alguns scripts.
+**Requirements:** none to install by copying `dist/`. Node.js 18+ for the scripts (export,
+sync, hooks); PowerShell 7+ only for the `.ps1` wrappers on Windows. No dependencies are
+installed: the harness is markdown, plus a few scripts.
 
 ---
 
-## Como funciona, em 30 segundos
+## How it works, in 30 seconds
 
 ```mermaid
 flowchart TD
-    A["Instale o harness no seu projeto<br/>(cópia da dist/ ou export)<br/>e abra o agente lá dentro"] --> B{"O projeto<br/>já existe?"}
-    B -- "sim" --> D["você digita: bootstrap"]
-    B -- "não, é do zero" --> E["descreva o produto<br/>→ descoberta → spec aprovada"]
-    D --> F["lê a stack REAL: lockfiles,<br/>versões, convenções do código"]
+    A["Install the harness in your project<br/>(copy of dist/ or the export)<br/>and open the agent inside it"] --> B{"Does the project<br/>already exist?"}
+    B -- "yes" --> D["you type: bootstrap"]
+    B -- "no, from scratch" --> E["describe the product<br/>→ discovery → approved spec"]
+    D --> F["reads the REAL stack: lockfiles,<br/>versions, code conventions"]
     E --> F
-    F --> H["propõe as skills de domínio do SEU projeto,<br/>fundamentadas na doc da versão que você usa"]
-    H --> I{"você aprova<br/>o conjunto?"}
-    I -- "ajusto" --> H
-    I -- "sim" --> K["catálogo e profile gravados em pelizzai/<br/>Daqui em diante: é só pedir tarefas."]
+    F --> H["proposes YOUR project's domain skills,<br/>grounded in the docs of the version you use"]
+    H --> I{"do you approve<br/>the set?"}
+    I -- "adjust" --> H
+    I -- "yes" --> K["catalog and profile written to pelizzai/<br/>From here on: just ask for tasks."]
 ```
 
-`bootstrap` é o único comando que existe. Depois dele, você trabalha pedindo coisas em linguagem
-natural; o harness classifica cada pedido e recomenda a rota.
+`bootstrap` is the only command there is. After it, you work by asking for things in natural
+language; the harness classifies each request and recommends the route.
 
 ---
 
-## Instalação
+## Installation
 
-### Sem linha de comando: copie a `dist/`
+### No command line: copy `dist/`
 
-A pasta `dist/` é o harness pronto para consumo: skills core (`.claude` e `.agents`), hooks,
-adaptador Cursor (`.cursor`), scripts e os três entrypoints (`CLAUDE.md` já na versão do
-consumidor, `AGENTS.md`, `GEMINI.md`) — sem a sentinela de repo-fonte e sem os arquivos de
-desenvolvimento do harness.
+The `dist/` folder is the harness ready for consumption: core skills (`.claude` and `.agents`),
+hooks, the Cursor adapter (`.cursor`), scripts, and the three entrypoints (`CLAUDE.md` already in
+the consumer version, `AGENTS.md`, `GEMINI.md`) — without the source-repo sentinel and without the
+harness's development files.
 
-1. Baixe o repositório (clone ou "Download ZIP" no GitHub).
-2. Copie **o conteúdo** de `dist/` para a raiz do seu projeto — Ctrl+C, Ctrl+V, pronto.
-3. Abra o agente no projeto e digite `bootstrap`.
+1. Download the repository (clone or "Download ZIP" on GitHub).
+2. Copy **the contents** of `dist/` into the root of your project — Ctrl+C, Ctrl+V, done.
+3. Open the agent in the project and type `bootstrap`.
 
-Para **atualizar** mais tarde, prefira o export abaixo: ele preserva as suas skills de domínio e o
-seu `pelizzai/` e valida a instalação. Copiar a `dist/` nova por cima também funciona, mas não
-remove skills core descontinuadas upstream nem roda a validação.
+To **update** later, prefer the export below: it preserves your domain skills and your
+`pelizzai/` and validates the installation. Copying the new `dist/` over the top also works, but it
+neither removes core skills discontinued upstream nor runs the validation.
 
-### Com linha de comando: instalar e atualizar são o mesmo comando
+### With a command line: install and update are the same command
 
-A partir do repo-fonte do PelizzAI, aponte para o seu projeto — rode de novo quando quiser a
-versão nova.
+From the PelizzAI source repo, point at your project — run it again whenever you want the new
+version.
 
 ```bash
-# Portátil (qualquer sistema com Node.js 18+)
-node scripts/sync-harness.mjs --export-consumer /caminho/do/seu-projeto
+# Portable (any system with Node.js 18+)
+node scripts/sync-harness.mjs --export-consumer /path/to/your-project
 ```
 
 ```powershell
 # Windows
-pwsh scripts/sync-harness.ps1 -ExportConsumer C:\caminho\do\seu-projeto
+pwsh scripts/sync-harness.ps1 -ExportConsumer C:\path\to\your-project
 ```
 
 ```bash
 # macOS / Linux
-bash scripts/sync-harness.sh --export-consumer /caminho/do/seu-projeto
+bash scripts/sync-harness.sh --export-consumer /path/to/your-project
 ```
 
-Isso copia as skills core, os hooks, o adaptador Cursor e os scripts úteis, gera o `CLAUDE.md` do
-consumidor e valida os espelhos — **sem tocar** nas suas skills de domínio, no seu `pelizzai/` ou
-no seu `settings.json`.
+This copies the core skills, the hooks, the Cursor adapter, and the useful scripts, generates the
+consumer's `CLAUDE.md`, and validates the mirrors — **without touching** your domain skills, your
+`pelizzai/`, or your `settings.json`.
 
-> **Nunca copie a raiz do repositório à mão** — para cópia manual existe a `dist/`. O que distingue
-> o repo-fonte de um consumidor é uma única sentinela, `scripts/pelizzai-source-repo.txt`. Copiar a
-> raiz a levaria junto e promoveria o seu projeto a repo-fonte por engano — com bootstrap mudo,
-> runtime desativado e writegate pela metade. A `dist/` e o `--export-consumer` excluem a sentinela
-> por contrato.
+> **Never copy the repository root by hand** — manual copying is what `dist/` is for. What sets
+> the source repo apart from a consumer is a single sentinel, `scripts/pelizzai-source-repo.txt`.
+> Copying the root would carry it along and promote your project to source repo by mistake — with
+> a mute bootstrap, disabled runtime, and half a writegate. `dist/` and `--export-consumer`
+> exclude the sentinel by contract.
 
-### Hooks: copiados, nunca ligados sem você
+### Hooks: copied, never enabled without you
 
-Os hooks são específicos do Claude Code e **opt-in**. Você tem dois caminhos:
+The hooks are Claude Code-specific and **opt-in**. You have two paths:
 
-- ligar junto com a instalação, acrescentando `--install-hooks` (ou `-InstallHooks`);
-- deixar para a primeira tarefa que escreve algo: a `pelizzai-audit` verifica, recomenda e pergunta
-  uma vez, um hook por vez.
+- enable them along with the installation, adding `--install-hooks` (or `-InstallHooks`);
+- leave it to the first task that writes something: `pelizzai-audit` checks, recommends, and asks
+  once, one hook at a time.
 
 ```bash
-node scripts/install-hooks.mjs --check                  # só verifica
-node scripts/install-hooks.mjs --only cadence,guardrails # instala os que você escolher
-node scripts/install-hooks.mjs --remove                 # remove só os hooks PelizzAI
+node scripts/install-hooks.mjs --check                  # check only
+node scripts/install-hooks.mjs --only cadence,guardrails # install the ones you choose
+node scripts/install-hooks.mjs --remove                 # remove only the PelizzAI hooks
 ```
 
-O instalador é idempotente e preserva hooks, permissões e demais campos que já existirem no seu
-`.claude/settings.json`. Nas outras plataformas os mesmos invariantes continuam valendo pelas
-skills — sem enforcement executável.
+The installer is idempotent and preserves hooks, permissions, and any other fields that already
+exist in your `.claude/settings.json`. On the other platforms the same invariants still hold
+through the skills — with no executable enforcement.
 
 ---
 
-## O ciclo de vida de uma tarefa
+## The lifecycle of a task
 
-Este é o fluxo principal do harness. Os losangos marcados **GATE** são os pontos onde ele para e
-espera você.
+This is the harness's main flow. The diamonds marked **GATE** are the points where it stops and
+waits for you.
 
 ```mermaid
 flowchart TD
-    P["Você pede algo"] --> GK{"GATE 1<br/>kickoff: a rota"}
-    GK -- "read-only" --> RO["responde · zero escrita"]
-    GK -- "você ratifica" --> DES["branch antes da 1ª escrita<br/>→ descoberta → spec"]
-    DES --> GS{"GATE 2<br/>a spec"}
-    GS --> PLAN["plano: critérios observáveis<br/>e estratégia de prova"]
-    PLAN --> GP{"GATE 3<br/>plano + setup"}
-    GP --> EXEC["execução tarefa a tarefa<br/>→ validação final da branch"]
-    EXEC --> GD{"GATE 4<br/>o destino"}
-    GD --> DEL["delivered · conteúdo selado<br/>→ done constatado contra o Git"]
+    P["You ask for something"] --> GK{"GATE 1<br/>kickoff: the route"}
+    GK -- "read-only" --> RO["answers · zero writes"]
+    GK -- "you ratify" --> DES["branch before the 1st write<br/>→ discovery → spec"]
+    DES --> GS{"GATE 2<br/>the spec"}
+    GS --> PLAN["plan: observable criteria<br/>and proof strategy"]
+    PLAN --> GP{"GATE 3<br/>plan + setup"}
+    GP --> EXEC["task-by-task execution<br/>→ final validation of the branch"]
+    EXEC --> GD{"GATE 4<br/>the destination"}
+    GD --> DEL["delivered · content sealed<br/>→ done observed against Git"]
 ```
 
-Quatro paradas em uma feature completa; menos nas rotas curtas. **Entre os gates o harness trabalha
-sozinho** — ele não pergunta "sigo?" a cada passo, porque autonomia dentro de fronteira ratificada
-é o ponto. O que ele nunca faz é atravessar um gate no silêncio.
+Four stops in a full feature; fewer on the short routes. **Between the gates the harness works on
+its own** — it does not ask "keep going?" at every step, because autonomy inside a ratified
+boundary is the point. What it never does is cross a gate in silence.
 
-Ratificar a rota no GATE 1 não encerra a sua autoridade: lacuna material que aparecer depois —
-na spec, no plano ou no meio do código — reabre a conversa (veja o fluxo seguinte).
+Ratifying the route at GATE 1 does not end your authority: a material gap that shows up later —
+in the spec, in the plan, or in the middle of the code — reopens the conversation (see the next
+flow).
 
 ---
 
-## O que acontece dentro de cada tarefa
+## What happens inside each task
 
 ```mermaid
 flowchart TD
-    T["Tarefa N do plano"] --> BRIEF["briefing fresco: constraints,<br/>skills de domínio da área,<br/>overlays e evidência esperada"]
-    BRIEF --> IMPL["implementação com a estratégia<br/>de prova daquele artefato"]
-    IMPL --> GAP{"apareceu lacuna material?<br/>escopo · UX · arquitetura<br/>dados · segurança · aceite"}
-    GAP -- "SIM" --> IV["PARA e chama a entrevista:<br/>uma pergunta por vez, 2-3 opções<br/>e a recomendada marcada"]
-    IV --> REG["sua resposta é registrada<br/>no plano, com data"]
+    T["Task N of the plan"] --> BRIEF["fresh briefing: constraints,<br/>domain skills for the area,<br/>overlays and expected evidence"]
+    BRIEF --> IMPL["implementation with that<br/>artifact's proof strategy"]
+    IMPL --> GAP{"material gap appeared?<br/>scope · UX · architecture<br/>data · security · acceptance"}
+    GAP -- "YES" --> IV["STOPS and calls the interview:<br/>one question at a time, 2-3 options<br/>with the recommended one marked"]
+    IV --> REG["your answer is recorded<br/>in the plan, with a date"]
     REG --> IMPL
-    GAP -- "não" --> REV["review em duas lentes"]
-    REV --> L1["lente SPEC — CEGA<br/>vê só o diff, a spec e as<br/>skills de domínio da área"]
-    REV --> L2["lente QUALIDADE<br/>vê o relatório do implementador<br/>e AUDITA as alegações"]
-    L1 --> OK{"as duas aprovam?"}
+    GAP -- "no" --> REV["review through two lenses"]
+    REV --> L1["SPEC lens — BLIND<br/>sees only the diff, the spec, and<br/>the area's domain skills"]
+    REV --> L2["QUALITY lens<br/>sees the implementer's report<br/>and AUDITS the claims"]
+    L1 --> OK{"do both approve?"}
     L2 --> OK
-    OK -- "não" --> IMPL
-    OK -- "sim" --> NEXT["próxima tarefa"]
+    OK -- "no" --> IMPL
+    OK -- "yes" --> NEXT["next task"]
 ```
 
-Duas coisas merecem destaque aqui:
+Two things deserve highlighting here:
 
-**A lente cega.** O revisor de spec nunca lê o relatório de quem implementou — só o diff e a spec.
-Assim ele não herda o enquadramento de quem escreveu o código. Quem lê o relatório é a outra lente,
-e o dever dela é justamente **auditar as alegações**, não confiar nelas.
+**The blind lens.** The spec reviewer never reads the implementer's report — only the diff and the
+spec. That way it does not inherit the framing of whoever wrote the code. The report is read by the
+other lens, whose duty is precisely to **audit the claims**, not trust them.
 
-**A entrevista não é só do planejamento.** Se a lacuna aparece na tarefa 7 de 9, o trabalho para
-ali. Quem executa não escolhe — nomeia a lacuna e devolve. Em modo time, o membro devolve ao
-coordenador, e o coordenador **também não decide**: consolida e leva a você.
+**The interview is not just for planning.** If the gap appears on task 7 of 9, the work stops
+right there. The executor does not choose — it names the gap and hands it back. In team mode, the
+member hands it back to the coordinator, and the coordinator **does not decide either**: it
+consolidates and brings it to you.
 
 ---
 
-## O kernel: o que é invariante e o que é situacional
+## The kernel: what is invariant and what is situational
 
-O PelizzAI separa autoridade, invariantes e heurísticas. Proteção de branch, autoridade do usuário,
-autorização externa e validação são **invariantes**. OODA, TDD, brainstorming, team e subagents são
-**ferramentas situacionais**: elas escolhem como trabalhar, nunca o que o produto deve fazer.
+PelizzAI separates authority, invariants, and heuristics. Branch protection, user authority,
+external authorization, and validation are **invariants**. OODA, TDD, brainstorming, team, and
+subagents are **situational tools**: they choose how to work, never what the product should do.
 
 ```mermaid
 flowchart LR
-    U["Pedido"] --> C["pelizzai-core<br/>objetivo e sucesso"]
+    U["Request"] --> C["pelizzai-core<br/>goal and success"]
     C --> R["pelizzai-router<br/>effect · intent · risk<br/>uncertainty · surfaces"]
-    R --> K["Gate de kickoff<br/>rota recomendada · ratificada"]
-    K --> H["exatamente uma head skill"]
-    K --> O["overlays obrigatórios<br/>por superfície"]
-    H --> E["execução proporcional"]
+    R --> K["kickoff gate<br/>route recommended · ratified"]
+    K --> H["exactly one head skill"]
+    K --> O["mandatory overlays<br/>per surface"]
+    H --> E["proportional execution"]
     O --> E
-    E --> V["review + Verification<br/>selam o conteúdo"]
-    V --> F["Finish integra<br/>sem mudar o conteúdo"]
+    E --> V["review + Verification<br/>seal the content"]
+    V --> F["Finish integrates<br/>without changing the content"]
 ```
 
-O envelope de decisão é derivado do pedido e das evidências — não é formulário para você preencher.
-Mas a rota montada volta como **recomendação a ratificar** antes de investir esforço:
+The decision envelope is derived from the request and the evidence — it is not a form for you to
+fill in. But the assembled route comes back as a **recommendation to ratify** before effort is
+invested:
 
-| Campo | Valores | Decisão que governa |
+| Field | Values | Decision it governs |
 | --- | --- | --- |
-| `effect` | `read-only`, `write-local`, `external` | se pode escrever e quais confirmações são necessárias |
-| `intent` | bootstrap, feature, bug, ajuste, refactor, infra, review, conflito | qual head skill conduz o ciclo de vida |
-| `risk` | low, medium, high | profundidade de validação, review e contenção |
-| `uncertainty` | low, medium, high | quanto descobrir antes de implementar |
-| `surfaces` | UI, security, data, public-contract, docs, none | quais overlays atravessam o fluxo |
+| `effect` | `read-only`, `write-local`, `external` | whether it may write and which confirmations are required |
+| `intent` | bootstrap, feature, bug, tweak, refactor, infra, review, conflict | which head skill drives the lifecycle |
+| `risk` | low, medium, high | depth of validation, review, and containment |
+| `uncertainty` | low, medium, high | how much to discover before implementing |
+| `surfaces` | UI, security, data, public-contract, docs, none | which overlays run through the flow |
 
-### Uma head skill, overlays transversais
+### One head skill, cross-cutting overlays
 
-Uma tarefa tem exatamente uma **head skill** responsável pelo ciclo de vida. Skills transversais não
-competem com ela: entram como overlays e são propagadas para design, plano, briefing de execução,
-review e Verification.
+A task has exactly one **head skill** responsible for the lifecycle. Cross-cutting skills do not
+compete with it: they enter as overlays and are propagated to design, plan, execution briefing,
+review, and Verification.
 
-| Sinal observado | Overlay obrigatório |
+| Observed signal | Mandatory overlay |
 | --- | --- |
-| tela, componente, CSS, layout, UX ou acessibilidade | `pelizzai-frontend` |
-| auth, input externo, SQL, upload, segredo, CORS, SSRF ou dependência sensível | `pelizzai-oswap` antes da validação final |
-| convenção específica do projeto | skill de domínio catalogada em `pelizzai/domain-skills.md` |
-| documentação humana no escopo | `pelizzai-documenting-features` |
+| screen, component, CSS, layout, UX, or accessibility | `pelizzai-frontend` |
+| auth, external input, SQL, upload, secret, CORS, SSRF, or a sensitive dependency | `pelizzai-oswap` before the final validation |
+| project-specific convention | domain skill cataloged in `pelizzai/domain-skills.md` |
+| human documentation in scope | `pelizzai-documenting-features` |
 
-O overlay frontend aplica o design system e a especificação existentes antes de qualquer preferência
-genérica. Ele exige estados reais, responsividade, acessibilidade e QA visual, e combate
-explicitamente AI slop: gradiente decorativo gratuito, glassmorphism automático, excesso de cards,
-copy genérica, ícone arbitrário e interface sem hierarquia ou intenção de produto.
+The frontend overlay applies the existing design system and specification before any generic
+preference. It demands real states, responsiveness, accessibility, and visual QA, and explicitly
+fights AI slop: gratuitous decorative gradients, automatic glassmorphism, card overload, generic
+copy, arbitrary icons, and interfaces without hierarchy or product intent.
 
 ---
 
-## Efeitos e a primeira escrita
+## Effects and the first write
 
-- `read-only` — inspeciona e analisa, mas **não** cria branch, estado, catálogo, profile, relatório
-  persistente nem bootstrap.
-- `write-local` — passa pelo router e pelo gate de primeira escrita.
-- `external` — além do isolamento, valida autoridade, alvo, reversibilidade e confirmação no momento
-  da ação: push, PR, deploy, mensagem, custo, mudança em produção.
+- `read-only` — inspects and analyzes, but does **not** create a branch, state, catalog, profile,
+  persistent report, or bootstrap.
+- `write-local` — goes through the router and the first-write gate.
+- `external` — beyond isolation, validates authority, target, reversibility, and confirmation at
+  the moment of the action: push, PR, deploy, message, cost, change in production.
 
 ```mermaid
 flowchart TD
-    D["Pedido classificado"] --> Q{"effect"}
-    Q -- "read-only" --> S["scan focado<br/>zero escrita"]
-    Q -- "write-local / external" --> G["gate de primeira escrita"]
+    D["Classified request"] --> Q{"effect"}
+    Q -- "read-only" --> S["focused scan<br/>zero writes"]
+    Q -- "write-local / external" --> G["first-write gate"]
     G --> B["task branch"]
-    B --> P["greenfield: descoberta + spec<br/>+ plano, ratificados"]
-    P --> I{"isolamento para executar"}
-    I -- "branch" --> SAME["continuar na mesma branch"]
-    I -- "worktree" --> CP["checkpoint do planejamento"]
-    CP --> WT["worktree da mesma branch"]
+    B --> P["greenfield: discovery + spec<br/>+ plan, ratified"]
+    P --> I{"isolation for execution"}
+    I -- "branch" --> SAME["continue on the same branch"]
+    I -- "worktree" --> CP["planning checkpoint"]
+    CP --> WT["worktree of the same branch"]
 ```
 
-Para tarefas mutáveis em Git, `pelizzai-starting-branch` cria ou valida a branch **antes** de
-qualquer estado, spec, plano, ADR, código, configuração, teste, scaffold ou protótipo. Spec e plano
-nunca nascem numa branch protegida.
+For Git-mutating tasks, `pelizzai-starting-branch` creates or validates the branch **before** any
+state, spec, plan, ADR, code, configuration, test, scaffold, or prototype. Spec and plan are never
+born on a protected branch.
 
-Branch, execução inline e commits granulares são os defaults **recomendados**; worktree, team e
-subagents entram quando frentes realmente independentes justificam o custo. Nada disso é aplicado em
-silêncio — depois do plano aprovado, isolamento, modo (com `team` sempre visível), commits e review
-são decididos **uma pergunta por vez**. `squash-final` só acontece a pedido explícito.
+Branch, inline execution, and granular commits are the **recommended** defaults; worktree, team,
+and subagents come in when genuinely independent fronts justify the cost. None of it is applied in
+silence — after the plan is approved, isolation, mode (with `team` always visible), commits, and
+review are decided **one question at a time**. `squash-final` happens only on explicit request.
 
-Decisões estruturais ratificadas podem virar **política do projeto** em `pelizzai/profile.md` e
-pré-selecionar recomendações futuras. Elas não auto-confirmam uma tarefa nova, salvo delegação
-explícita sua. `destination` nunca é herdado: push, PR e publicação são confirmados por tarefa.
+Ratified structural decisions can become **project policy** in `pelizzai/profile.md` and
+pre-select future recommendations. They do not auto-confirm a new task, barring your explicit
+delegation. `destination` is never inherited: push, PR, and publication are confirmed per task.
 
 ---
 
-## Rotas proporcionais
+## Proportional routes
 
-### Feature, refactor e infra
+### Feature, refactor, and infra
 
-| Lane | Quando usar | Rota |
+| Lane | When to use | Route |
 | --- | --- | --- |
-| `bounded` | aceite claro, risco e incerteza baixos, sem decisão arquitetural | plano compacto; brainstorming não é obrigatório |
-| `standard` | contrato e aceite claros, risco médio ou trade-offs limitados | plano; brainstorming compacto só se restar decisão real |
-| `exploratory` | incerteza alta ou decisões arquiteturais acopladas | brainstorming completo + stress proporcional → plano |
+| `bounded` | clear acceptance, low risk and uncertainty, no architectural decision | compact plan; brainstorming is not required |
+| `standard` | clear contract and acceptance, medium risk or limited trade-offs | plan; compact brainstorming only if a real decision remains |
+| `exploratory` | high uncertainty or coupled architectural decisions | full brainstorming + proportional stress → plan |
 
-Todo produto greenfield entra como `exploratory`, mesmo com a stack já definida. Framework,
-linguagem e banco não definem usuários, regras, estados, UX, dados nem critérios de aceite.
+Every greenfield product enters as `exploratory`, even with the stack already defined. Framework,
+language, and database define neither users, rules, states, UX, data, nor acceptance criteria.
 
 ### Debugging
 
-`pelizzai-debugging` começa por **triagem**, não por ritual fixo. A classe da falha escolhe o método:
+`pelizzai-debugging` starts with **triage**, not a fixed ritual. The failure class picks the
+method:
 
-| Classe da falha | Método | Hipóteses |
+| Failure class | Method | Hypotheses |
 | --- | --- | --- |
-| causa direta — compilador, stack trace ou contrato apontam o ponto | ReAct + Verification | zero ou uma |
-| determinístico, mas incerto | RCA leve + ReAct | uma basta, se discrimina |
-| flaky, recorrente ou distribuído | RCA + Evidence Synthesis | concorrentes, com instrumentação |
-| incidente com dano ativo | contenção primeiro; RCA depois | contenção não espera diagnóstico |
+| direct cause — compiler, stack trace, or contract points at the spot | ReAct + Verification | zero or one |
+| deterministic but uncertain | light RCA + ReAct | one is enough, if it discriminates |
+| flaky, recurring, or distributed | RCA + Evidence Synthesis | competing, with instrumentation |
+| incident with active damage | containment first; RCA later | containment does not wait for diagnosis |
 
-OODA é o **ciclo macro** — observar, orientar, decidir, agir — quando evidência nova muda o próximo
-passo. Não é técnica diagnóstica, não é obrigatório e não define quantidade de hipóteses. Três fixes
-que não resolvem param a tentativa e viram entrevista: é lacuna, não teimosia.
+OODA is the **macro cycle** — observe, orient, decide, act — when new evidence changes the next
+step. It is not a diagnostic technique, it is not mandatory, and it does not set the number of
+hypotheses. Three fixes that do not solve it stop the attempt and become an interview: it is a
+gap, not stubbornness.
 
-### Ajuste e review
+### Tweak and review
 
-- `pelizzai-quick-fix` — mudança local e reversível, sem nova regra, contrato ou superfície.
-- `pelizzai-review` — review read-only de diff, working tree, branch ou PR.
-- `pelizzai-improving-architecture` — revisão codebase-wide por fricção e evidência, sem escrita.
-- Se um ajuste revelar design, contrato ou risco novo, o router reclassifica antes de continuar.
+- `pelizzai-quick-fix` — a local, reversible change with no new rule, contract, or surface.
+- `pelizzai-review` — read-only review of a diff, working tree, branch, or PR.
+- `pelizzai-improving-architecture` — codebase-wide review by friction and evidence, with no
+  writes.
+- If a tweak reveals new design, contract, or risk, the router reclassifies before continuing.
 
 ---
 
-## Execução e testes
+## Execution and tests
 
-O plano registra critérios observáveis e a estratégia de validação **por artefato**. TDD é forte
-onde há comportamento executável, e não vira teatro para Markdown ou configuração.
+The plan records observable criteria and the validation strategy **per artifact**. TDD is strong
+where executable behavior exists, and does not become theater for Markdown or configuration.
 
-| Artefato / intenção | Estratégia primária | Evidência mínima |
+| Artifact / intent | Primary strategy | Minimum evidence |
 | --- | --- | --- |
-| comportamento novo ou bug reproduzível | TDD | RED observado → GREEN → refactor |
-| refactor ou legado sem contrato seguro | characterization | comportamento atual capturado antes; regressão depois |
-| config, schema, migration, build, integração | validate | parser, dry-run, fixture ou integração real; rollback quando aplicável |
-| UI, responsividade, interação visual | visual + funcional | app rodando, estados e viewports, QA do overlay frontend |
-| docs, prompts, policies, artefato estático | static / scenario | lint, render, link/schema/grep ou cenário de consumo |
+| new behavior or reproducible bug | TDD | RED observed → GREEN → refactor |
+| refactor or legacy without a safe contract | characterization | current behavior captured before; regression after |
+| config, schema, migration, build, integration | validate | parser, dry-run, fixture, or real integration; rollback when applicable |
+| UI, responsiveness, visual interaction | visual + functional | app running, states and viewports, frontend-overlay QA |
+| docs, prompts, policies, static artifact | static / scenario | lint, render, link/schema/grep, or a consumption scenario |
 
-Cada tarefa recebe briefing fresco com constraints, skills de domínio, overlays e evidência
-esperada. O review por tarefa usa o working tree inteiro — staged, unstaged e untracked. O review
-final usa o range `base-sha..HEAD`, com **o modelo que você escolheu — nunca um menor — e o effort
-mais alto que a sua plataforma permitir**: o harness eleva o raciocínio de qualquer modelo, a conta
-de qual modelo usar é sua, e a profundidade de processo é proporcional ao risco — nunca rebaixada
-para compensar um modelo menor.
+Each task receives a fresh briefing with constraints, domain skills, overlays, and expected
+evidence. The per-task review uses the entire working tree — staged, unstaged, and untracked. The
+final review uses the `base-sha..HEAD` range, with **the model you chose — never a smaller one —
+and the highest effort your platform allows**: the harness elevates the reasoning of any model,
+the math of which model to use is yours, and process depth is proportional to risk — never lowered
+to compensate for a smaller model.
 
 ---
 
-## Conteúdo selado e fechamento
+## Sealed content and closeout
 
 ```mermaid
 flowchart LR
-    C["conteúdo consolidado"] --> T["testes + overlays"]
+    C["consolidated content"] --> T["tests + overlays"]
     T --> R["review"]
     R --> V["Verification"]
-    V --> S["validated-head<br/>SHA do conteúdo aprovado"]
-    S --> M["um commit metadata-only<br/>state.md + history/ → delivered"]
-    M --> X["destino confirmado"]
-    X --> DN["done constatado depois,<br/>contra o Git"]
+    V --> S["validated-head<br/>SHA of the approved content"]
+    S --> M["one metadata-only commit<br/>state.md + history/ → delivered"]
+    M --> X["destination confirmed"]
+    X --> DN["done observed later,<br/>against Git"]
 ```
 
-A validação final acontece depois de squash, overlays, testes e correções. Quando tudo passa,
-`pelizzai-verification-before-completion` grava o `validated-head`: o SHA exato do último commit de
-conteúdo validado.
+The final validation happens after squash, overlays, tests, and fixes. When everything passes,
+`pelizzai-verification-before-completion` records the `validated-head`: the exact SHA of the last
+validated content commit.
 
-`pelizzai-finish-task` exige `HEAD == validated-head` — **o que você recebe é exatamente o que foi
-revisado**. Ela cria então um único commit metadata-only para selar a tarefa em `phase: delivered` e
-gravar `confirmar:`, a condição observável que virará `done`. Nesse selo, o bloco íntegro da tarefa
-migra para `pelizzai/data/history/` e o cursor volta ao tamanho do template.
+`pelizzai-finish-task` requires `HEAD == validated-head` — **what you receive is exactly what was
+reviewed**. It then creates a single metadata-only commit to seal the task in `phase: delivered`
+and record `confirm:`, the observable condition that will become `done`. In that seal, the task's
+intact block migrates to `pelizzai/data/history/` and the cursor returns to template size.
 
-`done` nunca é declarado no fechamento: é **constatado** na abertura da próxima tarefa ou na
-retomada, conferindo `confirmar:` contra o Git. Se a constatação falhar — PR fechado sem merge, por
-exemplo — o harness avisa e pergunta o que fazer.
+`done` is never declared at closeout: it is **observed** at the opening of the next task or on
+resumption, by checking `confirm:` against Git. If the observation fails — a PR closed without a
+merge, for example — the harness warns and asks what to do.
 
-Tudo nesta seção descreve o **seu projeto consumidor**. No repo-fonte do PelizzAI — o repositório
-marcado pela sentinela `scripts/pelizzai-source-repo.txt` — não existe runtime `pelizzai/`: o
-`validated-head` e o `phase: delivered` ficam no registro nativo da execução, o fechamento não cria
-commit metadata-only nem migra bloco para `data/history/`, e `done` continua sendo constatado
-depois, contra o Git.
+Everything in this section describes **your consumer project**. In the PelizzAI source repo — the
+repository marked by the sentinel `scripts/pelizzai-source-repo.txt` — there is no `pelizzai/` runtime:
+`validated-head` and `phase: delivered` stay in the native execution record, the closeout does not create
+a metadata-only commit or migrate a block to `data/history/`, and `done` is still observed later,
+against Git.
 
 ---
 
-## Estado e artefatos no seu projeto
+## State and artifacts in your project
 
-`pelizzai/` é a memória operacional do harness dentro do seu projeto. Regra única: a **raiz** guarda
-conhecimento versionado; `data/` guarda estado e efêmeros.
+`pelizzai/` is the harness's operational memory inside your project. Single rule: the **root**
+holds versioned knowledge; `data/` holds state and ephemera.
 
 ```text
 pelizzai/
 ├── .gitignore
-├── domain-skills.md              catálogo de domínio; marca o bootstrap concluído
-├── profile.md                    comandos test/build/lint, stack baseline, defaults ratificados
-├── context.md | context/         glossário de domínio, sob demanda
-├── adr/ | specs/ | plans/        sob demanda
+├── domain-skills.md              domain catalog; marks the bootstrap as complete
+├── profile.md                    test/build/lint commands, stack baseline, ratified defaults
+├── context.md | context/         domain glossary, on demand
+├── adr/ | specs/ | plans/        on demand
 └── data/
-    ├── state.md                  cursor da tarefa ativa                        (versionado)
-    ├── review-domain-skills.md   ledger de manutenção das skills de domínio    (versionado)
-    ├── history/                  bloco íntegro migrado no selo delivered       (versionado)
-    ├── .cadence-state.json       contador local do hook de cadência            (ignorado)
-    ├── handoffs/                 briefs de tarefa e pacotes de review          (ignorado)
-    ├── mockups/                  telas do visual companion                     (ignorado)
-    └── reports/                  relatórios longos de QA, review e arquitetura (ignorado)
+    ├── state.md                  cursor of the active task                     (versioned)
+    ├── review-domain-skills.md   maintenance ledger for the domain skills      (versioned)
+    ├── history/                  intact block migrated at the delivered seal   (versioned)
+    ├── .cadence-state.json       local counter for the cadence hook            (ignored)
+    ├── handoffs/                 task briefs and review packages               (ignored)
+    ├── mockups/                  visual companion screens                      (ignored)
+    └── reports/                  long QA, review, and architecture reports     (ignored)
 ```
 
-O `state.md` é **cursor, não arquivo de carimbos**: as aprovações de descoberta, spec, domain skills
-e plano ficam no cabeçalho do plano, com data — não no cursor. Campos principais:
+`state.md` is a **cursor, not a stamp file**: the discovery, spec, domain skills, and plan
+approvals live in the plan header, with dates — not in the cursor. Main fields:
 
-| Campo | Uso |
+| Field | Use |
 | --- | --- |
-| `slug` · `track` · `lane` | identidade, tipo e profundidade da tarefa ativa |
-| `phase` | `brainstorm`, `plan`, `exec`, `review`, `delivered`, `done`, `abandoned` ou `blocked` |
-| `branch` · `base-ref` · `base-sha` | branch de trabalho e a base exata que delimita o review final |
-| `validated-head` | SHA do conteúdo aprovado na validação final |
-| `confirmar` | condição observável que vira `done` — constatada contra o Git |
-| `kickoff` | `pendente` até você ratificar o gate consolidado |
-| `isolation` · `execution-mode` · `commit-strategy` | nascem `pending`; nunca viram default silencioso |
-| `effect` · `risk` · `overlays` · `audience` | derivados pelo router; modulam profundidade e linguagem |
-| `spec` · `plan` · `project` | caminho do artefato ou dispensa explícita datada |
+| `slug` · `track` · `lane` | identity, type, and depth of the active task |
+| `phase` | `brainstorm`, `plan`, `exec`, `review`, `delivered`, `done`, `abandoned`, or `blocked` |
+| `branch` · `base-ref` · `base-sha` | working branch and the exact base that bounds the final review |
+| `validated-head` | SHA of the content approved in the final validation |
+| `confirm` | observable condition that becomes `done` — observed against Git |
+| `kickoff` | `pending` until you ratify the consolidated gate |
+| `isolation` · `execution-mode` · `commit-strategy` | born `pending`; never become a silent default |
+| `effect` · `risk` · `overlays` · `audience` | derived by the router; modulate depth and language |
+| `spec` · `plan` · `project` | path of the artifact or a dated explicit waiver |
 
-Abaixo do cursor ficam apenas `## Progresso` (uma linha por tarefa; relatório longo vai para
-`data/reports/` e sobra o link) e `## Histórico` (índice durável). Na retomada, tudo isso é
-confrontado com o Git; divergência perigosa vai para `pelizzai-recovery`.
+Below the cursor sit only `## Progress` (one line per task; a long report goes to `data/reports/`
+and the link stays) and `## History` (durable index). On resumption, all of it is checked against
+Git; dangerous divergence goes to `pelizzai-recovery`.
 
 ---
 
-## Skills de domínio: criação e manutenção
+## Domain skills: creation and maintenance
 
-Skills de domínio são as regras **do seu projeto** — build, deploy, convenções de UI, migrações,
-integrações. O bootstrap cria o máximo de skills úteis que os padrões observados justificam, cada
-uma fundamentada na documentação da versão que você realmente usa. Elas não são estáticas:
+Domain skills are **your project's** rules — build, deploy, UI conventions, migrations,
+integrations. The bootstrap creates as many useful skills as the observed patterns justify, each
+grounded in the documentation of the version you actually use. They are not static:
 
 ```mermaid
 flowchart TD
-    VD["version-driven<br/>a stack mudou de versão"] --> PROP
-    RD["rework-driven<br/>o mesmo ajuste manual se repete"] --> PROP
-    AD["adoption-driven<br/>dependência nova sem cobertura"] --> PROP
-    LED["ledger em<br/>data/review-domain-skills.md"] --> NUD{"10 commits<br/>ou 10 dias?"}
-    NUD -- "sim" --> PROP["propõe revisão<br/>avisa UMA vez, nunca bloqueia"]
-    PROP --> READ["lê a skill atual e muda só o que<br/>a versão ou o padrão exige"]
-    READ --> DIFF["mostra o diff ANTES de gravar"]
-    DIFF --> APR{"aprovação POR skill,<br/>nunca em lote"}
-    APR -- "sim" --> W["grava, preservando<br/>as suas customizações"]
-    APR -- "não" --> SKIP["mantém como está"]
+    VD["version-driven<br/>the stack changed version"] --> PROP
+    RD["rework-driven<br/>the same manual fix keeps repeating"] --> PROP
+    AD["adoption-driven<br/>new dependency without coverage"] --> PROP
+    LED["ledger in<br/>data/review-domain-skills.md"] --> NUD{"10 commits<br/>or 10 days?"}
+    NUD -- "yes" --> PROP["proposes a review<br/>warns ONCE, never blocks"]
+    PROP --> READ["reads the current skill and changes only<br/>what the version or the pattern requires"]
+    READ --> DIFF["shows the diff BEFORE writing"]
+    DIFF --> APR{"approval PER skill,<br/>never in batch"}
+    APR -- "yes" --> W["writes, preserving<br/>your customizations"]
+    APR -- "no" --> SKIP["keeps it as is"]
 ```
 
-Dois eixos atualizam o que existe; **adoption-driven é o único que cria** fora do bootstrap. O
-disparo primário é o nudge de fechamento; no Claude Code, o hook opt-in `pelizzai-cadence` é a rede
-de segurança, checando o ledger a cada 10 interações com supressão de 7 dias depois de avisar.
+Two axes update what exists; **adoption-driven is the only one that creates** outside the
+bootstrap. The primary trigger is the closeout nudge; on Claude Code, the opt-in
+`pelizzai-cadence` hook is the safety net, checking the ledger every 10 interactions with 7-day
+suppression after warning.
 
-A manutenção proativa atua **somente** sobre skills de domínio. As skills do harness (`pelizzai-*`)
-só mudam a pedido explícito.
+Proactive maintenance acts **only** on domain skills. The harness skills (`pelizzai-*`) change
+only on explicit request.
 
 ---
 
-## Context7: a fonte técnica transversal
+## Context7: the cross-cutting technical source
 
-Context7 é a fonte técnica preferencial do PelizzAI — o antídoto contra decisão baseada em memória
-desatualizada da LLM.
+Context7 is PelizzAI's preferred technical source — the antidote to decisions based on the LLM's
+outdated memory.
 
-| Situação | Como o harness usa |
+| Situation | How the harness uses it |
 | --- | --- |
-| Projeto novo | valida capacidades e trade-offs da stack antes de recomendar |
-| Projeto existente | lê manifests e lockfiles primeiro, depois a doc da versão realmente instalada |
-| Feature ou plano | confirma APIs, limites e compatibilidade antes de decompor |
-| Debugging | confronta sintoma e código com os contratos da versão usada |
-| Upgrade | verifica breaking changes, migração e alvo suportado |
-| Skills de domínio | cria e atualiza regras a partir da versão real |
+| New project | validates stack capabilities and trade-offs before recommending |
+| Existing project | reads manifests and lockfiles first, then the docs of the version actually installed |
+| Feature or plan | confirms APIs, limits, and compatibility before decomposing |
+| Debugging | confronts symptom and code with the contracts of the version in use |
+| Upgrade | checks breaking changes, migration, and supported target |
+| Domain skills | creates and updates rules from the real version |
 
-Context7 é read-only e elimina dúvida **factual** — ele nunca escolhe requisito, UX, regra de
-negócio, arquitetura, risco aceito ou critério de aceite. Isso continua sendo seu.
+Context7 is read-only and eliminates **factual** doubt — it never chooses a requirement, UX,
+business rule, architecture, accepted risk, or acceptance criterion. That remains yours.
 
-O servidor não é instalado à força, porque cada host configura MCP de um jeito. No bootstrap o
-harness verifica se está disponível e recomenda a configuração quando faltar. O fallback é
-documentação oficial atual; memória da LLM não é fallback.
+The server is not force-installed, because each host configures MCP its own way. During bootstrap
+the harness checks whether it is available and recommends the configuration when it is missing.
+The fallback is current official documentation; LLM memory is not a fallback.
 
 ---
 
-## Distribuição e compatibilidade
+## Distribution and compatibility
 
 ```mermaid
 flowchart TD
-    SRC["Fonte editável<br/>.claude/skills + CLAUDE.md"] --> SYNC["sync-harness.mjs<br/>núcleo portátil"]
-    PS["wrapper PowerShell"] --> SYNC
-    SH["wrapper Bash"] --> SYNC
+    SRC["Editable source<br/>.claude/skills + CLAUDE.md"] --> SYNC["sync-harness.mjs<br/>portable core"]
+    PS["PowerShell wrapper"] --> SYNC
+    SH["Bash wrapper"] --> SYNC
     SYNC --> AS[".agents/skills"]
     SYNC --> AG["AGENTS.md"]
     SYNC --> GE["GEMINI.md"]
-    SYNC --> MF["manifesto<br/>com --update-manifest"]
-    SYNC --> EXP["--export-consumer<br/>projeto alvo"]
-    SYNC --> DIST["dist/<br/>pronta para copiar"]
-    CUR[".cursor/rules/pelizzai.mdc<br/>autoria manual, distribuído pelo export"] -.->|aponta para os entrypoints| AS
+    SYNC --> MF["manifest<br/>with --update-manifest"]
+    SYNC --> EXP["--export-consumer<br/>target project"]
+    SYNC --> DIST["dist/<br/>ready to copy"]
+    CUR[".cursor/rules/pelizzai.mdc<br/>manually authored, distributed by the export"] -.->|points at the entrypoints| AS
 ```
 
-| Ambiente | Entrada / skills |
+| Environment | Entry / skills |
 | --- | --- |
 | Claude Code | `CLAUDE.md` + `.claude/skills/` |
-| Codex, Copilot e compatíveis | `AGENTS.md` + `.agents/skills/` |
+| Codex, Copilot, and compatibles | `AGENTS.md` + `.agents/skills/` |
 | Gemini CLI | `GEMINI.md` + `.agents/skills/` |
 | Cursor | `.cursor/rules/pelizzai.mdc` + `AGENTS.md` + `.agents/skills/` |
 
-Arquivos gerados não são editados à mão. O adaptador Cursor é a exceção de autoria: o sync **não**
-o gera a partir do `CLAUDE.md` — ele é escrito à mão na fonte e precisa ser revisado quando os
-entrypoints mudarem. A **distribuição**, porém, é automática: o `--export-consumer` o copia para o
-projeto consumidor junto com o resto do harness.
+Generated files are not edited by hand. The Cursor adapter is the authoring exception: the sync
+does **not** generate it from `CLAUDE.md` — it is hand-written at the source and needs review
+whenever the entrypoints change. **Distribution**, however, is automatic: the `--export-consumer`
+copies it to the consumer project along with the rest of the harness.
 
 ---
 
-## Catálogo de skills
+## Skill catalog
 
-| Grupo | Skills | Responsabilidade |
+| Group | Skills | Responsibility |
 | --- | --- | --- |
-| Entrada e orquestração | `pelizzai-core`, `pelizzai-router`, `pelizzai-audit`, `pelizzai-preferences` | entrada obrigatória, classificação da rota e gate de kickoff, bootstrap, piso global de comportamento |
-| Raciocínio e conversa | `pelizzai-reasoning`, `pelizzai-interview-me`, `pelizzai-writing-clearly-and-concisely` | técnicas proporcionais de raciocínio (inclui OODA), entrevista que resolve toda lacuna material, escrita clara |
-| Design, plano e execução | `pelizzai-brainstorming`, `pelizzai-writing-plans`, `pelizzai-execution-plans` | design ratificado com spec, plano executável e stress, gate de setup e execução tarefa a tarefa |
-| Execução por tarefa | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop`, `pelizzai-handoff` | estratégia de prova por artefato, delegação e times, laço macro e bifurcação para sessão nova |
-| Tracks dedicados | `pelizzai-debugging`, `pelizzai-quick-fix` | bug com triagem e causa raiz; ajuste local sem perder isolamento, prova e fechamento |
-| Design e exploração | `pelizzai-codebase-design`, `pelizzai-domain-modeling`, `pelizzai-prototype`, `pelizzai-improving-architecture` | módulos profundos e seams, vocabulário e ADR, protótipo descartável, revisão arquitetural read-only |
-| Isolamento e integração | `pelizzai-starting-branch`, `pelizzai-finish-task`, `pelizzai-resolving-merge-conflicts`, `pelizzai-recovery`, `pelizzai-documenting-features` | branch antes da primeira escrita, selo `delivered`, conflitos, recuperação e doc humana |
-| Qualidade e segurança | `pelizzai-review`, `pelizzai-oswap`, `pelizzai-verification-before-completion` | review por tarefa e final, OWASP na superfície sensível, evidência fresca antes de concluir |
-| Frontend | `pelizzai-frontend` | overlay de produto, design, implementação e QA visual — desde o design |
-| Autoria de skills | `pelizzai-writing-skills` | autoria e manutenção das skills de domínio |
+| Entry and orchestration | `pelizzai-core`, `pelizzai-router`, `pelizzai-audit`, `pelizzai-preferences` | mandatory entry, route classification and kickoff gate, bootstrap, global behavior floor |
+| Reasoning and conversation | `pelizzai-reasoning`, `pelizzai-interview-me`, `pelizzai-writing-clearly-and-concisely` | proportional reasoning techniques (including OODA), the interview that resolves every material gap, clear writing |
+| Design, plan, and execution | `pelizzai-brainstorming`, `pelizzai-writing-plans`, `pelizzai-execution-plans` | ratified design with spec, executable and stress-tested plan, setup gate and task-by-task execution |
+| Per-task execution | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop`, `pelizzai-handoff` | proof strategy per artifact, delegation and teams, macro loop and forking into a new session |
+| Dedicated tracks | `pelizzai-debugging`, `pelizzai-quick-fix` | bug with triage and root cause; local tweak without losing isolation, proof, and closeout |
+| Design and exploration | `pelizzai-codebase-design`, `pelizzai-domain-modeling`, `pelizzai-prototype`, `pelizzai-improving-architecture` | deep modules and seams, vocabulary and ADRs, disposable prototype, read-only architectural review |
+| Isolation and integration | `pelizzai-starting-branch`, `pelizzai-finish-task`, `pelizzai-resolving-merge-conflicts`, `pelizzai-recovery`, `pelizzai-documenting-features` | branch before the first write, `delivered` seal, conflicts, recovery, and human docs |
+| Quality and security | `pelizzai-review`, `pelizzai-oswap`, `pelizzai-verification-before-completion` | per-task and final review, OWASP on the sensitive surface, fresh evidence before completion |
+| Frontend | `pelizzai-frontend` | product, design, implementation, and visual QA overlay — from design onward |
+| Skill authoring | `pelizzai-writing-skills` | authoring and maintenance of the domain skills |
 
 ---
 
-## Estrutura do repositório
+## Repository structure
 
 ```text
 PelizzAI/
 ├── .claude/
-│   ├── skills/                   fonte canônica das skills
-│   └── hooks/                    cadence, guardrails, writegate e SessionStart (opt-in)
-├── .agents/skills/               espelho gerado
-├── .cursor/rules/pelizzai.mdc    adaptador de autoria manual, distribuído pelo export
-├── dist/                         harness pronto para copiar (gerado pelo sync; sem sentinela)
+│   ├── skills/                   canonical source of the skills
+│   └── hooks/                    cadence, guardrails, writegate, and SessionStart (opt-in)
+├── .agents/skills/               generated mirror
+├── .cursor/rules/pelizzai.mdc    manually authored adapter, distributed by the export
+├── dist/                         harness ready to copy (generated by the sync; no sentinel)
 ├── scripts/
-│   ├── sync-harness.mjs          núcleo portátil de sync + distribuição
+│   ├── sync-harness.mjs          portable core of sync + distribution
 │   ├── sync-harness.ps1|.sh      wrappers
-│   ├── install-hooks.mjs         merge/check/remove de hooks do Claude Code
-│   ├── test-harness-contracts.ps1  suíte de contratos do harness
-│   ├── pelizzai-source-repo.txt  sentinela de source mode (NUNCA copiar a consumidores)
+│   ├── install-hooks.mjs         merge/check/remove of the Claude Code hooks
+│   ├── test-harness-contracts.ps1  harness contract suite
+│   ├── pelizzai-source-repo.txt  source mode sentinel (NEVER copy to consumers)
 │   ├── task-brief.ps1|.sh
 │   └── review-package.ps1|.sh
-├── CLAUDE.md                     entrada canônica
-├── AGENTS.md · GEMINI.md         gerados
+├── CLAUDE.md                     canonical entry
+├── AGENTS.md · GEMINI.md         generated
 └── .github/workflows/check-harness.yml
 ```
 
-**Os hooks são redes de segurança, não o cérebro do harness.** `guardrails` bloqueia um punhado
-estreito de comandos Git irreversíveis — deliberadamente estreito, porque regra larga trava trabalho
-legítimo e ensina o agente a contornar a rede.
+**The hooks are safety nets, not the harness's brain.** `guardrails` blocks a narrow handful of
+irreversible Git commands — deliberately narrow, because a broad rule blocks legitimate work and
+teaches the agent to route around the net.
 
-O `writegate` é um `PreToolUse` fail-closed que move o invariante "isolar antes da primeira escrita"
-da obediência do modelo para enforcement executável. São duas regras: a **Regra A** barra escrita de
-produto em branch protegida ou HEAD destacado; no consumidor, escrever produto exige
-`kickoff: ratificado` no `state.md` — a **Regra B**. Escrever metadata em `pelizzai/` continua
-liberado mesmo em branch protegida, senão a reconciliação do próprio estado travaria.
+The `writegate` is a fail-closed `PreToolUse` hook that moves the invariant "isolate before the
+first write" from model obedience to executable enforcement. There are two rules: **Rule A** bars
+product writes on a protected branch or a detached HEAD; in a consumer, writing product requires
+`kickoff: ratified` in `state.md` — **Rule B**. Writing metadata in `pelizzai/` stays allowed even
+on a protected branch, otherwise reconciling the state itself would deadlock.
 
-O hook **não enforça as etapas de aprovação do
-greenfield** — descoberta, spec, domain skills e plano continuam obrigatórios, mas são conduzidos
-pelas skills, com você, e não por um hook contando carimbos no cursor.
+The hook **does not enforce the greenfield approval steps** — discovery, spec, domain skills, and
+plan remain mandatory, but they are driven by the skills, with you, not by a hook counting stamps
+in the cursor.
 
-Erro interno de qualquer hook é fail-open: um bug na rede de segurança nunca sequestra a sua
-ferramenta.
+An internal error in any hook is fail-open: a bug in the safety net never hijacks your tool.
 
 ---
 
-## Desenvolvimento do harness
+## Harness development
 
-A fonte do comportamento é `.claude/` (skills e hooks); `CLAUDE.md`, `README.md`, `scripts/` e
-`.github/` também são autorais, e o adaptador Cursor é manual. **Não edite os gerados** — `.agents/`,
-`AGENTS.md`, `GEMINI.md`, o manifesto e a `dist/` inteira — mudança feita lá é perdida no próximo
-sync.
+The source of behavior is `.claude/` (skills and hooks); `CLAUDE.md`, `README.md`, `scripts/`, and
+`.github/` are authored as well, and the Cursor adapter is manual. **Do not edit the generated
+files** — `.agents/`, `AGENTS.md`, `GEMINI.md`, the manifest, and the entire `dist/` — a change
+made there is lost on the next sync.
 
 ```bash
-node scripts/sync-harness.mjs                    # regenera espelhos e dist/
-node scripts/sync-harness.mjs --check            # valida a sincronia
-pwsh scripts/test-harness-contracts.ps1          # suíte de contratos
+node scripts/sync-harness.mjs                    # regenerates mirrors and dist/
+node scripts/sync-harness.mjs --check            # validates the sync
+pwsh scripts/test-harness-contracts.ps1          # contract suite
 ```
 
-O sync regenera a `dist/` automaticamente no repo-fonte (há também o `--build-dist` isolado); o CI
-falha se ela for commitada fora de sincronia com `.claude/`.
+The sync regenerates `dist/` automatically in the source repo (there is also the standalone
+`--build-dist`); the CI fails if it is committed out of sync with `.claude/`.
 
-Cada comportamento do harness é travado por uma asserção na suíte de contratos. Comportamento novo
-sem asserção nova é regressão esperando acontecer — e asserção enfraquecida a um regex que casa tudo
-é pior que asserção nenhuma, porque simula cobertura. O CI roda o núcleo e os wrappers em Windows,
-Ubuntu e macOS; os contratos rodam em Windows e Ubuntu.
-
----
-
-## Limites conhecidos
-
-- O carregamento **nativo** de skills por diretório varia por ferramenta: `.agents/skills/` cobre
-  Codex, Gemini CLI e Warp; as demais recebem a entrada via `AGENTS.md` e podem ganhar espelho
-  nativo acrescentando o alvo ao `sync-harness.mjs`.
-- A autoria de `.cursor/rules/pelizzai.mdc` é manual — o sync o distribui aos consumidores, mas não
-  o gera a partir do `CLAUDE.md`, e nenhum job de CI o compara com os entrypoints.
-- O núcleo exige Node.js 18+; os wrappers `.ps1` exigem PowerShell 7+ com encoding UTF-8.
-- Os hooks são específicos do Claude Code e opt-in. Nas demais plataformas os invariantes valem
-  apenas pelas skills, sem enforcement executável.
-- Agent Teams é experimental no Claude Code; sem ele, a `pelizzai-team` degrada para subagents. No
-  Windows, teammates devem usar visualização `in-process`.
-- Escrita paralela exige `isolation: worktree` com caminhos disjuntos; em `branch`, o coordenador
-  integra em série.
-- Context7 depende do host para instalação e configuração. Sem ele, o fallback é documentação
-  oficial atual, com a limitação declarada.
+Every harness behavior is locked by an assertion in the contract suite. New behavior without a new
+assertion is a regression waiting to happen — and an assertion weakened into a regex that matches
+everything is worse than no assertion, because it simulates coverage. The CI runs the core and the
+wrappers on Windows, Ubuntu, and macOS; the contracts run on Windows and Ubuntu.
 
 ---
 
-## Licença e participação
+## Known limits
 
-Distribuído sob a **Licença Apache 2.0** — veja [LICENSE](LICENSE). Você pode usar, modificar e
-embutir o harness em produtos próprios, inclusive comerciais, preservando o aviso de copyright e a
-licença. A Apache-2.0 também concede expressamente os direitos de patente dos contribuidores, o que
-importa para quem vai embutir isso em produto.
-
-- **Contribuir:** [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) — leia antes do primeiro PR;
-  este repositório tem regras próprias (edite só `.claude/`, comportamento novo exige asserção nova).
-- **Reportar vulnerabilidade:** [.github/SECURITY.md](.github/SECURITY.md) — em canal privado,
-  nunca em issue pública.
+- **Native** per-directory skill loading varies by tool: `.agents/skills/` covers Codex, Gemini
+  CLI, and Warp; the others receive the entry via `AGENTS.md` and can gain a native mirror by
+  adding the target to `sync-harness.mjs`.
+- The authoring of `.cursor/rules/pelizzai.mdc` is manual — the sync distributes it to consumers,
+  but does not generate it from `CLAUDE.md`, and no CI job compares it against the entrypoints.
+- The core requires Node.js 18+; the `.ps1` wrappers require PowerShell 7+ with UTF-8 encoding.
+- The hooks are Claude Code-specific and opt-in. On the other platforms the invariants hold only
+  through the skills, with no executable enforcement.
+- Agent Teams is experimental in Claude Code; without it, `pelizzai-team` degrades to subagents.
+  On Windows, teammates must use the `in-process` display.
+- Parallel writes require `isolation: worktree` with disjoint paths; on `branch`, the coordinator
+  integrates serially.
+- Context7 depends on the host for installation and configuration. Without it, the fallback is
+  current official documentation, with the limitation declared.
 
 ---
 
-## Princípio operacional
+## License and participation
 
-Use o menor fluxo que preserve os invariantes. Leia antes de perguntar, não escreva em pedido
-read-only, isole antes da primeira escrita, aplique overlays pela superfície real e só declare
-conclusão quando o mesmo conteúdo revisado estiver testado, verificado e selado.
+Distributed under the **Apache 2.0 License** — see [LICENSE](LICENSE). You may use, modify, and
+embed the harness in your own products, including commercial ones, preserving the copyright notice
+and the license. Apache-2.0 also expressly grants the contributors' patent rights, which matters
+for anyone embedding this in a product.
 
-E quando faltar uma decisão que é do usuário: pergunte. Sempre.
+- **Contribute:** [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) — read it before your first
+  PR; this repository has rules of its own (edit only `.claude/`, new behavior requires a new
+  assertion).
+- **Report a vulnerability:** [.github/SECURITY.md](.github/SECURITY.md) — through a private
+  channel, never in a public issue.
+
+---
+
+## Operating principle
+
+Use the smallest flow that preserves the invariants. Read before asking, do not write on a
+read-only request, isolate before the first write, apply overlays by the real surface, and only
+declare completion when the same reviewed content is tested, verified, and sealed.
+
+And when a decision that belongs to the user is missing: ask. Always.

@@ -1,135 +1,137 @@
 ---
 name: pelizzai-subagents
-description: Use para delegar uma tarefa focada e independente a UM subagente isolado (ou alguns subagentes independentes que só reportam de volta) — pesquisa, varredura/mapeamento do código, análise, ou uma implementação contida. Subagentes não conversam entre si; para um TIME de papéis que precisam dialogar/coordenar, use `pelizzai-team`. Acione quando o usuário disser "delega isso", "manda um subagente", ou quando a execução for em modo subagents.
+description: Use to delegate a focused, independent task to ONE isolated subagent (or a few independent subagents that only report back) — research, code sweep/mapping, analysis, or a contained implementation. Subagents do not talk to each other; for a TEAM of roles that need to dialogue/coordinate, use `pelizzai-team`. Trigger when the user says "delegate this", "send a subagent", or when execution runs in subagents mode.
 ---
 
 # PelizzAI Subagents
 
-## Objetivo
+## Goal
 
-Delegar trabalho a um **subagente isolado**: contexto próprio, sem poluir o seu, que executa e **reporta de volta**. É o caminho leve — quando você precisa do **resultado** de uma frente, não de um diálogo entre papéis.
+Delegate work to an **isolated subagent**: its own context, without polluting yours, that executes and **reports back**. It is the light path — when you need the **result** of a workstream, not a dialogue between roles.
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Subagents para delegar a um subagente."
+**Announce at start**, in the conversation's language: that you are using the PelizzAI Subagents skill to delegate to a subagent.
 
-> **Fronteira com a `pelizzai-team`:** use **subagents** para uma frente independente que só
-> reporta. Use **team** quando múltiplos papéis precisam dialogar/coordenar. Branch ou worktree da
-> tarefa continua sendo uma working tree compartilhada — ela não isola agentes entre si.
-> Investigação é sempre paralelizável; a escrita segue o isolamento ratificado: em `branch`, o
-> coordenador aplica em série; em `worktree`, frentes com **caminhos disjuntos** escrevem em
-> paralelo dentro do worktree único da tarefa.
+> **Boundary with `pelizzai-team`:** use **subagents** for an independent workstream that only
+> reports. Use **team** when multiple roles need to dialogue/coordinate. The task's branch or
+> worktree is still a shared working tree — it does not isolate agents from each other.
+> Investigation is always parallelizable; writing follows the ratified isolation: on `branch`, the
+> coordinator applies serially; on `worktree`, workstreams with **disjoint paths** write in
+> parallel inside the task's single worktree.
 
-<MEMBRO-DO-TIME-STOP>
-Se você é o subagente despachado, execute apenas a sua tarefa: acione `pelizzai-reasoning`, aplique as skills de domínio coladas no seu briefing (elas prevalecem sobre padrões genéricos) e a camada global `pelizzai-preferences`, e devolva o resultado no formato combinado. Não delegue sub-subagentes nem orquestre o fluxo. Em tarefa de implementação, **não commite** — a consolidação é do coordenador, após review e verificação.
+<TEAM-MEMBER-STOP>
+If you are the dispatched subagent, execute only your task: trigger `pelizzai-reasoning`, apply the domain skills pasted into your briefing (they prevail over generic patterns) and the global layer `pelizzai-preferences`, and return the result in the agreed format. Do not delegate sub-subagents or orchestrate the flow. On an implementation task, **do not commit** — consolidation belongs to the coordinator, after review and verification.
 
-Sob briefing fechado (MEMBRO-DO-TIME-STOP/SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing, **sinalize no retorno** (`DONE_WITH_CONCERNS`/`NEEDS_CONTEXT`) se faltou skill de domínio cobrindo a stack da sua tarefa, e escale ao coordenador o que exigir decisão.
+Under a closed briefing (TEAM-MEMBER-STOP/SUBAGENT-STOP), do not produce route analyses or open gates: apply the briefing, **flag in your return** (`DONE_WITH_CONCERNS`/`NEEDS_CONTEXT`) if a domain skill covering your task's stack was missing, and escalate to the coordinator whatever requires a decision.
 
-Você **não decide lacuna de produto**. Se requisito, escopo, UX, arquitetura, dados, segurança,
-custo ou critério de aceite não estiver escrito no briefing, no plano ou na spec, **nomeie a
-lacuna** — o que falta, o que ela muda na entrega e 2–3 opções que você enxerga, com a que
-recomenda — e devolva `NEEDS_CONTEXT`. Não preencha por convenção, default, Context7 ou "inferência
-razoável", mesmo que a escolha pareça óbvia e reversível; quem leva a lacuna ao humano é o
-coordenador.
-</MEMBRO-DO-TIME-STOP>
-
----
-
-## Mecânica
-
-```text
-- Ferramenta Agent/Task: o subagente tem janela de contexto própria, SÓ devolve seu texto final ao
-  coordenador, NÃO conversa com outros subagentes, e ENCERRA ao retornar (sem memória entre chamadas).
-- agentTypes: Explore (busca read-only), Plan (arquiteto read-only), general-purpose, ou customizado.
-  Read-only (Explore/Plan) NÃO editam arquivos — papéis de escrita exigem general-purpose ou customizado.
-- Paralelismo: para subagentes independentes, emita várias chamadas Agent numa única mensagem.
-  Leitura em paralelo é segura; escrita exige arquivos disjuntos e depende do isolamento ratificado
-  (state consumidor ou execution record source): em `branch`, um writer por vez e o coordenador
-  integra as escritas EM SÉRIE; em `worktree`, escrita paralela é permitida em CAMINHOS DISJUNTOS
-  dentro do worktree único da tarefa (nunca um worktree por agente). Worktree isola a tarefa do
-  principal, não os agentes entre si — quem serializa é a regra, não o Git; review, stage, commit e
-  cursor são sempre do coordenador.
-```
-
-## Briefing autossuficiente
-
-O subagente **não herda o seu contexto** — construa o prompt. Em execução de plano, use
-`task-brief.*` apenas com plano Markdown persistente compatível; plano nativo usa conteúdo colado.
-O handoff dir é gitignored no consumidor e temp em source mode (ver task-cycle §1):
-
-```text
-- Objetivo: o resultado único e claro esperado.
-- Contexto necessário: caminhos, contratos, decisões já tomadas, convenções (o subagente não viu a conversa).
-- Regras/skills locais relevantes: monte um ESPECIALISTA — quando o subagente encarna um papel de
-  área (ex.: implementador-backend), nomeie-o pela área e cole o pacote **COMPLETO** de skills de
-  domínio dessa área (consumidor: catálogo `pelizzai/domain-skills.md`; source mode: regras/skills
-  do repo-fonte), não só as que parecem aplicar à tarefa específica. Em dúvida se uma skill de
-  domínio do catálogo pertence à área,
-  inclua-a: o custo de incluir é menor que o de ignorar uma regra do projeto. Cole os pontos
-  operacionais — o subagente deve aplicá-los em vez de padrões genéricos. Se a área não tem skill
-  cobrindo, diga isso e peça que o subagente sinalize a lacuna no retorno.
-- Camada global: instrua o subagente a aplicar `pelizzai-preferences` e a raciocinar via
-  `pelizzai-reasoning`; em conflito, as SKILLS DE DOMÍNIO coladas e as regras do projeto PREVALECEM.
-- Raciocínio: técnica principal sugerida de `pelizzai-reasoning` conforme a tarefa. Para APIs de
-  libs externas, fundamente na documentação oficial atual disponível — não na memória.
-- Contrato de entrega: o formato EXATO do retorno (lista de achados arquivo:linha; diff; relatório X/Y/Z).
-- Salvo-conduto (no texto do briefing): é sempre OK parar e dizer "isso é difícil demais para mim" —
-  trabalho ruim é pior que trabalho nenhum; o subagente não será penalizado por escalar.
-- Lacuna material (no texto do briefing): se requisito, escopo, UX, arquitetura, dados, segurança
-  ou aceite não estiver escrito no briefing, no plano ou na spec, PARE, NOMEIE a lacuna (o que
-  falta + o que ela muda + 2–3 opções com a recomendada), devolva `NEEDS_CONTEXT` e declare-a
-  também em `Desvios do plano:`. Não preencha por default nem por "inferência razoável" — quem leva
-  a decisão ao humano é o coordenador, pela `pelizzai-interview-me` (modo lacuna).
-- Restrições: o que não tocar; só leitura, quando aplicável.
-```
-
-## Verificação e integração
-
-O resultado de um subagente **não** é verdade até ser conferido. Para implementação, passe pelas
-duas lentes do `pelizzai-review` no perfil registrado (`split` por padrão; `combined` só quando o
-usuário ratificou o rebaixamento no gate de setup). No `split`, a cegueira é assimétrica: a
-**lente spec cega** recebe só diff + spec/plano + domain skills da área e
-**NÃO recebe o relatório** do subagente (julga o código contra o contrato, sem a narrativa); a
-**lente qualidade/evidência** recebe o relatório e verifica as alegações com prova fresca. O
-coordenador (a sessão principal) cruza as lentes e **nunca** é a lente cega. Depois, aplique
-`pelizzai-verification-before-completion` antes de consolidar. Para pesquisa, cruze achados
-conflitantes e desconfie de relatório não verificado.
-
-Se o subagente sinalizou lacuna de skill de domínio para a stack da tarefa, o coordenador acumula
-essas lacunas e as consolida numa única proposta no fechamento (eixo adoption-driven de
-`pelizzai-finish-task`) — nunca cria skill no meio da tarefa. Essa via **não** para a execução.
-
-**Lacuna material é a outra via, e essa para a frente.** Se o subagente NOMEOU uma decisão de
-requisito, escopo, UX, arquitetura, dados, segurança, custo ou aceite que não estava no briefing,
-no plano nem na spec, ela não se resolve no despacho seguinte: o coordenador **não decide** por si
-nem pelo subagente. Ele consolida as lacunas abertas — agrupar e ordenar por dependência, nunca
-escolher — e as leva ao humano por `pelizzai-interview-me` no modo lacuna (uma pergunta por vez,
-2–3 opções com a recomendada) antes de re-despachar. A decisão ratificada volta ao plano e ao
-briefing; só então a frente continua.
+You **do not decide product gaps**. If a requirement, scope, UX, architecture, data, security,
+cost, or acceptance criterion is not written in the briefing, the plan, or the spec, **name the
+gap** — what is missing, what it changes in the delivery, and 2–3 options you see, with the one
+you recommend — and return `NEEDS_CONTEXT`. Do not fill it by convention, default, Context7, or
+"reasonable inference", even if the choice seems obvious and reversible; the coordinator is who
+takes the gap to the human.
+</TEAM-MEMBER-STOP>
 
 ---
 
-## Anti-padrões
+## Mechanics
 
 ```text
-- Esperar que subagentes se coordenem sozinhos (eles não se falam) — isso é trabalho do coordenador.
-- Mandar um papel de escrita a um agentType read-only (Explore/Plan não editam).
-- Briefing vago, ou assumir que o subagente tem o histórico da conversa.
-- Tratar o relatório do subagente como verdade sem conferir (diff do git / evidência fresca).
-- Entregar o relatório do subagente à lente spec cega, ou o coordenador se despachar como essa lente.
-- Montar o subagente-especialista sem o pacote completo de domain skills da sua área.
-- Subagente preencher por default ou "inferência razoável" uma decisão que não está no briefing/plano/spec, em vez de nomear a lacuna e devolver NEEDS_CONTEXT.
-- Coordenador resolver a lacuna material sozinho (ou re-despachar por cima dela) em vez de levá-la ao humano pela `pelizzai-interview-me` — consolidar não é decidir.
-- Usar subagents para um TIME de papéis que precisam dialogar — isso é `pelizzai-team`.
+- Agent/Task tool: the subagent has its own context window, ONLY returns its final text to the
+  coordinator, does NOT talk to other subagents, and TERMINATES on return (no memory between calls).
+- agentTypes: Explore (read-only search), Plan (read-only architect), general-purpose, or custom.
+  Read-only ones (Explore/Plan) do NOT edit files — writing roles require general-purpose or custom.
+- Parallelism: for independent subagents, issue several Agent calls in a single message.
+  Parallel reading is safe; writing requires disjoint files and depends on the ratified isolation
+  (consumer state or source execution record): on `branch`, one writer at a time and the coordinator
+  integrates the writes SERIALLY; on `worktree`, parallel writing is allowed on DISJOINT PATHS
+  inside the task's single worktree (never one worktree per agent). The worktree isolates the task
+  from the mainline, not the agents from each other — the rule serializes, not Git; review, stage,
+  commit, and cursor always belong to the coordinator.
+```
+
+## Self-sufficient briefing
+
+The subagent **does not inherit your context** — build the prompt. In plan execution, use
+`task-brief.*` only with a compatible persistent Markdown plan; a native plan uses pasted content.
+The handoff dir is gitignored in the consumer and temp in source mode (see task-cycle §1):
+
+```text
+- Goal: the single, clear expected result.
+- Necessary context: paths, contracts, decisions already made, conventions (the subagent has not seen the conversation).
+- Relevant local rules/skills: assemble a SPECIALIST — when the subagent embodies an area role
+  (e.g., backend-implementer), name it by the area and paste the **COMPLETE** domain-skill package
+  for that area (consumer: catalog `pelizzai/domain-skills.md`; source mode: the source repo's
+  rules/skills), not just the ones that seem to apply to the specific task. When in doubt whether a
+  domain skill from the catalog belongs to the area,
+  include it: the cost of including is lower than the cost of ignoring a project rule. Paste the
+  operational points — the subagent must apply them instead of generic patterns. If the area has no
+  covering skill, say so and ask the subagent to flag the gap in its return.
+- Global layer: instruct the subagent to apply `pelizzai-preferences` and to reason via
+  `pelizzai-reasoning`; on conflict, the pasted DOMAIN SKILLS and the project rules PREVAIL.
+- Reasoning: main suggested technique from `pelizzai-reasoning` per the task. For external library
+  APIs, ground in the current official documentation available — not in memory.
+- Delivery contract: the EXACT return format (list of findings file:line; diff; X/Y/Z report).
+- Safe harbor (in the briefing text): it is always OK to stop and say "this is too hard for me" —
+  bad work is worse than no work; the subagent will not be penalized for escalating.
+- Material gap (in the briefing text): if a requirement, scope, UX, architecture, data, security,
+  or acceptance criterion is not written in the briefing, the plan, or the spec, STOP, NAME the gap
+  (what is missing + what it changes + 2–3 options with the recommended one), return
+  `NEEDS_CONTEXT`, and also declare it under `Deviations from plan:`. Do not fill it by default or
+  by "reasonable inference" — the coordinator is who takes the decision to the human, via
+  `pelizzai-interview-me` (gap mode).
+- Constraints: what not to touch; read-only, when applicable.
+```
+
+## Verification and integration
+
+A subagent's result is **not** truth until checked. For implementation, run it through the two
+`pelizzai-review` lenses under the recorded profile (`split` by default; `combined` only when the
+user ratified the downgrade at the setup gate). In `split`, the blindness is asymmetric: the
+**blind spec lens** receives only diff + spec/plan + the area's domain skills and does
+**NOT receive the report** of the subagent (it judges the code against the contract, without the
+narrative); the **quality/evidence lens** receives the report and verifies the claims with fresh
+proof. The coordinator (the main session) cross-checks the lenses and is **never** the blind lens.
+Then apply `pelizzai-verification-before-completion` before consolidating. For research,
+cross-check conflicting findings and distrust an unverified report.
+
+If the subagent flagged a domain-skill gap for the task's stack, the coordinator accumulates
+those gaps and consolidates them into a single proposal at closeout (the adoption-driven axis of
+`pelizzai-finish-task`) — never creating a skill mid-task. This path does **not** halt execution.
+
+**A material gap is the other path, and that one halts the workstream.** If the subagent NAMED a
+requirement, scope, UX, architecture, data, security, cost, or acceptance decision that was not in
+the briefing, the plan, or the spec, it does not get resolved in the next dispatch: the coordinator
+does **not decide** for itself or for the subagent. It consolidates the open gaps — grouping and
+ordering by dependency, never choosing — and takes them to the human via `pelizzai-interview-me`
+in gap mode (one question at a time, 2–3 options with the recommended one) before re-dispatching.
+The ratified decision goes back into the plan and the briefing; only then does the workstream
+continue.
+
+---
+
+## Anti-patterns
+
+```text
+- Expecting subagents to coordinate on their own (they do not talk to each other) — that is the coordinator's job.
+- Sending a writing role to a read-only agentType (Explore/Plan do not edit).
+- A vague briefing, or assuming the subagent has the conversation history.
+- Treating the subagent's report as truth without checking (git diff / fresh evidence).
+- Handing the subagent's report to the blind spec lens, or the coordinator dispatching itself as that lens.
+- Assembling the specialist subagent without the complete domain-skill package for its area.
+- The subagent filling by default or "reasonable inference" a decision that is not in the briefing/plan/spec, instead of naming the gap and returning NEEDS_CONTEXT.
+- The coordinator resolving the material gap alone (or re-dispatching over it) instead of taking it to the human via `pelizzai-interview-me` — consolidating is not deciding.
+- Using subagents for a TEAM of roles that need to dialogue — that is `pelizzai-team`.
 ```
 
 ---
 
-## Integração
+## Integration
 
-**Combina com:**
+**Composes with:**
 
-- `pelizzai-team` — o time completo (vários papéis, task list, diálogo); subagents é a delegação a UM agente.
-- `pelizzai-reasoning` / `pelizzai-preferences` — camada de raciocínio e piso global instruídos no briefing (skills de domínio prevalecem).
-- `pelizzai-execution-plans` — modo `subagents`: um subagente por tarefa, despachado pelo coordenador.
-- `pelizzai-interview-me` — destino da lacuna material que o subagente nomear: o coordenador a leva ao humano antes de re-despachar.
-- `pelizzai-review` / `pelizzai-verification-before-completion` — conferir o resultado antes de consolidar.
-- `pelizzai-audit` — catálogo de skills de domínio coladas no briefing.
+- `pelizzai-team` — the full team (multiple roles, task list, dialogue); subagents is delegation to ONE agent.
+- `pelizzai-reasoning` / `pelizzai-preferences` — reasoning layer and global floor instructed in the briefing (domain skills prevail).
+- `pelizzai-execution-plans` — `subagents` mode: one subagent per task, dispatched by the coordinator.
+- `pelizzai-interview-me` — destination of the material gap the subagent names: the coordinator takes it to the human before re-dispatching.
+- `pelizzai-review` / `pelizzai-verification-before-completion` — check the result before consolidating.
+- `pelizzai-audit` — catalog of domain skills pasted into the briefing.

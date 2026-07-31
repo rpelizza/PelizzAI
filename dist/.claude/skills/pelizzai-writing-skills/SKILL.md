@@ -1,300 +1,322 @@
 ---
 name: pelizzai-writing-skills
-description: Use essa skill para criar, editar, validar ou otimizar uma skill **a pedido do usuário**, e como motor de autoria e manutenção das skills de **DOMÍNIO** de um projeto. Acione-a (a) no bootstrap, chamada pela `pelizzai-audit`, para enumerar generosamente as candidatas que os padrões do repo justificam — uma por fluxo/responsabilidade recorrente — e redigi-las depois que o usuário ratifica a lista, fundamentadas em `context7`/doc oficial e nas regras de skills da Anthropic; (b) na manutenção das skills de domínio — stack que muda de versão, retrabalho que se repete no git, stack nova adotada sem cobertura, ou cadência vencida (≥10 commits, >10 dias, repo-scan a cada 15 dias); e (c) quando o usuário disser "criar skill", "transforme isso numa skill", "otimizar a descrição" ou "atualizar as skills de domínio". A manutenção proativa atua SOMENTE sobre skills de domínio — as skills do harness (`pelizzai-*`) só são criadas ou editadas a pedido explícito do usuário. E NUNCA sobrescreve uma skill às cegas: o diff vai ao usuário antes de gravar, com aprovação por skill.
+description: Use this skill to create, edit, validate, or optimize a skill **at the user's request**, and as the authoring and maintenance engine for a project's **DOMAIN** skills. Trigger it (a) at bootstrap, called by `pelizzai-audit`, to generously enumerate the candidates the repo's patterns justify — one per recurring flow/responsibility — and write them after the user ratifies the list, grounded in `context7`/official docs and Anthropic's skill rules; (b) for domain-skill maintenance — a stack that changes version, rework that repeats in git, a newly adopted stack with no coverage, or an overdue cadence (≥10 commits, >10 days, repo-scan every 15 days); and (c) when the user says "create a skill", "turn this into a skill", "optimize the description", or "update the domain skills". Proactive maintenance acts ONLY on domain skills — harness skills (`pelizzai-*`) are only created or edited at the user's explicit request. And it NEVER overwrites a skill blindly: the diff goes to the user before writing, with per-skill approval.
 ---
 
 # PelizzAI Writing Skills
 
-## Objetivo
+## Purpose
 
-Esta skill é o **motor de autoria e manutenção de skills** do harness PelizzAI. Ela faz dois trabalhos:
+This skill is the PelizzAI harness's **skill authoring and maintenance engine**. It does two jobs:
 
-| Trabalho       | Quando                                                                 | Resultado                                                        |
-| -------------- | --------------------------------------------------------------------- | --------------------------------------------------------------- |
-| **Autoria**    | O usuário quer uma skill nova; ou a `pelizzai-audit` pede skills de domínio no bootstrap | Uma ou várias skills bem escritas, fundamentadas e catalogadas   |
-| **Manutenção** | A stack muda de versão; padrões se repetem no git; a cadência vence    | Skills de domínio atualizadas (com diff e confirmação) e registradas |
+| Job            | When                                                                   | Result                                                           |
+| -------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| **Authoring**  | The user wants a new skill; or `pelizzai-audit` requests domain skills at bootstrap | One or several well-written, grounded, cataloged skills          |
+| **Maintenance** | The stack changes version; patterns repeat in git; the cadence comes due | Domain skills updated (with diff and confirmation) and recorded |
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Writing Skills para criar/manter skills."
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Writing Skills skill to create/maintain skills.
 
-<MEMBRO-DO-TIME-STOP>
-Se você é um **membro** de um time (subagente/teammate) encarregado de redigir **uma** skill de domínio, escreva apenas a sua e devolva o rascunho ao coordenador — não orquestre o bootstrap inteiro nem mexa no catálogo/ledger. Acione `pelizzai-reasoning` para a sua subtarefa.
-</MEMBRO-DO-TIME-STOP>
-
----
-
-## Princípio central
-
-> Uma skill é escrita uma vez e invocada milhares de vezes, em contextos que você não viu. Escreva para **generalizar**, não para acertar um caso específico. Mantenha enxuto, explique o **porquê** de cada regra (teoria da mente, não comandos rígidos), e **nunca** sobrescreva o trabalho de outra pessoa sem mostrar o que muda.
+<TEAM-MEMBER-STOP>
+If you are a **member** of a team (subagent/teammate) tasked with writing **one** domain skill, write only yours and return the draft to the coordinator — do not orchestrate the whole bootstrap or touch the catalog/ledger. Invoke `pelizzai-reasoning` for your subtask.
+</TEAM-MEMBER-STOP>
 
 ---
 
-## Autoridade
+## Core principle
 
-Respeite a hierarquia nativa da plataforma. Dentro do mesmo nível, instrução específica do usuário/projeto prevalece sobre defaults desta skill. Segurança e ausência de surpresas não são preferências de estilo.
-
----
-
-## Regras de autoria (resumo)
-
-Detalhe completo em **[references/skill-authoring.md](references/skill-authoring.md)** — leia antes de redigir uma skill. Em resumo:
-
-- **Frontmatter:** só `name` e `description`. A `description` é o gatilho — inclua **o que a skill faz E os sinais/frases observáveis de quando usá-la**. Seja **incisivo**: o sub-acionamento é a falha dominante (o harness tende a acionar de menos); nomear os *near misses* é o que evita o skill storm, não encolher o gatilho. A `description` **nunca resume o workflow** — um resumo do processo faz o agente seguir a description e PULAR o corpo.
-- **Divulgação progressiva (3 níveis):** metadados (sempre no contexto) → corpo do `SKILL.md` (ideal <500 linhas) → recursos agrupados sob demanda (`scripts/`, `references/`, `assets/`). Se o corpo passar de ~500 linhas, mova profundidade para `references/` com ponteiros claros.
-- **Estilo:** imperativo nas instruções; explique o porquê (teoria da mente); **generalize** — escreva para muitos contextos, não para os casos de teste; comece com rascunho e melhore com um olhar renovado.
-- **Evals:** skills com saída **verificável** (transformar arquivo, extrair dados, gerar código, fluxo fixo) se beneficiam de casos de teste em `evals/`; skills subjetivas (estilo, arte) geralmente não. Ver `references/skill-authoring.md`.
+> A skill is written once and invoked thousands of times, in contexts you never saw. Write to **generalize**, not to nail one specific case. Keep it lean, explain the **why** behind every rule (theory of mind, not rigid commands), and **never** overwrite someone else's work without showing what changes.
 
 ---
 
-## Validação comportamental proporcional
+## Authority
 
-Trate skills como comportamento versionado. Use a menor evidência que detecta a regressão relevante; detalhe em **[references/skill-authoring.md](references/skill-authoring.md)**.
+Respect the platform's native hierarchy. Within the same level, a specific user/project instruction prevails over this skill's defaults. Safety and the absence of surprises are not style preferences.
+
+---
+
+## Authoring rules (summary)
+
+Full detail in **[references/skill-authoring.md](references/skill-authoring.md)** — read it before writing a skill. In short:
+
+- **Frontmatter:** only `name` and `description`. The `description` is the trigger — include **what the skill does AND the observable signals/phrases for when to use it**. Be **incisive**: under-triggering is the dominant failure (the harness tends to trigger too little); naming the *near misses* is what prevents the skill storm, not shrinking the trigger. The `description` **never summarizes the workflow** — a process summary makes the agent follow the description and SKIP the body.
+- **Progressive disclosure (3 levels):** metadata (always in context) → `SKILL.md` body (ideally <500 lines) → bundled resources on demand (`scripts/`, `references/`, `assets/`). If the body exceeds ~500 lines, move depth to `references/` with clear pointers.
+- **Style:** imperative in instructions; explain the why (theory of mind); **generalize** — write for many contexts, not for the test cases; start with a draft and improve with fresh eyes.
+- **Evals:** skills with **verifiable** output (transforming a file, extracting data, generating code, fixed flow) benefit from test cases in `evals/`; subjective skills (style, art) usually do not. See `references/skill-authoring.md`.
+
+---
+
+## Proportional behavioral validation
+
+Treat skills as versioned behavior. Use the smallest evidence that detects the relevant regression; detail in **[references/skill-authoring.md](references/skill-authoring.md)**.
 
 ```text
-- Mudança comportamental de alto risco ou comportamento ainda desconhecido precisa de baseline:
-  falha real documentada, eval existente ou cenário mínimo. Evidência do repo/feedback pode bastar;
-  edição editorial dispensa baseline comportamental.
-- Escreva a menor regra que corrige a classe de falha; não sobreajuste ao exemplo.
-- Versione pressure test somente quando ele protege falha material/recorrente. Não crie um arquivo
-  de teste para cada ajuste de wording.
-- Fluxo fixo/script: teste executável. Roteamento/heurística: forward-test com contexto limpo.
-  Estilo subjetivo: exemplos contrastivos e inspeção, sem fingir determinismo.
-- Reexecute a regressão afetada e uma smoke suite composta. Mais amostras somente quando a
-  variância observada justificar.
-- Se uma regra só funciona com proibições crescentes, revise o predicado de ativação antes de
-  adicionar outra exceção.
+- A high-risk behavioral change, or behavior still unknown, needs a baseline:
+  a documented real failure, an existing eval, or a minimal scenario. Repo/feedback evidence may
+  suffice; an editorial edit needs no behavioral baseline.
+- Write the smallest rule that fixes the failure class; do not overfit to the example.
+- Version a pressure test only when it protects against a material/recurring failure. Do not
+  create a test file for every wording tweak.
+- Fixed flow/script: executable test. Routing/heuristic: forward-test with clean context.
+  Subjective style: contrastive examples and inspection, without faking determinism.
+- Re-run the affected regression and a composite smoke suite. More samples only when the
+  observed variance justifies them.
+- If a rule only works with growing prohibitions, revise the activation predicate before
+  adding another exception.
 ```
 
 ---
 
-## Skills de domínio: regras específicas
+## Domain skills: specific rules
 
-Skills de domínio capturam os padrões, stacks e convenções **deste projeto**, tornando o harness assertivo.
+Domain skills capture **this project's** patterns, stacks, and conventions, making the harness assertive.
 
 ```text
-- NUNCA use o prefixo `pelizzai-` (reservado às skills do harness).
-- Nomeie com o prefixo do projeto + verbo descritivo: ex.: `<projeto>-gerar-relatorio`, `<projeto>-migrar-schema`.
-- Skill de stack/lib externa deve ser **fundamentada em context7 ou documentação oficial atual**
-  da versão travada no lockfile; sem essa fundamentação disponível, não escreva a skill de stack —
-  fundamente ou adie (nunca invente de memória). Skill de convenção interna se fundamenta no código,
-  testes, ADRs e histórico do próprio projeto, onde `context7` é preferencial, não um bloqueio.
-- Toda skill de domínio criada/atualizada entra no catálogo `pelizzai/domain-skills.md` e no
-  ledger `pelizzai/data/review-domain-skills.md` (ver Templates).
+- NEVER use the `pelizzai-` prefix (reserved for harness skills).
+- Name with the project prefix + a descriptive verb: e.g. `<project>-generate-report`,
+  `<project>-migrate-schema`.
+- A skill for an external stack/lib must be **grounded in context7 or current official documentation**
+  for the version pinned in the lockfile; without that grounding available, do not write the stack
+  skill — ground it or defer (never invent from memory). A skill for an internal convention is
+  grounded in the project's own code, tests, ADRs, and history, where `context7` is preferred,
+  not a blocker.
+- In a CONSUMER, every domain skill created/updated enters the catalog `pelizzai/domain-skills.md`
+  and the ledger `pelizzai/data/review-domain-skills.md` (see Templates). In the PelizzAI source
+  repo (sentinel `scripts/pelizzai-source-repo.txt`) that runtime does not exist: record the same
+  facts in the native execution record and create no `pelizzai/` file.
 ```
 
-### Skill roots no projeto consumidor
+### Skill roots in the consumer project
 
-Detecte os roots realmente instalados e registre-os no `pelizzai/profile.md`.
+Detect the actually installed roots and record them in `pelizzai/profile.md`.
 
 ```text
-Repo-fonte PelizzAI:
-  edite .claude/skills e rode sync-harness para gerar .agents.
+PelizzAI source repo:
+  edit .claude/skills and run sync-harness to generate .agents.
 
-Consumidor com um root:
-  grave a domain skill no root ativo (.claude/skills OU .agents/skills).
+Consumer with one root:
+  write the domain skill to the active root (.claude/skills OR .agents/skills).
 
-Consumidor com ambos:
-  use o canonical-skill-root do profile, espelhe a domain skill no outro root e verifique hash.
+Consumer with both:
+  use the profile's canonical-skill-root, mirror the domain skill to the other root, and verify hash.
 ```
 
-Nunca crie uma domain skill num diretório que a plataforma atual não carrega. Catálogo e ledger registram o caminho real.
+Never create a domain skill in a directory the current platform does not load. Catalog and ledger record the real path.
 
-### Sync obrigatório como parte da edição
+### Mandatory sync as part of the edit
 
-Depois que o usuário autorizou criar, alterar ou remover uma skill, sincronizar os roots gerados é
-parte mecânica dessa mesma alteração — não peça uma segunda autorização:
+Once the user has authorized creating, changing, or removing a skill, syncing the generated roots is
+a mechanical part of that same change — do not ask for a second authorization:
 
 ```text
-1. Edite somente o canonical-skill-root.
-2. Se scripts/sync-harness.mjs existir, rode automaticamente:
+1. Edit only the canonical-skill-root.
+2. If scripts/sync-harness.mjs exists, run automatically:
    node scripts/sync-harness.mjs
-   node scripts/sync-harness.mjs --check [--source-mode no repo-fonte]
-3. Os wrappers sync-harness.ps1 e sync-harness.sh são entradas equivalentes, não implementações
-   diferentes. Use o disponível quando `node` não estiver diretamente exposto pelo agente.
-4. Ao criar/remover skill core no repo-fonte, inclua --update-manifest antes do --check.
-5. Sem script de geração, espelhe conforme o profile e compare hashes.
+   node scripts/sync-harness.mjs --check [--source-mode in the source repo]
+3. The sync-harness.ps1 and sync-harness.sh wrappers are equivalent entry points, not different
+   implementations. Use whichever is available when `node` is not directly exposed to the agent.
+4. When creating/removing a core skill in the source repo, include --update-manifest before --check.
+5. Without a generation script, mirror per the profile and compare hashes.
 ```
 
-Não sincronize uma proposta de manutenção ainda não ratificada. Depois da ratificação, não deixe
-skill canônica e mirrors divergentes nem transfira esse passo ao usuário.
+Do not sync a maintenance proposal not yet ratified. After ratification, do not leave the canonical
+skill and mirrors divergent, and do not hand this step off to the user.
 
 ---
 
-## Modo Bootstrap (chamado pela `pelizzai-audit`)
+## Bootstrap mode (called by `pelizzai-audit`)
 
-Acionado em `bootstrap-write`, depois que a `pelizzai-audit` mapeou o contexto e criou a task branch. Scan-only não chama este modo.
+Triggered in `bootstrap-write`, after `pelizzai-audit` has mapped the context and created the task branch. Scan-only does not call this mode. **Consumer only:** in the PelizzAI source repo there is no consumer bootstrap and no `pelizzai/` runtime — steps 4–5 below write nothing under `pelizzai/`; the equivalent record lives in the native execution record.
 
 ```text
-1. Receba o inventário evidenciado da pelizzai-audit (stacks, frameworks, módulos, convenções, MCPs)
-   e os skill roots ativos. Se o `context7` estiver ausente, PROPONHA instalá-lo antes de gerar —
-   sem ele a fundamentação cai para web/memória justamente onde o MCP-chave faria diferença.
-2. Liste as skills de domínio CANDIDATAS — o máximo de skills úteis que os padrões justificam (uma
-   por fluxo/responsabilidade recorrente: build/deploy, geração de código, testes, migrações,
-   integrações, convenções de UI, etc.). O filtro é VERACIDADE, não escassez: não invente skills sem
-   padrão real por trás, e não corte uma candidata verdadeira só para manter a lista curta. Cada
-   candidata nomeia o padrão observado e a decisão/erro do agente que ela muda.
-2.5. GATE: apresente a lista de candidatas ao usuário (nome + o que cada uma cobriria) e AGUARDE a
-   confirmação antes de redigir — criar skills grava arquivos no repositório dele. Ele pode cortar,
-   somar ou ajustar candidatas; zero domain skills é um resultado possível QUANDO ele o ratifica
-   diante da proposta — a decisão de não criar é do usuário, não do classificador. Se o
-   consentimento de bootstrap já incluiu nomes/escopo das candidatas, não repita a pergunta; reabra
-   a decisão só se o scan mudou materialmente o conjunto proposto.
-3. Redija em PARALELO as candidatas confirmadas com a `pelizzai-team` — uma skill candidata por
-   membro, cada um fundamentando a sua via context7. **Escala com o nº de candidatas:** 5 candidatas
-   confirmadas são 5 frentes, não uma fila. Com uma única candidata (ou quando um time for
-   desnecessário), delegue via `pelizzai-subagents`. Os membros que REDIGEM skills precisam de
-   capacidade de ESCRITA (general-purpose ou subagent com ferramentas de escrita) e de acesso ao
-   context7/doc oficial — agentes read-only servem só para a pesquisa/leitura de fundamentação, não
-   para gravar a skill.
-4. Para cada skill: siga as regras de autoria; valide o frontmatter; registre no catálogo e no ledger
-   (incluindo a origem: repo-scan ou interview).
-5. Semeie o ledger (`last-review`/`last-full-scan`) com a **data do bootstrap (hoje)** — as skills
-   nascem do repo-scan do HEAD atual, então o bootstrap É a primeira revisão; semear com o 1º commit
-   de um repo maduro dispara um nudge espúrio já na primeira tarefa. Escreva o catálogo `pelizzai/domain-skills.md` — sua existência
-   marca o bootstrap como concluído. Ver Templates.
-6. Ofereça instalar o hook de cadência (opt-in; ver `references/domain-skill-maintenance.md`).
-7. Apresente ao usuário o catálogo das skills criadas, com diff e validação — nada é definitivo sem
-   o aval dele. Peça nova decisão apenas para escopo/conteúdo não coberto pela autorização existente
-   ou para efeito externo.
+1. Receive the evidenced inventory from pelizzai-audit (stacks, frameworks, modules, conventions,
+   MCPs) and the active skill roots. If `context7` is missing, PROPOSE installing it before
+   generating — without it, grounding falls back to the current official documentation exactly
+   where the key MCP would make the difference, and a stack skill with neither source available is
+   deferred, never written from memory.
+2. List the CANDIDATE domain skills — the maximum number of useful skills the patterns justify
+   (one per recurring flow/responsibility: build/deploy, code generation, tests, migrations,
+   integrations, UI conventions, etc.). The filter is TRUTH, not scarcity: do not invent skills
+   with no real pattern behind them, and do not cut a true candidate just to keep the list short.
+   Each candidate names the observed pattern and the agent decision/error it changes.
+2.5. GATE: present the candidate list to the user (name + what each would cover) and WAIT for
+   confirmation before writing — creating skills writes files into their repository. They can cut,
+   add, or adjust candidates; zero domain skills is a possible outcome WHEN they ratify it in the
+   face of the proposal — the decision not to create belongs to the user, not to the classifier.
+   If the bootstrap consent already included the candidates' names/scope, do not repeat the
+   question; reopen the decision only if the scan materially changed the proposed set.
+3. Write the confirmed candidates in PARALLEL with `pelizzai-team` — one candidate skill per
+   member, each grounding theirs via context7 or, when it is unavailable, the current official
+   documentation; defer the skill only when neither source is. **Scale with the number of candidates:** 5
+   confirmed candidates are 5 fronts, not a queue. With a single candidate (or when a team would
+   be unnecessary), delegate via `pelizzai-subagents`. Members who WRITE skills need WRITE
+   capability (general-purpose or a subagent with write tools) and access to context7/official
+   docs — read-only agents serve only for grounding research/reading, not for writing the skill.
+   DISJOINT PATHS: each member writes ONLY its own candidate's file, one writer per file. No
+   member touches the catalog, the ledger, the generated mirrors, or the manifest — those are the
+   coordinator's, serially, in 5.5.
+4. For each skill: follow the authoring rules and validate the frontmatter. CONSUMER ONLY: record
+   it in the catalog and the ledger (including the origin: repo-scan or interview). In source mode
+   the same facts go to the native execution record — no file under `pelizzai/`.
+5. CONSUMER ONLY: seed the ledger (`last-review`/`last-full-scan`) with the **bootstrap date
+   (today)** — the skills are born from the repo-scan of the current HEAD, so the bootstrap IS the
+   first review; seeding with a mature repo's 1st commit fires a spurious nudge on the very first
+   task. Write the catalog `pelizzai/domain-skills.md` — its existence marks the bootstrap as
+   complete. See Templates. In source mode this step does not run: there is no catalog, no ledger,
+   and nothing marks a consumer bootstrap.
+5.5. SERIAL, COORDINATOR ONLY, after every member has returned: run the sync ONCE for the whole
+   batch (§Mandatory sync as part of the edit), plus `--update-manifest` before `--check` when a
+   core skill was created in the source repo. Never let members sync in parallel — concurrent runs
+   regenerate the same mirrors and leave divergent hashes.
+6. Offer to install the cadence hook (opt-in; see `references/domain-skill-maintenance.md`).
+7. Present the user the catalog of created skills, with diff and validation — nothing is final
+   without their sign-off. Ask for a new decision only for scope/content not covered by the
+   existing authorization or for external effect.
 ```
 
-> Em projeto **novo** (sem código), não há padrões a extrair: conclua primeiro descoberta
-> sequencial, design, stress e spec aprovada. Depois proponha domain skills fundamentadas na stack e
-> no design ratificados; só escreva as escolhidas pelo usuário e só então siga para o plano.
+> In a **new** project (no code), there are no patterns to extract: first complete sequential
+> discovery, design, stress-testing, and an approved spec. Then propose domain skills grounded in
+> the ratified stack and design; write only the ones the user chooses, and only then move on to
+> the plan.
 
 ---
 
-## Modo Manutenção
+## Maintenance mode
 
-Mantém as skills de **domínio** vivas conforme o projeto evolui. Detalhe completo em **[references/domain-skill-maintenance.md](references/domain-skill-maintenance.md)**. Três eixos — dois **atualizam** o que já existe, um **cria** a primeira skill de uma stack nova:
+Keeps the **domain** skills alive as the project evolves. Full detail in **[references/domain-skill-maintenance.md](references/domain-skill-maintenance.md)**. Three axes — two **update** what already exists, one **creates** the first skill for a new stack:
 
-> **Escopo (inegociável):** a detecção proativa dos três eixos e da cadência atua somente sobre
-> skills de domínio e apenas propõe mudanças. As skills do harness (`pelizzai-*`) nunca são alteradas
-> sem pedido explícito do usuário.
+> **Scope (non-negotiable):** proactive detection across the three axes and the cadence acts only
+> on domain skills and only proposes changes. Harness skills (`pelizzai-*`) are never changed
+> without the user's explicit request.
 
-- **Version-driven (refresh — ATUALIZA):** a stack mudou de versão maior ou ganhou dependência significativa → reler a doc da versão atual (context7) e **atualizar** a skill existente afetada. O drift é detectado comparando os manifests atuais com o **Stack baseline** de `pelizzai/profile.md` (gravado pela `pelizzai-audit` no bootstrap).
-- **Rework-driven (histórico — ATUALIZA):** o mesmo ajuste foi feito à mão várias vezes no git → o padrão vira uma regra na skill existente.
-- **Adoption-driven (nova stack — CRIA):** a tarefa adotou dependência/serviço significativo **ainda não coberto** por skill do catálogo (top-level novo nos manifests, ausente do **Stack baseline** e do catálogo) → **propor CRIAR** a primeira skill dessa stack, **fundamentada em context7 ou documentação oficial atual** da versão travada — não apenas atualizar. A proposta é SEMPRE apresentada no fechamento, agrupada; criar/adiar/não-criar é decisão do usuário. É o único eixo que CRIA fora do bootstrap: ele acompanha a evolução da stack entre bootstraps, em vez de deixar a cobertura envelhecer até o próximo repo-scan.
+- **Version-driven (refresh — UPDATES):** the stack changed major version or gained a significant dependency → re-read the current version's docs (context7) and **update** the affected existing skill. Drift is detected by comparing the current manifests against the **Stack baseline** in `pelizzai/profile.md` (written by `pelizzai-audit` at bootstrap).
+- **Rework-driven (history — UPDATES):** the same fix was made by hand several times in git → the pattern becomes a rule in the existing skill.
+- **Adoption-driven (new stack — CREATES):** the task adopted a significant dependency/service **not yet covered** by a catalog skill (new top-level in the manifests, absent from the **Stack baseline** and the catalog) → **propose CREATING** the first skill for that stack, **grounded in context7 or current official documentation** for the pinned version — not just updating. The proposal is ALWAYS presented at closeout, grouped; create/defer/don't-create is the user's decision. It is the only axis that CREATES outside bootstrap: it tracks the stack's evolution between bootstraps instead of letting coverage age until the next repo-scan.
 
 <HARD-GATE>
-**Refresh nunca sobrescreve às cegas.** Ao atualizar uma skill existente: leia a skill atual, mude
-**só** o que a nova versão/padrão exige, **preserve as customizações** que o projeto adicionou, e
-**mostre o diff ao usuário ANTES de gravar**. Aprovação é **por skill** — nunca em lote, nunca
-implícita no "sim" dado a outra. Recriar uma skill do zero por cima de outra é proibido.
+**Refresh never overwrites blindly.** When updating an existing skill: read the current skill,
+change **only** what the new version/pattern requires, **preserve the customizations** the project
+added, and **show the diff to the user BEFORE writing**. Approval is **per skill** — never in bulk,
+never implicit in the "yes" given to another. Recreating a skill from scratch on top of another is
+forbidden.
 </HARD-GATE>
 
-Atualização é sempre **propor → confirmar → aplicar → registrar**. Não há modo "mãos livres". Numa
-edição que o usuário já pediu, a proposta é o próprio diff: mostre-o antes de gravar, no escopo
-pedido, sem reabrir a autorização que ele acabou de dar.
+An update is always **propose → confirm → apply → record**. There is no "hands-free" mode. In an
+edit the user already requested, the proposal is the diff itself: show it before writing, within
+the requested scope, without reopening the authorization they just gave.
 
 ---
 
-## Cadência e gatilhos (híbrido)
+## Cadence and triggers (hybrid)
 
-A auto-manutenção combina lógica **portável na skill** (núcleo) com um **hook de reforço** no Claude Code. Mecânica detalhada em **[references/domain-skill-maintenance.md](references/domain-skill-maintenance.md)**.
+Self-maintenance combines **portable logic in the skill** (core) with a **reinforcement hook** in Claude Code. Detailed mechanics in **[references/domain-skill-maintenance.md](references/domain-skill-maintenance.md)**.
 
 ```text
-- Ao FECHAR uma tarefa (núcleo, portável — vale em .claude/.agents/.cursor; DISPARO PRIMÁRIO):
-  leia o ledger, conte commits desde `last-review` (git rev-list --since) e os dias decorridos.
-  Se >= 10 commits OU > 10 dias → proponha a revisão UMA vez ("avisa uma vez, nunca bloqueia").
-  O eixo de DIAS é a âncora (cadência curta); os commits só antecipam num burst real.
-- Repo-scan completo: se > 15 dias desde `last-full-scan` → proponha um re-scan e atualização ampla.
-- A cada 10 interações (hook de reforço, só Claude Code): rede de segurança que checa o delta do
-  git e injeta um lembrete quando o limiar é cruzado, com supressão de 7 dias após avisar. Ver
-  `references/domain-skill-maintenance.md` e o script `.claude/hooks/pelizzai-cadence.mjs`. Opt-in:
-  instalado no bootstrap com confirmação.
+- When CLOSING a task (core, portable — valid in .claude/.agents/.cursor; PRIMARY TRIGGER):
+  read the ledger, count commits since `last-review` (git rev-list --since) and the elapsed days.
+  If >= 10 commits OR > 10 days → propose the review ONCE ("warn once, never block").
+  The DAYS axis is the anchor (short cadence); commits only bring it forward in a real burst.
+- Full repo-scan: if > 15 days since `last-full-scan` → propose a re-scan and a broad update.
+- Every 10 interactions (reinforcement hook, Claude Code only): a safety net that checks the git
+  delta and injects a reminder when the threshold is crossed, with 7-day suppression after
+  warning. See `references/domain-skill-maintenance.md` and the script
+  `.claude/hooks/pelizzai-cadence.mjs`. Opt-in: installed at bootstrap with confirmation.
 ```
 
-Os limiares (10 commits / 10 dias de revisão / 15 dias de full-scan / 10 interações / 7 dias de supressão) são deliberadamente curtos para manter a manutenção perto do trabalho real; ajuste-os ao ritmo do projeto. Nada na cadência **bloqueia** o trabalho do usuário — apenas sugere.
+The thresholds (10 commits / 10 review days / 15 full-scan days / 10 interactions / 7 suppression days) are deliberately short to keep maintenance close to the real work; tune them to the project's rhythm. Nothing in the cadence **blocks** the user's work — it only suggests.
 
 ---
 
-## Ledger e catálogo
+## Ledger and catalog
 
-Dois artefatos por projeto, criados/atualizados por esta skill:
+Two artifacts per **consumer** project, created/updated by this skill (in the source repo neither
+exists: the native execution record takes their place and no `pelizzai/` runtime is created):
 
-- **`pelizzai/domain-skills.md`** — catálogo: o que cada skill de domínio faz e quando usar. Template: [templates/domain-skills.md](templates/domain-skills.md).
-- **`pelizzai/data/review-domain-skills.md`** — ledger: por skill, data de criação, última atualização, último commit/ref revisado, o eixo da mudança e a origem (repo-scan/interview); + `last-review` e `last-full-scan` globais. Template: [templates/review-domain-skills.md](templates/review-domain-skills.md).
+- **`pelizzai/domain-skills.md`** — catalog: what each domain skill does and when to use it. Template: [templates/domain-skills.md](templates/domain-skills.md).
+- **`pelizzai/data/review-domain-skills.md`** — ledger: per skill, creation date, last update, last commit/ref reviewed, the axis of the change, and the origin (repo-scan/interview); + global `last-review` and `last-full-scan`. Template: [templates/review-domain-skills.md](templates/review-domain-skills.md).
 
-Semeie o ledger com a **data do bootstrap (hoje)**, tanto em repo novo quanto existente — o bootstrap acabou de criar as skills a partir do HEAD atual, então "última revisão = agora". Semear com o 1º commit de um repo maduro faz `daysReview`/`commits` nascerem estourados e dispara um nudge espúrio na primeira tarefa. `count=0` no dia do bootstrap é o correto (sobe conforme novos commits chegam). Ver `references/domain-skill-maintenance.md` → "Seeding".
-
----
-
-## Otimização da descrição
-
-Depois que uma skill está pronta, você pode **otimizar a `description`** para melhorar o acionamento (combater o sub-acionamento). Ver `references/skill-authoring.md` (seções "Frontmatter" e "Leading words"). Regra de ouro: a `description` diz o que a skill faz **e** lista os contextos/frases que devem acioná-la — e **nunca resume os passos do workflow** (o agente segue o resumo e pula o corpo). **Front-load a leading word** da skill — a palavra-âncora que já carrega o comportamento no pretraining (*seam*, *red*, *tracer bullet*).
+In a consumer, seed the ledger with the **bootstrap date (today)**, in new and existing repos alike — the bootstrap just created the skills from the current HEAD, so "last review = now". In source mode there is no ledger to seed. Seeding with a mature repo's 1st commit makes `daysReview`/`commits` born already past the threshold and fires a spurious nudge on the first task. `count=0` on bootstrap day is correct (it climbs as new commits arrive). See `references/domain-skill-maintenance.md` → "Seeding".
 
 ---
 
-## Anti-padrões
+## Description optimization
+
+Once a skill is ready, you can **optimize the `description`** to improve triggering (fight under-triggering). See `references/skill-authoring.md` (sections "Frontmatter" and "Leading words"). Golden rule: the `description` says what the skill does **and** lists the contexts/phrases that should trigger it — and **never summarizes the workflow steps** (the agent follows the summary and skips the body). **Front-load the skill's leading word** — the anchor word that already carries the behavior in pretraining (*seam*, *red*, *tracer bullet*).
+
+---
+
+## Anti-patterns
 
 ```text
-- Sobrescrever uma skill existente sem ler/preservar customizações ou sem mostrar o diff.
-- Auto-aplicar atualizações de skill em modo "mãos livres" (reprovado em campo no harness anterior).
-- Criar skill de domínio com prefixo `pelizzai-`, sem evidência adequada ou num root inativo.
-- Sobreajustar a skill aos casos de teste em vez de generalizar.
-- Inflar o SKILL.md além de ~500 linhas em vez de usar `references/`.
-- Inventar skills de domínio sem um padrão real do projeto por trás.
-- Deixar a cadência bloquear o trabalho, ou repetir o nudge mais de uma vez.
-- Esquecer de atualizar o catálogo e o ledger após criar/alterar uma skill.
-- Fazer edição comportamental sem baseline/eval/forward-test proporcional ao risco.
-- Resumir o workflow na description (o agente segue o resumo e pula o corpo).
-- Gatilho vago que disputa qualquer pedido sem nomear os near misses (skill storm) — ou tão estreito
-  que a skill nunca dispara (sub-acionamento, a falha dominante).
-- Cortar candidata verdadeira para "manter o conjunto pequeno", ou redigir N candidatas em fila
-  quando o time as escreveria em paralelo.
-- Duplicar a mesma domain skill em roots sem verificar paridade.
-```
-
----
-
-## Fluxo operacional resumido
-
-```text
-1. Identifique o modo: Autoria (nova skill) ou Manutenção (atualizar existentes).
-2. AUTORIA: capture a intenção → reúna evidência → baseline proporcional → escreva a skill mínima
-   → valide/forward-test → registre no catálogo e ledger quando for domain skill.
-3. BOOTSTRAP: enumere generosamente as candidatas verdadeiras → CONFIRME a lista com o usuário
-   (gate 2.5) → redija em paralelo (time; subagente quando for uma só) → sincronize roots →
-   catalogue → semeie o ledger → aceite final do usuário.
-4. MANUTENÇÃO: detecte o eixo (versão/histórico/adoção) → version/rework leem a skill existente e
-   mudam só o necessário; adoption PROPÕE criar a skill da stack nova (context7/doc oficial atual) →
-   confirme se for proposta proativa → valide proporcionalmente → mostre o diff → registre no ledger
-   com o eixo.
-5. CADÊNCIA: ao fechar a tarefa, cheque o ledger e proponha revisão se o limiar foi cruzado.
+- Overwriting an existing skill without reading/preserving customizations or without showing the diff.
+- Auto-applying skill updates in "hands-free" mode (failed in the field in the previous harness).
+- Creating a domain skill with the `pelizzai-` prefix, without adequate evidence, or in an
+  inactive root.
+- Overfitting the skill to the test cases instead of generalizing.
+- Bloating SKILL.md past ~500 lines instead of using `references/`.
+- Inventing domain skills with no real project pattern behind them.
+- Letting the cadence block the work, or repeating the nudge more than once.
+- Forgetting to update the catalog and the ledger after creating/changing a skill.
+- Making a behavioral edit without a baseline/eval/forward-test proportional to the risk.
+- Summarizing the workflow in the description (the agent follows the summary and skips the body).
+- A vague trigger that contends for every request without naming the near misses (skill storm) —
+  or one so narrow the skill never fires (under-triggering, the dominant failure).
+- Cutting a true candidate to "keep the set small", or writing N candidates in a queue when the
+  team would write them in parallel.
+- Duplicating the same domain skill across roots without verifying parity.
 ```
 
 ---
 
-## Integração
+## Condensed operating flow
 
-**Combina com:**
-
-- `pelizzai-audit` — chama esta skill no bootstrap; aqui mora o motor de criação das skills de domínio.
-- `pelizzai-team` — redigir muitas skills candidatas em paralelo; `pelizzai-subagents` para a delegação a um único subagente.
-- `pelizzai-reasoning` — raciocínio da autoria (Structured Decomposition) e da manutenção (Critique and Refine, Evidence Synthesis).
-- `pelizzai-interview-me` / `pelizzai-brainstorming` — ramo de projeto novo, antes de criar as primeiras skills.
-- `pelizzai-writing-clearly-and-concisely` — redigir o corpo das skills com clareza.
+```text
+1. Identify the mode: Authoring (new skill) or Maintenance (update existing ones).
+2. AUTHORING: capture the intent → gather evidence → proportional baseline → write the minimal
+   skill → validate/forward-test → record in catalog and ledger when it is a domain skill.
+3. BOOTSTRAP: generously enumerate the true candidates → CONFIRM the list with the user
+   (gate 2.5) → write in parallel (team; a subagent when there is just one) → sync roots →
+   catalog → seed the ledger → final user acceptance.
+4. MAINTENANCE: detect the axis (version/history/adoption) → version/rework read the existing
+   skill and change only what is needed; adoption PROPOSES creating the new stack's skill
+   (context7/current official docs) → confirm when the proposal is proactive → validate
+   proportionally → show the diff → record in the ledger with the axis.
+5. CADENCE: when closing the task, check the ledger and propose a review if the threshold was
+   crossed.
+```
 
 ---
 
-## Instrução final para o agente
+## Integration
+
+**Combines with:**
+
+- `pelizzai-audit` — calls this skill at bootstrap; the domain-skill creation engine lives here.
+- `pelizzai-team` — write many candidate skills in parallel; `pelizzai-subagents` for delegation to a single subagent.
+- `pelizzai-reasoning` — reasoning for authoring (Structured Decomposition) and maintenance (Critique and Refine, Evidence Synthesis).
+- `pelizzai-interview-me` / `pelizzai-brainstorming` — the new-project branch, before creating the first skills.
+- `pelizzai-writing-clearly-and-concisely` — write skill bodies with clarity.
+
+---
+
+## Final instruction to the agent
 
 ```text
-Crie skills que generalizam e mantenha-as vivas sem nunca destruir o trabalho de quem veio antes.
+Create skills that generalize and keep them alive without ever destroying the work of those who
+came before.
 
-Prefira:
-- fundamentar no context7 a confiar na memória, sem tratar documentação como decisão do usuário;
-- enumerar as candidatas que os padrões justificam a encolher a lista por escassez;
-- redigir em paralelo (uma candidata por membro) a enfileirar candidatas confirmadas;
-- mostrar o diff a sobrescrever;
-- propor-confirmar a "mãos livres";
-- references/ a um SKILL.md gigante;
-- catalogar e registrar a deixar a manutenção depender de memória humana.
+Prefer:
+- grounding in context7 over trusting memory, without treating documentation as the user's decision;
+- enumerating the candidates the patterns justify over shrinking the list for scarcity;
+- writing in parallel (one candidate per member) over queueing confirmed candidates;
+- showing the diff over overwriting;
+- propose-and-confirm over "hands-free";
+- references/ over a giant SKILL.md;
+- cataloging and recording over letting maintenance depend on human memory.
 
-Toda skill de domínio entra no catálogo e no ledger.
-Nenhuma atualização de skill é aplicada sem o diff e a confirmação do usuário; a aprovação é por
-skill e vem acompanhada da evidência.
-A criação incremental (eixo adoption) segue o mesmo propor→confirmar e nunca escreve skill de stack
-sem fundamentação em context7 ou documentação oficial atual.
-A cadência sugere; nunca bloqueia.
+Every domain skill enters the catalog and the ledger.
+No skill update is applied without the diff and the user's confirmation; approval is per skill
+and comes with the evidence.
+Incremental creation (the adoption axis) follows the same propose→confirm and never writes a
+stack skill without grounding in context7 or current official documentation.
+The cadence suggests; it never blocks.
 ```

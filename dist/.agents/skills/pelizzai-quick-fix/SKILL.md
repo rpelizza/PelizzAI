@@ -1,112 +1,115 @@
 ---
 name: pelizzai-quick-fix
-description: Head skill para ajuste local, coeso, claro e de baixo risco — texto, label, cor, botão ou campo em tela existente, constante, rename/refactor mecânico, configuração óbvia. Sinais típicos: ~1 arquivo e menos de ~50 linhas (sinais de escala, não limites rígidos). Superfície pública = rota, comando, endpoint, API ou config NOVA — ajuste não cria nenhuma delas nem muda regra de negócio. Algo quebrado usa `pelizzai-debugging`; nova superfície/contrato ou decisão de design reclassifica pela lane do router.
+description: Head skill for a local, cohesive, clear, low-risk tweak — text, label, color, button, or field on an existing screen, a constant, a mechanical rename/refactor, an obvious configuration. Typical signals: ~1 file and under ~50 lines (scale signals, not hard limits). Public surface = a NEW route, command, endpoint, API, or config — a tweak creates none of them and changes no business rule. Something broken uses `pelizzai-debugging`; a new surface/contract or a design decision reclassifies through the router's lane.
 ---
 
 # PelizzAI Quick Fix
 
-## Objetivo
+## Goal
 
-Um caminho enxuto para mudanças triviais. Evita o custo de design + plano quando não há decisão de arquitetura a tomar — **sem** abrir mão de branch isolada, verificação e fechamento.
+A lean path for trivial changes. It avoids the cost of design + plan when there is no architecture
+decision to make — **without** giving up an isolated branch, verification, and closeout.
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Quick Fix para este ajuste pontual."
+**Announce at start**, in the conversation's language: that you are using the PelizzAI Quick Fix skill for this one-off tweak.
 
-> **Princípio:** trivial ≠ desleixado. Pule o design, não a disciplina.
+> **Principle:** trivial ≠ sloppy. Skip the design, not the discipline.
 
-## Critérios sem contagem rígida
+## Criteria without hard counts
 
-É `quick-fix` quando a mudança:
-
-```text
-- objetivo e aceite são inequívocos;
-- mudança é local, coesa, reversível e de baixo risco;
-- NÃO cria superfície pública — rota, comando, endpoint, API ou config nova — nem muda regra de
-  negócio ou decide arquitetura (botão, campo ou label numa tela existente NÃO é superfície
-  pública: é ajuste);
-- prova e rollback são diretos;
-- o diff esperado é pequeno o bastante para um review formal não agregar sinal material
-  (~1 arquivo e <~50 linhas são os sinais típicos de escala, não limites rígidos).
-```
-
-Linhas e arquivos ajudam a detectar crescimento, mas não decidem sozinhos. Aceite claro é critério
-de ENTRADA do quick-fix, nunca motivo de promoção. Promova somente quando surgir coisa nova: NOVA
-superfície pública/contrato com aceite claro → lane `bounded` e plano compacto; decisão real de
-design ou incerteza → `standard`/`exploratory` e brainstorming proporcional. Na dúvida entre ajuste
-e bounded, recomende `ajuste` no kickoff — promover depois é barato; um plano para trocar um botão
-não é. Algo **quebrado** usa debugging.
-
-## Processo
-
-A `pelizzai-router` calcula as recomendações deste ajuste; esta head skill é o único emissor do
-setup. Ajuste usa o **confirm compacto de uma linha** — não o menu de perguntas do gate pós-plano.
-A `pelizzai-starting-branch` descobre a base e propõe o nome SEM parada própria (base sem candidato
-inequívoco ainda para lá); a head skill apresenta tudo numa linha, com as decisões visíveis e
-nomeadas, e aguarda:
-
-`Kickoff: quick-fix na branch <tipo>/<slug> @ <base-ref> (<sha-curto>) — isolamento: branch · modo: inline · commits: granular. Ok? (overrides: worktree · subagents/team · squash-final · outro nome/base)`
-
-Um "ok" ratifica base, nome e as três decisões de uma vez — todas estão nomeadas na linha, nada foi
-silencioso; um override nomeado ajusta só aquele item e mantém os demais. Só então a branch é
-criada. Não pulverize esta linha em perguntas separadas: o menu uma-decisão-por-turno pertence ao
-gate pós-plano dos tracks com plano. Sob briefing fechado (SUBAGENT-STOP), não abra gates: aplique
-o briefing e escale ao coordenador o que exigir decisão.
+It is a `quick-fix` when the change:
 
 ```text
-1. Branch — a pelizzai-starting-branch descobre a base e propõe `<tipo>/<slug>`; a ratificação
-   acontece no confirm compacto acima e só depois dele a branch é criada (nunca em branch protegida).
-1.5. Regras locais — no consumidor, confira `pelizzai/domain-skills.md`; em source mode, use as
-   regras/skills do próprio repo. Siga somente as aplicáveis à área.
-1.6. Registrar a ratificação (após o "ok" do confirm compacto) — grave o marcador `kickoff: ratificado <AAAA-MM-DD>`
-   (com `isolation`/`execution-mode`/`commit-strategy` ratificados) no state consumidor
-   `pelizzai/data/state.md` ou, em source mode, no execution record nativo com a mesma palavra-chave,
-   ANTES da primeira escrita de produto. A head skill é o único dono deste marcador no track
-   `ajuste`; sem ele o writegate (Regra B) bloqueia a primeira escrita de produto e a retomada não
-   reconhece o gate.
-2. Mudança + verificação mínima — toda linha alterada deve rastrear diretamente ao pedido
-   (linha sem rastro é scope creep: remova ou escale). Escolha o balde honestamente:
-   - Comportamento testável (constante, condição, valor retornado): pelizzai-tdd — menor teste que falha primeiro, depois a mudança.
-   - Refatoração que preserva comportamento (rename/extract/inline): NÃO fabrique RED — garanta caracterização/suíte verde antes, refatore em passo pequeno e rode a mesma prova depois.
-   - Config/IaC/migração: use validate/plan/dry-run e confira compatibilidade/rollback; teste unitário só para lógica separável.
-   - UI/CSS/estado visual: aplique obrigatoriamente pelizzai-frontend e use a prova visual
-     proporcional definida lá; TDD entra apenas se houver comportamento.
-   - Documentação, label ou copy: lint/links/build-render ou inspeção estática proporcional; nada a testar em unidade.
-   Não se auto-classifique uma mudança de comportamento como "cosmética"/"config" para pular o teste.
-3. Prove a working tree — rode a prova selecionada acima e, quando houver código executável, a
-   suíte relevante do projeto. Corrija antes de consolidar.
-3.5. Commite o **conteúdo** com paths exatos e mensagem definitiva
-   `<tipo>(<escopo>): <descrição>`. Quick-fix já produz um único commit; não crie WIP nem deixe
-   squash para a finish-task.
-4. Sele e feche — rode `pelizzai-verification-before-completion` contra esse HEAD, grave
-   `validated-head` somente após sucesso e invoque `pelizzai-finish-task`: consumidor acrescenta
-   apenas o closure de metadata (state + history da tarefa);
-   source mode fecha o execution record sem arquivo/commit de closure.
+- goal and acceptance are unambiguous;
+- the change is local, cohesive, reversible, and low-risk;
+- it does NOT create a public surface — a new route, command, endpoint, API, or config — nor
+  changes a business rule or decides architecture (a button, field, or label on an existing
+  screen is NOT a public surface: it is a tweak);
+- proof and rollback are direct;
+- the expected diff is small enough that a formal review would add no material signal
+  (~1 file and <~50 lines are the typical scale signals, not hard limits).
 ```
 
-> O track de ajuste pula review formal somente enquanto permanecer low-risk, coeso e sem nova
-> superfície/regra. A prova adequada + Verification cobrem o fechamento. Se o diff revelar risco,
-> promova a lane e aplique `pelizzai-review` antes de consolidar.
+Lines and files help detect growth, but they never decide alone. Clear acceptance is an ENTRY
+criterion of the quick-fix, never a reason for promotion. Promote only when something new appears:
+a NEW public surface/contract with clear acceptance → `bounded` lane and a compact plan; a real
+design decision or uncertainty → `standard`/`exploratory` and proportional brainstorming. In doubt
+between tweak and bounded, recommend `tweak` at kickoff — promoting later is cheap; a plan to swap
+a button is not. Something **broken** uses debugging.
+
+## Process
+
+`pelizzai-router` computes the recommendations for this tweak; this head skill is the sole emitter
+of the setup. A tweak uses the **compact one-line confirm** — not the post-plan gate's question
+menu. `pelizzai-starting-branch` discovers the base and proposes the name WITHOUT a stop of its
+own (a base with no unambiguous candidate still stops there); the head skill presents everything
+in one line, with the decisions visible and named, and waits:
+
+`Kickoff: quick-fix on branch <type>/<slug> @ <base-ref> (<short-sha>) — isolation: branch · mode: inline · commits: granular. Ok? (overrides: worktree · subagents/team · squash-final · different name/base)`
+
+One "ok" ratifies base, name, and the three decisions at once — all are named in the line, nothing
+was silent; a named override adjusts only that item and keeps the rest. Only then is the branch
+created. Do not scatter this line across separate questions: the one-decision-per-turn menu
+belongs to the post-plan gate of the tracks with a plan. Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP),
+open no gates: apply the briefing and escalate to the coordinator whatever requires a decision.
+
+```text
+1. Branch — pelizzai-starting-branch discovers the base and proposes `<type>/<slug>`; ratification
+   happens in the compact confirm above and only after it is the branch created (never on a
+   protected branch).
+1.5. Local rules — in a consumer, check `pelizzai/domain-skills.md`; in source mode, use the repo's
+   own rules/skills. Follow only those applicable to the area.
+1.6. Record the ratification (after the compact confirm's "ok") — write the marker `kickoff: ratified <YYYY-MM-DD>`
+   (with `isolation`/`execution-mode`/`commit-strategy` ratified) in the consumer state
+   `pelizzai/data/state.md` or, in source mode, in the native execution record with the same keyword,
+   BEFORE the first product write. The head skill is the sole owner of this marker in the `tweak`
+   track; without it the writegate (Rule B) blocks the first product write and resumption does not
+   recognize the gate.
+2. Change + minimal verification — every changed line must trace directly to the request
+   (a line without a trace is scope creep: remove it or escalate). Choose the bucket honestly:
+   - Testable behavior (constant, condition, return value): pelizzai-tdd — smallest failing test first, then the change.
+   - Behavior-preserving refactor (rename/extract/inline): do NOT fabricate a RED — ensure characterization/a green suite first, refactor in a small step, and run the same proof after.
+   - Config/IaC/migration: use validate/plan/dry-run and check compatibility/rollback; unit tests only for separable logic.
+   - UI/CSS/visual state: mandatorily apply pelizzai-frontend and use the proportional visual
+     proof defined there; TDD enters only if there is behavior.
+   - Documentation, label, or copy: lint/links/build-render or proportional static inspection; nothing to unit-test.
+   Do not self-classify a behavior change as "cosmetic"/"config" to skip the test.
+3. Prove the working tree — run the proof selected above and, when there is executable code, the
+   project's relevant suite. Fix before consolidating.
+3.5. Commit the **content** with exact paths and a definitive message
+   `<type>(<scope>): <description>`. A quick-fix already produces a single commit; do not create
+   WIP nor leave a squash for finish-task.
+4. Seal and close — run `pelizzai-verification-before-completion` against that HEAD, record
+   `validated-head` only after success, and invoke `pelizzai-finish-task`: a consumer adds
+   only the metadata closure (state + the task's history file);
+   source mode closes the execution record without a closure file/commit.
+```
+
+> The tweak track skips formal review only while it stays low-risk, cohesive, and without a new
+> surface/rule. The adequate proof + Verification cover the closeout. If the diff reveals risk,
+> promote the lane and apply `pelizzai-review` before consolidating.
 
 ---
 
 ## Red flags
 
 ```text
-Nunca: tratar como quick-fix algo que cria nova superfície ou muda regra de negócio; promover a
-       bounded/plano só porque o aceite é claro (aceite claro é critério de entrada, não gatilho de
-       promoção); pulverizar o confirm compacto em perguntas separadas; pular a branch isolada
-       ("é só um textinho" — o gate de branch protegida vale igual); pular a verificação;
-       insistir no caminho leve depois que a mudança cresceu (escale para feature).
+Never: treat as quick-fix something that creates a new surface or changes a business rule; promote
+       to bounded/plan just because the acceptance is clear (clear acceptance is an entry
+       criterion, not a promotion trigger); scatter the compact confirm across separate questions;
+       skip the isolated branch ("it's just a tiny bit of text" — the protected-branch gate applies
+       all the same); skip the verification; insist on the light path after the change has grown
+       (escalate to feature).
 ```
 
 ---
 
-## Integração
+## Integration
 
-**Roteada por:** `pelizzai-router` (track `ajuste`).
+**Routed by:** `pelizzai-router` (track `tweak`).
 
-**Usa:** `pelizzai-starting-branch`, regras/skills locais, `pelizzai-reasoning` (seleção da
-estratégia), `pelizzai-tdd` somente para comportamento, `pelizzai-frontend` como overlay
-obrigatório para UI, `pelizzai-verification-before-completion` e `pelizzai-finish-task`.
+**Uses:** `pelizzai-starting-branch`, local rules/skills, `pelizzai-reasoning` (strategy
+selection), `pelizzai-tdd` only for behavior, `pelizzai-frontend` as the mandatory overlay
+for UI, `pelizzai-verification-before-completion`, and `pelizzai-finish-task`.
 
-**Escala para:** `pelizzai-writing-plans` em bounded, `pelizzai-brainstorming` quando houver decisão
-ou incerteza, ou `pelizzai-debugging` quando for bug.
+**Escalates to:** `pelizzai-writing-plans` for bounded, `pelizzai-brainstorming` when there is a
+design decision or uncertainty, or `pelizzai-debugging` when it is a bug.

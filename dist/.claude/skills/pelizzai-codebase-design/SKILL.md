@@ -1,75 +1,75 @@
 ---
 name: pelizzai-codebase-design
-description: Vocabulário compartilhado para projetar módulos profundos. Use quando o usuário quer projetar ou melhorar a interface de um módulo, achar oportunidades de aprofundamento, decidir onde fica um seam (costura), tornar o código mais testável ou navegável, ou quando outra skill (`pelizzai-tdd`, `pelizzai-brainstorming`, `pelizzai-writing-plans`) precisa do vocabulário de módulos profundos. Acione ao desenhar interfaces, definir fronteiras de unidades, ou avaliar testabilidade.
+description: Shared vocabulary for designing deep modules. Use when the user wants to design or improve a module's interface, find deepening opportunities, decide where a seam goes, make code more testable or navigable, or when another skill (`pelizzai-tdd`, `pelizzai-brainstorming`, `pelizzai-writing-plans`) needs the deep-modules vocabulary. Trigger when designing interfaces, defining unit boundaries, or assessing testability.
 ---
 
 # PelizzAI Codebase Design
 
-Projete **módulos profundos**: muito comportamento atrás de uma interface pequena, num seam limpo, testável pela própria interface. Use esta linguagem e estes princípios sempre que houver código sendo desenhado ou reestruturado. O objetivo é alavancagem para quem chama, localidade para quem mantém e testabilidade para todos.
+Design **deep modules**: lots of behavior behind a small interface, at a clean seam, testable through the interface itself. Use this language and these principles whenever code is being designed or restructured. The goal is leverage for callers, locality for maintainers, and testability for everyone.
 
-**Anuncie ao iniciar (quando acionada explicitamente):** "Usando a skill PelizzAI Codebase Design para projetar módulos profundos."
+**Announce on start (when triggered explicitly)**, in the conversation's language: that you are using the PelizzAI Codebase Design skill to design deep modules.
 
-## Glossário
+## Glossary
 
-Use estes termos **exatamente** — não troque por "componente", "serviço", "API" ou "boundary". A linguagem consistente é o ponto.
-
-```text
-- Módulo: qualquer coisa com interface e implementação. Escala-agnóstico: função, classe, pacote, fatia.
-- Interface: tudo o que quem chama precisa saber para usar corretamente — assinatura de tipo, mas também
-  invariantes, ordem, modos de erro, config necessária, características de desempenho. (Mais amplo que "assinatura".)
-- Implementação: o que está dentro do módulo. Distinta de Adapter.
-- Profundidade (Depth): alavancagem na interface — quanto comportamento se exercita por unidade de interface
-  que se precisa aprender. PROFUNDO = muito comportamento atrás de interface pequena; RASO = interface quase
-  tão complexa quanto a implementação (evite).
-- Seam (Michael Feathers): lugar onde dá para alterar comportamento sem editar ali; a LOCALIZAÇÃO da interface.
-  Onde colocar o seam é uma decisão de design distinta do que vai atrás dele. (Use "seam", não "boundary".)
-- Adapter: coisa concreta que satisfaz uma interface num seam (papel, não substância).
-- Alavancagem (Leverage): o que quem chama ganha com profundidade — uma implementação paga em N call sites e M testes.
-- Localidade (Locality): o que quem mantém ganha — mudança, bug, conhecimento e verificação concentram num lugar.
-```
-
-## Profundo vs raso
+Use these terms **exactly** — do not swap in "component", "service", "API", or "boundary". Consistent language is the point.
 
 ```text
-Módulo PROFUNDO = interface pequena + muita implementação (poucos métodos, params simples, complexidade escondida).
-Módulo RASO     = interface grande + pouca implementação (só repassa) — EVITE.
-
-Ao desenhar a interface, pergunte:
-- Dá para reduzir o número de métodos?
-- Dá para simplificar os parâmetros?
-- Dá para esconder mais complexidade dentro?
+- Module: anything with an interface and an implementation. Scale-agnostic: function, class, package, slice.
+- Interface: everything a caller must know to use it correctly — the type signature, but also
+  invariants, ordering, error modes, required config, performance characteristics. (Broader than "signature".)
+- Implementation: what is inside the module. Distinct from Adapter.
+- Depth: leverage at the interface — how much behavior you exercise per unit of interface
+  you must learn. DEEP = lots of behavior behind a small interface; SHALLOW = an interface almost
+  as complex as the implementation (avoid).
+- Seam (Michael Feathers): a place where you can change behavior without editing there; the LOCATION of the interface.
+  Where to put the seam is a design decision distinct from what goes behind it. (Say "seam", not "boundary".)
+- Adapter: a concrete thing that satisfies an interface at a seam (a role, not a substance).
+- Leverage: what callers gain from depth — one implementation pays off across N call sites and M tests.
+- Locality: what maintainers gain — change, bugs, knowledge, and verification concentrate in one place.
 ```
 
-## Princípios
+## Deep vs shallow
 
 ```text
-- Profundidade é propriedade da INTERFACE, não da implementação. Um módulo profundo pode ter partes internas
-  pequenas e mockáveis — elas só não fazem parte da interface (seams internos vs o seam externo).
-- Teste da deleção: imagine apagar o módulo. Se a complexidade some, era um pass-through; se reaparece nos N
-  callers, ele pagava o próprio custo.
-- A interface é a superfície de teste. Quem chama e quem testa cruzam o mesmo seam. Se você quer testar ALÉM da
-  interface, o módulo provavelmente tem a forma errada.
-- Um adapter = seam hipotético. Dois adapters = seam real. Não crie um seam sem algo que de fato varie nele.
+DEEP module    = small interface + lots of implementation (few methods, simple params, hidden complexity).
+SHALLOW module = large interface + little implementation (it only passes through) — AVOID.
+
+When designing the interface, ask:
+- Can the number of methods be reduced?
+- Can the parameters be simplified?
+- Can more complexity be hidden inside?
 ```
 
-## Projetando para testabilidade
+## Principles
+
+```text
+- Depth is a property of the INTERFACE, not the implementation. A deep module may have small,
+  mockable internal parts — they just are not part of the interface (internal seams vs the external seam).
+- The deletion test: imagine deleting the module. If the complexity disappears, it was a pass-through; if it
+  reappears across the N callers, it was paying its own cost.
+- The interface is the test surface. Callers and tests cross the same seam. If you want to test BEYOND the
+  interface, the module probably has the wrong shape.
+- One adapter = a hypothetical seam. Two adapters = a real seam. Do not create a seam without something that actually varies at it.
+```
+
+## Designing for testability
 
 ```typescript
-// Testável: recebe a dependência          // Difícil: cria a dependência
+// Testable: receives the dependency          // Hard: creates the dependency
 function processOrder(order, gateway) {}    function processOrder(order) { const g = new StripeGateway() }
 
-// Testável: retorna resultado               // Difícil: efeito colateral
-function calcularDesconto(cart): Desconto {} function aplicarDesconto(cart): void { cart.total -= d }
+// Testable: returns a result                // Hard: side effect
+function computeDiscount(cart): Discount {}  function applyDiscount(cart): void { cart.total -= d }
 ```
 
-Superfície pequena: menos métodos = menos testes; menos params = setup de teste mais simples.
+Small surface: fewer methods = fewer tests; fewer params = simpler test setup.
 
-## Projetar a interface duas vezes
+## Design the interface twice
 
-Quando a forma da interface é incerta e o impacto é alto, **projete-a de várias maneiras radicalmente diferentes** e compare por profundidade, localidade e posição do seam. Use a `pelizzai-team`/`pelizzai-subagents` para gerar as alternativas — em paralelo apenas quando a exploração for de leitura/análise ou quando cada alternativa escrever em caminhos disjuntos sob o isolamento ratificado; protótipos que compartilham caminhos são gerados em série — e a `pelizzai-reasoning` (*Decision Making*, no modo de busca com poda para os caminhos interdependentes) para comparar e **recomendar** — a escolha entre as alternativas é arquitetura, e arquitetura é decisão do usuário: apresente a recomendada para ratificação e leve lacuna material à `pelizzai-interview-me`.
+When the interface's shape is uncertain and the impact is high, **design it in several radically different ways** and compare them by depth, locality, and seam position. Use `pelizzai-team`/`pelizzai-subagents` to generate the alternatives — in parallel only when the exploration is read/analysis or when each alternative writes to disjoint paths under the ratified isolation; prototypes that share paths are generated serially — and `pelizzai-reasoning` (*Decision Making*, in search-with-pruning mode for the interdependent paths) to compare and **recommend** — choosing among the alternatives is architecture, and architecture is the user's decision: present the recommended one for ratification and take any material gap to `pelizzai-interview-me`.
 
-## Integração
+## Integration
 
-**Usada por:** `pelizzai-tdd` (planejamento — módulos profundos e testabilidade), `pelizzai-brainstorming` (isolamento e clareza), `pelizzai-writing-plans` (estrutura de arquivos), `pelizzai-improving-architecture` (o teste da deleção e este vocabulário guiam a revisão proativa; um seam ausente flagrado pela `pelizzai-debugging` no teste de regressão é achado arquitetural que entra lá como candidato).
+**Used by:** `pelizzai-tdd` (planning — deep modules and testability), `pelizzai-brainstorming` (isolation and clarity), `pelizzai-writing-plans` (file structure), `pelizzai-improving-architecture` (the deletion test and this vocabulary guide the proactive review; a missing seam caught by `pelizzai-debugging` in the regression test is an architectural finding that lands there as a candidate).
 
-**Combina com:** `pelizzai-reasoning` (Structured Decomposition, Decision Making), `pelizzai-domain-modeling` (o vocabulário do domínio que nomeia esses módulos).
+**Combines with:** `pelizzai-reasoning` (Structured Decomposition, Decision Making), `pelizzai-domain-modeling` (the domain vocabulary that names these modules).

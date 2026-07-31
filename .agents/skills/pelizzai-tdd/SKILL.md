@@ -1,250 +1,251 @@
 ---
 name: pelizzai-tdd
-description: Desenvolvimento orientado a testes (TDD) — a disciplina test-first POR TAREFA do harness. Use para desenvolver funcionalidades ou corrigir bugs test-first (red → green → refactor, fatias verticais, testes de integração); acione ao implementar cada tarefa de código de um plano (via `pelizzai-execution-plans`) e quando um membro de `pelizzai-team`/`pelizzai-subagents` escreve código. O gate de adequação decide as exceções legítimas: refatoração preservativa, CSS visual, documentação, configuração, IaC, migração e código gerado usam caracterização, validação nativa, dry-run, QA visual ou checagem estática.
+description: Test-driven development (TDD) — the harness's PER-TASK test-first discipline. Use to build features or fix bugs test-first (red → green → refactor, vertical slices, integration tests); trigger it when implementing each code task of a plan (via `pelizzai-execution-plans`) and whenever a `pelizzai-team`/`pelizzai-subagents` member writes code. The suitability gate decides the legitimate exceptions: preserving refactors, visual CSS, documentation, configuration, IaC, migrations, and generated code use characterization, native validation, dry-run, visual QA, or static checks.
 ---
 
 # PelizzAI TDD
 
-## Objetivo
+## Goal
 
-Usar um teste comportamental como instrumento de design e prova. TDD é o default de toda tarefa de
-código: ao implementar cada tarefa de um plano e sempre que um membro despachado escreve código, o
-ciclo é red → green → refactor por fatia vertical. Quando o efeito da tarefa não é comportamental, o
-gate abaixo nomeia a prova correta — a exceção é declarada, nunca improvisada.
+Use a behavioral test as an instrument of design and proof. TDD is the default for every code
+task: when implementing each task of a plan and whenever a dispatched member writes code, the
+cycle is red → green → refactor per vertical slice. When the task's effect is not behavioral, the
+gate below names the correct proof — the exception is declared, never improvised.
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI TDD para implementar este comportamento em red → green → refactor."
+**Announce at start**, in the conversation's language: that you are using the PelizzAI TDD skill to implement this behavior red → green → refactor. The brand spelling "PelizzAI" and the skill's name stay as written; the rest of the sentence follows the conversation.
 
-## Gate de adequação
+## Suitability gate
 
-Use TDD quando todas forem verdadeiras:
+Use TDD when all of these are true:
 
 ```text
-[ ] Existe comportamento observável novo, alterado ou quebrado.
-[ ] Há interface/seam adequado para exercitá-lo sem acoplar o teste à implementação.
-[ ] O teste automatizado reduz risco de regressão e é mais estável que o detalhe testado.
+[ ] There is new, changed, or broken observable behavior.
+[ ] There is a suitable interface/seam to exercise it without coupling the test to the implementation.
+[ ] The automated test reduces regression risk and is more stable than the detail under test.
 ```
 
-Caso contrário, use a estratégia selecionada por `pelizzai-reasoning` e registrada no plano:
+Otherwise, use the strategy selected by `pelizzai-reasoning` and recorded in the plan:
 
-| Efeito | Estratégia correta |
+| Effect | Correct strategy |
 | --- | --- |
-| Refatoração sem mudança comportamental | cobertura/suíte de caracterização verde antes; refatorar no verde; mesma suíte depois |
-| Configuração ou IaC | validator/plan/dry-run da ferramenta e checagem de compatibilidade/rollback |
-| Migração | validação de schema, dry-run/ambiente descartável, forward/rollback conforme suporte |
-| UI puramente visual | `pelizzai-frontend` + navegador/screenshot em viewports e estados relevantes |
-| Documentação/copy | lint, links, exemplos, build/render ou inspeção estática proporcional |
-| Código gerado/vendor | validar fonte/gerador e regeneração determinística; não testar o artefato como código autoral |
+| Refactor with no behavioral change | green characterization coverage/suite first; refactor on green; same suite after |
+| Configuration or IaC | the tool's validator/plan/dry-run plus compatibility/rollback checks |
+| Migration | schema validation, dry-run/disposable environment, forward/rollback as supported |
+| Purely visual UI | `pelizzai-frontend` + browser/screenshot across relevant viewports and states |
+| Documentation/copy | lint, links, examples, build/render, or proportional static inspection |
+| Generated/vendor code | validate the source/generator and deterministic regeneration; do not test the artifact as authored code |
 
-Combinações são normais: um formulário usa TDD para submissão/erros **e** `pelizzai-frontend` para aparência, acessibilidade e responsividade.
+Combinations are normal: a form uses TDD for submission/errors **and** `pelizzai-frontend` for appearance, accessibility, and responsiveness.
 
-Não se auto-classifique uma mudança de comportamento como "cosmética" ou "config" para escapar do
-ciclo: a exceção vale pelo efeito real do artefato, não pela pressa.
+Do not self-classify a behavioral change as "cosmetic" or "config" to escape the cycle: the
+exception holds by the artifact's real effect, not by haste.
 
 ---
 
-## Princípio de teste
+## Testing principle
 
-Teste comportamento por interface pública, não detalhes internos. O teste deve sobreviver a uma refatoração que preserve o contrato.
+Test behavior through the public interface, not internal details. The test must survive a refactor that preserves the contract.
 
-Prefira integração fina ou tracer bullet que percorra o caminho real. Use mocks somente em fronteiras externas caras, lentas ou não determinísticas; não simule colaboradores internos para validar a forma do código. Consulte [tests.md](tests.md) e [mocking.md](mocking.md) quando precisar de exemplos.
+Prefer thin integration or a tracer bullet that walks the real path. Use mocks only at external boundaries that are expensive, slow, or non-deterministic; do not simulate internal collaborators to validate the code's shape. See [tests.md](tests.md) and [mocking.md](mocking.md) when you need examples.
 
-## Antipadrão: Fatias Horizontais
+## Anti-pattern: Horizontal Slices
 
-**NÃO escreva todos os testes primeiro para depois escrever toda a implementação.** Isso é "fatiamento horizontal" — tratar o estado VERMELHO (RED) como "escrever todos os testes" e o estado VERDE (GREEN) como "escrever todo o código".
+**Do NOT write all the tests first and then write all the implementation.** That is "horizontal slicing" — treating the RED state as "write all the tests" and the GREEN state as "write all the code".
 
-Isso gera **testes ruins**:
+It produces **bad tests**:
 
-- Testes escritos em lote testam comportamentos _imaginados_, não comportamentos _reais_
-- Você acaba testando a _forma_ das coisas (estruturas de dados, assinaturas de funções) em vez do comportamento visível ao usuário
-- Os testes tornam-se insensíveis a mudanças reais: passam quando o comportamento quebra e falham quando o comportamento está correto
-- Você avança além da sua visibilidade, comprometendo-se com a estrutura de testes antes de compreender a implementação
+- Tests written in batch test _imagined_ behaviors, not _real_ behaviors
+- You end up testing the _shape_ of things (data structures, function signatures) instead of user-visible behavior
+- The tests become insensitive to real changes: they pass when the behavior breaks and fail when the behavior is correct
+- You advance beyond your visibility, committing to a test structure before understanding the implementation
 
-**Abordagem correta**: fatias verticais via _tracer bullets_ (testes que percorrem todo o caminho real do sistema). Um teste → uma implementação → repetir. Cada teste responde ao que você aprendeu no ciclo anterior. Como você acabou de escrever o código, sabe exatamente qual comportamento é importante e como verificá-lo.
+**Correct approach**: vertical slices via _tracer bullets_ (tests that walk the system's entire real path). One test → one implementation → repeat. Each test responds to what you learned in the previous cycle. Since you just wrote the code, you know exactly which behavior matters and how to verify it.
 
-```
-ERRADO (horizontal):
+```text
+WRONG (horizontal):
   RED:   test1, test2, test3, test4, test5
   GREEN: impl1, impl2, impl3, impl4, impl5
 
-CERTO (vertical):
+RIGHT (vertical):
   RED→GREEN: test1→impl1
   RED→GREEN: test2→impl2
   RED→GREEN: test3→impl3
   ...
 ```
 
-## Preparação mínima
+## Minimal preparation
 
-Antes do primeiro teste:
+Before the first test:
 
 ```text
-1. Consumidor: leia `pelizzai/domain-skills.md` e carregue as skills de domínio do comportamento em
-   teste — os padrões do projeto prevalecem sobre os genéricos; membro despachado já as recebe no
-   briefing. Source mode: use regras/skills do repo-fonte.
-2. Obtenha o comando canônico em `pelizzai/profile.md`, quando existir, ou no manifest/script real;
-   nunca chute (`npm test` num projeto pnpm é o antipadrão).
-3. Explore o código da área e respeite as ADRs vigentes.
-4. Confirme contrato, comportamento e seam no pedido/aceite; use spec/plano quando existirem.
-5. Para API externa incerta, derive a versão instalada e consulte Context7; use documentação
-   oficial atual como fallback.
+1. Consumer: read `pelizzai/domain-skills.md` and load the domain skills for the behavior under
+   test — project patterns prevail over generic ones; a dispatched member already receives them in
+   the briefing. Source mode: use the source repo's rules/skills.
+2. Get the canonical command from `pelizzai/profile.md`, when it exists, or from the real
+   manifest/script; never guess (`npm test` in a pnpm project is the anti-pattern).
+3. Explore the area's code and respect the ADRs in force.
+4. Confirm contract, behavior, and seam in the request/acceptance criteria; use the spec/plan when they exist.
+5. For an uncertain external API, derive the installed version and consult Context7; use current
+   official documentation as fallback.
 ```
 
-**Acorde os seams antes dos testes: nenhum teste é escrito num seam não confirmado.** Em fluxo de
-feature, os seams já vêm da spec aprovada (`pelizzai-brainstorming`, estratégia de validação e seams
-reais) — confirme-os; fora dele, acorde-os aqui, com o vocabulário de `pelizzai-codebase-design`.
+**Agree the seams before the tests: no test is written on an unconfirmed seam.** In a feature
+flow, the seams already come from the approved spec (`pelizzai-brainstorming`, validation strategy,
+and real seams) — confirm them; outside it, agree them here, with the vocabulary of
+`pelizzai-codebase-design`.
 
-Ao acordar o seam, identifique oportunidades de módulos profundos (interface simples, implementação
-robusta) usando o vocabulário de `pelizzai-codebase-design` e a *Structured Decomposition* de
-`pelizzai-reasoning` para mapear comportamentos e testabilidade; em design novo, isso já vem da
+While agreeing the seam, identify opportunities for deep modules (simple interface, robust
+implementation) using the vocabulary of `pelizzai-codebase-design` and `pelizzai-reasoning`'s
+*Structured Decomposition* to map behaviors and testability; in new design, this already comes from
 `pelizzai-brainstorming`.
 
-Se o seam necessário não existe, isso é sinal arquitetural. Não contorça o teste: registre a lacuna e use `pelizzai-improving-architecture` quando ela exigir mudança de design.
+If the needed seam does not exist, that is an architectural signal. Do not contort the test: record the gap and use `pelizzai-improving-architecture` when it requires a design change.
 
-Qualquer lacuna material — interface a alterar, comportamento esperado, seam, critério de aceite —
-para o trabalho e vai para `pelizzai-interview-me`, uma pergunta por vez. Não preencha por
-convenção, default ou inferência razoável; também não reabra decisão já aprovada.
-
----
-
-## Plano de teste na borda (antes do primeiro RED)
-
-**Não é possível testar tudo.** Confirme com o usuário exatamente quais comportamentos são mais
-relevantes e concentre o esforço em caminhos críticos e lógica complexa, não em todo caso de borda
-imaginável. Os comportamentos e seams a testar não começam por suposição: apresente o plano de teste
-na borda e **obtenha a aprovação do usuário** antes do primeiro RED. A escolha de comportamentos e
-seams continua sua (o desenho é preservado); ela vira recomendação a ratificar, não decisão aplicada
-em silêncio.
-
-```text
-Plano de teste proposto (responda "ok" ou ajuste):
-- Comportamentos por fatia: <lista ordenada de comportamentos observáveis, um por fatia>
-- Seams: <interface/fronteira que exercita cada um sem acoplar à implementação>
-- Fora de escopo: <o que este ciclo não cobre>
-```
-
-A pergunta canônica do planejamento: "Qual é a interface pública, e em quais seams vamos testar?
-Quais comportamentos são mais importantes?"
-
-Dispensam este gate — sem "obviedade" autodeclarada:
-
-```text
-- spec/plano ratificado que já aprovou os comportamentos e seams desta tarefa (não reabra);
-- caminho leve: teste único de regressão (`pelizzai-debugging`) ou teste mínimo de ajuste
-  (`pelizzai-quick-fix`), onde o comportamento-alvo já está fixado pela causa raiz ou pelo
-  critério do ajuste;
-- briefing fechado (SUBAGENT-STOP): aplique o briefing, não abra gates e escale ao coordenador
-  o que exigir decisão.
-```
-
-O gate de adequação (acima) permanece: se TDD não é a estratégia certa, ele decide isso antes.
+Any material gap — an interface to change, expected behavior, a seam, an acceptance criterion —
+halts the work and goes to `pelizzai-interview-me`, one question at a time. Do not fill it by
+convention, default, or reasonable inference; also do not reopen an already-approved decision.
 
 ---
 
-## Ciclo por fatia vertical
+## Test plan at the edge (before the first RED)
+
+**You cannot test everything.** Confirm with the user exactly which behaviors matter most and
+focus the effort on critical paths and complex logic, not on every imaginable edge case. The
+behaviors and seams to test do not start from assumption: present the test plan at the edge and
+**get the user's approval** before the first RED. Choosing behaviors and seams remains your job
+(the design is preserved); it becomes a recommendation to ratify, not a decision applied in
+silence.
+
+```text
+Proposed test plan (answer "ok" or adjust):
+- Behaviors per slice: <ordered list of observable behaviors, one per slice>
+- Seams: <interface/boundary that exercises each one without coupling to the implementation>
+- Out of scope: <what this cycle does not cover>
+```
+
+The canonical planning question: "What is the public interface, and on which seams will we test?
+Which behaviors matter most?"
+
+Waived from this gate — with no self-declared "obviousness":
+
+```text
+- a ratified spec/plan that already approved this task's behaviors and seams (do not reopen);
+- light path: a single regression test (`pelizzai-debugging`) or a minimal tweak test
+  (`pelizzai-quick-fix`), where the target behavior is already fixed by the root cause or by the
+  tweak's criterion;
+- closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP): apply the briefing, do not open gates, and escalate to the
+  coordinator whatever requires a decision.
+```
+
+The suitability gate (above) still stands: if TDD is not the right strategy, it decides that first.
+
+---
+
+## Cycle per vertical slice
 
 ### 1. RED
 
-Escreva **um** teste para **um** comportamento observável. Rode-o e confirme:
+Write **one** test for **one** observable behavior. Run it and confirm:
 
 ```text
-- falha pelo motivo esperado;
-- falha no código de produção, não por fixture/import/setup quebrado;
-- passaria somente se o comportamento existisse.
+- it fails for the expected reason;
+- it fails in production code, not from a broken fixture/import/setup;
+- it would pass only if the behavior existed.
 ```
 
-Teste que já passa não provou a regressão nem guiou a implementação. Corrija o teste/seam antes de seguir.
+A test that already passes has neither proven the regression nor guided the implementation. Fix the test/seam before moving on.
 
 ### 2. GREEN
 
-Implemente o mínimo coerente para satisfazer o comportamento. Rode o teste e leia exit code/contagem. Não antecipe casos futuros nem misture refator amplo.
+Implement the minimum coherent code to satisfy the behavior. Run the test and read the exit code/counts. Do not anticipate future cases or mix in a broad refactor.
 
-### 3. Próxima fatia
+### 3. Next slice
 
-Repita um comportamento por vez. Não escreva todos os testes primeiro para depois escrever toda a implementação; isso congela uma forma imaginada antes do aprendizado do ciclo anterior.
+Repeat, one behavior at a time. Do not write all the tests first and then all the implementation; that freezes an imagined shape before the previous cycle's learning.
 
 ### 4. REFACTOR
 
-Somente no verde — nunca refatore no VERMELHO:
+Only on green — never refactor on RED:
 
 ```text
-- remova duplicação;
-- melhore nomes e fronteiras;
-- aprofunde módulos quando simplificar a interface;
-- rode a suíte relevante após cada passo.
+- remove duplication;
+- improve names and boundaries;
+- deepen modules when it simplifies the interface;
+- run the relevant suite after each step.
 ```
 
-Use [refactoring.md](refactoring.md) para candidatos. Refatoração pode acontecer dentro do ciclo, mas uma tarefa cujo único efeito é refatorar não precisa fabricar RED: ela começa e termina com caracterização verde.
+Use [refactoring.md](refactoring.md) for candidates. Refactoring can happen inside the cycle, but a task whose only effect is to refactor does not need to fabricate a RED: it starts and ends with green characterization.
 
-## Ciclo de TDD (visão geral)
+## TDD cycle (overview)
 
 ```mermaid
 flowchart LR
-    P[Planejar: listar comportamentos] --> T[Tracer bullet: 1 teste ponta-a-ponta]
-    T --> R[RED: proximo teste -> falha]
-    R --> G[GREEN: codigo minimo -> passa]
-    G --> C{Mais comportamentos criticos?}
-    C -- Sim --> R
-    C -- Nao --> RF[Refatorar no verde]
+    P[Plan: list behaviors] --> T[Tracer bullet: 1 end-to-end test]
+    T --> R[RED: next test -> fails]
+    R --> G[GREEN: minimal code -> passes]
+    G --> C{More critical behaviors?}
+    C -- Yes --> R
+    C -- No --> RF[Refactor on green]
     RF --> D{Definition of Done?}
-    D -- Nao --> R
-    D -- Sim --> done([Tarefa pronta para review])
+    D -- No --> R
+    D -- Yes --> done([Task ready for review])
 ```
 
 ---
 
-## Checklist por ciclo
+## Checklist per cycle
 
 ```text
-[ ] O teste descreve o contrato observável, não a implementação.
-[ ] Usa a interface/seam acordado, sem detalhe privado.
-[ ] O teste resistiria a uma refatoração interna que preserve o contrato.
-[ ] O RED foi observado pela razão esperada.
-[ ] O GREEN foi observado com saída fresca.
-[ ] O código adicionado é proporcional ao comportamento atual.
-[ ] Nenhuma funcionalidade especulativa entrou.
+[ ] The test describes the observable contract, not the implementation.
+[ ] It uses the agreed interface/seam, with no private detail.
+[ ] The test would survive an internal refactor that preserves the contract.
+[ ] The RED was observed for the expected reason.
+[ ] The GREEN was observed with fresh output.
+[ ] The added code is proportional to the current behavior.
+[ ] No speculative functionality got in.
 ```
 
-Para bug de regressão, `pelizzai-verification-before-completion` exige a prova reforçada: verde com o fix, falha ao remover/reverter somente o fix, verde após restaurá-lo.
+For a regression bug, `pelizzai-verification-before-completion` requires the reinforced proof: green with the fix, failing when only the fix is removed/reverted, green after restoring it.
 
-## Quando um teste falha inesperadamente
+## When a test fails unexpectedly
 
-Não invoque RCA por reflexo:
+Do not invoke RCA by reflex:
 
 ```text
-- causa direta explícita → ReAct + Verification;
-- bug determinístico com causa incerta → RCA leve;
-- flaky/recorrente/distribuído → RCA + síntese de evidência;
-- dano ativo → contenção reversível primeiro.
+- explicit direct cause → ReAct + Verification;
+- deterministic bug with uncertain cause → light RCA;
+- flaky/recurring/distributed → RCA + evidence synthesis;
+- active damage → reversible containment first.
 ```
 
-Siga a triagem de `pelizzai-debugging`.
+Follow the triage in `pelizzai-debugging`.
 
-## Integração no harness
+## Harness integration
 
-**Quando o TDD entra:**
+**When TDD comes in:**
 
-- Diretamente, quando o usuário desenvolve test-first ou corrige um bug — escreva primeiro o teste de regressão que reproduz o bug.
-- Como **disciplina por tarefa** ao executar um plano: a `pelizzai-execution-plans` conduz tarefa a tarefa (team, subagentes ou inline) e aplica a estratégia registrada — TDD por padrão na tarefa de código, sem forçá-lo onde o efeito não é comportamental.
-- Por **membros de `pelizzai-team` / `pelizzai-subagents`**: cada membro que escreve código implementa sua frente via TDD.
-- `pelizzai-writing-plans` registra a estratégia de prova por tarefa: TDD é o default da tarefa de código e o gate de adequação nomeia a exceção quando o efeito não é comportamental.
-- `pelizzai-debugging` usa regressão red→green quando há comportamento automatizável.
-- `pelizzai-frontend` continua obrigatório para UI mesmo quando os testes de componente passam.
-- `pelizzai-verification-before-completion` valida o resultado completo antes de qualquer alegação.
+- Directly, when the user develops test-first or fixes a bug — first write the regression test that reproduces the bug.
+- As a **per-task discipline** when executing a plan: `pelizzai-execution-plans` drives task by task (team, subagents, or inline) and applies the recorded strategy — TDD by default for the code task, without forcing it where the effect is not behavioral.
+- By **`pelizzai-team` / `pelizzai-subagents` members**: every member who writes code implements their workstream via TDD.
+- `pelizzai-writing-plans` records the proof strategy per task: TDD is the code task's default and the suitability gate names the exception when the effect is not behavioral.
+- `pelizzai-debugging` uses red→green regression when there is automatable behavior.
+- `pelizzai-frontend` remains mandatory for UI even when component tests pass.
+- `pelizzai-verification-before-completion` validates the complete result before any claim.
 
-**Raciocínio — `pelizzai-reasoning`:**
+**Reasoning — `pelizzai-reasoning`:**
 
-- Planejamento: liste os comportamentos com *Structured Decomposition* (comportamentos, não passos de implementação).
-- Teste vermelho inesperado ou bug: triagem de `pelizzai-debugging` antes de mexer no código.
-- Estado verde: *Verification* confirma que o comportamento existe de fato — não basta "passou".
+- Planning: list the behaviors with *Structured Decomposition* (behaviors, not implementation steps).
+- Unexpected red test or bug: `pelizzai-debugging` triage before touching the code.
+- Green state: *Verification* confirms the behavior actually exists — "it passed" is not enough.
 
-**Loop até a entrega — `pelizzai-loop` (OODA):**
+**Loop until delivery — `pelizzai-loop` (OODA):**
 
-- O ciclo RED→GREEN é um loop: repita teste→código por comportamento até a *Definition of Done* (comportamentos críticos testados e verdes, refatorado no verde).
-- No nível da tarefa/plano, o harness mantém o loop **OODA** (observar a evidência fresca → orientar contra o plano → decidir → agir) até a tarefa ser entregue com êxito. Em dúvida material, **pare** e use `pelizzai-interview-me`.
+- The RED→GREEN cycle is a loop: repeat test→code per behavior until the *Definition of Done* (critical behaviors tested and green, refactored on green).
+- At the task/plan level, the harness keeps the **OODA** loop (observe the fresh evidence → orient against the plan → decide → act) until the task is delivered successfully. On material doubt, **stop** and use `pelizzai-interview-me`.
 
-**Aprovação e conclusão:**
+**Approval and completion:**
 
-- Confirme interface, comportamentos e seams com `pelizzai-interview-me`, ou no design aprovado da `pelizzai-brainstorming`, antes de escrever testes.
-- Antes de declarar pronto, passe pela `pelizzai-verification-before-completion` e pela `pelizzai-review` (exceção: o track **ajuste** dispensa o review formal por escopo trivial — ver `pelizzai-quick-fix`; a verificação vale sempre).
+- Confirm interface, behaviors, and seams with `pelizzai-interview-me`, or in the approved `pelizzai-brainstorming` design, before writing tests.
+- Before declaring done, go through `pelizzai-verification-before-completion` and `pelizzai-review` (exception: the **tweak** track waives the formal review for trivial scope — see `pelizzai-quick-fix`; verification always applies).
 
-> TDD é a disciplina padrão do comportamento — não uma prova universal de qualidade para artefato sem comportamento automatizável.
+> TDD is the default discipline for behavior — not a universal quality proof for an artifact with no automatable behavior.

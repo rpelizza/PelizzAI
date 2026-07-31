@@ -1,113 +1,113 @@
-# Proposal Stress (Assumption Tracking aplicado)
+# Proposal Stress (Assumption Tracking applied)
 
-## Objetivo
+## Purpose
 
-Use Proposal Stress para **estressar um pedido novo antes de rotear**: expor as premissas, as lacunas
-materiais, os riscos e as alternativas de que a solução dependeria, produzindo a **Análise da
-proposta** que o `pelizzai-router` apresenta ao usuário. É a aplicação de
-[Assumption Tracking](assumption-tracking.md) com uma lente de premortem de escopo — não uma técnica
-nova, mas a rotina padronizada sobre a mesma máquina de premissas.
+Use Proposal Stress to **stress-test a new request before routing**: expose the assumptions, the
+material gaps, the risks, and the alternatives the solution would depend on, producing the
+**Proposal Analysis** that `pelizzai-router` presents to the user. It is
+[Assumption Tracking](assumption-tracking.md) applied with a scope-premortem lens — not a new
+technique, but the standardized routine on top of the same assumption machine.
 
-> A Análise da proposta é resultado apresentado, não pergunta; ela alimenta o gate de descoberta
-> quando há lacuna material.
+> The Proposal Analysis is a presented result, not a question; it feeds the discovery gate
+> when there is a material gap.
 
-O ganho recuperado é comportamental: antes de agir, o harness volta a expor premissas/lacunas/riscos/
-alternativas em vez de escolher em silêncio uma leitura de escopo/UX/arquitetura/segurança e
-prosseguir.
+The recovered gain is behavioral: before acting, the harness once again exposes assumptions/gaps/
+risks/alternatives instead of silently choosing one reading of scope/UX/architecture/security and
+moving on.
 
-## Quando usar
+## When to use
 
-Produza a Análise da proposta quando o pedido tiver **efeito mutável não-trivial** com incerteza
-material:
-
-```text
-- feature nova ou alterada;
-- refactor com contrato/fronteira em jogo;
-- mudança estrutural, de dados ou de segurança;
-- qualquer pedido em que uma decisão de escopo/UX/arquitetura ainda está em aberto.
-- todo produto/projeto greenfield, mesmo com stack informada.
-```
-
-## Quando evitar
-
-Não produza a análise (ela colapsa a zero) em:
+Produce the Proposal Analysis when the request has a **non-trivial mutating effect** with material
+uncertainty:
 
 ```text
-- tarefa read-only (explicar, analisar, revisar sem escrever);
-- ajuste trivial de baixa incerteza (texto, label, rename mecânico, config óbvia).
+- a new or changed feature;
+- a refactor with a contract/boundary at stake;
+- a structural, data, or security change;
+- any request in which a scope/UX/architecture decision is still open.
+- every greenfield product/project, even with the stack stated.
 ```
 
-Nesses casos a rota é anunciada sem parada — não transforme ativação de skill em preâmbulo maior que
-a tarefa. **Risco alto não é gatilho de análise expandida**: um refactor de risco alto com escopo
-claro colapsa a análise numa linha; risco eleva prova, gates e overlays, não cria incerteza
-artificial. O gatilho da análise expandida e do gate de descoberta é a **lacuna material**, não o
-risco isolado.
+## When to avoid
 
-## Rotina
+Do not produce the analysis (it collapses to zero) for:
 
-Dado um pedido:
+```text
+- read-only tasks (explaining, analyzing, reviewing without writing);
+- trivial low-uncertainty tweaks (text, a label, a mechanical rename, obvious config).
+```
 
-1. **Listar as premissas** de que o plano dependeria para prosseguir (funcionais, de arquitetura, de
-   dados, de segurança, de integração, de compatibilidade). Use os sinais de premissa oculta de
+In those cases the route is announced without a stop — do not turn skill activation into a preamble
+bigger than the task. **High risk is not a trigger for an expanded analysis**: a high-risk refactor
+with clear scope collapses the analysis into one line; risk raises proof, gates, and overlays, it
+does not create artificial uncertainty. The trigger for the expanded analysis and the discovery
+gate is the **material gap**, not risk alone.
+
+## Routine
+
+Given a request:
+
+1. **List the assumptions** the plan would depend on to proceed (functional, architectural, data,
+   security, integration, compatibility). Use the hidden-assumption signals from
    [Assumption Tracking](assumption-tracking.md).
-2. **Classificar cada premissa** por impacto × incerteza (a mesma matriz de criticidade).
-3. **Marcar como MATERIAL** as premissas cuja leitura errada mudaria requisito, escopo, UX,
-   arquitetura, segurança, dados ou aceite. Decisão de produto reversível continua pertencendo ao
-   usuário; somente detalhe mecânico coberto por contrato ratificado pode virar suposição operacional.
-4. **Emitir a análise compacta** e apontar **quais lacunas materiais justificam PROPOR descoberta**
-   (brainstorming compacto ou `pelizzai-interview-me` focal).
+2. **Classify each assumption** by impact × uncertainty (the same criticality matrix).
+3. **Mark as MATERIAL** the assumptions whose wrong reading would change a requirement, scope, UX,
+   architecture, security, data, or acceptance. A reversible product decision still belongs to the
+   user; only a mechanical detail covered by a ratified contract may become an operational assumption.
+4. **Emit the compact analysis** and point out **which material gaps justify PROPOSING discovery**
+   (compact brainstorming or a focused `pelizzai-interview-me`).
 
-## Formato da análise (≤ 6 bullets, proporcional)
+## Analysis format (≤ 6 bullets, proportional)
 
 ```text
-Fatos e decisões já ratificadas:
-- <item> — <evidência ou decisão do usuário>
+Facts and decisions already ratified:
+- <item> — <evidence or user decision>
 
-Decisões ainda abertas:
-- <decisão> — muda <requisito/escopo/UX/arquitetura/segurança/dados/aceite>
+Decisions still open:
+- <decision> — changes <requirement/scope/UX/architecture/security/data/acceptance>
 
-Lacunas materiais (mudam escopo/UX/arquitetura/segurança/dados):
-- <lacuna> — o que muda se a leitura for outra
+Material gaps (change scope/UX/architecture/security/data):
+- <gap> — what changes if the reading is different
 
-Riscos concretos:
-- <risco> — quando aparece
+Concrete risks:
+- <risk> — when it appears
 
-Alternativas materialmente diferentes (quando existirem):
-- <alternativa> — trade-off central
+Materially different alternatives (when they exist):
+- <alternative> — central trade-off
 ```
 
-Em bounded/ajuste já especificado, a passada colapsa em **uma linha**: `Sem lacunas materiais;
-contrato informado: <lista curta>`. Greenfield nunca colapsa.
+For an already-specified bounded/tweak change, the pass collapses into **one line**: `No material
+gaps; stated contract: <short list>`. Greenfield never collapses.
 
-## Ligação com o roteamento
+## Link to routing
 
-- **Sem lacuna material** → recomende a rota e aguarde ratificação se houver mutação.
-- **≥ 1 lacuna material** → o router recomenda descoberta; depois a entrevista resolve uma decisão
-  por turno. Pular é decisão explícita do usuário; recomendação não é autorização.
+- **No material gap** → recommend the route and await ratification if there is a mutation.
+- **≥ 1 material gap** → the router recommends discovery; the interview then resolves one decision
+  per turn. Skipping is an explicit user decision; a recommendation is not an authorization.
 
-## Carve-out de subagente
+## Subagent carve-out
 
-Sob briefing fechado (SUBAGENT-STOP), NÃO produza a análise sempre-ativa nem abra o gate de
-descoberta: aplique o briefing e escale ao coordenador a decisão de escopo que ele deixou em aberto.
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do NOT produce the always-on analysis and do NOT open the
+discovery gate: apply the briefing and escalate to the coordinator the scope decision it left open.
 
-## Relação com outras técnicas
+## Relation to other techniques
 
-| Técnica                                        | Papel em relação a Proposal Stress                                        |
+| Technique                                      | Role relative to Proposal Stress                                          |
 | ---------------------------------------------- | ------------------------------------------------------------------------- |
-| [Assumption Tracking](assumption-tracking.md)  | Máquina de premissas (identificar, classificar, validar) que esta rotina aplica |
-| [Constraint Satisfaction](constraint-satisfaction.md) | Separa o obrigatório do desejável entre as lacunas encontradas       |
-| [Decision Making](decision-making.md)          | Compara as alternativas materialmente diferentes quando o gate abre       |
-| [pelizzai-interview-me](../../pelizzai-interview-me/SKILL.md) | Skill irmã que resolve as lacunas materiais quando a descoberta é aceita |
+| [Assumption Tracking](assumption-tracking.md)  | The assumption machine (identify, classify, validate) this routine applies |
+| [Constraint Satisfaction](constraint-satisfaction.md) | Separates the mandatory from the desirable among the gaps found      |
+| [Decision Making](decision-making.md)          | Compares the materially different alternatives when the gate opens        |
+| [pelizzai-interview-me](../../pelizzai-interview-me/SKILL.md) | Sister skill that resolves the material gaps once discovery is accepted |
 
-## Anti-padrões
+## Anti-patterns
 
 ```text
-- Rodar a análise em tarefa read-only ou ajuste trivial (cerimônia sem efeito).
-- Escolher em silêncio uma leitura de escopo/UX/arquitetura e prosseguir sem declará-la.
-- Tratar reversibilidade como autorização para a LLM decidir uma preferência de produto.
-- Tratar risco alto como incerteza e inflar a análise de um pedido de escopo claro.
-- Transformar a análise numa pergunta em vez de resultado apresentado.
-- Abrir o gate de descoberta sob briefing fechado (SUBAGENT-STOP).
+- Running the analysis on a read-only task or a trivial tweak (ceremony with no effect).
+- Silently choosing one reading of scope/UX/architecture and proceeding without declaring it.
+- Treating reversibility as authorization for the LLM to decide a product preference.
+- Treating high risk as uncertainty and inflating the analysis of a clearly scoped request.
+- Turning the analysis into a question instead of a presented result.
+- Opening the discovery gate under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP).
 ```
 
-Voltar ao [catálogo de técnicas](../SKILL.md).
+Back to the [technique catalog](../SKILL.md).

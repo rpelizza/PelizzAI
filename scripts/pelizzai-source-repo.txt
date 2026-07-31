@@ -1,15 +1,16 @@
-# SENTINELA DO REPO-FONTE PelizzAI (source mode)
+# PelizzAI SOURCE-REPO SENTINEL (source mode)
 #
-# A PRESENCA deste arquivo e o UNICO criterio que marca este repositorio como o
-# repo-fonte do harness PelizzAI. Com ele presente:
-#   - o harness NAO cria runtime `pelizzai/` consumidor (state/specs/plans/profile);
-#   - o hook pelizzai-writegate PULA a Regra B (kickoff via state consumidor);
-#   - o hook pelizzai-session-start NAO sugere bootstrap consumidor;
-#   - pelizzai-audit trata o projeto como fonte (scan sem bootstrap).
+# The PRESENCE of this file is the ONLY criterion that marks this repository as
+# the source repo of the PelizzAI harness. While it is present:
+#   - the harness does NOT create the consumer `pelizzai/` runtime (state/specs/plans/profile);
+#   - the pelizzai-writegate hook SKIPS Rule B (kickoff via consumer state);
+#   - the pelizzai-session-start hook does NOT suggest consumer bootstrap;
+#   - pelizzai-audit treats the project as a source (scan without bootstrap).
 #
-# NUNCA copie este arquivo para um projeto consumidor: ele desativaria o lifecycle
-# consumidor e o enforcement do writegate la. A distribuicao correta e:
-#   node scripts/sync-harness.mjs --export-consumer <caminho-do-projeto>
-#   # ou os wrappers sync-harness.ps1 / sync-harness.sh
-# que copia skills core, hooks e scripts uteis, gera o CLAUDE.md consumidor e
-# EXCLUI esta sentinela por contrato (removendo-a do destino se existir).
+# NEVER copy this file into a consumer project: it would disable the consumer
+# lifecycle and the writegate enforcement there. The correct distribution is:
+#   node scripts/sync-harness.mjs --export-consumer <project-path>
+#   # or the wrappers sync-harness.ps1 / sync-harness.sh
+# which copies core skills, hooks, and useful scripts, generates the consumer
+# CLAUDE.md, and EXCLUDES this sentinel by contract (removing it from the
+# target if it exists).

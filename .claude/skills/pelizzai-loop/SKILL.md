@@ -1,89 +1,89 @@
 ---
 name: pelizzai-loop
-description: Use para conduzir loops macro até a entrega — execução tarefa a tarefa, fix→re-review ou investigação em múltiplas rodadas — com OODA (Observar → Orientar → Decidir → Agir), Definition of Done e critérios de parada. Não use para transformar todo microciclo de teste ou ação única em OODA.
+description: Use to drive macro loops through to delivery — task-by-task execution, fix→re-review, or investigation across multiple rounds — with OODA (Observe → Orient → Decide → Act), Definition of Done, and stop criteria. Do not use to turn every test micro-cycle or single action into OODA.
 ---
 
 # PelizzAI Loop
 
-## Objetivo
+## Goal
 
-Dar ao harness a disciplina do **laço**: repetir o ciclo de trabalho até a entrega **com critério de parada explícito** — nem desistir cedo, nem iterar para sempre, nem declarar pronto sem a Definition of Done atingida e verificada.
+Give the harness the discipline of the **loop**: repeat the work cycle until delivery **with an explicit stop criterion** — never quitting early, never iterating forever, never declaring done without the Definition of Done reached and verified.
 
-**Anuncie ao iniciar (quando acionada explicitamente):** "Usando a skill PelizzAI Loop para iterar até a Definition of Done."
+**Announce on start (when triggered explicitly)**, in the conversation's language: that you are using the PelizzAI Loop skill to iterate until the Definition of Done.
 
 ---
 
-## O loop macro é OODA
+## The macro loop is OODA
 
-Loops **macro**, nos quais a realidade pode mudar entre iterações, seguem **OODA** (técnica completa: `pelizzai-reasoning` → [techniques/ooda.md](../pelizzai-reasoning/techniques/ooda.md)):
+**Macro** loops, in which reality can change between iterations, follow **OODA** (full technique: `pelizzai-reasoning` → [techniques/ooda.md](../pelizzai-reasoning/techniques/ooda.md)):
 
 ```text
-OBSERVAR  — colete a realidade ATUAL: git, saída fresca de testes/lint/build, vereditos de
-            review, o registro da tarefa (state consumidor ou execution record nativo)
-            validado contra o real. Nunca o snapshot da iteração anterior.
-ORIENTAR  — interprete contra o objetivo: o que mudou? a DoD está mais perto? alguma premissa caiu?
-DECIDIR   — próxima tarefa / corrigir / replanejar / parar e perguntar / escalar / concluir.
-AGIR      — execute (aqui vivem o TDD, o review, as ferramentas — os micro-ciclos ReAct).
-REPETIR   — a partir do OBSERVAR, até a Definition of Done.
+OBSERVE — collect CURRENT reality: git, fresh test/lint/build output, review verdicts,
+          the task record (consumer state or native execution record) validated against
+          the real thing. Never the previous iteration's snapshot.
+ORIENT  — interpret against the goal: what changed? is the DoD closer? did a premise fall?
+DECIDE  — next task / fix / replan / stop and ask / escalate / conclude.
+ACT     — execute (this is where TDD, review, and the tools live — the ReAct micro-cycles).
+REPEAT  — from OBSERVE, until the Definition of Done.
 ```
 
-Onde esse loop roda no harness:
+Where this loop runs in the harness:
 
-| Laço                                    | Condução                        | O que esta skill contribui            |
+| Loop                                    | Driven by                       | What this skill contributes           |
 | --------------------------------------- | ------------------------------- | ------------------------------------- |
-| Plano tarefa a tarefa                   | `pelizzai-execution-plans`      | lente OODA + DoD + parada em dúvida   |
-| fix → re-review                         | `pelizzai-review` + task-cycle  | re-observar (re-review) após cada fix |
-| Investigação em múltiplas rodadas       | `pelizzai-team` / `pelizzai-debugging` | reorientação por evidência nova     |
+| Task-by-task plan                       | `pelizzai-execution-plans`      | OODA lens + DoD + stop on doubt       |
+| fix → re-review                         | `pelizzai-review` + task-cycle  | re-observe (re-review) after each fix |
+| Multi-round investigation               | `pelizzai-team` / `pelizzai-debugging` | reorientation on new evidence   |
 
-RED→GREEN e chamadas de ferramenta são microciclos de TDD/ReAct dentro de **Agir**; não repita o vocabulário OODA a cada teste. Um bug direto com uma única sequência repro→fix→verify não aciona esta skill.
+RED→GREEN and tool calls are TDD/ReAct micro-cycles inside **Act**; do not repeat the OODA vocabulary on every test. A direct bug with a single repro→fix→verify sequence does not trigger this skill.
 
 ## Definition of Done (DoD)
 
-O loop só encerra quando a DoD é atingida **e verificada** (`pelizzai-verification-before-completion`). Defina a DoD **antes** de entrar no loop:
+The loop only ends when the DoD is reached **and verified** (`pelizzai-verification-before-completion`). Define the DoD **before** entering the loop:
 
 ```text
-- De um plano: todas as tarefas entregues + validação final do coordenador (review final da branch,
-  suíte completa verde com evidência, checklist requisito a requisito do plano).
-- De uma tarefa: efeito entregue com a estratégia registrada no plano (TDD, caracterização, validate/dry-run, visual ou estática), spec ✅ e qualidade ✅ com evidência fresca.
-- De um fix de bug: sintoma original agora verde pelo oráculo adequado; regressão red→green quando houver comportamento automatizável; nenhuma regressão relevante.
-- De uma especificação/workflow: quem for executar consegue trabalhar sem fazer UMA pergunta —
-  enquanto restar dúvida, não está pronto.
+- For a plan: all tasks delivered + the coordinator's final validation (final review of the branch,
+  full suite green with evidence, requirement-by-requirement checklist of the plan).
+- For a task: effect delivered with the strategy recorded in the plan (TDD, characterization, validate/dry-run, visual, or static), spec ✅ and quality ✅ with fresh evidence.
+- For a bug fix: original symptom now green through the adequate oracle; red→green regression when there is automatable behavior; no relevant regression.
+- For a specification/workflow: whoever executes it can work without asking ONE question —
+  while doubt remains, it is not ready.
 ```
 
-"Quase tudo" não é DoD. Requisito sem entrega = loop continua.
+"Almost everything" is not a DoD. An undelivered requirement = the loop continues.
 
-## Critérios de parada (saídas legítimas do loop)
+## Stop criteria (legitimate exits from the loop)
 
 ```text
-1. DoD atingida e VERIFICADA (evidência fresca) → concluir.
-2. Decisão material no meio do loop → PARE e acione `pelizzai-interview-me`; resolva uma pergunta
-   por vez, com recomendação, e só retome quando nenhuma decisão humana estiver pendente.
-3. Bloqueio que você não resolve (circuit breaker estourado, decisão que pertence ao humano)
-   → registre phase: blocked no state consumidor ou execution record nativo e escale com
-   mensagem acionável.
-4. A evidência invalidou o caminho → replaneje (volte ao plano/design), não insista.
-5. Custo de continuar maior que o benefício (investigação/rodadas sem circuit breaker próprio
-   que pararam de render informação) → escale ou pergunte antes de insistir; nunca saia em
-   silêncio por cansaço.
+1. DoD reached and VERIFIED (fresh evidence) → conclude.
+2. Material decision mid-loop → STOP and trigger `pelizzai-interview-me`; resolve one question
+   at a time, with a recommendation, and only resume when no human decision is pending.
+3. A blocker you cannot resolve (circuit breaker tripped, a decision that belongs to the human)
+   → record phase: blocked in the consumer state or native execution record and escalate with
+   an actionable message.
+4. Evidence invalidated the path → replan (go back to the plan/design); do not insist.
+5. Cost of continuing exceeds the benefit (investigation/rounds without their own circuit breaker
+   that stopped yielding information) → escalate or ask before insisting; never exit
+   silently out of fatigue.
 ```
 
-Fora esses cinco, não peça permissão para cada passo mecânico já aprovado. Execução contínua não é
-autonomia decisória: qualquer escolha nova de produto aciona o critério 2. Estes cinco critérios
-são a lista canônica; `techniques/ooda.md` remete a ela.
+Outside these five, do not ask permission for every already-approved mechanical step. Continuous
+execution is not decision autonomy: any new product choice triggers criterion 2. These five
+criteria are the canonical list; `techniques/ooda.md` points back to it.
 
 ---
 
-## Lente opcional: loops como workflows delegáveis
+## Optional lens: loops as delegable workflows
 
-Fora da execução de código, "loop" também é um padrão recorrente na vida do usuário (rotina, semana, atividade repetida). Um **workflow** é a especificação de um loop desses; vocabulário útil ao especificá-lo: **Gatilho** (evento ou agenda que dispara cada execução), **Checkpoint** (ponto de decisão humana), **Push right** (adiar o checkpoint para quando tudo estiver pronto), **Brief** (resumo executivo pronto para decisão, nunca o resultado bruto). Use esta lente apenas quando o usuário estiver especificando automações/rotinas — não a imponha ao fluxo de código.
+Outside code execution, a "loop" is also a recurring pattern in the user's life (routine, week, repeated activity). A **workflow** is the specification of such a loop; useful vocabulary when specifying one: **Trigger** (event or schedule that fires each run), **Checkpoint** (human decision point), **Push right** (defer the checkpoint until everything is ready), **Brief** (executive summary ready for decision, never the raw result). Use this lens only when the user is specifying automations/routines — do not impose it on the code flow.
 
 ---
 
-## Integração
+## Integration
 
-- `pelizzai-execution-plans` — conduz o laço macro de planos com esta lente (OODA + DoD + parada em dúvida).
-- `pelizzai-reasoning` — a técnica OODA (macro) e ReAct (micro) vivem lá; Verification confirma a DoD.
-- `pelizzai-tdd` — microciclo para comportamento quando essa for a estratégia selecionada; não torna OODA obrigatório.
-- `pelizzai-interview-me` — destino obrigatório da parada por dúvida material.
-- `pelizzai-verification-before-completion` — nenhuma saída do loop sem evidência fresca.
-- `pelizzai-router` — o Sync & delta é o Observar do início de cada tarefa.
+- `pelizzai-execution-plans` — drives the macro loop of plans with this lens (OODA + DoD + stop on doubt).
+- `pelizzai-reasoning` — the OODA (macro) and ReAct (micro) techniques live there; Verification confirms the DoD.
+- `pelizzai-tdd` — micro-cycle for behavior when that is the selected strategy; does not make OODA mandatory.
+- `pelizzai-interview-me` — mandatory destination of the stop for material doubt.
+- `pelizzai-verification-before-completion` — no loop exit without fresh evidence.
+- `pelizzai-router` — Sync & delta is the Observe at the start of each task.

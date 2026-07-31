@@ -1,64 +1,65 @@
 ---
 name: pelizzai-finish-task
-description: Use depois que overlays, consolidação e validação final selaram o conteúdo em validated-head. Antes do destino, checa como rede de segurança se segurança, UI ou documentação ficaram descobertas e oferece — sem bloquear — devolver a entrega ao ciclo. No consumidor, encerra a tarefa em phase delivered com um commit metadata-only de state.md + o arquivo de data/history/ da migração (done é constatação posterior, não aqui); no repo-fonte, valida o seal sem criar runtime/closure. Mantém local por default ou publica/abre PR com autorização. Nunca altera conteúdo ou histórico depois do seal.
+description: Use after overlays, consolidation, and final validation have sealed the content at validated-head. Before the destination, checks as a safety net whether security, UI, or documentation went uncovered and offers — without blocking — to return the delivery to the cycle. In a consumer, closes the task in phase delivered with a metadata-only commit of state.md + the data/history/ file from the migration (done is observed later, not here); in the source repo, validates the seal without creating runtime/closure. Keeps local by default or publishes/opens a PR with authorization. Never alters content or history after the seal.
 ---
 
 # PelizzAI Finish Task
 
-## Objetivo
+## Goal
 
-Integrar **o conteúdo que foi validado**, sem uma última rodada oculta de mutações. Squash,
-security, frontend, documentação, fixes e testes pertencem ao fluxo anterior e esta skill não
-executa nenhum deles. O que ela faz antes de qualquer destino é uma **checagem-rede** (§1.5): se a
-superfície tocada passou sem o overlay correspondente, ela oferece uma vez devolver a entrega ao
-ciclo — sem bloquear e sem remendar depois do seal. Esta skill encerra em
-`phase: delivered` (conteúdo selado + destino executado) e grava `confirmar:`; `done` é constatação
-posterior, na próxima abertura/retomada — nunca declarado aqui. Esta skill:
+Integrate **the content that was validated**, with no hidden final round of mutations. Squash,
+security, frontend, documentation, fixes, and tests belong to the preceding flow and this skill
+runs none of them. What it does before any destination is a **safety-net check** (§1.5): if a
+touched surface got through without the matching overlay, it offers once to return the delivery to
+the cycle — without blocking and without patching after the seal. This skill closes in
+`phase: delivered` (content sealed + destination executed) and records `confirm:`; `done` is
+observed, not declared — the observation happens at the next opening/resumption, never here. This
+skill:
 
 ```text
-consumer: validated-head → closure `delivered` (state.md + history/ da migração) → delivery-head
+consumer: validated-head → closure `delivered` (state.md + history/ from the migration) → delivery-head
 source:   validated-head ──────────────────────────────────→ delivery-head
-                                     (done constatado depois, fora desta skill)
+                                     (done observed later, outside this skill)
 ```
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Finish Task para integrar o conteúdo já validado."
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Finish Task skill to integrate the already-validated content.
 
-## Source mode — sem runtime consumidor
+## Source mode — no consumer runtime
 
-Se o sentinel do repo-fonte estiver presente, não procure/crie `pelizzai/data/state.md`. Receba do
-execution record `branch`, `base-ref`, `base-sha` e `validated-head`; exija branch segura,
-`git rev-parse HEAD == validated-head` e working tree limpa. Defina
-`delivery-head=validated-head`, pule o closure commit e vá direto a
-**Resolver o destino**. Sem pedido externo, recomende manter local e aguarde a escolha. Ao terminar,
-marque o execution record
-`phase: delivered` com `validated-head`, `delivery-head`, `confirmar:` e status do destino; `done` é
-constatado depois (mesma reconciliação, no execution record nativo, sem criar `pelizzai/`). Qualquer
-divergência volta ao lifecycle.
+If the source repo sentinel is present, do not look for or create `pelizzai/data/state.md`. Take
+`branch`, `base-ref`, `base-sha`, and `validated-head` from the execution record; require a safe
+branch, `git rev-parse HEAD == validated-head`, and a clean working tree. Set
+`delivery-head=validated-head`, skip the closure commit, and go straight to
+**Resolve the destination**. Without an external request, recommend keeping local and wait for the
+choice. When finished, mark the execution record
+`phase: delivered` with `validated-head`, `delivery-head`, `confirm:`, and the destination status;
+`done` is observed later (same reconciliation, in the native execution record, without creating
+`pelizzai/`). Any divergence goes back to the lifecycle.
 
-As seções de state/closure abaixo são exclusivas do projeto consumidor.
+The state/closure sections below apply only to consumer projects.
 
-## Invariantes
+## Invariants
 
 ```text
-- Uma tarefa/state representa um único repositório Git.
-- Ao entrar, HEAD == validated-head.
-- A única sujeira permitida é pelizzai/data/state.md com o seal ainda não commitado.
-- Depois do seal, não roda squash/rebase/reset, overlay, formatter, codegen, teste que escreva
-  snapshot, doc generator nem fix.
-- Lacuna de cobertura (segurança, UI, documentação) vira oferta explícita no §1.5, nunca silêncio;
-  aceitá-la devolve a tarefa ao ciclo de validação, nunca vira patch pós-seal.
-- O único commit novo toca somente metadata do harness: pelizzai/data/state.md e o
-  pelizzai/data/history/<AAAA-MM-DD>-<slug>.md que a migração do selo acabou de gerar.
-- Manter local é a recomendação padrão, mas também exige resposta no gate. Push/PR, remover
-  worktree e descarte exigem decisão explícita por tarefa: nunca são aplicados a partir de um
-  default de profile nem herdados de outra tarefa.
-- Nunca use reset --hard, branch -D, worktree remove --force ou stash automático.
+- One task/state represents a single Git repository.
+- On entry, HEAD == validated-head.
+- The only dirt allowed is pelizzai/data/state.md with the seal not yet committed.
+- After the seal, no squash/rebase/reset, overlay, formatter, codegen, snapshot-writing test,
+  doc generator, or fix runs.
+- A coverage gap (security, UI, documentation) becomes an explicit offer in §1.5, never silence;
+  accepting it returns the task to the validation cycle — it never becomes a post-seal patch.
+- The single new commit touches only harness metadata: pelizzai/data/state.md and the
+  pelizzai/data/history/<YYYY-MM-DD>-<slug>.md the seal's migration just generated.
+- Keeping local is the default recommendation, but it still requires an answer at the gate.
+  Push/PR, worktree removal, and discard require an explicit per-task decision: they are never
+  applied from a profile default nor inherited from another task.
+- Never use reset --hard, branch -D, worktree remove --force, or automatic stash.
 ```
 
-## 1. Gate fail-closed do conteúdo selado
+## 1. Fail-closed gate on the sealed content
 
-Leia `project`, `branch`, `base-ref`, `base-sha`, `validated-head`, `isolation` e
-`worktree-path` do state. Confirme que `project` é a raiz do repositório atual e rode:
+Read `project`, `branch`, `base-ref`, `base-sha`, `validated-head`, `isolation`, and
+`worktree-path` from the state. Confirm that `project` is the current repository root and run:
 
 ```bash
 git branch --show-current
@@ -70,281 +71,289 @@ git diff --name-only
 git diff --cached --name-only
 ```
 
-Pare e volte ao fluxo que valida quando qualquer item falhar:
+Stop and go back to the validating flow when any item fails:
 
-- branch vazia/protegida (`main`, `master`, `develop`, `dev` ou o nome de `base-ref`) ou diferente do state;
-- `validated-head` ausente, abreviado, inválido ou diferente de `git rev-parse HEAD`;
-- mudança staged;
-- arquivo alterado/untracked diferente de `pelizzai/data/state.md`;
-- evidência de review/checklist/verification anterior ao último fix;
-- overlay registrado em `overlays:` que nunca rodou — o plano prometeu e não cumpriu; volte e
-  execute lá. Superfície tocada que ninguém chegou a registrar **não** para aqui: ela cai na rede
-  do §1.5, que oferece em vez de bloquear.
+- branch empty/protected (`main`, `master`, `develop`, `dev`, or the `base-ref` name) or different from the state;
+- `validated-head` missing, abbreviated, invalid, or different from `git rev-parse HEAD`;
+- staged change;
+- modified/untracked file other than `pelizzai/data/state.md`;
+- evidence of review/checklist/verification predating the last fix;
+- an overlay recorded in `overlays:` that never ran — the plan promised and did not deliver; go
+  back and run it there. A touched surface nobody ever recorded does **not** stop here: it falls
+  into the §1.5 net, which offers instead of blocking.
 
-Se `commit-strategy: squash-final`, confirme que a consolidação ocorreu **antes** do seal (em
-geral, um commit de conteúdo no range `base-sha..validated-head`). Não tente corrigir o histórico
-aqui; volte à `pelizzai-execution-plans` e revalide o novo candidato.
+If `commit-strategy: squash-final`, confirm the consolidation happened **before** the seal (in
+general, one content commit in the `base-sha..validated-head` range). Do not try to fix history
+here; go back to `pelizzai-execution-plans` and revalidate the new candidate.
 
-Se houver commits indevidos numa branch protegida, preserve-os criando uma branch de resgate e
-pare. Entregue instruções manuais para reconciliar a protegida; não faça reset automático.
+If there are stray commits on a protected branch, preserve them by creating a rescue branch and
+stop. Hand over manual instructions to reconcile the protected branch; do not auto-reset.
 
-## 1.5. Rede de segurança de cobertura (oferta — não bloqueia)
+## 1.5. Coverage safety net (an offer — it does not block)
 
-Overlay é responsabilidade do router e do plano e roda **na execução**, antes do review final e de
-`validated-head`; esta seção não o traz para cá. Ela é a **última rede**: pega a superfície que
-escapou da classificação lá atrás. Rode-a uma vez, com o gate do §1 verde e antes de oferecer o
-destino.
+Overlays are the router's and the plan's responsibility and run **during execution**, before the
+final review and `validated-head`; this section does not pull them here. It is the **last net**: it
+catches the surface that escaped classification back then. Run it once, with the §1 gate green and
+before offering the destination.
 
-Cruze o diff fechado com a cobertura registrada — `overlays:` no state (em source mode, no execution
-record) mais a evidência da validação final:
+Cross the closed diff against the recorded coverage — `overlays:` in the state (in source mode, in
+the execution record) plus the final-validation evidence:
 
 ```bash
 git diff --name-only <base-sha>..<validated-head>
 ```
 
-Classifique cada superfície como COBERTA ou DESCOBERTA:
+Classify each surface as COVERED or UNCOVERED:
 
 ```text
-- Segurança     → pelizzai-oswap: auth/autorização, input não confiável, SQL/query, segredo, dado
-                  sensível, upload, desserialização, CORS/SSRF, header, dependência nova.
-- UI            → pelizzai-frontend: componente, página, rota de tela, estilo, estado visual.
-- Documentação  → pelizzai-documenting-features: nova superfície estável para humanos — rota,
-                  comando, API pública, tela.
+- Security       → pelizzai-oswap: auth/authorization, untrusted input, SQL/query, secret,
+                   sensitive data, upload, deserialization, CORS/SSRF, header, new dependency.
+- UI             → pelizzai-frontend: component, page, screen route, style, visual state.
+- Documentation  → pelizzai-documenting-features: new stable human-facing surface — route,
+                   command, public API, screen.
 ```
 
-**Coberta: não pergunte.** Overlay registrado e com evidência na validação final está resolvido;
-repetir a pergunta no fechamento é ruído e desautoriza o trabalho já feito.
+**Covered: do not ask.** An overlay recorded and evidenced in the final validation is settled;
+repeating the question at closeout is noise and undermines the work already done.
 
-**Descoberta: ofereça UMA vez**, uma pergunta por superfície, na ordem segurança → UI →
-documentação, com o custo na mesa:
+**Uncovered: offer ONCE**, one question per surface, in the order security → UI → documentation,
+with the cost on the table:
 
 ```text
-O diff toca <superfície concreta> e nenhum overlay de <área> cobriu esta entrega.
+The diff touches <concrete surface> and no <area> overlay covered this delivery.
 
-Rodar `<skill>` agora é tardio: o seal cai e o conteúdo volta ao ciclo (overlay →
-consolidação → review final → novo validated-head), o que atrasa a entrega. Ainda assim
-é melhor tarde do que entregar descoberto.
+Running `<skill>` now is late: the seal falls and the content returns to the cycle (overlay →
+consolidation → final review → new validated-head), which delays the delivery. Even so, late
+beats delivering uncovered.
 
-Rodar agora, ou seguir para o destino assumindo a lacuna?
+Run it now, or proceed to the destination accepting the gap?
 ```
 
-- **Aceito:** não rode o overlay aqui nem crie commit corretivo depois do seal. Grave
-  `validated-head: <none>` (source mode: no execution record, sem criar `pelizzai/`), anote a
-  superfície em `## Progresso` → `pending` e devolva a tarefa à
-  `pelizzai-execution-plans` → **Validação final da entrega**, passo 1 (rodar overlays). O conteúdo
-  corrigido é reconsolidado, revisado e selado de novo, e só então volta a esta skill. "O conteúdo
-  entregue é exatamente o conteúdo validado" não se negocia por pressa.
-- **Recusado:** siga para o §2a sem insistir. Registre a lacuna assumida em uma linha (`pending`) e
-  repita-a no relatório do destino — recusa informada é decisão do usuário; silêncio seria falha do
-  harness.
+- **Accepted:** do not run the overlay here nor create a corrective commit after the seal. Record
+  `validated-head: <none>` (source mode: in the execution record, without creating `pelizzai/`),
+  note the surface under `## Progress` → `pending`, and return the task to
+  `pelizzai-execution-plans` → **Final delivery validation**, step 1 (run overlays). The corrected
+  content is reconsolidated, re-reviewed, and sealed again, and only then comes back to this
+  skill. "The delivered content is exactly the validated content" is not traded away for speed.
+- **Declined:** proceed to §2a without insisting. Record the accepted gap in one line (`pending`)
+  and repeat it in the destination report — an informed refusal is the user's decision; silence
+  would be a harness failure.
 
-Sob briefing fechado (SUBAGENT-STOP), não abra a oferta: reporte a superfície descoberta ao
-coordenador e siga o briefing.
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not open the offer: report the uncovered surface to
+the coordinator and follow the briefing.
 
-## 2. Resolver o destino e selar o closure (`delivered`)
+## 2. Resolve the destination and seal the closure (`delivered`)
 
-### 2a. Ofereça o destino
+### 2a. Offer the destination
 
-**Ofereça o destino** uma vez. **Manter local** é recomendado quando não houve intenção externa, mas
-nunca é auto-confirmado. Faça uma única pergunta e aguarde:
+**Offer the destination** once. **Keep local** is recommended when no external intent was
+expressed, but it is never auto-confirmed. Ask a single question and wait:
 
 ```text
-Como integrar o conteúdo validado?
+How should the validated content be integrated?
 
-1. Publicar esta branch sem abrir PR
-2. Publicar esta branch e abrir Pull Request
-3. Manter local
-4. Preparar descarte/arquivamento manual
+1. Publish this branch without opening a PR
+2. Publish this branch and open a Pull Request
+3. Keep local
+4. Prepare manual discard/archival
 
-Qual opção?
+Which option?
 ```
 
-Numa tarefa trivial local, a pergunta pode ser curta: "Recomendo manter local; confirma ou prefere
-publicar/abrir PR?". Ainda assim, aguarde resposta. Quando intenção externa já foi expressa, confirme
-somente o alvo materialmente ambíguo. Destino nunca vem de default de profile.
+On a trivial local task, the question can be short: "I recommend keeping local; confirm, or would
+you rather publish/open a PR?". Still, wait for the answer. When external intent was already
+expressed, confirm only the materially ambiguous target. The destination never comes from a
+profile default.
 
-Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing
-e escale ao coordenador o que exigir decisão.
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route analyses and open no
+gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
-### 2b. Selar o closure em `delivered` (commit metadata-only)
+### 2b. Seal the closure in `delivered` (metadata-only commit)
 
-`delivered` = conteúdo selado + destino executado; grava-se ANTES de sair da branch de tarefa (sobe
-junto no PR). No `pelizzai/data/state.md` já modificado pelo seal:
+`delivered` = content sealed + destination executed; it is recorded BEFORE leaving the task branch
+(it rides along in the PR). In the `pelizzai/data/state.md` already modified by the seal:
 
-1. **Migre o bloco íntegro e desinfle o cursor** pela fronteira definida em `pelizzai-execution-plans`
-   → §Estado e retomada: copie fielmente os campos da tarefa + as linhas `T<n>`/`next`/`pending` para
-   `pelizzai/data/history/<AAAA-MM-DD>-<slug>.md` (VERSIONADO), devolva `## Tarefa ativa` e
-   `## Progresso` aos placeholders do template e deixe no `## Histórico` **uma** linha de índice
-   (`- <data> <slug> — delivered — <resultado ≤10 palavras> → data/history/<arquivo>`). O cursor volta
-   ao tamanho do template AQUI, no fechamento — não fica inchado durante toda a janela `delivered`.
-   Preserve `slug`, `phase`, `branch`, `base-ref`, `base-sha`, `validated-head`, `commit-strategy`,
-   `worktree-path` e `confirmar:`: o destino (Passo 3) e a constatação posterior ainda os leem.
-2. Defina `phase: delivered` e grave `confirmar:` com a condição observável que vira `done`, derivada
-   do destino escolhido em 2a: publicar/PR → `base-ref contém validated-head (PR/branch integrada)`;
-   manter local → `entrega local aceita pelo usuário`; descarte/arquivamento (opção 4) → `arquivada
-   localmente, sem merge esperado` (não é entrega numa base: o §3d define arquivar ou descartar; a
-   constatação vira `done` quando o arquivo é aceito, ou `abandoned` se descartado).
-3. Confira que a linha de índice do `## Histórico` (passo 1) está datada como `delivered`, sem
-   prometer merge/`done` ainda — o carimbo vem da constatação posterior.
-4. Atualize a data.
+1. **Migrate the intact block and deflate the cursor** along the boundary defined in
+   `pelizzai-execution-plans` → §State and resumption: copy the task fields + the
+   `T<n>`/`next`/`pending` lines faithfully into `pelizzai/data/history/<YYYY-MM-DD>-<slug>.md`
+   (VERSIONED), return `## Active task` and `## Progress` to the template placeholders, and leave
+   in `## History` **one** index line
+   (`- <date> <slug> — delivered — <result ≤10 words> → data/history/<file>`). The cursor shrinks
+   back to template size HERE, at closeout — it does not stay bloated through the whole
+   `delivered` window. Preserve `slug`, `phase`, `branch`, `base-ref`, `base-sha`,
+   `validated-head`, `commit-strategy`, `worktree-path`, and `confirm:`: the destination (Step 3)
+   and the later observation still read them.
+2. Set `phase: delivered` and record `confirm:` with the observable condition that becomes `done`,
+   derived from the destination chosen in 2a: publish/PR → `base-ref contains validated-head
+   (PR/branch integrated)`; keep local → `local delivery accepted by the user`; discard/archival
+   (option 4) → `archived locally, no merge expected` (it is not a delivery onto a base: §3d
+   decides archive or discard; the observation becomes `done` when the archive is accepted, or
+   `abandoned` if discarded).
+3. Check that the `## History` index line (step 1) is dated as `delivered`, without promising
+   merge/`done` yet — that stamp comes from the later observation.
+4. Update the date.
 
-Estagie **somente** a metadata do harness — o cursor e o arquivo de história que ele acabou de
-gerar (a migração do passo 1 cria um arquivo versionado; ele viaja neste mesmo closure, nunca num
-commit extra):
+Stage **only** the harness metadata — the cursor and the history file it just generated (the
+step 1 migration creates a versioned file; it travels in this same closure, never in an extra
+commit):
 
 ```bash
-git add -- pelizzai/data/state.md pelizzai/data/history/<AAAA-MM-DD>-<slug>.md
+git add -- pelizzai/data/state.md pelizzai/data/history/<YYYY-MM-DD>-<slug>.md
 git diff --cached --name-only
-git commit -m "chore: sela tarefa em delivered"
+git commit -m "chore: seal task as delivered"
 ```
 
-Antes de executar o destino, prove as três guardas:
+Before executing the destination, prove the three guards:
 
 ```bash
-# deve listar exatamente esses dois arquivos de metadata, nada mais
+# must list exactly these two metadata files, nothing more
 git diff --name-only <validated-head>..HEAD
 
-# nenhuma diferença de produto fora da metadata do harness
+# no product difference outside the harness metadata
 git diff --quiet <validated-head>..HEAD -- . ':(exclude)pelizzai/data/state.md' ':(exclude)pelizzai/data/history/*'
 
-# deve estar vazio
+# must be empty
 git status --porcelain --untracked-files=all
 ```
 
-Grave `closure-head=$(git rev-parse HEAD)` e `delivery-head=$closure-head` apenas para as operações desta execução. Hook que
-incluiu outro arquivo ou deixou sujeira invalida o fechamento; pare, não faça outro commit corretivo.
+Record `closure-head=$(git rev-parse HEAD)` and `delivery-head=$closure-head` for this run's
+operations only. A hook that included another file or left dirt invalidates the closeout; stop, do
+not make another corrective commit.
 
-## 3. Executar o destino
+## 3. Execute the destination
 
-O destino foi decidido em 2a e o closure `delivered` já foi commitado (2b). Execute agora o efeito
-escolhido. Sob briefing fechado (SUBAGENT-STOP), aplique o briefing e escale ao coordenador o que
-exigir decisão; não reabra o gate.
+The destination was decided in 2a and the `delivered` closure is already committed (2b). Now
+execute the chosen effect. Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), apply the
+briefing and escalate to the coordinator whatever requires a decision; do not reopen the gate.
 
-Imediatamente antes de qualquer efeito externo, repita:
+Immediately before any external effect, repeat:
 
 ```bash
 test "$(git rev-parse HEAD)" = "<delivery-head>"
 git status --porcelain --untracked-files=all
 ```
 
-No consumidor, repita também `git diff --name-only <validated-head>..<delivery-head>` e exija
-somente os dois arquivos de metadata do closure: `pelizzai/data/state.md` e o
-`pelizzai/data/history/<AAAA-MM-DD>-<slug>.md` gerado pela migração do selo — nada mais.
-No source mode, exija `delivery-head == validated-head`.
-Divergiu? Pare; não publique.
+In a consumer, also repeat `git diff --name-only <validated-head>..<delivery-head>` and require
+only the two closure metadata files: `pelizzai/data/state.md` and the
+`pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` generated by the seal's migration — nothing more.
+In source mode, require `delivery-head == validated-head`.
+Diverged? Stop; do not publish.
 
-### 3a. Publicar sem PR
+### 3a. Publish without a PR
 
-Isto publica **a task branch**, não faz merge/push direto na base. Exija remoto `origin` conhecido e
-empurre o SHA fechado por refspec explícito:
+This publishes **the task branch**; it does not merge/push directly onto the base. Require a known
+`origin` remote and push the closed SHA via an explicit refspec:
 
 ```bash
 git push origin <delivery-head>:refs/heads/<branch>
 git branch --set-upstream-to=origin/<branch> <branch>
 ```
 
-Depois, confirme que `refs/heads/<branch>` no remoto aponta para `delivery-head` e registre
-`delivery-status: pushed`. Non-fast-forward, auth, rede ou SHA remoto divergente falha de forma
-fechada; não force-push.
+Then confirm that `refs/heads/<branch>` on the remote points to `delivery-head` and record
+`delivery-status: pushed`. Non-fast-forward, auth, network, or a divergent remote SHA fails
+closed; do not force-push.
 
-### 3b. Publicar e abrir PR
+### 3b. Publish and open a PR
 
-Faça o mesmo push exato e derive o nome de base de `base-ref` (por exemplo,
-`origin/trunk` → `trunk`). Depois:
+Do the exact same push and derive the base name from `base-ref` (for example,
+`origin/trunk` → `trunk`). Then:
 
 ```bash
-gh pr create --head <branch> --base <nome-da-base> --title "..." --body "..."
+gh pr create --head <branch> --base <base-name> --title "..." --body "..."
 ```
 
-O body contém resumo e evidência/como testar. Sem autenticação, reporte o bloqueio; não troque o
-destino sozinho.
+The body carries the summary and the evidence/how to test. Without authentication, report the
+blocker; do not switch the destination on your own.
 
-Com sucesso, capture a URL retornada, confira head/base do PR e registre
-`delivery-status: pr-open` + URL. Essa mesma transição fecha uma retomada que estava `partial`.
+On success, capture the returned URL, check the PR's head/base, and record
+`delivery-status: pr-open` + the URL. This same transition closes a resumption that was `partial`.
 
-Push e criação do PR são checkpoints separados. Se o push foi confirmado e `gh pr create` falhar,
-registre/reporte `delivery-status: partial`, branch remota + SHA e erro do PR: o conteúdo já foi
-publicado, mas o PR não foi criado. Em retomada, reconcilie branch remota e PR existente; pule o
-push já confirmado e repita só a criação do PR. Não revalide conteúdo, não crie outro commit de
-state e não mude o destino por conta própria.
+Push and PR creation are separate checkpoints. If the push was confirmed and `gh pr create`
+fails, record/report `delivery-status: partial`, the remote branch + SHA, and the PR error: the
+content is already published, but the PR was not created. On resumption, reconcile the remote
+branch and any existing PR; skip the already-confirmed push and repeat only the PR creation. Do
+not revalidate content, do not create another state commit, and do not change the destination on
+your own.
 
-### 3c. Manter local
+### 3c. Keep local
 
-Não faça efeito externo. Reporte branch, `validated-head` e `delivery-head`; em source mode registre
-`delivery-status: local`.
+Make no external effect. Report the branch, `validated-head`, and `delivery-head`; in source mode
+record `delivery-status: local`.
 
-### 3d. Preparar descarte/arquivamento
+### 3d. Prepare discard/archival
 
-Peça a confirmação literal `descartar`. Mesmo confirmada, o harness não força deleção:
+Ask for the literal confirmation `discard`. Even confirmed, the harness never forces deletion:
 
-- ofereça manter/renomear a branch como arquivo local;
-- se já estiver integrada, `git branch -d` é a única deleção automática aceitável;
-- se não estiver integrada, entregue ao usuário o comando manual de `branch -D` e seus SHAs,
-  mas não o execute;
-- worktree sujo nunca é removido; worktree limpo segue o gate do §4, sem `--force`.
+- offer to keep/rename the branch as a local archive;
+- if it is already integrated, `git branch -d` is the only acceptable automatic deletion;
+- if it is not integrated, hand the user the manual `branch -D` command and its SHAs,
+  but do not run it;
+- a dirty worktree is never removed; a clean worktree follows the §4 gate, without `--force`.
 
 ## 4. Worktree
 
-Depois de publicar ou manter a branch segura, ofereça remover o worktree. Confirme novamente,
-saia para o repositório principal, verifique que ele está limpo e use somente:
+After publishing or keeping the branch safe, offer to remove the worktree. Confirm again, exit to
+the main repository, verify it is clean, and use only:
 
 ```bash
-git worktree remove <caminho>
+git worktree remove <path>
 ```
 
-Falha significa parar e reportar. Não use `--force`. Não crie outro commit para limpar
-`worktree-path`; o state selado em `delivered` já está enxuto (o bloco íntegro foi para `history/`) e
-a próxima abertura carimba `done` no índice antes de sobrescrever.
+Failure means stop and report. Do not use `--force`. Do not create another commit to clear
+`worktree-path`; the state sealed in `delivered` is already lean (the intact block went to
+`history/`) and the next opening stamps `done` on the index before overwriting.
 
-## 5. Nudge de manutenção (read-only)
+## 5. Maintenance nudge (read-only)
 
-No consumidor, após o destino, sem bloquear nem alterar a entrega — tudo aqui é propor-confirmar e
-ação do coordenador; um membro de time apenas sinaliza a lacuna no relatório:
+In a consumer, after the destination, without blocking or altering the delivery — everything here
+is propose-and-confirm and coordinator action; a team member only flags the gap in the report:
 
-- **Cadência vencida:** este é o **disparo primário** da cadência de skills de domínio — o hook do
-  Claude Code é só rede de segurança. Verifique no ledger `pelizzai/data/review-domain-skills.md` os
-  **dois** gatilhos: (a) revisão — commits desde `last-review` ou dias decorridos; (b) repo-scan
-  completo desde `last-full-scan`. Limiares em `pelizzai-writing-skills` →
-  `references/domain-skill-maintenance.md`. Qualquer um vencido → sugira **uma vez** acionar a
-  `pelizzai-writing-skills` em modo manutenção, dizendo qual gatilho venceu. Abaixo dos limiares,
-  não diga nada; se o usuário adiar, não repita na mesma sessão.
-- **Adoção de stack nova (adoption-driven):** cheque no range fechado desta tarefa
-  (`git diff <base-sha>..<validated-head>` sobre manifests/lockfiles) se uma dependência ou serviço
-  significativo foi adotado sem domain skill cobrindo. Se sim, proponha UMA vez criar a skill,
-  fundamentada em context7/doc oficial da versão travada no lockfile: "A tarefa adotou
-  `<lib@versão>`, sem domain skill cobrindo. Criar uma agora? [criar · adiar · não criar]". Recomende
-  `criar` para libs de alta alavancagem (auth, pagamentos, ORM/dados, framework, fila/infra sensível)
-  e `adiar` para utilitário trivial; a escrita só ocorre depois do "sim", via `pelizzai-writing-skills`.
-- **Manutenção não armada:** se o hook de cadência está instalado mas o ledger está ausente, informe
-  UMA vez ("cadência inativa: sem ledger; rode a inicialização mínima da `pelizzai-audit` para
-  ativar") para distinguir "desligado" de "quebrado".
-- **State volumoso:** se `pelizzai/data/state.md` passou de ~60 linhas, sugira compactar uma vez
-  (advisory) — o template inteiro tem ~50. A migração do bloco íntegro para `data/history/` no selo
-  `delivered` já enxuga o state; condensar conteúdo remanescente é propor-confirmar.
+- **Cadence due:** this is the **primary trigger** of the domain-skill cadence — the Claude Code
+  hook is only a safety net. Check the **two** triggers in the
+  `pelizzai/data/review-domain-skills.md` ledger: (a) review — commits since `last-review` or days
+  elapsed; (b) full repo-scan since `last-full-scan`. Thresholds live in `pelizzai-writing-skills`
+  → `references/domain-skill-maintenance.md`. Either one due → suggest **once** invoking
+  `pelizzai-writing-skills` in maintenance mode, saying which trigger is due. Below the
+  thresholds, say nothing; if the user defers, do not repeat it in the same session.
+- **New stack adoption (adoption-driven):** check in this task's closed range
+  (`git diff <base-sha>..<validated-head>` over manifests/lockfiles) whether a significant
+  dependency or service was adopted without a covering domain skill. If so, propose ONCE creating
+  the skill, grounded in context7/the official docs for the version pinned in the lockfile: "The
+  task adopted `<lib@version>` with no covering domain skill. Create one now? [create · defer ·
+  don't create]". Recommend `create` for high-leverage libs (auth, payments, ORM/data, framework,
+  queue/sensitive infra) and `defer` for a trivial utility; the writing only happens after the
+  "yes", via `pelizzai-writing-skills`.
+- **Maintenance not armed:** if the cadence hook is installed but the ledger is missing, say so
+  ONCE ("cadence inactive: no ledger; run the minimal initialization of `pelizzai-audit` to arm
+  it") to distinguish "off" from "broken".
+- **Bulky state:** if `pelizzai/data/state.md` grew past ~60 lines, suggest compacting once
+  (advisory) — the whole template is ~50. The intact-block migration to `data/history/` at the
+  `delivered` seal already slims the state; condensing what remains is propose-and-confirm.
 
-Source mode, ou sem hook e sem ledger: no-op silencioso.
+Source mode, or no hook and no ledger: silent no-op.
 
 ## Red flags
 
 ```text
-- Entregar superfície sensível, de UI ou documentável sem overlay e sem a oferta do §1.5.
-- Rodar aqui o overlay aceito, ou remendar com fix/doc depois do seal, em vez de devolver ao ciclo.
-- Repetir no fechamento a oferta de um overlay que já rodou na execução.
-- Declarar `phase: done` aqui (finish-task encerra em `delivered`; `done` é constatação posterior).
-- Squash/reset/rebase/amend depois de validated-head.
-- `git add -A` no closure commit.
-- Segundo commit de cursor para registrar o destino.
-- Push de HEAD sem comparar com delivery-head ou push direto na base.
-- Force-push, branch -D, worktree --force, stash/reset automático.
-- Tratar vários repositórios como uma só tarefa.
+- Delivering a sensitive, UI, or documentable surface without an overlay and without the §1.5 offer.
+- Running the accepted overlay here, or patching with a fix/doc after the seal, instead of
+  returning to the cycle.
+- Repeating at closeout the offer of an overlay that already ran during execution.
+- Declaring `phase: done` here (finish-task closes in `delivered`; `done` is observed later).
+- Squash/reset/rebase/amend after validated-head.
+- `git add -A` in the closure commit.
+- A second cursor commit to record the destination.
+- Pushing HEAD without comparing it to delivery-head, or pushing directly onto the base.
+- Force-push, branch -D, worktree --force, automatic stash/reset.
+- Treating multiple repositories as a single task.
 ```
 
-## Integração
+## Integration
 
-**Chamada por:** `pelizzai-execution-plans`, `pelizzai-debugging` e `pelizzai-quick-fix`, somente
-depois de seus overlays e validação gravarem `validated-head`.
+**Called by:** `pelizzai-execution-plans`, `pelizzai-debugging`, and `pelizzai-quick-fix`, only
+after their overlays and validation have recorded `validated-head`.
 
-**Combina com:** `pelizzai-starting-branch`, `pelizzai-verification-before-completion`,
-`pelizzai-review`, `pelizzai-recovery` e `pelizzai-resolving-merge-conflicts`. A rede do §1.5 aponta
-para `pelizzai-oswap`, `pelizzai-frontend` e `pelizzai-documenting-features` — sempre pelo retorno à
-`pelizzai-execution-plans`, nunca executando o overlay dentro desta skill.
+**Combines with:** `pelizzai-starting-branch`, `pelizzai-verification-before-completion`,
+`pelizzai-review`, `pelizzai-recovery`, and `pelizzai-resolving-merge-conflicts`. The §1.5 net
+points to `pelizzai-oswap`, `pelizzai-frontend`, and `pelizzai-documenting-features` — always via
+the return to `pelizzai-execution-plans`, never by running the overlay inside this skill.
