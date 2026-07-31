@@ -1,41 +1,41 @@
 #!/usr/bin/env pwsh
-# PelizzAI - hook de cadencia (UserPromptSubmit), variante PowerShell.
+# PelizzAI - cadence hook (UserPromptSubmit), PowerShell variant.
 #
-# Equivalente ao pelizzai-cadence.mjs, para frota sem Node. Requer PowerShell 7+ (pwsh)
-# - o 5.1 corrompe a saida UTF-8 com acentos.
+# Equivalent to pelizzai-cadence.mjs, for fleets without Node. Requires PowerShell 7+ (pwsh)
+# - 5.1 corrupts accented UTF-8 output.
 #
-# Cadencia (calibrada para times ativos - ver pelizzai-writing-skills ->
+# Cadence (calibrated for active teams - see pelizzai-writing-skills ->
 # references/domain-skill-maintenance.md):
-#  - Amostragem: checa a cada 10 interacoes (nao a cada mensagem).
-#  - Revisao devida: >= 10 commits OU > 10 dias desde last-review (o eixo de DIAS e a ancora
-#    de sprint; os commits so ANTECIPAM num burst real de trabalho).
-#  - Repo-scan completo: > 15 dias desde last-full-scan.
-#  - Supressao: depois de avisar, silencia por 7 dias (evita repetir a cada janela).
+#  - Sampling: checks every 10 interactions (not on every message).
+#  - Review due: >= 10 commits OR > 10 days since last-review (the DAYS axis is the sprint
+#    anchor; commits only PULL IT FORWARD in a real burst of work).
+#  - Full repo-scan: > 15 days since last-full-scan.
+#  - Snooze: after nudging, stays silent for 7 days (avoids repeating every window).
 #
-# Mesmas garantias do .mjs: no-op silencioso sem ledger; checagem cara (git) so a cada N
-# interacoes; SEMPRE sai 0 (nunca bloqueia o prompt); engole qualquer erro.
+# Same guarantees as the .mjs: silent no-op without the ledger; the expensive check (git)
+# only every N interactions; ALWAYS exits 0 (never blocks the prompt); swallows any error.
 #
-# Instalacao (opt-in, no bootstrap), em .claude/settings.json:
+# Installation (opt-in, at bootstrap), in .claude/settings.json:
 #   { "hooks": { "UserPromptSubmit": [ { "hooks": [
 #       { "type": "command",
 #         "command": "pwsh -NoProfile -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-cadence.ps1\"" } ] } ] } }
 
 $ErrorActionPreference = 'SilentlyContinue'
 try {
-  $EVERY = 10                  # checa a cada N interacoes (amostragem, nao frequencia do nudge)
-  $COMMIT_THRESHOLD = 10       # >= N commits desde a ultima revisao (antecipa em burst real)
-  $DAY_THRESHOLD_REVIEW = 10   # > N dias desde a ultima revisao (ancora de sprint)
-  $DAY_THRESHOLD_SCAN = 15     # > N dias desde o ultimo full-scan
-  $SNOOZE_DAYS = 7             # apos avisar, silencia por N dias
+  $EVERY = 10                  # check every N interactions (sampling, not the nudge frequency)
+  $COMMIT_THRESHOLD = 10       # >= N commits since the last review (pulls forward in a real burst)
+  $DAY_THRESHOLD_REVIEW = 10   # > N days since the last review (sprint anchor)
+  $DAY_THRESHOLD_SCAN = 15     # > N days since the last full-scan
+  $SNOOZE_DAYS = 7             # after nudging, stay silent for N days
 
   $raw = [Console]::In.ReadToEnd()
   $cwd = (Get-Location).Path
   if ($raw) { try { $j = $raw | ConvertFrom-Json; if ($j.cwd) { $cwd = $j.cwd } } catch {} }
 
   $ledger = Join-Path $cwd 'pelizzai/data/review-domain-skills.md'
-  if (-not (Test-Path -LiteralPath $ledger)) { exit 0 } # harness nao inicializado neste projeto
+  if (-not (Test-Path -LiteralPath $ledger)) { exit 0 } # harness not initialized in this project
 
-  # estado: contador de interacoes + janela de supressao (retrocompativel com { count })
+  # state: interaction counter + snooze window (backward-compatible with { count })
   $statePath = Join-Path $cwd 'pelizzai/data/.cadence-state.json'
   $count = 0
   $snoozeUntil = 0
@@ -52,10 +52,10 @@ try {
   }
   & $persist
 
-  if ($count % $EVERY -ne 0) { exit 0 } # so checa (e nudga) a cada N interacoes
+  if ($count % $EVERY -ne 0) { exit 0 } # only check (and nudge) every N interactions
 
   $nowMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
-  if ($snoozeUntil -gt 0 -and $nowMs -lt $snoozeUntil) { exit 0 } # silenciado apos aviso recente
+  if ($snoozeUntil -gt 0 -and $nowMs -lt $snoozeUntil) { exit 0 } # snoozed after a recent nudge
 
   $text = Get-Content -LiteralPath $ledger -Raw
   $mReview = [regex]::Match($text, 'last-review:\D*(\d{4}-\d{2}-\d{2})')
@@ -78,10 +78,10 @@ try {
   if (-not $reviewDue -and -not $scanDue) { exit 0 }
 
   $parts = @()
-  if ($reviewDue) { $parts += "$commits commit(s) e $daysReview dia(s) desde a ultima revisao de skills de dominio" }
-  if ($scanDue) { $parts += "$daysScan dia(s) desde o ultimo repo-scan completo" }
+  if ($reviewDue) { $parts += "$commits commit(s) and $daysReview day(s) since the last domain-skill review" }
+  if ($scanDue) { $parts += "$daysScan day(s) since the last full repo-scan" }
 
-  $ctx = 'PelizzAI (cadencia): ' + ($parts -join '; ') + '. Considere acionar a skill pelizzai-writing-skills (modo manutencao) para revisar/atualizar as skills de dominio. Sugira ao usuario uma vez; nao bloqueie o trabalho.'
+  $ctx = 'PelizzAI (cadence): ' + ($parts -join '; ') + '. Consider invoking the pelizzai-writing-skills skill (maintenance mode) to review/update the domain skills. Suggest it to the user once; do not block the work.'
   $out = [pscustomobject]@{
     hookSpecificOutput = [pscustomobject]@{
       hookEventName     = 'UserPromptSubmit'
@@ -90,10 +90,10 @@ try {
   }
   $out | ConvertTo-Json -Compress -Depth 5 | Write-Output
 
-  # silencia os proximos SNOOZE_DAYS dias para nao repetir a cada janela
+  # snooze for the next SNOOZE_DAYS days so it does not repeat every window
   $snoozeUntil = $nowMs + ($SNOOZE_DAYS * 86400000L)
   & $persist
 } catch {
-  # nunca falhe o prompt do usuario
+  # never fail the user's prompt
 }
 exit 0

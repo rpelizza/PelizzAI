@@ -1,152 +1,155 @@
 ---
 name: pelizzai-improving-architecture
-description: Head skill read-only para revisão PROATIVA codebase-wide de arquitetura, dívida técnica e seams ausentes. Use periodicamente (a cada poucos dias de trabalho intenso no projeto), quando o usuário pedir análise arquitetural ampla ou o que vale refatorar, e quando debugging registrar uma lacuna estrutural. Entrega candidatos priorizados por evidência; não edita código, relatório, ADR ou out-of-scope. Review de diff/branch/PR usa pelizzai-review.
+description: Read-only head skill for PROACTIVE codebase-wide review of architecture, technical debt, and missing seams. Use periodically (every few days of intense work on the project), when the user asks for a broad architectural analysis or what is worth refactoring, and when debugging records a structural gap. Delivers candidates prioritized by evidence; does not edit code, report, ADR, or out-of-scope. Diff/branch/PR review uses pelizzai-review.
 ---
 
 # PelizzAI Improving Architecture
 
-## Objetivo
+## Goal
 
-Encontrar onde a arquitetura está cobrando custo **observável** e devolver poucas oportunidades
-acionáveis, sem transformar preferência estética em refactor nem uma análise read-only em escrita.
+Find where the architecture is charging an **observable** cost and return a few actionable
+opportunities, without turning aesthetic preference into a refactor or a read-only analysis into
+writes.
 
-**Anuncie:** "Usando a skill PelizzAI Improving Architecture para revisar a arquitetura por evidência."
+**Announce:** "Using the PelizzAI Improving Architecture skill to review the architecture by evidence."
 
-## Contrato de efeito
+## Effect contract
 
-O modo padrão é `read-only`:
-
-```text
-- não cria branch, state, HTML, ADR, spec, out-of-scope ou qualquer arquivo;
-- entrega o relatório no chat/recurso nativo da plataforma;
-- não corrige os candidatos encontrados;
-- só executa checks focalizados quando eles discriminam uma hipótese arquitetural.
-```
-
-Se o usuário pedir um artefato persistente ou escolher implementar um candidato, volte ao router,
-reclassifique para `write-local` e passe por `pelizzai-starting-branch` **antes** da primeira escrita.
-Consumidor usa os paths do harness; source mode usa paths nativos do repo e nunca cria `pelizzai/`.
-
-## Escopo
-
-Arquitetura degrada em silêncio: cada tarefa olha o próprio diff e ninguém olha o todo. Por isso o
-gatilho não é só o pedido do usuário — é também a **cadência**: a cada poucos dias de trabalho
-intenso no projeto, o harness oferece esta revisão. Oferecer é proativo; rodar e implementar
-continuam sendo escolha do usuário.
-
-Use para:
-
-- revisão periódica ampla de arquitetura/dívida/seams;
-- fricção recorrente sustentada por bugs, mudanças ou navegação reais;
-- seam ausente que impediu uma regressão útil.
-
-Não use para:
-
-- bug ativo (`pelizzai-debugging`);
-- review de diff, working tree, branch ou PR (`pelizzai-review`);
-- implementar um refactor já decidido (lane/plano do router);
-- interromper uma tarefa em andamento: a oferta periódica espera a tarefa fechar.
-
-## Processo adaptativo
-
-### 1. Fixe a pergunta
-
-Derive o escopo do pedido e da evidência existente. Pergunte somente quando duas fronteiras
-plausíveis mudarem materialmente o resultado. Não transforme "repo inteiro" em formulário.
-
-### 2. Colete fricção, não smells por checklist
-
-Inspecione o mínimo capaz de testar sinais reais:
+The default mode is `read-only`:
 
 ```text
-- mudanças semelhantes espalhadas por muitos lugares;
-- bugs/fixes recorrentes na mesma fronteira;
-- seam ausente ou teste que precisa conhecer implementação demais;
-- módulo pass-through cujo custo reaparece nos callers;
-- contrato largo para uso estreito;
-- conceito que exige saltos excessivos entre módulos;
-- dependência/ciclo que aumenta blast radius.
+- does not create branch, state, HTML, ADR, spec, out-of-scope, or any file whatsoever;
+- delivers the report in chat/the platform's native resource;
+- does not fix the candidates it finds;
+- runs focused checks only when they discriminate an architectural hypothesis.
 ```
 
-Use histórico, testes, imports/callers e ADRs quando ajudarem. Subagentes read-only só quando houver
-frentes independentes. Ausência de métrica perfeita não autoriza inventar frequência ou impacto.
+If the user asks for a persistent artifact or chooses to implement a candidate, return to the router,
+reclassify to `write-local`, and go through `pelizzai-starting-branch` **before** the first write.
+A consumer uses the harness paths; source mode uses the repo's native paths and never creates `pelizzai/`.
 
-### 3. Teste cada hipótese
+## Scope
 
-Para cada candidato material:
+Architecture degrades silently: each task looks at its own diff and nobody looks at the whole. That
+is why the trigger is not just the user's request — it is also **cadence**: every few days of
+intense work on the project, the harness offers this review. Offering is proactive; running and implementing
+remain the user's choice.
 
-1. descreva a fricção observada;
-2. aplique o teste da deleção: sem essa camada, a complexidade some ou apenas migra?;
-3. encontre contraexemplo/prior art que possa refutar a hipótese;
-4. verifique ADR/constraint que explique o desenho atual;
-5. estime alcance, reversibilidade e risco de migração.
+Use for:
 
-Use `pelizzai-codebase-design` como vocabulário/lente, não como segunda head skill. Reasoning útil:
-Evidence Synthesis para sinais dispersos, Assumption Tracking para lacunas e Decision Making para
-priorização. Não force OODA sem rodadas reais nem TDD numa análise.
+- broad periodic review of architecture/debt/seams;
+- recurring friction backed by real bugs, changes, or navigation;
+- a missing seam that blocked a useful regression test.
 
-### 4. Priorize com honestidade
+Do not use for:
 
-Classifique cada candidato:
+- an active bug (`pelizzai-debugging`);
+- review of a diff, working tree, branch, or PR (`pelizzai-review`);
+- implementing an already-decided refactor (router lane/plan);
+- interrupting a task in progress: the periodic offer waits for the task to close.
 
-| Classe | Evidência |
+## Adaptive process
+
+### 1. Pin the question
+
+Derive the scope from the request and the existing evidence. Ask only when two plausible
+boundaries would materially change the result. Do not turn "the whole repo" into a questionnaire.
+
+### 2. Collect friction, not checklist smells
+
+Inspect the minimum able to test real signals:
+
+```text
+- similar changes scattered across many places;
+- recurring bugs/fixes at the same boundary;
+- a missing seam, or a test that must know too much implementation;
+- a pass-through module whose cost reappears in the callers;
+- a wide contract for narrow use;
+- a concept that demands excessive jumps between modules;
+- a dependency/cycle that grows the blast radius.
+```
+
+Use history, tests, imports/callers, and ADRs when they help. Read-only subagents only when there
+are independent fronts. The absence of a perfect metric does not authorize inventing frequency or
+impact.
+
+### 3. Test each hypothesis
+
+For each material candidate:
+
+1. describe the observed friction;
+2. apply the deletion test: without this layer, does the complexity disappear or merely migrate?;
+3. find a counterexample/prior art that could refute the hypothesis;
+4. check for an ADR/constraint that explains the current design;
+5. estimate reach, reversibility, and migration risk.
+
+Use `pelizzai-codebase-design` as vocabulary/lens, not as a second head skill. Useful reasoning:
+Evidence Synthesis for scattered signals, Assumption Tracking for gaps, and Decision Making for
+prioritization. Do not force OODA without real rounds, nor TDD onto an analysis.
+
+### 4. Prioritize honestly
+
+Classify each candidate:
+
+| Class | Evidence |
 | --- | --- |
-| Forte | fricção recorrente + mecanismo causal + direção plausível |
-| Vale explorar | sinal real, mas benefício ou desenho ainda precisa discovery |
-| Especulativo | hipótese útil sem evidência suficiente; não recomendar implementação |
+| Strong | recurring friction + causal mechanism + plausible direction |
+| Worth exploring | real signal, but the benefit or design still needs discovery |
+| Speculative | useful hypothesis without sufficient evidence; do not recommend implementation |
 
-Prefira 1–5 candidatos. Se nada justificar mudança, diga isso; "nenhuma refatoração recomendada"
-é uma conclusão válida.
+Prefer 1–5 candidates. If nothing justifies change, say so; "no refactoring recommended"
+is a valid conclusion.
 
-### 5. Entregue o relatório
+### 5. Deliver the report
 
-Para cada candidato, informe:
+For each candidate, state:
 
 ```text
-evidência: arquivos/linhas, histórico ou teste relevante
-fricção: custo concreto hoje
-mecanismo: por que a estrutura produz esse custo
-direção: mudança de fronteira, sem inventar a interface final
-ganho esperado e trade-offs
-confiança: Forte | Vale explorar | Especulativo
-próxima prova mais barata
+evidence: files/lines, history, or the relevant test
+friction: concrete cost today
+mechanism: why the structure produces that cost
+direction: boundary change, without inventing the final interface
+expected gain and trade-offs
+confidence: Strong | Worth exploring | Speculative
+next cheapest proof
 ```
 
-Inclua também "manter como está" quando for alternativa racional. Visualização só quando relações
-entre módulos ficarem materialmente mais claras; use recurso inline/nativo no modo read-only.
+Also include "keep as is" when it is a rational alternative. Visualize only when relations between
+modules become materially clearer; use inline/native resources in read-only mode.
 
-## Depois da escolha
+## After the choice
 
-Ao fim da análise, sem sair do modo read-only, ofereça registrar o que for durável — propor-confirmar,
-nunca escrita por reflexo:
+At the end of the analysis, without leaving read-only mode, offer to record what is durable —
+propose-and-confirm, never writing by reflex:
 
-- Candidato escolhido: router decide `bounded | standard | exploratory`; arquitetura aberta
-  normalmente passa por brainstorming, mas refactor claro pode ir direto ao plano.
-- Decisão arquitetural durável que valha memória (adotar uma nova fronteira, ou manter a atual por um
-  trade-off real): **ofereça** registrar um ADR via `pelizzai-domain-modeling`. A gravação só ocorre
-  depois de reclassificar para `write-local` e passar pela primeira-write gate; o relatório em si não
-  escreve.
-- Rejeição com razão durável: **ofereça** registrar em ADR/out-of-scope; não escreva automaticamente.
-- Seam ausente: entregue a evidência ao fluxo de design, sem fabricar teste tautológico.
+- Chosen candidate: the router decides `bounded | standard | exploratory`; open architecture
+  usually goes through brainstorming, but a clear refactor can go straight to the plan.
+- A durable architectural decision worth remembering (adopting a new boundary, or keeping the
+  current one for a real trade-off): **offer** to record an ADR via `pelizzai-domain-modeling`. The
+  write only happens after reclassifying to `write-local` and passing the first-write gate; the
+  report itself does not write.
+- A rejection with a durable reason: **offer** to record it in an ADR/out-of-scope; do not write it
+  automatically.
+- A missing seam: hand the evidence to the design flow, without fabricating a tautological test.
 
 ## Red flags
 
 ```text
-- Criar relatório/ADR/out-of-scope durante análise read-only.
-- Confundir review arquitetural amplo com code review de diff.
-- Recomendar refactor só por tamanho, estilo ou "clean code".
-- Inventar interface definitiva antes do design.
-- Ignorar ADR/constraint que explica o trade-off atual.
-- Reescrever o mundo em vez de priorizar poucos candidatos.
-- Forçar subagentes, visual ou checks sem ganho de sinal.
+- Creating a report/ADR/out-of-scope during read-only analysis.
+- Confusing a broad architectural review with code review of a diff.
+- Recommending a refactor for size, style, or "clean code" alone.
+- Inventing the definitive interface before design.
+- Ignoring an ADR/constraint that explains the current trade-off.
+- Rewriting the world instead of prioritizing a few candidates.
+- Forcing subagents, visuals, or checks with no signal gain.
 ```
 
 ## Definition of Done
 
 ```text
-[ ] cada recomendação aponta para evidência verificável;
-[ ] hipótese, fato e inferência estão separados;
-[ ] trade-offs e alternativa de não agir foram considerados;
-[ ] nenhum estado foi alterado no modo read-only;
-[ ] próxima rota está clara sem iniciar implementação implicitamente.
+[ ] every recommendation points to verifiable evidence;
+[ ] hypothesis, fact, and inference are kept separate;
+[ ] trade-offs and the do-nothing alternative were considered;
+[ ] no state was changed in read-only mode;
+[ ] the next route is clear without implicitly starting implementation.
 ```

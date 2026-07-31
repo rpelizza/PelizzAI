@@ -1,95 +1,93 @@
-## IV. Algumas Questões de Forma
+## IV. A Few Matters of Form
 
-**Títulos.** Deixe uma linha em branco, ou o espaço equivalente, depois do título ou do cabeçalho de um texto. Nas páginas seguintes, se estiver usando papel pautado, comece na primeira linha.
+**Headings.** Leave a blank line, or its equivalent in space, after the title or heading of a text. On succeeding pages, if using ruled paper, begin on the first line.
 
-**Numerais.** Não escreva por extenso datas ou outros números seriais. Use algarismos ou numeração romana, conforme for apropriado.
+**Numerals.** Do not spell out dates or other serial numbers. Write them in figures or in Roman numerals, as appropriate.
 
-9 de agosto de 1918
+August 9, 1918
 
-Regra 3
+Rule 3
 
-Capítulo XII
+Chapter XII
 
-352.º Batalhão
+352nd Battalion
 
-**Parênteses.** Uma frase que contém uma expressão entre parênteses é pontuada, fora dos parênteses, exatamente como se a expressão entre parênteses estivesse ausente. A expressão interna é pontuada como se estivesse sozinha, exceto que o sinal final é omitido, a menos que seja ponto de interrogação ou ponto de exclamação.
+**Parentheses.** A sentence containing an expression in parentheses is punctuated, outside the parentheses, exactly as if the parenthetical expression were absent. The expression within is punctuated as if it stood by itself, except that the final mark is omitted unless it is a question mark or an exclamation point.
 
-Fui à casa dele ontem (minha terceira tentativa de encontrá-lo), mas ele havia viajado.
+I went to his house yesterday (my third attempt to see him), but he had left town.
 
-Ele afirma (e por que duvidaríamos de sua boa-fé?) que agora tem certeza do sucesso.
+He declares (and why should we doubt his good faith?) that he is now certain of success.
 
-(Quando uma frase inteira e independente é colocada entre parênteses, o ponto final vem antes do parêntese de fechamento.)
+(When a wholly detached sentence is placed in parentheses, the final period comes before the closing parenthesis.)
 
-**Citações.** Citações formais, apresentadas como prova documental, são introduzidas por dois-pontos e colocadas entre aspas. Em português do Brasil, quando a citação encerra o período, o ponto final costuma ficar fora das aspas.
+**Quotations.** Formal quotations, cited as documentary evidence, are introduced by a colon and enclosed in quotation marks. In American usage, when the quotation ends the sentence, the period falls inside the closing quotation marks.
 
-O dispositivo da Constituição é o seguinte: "Nenhum tributo ou taxa será cobrado sobre artigos exportados de qualquer estado".
+The provision of the Constitution is: "No tax or duty shall be laid on articles exported from any state."
 
-Citações gramaticalmente em aposto, ou que funcionam como objeto direto de um verbo, são precedidas de vírgula e colocadas entre aspas.
+Quotations grammatically in apposition, or serving as the direct object of a verb, are preceded by a comma and enclosed in quotation marks.
 
-Lembro-me da máxima de La Rochefoucauld, "Gratitude is a lively sense of benefits to come" ("A gratidão é um vivo sentimento dos benefícios por vir").
+I recall the maxim of La Rochefoucauld, "Gratitude is a lively sense of benefits to come."
 
-Aristóteles diz: "Art is an imitation of nature" ("A arte é uma imitação da natureza").
+Aristotle says, "Art is an imitation of nature."
 
-Citações de um verso inteiro, ou mais, começam em uma nova linha e são centralizadas, mas não precisam ser colocadas entre aspas.
+Quotations of an entire line of verse, or more, begin on a new line and are centered, but need not be enclosed in quotation marks.
 
-O entusiasmo de Wordsworth pela Revolução foi a princípio ilimitado:
+Wordsworth's enthusiasm for the Revolution was at first unbounded:
 
 Bliss was it in that dawn to be alive,
 
 But to be young was very heaven!
 
-(Que felicidade estar vivo naquele alvorecer, / mas ser jovem era o próprio paraíso!)
+Quotations introduced by "that", in indirect discourse, take no quotation marks.
 
-Citações introduzidas por "que", em discurso indireto, não levam aspas.
+Keats declares that beauty is truth, and truth, beauty.
 
-Keats afirma que a beleza é verdade, e a verdade, beleza.
+> Note: the conjunction _that_ is the mark of indirect discourse in English; whenever the reported words follow it, omit the quotation marks.
 
-> Nota (pt-BR): em inglês, a oração de discurso indireto é introduzida por _that_; o equivalente em português é a conjunção integrante **que**. Em ambos os casos, sem aspas.
+Proverbial expressions and familiar phrases of literary origin need no quotation marks.
 
-Expressões proverbiais e frases consagradas de origem literária dispensam aspas.
+A bird in the hand is worth two in the bush.
 
-Quem não tem cão caça com gato.
+It is no use crying over spilt milk.
 
-Águas passadas não movem moinhos.
+The same holds for colloquialisms and slang.
 
-O mesmo vale para coloquialismos e gírias.
+**References.** In scholarly work that requires exact references, abbreviate titles that occur frequently and give the full forms in a list at the end. As a general rule, put references in parentheses or in footnotes, not in the body of the sentence. Omit the words "act", "scene", "line", "book", "volume", "page", except when the reference is made by only one of them. Punctuate as indicated below.
 
-**Referências.** Em trabalho acadêmico que exige referências exatas, abrevie os títulos que aparecem com frequência e dê as formas completas em uma lista ao final. Como regra geral, coloque as referências entre parênteses ou em nota de rodapé, não no corpo da frase. Omita as palavras "ato", "cena", "verso", "livro", "volume", "página", exceto quando a referência for feita por apenas uma delas. Pontue conforme indicado abaixo.
+In the second scene of the third act; or, better still, simply insert (III.ii) at the proper place in the sentence.
 
-Na segunda cena do terceiro ato; ou, melhor ainda, insira simplesmente (III.ii) no ponto adequado da frase.
-
-Depois da morte de Polônio, Hamlet é posto sob guarda (IV.ii.14).
+After the death of Polonius, Hamlet is placed under guard (IV.ii.14).
 
 2 Samuel 1:17–27
 
-Otelo II.iii.264–267, III.iii.155–161.
+Othello II.iii.264–267, III.iii.155–161.
 
-**Divisão silábica (translineação).** Se houver espaço no fim de uma linha para uma ou mais sílabas de uma palavra, mas não para a palavra inteira, divida-a com hífen, evitando deixar uma única letra sozinha. A divisão segue a separação silábica do português (Base XX do Acordo Ortográfico). Os princípios mais usados são:
+**Word division (end-of-line hyphenation).** If there is room at the end of a line for one or more syllables of a word, but not for the whole word, divide it with a hyphen, avoiding leaving a single letter stranded. Division follows the word's syllable structure. The principles most often applied are:
 
-(a) Não isole vogal no fim nem no início de linha:
+(a) Do not leave a single letter alone at the end or the beginning of a line:
 
-a-/migo e cami-/nho são divisões inadequadas (preferir ami-/go, ca-/minho).
+a-/bandon and stead-/y are bad divisions (prefer aban-/don; leave short words like *steady* unbroken).
 
-(b) Não separe os dígrafos **ch**, **lh**, **nh**, **gu** e **qu**, nem ditongos e tritongos:
+(b) Do not split digraphs — letter pairs that spell a single sound, such as **th**, **sh**, **ch**, and **ph** — nor diphthongs:
 
-cha-/péu, ve-/lho (não vel-/ho), ba-/nho, lin-/gui-/ça (mantendo o **gu**), pe-/queno (mantendo o **qu**); cai-/xa (não ca-/ixa).
+moth-/er (not mot-/her), wash-/ing (not was-/hing), gra-/phic (keeping the **ph**); poi-/son (not po-/ison).
 
-(c) Mantenha juntos os grupos consonantais de consoante + **l** ou **r** que iniciam sílaba:
+(c) Keep together the consonant clusters of consonant + **l** or **r** that begin a syllable:
 
-re-/gra, du-/plo, ou-/tro, le-/tra.
+se-/cret, du-/plicate, pa-/tron, ta-/ble.
 
-(d) Separe os encontros **rr**, **ss**, **sc**, **sç** e **xc**, além dos hiatos e das consoantes que pertencem a sílabas diferentes (sem isolar uma única letra, conforme o item *a*):
+(d) Divide double consonants, as well as hiatuses and consonants that belong to different syllables (without stranding a single letter, as in item *a*):
 
-car-/ro, pas-/so, nas-/cer, des-/ço, ex-/ce-/ção; co-/or-/de-/nar (hiato **o-o**), ad-/mi-/rar, ap-/to.
+din-/ner, pas-/sive, suc-/ceed, ex-/cept; co-/operate (the **o-o** hiatus), ad-/mire, cap-/tive.
 
-(e) Ao quebrar, na fronteira do hífen, uma palavra composta ou uma forma com pronome enclítico, repita o hífen no início da linha seguinte, para não confundir com fim de palavra:
+(e) When breaking a word that is itself hyphenated, break only at its own hyphen, so the reader does not mistake the line-end hyphen for part of the word:
 
-vice-/-almirante; dir-/-se-ia.
+self-/evident; vice-/admiral.
 
-O melhor critério é examinar a separação silábica em qualquer texto cuidadosamente revisado.
+The best guide is to examine the divisions in any carefully edited text.
 
-**Títulos de obras.** Para títulos de obras literárias, o uso em português do Brasil prefere o itálico, com apenas a inicial maiúscula (e os nomes próprios). Em manuscrito, o itálico é indicado por sublinhado. Mantenha o artigo inicial do título quando ele faz parte do nome da obra.
+**Titles of works.** For the titles of literary works, usage prefers italics, capitalizing the first word and all principal words (plus proper nouns). In manuscript, italics are indicated by underlining. Keep the initial article of the title when it is part of the work's name.
 
-_Os lusíadas_; _Dom Casmurro_; _Grande sertão: veredas_; _Memórias póstumas de Brás Cubas_; _A hora da estrela_.
+_The Iliad_; _A Tale of Two Cities_; _Paradise Lost_; _Wuthering Heights_; _The Scarlet Letter_.
 
-> Nota: a regra inglesa de suprimir o artigo inicial ao antepor o possessivo (_Dickens's Tale of Two Cities_) é específica do inglês e não se aplica ao português, que forma o possessivo com a preposição **de** (o _Dom Casmurro_ de Machado), nunca com apóstrofo.
+> Note: omit the initial _A_ or _The_ of a title when you place a possessive before it: Dickens's _Tale of Two Cities_, never Dickens's _A Tale of Two Cities_.

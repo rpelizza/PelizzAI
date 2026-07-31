@@ -29,9 +29,9 @@ const DEFINITIONS = [
   },
 ];
 
-// Instalação é OPT-IN, um hook por vez e com confirmação — nunca imposta em bloco. `--only`
-// é o que torna essa doutrina operável na linha de comando: instala/checa/remove só os hooks
-// que o usuário aceitou, sem tocar nos demais.
+// Installation is OPT-IN, one hook at a time and with confirmation — never imposed as a block.
+// `--only` is what makes that doctrine operable on the command line: it installs/checks/removes
+// only the hooks the user accepted, without touching the rest.
 const HOOK_PATTERN = /pelizzai-(guardrails|writegate|cadence|session-start)\.mjs/;
 const HOOK_IDS = ['guardrails', 'writegate', 'cadence', 'session-start'];
 
@@ -45,21 +45,21 @@ function parseArgs(argv) {
     switch (argv[index]) {
       case '--project':
         index += 1;
-        if (!argv[index]) throw new Error('--project exige um caminho.');
+        if (!argv[index]) throw new Error('--project requires a path.');
         options.project = argv[index];
         break;
       case '--only': {
         index += 1;
-        if (!argv[index]) throw new Error(`--only exige uma lista (${HOOK_IDS.join(',')}).`);
+        if (!argv[index]) throw new Error(`--only requires a list (${HOOK_IDS.join(',')}).`);
         const ids = argv[index]
           .split(',')
           .map((id) => id.trim())
           .filter(Boolean);
         const unknown = ids.filter((id) => !HOOK_IDS.includes(id));
         if (unknown.length) {
-          throw new Error(`--only não conhece: ${unknown.join(', ')}. Válidos: ${HOOK_IDS.join(', ')}.`);
+          throw new Error(`--only does not recognize: ${unknown.join(', ')}. Valid: ${HOOK_IDS.join(', ')}.`);
         }
-        if (!ids.length) throw new Error(`--only exige ao menos um hook (${HOOK_IDS.join(',')}).`);
+        if (!ids.length) throw new Error(`--only requires at least one hook (${HOOK_IDS.join(',')}).`);
         options.only = ids;
         break;
       }
@@ -72,23 +72,23 @@ function parseArgs(argv) {
       case '--help':
       case '-h':
         console.log(
-          'Uso: node scripts/install-hooks.mjs [--project <raiz>] [--only <lista>] [--check|--remove]\n' +
-            `  --only <lista>  aplica só a estes hooks (${HOOK_IDS.join(', ')}), separados por vírgula.\n` +
-            '                  Sem --only, a operação cobre os quatro.\n' +
-            '  --check         inventário: instalação parcial é opt-in legítimo e não falha.\n' +
-            '                  Com --only, exige que os hooks listados estejam registrados.',
+          'Usage: node scripts/install-hooks.mjs [--project <root>] [--only <list>] [--check|--remove]\n' +
+            `  --only <list>   applies only to these hooks (${HOOK_IDS.join(', ')}), comma-separated.\n` +
+            '                  Without --only, the operation covers all four.\n' +
+            '  --check         inventory: partial installation is legitimate opt-in and does not fail.\n' +
+            '                  With --only, requires the listed hooks to be registered.',
         );
         process.exit(0);
         break;
       default:
-        throw new Error(`Argumento desconhecido: ${argv[index]}`);
+        throw new Error(`Unknown argument: ${argv[index]}`);
     }
   }
-  if (options.check && options.remove) throw new Error('--check e --remove são exclusivos.');
+  if (options.check && options.remove) throw new Error('--check and --remove are mutually exclusive.');
   return options;
 }
 
-// DEFINITIONS recortadas pelo --only (um grupo some quando nenhum comando dele foi pedido).
+// DEFINITIONS trimmed by --only (a group disappears when none of its commands was requested).
 function selectDefinitions(only) {
   if (!only) return DEFINITIONS;
   return DEFINITIONS.map((definition) => ({
@@ -103,16 +103,16 @@ function readSettings(path) {
   try {
     const parsed = JSON.parse(source);
     if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') {
-      throw new Error('a raiz precisa ser um objeto JSON');
+      throw new Error('the root must be a JSON object');
     }
     return parsed;
   } catch (error) {
-    throw new Error(`Não foi possível ler ${path}: ${error.message}. O arquivo não foi alterado.`);
+    throw new Error(`Could not read ${path}: ${error.message}. The file was not changed.`);
   }
 }
 
-// `only` restringe o reconhecimento aos hooks pedidos — é o que permite remover/reinstalar um
-// hook sem derrubar os companheiros que o usuário já havia aceitado.
+// `only` restricts recognition to the requested hooks — this is what allows removing/reinstalling
+// one hook without tearing down the companions the user had already accepted.
 function isPelizzai(handler, only = null) {
   if (handler?.type !== 'command') return false;
   const id = hookId(handler.command);
@@ -134,7 +134,7 @@ function removePelizzai(settings, only = null) {
 }
 
 function installPelizzai(settings, definitions, only = null) {
-  removePelizzai(settings, only); // idempotência sem colateral: só os hooks desta operação
+  removePelizzai(settings, only); // idempotency without collateral: only this operation's hooks
   settings.hooks ??= {};
   for (const definition of definitions) {
     settings.hooks[definition.event] ??= [];
@@ -182,15 +182,15 @@ try {
   const escopo = options.only ? ` (--only ${options.only.join(', ')})` : '';
 
   if (options.check) {
-    // Instalação PARCIAL é opt-in deliberado, não defeito: o bootstrap propõe os hooks um a um,
-    // com confirmação, e o usuário aceita os que quiser. Sem --only o --check é INVENTÁRIO, não
-    // catraca: ausência não reprova. Ele só reprova (a) handler registrado mais vezes do que o
-    // padrão prevê — o mesmo hook disparando duas vezes é defeito real — e (b) com --only, a
-    // ausência de algo que o chamador declarou esperar. Um handler PelizzAI em forma diferente
-    // da que este instalador escreve (aspas/caminho à mão) é anotado, não reprovado: está
-    // registrado e funciona.
-    // ATENÇÃO: o writegate aparece DUAS vezes no padrão (matcher Bash + Write|Edit|MultiEdit|
-    // NotebookEdit). Duplicidade é contagem ACIMA do padrão, nunca "apareceu repetido".
+    // PARTIAL installation is deliberate opt-in, not a defect: the bootstrap proposes the hooks
+    // one by one, with confirmation, and the user accepts the ones they want. Without --only,
+    // --check is an INVENTORY, not a turnstile: absence does not fail. It only fails on (a) a
+    // handler registered more times than the standard prescribes — the same hook firing twice is
+    // a real defect — and (b) with --only, the absence of something the caller declared they
+    // expect. A PelizzAI handler in a different form than the one this installer writes
+    // (hand-written quotes/path) is noted, not failed: it is registered and works.
+    // ATTENTION: the writegate appears TWICE in the standard (matcher Bash + Write|Edit|MultiEdit|
+    // NotebookEdit). Duplication means a count ABOVE the standard, never "it showed up repeated".
     const actual = installedCommands(settings);
     const canonical = new Map();
     for (const command of expectedCommands(DEFINITIONS)) canonical.set(command, (canonical.get(command) ?? 0) + 1);
@@ -201,10 +201,10 @@ try {
     const duplicated = [...counted]
       .filter(([command, n]) => canonical.has(command) && n > canonical.get(command))
       .map(([command]) => hookId(command));
-    if (duplicated.length) problems.push(`handlers registrados mais de uma vez: ${[...new Set(duplicated)].join(', ')}`);
+    if (duplicated.length) problems.push(`handlers registered more than once: ${[...new Set(duplicated)].join(', ')}`);
     if (options.only) {
-      // Presença exigida comando a comando (multiset): writegate só conta como registrado
-      // quando os DOIS matchers estão lá.
+      // Presence required command by command (multiset): the writegate only counts as registered
+      // when BOTH matchers are there.
       const pool = [...actual];
       const absent = [];
       for (const command of expectedCommands(definitions)) {
@@ -212,32 +212,32 @@ try {
         if (at === -1) absent.push(hookId(command));
         else pool.splice(at, 1);
       }
-      if (absent.length) problems.push(`hooks pedidos em --only e não registrados: ${[...new Set(absent)].join(', ')}`);
+      if (absent.length) problems.push(`hooks requested via --only and not registered: ${[...new Set(absent)].join(', ')}`);
     }
 
     if (problems.length) {
-      console.error(`FAIL: ${problems.join('; ')} em ${settingsPath}.`);
+      console.error(`FAIL: ${problems.join('; ')} in ${settingsPath}.`);
       process.exitCode = 1;
     } else {
       const ids = [...new Set(actual.map(hookId))];
       const registered = options.only ? ids.filter((id) => options.only.includes(id)) : ids;
       const optIn = options.only ? [] : HOOK_IDS.filter((id) => !ids.includes(id));
       const foraDoPadrao = [...counted.keys()].filter((command) => !canonical.has(command));
-      const inventario = registered.length ? registered.join(', ') : 'nenhum';
-      const pendentes = optIn.length ? ` | não registrados (opt-in, não é falha): ${optIn.join(', ')}` : '';
-      const anotacao = foraDoPadrao.length ? ` | fora da forma escrita por este instalador: ${foraDoPadrao.join(', ')}` : '';
-      console.log(`OK: hooks PelizzAI em ${settingsPath}${escopo}: ${inventario}${pendentes}${anotacao}.`);
+      const inventario = registered.length ? registered.join(', ') : 'none';
+      const pendentes = optIn.length ? ` | not registered (opt-in, not a failure): ${optIn.join(', ')}` : '';
+      const anotacao = foraDoPadrao.length ? ` | not in the form written by this installer: ${foraDoPadrao.join(', ')}` : '';
+      console.log(`OK: PelizzAI hooks in ${settingsPath}${escopo}: ${inventario}${pendentes}${anotacao}.`);
     }
   } else if (options.remove) {
     writeAtomic(settingsPath, removePelizzai(settings, options.only));
-    console.log(`Hooks PelizzAI removidos de ${settingsPath}${escopo}; demais configurações preservadas.`);
+    console.log(`PelizzAI hooks removed from ${settingsPath}${escopo}; other settings preserved.`);
   } else {
     const missing = expectedCommands(definitions)
       .map((command) => command.match(/pelizzai-[\w-]+\.mjs/)?.[0])
       .filter((name) => name && !existsSync(join(project, '.claude', 'hooks', name)));
-    if (missing.length) throw new Error(`Hooks não copiados para o projeto: ${[...new Set(missing)].join(', ')}`);
+    if (missing.length) throw new Error(`Hooks not copied to the project: ${[...new Set(missing)].join(', ')}`);
     writeAtomic(settingsPath, installPelizzai(settings, definitions, options.only));
-    console.log(`Hooks PelizzAI registrados em ${settingsPath}${escopo}; configurações existentes preservadas.`);
+    console.log(`PelizzAI hooks registered in ${settingsPath}${escopo}; existing settings preserved.`);
   }
 } catch (error) {
   console.error(`FAIL: ${error instanceof Error ? error.message : String(error)}`);

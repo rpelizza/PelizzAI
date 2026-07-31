@@ -1,537 +1,537 @@
 # Planning and Execution Evals
 
-## Objetivo
+## Objective
 
-Este arquivo avalia se a skill [pelizzai-reasoning](../SKILL.md) conduz planejamento, decomposição e execução de tarefas multi-etapa de forma confiável e proporcional.
+This file evaluates whether the [pelizzai-reasoning](../SKILL.md) skill conducts planning, decomposition, and execution of multi-step tasks reliably and proportionally.
 
-É a suíte que exercita como **técnica principal** o núcleo de planejamento do harness, hoje sem cobertura dedicada:
+It is the suite that exercises, as the **primary technique**, the harness's planning core, until now without dedicated coverage:
 
-- [Plan and Execute](../techniques/plan-and-execute.md) — planejar, validar antes de executar, criar checkpoints e replanejar;
-- [Structured Decomposition](../techniques/structured-decomposition.md) — dividir problema complexo em partes, responsabilidades, contratos e dependências;
-- [Decision Making](../techniques/decision-making.md) — no modo de busca com poda e backtracking, explorar caminhos interdependentes quando as alternativas são materialmente diferentes.
+- [Plan and Execute](../techniques/plan-and-execute.md) — plan, validate before executing, create checkpoints, and replan;
+- [Structured Decomposition](../techniques/structured-decomposition.md) — split a complex problem into parts, responsibilities, contracts, and dependencies;
+- [Decision Making](../techniques/decision-making.md) — in search mode with pruning and backtracking, explore interdependent paths when the alternatives are materially different.
 
-O agente deve ser capaz de:
+The agent must be able to:
 
 ```text
-- distinguir tarefa que exige plano de tarefa que deve ser executada diretamente;
-- separar descoberta de execução quando há partes ou contratos ainda desconhecidos;
-- mapear dependências reais entre etapas antes de agir;
-- validar pré-condições e resultados em checkpoints proporcionais ao risco;
-- replanejar quando uma hipótese ou dependência crítica muda, preservando o trabalho já validado;
-- paralelizar apenas ações independentes e sem recurso compartilhado;
-- decompor por responsabilidade e contrato, não por arquivo, e detectar lacunas de integração;
-- explorar alternativas materialmente distintas com critério de poda quando a decisão é estrutural;
-- definir critério de conclusão objetivo e parar quando ele é atendido.
+- distinguish a task that requires a plan from a task that should be executed directly;
+- separate discovery from execution when parts or contracts are still unknown;
+- map real dependencies between steps before acting;
+- validate preconditions and results at checkpoints proportional to the risk;
+- replan when a critical hypothesis or dependency changes, preserving already-validated work;
+- parallelize only actions that are independent and share no resource;
+- decompose by responsibility and contract, not by file, and detect integration gaps;
+- explore materially distinct alternatives with a pruning criterion when the decision is structural;
+- define an objective completion criterion and stop when it is met.
 ```
 
-Este eval não mede a elegância do plano. Mede se a estrutura de execução é correta, segura, proporcional e verificável.
+This eval does not measure the elegance of the plan. It measures whether the execution structure is correct, safe, proportional, and verifiable.
 
 ---
 
-## Técnicas avaliadas
+## Techniques evaluated
 
-| Técnica                                                               | Uso esperado                                                               |
-| --------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [Plan and Execute](../techniques/plan-and-execute.md)                 | Planejar, validar antes de executar, criar checkpoints e replanejar        |
-| [Structured Decomposition](../techniques/structured-decomposition.md) | Dividir por responsabilidade e contrato, mapear dependências e integração  |
-| [Decision Making](../techniques/decision-making.md)                   | No modo de busca, explorar caminhos interdependentes com poda e backtracking |
-| [ReAct](../techniques/react.md)                                       | Executar etapa, observar resultado e ajustar o próximo passo               |
-| [Verification](../techniques/verification.md)                         | Validar pré-condições, resultados e regressões em cada checkpoint          |
-| [Assumption Tracking](../techniques/assumption-tracking.md)           | Registrar premissas e dependências não confirmadas que condicionam o plano |
-| [Constraint Satisfaction](../techniques/constraint-satisfaction.md)   | Garantir requisitos obrigatórios e proibições ao longo da execução         |
-| [Critique and Refine](../techniques/critique-and-refine.md)           | Ajustar o plano após falha, bloqueio ou requisito não atendido             |
+| Technique                                                             | Expected use                                                                 |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [Plan and Execute](../techniques/plan-and-execute.md)                 | Plan, validate before executing, create checkpoints, and replan              |
+| [Structured Decomposition](../techniques/structured-decomposition.md) | Split by responsibility and contract, map dependencies and integration      |
+| [Decision Making](../techniques/decision-making.md)                   | In search mode, explore interdependent paths with pruning and backtracking   |
+| [ReAct](../techniques/react.md)                                       | Execute a step, observe the result, and adjust the next step                 |
+| [Verification](../techniques/verification.md)                         | Validate preconditions, results, and regressions at each checkpoint          |
+| [Assumption Tracking](../techniques/assumption-tracking.md)           | Record unconfirmed assumptions and dependencies that condition the plan      |
+| [Constraint Satisfaction](../techniques/constraint-satisfaction.md)   | Enforce mandatory requirements and prohibitions throughout execution         |
+| [Critique and Refine](../techniques/critique-and-refine.md)           | Adjust the plan after a failure, a blocker, or an unmet requirement          |
 
 ---
 
-## Protocolo de avaliação
+## Evaluation protocol
 
-Para cada cenário, avalie primeiro a estrutura do plano e a próxima ação, **antes** de qualquer execução completa.
+For each scenario, evaluate the plan structure and the next action first, **before** any full execution.
 
-O agente avaliado deve produzir, de forma compacta:
+The agent under evaluation must produce, compactly:
 
 ```text
-Classificação:
-- Tipo de tarefa: ação direta, plano linear, plano com decomposição ou exploração de alternativas.
-- Risco e impacto:
-- Incerteza material:
-- Técnica principal:
-- Técnicas auxiliares:
+Classification:
+- Task type: direct action, linear plan, plan with decomposition, or exploration of alternatives.
+- Risk and impact:
+- Material uncertainty:
+- Primary technique:
+- Auxiliary techniques:
 
-Descoberta:
-- O que precisa ser conhecido antes de executar (contrato, partes, dependências, premissas).
+Discovery:
+- What must be known before executing (contract, parts, dependencies, assumptions).
 
-Plano:
-- Etapas com dependências e ordem.
-- Pré-condições e checkpoints de validação.
-- O que pode ser paralelo e o que deve ser sequencial.
+Plan:
+- Steps with dependencies and order.
+- Preconditions and validation checkpoints.
+- What can run in parallel and what must be sequential.
 
-Gatilhos de replanejamento:
-- O que invalidaria o plano atual.
+Replanning triggers:
+- What would invalidate the current plan.
 
-Critério de conclusão:
-- Como saber que a tarefa terminou corretamente.
+Completion criterion:
+- How to know the task finished correctly.
 ```
 
-O agente não deve expor cadeia de pensamento detalhada nem produzir um plano maior que o necessário.
+The agent must not expose detailed chain of thought or produce a plan larger than necessary.
 
 ---
 
-## Rubrica
+## Rubric
 
-Cada cenário vale 10 pontos.
+Each scenario is worth 10 points.
 
-| Critério                     | Pontos | Descrição                                                                  |
-| ---------------------------- | -----: | -------------------------------------------------------------------------- |
-| Classificação e técnica      |      2 | Escolhe planejar, decompor, explorar ou agir direto de forma proporcional  |
-| Descoberta antes da execução |      2 | Confirma contrato, partes e premissas antes de alterar o sistema           |
-| Dependências e ordem         |      2 | Mapeia dependências reais; paraleliza só o que é seguro                    |
-| Checkpoints e validação      |      1 | Define validação proporcional ao risco antes de etapas irreversíveis       |
-| Replanejamento               |      2 | Replaneja preservando trabalho válido; distingue bloqueio de inviabilidade |
-| Minimalidade e conclusão     |      1 | Evita overplanning; define e respeita o critério de conclusão              |
+| Criterion                    | Points | Description                                                                      |
+| ---------------------------- | -----: | -------------------------------------------------------------------------------- |
+| Classification and technique |      2 | Chooses to plan, decompose, explore, or act directly, proportionally             |
+| Discovery before execution   |      2 | Confirms contract, parts, and assumptions before changing the system             |
+| Dependencies and order       |      2 | Maps real dependencies; parallelizes only what is safe                           |
+| Checkpoints and validation   |      1 | Defines validation proportional to risk before irreversible steps                |
+| Replanning                   |      2 | Replans preserving valid work; distinguishes a blocker from infeasibility        |
+| Minimality and completion    |      1 | Avoids overplanning; defines and honors the completion criterion                 |
 
-### Falhas graves
+### Critical failures
 
-O cenário recebe no máximo 3 pontos se o agente:
-
-```text
-- executa ação irreversível sem checkpoint nem validação de pré-condição;
-- paraleliza ações que compartilham recurso, estado ou dependência;
-- decompõe por arquivos em vez de por responsabilidade, ou trata validação de partes isoladas como prova de comportamento integrado;
-- descarta trabalho já validado ao replanejar, recomeçando do zero sem necessidade;
-- trata configuração ou dependência local como prova de disponibilidade em produção;
-- aceita um plano genérico ("Analisar, Implementar, Testar") sem etapas, dependências ou critérios verificáveis;
-- aplica plano extenso a um ajuste local trivial e reversível;
-- explora alternativas sem critério de poda ou gera apenas variantes superficiais de uma mesma ideia.
-```
-
----
-
-## Critérios globais de aprovação
-
-A implementação passa neste conjunto quando:
+The scenario receives at most 3 points if the agent:
 
 ```text
-- Média geral mínima: 8,0 / 10.
-- Nenhuma falha grave em cenários de mudança irreversível ou de alto impacto.
-- Em pelo menos 85% dos cenários multi-etapa, separa descoberta de execução quando há contrato ou parte desconhecida.
-- Em 100% dos cenários de replanejamento, preserva o trabalho já validado.
-- Em 100% dos cenários simples e reversíveis, evita overplanning.
+- executes an irreversible action without a checkpoint or precondition validation;
+- parallelizes actions that share a resource, state, or dependency;
+- decomposes by files instead of by responsibility, or treats validation of isolated parts as proof of integrated behavior;
+- discards already-validated work when replanning, restarting from scratch without need;
+- treats local configuration or a local dependency as proof of availability in production;
+- accepts a generic plan ("Analyze, Implement, Test") without steps, dependencies, or verifiable criteria;
+- applies an extensive plan to a trivial, reversible local tweak;
+- explores alternatives without a pruning criterion, or generates only superficial variants of the same idea.
 ```
 
 ---
 
-## Cenários
+## Global pass criteria
 
-### P-01 — Feature multi-camada com contrato não confirmado
+The implementation passes this suite when:
+
+```text
+- Minimum overall average: 8.0 / 10.
+- No critical failure in irreversible-change or high-impact scenarios.
+- In at least 85% of multi-step scenarios, it separates discovery from execution when a contract or part is unknown.
+- In 100% of replanning scenarios, it preserves already-validated work.
+- In 100% of simple, reversible scenarios, it avoids overplanning.
+```
+
+---
+
+## Scenarios
+
+### P-01 — Multi-layer feature with an unconfirmed contract
 
 ```yaml
 id: P-01
-categoria: plano com descoberta
-prompt: 'Adicione exportação de pedidos filtrados para CSV na tela de pedidos.'
-contexto: |
-    Há frontend, API e banco.
-    Não está confirmado se a API já expõe os filtros aplicados na tela
-    nem se existe endpoint de exportação.
-    O projeto tem testes e build.
+category: plan with discovery
+prompt: 'Add CSV export of the filtered orders to the orders screen.'
+context: |
+    There is a frontend, an API, and a database.
+    It is not confirmed whether the API already exposes the filters applied on the screen
+    or whether an export endpoint exists.
+    The project has tests and a build.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Plan and Execute.
 
-Auxiliares:
-- Structured Decomposition, se a exportação envolver partes novas (geração, filtro, download).
+Auxiliary:
+- Structured Decomposition, if the export involves new parts (generation, filtering, download).
 - Verification.
 
-Descoberta antes de executar:
-- Contrato da API de listagem e filtros, existência de endpoint de exportação,
-  padrão de download da interface.
+Discovery before executing:
+- Contract of the listing API and its filters, existence of an export endpoint,
+  the interface's download pattern.
 
-Plano:
-- Inspecionar contrato -> definir onde gerar o CSV -> implementar -> validar build/teste.
+Plan:
+- Inspect the contract -> decide where to generate the CSV -> implement -> validate build/tests.
 ```
 
-#### Critério de aprovação
+#### Pass criterion
 
-O agente inspeciona contrato e padrões existentes antes de implementar e não assume a forma da API.
+The agent inspects the contract and existing patterns before implementing and does not assume the shape of the API.
 
 ---
 
-### P-02 — Plano dependente de premissa não confirmada
+### P-02 — Plan dependent on an unconfirmed assumption
 
 ```yaml
 id: P-02
-categoria: descoberta versus execução
-prompt: 'Vamos gerar os relatórios mensais grandes em background usando uma fila.'
-contexto: |
-    Existe um worker local, mas não há confirmação de fila, broker
-    ou capacidade disponível em produção.
+category: discovery versus execution
+prompt: 'We are going to generate the large monthly reports in the background using a queue.'
+context: |
+    A local worker exists, but there is no confirmation of a queue, a broker,
+    or available capacity in production.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Assumption Tracking.
 
-Auxiliares:
+Auxiliary:
 - Plan and Execute.
 - Decision Making.
 
-Ação:
-- Registrar disponibilidade do broker/fila em produção como premissa crítica.
-- Separar a etapa de descoberta (validar infraestrutura) da etapa de construção da solução.
-- Não construir todo o desenho em torno da fila antes de confirmar o ambiente.
+Action:
+- Record broker/queue availability in production as a critical assumption.
+- Separate the discovery step (validate the infrastructure) from the solution-building step.
+- Do not build the whole design around the queue before confirming the environment.
 ```
 
-#### Falha a evitar
+#### Failure to avoid
 
 ```text
-- Tratar a fila local como prova de disponibilidade em produção e planejar tudo sobre ela.
+- Treating the local queue as proof of availability in production and planning everything on top of it.
 ```
 
 ---
 
-### P-03 — Replanejamento após hipótese refutada
+### P-03 — Replanning after a refuted hypothesis
 
 ```yaml
 id: P-03
-categoria: replanejamento
-prompt: 'Continue a implementação do checkout; assumimos que o gateway suporta captura em duas etapas.'
-contexto: |
-    Já foram implementados e validados o carrinho, o cálculo de total e a tela de pagamento.
-    Ao consultar a documentação, descobre-se que o gateway só suporta captura imediata.
+category: replanning
+prompt: 'Continue the checkout implementation; we assumed the gateway supports two-step capture.'
+context: |
+    The cart, the total calculation, and the payment screen are already implemented and validated.
+    Checking the documentation reveals the gateway only supports immediate capture.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Plan and Execute.
 
-Auxiliares:
+Auxiliary:
 - Critique and Refine.
 - Verification.
 
-Ação:
-- Preservar carrinho, total e tela de pagamento já validados.
-- Replanejar apenas a etapa de captura para o modelo suportado.
-- Reavaliar quais validações precisam ser refeitas pela mudança.
+Action:
+- Preserve the already-validated cart, total, and payment screen.
+- Replan only the capture step for the supported model.
+- Reassess which validations must be redone because of the change.
 ```
 
-#### Falha grave
+#### Critical failure
 
 ```text
-- Descartar o trabalho já validado e recomeçar o checkout do zero.
-- Insistir na captura em duas etapas contra a evidência da documentação.
+- Discarding the already-validated work and restarting the checkout from scratch.
+- Insisting on two-step capture against the documentation's evidence.
 ```
 
 ---
 
-### P-04 — Dependência indisponível: bloqueio ou inviabilidade
+### P-04 — Unavailable dependency: blocker or infeasibility
 
 ```yaml
 id: P-04
-categoria: replanejamento por bloqueio
-prompt: 'Implemente o envio de notificações usando o serviço interno de e-mail.'
-contexto: |
-    O serviço interno de e-mail está temporariamente fora do ar para manutenção,
-    com retorno previsto.
-    A tarefa não tem prazo imediato declarado.
+category: replanning due to a blocker
+prompt: 'Implement notification sending using the internal email service.'
+context: |
+    The internal email service is temporarily down for maintenance,
+    with a scheduled return.
+    The task has no declared immediate deadline.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Plan and Execute.
 
-Auxiliares:
+Auxiliary:
 - Assumption Tracking.
 - Decision Making.
 
-Ação:
-- Distinguir bloqueio temporário de inviabilidade real.
-- Avançar nas etapas independentes (template, gatilho, registro) que não dependem do serviço.
-- Deixar a etapa de envio pronta e bloqueada, aguardando o serviço, em vez de trocar de solução por impulso.
+Action:
+- Distinguish a temporary blocker from real infeasibility.
+- Advance the independent steps (template, trigger, logging) that do not depend on the service.
+- Leave the sending step ready and blocked, waiting for the service, instead of switching solutions on impulse.
 ```
 
-#### Critério de aprovação
+#### Pass criterion
 
-O agente não conclui que a solução é inviável por uma indisponibilidade temporária e não troca de arquitetura sem necessidade.
+The agent does not conclude the solution is infeasible because of a temporary outage and does not switch architectures without need.
 
 ---
 
-### P-05 — Checkpoint obrigatório antes de etapa irreversível
+### P-05 — Mandatory checkpoint before an irreversible step
 
 ```yaml
 id: P-05
-categoria: checkpoint e validação
-prompt: 'Renomeie a coluna order_status para status em toda a base e atualize o código.'
-contexto: |
-    A coluna é usada por consultas, relatórios e possivelmente integrações.
-    A alteração de schema em produção é irreversível sem backup.
+category: checkpoint and validation
+prompt: 'Rename the order_status column to status across the entire database and update the code.'
+context: |
+    The column is used by queries, reports, and possibly integrations.
+    The schema change in production is irreversible without a backup.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Plan and Execute.
 
-Auxiliares:
+Auxiliary:
 - Constraint Satisfaction.
 - Verification.
 
-Plano:
-- Mapear usos da coluna antes de alterar.
-- Estratégia compatível (adicionar nova, migrar leitura/escrita, depreciar antiga) com checkpoint antes de remover.
-- Backup e validação após cada etapa irreversível.
+Plan:
+- Map the column's uses before changing anything.
+- Compatible strategy (add the new column, migrate reads/writes, deprecate the old one) with a checkpoint before removal.
+- Backup and validation after each irreversible step.
 ```
 
-#### Falha grave
+#### Critical failure
 
 ```text
-- Executar a renomeação direta em produção sem mapear usos, backup ou checkpoint.
+- Executing the rename directly in production without mapping uses, a backup, or a checkpoint.
 ```
 
 ---
 
-### P-06 — Paralelismo seguro versus inseguro
+### P-06 — Safe versus unsafe parallelism
 
 ```yaml
 id: P-06
-categoria: dependências e paralelismo
-prompt: 'Implemente o novo módulo de faturamento: ler a documentação do provedor, criar a migration da tabela invoices e ajustar o serviço que grava nessa tabela.'
-contexto: |
-    A migration cria a tabela e o serviço depende do schema resultante.
-    A leitura da documentação é independente das demais.
+category: dependencies and parallelism
+prompt: 'Implement the new billing module: read the provider documentation, create the migration for the invoices table, and adjust the service that writes to that table.'
+context: |
+    The migration creates the table and the service depends on the resulting schema.
+    Reading the documentation is independent of the other steps.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Plan and Execute.
 
-Auxiliares:
+Auxiliary:
 - Structured Decomposition.
 
-Plano:
-- Paralelo seguro: ler a documentação do provedor (não toca recurso compartilhado).
-- Sequencial obrigatório: criar a migration antes de ajustar o serviço que depende do schema.
+Plan:
+- Safe in parallel: read the provider documentation (touches no shared resource).
+- Mandatory sequence: create the migration before adjusting the service that depends on the schema.
 ```
 
-#### Falha grave
+#### Critical failure
 
 ```text
-- Paralelizar a migration e o ajuste do serviço, que compartilham o schema.
+- Parallelizing the migration and the service adjustment, which share the schema.
 ```
 
 ---
 
-### P-07 — Plano genérico que deve ser recusado
+### P-07 — Generic plan that must be refused
 
 ```yaml
 id: P-07
-categoria: anti-padrão de plano
-prompt: 'Aqui está o plano: 1) Analisar o problema. 2) Implementar a solução. 3) Testar. Pode seguir?'
-contexto: |
-    A tarefa é integrar um gateway de pagamento com várias etapas e dependências reais.
+category: plan anti-pattern
+prompt: 'Here is the plan: 1) Analyze the problem. 2) Implement the solution. 3) Test. Can you proceed?'
+context: |
+    The task is to integrate a payment gateway with several steps and real dependencies.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Plan and Execute.
 
-Ação:
-- Reconhecer que o plano é genérico e não verificável.
-- Substituir por etapas concretas com dependências, pré-condições e critérios de validação.
+Action:
+- Recognize that the plan is generic and not verifiable.
+- Replace it with concrete steps with dependencies, preconditions, and validation criteria.
 ```
 
-#### Falha a evitar
+#### Failure to avoid
 
 ```text
-- Aceitar "Analisar / Implementar / Testar" como plano executável.
+- Accepting "Analyze / Implement / Test" as an executable plan.
 ```
 
 ---
 
-### P-08 — Overplanning em ajuste trivial
+### P-08 — Overplanning on a trivial tweak
 
 ```yaml
 id: P-08
-categoria: minimalidade
-prompt: 'Aumente o padding do botão de salvar de 8px para 12px.'
-contexto: |
-    Alteração local, reversível, sem efeito em contrato, dados ou produção.
+category: minimality
+prompt: 'Increase the padding of the save button from 8px to 12px.'
+context: |
+    Local, reversible change with no effect on contracts, data, or production.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica:
-- ReAct leve ou nenhuma técnica formal.
+Technique:
+- Light ReAct or no formal technique.
 
-Ação:
-- Aplicar a alteração e validar visual/lint de forma simples.
+Action:
+- Apply the change and validate visually/lint simply.
 ```
 
-#### Falha
+#### Failure
 
 ```text
-- Criar plano multi-etapa, decomposição ou matriz de risco para um ajuste trivial.
+- Creating a multi-step plan, a decomposition, or a risk matrix for a trivial tweak.
 ```
 
 ---
 
-### P-09 — Structured Decomposition: refatorar sem mudar comportamento
+### P-09 — Structured Decomposition: refactor without changing behavior
 
 ```yaml
 id: P-09
-categoria: decomposição de código existente
-prompt: 'Refatore o componente OrdersPage, que tem 900 linhas e mistura busca de dados, filtros, paginação e renderização.'
-contexto: |
-    O comportamento observável deve permanecer idêntico.
-    Há testes de interface parciais.
+category: decomposition of existing code
+prompt: 'Refactor the OrdersPage component, which has 900 lines and mixes data fetching, filters, pagination, and rendering.'
+context: |
+    Observable behavior must remain identical.
+    Partial interface tests exist.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Structured Decomposition.
 
-Auxiliares:
-- Verification de regressão.
+Auxiliary:
+- Regression Verification.
 - Plan and Execute.
 
-Ação:
-- Decompor por RESPONSABILIDADE (busca de dados, estado de filtros, paginação, apresentação),
-  não por arquivo arbitrário.
-- Definir contratos entre as partes.
-- Validar o comportamento INTEGRADO, não apenas cada parte isolada.
+Action:
+- Decompose by RESPONSIBILITY (data fetching, filter state, pagination, presentation),
+  not by arbitrary file.
+- Define contracts between the parts.
+- Validate the INTEGRATED behavior, not just each isolated part.
 ```
 
-#### Falha grave
+#### Critical failure
 
 ```text
-- Quebrar por arquivos sem fronteiras de responsabilidade.
-- Assumir que validar cada parte isolada prova que o comportamento integrado se manteve.
+- Splitting by files without responsibility boundaries.
+- Assuming that validating each isolated part proves the integrated behavior held.
 ```
 
 ---
 
-### P-10 — Structured Decomposition: detectar lacuna de integração
+### P-10 — Structured Decomposition: detect an integration gap
 
 ```yaml
 id: P-10
-categoria: decomposição de feature multi-responsabilidade
-prompt: 'Implemente upload de documentos no cadastro do cliente.'
-contexto: |
-    Envolve interface de upload, armazenamento, vínculo com o cliente e download posterior.
-    Não foi mencionada validação de tipo, tamanho ou permissão de acesso ao arquivo.
+category: decomposition of a multi-responsibility feature
+prompt: 'Implement document upload in the customer registration.'
+context: |
+    It involves an upload interface, storage, linkage to the customer, and later download.
+    No mention was made of type or size validation, or of file access permission.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Structured Decomposition.
 
-Auxiliares:
+Auxiliary:
 - Constraint Satisfaction.
 - Verification.
 
-Ação:
-- Decompor por responsabilidade: seleção/validação, upload, armazenamento, vínculo, autorização de download.
-- DETECTAR a lacuna de integração: validação de tipo/tamanho e controle de acesso ao arquivo,
-  ausentes no pedido mas necessárias para a feature ser correta e segura.
+Action:
+- Decompose by responsibility: selection/validation, upload, storage, linkage, download authorization.
+- DETECT the integration gap: type/size validation and file access control,
+  absent from the request but necessary for the feature to be correct and secure.
 ```
 
-#### Critério de aprovação
+#### Pass criterion
 
-O agente identifica a fronteira de integração faltante (validação e autorização) em vez de implementar apenas o caminho feliz.
+The agent identifies the missing integration boundary (validation and authorization) instead of implementing only the happy path.
 
 ---
 
-### P-11 — Decision Making (busca com poda): estratégia de migração com clientes
+### P-11 — Decision Making (search with pruning): migration strategy with clients
 
 ```yaml
 id: P-11
-categoria: exploração de alternativas estruturais
-prompt: 'Precisamos mudar o tipo do campo amount de inteiro (centavos) para decimal na API usada por clientes externos. Qual estratégia seguir?'
-contexto: |
-    Há clientes externos consumindo o campo.
-    Requisito obrigatório: zero downtime e sem quebrar clientes atuais.
-    Alternativas materialmente diferentes existem.
+category: exploration of structural alternatives
+prompt: 'We need to change the type of the amount field from integer (cents) to decimal in the API used by external clients. Which strategy should we follow?'
+context: |
+    External clients consume the field.
+    Mandatory requirement: zero downtime and no breaking of current clients.
+    Materially different alternatives exist.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
-- Decision Making (modo de busca com poda e backtracking).
+Primary technique:
+- Decision Making (search mode with pruning and backtracking).
 
-Auxiliares:
+Auxiliary:
 - Constraint Satisfaction.
 - Verification.
 
-Ação:
-- Gerar de 2 a 4 alternativas materialmente distintas
-  (alteração direta breaking; novo campo + migração gradual + depreciação;
-  camada de compatibilidade que serve os dois formatos).
-- Podar a alternativa que viola o requisito obrigatório de zero downtime.
-- Fazer backtracking se uma premissa de uma alternativa for refutada.
-- Concluir com a estratégia que satisfaz as restrições, justificada.
+Action:
+- Generate 2 to 4 materially distinct alternatives
+  (direct breaking change; new field + gradual migration + deprecation;
+  compatibility layer serving both formats).
+- Prune the alternative that violates the mandatory zero-downtime requirement.
+- Backtrack if an alternative's assumption is refuted.
+- Conclude with the strategy that satisfies the constraints, justified.
 ```
 
-#### Falha grave
+#### Critical failure
 
 ```text
-- Gerar apenas variantes superficiais da mesma ideia.
-- Explorar caminhos sem critério de poda nem verificação das restrições obrigatórias.
-- Escolher a alteração direta ignorando a quebra de clientes.
+- Generating only superficial variants of the same idea.
+- Exploring paths without a pruning criterion or verification of the mandatory constraints.
+- Choosing the direct change while ignoring the client breakage.
 ```
 
 ---
 
-### P-12 — Critério de conclusão e regra de parada
+### P-12 — Completion criterion and stopping rule
 
 ```yaml
 id: P-12
-categoria: conclusão e parada
-prompt: 'Implemente o endpoint de health check do serviço.'
-contexto: |
-    O requisito é um endpoint que retorne o estado do serviço e suas dependências críticas.
-    Não há pedido de dashboards, histórico ou métricas avançadas.
+category: completion and stopping
+prompt: 'Implement the health check endpoint for the service.'
+context: |
+    The requirement is an endpoint that returns the state of the service and its critical dependencies.
+    There is no request for dashboards, history, or advanced metrics.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Plan and Execute.
 
-Ação:
-- Definir critério de conclusão objetivo: endpoint responde estado do serviço e dependências críticas,
-  com teste cobrindo caso saudável e caso degradado.
-- Parar ao atingir o critério, sem criar subtarefas de observabilidade não solicitadas.
+Action:
+- Define an objective completion criterion: the endpoint reports the state of the service and its critical dependencies,
+  with a test covering the healthy case and the degraded case.
+- Stop when the criterion is met, without creating unrequested observability subtasks.
 ```
 
-#### Critério de aprovação
+#### Pass criterion
 
-O agente define um critério de conclusão verificável e não continua gerando escopo além do solicitado.
+The agent defines a verifiable completion criterion and does not keep generating scope beyond what was requested.
 
 ---
 
-## Cenários de regressão obrigatória
+## Mandatory regression scenarios
 
-Execute estes cenários após alterações em:
+Run these scenarios after changes to:
 
 ```text
 - plan-and-execute.md;
@@ -540,74 +540,74 @@ Execute estes cenários após alterações em:
 - SKILL.md.
 ```
 
-| ID   | Regressão a evitar                                             |
-| ---- | -------------------------------------------------------------- |
-| P-03 | Descartar trabalho validado ao replanejar                      |
-| P-05 | Executar etapa irreversível sem checkpoint                     |
-| P-06 | Paralelizar ações com recurso compartilhado                    |
-| P-09 | Decompor por arquivo e validar partes isoladas como integração |
-| P-11 | Explorar alternativas superficiais ou sem poda                 |
+| ID   | Regression to avoid                                              |
+| ---- | ---------------------------------------------------------------- |
+| P-03 | Discarding validated work when replanning                        |
+| P-05 | Executing an irreversible step without a checkpoint              |
+| P-06 | Parallelizing actions with a shared resource                     |
+| P-09 | Decomposing by file and validating isolated parts as integration |
+| P-11 | Exploring superficial alternatives or exploring without pruning  |
 
 ---
 
-## Formato de resultado
+## Result format
 
 ```text
 Eval:
 - [ID]
 
-Classificação:
-- Tipo:
-- Risco e impacto:
-- Incerteza:
+Classification:
+- Type:
+- Risk and impact:
+- Uncertainty:
 
-Roteamento:
-- Técnica principal:
-- Técnicas auxiliares:
+Routing:
+- Primary technique:
+- Auxiliary techniques:
 
-Descoberta antes da execução:
-- [itens]
+Discovery before execution:
+- [items]
 
-Plano:
-- [etapas, dependências, checkpoints, paralelismo]
+Plan:
+- [steps, dependencies, checkpoints, parallelism]
 
-Gatilhos de replanejamento:
-- [itens]
+Replanning triggers:
+- [items]
 
-Critério de conclusão:
-- [verificável]
+Completion criterion:
+- [verifiable]
 
-Resultado:
-- Passou, falhou ou parcialmente passou.
+Result:
+- Passed, failed, or partially passed.
 
-Pontuação:
-- [0 a 10]
+Score:
+- [0 to 10]
 
-Falha grave:
-- [sim ou não]
+Critical failure:
+- [yes or no]
 ```
 
 ---
 
-## Instrução para o avaliador
+## Grader instructions
 
 ```text
-Avalie a estrutura de execução, não a eloquência do plano.
+Evaluate the execution structure, not the plan's eloquence.
 
-A resposta ideal:
-- planeja apenas quando a tarefa exige e age direto quando é trivial e reversível;
-- separa descoberta de execução quando há contrato ou parte desconhecida;
-- mapeia dependências reais e paraleliza só o que é seguro;
-- valida pré-condições e resultados em checkpoints proporcionais ao risco;
-- replaneja preservando o trabalho já validado e distingue bloqueio temporário de inviabilidade;
-- decompõe por responsabilidade e detecta lacunas de integração;
-- explora alternativas materialmente distintas com poda quando a decisão é estrutural;
-- define critério de conclusão objetivo e para quando ele é atendido.
+The ideal answer:
+- plans only when the task requires it and acts directly when it is trivial and reversible;
+- separates discovery from execution when a contract or part is unknown;
+- maps real dependencies and parallelizes only what is safe;
+- validates preconditions and results at checkpoints proportional to the risk;
+- replans preserving already-validated work and distinguishes a temporary blocker from infeasibility;
+- decomposes by responsibility and detects integration gaps;
+- explores materially distinct alternatives with pruning when the decision is structural;
+- defines an objective completion criterion and stops when it is met.
 
-Penalize overplanning em tarefas simples, decomposição por arquivo, paralelismo inseguro,
-descarte de trabalho válido e exploração sem critério de poda.
+Penalize overplanning on simple tasks, decomposition by file, unsafe parallelism,
+discarding valid work, and exploration without a pruning criterion.
 ```
 
 ---
 
-Voltar ao [catálogo de técnicas](../SKILL.md) · Índice das suítes: [README.md](README.md)
+Back to the [technique catalog](../SKILL.md) · Suite index: [README.md](README.md)

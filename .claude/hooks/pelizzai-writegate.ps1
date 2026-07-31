@@ -1,45 +1,45 @@
 #!/usr/bin/env pwsh
-# PelizzAI - hook writegate (PreToolUse), variante PowerShell. OPT-IN.
-# Fail-CLOSED no invariante, fail-OPEN no erro. Requer PowerShell 7+ (pwsh).
+# PelizzAI - writegate hook (PreToolUse), PowerShell variant. OPT-IN.
+# Fail-CLOSED on the invariant, fail-OPEN on error. Requires PowerShell 7+ (pwsh).
 #
-# Equivalente ao pelizzai-writegate.mjs (comportamento identico), para frota sem Node.
-# Rede de seguranca que move da obediencia do modelo para enforcement executavel as DUAS
-# autonomias irreversiveis do redesign: escrever produto sem isolamento e escrever codigo
-# antes de o gate ser ratificado. NAO decide rota - devolve o controle ao gate humano.
-# Espelha o espirito e o envelope de seguranca do pelizzai-guardrails.ps1.
+# Equivalent to pelizzai-writegate.mjs (identical behavior), for fleets without Node.
+# Safety net that moves the TWO irreversible autonomies of the redesign from model
+# obedience to executable enforcement: writing product without isolation and writing code
+# before the gate is ratified. It does NOT decide the route - it hands control back to the
+# human gate. Mirrors the spirit and safety envelope of pelizzai-guardrails.ps1.
 #
-# Dispara ANTES da escrita, em dois matchers irmaos que compartilham este mesmo arquivo:
-#  - Write | Edit | MultiEdit | NotebookEdit  -> le tool_input.file_path / .notebook_path;
-#  - Bash                                     -> detecta redirecionamento de escrita no
-#    tool_input.command (>, >>, &>, tee, sed -i, Set-Content/Add-Content/Out-File) para
-#    caminhos DENTRO da raiz do projeto. Mesma regra dos dois lados. Sinks nulos (NUL, $null,
-#    /dev/null) e alvos que resolvem para FORA da raiz (incl. $env:TEMP, %TEMP%, absolutos)
-#    nunca sao escrita de produto e nunca bloqueiam.
+# Fires BEFORE the write, on two sibling matchers that share this same file:
+#  - Write | Edit | MultiEdit | NotebookEdit  -> reads tool_input.file_path / .notebook_path;
+#  - Bash                                     -> detects write redirection in
+#    tool_input.command (>, >>, &>, tee, sed -i, Set-Content/Add-Content/Out-File) to
+#    paths INSIDE the project root. Same rule on both sides. Null sinks (NUL, $null,
+#    /dev/null) and targets that resolve OUTSIDE the root (incl. $env:TEMP, %TEMP%,
+#    absolutes) are never product writes and never block.
 #
-# REGRA A (invariante, ambos os modos) - isolamento antes da primeira escrita:
-#   escrever caminho de PRODUTO (fora de pelizzai/) dentro da raiz estando em branch protegida
-#   (main/master/develop/dev, o default do origin/HEAD) ou em HEAD destacado -> BLOQUEIA.
-#   CARVE-OUT: escrita de metadata em pelizzai/** e liberada mesmo aqui (o sistema se atualizando;
-#   e so de escrita de arquivo - o commit segue no fluxo de branch de tarefa).
+# RULE A (invariant, both modes) - isolation before the first write:
+#   writing a PRODUCT path (outside pelizzai/) inside the root while on a protected branch
+#   (main/master/develop/dev, plus origin/HEAD's default) or on a detached HEAD -> BLOCKS.
+#   CARVE-OUT: metadata writes in pelizzai/** are allowed even here (the system updating itself;
+#   it is file writes only - the commit still follows the task-branch flow).
 #
-# REGRA B (so consumidor: existe pelizzai/ e NAO e o repo-fonte) - nada de codigo antes do gate:
-#   escrever caminho de PRODUTO (fora de pelizzai/) enquanto pelizzai/data/state.md NAO
-#   contem "kickoff: ratificado" -> BLOQUEIA. Escritas em pelizzai/ sao sempre liberadas
-#   (sao os artefatos que registram o proprio gate).
-#   ESCOPO DELIBERADO: o hook trava UM marcador - o kickoff. As etapas de greenfield
-#   (descoberta -> spec -> stress -> aprovacao -> plano -> stress -> aprovacao) continuam
-#   obrigatorias, mas vivem nas skills, NAO em enforcement de runtime: transforma-las em
-#   catraca de arquivo travava trabalho legitimo sempre que o state ficava um passo atras da
-#   conversa. Doutrina nas skills; no hook, so o invariante.
-#   Em SOURCE MODE (repo-fonte PelizzAI: sentinela pelizzai-source-repo.txt) a Regra B e
-#   PULADA - ali o marcador vive no execution record nativo.
+# RULE B (consumer only: pelizzai/ exists and this is NOT the source repo) - no code before the gate:
+#   writing a PRODUCT path (outside pelizzai/) while pelizzai/data/state.md does NOT
+#   contain "kickoff: ratified" -> BLOCKS. Writes in pelizzai/ are always allowed
+#   (they are the artifacts that record the gate itself).
+#   DELIBERATE SCOPE: the hook locks ONE marker - the kickoff. The greenfield stages
+#   (discovery -> spec -> stress -> approval -> plan -> stress -> approval) remain
+#   mandatory, but they live in the skills, NOT in runtime enforcement: turning them into
+#   a file turnstile locked out legitimate work whenever the state fell one step behind
+#   the conversation. Doctrine in the skills; in the hook, only the invariant.
+#   In SOURCE MODE (PelizzAI source repo: sentinel pelizzai-source-repo.txt) Rule B is
+#   SKIPPED - there the marker lives in the native execution record.
 #
-# Bloqueio: exit 2 + motivo e caminho seguro no stderr. Erros do PROPRIO hook e casos em que
-# NAO da para decidir com seguranca: exit 0 (fail-open - bug ou falso positivo nunca trava o
-# usuario). Sem state.md em consumidor: permite e avisa no maximo 1x por janela.
+# Block: exit 2 + reason and safe path on stderr. Errors in the hook ITSELF and cases it
+# cannot decide safely: exit 0 (fail-open - a bug or false positive never locks the user
+# out). No state.md in a consumer: allows and warns at most once per window.
 #
-# Instalacao (opt-in, recomendada pela pelizzai-audit no bootstrap, mesclada sem sobrescrever
-# hooks/permissoes ja existentes), em .claude/settings.json - os DOIS matchers sao necessarios:
+# Install (opt-in, recommended by pelizzai-audit at bootstrap, merged without overwriting
+# existing hooks/permissions), in .claude/settings.json - BOTH matchers are required:
 #   { "hooks": { "PreToolUse": [
 #       { "matcher": "Write|Edit|MultiEdit|NotebookEdit", "hooks": [
 #           { "type": "command",
@@ -48,30 +48,31 @@
 #           { "type": "command",
 #             "command": "pwsh -NoProfile -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-writegate.ps1\"" } ] } ] } }
 #
-# Teste manual (num shell PowerShell):
-#   '{"tool_input":{"file_path":"src/app.ts"},"cwd":"/caminho/do/repo"}' | pwsh -NoProfile -File pelizzai-writegate.ps1; echo $LASTEXITCODE
-#   -> em branch protegida ou sem "kickoff: ratificado": motivo no stderr e exit 2; caso
-#      contrario (branch de tarefa com kickoff ratificado, ou fora do repo): exit 0.
+# Manual test (in a PowerShell shell):
+#   '{"tool_input":{"file_path":"src/app.ts"},"cwd":"/path/to/repo"}' | pwsh -NoProfile -File pelizzai-writegate.ps1; echo $LASTEXITCODE
+#   -> on a protected branch or without "kickoff: ratified": reason on stderr and exit 2;
+#      otherwise (task branch with the kickoff ratified, or outside the repo): exit 0.
 #
-# O usuario pode desabilitar o hook em .claude/settings.json - nunca e bloqueio inescapavel.
+# The user can disable the hook in .claude/settings.json - it is never an inescapable block.
 
 $ErrorActionPreference = 'SilentlyContinue'
 
-# Branches protegidas por default (Regra A). origin/HEAD enriquece a lista em runtime.
+# Default protected branches (Rule A). origin/HEAD enriches the list at runtime.
 $PROTECTED = @('main', 'master', 'develop', 'dev')
-# Marcadores maquina-legiveis dos gates sequenciais no state.md (kickoff/pos-plano ratificado
-# pelo usuario: conteudo + isolamento + modo + commit). writegate e retomada dependem dele.
-$KICKOFF_RATIFIED = 'kickoff:\s*ratificado'
-# Sentinela DEDICADA do repo-fonte PelizzAI (source mode): presente, a Regra B e pulada.
-# Criterio unico e inequivoco: manifesto e sync-harness existem tambem nos consumidores
-# instalados via -ExportConsumer e NAO indicam source mode.
+# Machine-readable markers for the sequential gates in state.md (kickoff/post-plan ratified
+# by the user: content + isolation + mode + commit). Writegate and resumption depend on it.
+# Also accepts "ratificado": legacy pt-BR states written before the English harness.
+$KICKOFF_RATIFIED = 'kickoff:\s*rati(fied|ficado)'
+# DEDICATED sentinel of the PelizzAI source repo (source mode): when present, Rule B is skipped.
+# Single unambiguous criterion: the manifest and sync-harness also exist in consumers
+# installed via -ExportConsumer and do NOT indicate source mode.
 $SOURCE_SENTINELS = @('scripts/pelizzai-source-repo.txt')
-# Fail-open "nao pode decidir": avisa no maximo 1x por janela (por repo) para nao spammar.
+# "Could not decide" fail-open: warns at most once per window (per repo) to avoid spam.
 $script:WARN_SNOOZE_MS = 86400000L  # 24h
-# Windows e macOS comparam caminhos sem case; Linux com case.
+# Windows and macOS compare paths case-insensitively; Linux is case-sensitive.
 $script:CI = $IsWindows -or $IsMacOS
 
-# git com o cwd do stdin; '' em QUALQUER falha (git ausente, fora de repo, ref inexistente).
+# git with the stdin cwd; '' on ANY failure (git missing, outside a repo, nonexistent ref).
 function Invoke-Git([string]$Cwd, [string[]]$GitArgs) {
   try {
     $out = & git -C $Cwd @GitArgs 2>$null
@@ -80,12 +81,12 @@ function Invoke-Git([string]$Cwd, [string[]]$GitArgs) {
   } catch { return '' }
 }
 
-# Barras para frente e sem barra final, para comparacao de prefixo robusta a \ e /.
+# Forward slashes and no trailing slash, for prefix comparison robust to \ and /.
 function Get-Norm([string]$p) {
   return (($p -replace '\\', '/') -replace '/+$', '')
 }
 
-# child e o proprio root ou esta DENTRO dele (case conforme o SO).
+# child is the root itself or is INSIDE it (case per the OS).
 function Test-Inside([string]$child, [string]$root) {
   $c = Get-Norm $child
   $r = Get-Norm $root
@@ -93,8 +94,8 @@ function Test-Inside([string]$child, [string]$root) {
   return ($c -eq $r) -or $c.StartsWith($r + '/')
 }
 
-# Fecha o token corrente: alvo de redirecionamento (ignora dup de fd >&N) ou token comum
-# (descarta prefixo de fd solto, o "2" de "2>"). Mutacoes via [ref] (parametro por referencia).
+# Closes the current token: redirection target (ignores fd dup >&N) or regular token
+# (drops a stray fd prefix, the "2" in "2>"). Mutations via [ref] (by-reference parameter).
 function Flush-Token([ref]$Cur, $Tokens, $Redirects, [ref]$Expect) {
   if ($Cur.Value -eq '') { return }
   if ($Expect.Value) {
@@ -106,9 +107,9 @@ function Flush-Token([ref]$Cur, $Tokens, $Redirects, [ref]$Expect) {
   $Cur.Value = ''
 }
 
-# Parser de UM segmento de shell, ciente de aspas: separa tokens e ALVOS de redirecionamento.
-# Ciente de aspas para nao confundir um '>' dentro de string (ex.: git commit -m "a > b")
-# com redirecionamento real.
+# Parser for ONE shell segment, quote-aware: splits tokens and redirection TARGETS.
+# Quote-aware so it does not mistake a '>' inside a string (e.g. git commit -m "a > b")
+# for a real redirection.
 function Get-ParsedSegment([string]$seg) {
   $tokens = [System.Collections.Generic.List[string]]::new()
   $redirects = [System.Collections.Generic.List[string]]::new()
@@ -138,22 +139,22 @@ function Get-ParsedSegment([string]$seg) {
   return @{ Tokens = $tokens; Redirects = $redirects }
 }
 
-# Sinks que NAO sao arquivo do repositorio: dispositivos nulos do Windows (NUL, NUL:), do
-# PowerShell ($null) e do POSIX (/dev/null e o restante de /dev/). Redirecionar para eles e
-# DESCARTAR saida, nao escrever produto - `node x.js > NUL` resolvia para um caminho relativo
-# dentro da raiz e bloqueava indevidamente.
+# Sinks that are NOT repository files: the null devices of Windows (NUL, NUL:), of
+# PowerShell ($null) and of POSIX (/dev/null and the rest of /dev/). Redirecting to them
+# DISCARDS output, it does not write product - `node x.js > NUL` used to resolve to a
+# relative path inside the root and block wrongly.
 $NULL_SINKS = @('nul', 'nul:', '$null', 'con', 'con:', '/dev/null')
 function Test-NullSink([string]$target) {
   $t = ((([string]$target).Trim()) -replace '\\', '/').ToLowerInvariant()
   return ($NULL_SINKS -contains $t) -or $t.StartsWith('/dev/')
 }
 
-# Expande referencias de variavel de ambiente no alvo: $env:NOME (PowerShell), %NOME% (cmd),
-# ${NOME} e $NOME (POSIX). Sem isso, `> $env:TEMP/build.log` era lido como caminho RELATIVO
-# dentro da raiz e bloqueava - quando o arquivo nem sequer nasce no repositorio.
-# Referencia que nao resolve -> alvo indecidivel -> devolve $null e o hook nao bloqueia
-# (fail-open, a mesma honestidade do resto do matcher: o que nao da para parsear com
-# seguranca, nao vira invariante). O valor expandido nao e reexpandido (sem laco infinito).
+# Expands environment variable references in the target: $env:NAME (PowerShell), %NAME% (cmd),
+# ${NAME} and $NAME (POSIX). Without this, `> $env:TEMP/build.log` was read as a RELATIVE path
+# inside the root and blocked - when the file is not even born in the repository.
+# A reference that does not resolve -> undecidable target -> returns $null and the hook does
+# not block (fail-open, the same honesty as the rest of the matcher: what cannot be parsed
+# safely does not become an invariant). The expanded value is not re-expanded (no infinite loop).
 function Expand-ShellVars([string]$target) {
   $patterns = @(
     '\$env:([A-Za-z_][A-Za-z0-9_]*)',
@@ -177,8 +178,8 @@ function Expand-ShellVars([string]$target) {
   return $out
 }
 
-# Alvos de escrita de um comando shell (matcher irmao de Bash). Best-effort e honesto:
-# cobre os casos comuns; o que nao conseguir parsear com seguranca, nao bloqueia.
+# Write targets of a shell command (Bash sibling matcher). Best-effort and honest:
+# covers the common cases; what it cannot parse safely does not block.
 function Get-ShellTargets([string]$command) {
   $targets = [System.Collections.Generic.List[string]]::new()
   foreach ($seg in ($command -split '&&|\|\||;|\||\r?\n')) {
@@ -187,7 +188,7 @@ function Get-ShellTargets([string]$command) {
     foreach ($r in $parsed.Redirects) { [void]$targets.Add($r) }
     for ($i = 0; $i -lt $tokens.Count; $i++) {
       $t = $tokens[$i].ToLowerInvariant()
-      # tee [-flags] arquivo...  /  Tee-Object -FilePath arquivo
+      # tee [-flags] file...  /  Tee-Object -FilePath file
       if ($t -eq 'tee' -or $t -eq 'tee-object') {
         for ($j = $i + 1; $j -lt $tokens.Count; $j++) {
           $a = $tokens[$j]
@@ -197,7 +198,7 @@ function Get-ShellTargets([string]$command) {
           if (-not $a.StartsWith('-')) { [void]$targets.Add($a) }
         }
       }
-      # Set-Content / Add-Content / Out-File: -Path/-LiteralPath ou primeiro posicional.
+      # Set-Content / Add-Content / Out-File: -Path/-LiteralPath or first positional.
       if ($t -eq 'set-content' -or $t -eq 'add-content' -or $t -eq 'out-file') {
         $took = $false
         for ($j = $i + 1; ($j -lt $tokens.Count) -and (-not $took); $j++) {
@@ -209,7 +210,7 @@ function Get-ShellTargets([string]$command) {
           }
         }
       }
-      # sed -i / --in-place <arquivo> (ultimo operando nao-flag do segmento).
+      # sed -i / --in-place <file> (last non-flag operand of the segment).
       if ($t -eq 'sed') {
         $inPlace = $false
         for ($k = $i + 1; $k -lt $tokens.Count; $k++) {
@@ -224,8 +225,8 @@ function Get-ShellTargets([string]$command) {
       }
     }
   }
-  # Descarta flags, sinks nulos e alvos com variavel irresolvivel; expande o que sobrar para
-  # que a comparacao com a raiz do repo veja o caminho REAL, nao o literal do shell.
+  # Drops flags, null sinks, and targets with an unresolvable variable; expands the rest so
+  # that the comparison against the repo root sees the REAL path, not the shell literal.
   $clean = [System.Collections.Generic.List[string]]::new()
   foreach ($t in $targets) {
     if (-not $t) { continue }
@@ -239,14 +240,14 @@ function Get-ShellTargets([string]$command) {
   return @($clean)
 }
 
-# Bloqueia: motivo + caminho seguro no stderr e exit 2.
+# Blocks: reason + safe path on stderr and exit 2.
 function Invoke-Block([string]$reason) {
-  [Console]::Error.WriteLine("PelizzAI writegate: escrita bloqueada - $reason")
-  [Console]::Error.WriteLine('(Hook opt-in fail-closed de isolamento/kickoff. Se a escrita for legitima fora do fluxo, isole via pelizzai-starting-branch, ratifique o gate, ou desabilite o hook em .claude/settings.json.)')
+  [Console]::Error.WriteLine("PelizzAI writegate: write blocked - $reason")
+  [Console]::Error.WriteLine('(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, isolate via pelizzai-starting-branch, ratify the gate, or disable the hook in .claude/settings.json.)')
   exit 2
 }
 
-# Aviso best-effort, no maximo 1x por janela e por repo - nunca afeta o exit code.
+# Best-effort warning, at most once per window and per repo - never affects the exit code.
 function Invoke-WarnOnce([string]$gitRoot, [string]$message) {
   try {
     $key = ((Get-Norm $gitRoot).ToLowerInvariant() -replace '[^a-z0-9]', '_')
@@ -258,7 +259,7 @@ function Invoke-WarnOnce([string]$gitRoot, [string]$message) {
       try { $warnUntil = [long]((Get-Content -LiteralPath $statePath -Raw | ConvertFrom-Json).warnUntil) } catch {}
     }
     if ($now -lt $warnUntil) { return }
-    [Console]::Error.WriteLine("PelizzAI writegate (aviso): $message")
+    [Console]::Error.WriteLine("PelizzAI writegate (warning): $message")
     try { (@{ warnUntil = ($now + $script:WARN_SNOOZE_MS) } | ConvertTo-Json -Compress) | Set-Content -LiteralPath $statePath -Encoding utf8 } catch {}
   } catch {}
 }
@@ -267,23 +268,23 @@ try {
   $raw = [Console]::In.ReadToEnd()
   if (-not $raw) { exit 0 }
   $data = $null
-  try { $data = $raw | ConvertFrom-Json } catch { exit 0 } # payload ilegivel -> nao trava
+  try { $data = $raw | ConvertFrom-Json } catch { exit 0 } # unreadable payload -> no lock-up
 
   $cwd = (Get-Location).Path
   if (($data.cwd -is [string]) -and $data.cwd) { $cwd = $data.cwd }
   $ti = $data.tool_input
 
-  # Alvos: file_path (Write/Edit/MultiEdit), notebook_path (NotebookEdit), shell (Bash).
+  # Targets: file_path (Write/Edit/MultiEdit), notebook_path (NotebookEdit), shell (Bash).
   $targets = [System.Collections.Generic.List[string]]::new()
   if (($ti.file_path -is [string]) -and $ti.file_path) { [void]$targets.Add($ti.file_path) }
   if (($ti.notebook_path -is [string]) -and $ti.notebook_path) { [void]$targets.Add($ti.notebook_path) }
   if (($ti.command -is [string]) -and $ti.command) { foreach ($x in (Get-ShellTargets $ti.command)) { [void]$targets.Add($x) } }
-  if ($targets.Count -eq 0) { exit 0 } # nada a guardar (ex.: Bash somente leitura)
+  if ($targets.Count -eq 0) { exit 0 } # nothing to guard (e.g. read-only Bash)
 
   $gitRoot = Invoke-Git $cwd @('rev-parse', '--show-toplevel')
-  if (-not $gitRoot) { exit 0 } # fora de repo git (scratchpad/externos) ou git ausente -> permite
+  if (-not $gitRoot) { exit 0 } # outside a git repo (scratchpad/external) or git missing -> allow
 
-  # So interessam alvos DENTRO da raiz; scratchpad/temp fora da raiz nunca bloqueia.
+  # Only targets INSIDE the root matter; scratchpad/temp outside the root never blocks.
   $inRoot = [System.Collections.Generic.List[string]]::new()
   foreach ($t in $targets) {
     $abs = if ([System.IO.Path]::IsPathRooted($t)) { $t } else { Join-Path $cwd $t }
@@ -292,30 +293,30 @@ try {
   }
   if ($inRoot.Count -eq 0) { exit 0 }
 
-  # Metadata do harness (pelizzai/**) vs. PRODUTO (fora de pelizzai/). Tanto o carve-out da
-  # Regra A quanto a Regra B se apoiam nessa separacao.
+  # Harness metadata (pelizzai/**) vs. PRODUCT (outside pelizzai/). Both Rule A's carve-out
+  # and Rule B rest on this separation.
   $pelizzaiDir = Join-Path $gitRoot 'pelizzai'
   $products = @($inRoot | Where-Object { -not (Test-Inside $_ $pelizzaiDir) })
 
-  # -- Regra A (ambos os modos): branch protegida/destacada bloqueia escrita de PRODUTO in-root.
-  # CARVE-OUT DE METADATA: escrever dentro de pelizzai/** e LIBERADO mesmo em branch protegida ou
-  # HEAD destacado - e metadata do harness (state/plano/spec/reports), o sistema se atualizando,
-  # nunca produto. Isso destrava a reconciliacao do state na propria branch protegida a qual o dev
-  # volta apos o merge do PR. NOTA DE SEGURANCA: o carve-out e SO de escrita de ARQUIVO e nao abre
-  # brecha de produto nem de commit - produto (fora de pelizzai/) segue bloqueado por esta mesma
-  # Regra A; a metadata so e COMMITADA no primeiro commit da branch de tarefa nova (o fluxo nunca
-  # exige commit em protegida); e o pelizzai-guardrails continua barrando git destrutivo.
-  # LIMITE (symlink): a classificacao metadata-vs-produto e por CAMINHO - GetFullPath normaliza `..`
-  # (por isso `pelizzai/../src` corretamente vira produto), mas NAO segue symlinks. Um symlink dentro
-  # de pelizzai/ apontando para fora (ex.: `pelizzai/link -> ../src`) poderia fazer uma escrita real
-  # em produto ser lida como metadata e liberada em branch protegida. O carve-out NAO e airtight
-  # quanto a symlink; os controles compensatorios permanecem: pelizzai-guardrails barra o git
-  # destrutivo e o review humano enxerga o alvo real.
-  $branch = Invoke-Git $cwd @('branch', '--show-current') # '' = HEAD destacado (ou sem branch)
+  # -- Rule A (both modes): protected/detached branch blocks in-root PRODUCT writes.
+  # METADATA CARVE-OUT: writing inside pelizzai/** is ALLOWED even on a protected branch or a
+  # detached HEAD - it is harness metadata (state/plan/spec/reports), the system updating itself,
+  # never product. This unblocks state reconciliation on the very protected branch the dev returns
+  # to after the PR merge. SECURITY NOTE: the carve-out is for FILE writes ONLY and opens no
+  # product or commit loophole - product (outside pelizzai/) stays blocked by this same Rule A;
+  # the metadata is only COMMITTED in the first commit of the new task branch (the flow never
+  # requires a commit on a protected branch); and pelizzai-guardrails keeps blocking destructive
+  # git. LIMIT (symlink): the metadata-vs-product classification is by PATH - GetFullPath normalizes
+  # `..` (which is why `pelizzai/../src` correctly counts as product) but does NOT follow symlinks.
+  # A symlink inside pelizzai/ pointing outside (e.g. `pelizzai/link -> ../src`) could make a real
+  # product write be read as metadata and allowed on a protected branch. The carve-out is NOT
+  # airtight against symlinks; the compensating controls remain: pelizzai-guardrails blocks
+  # destructive git and human review sees the real target.
+  $branch = Invoke-Git $cwd @('branch', '--show-current') # '' = detached HEAD (or no branch)
   $isProtected = ($branch -eq '') -or ($PROTECTED -contains $branch)
   if (-not $isProtected) {
-    # Enriquecimento pelo default do remoto; se falhar, degrada para a lista estatica
-    # (NAO para fail-open - a Regra A precisa continuar armada sem origin/HEAD).
+    # Enrichment via the remote's default; on failure, degrades to the static list
+    # (NOT to fail-open - Rule A must stay armed without origin/HEAD).
     $originHead = Invoke-Git $cwd @('symbolic-ref', '--short', 'refs/remotes/origin/HEAD')
     if ($originHead) {
       $tail = ($originHead -split '/')[-1]
@@ -323,32 +324,32 @@ try {
     }
   }
   if ($isProtected -and $products.Count -gt 0) {
-    $b = if ($branch) { $branch } else { 'HEAD destacado' }
-    Invoke-Block "branch protegida/destacada ($b). Isole via pelizzai-starting-branch antes de escrever produto - isolamento antes da primeira escrita e invariante (escrita de metadata em pelizzai/ e liberada mesmo aqui)."
+    $b = if ($branch) { $branch } else { 'detached HEAD' }
+    Invoke-Block "protected/detached branch ($b). Isolate via pelizzai-starting-branch before writing product - isolation before the first write is an invariant (metadata writes in pelizzai/ are allowed even here)."
   }
 
-  # Source mode (repo-fonte PelizzAI): o marcador vive no execution record -> Regra B pulada.
+  # Source mode (PelizzAI source repo): the marker lives in the execution record -> Rule B skipped.
   $sourceMode = $true
   foreach ($rel in $SOURCE_SENTINELS) {
     if (-not (Test-Path -LiteralPath (Join-Path $gitRoot $rel))) { $sourceMode = $false; break }
   }
   if ($sourceMode) { exit 0 }
 
-  # -- Regra B (so consumidor): escrita de PRODUTO exige kickoff ratificado no state.md.
-  if ($products.Count -eq 0) { exit 0 } # so artefatos de setup em pelizzai/ -> liberado
+  # -- Rule B (consumer only): a PRODUCT write requires a ratified kickoff in state.md.
+  if ($products.Count -eq 0) { exit 0 } # only setup artifacts in pelizzai/ -> allowed
 
   $statePath = Join-Path $gitRoot 'pelizzai/data/state.md'
   if (-not (Test-Path -LiteralPath $statePath)) {
-    # Consumidor sem state.md: nao da para ler o kickoff com seguranca -> fail-open + aviso 1x.
-    Invoke-WarnOnce $gitRoot 'sem pelizzai/data/state.md para verificar o kickoff; permitindo a escrita. Se este projeto usa o harness, conduza o gate de kickoff e registre "kickoff: ratificado" antes de escrever produto.'
+    # Consumer without state.md: cannot read the kickoff safely -> fail-open + warn once.
+    Invoke-WarnOnce $gitRoot 'no pelizzai/data/state.md to check the kickoff; allowing the write. If this project uses the harness, run the kickoff gate and record "kickoff: ratified" before writing product.'
     exit 0
   }
   $state = ''
-  try { $state = Get-Content -LiteralPath $statePath -Raw } catch { exit 0 } # nao leu o marcador -> fail-open
+  try { $state = Get-Content -LiteralPath $statePath -Raw } catch { exit 0 } # could not read the marker -> fail-open
   if ([regex]::IsMatch($state, $KICKOFF_RATIFIED, 'IgnoreCase')) { exit 0 }
 
-  Invoke-Block 'o kickoff ainda nao foi ratificado (falta "kickoff: ratificado" em pelizzai/data/state.md). Conduza o gate de kickoff/pos-plano COM o usuario - isolamento, modo de execucao e estrategia de commit -, grave "kickoff: ratificado" em pelizzai/data/state.md e entao escreva o codigo.'
+  Invoke-Block 'the kickoff has not been ratified yet ("kickoff: ratified" is missing from pelizzai/data/state.md). Run the kickoff/post-plan gate WITH the user - isolation, execution mode, and commit strategy -, record "kickoff: ratified" in pelizzai/data/state.md, and then write the code.'
 } catch {
-  # fail-open: erro do proprio hook nunca trava o usuario
+  # fail-open: an error in the hook itself never locks the user out
 }
 exit 0

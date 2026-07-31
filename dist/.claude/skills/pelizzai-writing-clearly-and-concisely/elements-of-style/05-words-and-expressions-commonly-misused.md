@@ -1,57 +1,57 @@
-## V. Palavras e Expressões Mal Empregadas
+## V. Words and Expressions Commonly Misused
 
-(Algumas das palavras tratadas aqui — *caso*, *fator*, *aspecto*, *questão* — são boas em seu lugar, mas se intrometem constantemente onde não têm direito de estar. Outras são parônimos e homônimos que o ouvido troca com facilidade. Se você tiver desde o início o propósito de expressar com precisão o seu pensamento, e não se contentar com a fórmula pronta que poupa o trabalho de fazê-lo, esse tipo de expressão lhe causará pouca dificuldade. Mas, se perceber que, num momento de distração, deixou escapar uma delas, o procedimento certo em geral não é remendar a frase trocando uma palavra por outra, e sim reformulá-la por completo, como ilustram vários exemplos abaixo e outros nas Regras 12 e 13.)
+(Some of the words treated here — *case*, *factor*, *feature*, *question* — are good in their place, but constantly intrude where they have no right to be. Others are look-alikes and sound-alikes that the ear swaps easily. If you set out from the start with the purpose of expressing your thought precisely, instead of settling for the ready-made formula that spares you the trouble of doing so, this kind of expression will give you little difficulty. But if you find that, in a careless moment, one of them has slipped in, the right procedure is usually not to patch the sentence by swapping one word for another, but to recast it entirely, as several examples below illustrate, and others under Rules 12 and 13.)
 
-> Nota de adaptação: a versão original deste capítulo era um glossário de erros do inglês (*all right*, *different than*, *who/whom*, infinitivo separado, plural de *data*, etc.), em sua maioria sem qualquer equivalência em português. Mantivemos apenas o núcleo transferível: o princípio do cabeçalho, os vícios de escolha de palavra que também afligem o português e o tipo de erro por confusão de parônimos. Cada item traz um exemplo Original → Revisão em pt-BR.
+> Adaptation note: the original version of this chapter was a glossary of early-20th-century English usage disputes (*all right*, *different than*, *who/whom*, the split infinitive, the plural of *data*, etc.), many of them dated. This edition keeps the transferable core: the principle in the headnote, the word-choice vices that afflict prose in any age, and the class of error that comes from confusing look-alike words. Each item gives an Original → Revision example.
 
-**Intensificadores em excesso.** *Muito*, *certamente*, *realmente*, *tão* e parentes são usados por alguns para reforçar toda e qualquer afirmação. O maneirismo, ruim na fala, é pior na escrita: enfraquece justamente o que pretende realçar. Quando a ênfase for necessária, escolha a palavra forte por si mesma, não o advérbio que a escora.
+**Overused intensifiers.** *Very*, *certainly*, *really*, *so*, and their relatives are used by some to bolster each and every statement. The mannerism, bad in speech, is worse in writing: it weakens exactly what it means to strengthen. When emphasis is needed, choose the word that is strong in itself, not the adverb that props it up.
 
-| Original                                  | Revisão                  |
-| ----------------------------------------- | ------------------------ |
-| O resultado foi muito surpreendente.      | O resultado foi notável. |
-| A explicação é realmente muito confusa.   | A explicação é obscura.  |
+| Original                                  | Revision                     |
+| ----------------------------------------- | ---------------------------- |
+| The result was very surprising.           | The result was remarkable.   |
+| The explanation is really very confusing. | The explanation is obscure.  |
 
-**Substantivos-curinga vazios.** *Caso*, *fator*, *aspecto*, *questão*, *sistema*, *natureza* e *caráter* são palavras batidas que, em geral, nada acrescentam à frase. Quase sempre a oração fica mais direta e idiomática quando você as corta e vai ao concreto.
+**Empty all-purpose nouns.** *Case*, *factor*, *feature*, *question*, *system*, *nature*, and *character* are threadbare words that, as a rule, add nothing to the sentence. The clause almost always becomes more direct and idiomatic when you cut them and go to the concrete.
 
-| Original                                                          | Revisão                                          |
-| ---------------------------------------------------------------- | ------------------------------------------------ |
-| Em muitos casos, as salas eram mal ventiladas.                   | Muitas das salas eram mal ventiladas.            |
-| O melhor preparo foi o grande fator de sua vitória na partida.   | Ele venceu a partida por estar mais bem preparado. |
-| Foram tomadas medidas de caráter hostil.                         | Foram tomadas medidas hostis.                    |
+| Original                                                          | Revision                                          |
+| ----------------------------------------------------------------- | ------------------------------------------------- |
+| In many cases, the rooms were poorly ventilated.                  | Many of the rooms were poorly ventilated.         |
+| Superior preparation was the great factor in his winning the match. | He won the match by being better prepared.      |
+| Measures of a hostile character were taken.                       | Hostile measures were taken.                      |
 
-**Literalmente.** Reserve o termo para o sentido próprio. Usá-lo para apoiar exagero ou metáfora produz o efeito contrário do pretendido: diz ao leitor que aconteceu de fato algo que não aconteceu.
+**Literally.** Reserve the term for its literal sense. Using it to shore up exaggeration or metaphor produces the opposite of the intended effect: it tells the reader that something actually happened that did not.
 
-| Original                              | Revisão                          |
-| ------------------------------------- | -------------------------------- |
-| Recebeu literalmente uma enxurrada de críticas. | Recebeu uma enxurrada de críticas. |
-| Literalmente morto de cansaço.        | Quase morto de cansaço.          |
+| Original                                        | Revision                            |
+| ----------------------------------------------- | ----------------------------------- |
+| He literally received a flood of criticism.     | He received a flood of criticism.   |
+| Literally dead with fatigue.                    | Almost dead with fatigue.           |
 
-**“Interessante” como anúncio.** Evite usar *interessante*, *curioso* ou *digno de nota* como fórmula de introdução. Em vez de anunciar que aquilo que você vai contar é interessante, torne-o interessante.
+**"Interesting" as an announcement.** Avoid using *interesting*, *curious*, or *worth noting* as a formula of introduction. Instead of announcing that what you are about to tell is interesting, make it interesting.
 
-| Original                                              | Revisão                                  |
-| ---------------------------------------------------- | ---------------------------------------- |
-| Conta-se uma história interessante sobre o autor.    | (Conte a história, sem preâmbulo.)       |
-| É interessante notar que a peça estreou em 1899.     | A peça estreou em 1899.                  |
+| Original                                              | Revision                                 |
+| ----------------------------------------------------- | ---------------------------------------- |
+| An interesting story is told of the author.           | (Tell the story, without preamble.)      |
+| It is interesting to note that the play opened in 1899. | The play opened in 1899.               |
 
-**“Um dos mais…” como preâmbulo.** Evite abrir um texto ou um parágrafo com fórmulas como “Um dos avanços mais interessantes da ciência moderna é…” ou “O Brasil é um dos países mais diversos do mundo.” Não há erro nelas; são apenas gastas e vigorosamente fracas. Entre direto no assunto.
+**"One of the most..." as a preamble.** Avoid opening a text or a paragraph with formulas such as "One of the most interesting developments of modern science is..." or "Brazil is one of the most diverse countries in the world." There is nothing wrong with them; they are merely worn out and vigorously weak. Go straight to the subject.
 
-| Original                                                             | Revisão                                            |
-| ------------------------------------------------------------------- | -------------------------------------------------- |
-| Uma das figuras mais influentes do período foi, sem dúvida, Machado. | Machado influenciou o período como poucos.         |
+| Original                                                             | Revision                                            |
+| -------------------------------------------------------------------- | --------------------------------------------------- |
+| One of the most influential figures of the period was, without doubt, Machado de Assis. | Machado de Assis influenced the period as few others did. |
 
-**“É fato” reservado ao verificável.** Use *fato* apenas para o que se pode verificar de forma direta, não para juízo de valor. Que certo evento ocorreu em determinada data, que o chumbo derrete a determinada temperatura: são fatos. Já conclusões como “foi o maior dos generais modernos” ou “o clima daqui é agradável”, por mais defensáveis que sejam, não são fatos. Apresentá-las como tal é pedir ao leitor que aceite uma opinião sem discuti-la. (Sobre a fórmula *o fato de que*, veja a Regra 13.)
+**"Fact" reserved for the verifiable.** Use *fact* only for what can be directly verified, not for judgments of value. That a certain event occurred on a given date, that lead melts at a certain temperature: these are facts. Conclusions such as "he was the greatest of modern generals" or "the climate here is pleasant," however defensible, are not facts. Presenting them as such asks the reader to accept an opinion without discussion. (On the formula *the fact that*, see Rule 13.)
 
-| Original                                                      | Revisão                                                          |
-| ------------------------------------------------------------ | --------------------------------------------------------------- |
-| É fato que este é o melhor romance da literatura brasileira. | Considero este o melhor romance da literatura brasileira.       |
+| Original                                                      | Revision                                                   |
+| ------------------------------------------------------------- | ---------------------------------------------------------- |
+| It is a fact that this is the best novel in Brazilian literature. | I consider this the best novel in Brazilian literature. |
 
-**Parônimos e homônimos.** A troca de palavras parecidas é fonte constante de erro na escrita em português. Não há substituição mecânica que resolva: é preciso saber qual palavra cabe. Os pares abaixo são os que mais derrubam.
+**Commonly confused pairs.** Swapping look-alike words is a constant source of error in writing. No mechanical substitution will fix it: you must know which word belongs. The pairs below are the ones that trip writers most.
 
-- ***mau* / *mal*.** *Mau* é adjetivo (oposto de *bom*); *mal* é advérbio (oposto de *bem*) ou substantivo. — *Ele dormiu* **mau**. → *Ele dormiu* **mal**.
-- ***a fim de* / *afim*.** *A fim de* indica finalidade; *afim* significa “semelhante, aparentado”. — *Estudou* **afim** *de passar.* → *Estudou* **a fim de** *passar.*
-- ***ao encontro de* / *de encontro a*.** *Ao encontro de* = a favor, em concordância; *de encontro a* = contra, em colisão. — *A proposta veio* **de encontro** *aos meus interesses* (quer dizer que os contrariou). → Se o sentido era favorável: *A proposta veio* **ao encontro** *dos meus interesses.*
-- ***ratificar* / *retificar*.** *Ratificar* = confirmar; *retificar* = corrigir. — *Vou* **ratificar** *o erro do relatório.* → *Vou* **retificar** *o erro do relatório.*
-- ***a par* / *ao par*.** *A par* = informado, ciente; *ao par* = na cotação cambial de igualdade. — *Mantenha-me* **ao par** *das novidades.* → *Mantenha-me* **a par** *das novidades.*
-- ***tampouco* / *tão pouco*.** *Tampouco* = também não; *tão pouco* = quantidade ínfima. — *Não li o livro nem* **tão pouco** *o resumo.* → *Não li o livro nem* **tampouco** *o resumo.*
-- ***senão* / *se não*.** *Senão* = caso contrário, exceto; *se não* = conjunção condicional + negação. — *Estude,* **se não** *será reprovado.* → *Estude,* **senão** *será reprovado.*
-- ***mas* / *mais*.** *Mas* é conjunção adversativa; *mais* indica quantidade. — *Tentei,* **mais** *não consegui.* → *Tentei,* **mas** *não consegui.*
+- ***affect* / *effect*.** *Affect* is the verb (to influence); *effect* is the noun (a result) — as a verb, *effect* means to bring about. — *The delay* **effected** *our plans.* → *The delay* **affected** *our plans.*
+- ***its* / *it's*.** *Its* is the possessive; *it's* is the contraction of *it is*. — *The team lost* **it's** *focus.* → *The team lost* **its** *focus.*
+- ***fewer* / *less*.** *Fewer* for what you count; *less* for what you measure. — *There were* **less** *errors in this build.* → *There were* **fewer** *errors in this build.*
+- ***imply* / *infer*.** The speaker *implies*; the listener *infers*. — *From his tone, I* **implied** *that he was angry.* → *From his tone, I* **inferred** *that he was angry.*
+- ***principal* / *principle*.** *Principal* = chief, main (or the person in charge); *principle* = a rule or fundamental truth. — *That violates a basic* **principal** *of design.* → *That violates a basic* **principle** *of design.*
+- ***complement* / *compliment*.** *Complement* = to complete or go well with; *compliment* = to praise. — *The colors* **compliment** *each other.* → *The colors* **complement** *each other.*
+- ***lose* / *loose*.** *Lose* is the verb (to misplace, to fail to keep); *loose* is the adjective (not tight). — *Don't* **loose** *the key.* → *Don't* **lose** *the key.*
+- ***than* / *then*.** *Than* compares; *then* orders in time. — *Faster* **then** *ever.* → *Faster* **than** *ever.*

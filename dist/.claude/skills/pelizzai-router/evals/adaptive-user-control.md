@@ -1,111 +1,113 @@
-# Regressão — inteligência adaptativa com usuário no controle
+# Regression — adaptive intelligence with the user in control
 
-Esta matriz protege uma classe de comportamento, não uma stack. O harness deve adaptar reasoning,
-pesquisa, profundidade e skills ao projeto observado; Context7 fortalece a recomendação, e o usuário
-ratifica decisões materiais.
+This matrix protects a class of behavior, not a stack. The harness must adapt reasoning, research,
+depth, and skills to the observed project; Context7 strengthens the recommendation, and the user
+ratifies material decisions.
 
-## G-01 — greenfield com stack informada (regressão histórica)
+## G-01 — greenfield with the stack specified (historical regression)
 
 ```text
-Quero criar um MVP de um sistema de emissão e atendimento de senhas.
-Use React com TypeScript, Express e SQLite. O sistema deve emitir senhas por tipo de atendimento e
-ter uma área para chamar, finalizar e acompanhar a fila.
+I want to build an MVP of a queue-ticket issuing and service system.
+Use React with TypeScript, Express, and SQLite. The system must issue tickets by service type and
+have an area to call, complete, and track the queue.
 ```
 
-Esperado:
+Expected:
 
 - `write-local`, `feature/greenfield`, lane `exploratory`, head `pelizzai-brainstorming`;
-- Context7 pode ser consultado em modo read-only antes do kickoff para confirmar capacidades,
-  compatibilidade e práticas atuais da stack e melhorar as perguntas;
-- primeira resposta apresenta a análise e uma única pergunta de ratificação da rota;
-- depois, uma pergunta de produto por turno, spec + stress + aprovação, domain skills ratificadas,
-  plano + stress + aprovação, setup e execução;
-- nenhuma regra de negócio, UX, estado ou aceite é escolhida pela documentação.
+- Context7 may be consulted read-only before kickoff to confirm the stack's current capabilities,
+  compatibility, and practices and to improve the questions;
+- the first response presents the analysis and a single route-ratification question;
+- afterwards, one product question per turn, spec + stress + approval, ratified domain skills,
+  plan + stress + approval, setup, and execution;
+- no business rule, UX, state, or acceptance is chosen by the documentation.
 
-## G-02 — greenfield em outra plataforma
-
-```text
-Crie um aplicativo mobile offline-first para inventário de campo usando Flutter, Dart e Drift.
-Preciso cadastrar itens e sincronizar quando a conexão voltar.
-```
-
-Esperado: mesma disciplina greenfield, overlays derivados da superfície mobile/dados e pesquisa
-Context7 específica para as versões/capacidades relevantes. O harness não reutiliza perguntas,
-skills ou arquitetura do cenário G-01.
-
-## F-01 — feature em projeto existente
+## G-02 — greenfield on another platform
 
 ```text
-Adicione retentativa configurável ao envio de webhooks deste projeto.
+Build an offline-first mobile app for field inventory using Flutter, Dart, and Drift.
+I need to register items and sync when the connection returns.
 ```
 
-O repositório contém uma stack e padrões próprios, testes, lockfile e skills de domínio.
+Expected: same greenfield discipline, overlays derived from the mobile/data surface, and Context7
+research specific to the relevant versions/capabilities. The harness does not reuse questions,
+skills, or architecture from scenario G-01.
 
-Esperado:
-
-- inspecionar implementação, testes, manifests/lockfiles e catálogo antes de perguntar;
-- consultar Context7 cedo para as APIs da versão instalada e eliminar dúvidas factuais;
-- classificar `bounded`, `standard` ou `exploratory` pela incerteza real, não por ser “feature”;
-- reutilizar skills de domínio aplicáveis e propor refresh apenas se a versão/evidência exigir;
-- perguntar uma decisão por turno somente se política de retry, compatibilidade ou aceite ainda
-  pertencer ao usuário; não impor o ciclo greenfield completo quando o contrato já estiver claro.
-
-## V-01 — upgrade e manutenção de skill
+## F-01 — feature in an existing project
 
 ```text
-Atualize o framework principal para a próxima versão suportada pelo projeto e ajuste a skill da
-stack para refletir as APIs instaladas.
+Add configurable retry to this project's webhook delivery.
 ```
 
-Esperado: descobrir versão atual e alvo nos arquivos reais; usar Context7 para migração, breaking
-changes e APIs da versão; apresentar alvo/trade-offs ao usuário quando ainda forem escolha; após
-ratificação, alterar a skill canônica, preservar customizações, rodar sync automaticamente e provar
-paridade dos mirrors.
+The repository contains its own stack and patterns, tests, a lockfile, and domain skills.
 
-## D-01 — debugging dependente de biblioteca
+Expected:
+
+- inspect the implementation, tests, manifests/lockfiles, and catalog before asking;
+- consult Context7 early for the installed version's APIs and eliminate factual doubts;
+- classify `bounded`, `standard`, or `exploratory` by real uncertainty, not because it is a
+  "feature";
+- reuse applicable domain skills and propose a refresh only if the version/evidence demands it;
+- ask one decision per turn only if retry policy, compatibility, or acceptance still belongs to
+  the user; do not impose the full greenfield cycle when the contract is already clear.
+
+## V-01 — skill upgrade and maintenance
 
 ```text
-Depois do upgrade, o cliente HTTP deixou de renovar a conexão e os testes de integração falham.
+Upgrade the main framework to the next version the project supports and adjust the stack skill to
+reflect the installed APIs.
 ```
 
-Esperado: selecionar RCA/ReAct/Verification conforme evidência, reproduzir, confrontar código e
-versão instalada com Context7 e só então recomendar correção. OODA não é obrigatório por ser bug.
+Expected: discover the current and target versions in the real files; use Context7 for migration,
+breaking changes, and the version's APIs; present target/trade-offs to the user while they are
+still a choice; after ratification, change the canonical skill, preserve customizations, run sync
+automatically, and prove mirror parity.
 
-## B-01 — near miss local já especificado
+## D-01 — library-dependent debugging
 
 ```text
-No componente existente, troque o rótulo “Fila” por “Fila de atendimento” e ajuste o snapshot.
+After the upgrade, the HTTP client stopped renewing the connection and the integration tests fail.
 ```
 
-Esperado: ajuste/`pelizzai-quick-fix`, sem entrevista, spec formal, skill nova ou pesquisa Context7
-sem pergunta técnica externa. Ainda exige kickoff e setup ratificados antes da escrita — no máximo
-DUAS paradas: o Gate de kickoff do router e o confirm compacto de uma linha da head skill (base,
-nome, isolamento, modo e commits juntos, visíveis e nomeados). Pulverizar o setup em perguntas
-separadas é falha.
+Expected: select RCA/ReAct/Verification according to the evidence, reproduce, confront the code and
+the installed version with Context7, and only then recommend a fix. OODA is not mandatory just
+because it is a bug.
 
-## B-02 — botão em tela existente (regressão de lane)
+## B-01 — local near miss, already specified
 
 ```text
-Adicione um botão "Exportar CSV" na toolbar da listagem de clientes, chamando o serviço de
-exportação que já existe.
+In the existing component, change the label "Queue" to "Service queue" and update the snapshot.
 ```
 
-Esperado: `ajuste`/`pelizzai-quick-fix` — botão em tela existente chamando serviço existente NÃO é
-superfície pública nova (superfície = rota, comando, endpoint, API ou config nova). Overlay
-`pelizzai-frontend` aplicado com prova visual proporcional; nenhum spec/plano gerado; no máximo
-duas paradas antes da escrita. Falha se o harness promover a `bounded`/`standard` (plano/spec para
-um botão) ou abrir entrevista de descoberta.
+Expected: tweak/`pelizzai-quick-fix`, with no interview, formal spec, new skill, or Context7
+research without an external technical question. It still requires a ratified kickoff and setup
+before writing — at most TWO stops: the router's kickoff gate and the head skill's compact one-line
+confirm (base, name, isolation, mode, and commits together, visible and named). Scattering the
+setup across separate questions is a failure.
 
-## Critérios transversais
+## B-02 — button on an existing screen (lane regression)
 
-Falha se o harness:
+```text
+Add an "Export CSV" button to the customer list toolbar, calling the export service that already
+exists.
+```
 
-- codificar antes dos gates aplicáveis;
-- tratar o exemplo G-01 como template universal;
-- ignorar Context7 quando versão/API externa altera a solução;
-- chamar Context7 para inventar requisito ou substituir ratificação;
-- criar/atualizar skill a partir de memória ou sem sincronizar roots;
-- aplicar o fluxo greenfield completo a toda feature ou ajuste;
-- gerar spec/plano ou pulverizar o setup em perguntas separadas num pedido cujos sinais o
-  classificam como ajuste;
-- fixar OODA, TDD, team ou qualquer técnica sem sinais observáveis.
+Expected: `tweak`/`pelizzai-quick-fix` — a button on an existing screen calling an existing service
+is NOT a new public surface (surface = a new route, command, endpoint, API, or config). The
+`pelizzai-frontend` overlay is applied with proportional visual proof; no spec/plan generated; at
+most two stops before writing. It fails if the harness promotes it to `bounded`/`standard` (a
+plan/spec for a button) or opens a discovery interview.
+
+## Cross-cutting criteria
+
+It is a failure if the harness:
+
+- codes before the applicable gates;
+- treats example G-01 as a universal template;
+- ignores Context7 when an external version/API changes the solution;
+- calls Context7 to invent a requirement or replace ratification;
+- creates/updates a skill from memory or without syncing roots;
+- applies the full greenfield flow to every feature or tweak;
+- generates a spec/plan or scatters the setup across separate questions for a request whose
+  signals classify it as a tweak;
+- fixes OODA, TDD, team, or any technique without observable signals.

@@ -1,880 +1,880 @@
 # Research Evals
 
-## Objetivo
+## Objective
 
-Este arquivo avalia se [`pelizzai-reasoning`](../SKILL.md) conduz pesquisas e recomendações baseadas em evidências de maneira confiável.
+This file evaluates whether [`pelizzai-reasoning`](../SKILL.md) conducts research and evidence-based recommendations reliably.
 
-O agente deve ser capaz de:
+The agent must be able to:
 
-- reconhecer quando informação atual, versão específica ou fonte externa exige pesquisa, e responder diretamente quando pesquisa não é necessária;
-- definir exatamente o que precisa ser confirmado;
-- priorizar fontes primárias, oficiais e adequadas ao domínio;
-- distinguir documentação, código, testes, changelog, anúncio, notícia, opinião e fórum;
-- comparar fontes conflitantes sem escolher arbitrariamente, considerando data, versão, ambiente, escopo e aplicabilidade;
-- separar fato confirmado, inferência, hipótese, recomendação e desconhecido;
-- evitar citações decorativas ou que não sustentam a conclusão;
-- declarar limitação quando não houver evidência suficiente.
+- recognize when current information, a specific version, or an external source requires research, and answer directly when research is not needed;
+- define exactly what needs to be confirmed;
+- prioritize primary, official sources appropriate to the domain;
+- distinguish documentation, code, tests, changelog, announcement, news, opinion, and forum;
+- compare conflicting sources without choosing arbitrarily, considering date, version, environment, scope, and applicability;
+- separate confirmed fact, inference, hypothesis, recommendation, and unknown;
+- avoid decorative citations or citations that do not support the conclusion;
+- declare the limitation when there is not enough evidence.
 
-Este eval não mede apenas se a resposta contém links ou fontes: mede se o agente usa evidência correta para a pergunta correta.
+This eval does not merely measure whether the answer contains links or sources: it measures whether the agent uses the right evidence for the right question.
 
-## Técnicas avaliadas
+## Techniques evaluated
 
-| Técnica                                                             | Uso esperado                                                          |
-| ------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| [Evidence Synthesis](../techniques/evidence-synthesis.md)           | Combinar fontes, comparar conflitos e produzir conclusão proporcional |
-| [Verification](../techniques/verification.md)                       | Confirmar afirmações críticas ou dependentes de versão                |
-| [Assumption Tracking](../techniques/assumption-tracking.md)         | Registrar premissas abertas, lacunas ou dependências não verificadas  |
-| [Decision Making](../techniques/decision-making.md)                 | Escolher alternativa em recomendações com trade-offs                  |
-| [Constraint Satisfaction](../techniques/constraint-satisfaction.md) | Filtrar opções por requisitos, proibições e compatibilidade           |
+| Technique                                                           | Expected use                                                             |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| [Evidence Synthesis](../techniques/evidence-synthesis.md)           | Combine sources, compare conflicts, and produce a proportional conclusion |
+| [Verification](../techniques/verification.md)                       | Confirm critical or version-dependent claims                             |
+| [Assumption Tracking](../techniques/assumption-tracking.md)         | Record open assumptions, gaps, or unverified dependencies                |
+| [Decision Making](../techniques/decision-making.md)                 | Choose an alternative in recommendations with trade-offs                 |
+| [Constraint Satisfaction](../techniques/constraint-satisfaction.md) | Filter options by requirements, prohibitions, and compatibility          |
 
-## Protocolo de avaliação
+## Evaluation protocol
 
-Antes de responder completamente, o agente deve produzir uma estratégia compacta:
-
-```text
-Classificação:
-- Tipo: explicação estável, fato atual, pesquisa técnica, comparação, recomendação ou conflito de fontes.
-- Atualidade necessária:
-- Versão, data ou escopo relevante:
-- Risco de erro:
-- Técnica principal:
-- Técnicas auxiliares:
-
-Pergunta de pesquisa:
-- [o que precisa ser confirmado]
-
-Fontes prioritárias:
-- [tipos de fonte ou fonte oficial esperada]
-
-Critérios de suficiência:
-- [qual evidência permitiria concluir]
-
-Limitações previsíveis:
-- [o que pode permanecer sem confirmação]
-```
-
-Depois da pesquisa, a resposta deve conter somente o necessário:
+Before answering in full, the agent must produce a compact strategy:
 
 ```text
-Conclusão:
-- [resultado principal]
+Classification:
+- Type: stable explanation, current fact, technical research, comparison, recommendation, or source conflict.
+- Recency required:
+- Relevant version, date, or scope:
+- Risk of error:
+- Primary technique:
+- Auxiliary techniques:
 
-Evidências:
-- [fontes e fatos relevantes]
+Research question:
+- [what needs to be confirmed]
 
-Limitações:
-- [lacunas, conflito, diferença de versão, ambiente ou escopo]
+Priority sources:
+- [source types or expected official source]
 
-Nível de confiança:
-- [alto, médio ou baixo]
+Sufficiency criteria:
+- [what evidence would allow a conclusion]
+
+Foreseeable limitations:
+- [what may remain unconfirmed]
 ```
 
-O agente não deve expor cadeia de pensamento detalhada.
-
-## Rubrica
-
-Cada cenário vale 10 pontos.
-
-| Critério                   | Pontos | Descrição                                          |
-| -------------------------- | -----: | -------------------------------------------------- |
-| Necessidade de pesquisa    |      1 | Pesquisa quando necessário e evita pesquisa inútil |
-| Pergunta e escopo          |      1 | Define fato, versão, data ou condição a confirmar  |
-| Qualidade das fontes       |      2 | Prioriza fonte apropriada e próxima do fato        |
-| Síntese e conflitos        |      2 | Compara fontes, versões, escopo e divergências     |
-| Fatos e inferências        |      1 | Não apresenta hipótese ou opinião como fato        |
-| Recomendação               |      1 | Usa critérios e trade-offs quando há escolha       |
-| Limitações e confiança     |      1 | Declara lacunas e confiança proporcional           |
-| Citações e rastreabilidade |      1 | Usa evidência que sustenta afirmações centrais     |
-
-Faixas de resultado por cenário: **Passou** = 8-10; **Parcial** = 4-7; **Falhou** = 0-3 (ou qualquer falha grave, que limita o teto a 3).
-
-### Falhas graves
-
-O cenário recebe no máximo 3 pontos se o agente:
+After the research, the answer must contain only what is necessary:
 
 ```text
-- responde por memória quando a pergunta depende de fato atual, versão, preço, regra, cargo, política ou disponibilidade;
-- usa fonte secundária ou informal para substituir fonte primária disponível;
-- cita fonte que não sustenta a afirmação apresentada;
-- ignora conflito material entre fontes;
-- usa documentação de versão diferente sem declarar a limitação;
-- recomenda produto, biblioteca ou serviço sem considerar requisitos explícitos;
-- trata ausência de evidência como prova de ausência;
-- declara certeza alta sem evidência proporcional;
-- inventa busca, teste, fonte ou resultado.
+Conclusion:
+- [main result]
+
+Evidence:
+- [relevant sources and facts]
+
+Limitations:
+- [gaps, conflicts, differences in version, environment, or scope]
+
+Confidence level:
+- [high, medium, or low]
 ```
 
-## Calibração de confiança
+The agent must not expose detailed chain of thought.
 
-O nível de confiança declarado deve ser proporcional à evidência. Confiança esperada por tipo de cenário:
+## Rubric
 
-| Tipo de cenário                                                              | Confiança esperada quando bem resolvido |
+Each scenario is worth 10 points.
+
+| Criterion                   | Points | Description                                            |
+| --------------------------- | -----: | ------------------------------------------------------ |
+| Need for research           |      1 | Researches when necessary and avoids useless research  |
+| Question and scope          |      1 | Defines the fact, version, date, or condition to confirm |
+| Source quality              |      2 | Prioritizes the appropriate source closest to the fact |
+| Synthesis and conflicts     |      2 | Compares sources, versions, scope, and divergences     |
+| Facts and inferences        |      1 | Does not present hypothesis or opinion as fact         |
+| Recommendation              |      1 | Uses criteria and trade-offs when there is a choice    |
+| Limitations and confidence  |      1 | Declares gaps and proportional confidence              |
+| Citations and traceability  |      1 | Uses evidence that supports the central claims         |
+
+Score bands per scenario: **Passed** = 8-10; **Partial** = 4-7; **Failed** = 0-3 (or any critical failure, which caps the score at 3).
+
+### Critical failures
+
+The scenario receives at most 3 points if the agent:
+
+```text
+- answers from memory when the question depends on a current fact, version, price, rule, officeholder, policy, or availability;
+- uses a secondary or informal source in place of an available primary source;
+- cites a source that does not support the stated claim;
+- ignores a material conflict between sources;
+- uses documentation for a different version without declaring the limitation;
+- recommends a product, library, or service without considering explicit requirements;
+- treats absence of evidence as proof of absence;
+- declares high certainty without proportional evidence;
+- fabricates a search, test, source, or result.
+```
+
+## Confidence calibration
+
+The declared confidence level must be proportional to the evidence. Expected confidence by scenario type:
+
+| Scenario type                                                                | Expected confidence when well resolved  |
 | ---------------------------------------------------------------------------- | --------------------------------------- |
-| Conceito estável ou fonte primária fornecida (S-01, S-15, S-20)              | Alto                                    |
-| Fato atual confirmado em fonte oficial (S-02, S-03, S-04, S-16, S-17)        | Alto, com data ou versão                |
-| Conflito, comparação ou benchmark (S-05, S-06, S-07, S-11, S-12, S-13, S-19) | Médio até separar escopo ou critérios   |
-| Recomendação sob requisitos abertos (S-08, S-09, S-14)                       | Baixo até definir critérios materiais   |
-| Evidência negativa ou inconclusiva (S-10, S-18)                              | Baixo, declarando inconclusivo          |
+| Stable concept or provided primary source (S-01, S-15, S-20)                 | High                                    |
+| Current fact confirmed in an official source (S-02, S-03, S-04, S-16, S-17)  | High, with date or version              |
+| Conflict, comparison, or benchmark (S-05, S-06, S-07, S-11, S-12, S-13, S-19) | Medium until scope or criteria are separated |
+| Recommendation under open requirements (S-08, S-09, S-14)                    | Low until material criteria are defined |
+| Negative or inconclusive evidence (S-10, S-18)                               | Low, declared inconclusive              |
 
-Declarar confiança alta sem evidência proporcional, ou baixa quando a fonte primária já resolve, é desvio de calibração.
+Declaring high confidence without proportional evidence, or low confidence when the primary source already settles the question, is a calibration deviation.
 
-## Critérios globais de aprovação
+## Global pass criteria
 
-A implementação passa neste conjunto quando:
+The implementation passes this suite when:
 
 ```text
-- Média geral mínima: 8,0 / 10.
-- Nenhuma falha grave em cenários de informação atual, segurança, preço, compatibilidade ou recomendação.
-- Em pelo menos 85% dos cenários dependentes de versão, o agente declara e verifica a versão correta.
-- Em pelo menos 80% dos cenários de conflito, o agente identifica escopo, tempo ou ambiente antes de concluir.
-- Em 100% dos cenários estáveis e puramente conceituais, evita pesquisa desnecessária.
+- Minimum overall average: 8.0 / 10.
+- No critical failure in scenarios involving current information, security, price, compatibility, or recommendation.
+- In at least 85% of version-dependent scenarios, the agent declares and verifies the correct version.
+- In at least 80% of conflict scenarios, the agent identifies scope, time, or environment before concluding.
+- In 100% of stable, purely conceptual scenarios, it avoids unnecessary research.
 ```
 
-## Cenários
+## Scenarios
 
-## S-01 — Conceito estável sem pesquisa
+## S-01 — Stable concept, no research
 
 ```yaml
 id: S-01
-categoria: explicação estável
-prompt: 'Explique a diferença entre HTTP GET e POST.'
-contexto: |
-    O usuário quer uma explicação geral.
-    Não pede regras atuais, framework específico ou comportamento de uma API.
+category: stable explanation
+prompt: 'Explain the difference between HTTP GET and POST.'
+context: |
+    The user wants a general explanation.
+    They are not asking about current rules, a specific framework, or the behavior of an API.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Pesquisa:
-- Não necessária.
+Research:
+- Not needed.
 
-Técnicas:
-- Nenhuma técnica formal ou ReAct leve, se necessário.
+Techniques:
+- No formal technique, or light ReAct if needed.
 
-Ação:
-- Explicar diretamente com exemplos simples.
+Action:
+- Explain directly with simple examples.
 ```
 
-### Falha a evitar
+### Failure to avoid
 
 ```text
-- Pesquisar documentação externa sem necessidade.
-- Criar síntese de múltiplas fontes para conceito básico.
+- Researching external documentation without need.
+- Building a multi-source synthesis for a basic concept.
 ```
 
 ---
 
-## S-02 — API com versão específica
+## S-02 — API with a specific version
 
 ```yaml
 id: S-02
-categoria: pesquisa técnica
-prompt: 'A biblioteca X suporta OAuth com Google no FastAPI 0.115?'
-contexto: |
-    A biblioteca X e o FastAPI evoluem com frequência.
-    O usuário não forneceu documentação.
+category: technical research
+prompt: 'Does library X support OAuth with Google on FastAPI 0.115?'
+context: |
+    Library X and FastAPI evolve frequently.
+    The user provided no documentation.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Evidence Synthesis.
 
-Auxiliares:
+Auxiliary:
 - Verification.
-- Assumption Tracking, se versão da biblioteca ou configuração não estiver definida.
+- Assumption Tracking, if the library version or configuration is undefined.
 
-Fontes prioritárias:
-- Documentação oficial da biblioteca.
-- Repositório e changelog oficial.
-- Documentação do FastAPI para a versão relevante.
-- Exemplo oficial ou teste mínimo, quando necessário.
+Priority sources:
+- The library's official documentation.
+- Official repository and changelog.
+- FastAPI documentation for the relevant version.
+- Official example or minimal test, when needed.
 
-Conclusão:
-- Deve limitar afirmações ao fluxo e versões confirmados.
+Conclusion:
+- Must limit claims to the confirmed flow and versions.
 ```
 
-### Falha grave
+### Critical failure
 
 ```text
-- Responder somente com conhecimento interno.
-- Usar artigo antigo sem confirmar compatibilidade atual.
+- Answering from internal knowledge alone.
+- Using an old article without confirming current compatibility.
 ```
 
 ---
 
-## S-03 — Regra atual de produto
+## S-03 — Current product rule
 
 ```yaml
 id: S-03
-categoria: informação atual
-prompt: 'Qual é o preço atual do plano Pro da ferramenta X?'
-contexto: |
-    O preço pode variar por país, moeda, plano anual ou mensal e data.
+category: current information
+prompt: 'What is the current price of the Pro plan for tool X?'
+context: |
+    The price may vary by country, currency, annual or monthly plan, and date.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Evidence Synthesis.
 
-Auxiliares:
+Auxiliary:
 - Verification.
 
-Fontes prioritárias:
-- Página oficial de preços.
-- Termos ou documentação oficial aplicável.
+Priority sources:
+- Official pricing page.
+- Applicable official terms or documentation.
 
-Ação:
-- Confirmar moeda, país, ciclo de cobrança e data de consulta.
+Action:
+- Confirm currency, country, billing cycle, and date of the check.
 ```
 
-### Falha grave
+### Critical failure
 
 ```text
-- Citar blog ou comparação de preços de terceiros como fonte principal.
-- Informar preço sem distinguir mensal, anual ou região.
+- Citing a blog or a third-party price comparison as the main source.
+- Reporting a price without distinguishing monthly, annual, or region.
 ```
 
 ---
 
-## S-04 — Cargo atual
+## S-04 — Current officeholder
 
 ```yaml
 id: S-04
-categoria: fato temporal
-prompt: 'Quem é o CEO atual da empresa X?'
-contexto: |
-    O cargo pode ter mudado recentemente.
+category: time-sensitive fact
+prompt: 'Who is the current CEO of company X?'
+context: |
+    The position may have changed recently.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
-- Evidence Synthesis ou Verification leve.
+Primary technique:
+- Evidence Synthesis or light Verification.
 
-Fontes prioritárias:
-- Página oficial de liderança.
-- Comunicado oficial recente.
-- Arquivo regulatório ou página de relações com investidores, quando aplicável.
+Priority sources:
+- Official leadership page.
+- Recent official announcement.
+- Regulatory filing or investor relations page, when applicable.
 
-Ação:
-- Verificar fonte atual antes de responder.
+Action:
+- Check a current source before answering.
 ```
 
-### Falha grave
+### Critical failure
 
 ```text
-- Assumir o ocupante atual com base em memória.
+- Assuming the current officeholder from memory.
 ```
 
 ---
 
-## S-05 — Documentação versus changelog
+## S-05 — Documentation versus changelog
 
 ```yaml
 id: S-05
-categoria: conflito temporal
-prompt: 'A documentação diz que o recurso Y existe, mas o changelog recente informa que ele foi removido. Ele ainda é suportado?'
-contexto: |
-    A documentação não informa versão.
-    O changelog possui data e versão de lançamento.
+category: temporal conflict
+prompt: 'The documentation says feature Y exists, but the recent changelog says it was removed. Is it still supported?'
+context: |
+    The documentation does not state a version.
+    The changelog has a date and a release version.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Evidence Synthesis.
 
-Auxiliares:
+Auxiliary:
 - Verification.
-- Assumption Tracking, se versão usada pelo usuário não estiver confirmada.
+- Assumption Tracking, if the version the user runs is unconfirmed.
 
-Ação:
-- Identificar versão da documentação, versão do changelog e versão instalada.
-- Não concluir até separar escopo temporal.
+Action:
+- Identify the documentation's version, the changelog's version, and the installed version.
+- Do not conclude until the temporal scope is separated.
 ```
 
-### Critério de aprovação
+### Pass criterion
 
-O agente não escolhe automaticamente documentação ou changelog sem verificar qual versão é relevante.
+The agent does not automatically pick the documentation or the changelog without checking which version is relevant.
 
 ---
 
-## S-06 — Código versus documentação
+## S-06 — Code versus documentation
 
 ```yaml
 id: S-06
-categoria: comportamento técnico
-prompt: 'A documentação diz que o endpoint aceita `status`, mas o código atual rejeita o campo. O que deve prevalecer?'
-contexto: |
-    O código é a versão implantada no ambiente atual.
-    Não está confirmado se a documentação deveria refletir versão futura,
-    contrato público atual ou comportamento legado.
+category: technical behavior
+prompt: 'The documentation says the endpoint accepts `status`, but the current code rejects the field. Which should prevail?'
+context: |
+    The code is the version deployed in the current environment.
+    It is not confirmed whether the documentation should reflect a future version,
+    the current public contract, or legacy behavior.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Evidence Synthesis.
 
-Auxiliares:
+Auxiliary:
 - Verification.
 - Assumption Tracking.
 
-Ação:
-- Comparar schema, implementação, testes de integração, versão e contrato publicado.
-- Distinguir comportamento atual de intenção documentada.
+Action:
+- Compare schema, implementation, integration tests, version, and the published contract.
+- Distinguish current behavior from documented intent.
 ```
 
-### Falha a evitar
+### Failure to avoid
 
 ```text
-- Afirmar que código sempre vence sem considerar contrato público e versão.
+- Claiming the code always wins without considering the public contract and version.
 ```
 
 ---
 
-## S-07 — Comparação de bibliotecas com requisitos
+## S-07 — Library comparison with requirements
 
 ```yaml
 id: S-07
-categoria: recomendação técnica
-prompt: 'Compare as bibliotecas A, B e C para autenticação em FastAPI.'
-contexto: |
-    Requisitos:
-    - Login por e-mail.
-    - OAuth com Google.
+category: technical recommendation
+prompt: 'Compare libraries A, B, and C for authentication in FastAPI.'
+context: |
+    Requirements:
+    - Email login.
+    - OAuth with Google.
     - PostgreSQL.
     - Refresh token.
-    - Sem serviço externo pago.
-    - Manutenção ativa.
+    - No paid external service.
+    - Active maintenance.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Decision Making.
 
-Auxiliares:
+Auxiliary:
 - Constraint Satisfaction.
 - Evidence Synthesis.
 
-Fontes prioritárias:
-- Documentação oficial.
-- Repositório e releases.
-- Código ou exemplos oficiais.
-- Licenciamento e política de preço oficial, se aplicável.
+Priority sources:
+- Official documentation.
+- Repository and releases.
+- Official code or examples.
+- Official licensing and pricing policy, if applicable.
 
-Ação:
-- Eliminar opções incompatíveis antes de comparar preferências.
-- Declarar pontos ainda não confirmados, como compatibilidade precisa de refresh token.
+Action:
+- Eliminate incompatible options before comparing preferences.
+- Declare points not yet confirmed, such as precise refresh-token compatibility.
 ```
 
-### Falha grave
+### Critical failure
 
 ```text
-- Escolher apenas com base em popularidade.
-- Recomendar serviço pago ignorando proibição explícita.
+- Choosing based on popularity alone.
+- Recommending a paid service in spite of the explicit prohibition.
 ```
 
 ---
 
-## S-08 — Recomendação com custo e segurança
+## S-08 — Recommendation with cost and security
 
 ```yaml
 id: S-08
-categoria: recomendação de alto impacto
-prompt: 'Qual provedor de autenticação devemos contratar para o produto?'
-contexto: |
-    O produto processa dados pessoais.
-    Há orçamento limitado, mas não definido.
-    Não está claro quais regiões, SLA, requisitos regulatórios
-    ou recursos de auditoria são necessários.
+category: high-impact recommendation
+prompt: 'Which authentication provider should we contract for the product?'
+context: |
+    The product processes personal data.
+    Budget is limited but undefined.
+    It is unclear which regions, SLA, regulatory requirements,
+    or audit capabilities are needed.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Constraint Satisfaction.
 
-Auxiliares:
+Auxiliary:
 - Assumption Tracking.
 - Decision Making.
-- Evidence Synthesis, após requisitos mínimos serem definidos.
+- Evidence Synthesis, once minimum requirements are defined.
 
-Ação:
-- Não recomendar fornecedor definitivo sem esclarecer requisitos críticos.
-- Identificar dados, região, custo, SSO, auditoria, SLA, suporte e integração.
+Action:
+- Do not recommend a definitive vendor without clarifying critical requirements.
+- Identify data, region, cost, SSO, audit, SLA, support, and integration.
 ```
 
-### Falha grave
+### Critical failure
 
 ```text
-- Escolher fornecedor por fama sem requisitos de segurança, região ou orçamento.
+- Choosing a vendor by reputation without security, region, or budget requirements.
 ```
 
 ---
 
-## S-09 — Informação insuficiente
+## S-09 — Insufficient information
 
 ```yaml
 id: S-09
-categoria: evidência insuficiente
-prompt: 'Qual é a melhor ferramenta de observabilidade?'
-contexto: |
-    Não há stack, orçamento, escala, retenção, compliance,
-    equipe, ambiente ou objetivo definidos.
+category: insufficient evidence
+prompt: 'What is the best observability tool?'
+context: |
+    No stack, budget, scale, retention, compliance,
+    team, environment, or goal is defined.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
-- Assumption Tracking ou Decision Making leve.
+Primary technique:
+- Assumption Tracking or light Decision Making.
 
-Ação:
-- Explicar que não existe melhor opção universal.
-- Solicitar ou inferir apenas critérios materiais.
-- Oferecer categorias ou recomendações condicionais, sem falsa certeza.
+Action:
+- Explain that no universal best option exists.
+- Request or infer only material criteria.
+- Offer categories or conditional recommendations, without false certainty.
 ```
 
-### Critério de aprovação
+### Pass criterion
 
-O agente não transforma ausência de requisitos em ranking definitivo.
+The agent does not turn an absence of requirements into a definitive ranking.
 
 ---
 
-## S-10 — Ausência de menção não prova ausência
+## S-10 — Absence of mention does not prove absence
 
 ```yaml
 id: S-10
-categoria: evidência negativa
-prompt: 'Não encontrei menção a limite de taxa na documentação. Então a API não tem rate limit?'
-contexto: |
-    A documentação pode estar incompleta ou o limite pode estar em termos,
-    headers, painel de conta ou configuração de plano.
+category: negative evidence
+prompt: 'I found no mention of rate limiting in the documentation. So the API has no rate limit?'
+context: |
+    The documentation may be incomplete, or the limit may live in the terms,
+    headers, account dashboard, or plan configuration.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Verification.
 
-Auxiliares:
+Auxiliary:
 - Evidence Synthesis.
 
-Ação:
-- Explicar que ausência de menção não prova ausência.
-- Consultar documentação operacional, headers, termos, FAQ ou suporte oficial.
-- Declarar inconclusivo caso não haja evidência suficiente.
+Action:
+- Explain that absence of mention does not prove absence.
+- Check operational documentation, headers, terms, FAQ, or official support.
+- Declare it inconclusive if there is not enough evidence.
 ```
 
-### Falha grave
+### Critical failure
 
 ```text
-- Confirmar ausência de rate limit apenas porque não encontrou uma página.
+- Confirming the absence of a rate limit merely because a page was not found.
 ```
 
 ---
 
-## S-11 — Artigo antigo versus fonte atual
+## S-11 — Old article versus current source
 
 ```yaml
 id: S-11
-categoria: informação desatualizada
-prompt: 'Um artigo de 2022 diz que o framework Z não suporta feature Q. Isso ainda é verdade?'
-contexto: |
-    Frameworks evoluem.
-    A versão atual não foi fornecida.
+category: outdated information
+prompt: 'A 2022 article says framework Z does not support feature Q. Is that still true?'
+context: |
+    Frameworks evolve.
+    The current version was not provided.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Evidence Synthesis.
 
-Auxiliares:
+Auxiliary:
 - Verification.
 - Assumption Tracking.
 
-Ação:
-- Identificar versão atual ou alvo.
-- Consultar documentação e changelog atuais.
-- Tratar o artigo como evidência histórica, não atual.
+Action:
+- Identify the current or target version.
+- Check the current documentation and changelog.
+- Treat the article as historical evidence, not current.
 ```
 
 ---
 
-## S-12 — Notícia versus comunicado oficial
+## S-12 — News versus official announcement
 
 ```yaml
 id: S-12
-categoria: fato corporativo recente
-prompt: 'A empresa X foi adquirida pela empresa Y?'
-contexto: |
-    Há notícias divergentes e rumores.
-    A informação pode afetar decisão de fornecedor.
+category: recent corporate fact
+prompt: 'Was company X acquired by company Y?'
+context: |
+    There are diverging news reports and rumors.
+    The information may affect a vendor decision.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Evidence Synthesis.
 
-Fontes prioritárias:
-- Comunicado oficial das empresas.
-- Documento regulatório, quando aplicável.
-- Página de relações com investidores.
-- Veículos confiáveis apenas como suporte secundário.
+Priority sources:
+- The companies' official announcements.
+- Regulatory filing, when applicable.
+- Investor relations page.
+- Reliable outlets only as secondary support.
 
-Ação:
-- Diferenciar anúncio, intenção, acordo assinado, aprovação regulatória e conclusão da aquisição.
+Action:
+- Differentiate announcement, intent, signed agreement, regulatory approval, and closing of the acquisition.
 ```
 
-### Falha a evitar
+### Failure to avoid
 
 ```text
-- Tratar rumor ou notícia preliminar como aquisição concluída.
+- Treating a rumor or a preliminary news report as a completed acquisition.
 ```
 
 ---
 
-## S-13 — Comparação de benchmark
+## S-13 — Benchmark comparison
 
 ```yaml
 id: S-13
-categoria: benchmark
-prompt: 'O modelo A é mais rápido que o modelo B?'
-contexto: |
-    Benchmarks podem variar por hardware, batch size, precisão,
-    comprimento de contexto, versão e tipo de carga.
+category: benchmark
+prompt: 'Is model A faster than model B?'
+context: |
+    Benchmarks may vary by hardware, batch size, precision,
+    context length, version, and workload type.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Evidence Synthesis.
 
-Ação:
-- Pedir ou definir contexto de hardware, workload, batch, latência versus throughput e versão.
-- Comparar benchmarks equivalentes.
-- Evitar conclusão universal.
+Action:
+- Request or define the context of hardware, workload, batch, latency versus throughput, and version.
+- Compare equivalent benchmarks.
+- Avoid a universal conclusion.
 ```
 
-### Critério de aprovação
+### Pass criterion
 
-O agente diferencia velocidade de inferência, throughput, latência, custo e qualidade.
+The agent differentiates inference speed, throughput, latency, cost, and quality.
 
 ---
 
-## S-14 — Recomendação de ferramenta com requisito de privacidade
+## S-14 — Tool recommendation with a privacy requirement
 
 ```yaml
 id: S-14
-categoria: recomendação sob restrição
-prompt: 'Recomende uma ferramenta para transcrever reuniões.'
-contexto: |
-    As reuniões podem conter informações confidenciais.
-    O usuário exige que os áudios não sejam usados para treinar modelos públicos.
-    Não está definido orçamento, idioma, volume ou ambiente.
+category: recommendation under constraint
+prompt: 'Recommend a tool to transcribe meetings.'
+context: |
+    The meetings may contain confidential information.
+    The user requires that the audio not be used to train public models.
+    Budget, language, volume, and environment are undefined.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Constraint Satisfaction.
 
-Auxiliares:
+Auxiliary:
 - Evidence Synthesis.
 - Decision Making.
 
-Ação:
-- Filtrar opções por política de uso de dados e contrato.
-- Verificar termos oficiais, retenção, localização e controles de privacidade.
-- Declarar requisitos ainda abertos.
+Action:
+- Filter options by data-use policy and contract.
+- Check official terms, retention, location, and privacy controls.
+- Declare the requirements still open.
 ```
 
-### Falha grave
+### Critical failure
 
 ```text
-- Recomendar ferramenta sem verificar política de dados.
+- Recommending a tool without checking its data policy.
 ```
 
 ---
 
-## S-15 — Informação factual com fonte fornecida
+## S-15 — Factual information with a provided source
 
 ```yaml
 id: S-15
-categoria: resposta baseada em arquivo
-prompt: 'Com base no documento anexado, qual é o prazo de rescisão?'
-contexto: |
-    O documento anexado é a fonte primária e suficiente.
-    O usuário não pede regra geral nem atualização externa.
+category: file-based answer
+prompt: 'Based on the attached document, what is the termination notice period?'
+context: |
+    The attached document is the primary and sufficient source.
+    The user is not asking for a general rule or an external update.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Pesquisa externa:
-- Não necessária.
+External research:
+- Not needed.
 
-Técnica principal:
-- Evidence Synthesis leve ou nenhuma técnica formal.
+Primary technique:
+- Light Evidence Synthesis or no formal technique.
 
-Ação:
-- Ler o documento, apontar trecho relevante e responder com base nele.
+Action:
+- Read the document, point to the relevant passage, and answer based on it.
 ```
 
-### Falha a evitar
+### Failure to avoid
 
 ```text
-- Buscar informação externa e substituir o conteúdo do documento por regra genérica.
+- Fetching external information and replacing the document's content with a generic rule.
 ```
 
 ---
 
-## S-16 — Preço em país ou moeda diferente
+## S-16 — Price in a different country or currency
 
 ```yaml
 id: S-16
-categoria: preço e escopo
-prompt: 'Quanto custa o plano Team da ferramenta X no Brasil?'
-contexto: |
-    A página global mostra preço em dólar.
-    Pode haver imposto, cobrança local, preço regional,
-    variação cambial ou indisponibilidade no país.
+category: price and scope
+prompt: 'How much does the Team plan for tool X cost in Brazil?'
+context: |
+    The global page shows the price in dollars.
+    There may be taxes, local billing, regional pricing,
+    exchange-rate variation, or unavailability in the country.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Evidence Synthesis.
 
-Auxiliares:
+Auxiliary:
 - Verification.
 
-Ação:
-- Confirmar se existe tabela Brasil, cobrança em BRL, impostos,
-  conversão, região e ciclo de cobrança.
-- Não converter automaticamente preço global em preço local final sem ressalva.
+Action:
+- Confirm whether a Brazil price table exists, billing in BRL, taxes,
+  conversion, region, and billing cycle.
+- Do not automatically convert the global price into a final local price without a caveat.
 ```
 
 ---
 
-## S-17 — Status de serviço atual
+## S-17 — Current service status
 
 ```yaml
 id: S-17
-categoria: disponibilidade atual
-prompt: 'A API da ferramenta X está fora do ar agora?'
-contexto: |
-    A disponibilidade muda rapidamente.
-    Há página de status oficial e relatos de usuários.
+category: current availability
+prompt: 'Is the tool X API down right now?'
+context: |
+    Availability changes quickly.
+    There is an official status page and there are user reports.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
-- Verification leve.
+Primary technique:
+- Light Verification.
 
-Auxiliares:
-- Evidence Synthesis, se houver divergência entre status e relatos.
+Auxiliary:
+- Evidence Synthesis, if the status page and the reports diverge.
 
-Fontes prioritárias:
-- Página de status oficial.
-- Comunicação operacional oficial.
-- Evidência de chamada controlada, se disponível e apropriada.
+Priority sources:
+- Official status page.
+- Official operational communication.
+- Evidence from a controlled call, if available and appropriate.
 
-Ação:
-- Informar horário da verificação e limitação de escopo.
+Action:
+- Report the time of the check and the scope limitation.
 ```
 
-### Falha grave
+### Critical failure
 
 ```text
-- Responder com base em memória ou relato isolado.
+- Answering from memory or from an isolated report.
 ```
 
 ---
 
-## S-18 — Afirmação com fonte fraca
+## S-18 — Claim with a weak source
 
 ```yaml
 id: S-18
-categoria: fonte insuficiente
-prompt: 'Um comentário em fórum diz que a biblioteca A foi abandonada. Posso assumir que ela está morta?'
-contexto: |
-    Há repositório oficial, releases e issues disponíveis.
+category: insufficient source
+prompt: 'A forum comment says library A was abandoned. Can I assume it is dead?'
+context: |
+    The official repository, releases, and issues are available.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Verification.
 
-Auxiliares:
+Auxiliary:
 - Evidence Synthesis.
 
-Ação:
-- Verificar atividade oficial: releases, commits, maintainers,
-  issues, roadmap e anúncio.
-- Tratar comentário como pista, não prova.
+Action:
+- Check official activity: releases, commits, maintainers,
+  issues, roadmap, and announcements.
+- Treat the comment as a lead, not proof.
 ```
 
-### Falha a evitar
+### Failure to avoid
 
 ```text
-- Declarar abandono somente por comentário comunitário.
+- Declaring abandonment based on a community comment alone.
 ```
 
 ---
 
-## S-19 — Conflito entre dados e narrativa
+## S-19 — Conflict between data and narrative
 
 ```yaml
 id: S-19
-categoria: dados versus interpretação
-prompt: 'O relatório afirma que a conversão aumentou 20%, mas a tabela bruta mostra aumento de 2%.'
-contexto: |
-    Pode haver diferença de período, métrica, segmento,
-    arredondamento, baseline ou erro de relatório.
+category: data versus interpretation
+prompt: 'The report claims conversion increased 20%, but the raw table shows a 2% increase.'
+context: |
+    There may be differences in period, metric, segment,
+    rounding, baseline, or a reporting error.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Evidence Synthesis.
 
-Auxiliares:
+Auxiliary:
 - Verification.
 
-Ação:
-- Reconstruir definição de métrica, denominador, período,
-  segmento e fórmula.
-- Não assumir erro em uma fonte antes de normalizar critérios.
+Action:
+- Reconstruct the metric definition, denominator, period,
+  segment, and formula.
+- Do not assume one source is wrong before normalizing criteria.
 ```
 
 ---
 
-## S-20 — Solicitação explicitamente sem pesquisa
+## S-20 — Request explicitly without research
 
 ```yaml
 id: S-20
-categoria: restrição do usuário
-prompt: 'Sem pesquisar na internet, explique o que é uma API REST.'
-contexto: |
-    O usuário explicitamente proíbe pesquisa.
-    A explicação pode ser fornecida com conhecimento estável.
+category: user constraint
+prompt: 'Without searching the internet, explain what a REST API is.'
+context: |
+    The user explicitly forbids research.
+    The explanation can be given from stable knowledge.
 ```
 
-### Conduta esperada
+### Expected behavior
 
 ```text
-Pesquisa:
-- Não usar.
+Research:
+- Do not use.
 
-Técnica:
-- Nenhuma técnica formal.
+Technique:
+- No formal technique.
 
-Ação:
-- Explicar diretamente e respeitar a proibição.
+Action:
+- Explain directly and honor the prohibition.
 ```
 
-### Falha grave
+### Critical failure
 
 ```text
-- Pesquisar mesmo com instrução explícita contrária.
+- Researching despite the explicit instruction not to.
 ```
 
 ---
 
-## Cenários de regressão obrigatória
+## Mandatory regression scenarios
 
-Execute estes cenários após alterações em [Evidence Synthesis](../techniques/evidence-synthesis.md), [Verification](../techniques/verification.md), [Assumption Tracking](../techniques/assumption-tracking.md), [Decision Making](../techniques/decision-making.md), [Constraint Satisfaction](../techniques/constraint-satisfaction.md) ou no [pelizzai-reasoning](../SKILL.md).
+Run these scenarios after changes to [Evidence Synthesis](../techniques/evidence-synthesis.md), [Verification](../techniques/verification.md), [Assumption Tracking](../techniques/assumption-tracking.md), [Decision Making](../techniques/decision-making.md), [Constraint Satisfaction](../techniques/constraint-satisfaction.md), or [pelizzai-reasoning](../SKILL.md).
 
-| ID   | Regressão a evitar                                       |
-| ---- | -------------------------------------------------------- |
-| S-01 | Pesquisa inútil em conceito estável                      |
-| S-02 | Resposta por memória em versão específica                |
-| S-03 | Preço sem contexto de país ou cobrança                   |
-| S-05 | Ignorar conflito temporal entre documentação e changelog |
-| S-07 | Recomendar ignorando requisitos explícitos               |
-| S-08 | Escolher fornecedor sem requisitos críticos              |
-| S-10 | Tratar ausência de menção como prova de ausência         |
-| S-12 | Confundir rumor, anúncio e conclusão de aquisição        |
-| S-14 | Ignorar privacidade em recomendação                      |
-| S-16 | Converter preço global sem considerar região             |
-| S-17 | Declarar status atual sem verificação                    |
-| S-20 | Desrespeitar proibição explícita de pesquisa             |
+| ID   | Regression to avoid                                              |
+| ---- | ---------------------------------------------------------------- |
+| S-01 | Useless research on a stable concept                             |
+| S-02 | Answering from memory on a specific version                      |
+| S-03 | Price without country or billing context                         |
+| S-05 | Ignoring the temporal conflict between documentation and changelog |
+| S-07 | Recommending in spite of explicit requirements                   |
+| S-08 | Choosing a vendor without critical requirements                  |
+| S-10 | Treating absence of mention as proof of absence                  |
+| S-12 | Confusing rumor, announcement, and closing of an acquisition     |
+| S-14 | Ignoring privacy in a recommendation                             |
+| S-16 | Converting a global price without considering the region         |
+| S-17 | Declaring current status without verification                    |
+| S-20 | Violating the explicit prohibition on research                   |
 
-Ver também: [README.md](README.md) (índice dos evals) e [regression.md](regression.md) (suíte transversal de regressão).
+See also: [README.md](README.md) (eval index) and [regression.md](regression.md) (cross-cutting regression suite).
 
-## Formato de resultado
+## Result format
 
 ```text
 Eval:
 - [ID]
 
-Classificação:
-- Tipo:
-- Pesquisa necessária:
-- Atualidade, versão ou escopo:
-- Risco:
+Classification:
+- Type:
+- Research needed:
+- Recency, version, or scope:
+- Risk:
 
-Roteamento:
-- Técnica principal:
-- Técnicas auxiliares:
+Routing:
+- Primary technique:
+- Auxiliary techniques:
 
-Pergunta de pesquisa:
-- [questão verificável]
+Research question:
+- [verifiable question]
 
-Fontes prioritárias:
-- [fontes]
+Priority sources:
+- [sources]
 
-Critérios de suficiência:
-- [evidência mínima necessária]
+Sufficiency criteria:
+- [minimum evidence required]
 
-Conclusão esperada:
-- [resultado ou condição para concluir]
+Expected conclusion:
+- [result or condition to conclude]
 
-Limitações:
-- [lacunas ou incertezas]
+Limitations:
+- [gaps or uncertainties]
 
-Resultado:
-- Passou (8-10), parcialmente passou (4-7) ou falhou (0-3).
+Result:
+- Passed (8-10), partially passed (4-7), or failed (0-3).
 
-Pontuação:
-- [0 a 10]
+Score:
+- [0 to 10]
 
-Falha grave:
-- [sim ou não]
+Critical failure:
+- [yes or no]
 ```
 
-## Instrução para o avaliador
+## Grader instructions
 
 ```text
-Avalie a qualidade epistemológica da resposta, não a quantidade de links.
-Aplique a Rubrica, as Falhas graves e a Calibração de confiança definidas acima.
+Evaluate the epistemic quality of the answer, not the number of links.
+Apply the Rubric, the Critical failures, and the Confidence calibration defined above.
 
-Penalize fontes fracas quando fontes primárias estiverem disponíveis, citações decorativas,
-confiança fora de calibração e recomendações sem critérios.
+Penalize weak sources when primary sources are available, decorative citations,
+miscalibrated confidence, and recommendations without criteria.
 ```

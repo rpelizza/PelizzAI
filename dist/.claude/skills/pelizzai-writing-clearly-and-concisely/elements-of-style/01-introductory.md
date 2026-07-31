@@ -1,3 +1,3 @@
-## I. Introdução
+## I. Introductory
 
-Este manual resume os fundamentos do estilo de linguagem clara e direta. Ele concentra-se nas regras de uso e nos princípios de redação mais frequentemente descumpridos, oferecendo uma alternativa concisa aos manuais exaustivos. Assimile as orientações aqui apresentadas e, em seguida, recorra aos melhores autores para aprofundar-se nas sutilezas do estilo.
+This manual condenses the essentials of plain, direct style. It concentrates on the rules of usage and the principles of writing most often violated, offering a concise alternative to exhaustive manuals. Absorb the guidance presented here, and then turn to the best authors to pursue the finer points of style.

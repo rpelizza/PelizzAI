@@ -1,79 +1,79 @@
 ---
 name: pelizzai-documenting-features
-description: Overlay de documentação HUMANA do contrato estável de uma feature, como rotas, comandos, APIs e telas. Use quando docs fazem parte do escopo, o diff cria uma superfície estável que precisa ser explicada ou o usuário pede documentação de uso. Entra antes do review final e de validated-head; a finish-task não a executa (só sinaliza a lacuna como rede de segurança) e ela não se aplica a specs/planos/ADRs do harness.
+description: Overlay for HUMAN documentation of a feature's stable contract, such as routes, commands, APIs, and screens. Use when docs are part of the scope, the diff creates a stable surface that needs explaining, or the user asks for usage documentation. Runs before the final review and validated-head; finish-task does not execute it (it only flags the gap as a safety net), and it does not apply to the harness's specs/plans/ADRs.
 ---
 
 # PelizzAI Documenting Features
 
-## Objetivo
+## Goal
 
-Explicar para humanos o contrato observável e durável da entrega, sem narrar detalhes internos que
-envelhecem no próximo refactor.
+Explain to humans the delivery's observable, durable contract, without narrating internal details
+that go stale in the next refactor.
 
-**Anuncie:** "Usando a skill PelizzAI Documenting Features para documentar o contrato da feature."
+**Announce:** "Using the PelizzAI Documenting Features skill to document the feature's contract."
 
-## Onde
+## Where
 
-Siga a estrutura de docs existente, seu índice e gerador. Sem convenção, use
-`docs/<area>/<feature>.md`. Docs humanas não vivem em `pelizzai/`; specs, planos e ADRs são
-artefatos de processo.
+Follow the existing docs structure, its index, and its generator. Absent a convention, use
+`docs/<area>/<feature>.md`. Human docs do not live in `pelizzai/`; specs, plans, and ADRs are
+process artifacts.
 
-## Conteúdo proporcional
+## Proportional content
 
-Inclua somente se aplicável:
+Include only what applies:
 
 ```markdown
 # <Feature>
 
-## Propósito
-Problema e público.
+## Purpose
+Problem and audience.
 
-## Uso
-Rotas, comandos, APIs ou fluxo de tela com exemplo real.
+## Usage
+Routes, commands, APIs, or screen flow with a real example.
 
-## Contrato
-Inputs, outputs, estados, permissões e compatibilidade.
+## Contract
+Inputs, outputs, states, permissions, and compatibility.
 
-## Limites e diagnóstico
-Pré-condições, erros relevantes e como observar/corrigir.
+## Limits and diagnostics
+Preconditions, relevant errors, and how to observe/fix.
 ```
 
-- Documente comportamento público, não funções/arquivos internos.
-- Use nomes, exemplos e saídas reais; não invente placeholder/dado de produto.
-- Atualize índice/README somente quando a convenção exigir.
-- Não crie um documento separado se comentário, schema ou página existente é o local canônico.
+- Document public behavior, not internal functions/files.
+- Use real names, examples, and outputs; do not invent placeholders/product data.
+- Update the index/README only when the convention requires it.
+- Do not create a separate document if a comment, schema, or existing page is the canonical home.
 
-## Validação e lifecycle
+## Validation and lifecycle
 
-Valide links, exemplos, snippets e build/render aplicáveis. A doc é conteúdo da entrega: consolide
-pela commit-strategy da head skill **antes** do review final e de `validated-head`. Qualquer
-correção reabre as provas afetadas.
+Validate applicable links, examples, snippets, and build/render. The doc is delivery content:
+consolidate it via the head skill's commit-strategy **before** the final review and
+`validated-head`. Any fix reopens the affected proofs.
 
-A doc entra em **commit próprio** — `docs(<feature>): <descrição>` —, nunca misturada ao commit de
-código: separar doc de código é higiene de histórico, não preferência. Em `commit-strategy:
-granular` é o commit definitivo da doc; em `squash-final` é o WIP `docs(...)` que a head skill
-consolida junto aos demais **antes** do review final. Vale o gate de branch protegida de
-`pelizzai-starting-branch`: nunca commite em `main`/`master`/`develop`/`dev` nem no default real
-descoberto.
+The doc goes in **its own commit** — `docs(<feature>): <description>` —, never mixed into the code
+commit: separating doc from code is history hygiene, not preference. In `commit-strategy:
+granular` it is the definitive commit of the doc; in `squash-final` it is the WIP `docs(...)` the
+head skill consolidates with the others **before** the final review. The protected-branch gate of
+`pelizzai-starting-branch` applies: never commit to `main`/`master`/`develop`/`dev` or to the
+actual discovered default.
 
-Finish-task nunca gera nem corrige documentação: depois do seal é tarde para escrever ali. O que ela
-faz é a checagem-rede — se uma superfície documentável passou sem esta skill, ela oferece **uma vez**
-devolver a entrega ao ciclo (o seal cai e a doc volta a ser conteúdo validado, com review final
-refeito). Recusa informada entrega sem doc; a rede não bloqueia, e também não substitui o caminho
-normal, que é rodar aqui antes do review final.
+Finish-task never generates or fixes documentation: after the seal it is too late to write there.
+What it does is the safety-net check — if a documentable surface got through without this skill, it
+offers **once** to return the delivery to the cycle (the seal falls and the doc becomes validated
+content again, with the final review redone). Informed refusal ships without docs; the net does not
+block, and it does not replace the normal path either, which is running here before the final review.
 
 ## Red flags
 
 ```text
-- Documentar implementação volátil em vez do contrato.
-- Criar docs humanas dentro de pelizzai/.
-- Exemplo que não foi validado.
-- Duplicar documentação canônica já existente.
-- Deixar a doc sem commit próprio: dangling na working tree, ou diluída no commit de código.
-- Criá-la depois do seal.
+- Documenting volatile implementation instead of the contract.
+- Creating human docs inside pelizzai/.
+- An example that was not validated.
+- Duplicating already-existing canonical documentation.
+- Leaving the doc without its own commit: dangling in the working tree, or diluted into the code commit.
+- Creating it after the seal.
 ```
 
-## Integração
+## Integration
 
-Router/plano registram este overlay; execution-plans o executa antes do review final. Combine com
-skills de domínio e `pelizzai-writing-clearly-and-concisely` quando isso mudar a redação.
+Router/plan register this overlay; execution-plans runs it before the final review. Combine with
+domain skills and `pelizzai-writing-clearly-and-concisely` when that changes the wording.

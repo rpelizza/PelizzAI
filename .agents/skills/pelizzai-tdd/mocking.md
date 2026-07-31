@@ -1,60 +1,60 @@
-# Quando Usar Mock
+# When to Mock
 
-Use mock **apenas em fronteiras do sistema**:
+Mock **only at system boundaries**:
 
-- APIs externas (pagamento, e-mail, etc.)
-- Bancos de dados (às vezes — prefira um banco de teste)
-- Tempo/aleatoriedade
-- Sistema de arquivos (às vezes)
+- External APIs (payment, e-mail, etc.)
+- Databases (sometimes — prefer a test database)
+- Time/randomness
+- File system (sometimes)
 
-Não use mock em:
+Do not mock:
 
-- Suas próprias classes/módulos
-- Colaboradores internos
-- Qualquer coisa que você controla
+- Your own classes/modules
+- Internal collaborators
+- Anything you control
 
-## Projetando para Mockabilidade
+## Designing for Mockability
 
-Nas fronteiras do sistema, projete interfaces fáceis de mockar:
+At system boundaries, design interfaces that are easy to mock:
 
-**1. Use injeção de dependência**
+**1. Use dependency injection**
 
-Receba as dependências externas por parâmetro, em vez de criá-las internamente:
+Take external dependencies as parameters instead of creating them internally:
 
 ```typescript
-// Fácil de mockar
+// Easy to mock
 function processPayment(order, paymentClient) {
 	return paymentClient.charge(order.total);
 }
 
-// Difícil de mockar
+// Hard to mock
 function processPayment(order) {
 	const client = new StripeClient(process.env.STRIPE_KEY);
 	return client.charge(order.total);
 }
 ```
 
-**2. Prefira interfaces no estilo SDK a fetchers genéricos**
+**2. Prefer SDK-style interfaces over generic fetchers**
 
-Crie funções específicas para cada operação externa, em vez de uma função genérica com lógica condicional:
+Create specific functions for each external operation instead of one generic function with conditional logic:
 
 ```typescript
-// BOM: cada função é mockável de forma independente
+// GOOD: each function is independently mockable
 const api = {
 	getUser: (id) => fetch(`/users/${id}`),
 	getOrders: (userId) => fetch(`/users/${userId}/orders`),
 	createOrder: (data) => fetch('/orders', { method: 'POST', body: data }),
 };
 
-// RUIM: mockar exige lógica condicional dentro do mock
+// BAD: mocking requires conditional logic inside the mock
 const api = {
 	fetch: (endpoint, options) => fetch(endpoint, options),
 };
 ```
 
-A abordagem SDK significa:
+The SDK approach means:
 
-- Cada mock retorna um formato específico
-- Sem lógica condicional na preparação do teste
-- Fica mais fácil ver quais endpoints um teste exercita
-- Segurança de tipos por endpoint
+- Each mock returns a specific shape
+- No conditional logic in test setup
+- It is easier to see which endpoints a test exercises
+- Type safety per endpoint

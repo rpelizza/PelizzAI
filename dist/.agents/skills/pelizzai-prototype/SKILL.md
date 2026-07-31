@@ -1,90 +1,91 @@
 ---
 name: pelizzai-prototype
-description: Overlay para construir um experimento descartável que responda uma pergunta de design mais barato que implementar ou discutir. Use para incerteza concreta de estado, integração, viabilidade ou UI. Não use como etapa obrigatória, demo polida ou atalho para produção; exige branch antes de escrita e remoção/absorção antes do seal.
+description: Overlay for building a throwaway experiment that answers a design question more cheaply than implementing or debating. Use for concrete uncertainty about state, integration, feasibility, or UI. Do not use as a mandatory step, a polished demo, or a shortcut to production; requires a branch before writing and removal/absorption before the seal.
 ---
 
 # PelizzAI Prototype
 
-## Objetivo
+## Goal
 
-Um protótipo é **código descartável que responde a uma pergunta** — e a pergunta decide o formato.
-Comprar informação com o menor experimento possível: **uma** pergunta por protótipo; quando a
-resposta aparece, ele termina.
+A prototype is **throwaway code that answers a question** — and the question decides the format.
+Buy information with the smallest possible experiment: **one** question per prototype; when the
+answer appears, it ends.
 
-**Anuncie:** "Usando PelizzAI Prototype para responder `<pergunta>` com um experimento descartável."
+**Announce:** "Using PelizzAI Prototype to answer `<question>` with a throwaway experiment."
 
 ## Gate
 
-Use somente quando:
+Use only when:
 
 ```text
-[ ] existe uma incerteza material e falsificável;
-[ ] análise, prior art ou teste menor não respondem com custo menor;
-[ ] a resposta pode mudar o design;
-[ ] há critério de parada e destino do código.
+[ ] there is a material, falsifiable uncertainty;
+[ ] analysis, prior art, or a smaller test cannot answer at lower cost;
+[ ] the answer can change the design;
+[ ] there is a stop criterion and a destination for the code.
 ```
 
-Os itens acima são o teste de adequação (decidir que um spike é o movimento certo continua seu
-trabalho); eles **não** autorizam sozinhos escrever o experimento. Um protótipo descartável é decisão
-estrutural e exige **aval explícito do usuário**, ratificado no gate certo — não no gate interno da
-skill:
+The items above are the suitability test (deciding that a spike is the right move remains your
+job); on their own they do **not** authorize writing the experiment. A throwaway prototype is a
+structural decision and requires the **user's explicit approval**, ratified at the right gate — not
+at the skill's internal gate:
 
-- com descoberta/plano → proponha o spike no gate de descoberta (`pelizzai-brainstorming`) ou no gate de setup pós-plano;
-- track de escrita sem plano → inclua o spike no confirm de kickoff da head skill.
+- with discovery/plan → propose the spike at the discovery gate (`pelizzai-brainstorming`) or at the post-plan setup gate;
+- writing track without a plan → include the spike in the head skill's kickoff confirm.
 
-Recomende e aguarde: "posso gastar `<timebox>` num spike descartável para responder `<pergunta>`?
-destino: `<apagar|absorver|virar tarefa>`". Sem "sim", não escreva o experimento.
+Recommend and wait: "may I spend `<timebox>` on a throwaway spike to answer `<question>`?
+destination: `<delete|absorb|turn into a task>`". Without a "yes", do not write the experiment.
 
-Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing e escale ao coordenador o que exigir decisão.
+Under a closed briefing (SUBAGENT-STOP), do not produce route analyses or open gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
-Protótipo escreve: passe por `pelizzai-starting-branch` antes. Use path temporário ignorado ou path
-de protótipo já adotado pelo projeto. Source mode nunca cria runtime `pelizzai/`; prefira temp do
-sistema ou estrutura nativa. Não inclua segredo/dado real desnecessário.
+A prototype writes: go through `pelizzai-starting-branch` first. Use an ignored temporary path or a
+prototype path the project has already adopted. Source mode never creates `pelizzai/` runtime;
+prefer system temp or native structure. Do not include unnecessary secrets/real data.
 
-## Escolha a forma pela pergunta
+## Choose the form by the question
 
-| Pergunta | Experimento provável |
+| Question | Likely experiment |
 | --- | --- |
-| Estado/regra/algoritmo | script/CLI mínimo com casos que discriminam os modelos |
-| Integração/viabilidade | spike fino na fronteira real, sandbox/fixture e timeout explícito |
-| UI/fluxo | uma ou mais variantes apenas quando há alternativas reais; overlay `pelizzai-frontend` e conteúdo plausível |
+| State/rule/algorithm | minimal script/CLI with cases that discriminate between the models |
+| Integration/feasibility | thin spike at the real boundary, sandbox/fixture, and an explicit timeout |
+| UI/flow | one or more variants only when there are real alternatives; `pelizzai-frontend` overlay and plausible content |
 
-Não force várias variantes “radicalmente diferentes” quando uma hipótese basta. Não use UI para
-responder pergunta de domínio nem mock para remover justamente a fronteira que está sendo testada.
+Do not force several “radically different” variants when one hypothesis is enough. Do not use UI to
+answer a domain question, or a mock to remove precisely the boundary being tested.
 
-## Contrato do experimento
+## Experiment contract
 
-Antes de codar, registre no plano/execution record:
+Before coding, record in the plan/execution record:
 
 ```text
-pergunta
-hipótese/alternativas materiais
-observação que confirma ou refuta
-timebox/custo máximo
-o que deliberadamente não terá qualidade de produção
-destino: apagar | absorver | transformar em tarefa
+question
+hypothesis/material alternatives
+observation that confirms or refutes
+timebox/maximum cost
+what will deliberately lack production quality
+destination: delete | absorb | turn into a task
 ```
 
-Implemente o mínimo executável. “Descartável” reduz polish e abstração, não elimina segurança básica
-nem a prova que responde à pergunta. Rode o cenário, preserve saída/limitações e pare no critério.
+Implement the minimum that runs. “Throwaway” cuts polish and abstraction; it does not remove basic
+security or the proof that answers the question. Run the scenario, preserve output/limitations, and
+stop at the criterion.
 
-## Encerrar
+## Close out
 
-1. Resuma evidência, resposta e confiança; inconclusivo é resultado válido.
-2. Atualize design/plano nativo com a decisão. ADR só se estiver autorizado, houver path correto e
-   passar o critério da `pelizzai-domain-modeling`; nunca registre automaticamente em `pelizzai/`.
-3. Apague o código descartável ou absorva apenas as partes que passam pelo ciclo normal de
-   implementação/teste/review.
-4. Confirme que nenhum protótipo, fixture sensível, dependência ou flag temporária ficou antes do
-   review final/seal.
+1. Summarize evidence, answer, and confidence; inconclusive is a valid result.
+2. Update the native design/plan with the decision. An ADR only if authorized, with the correct
+   path, and passing the `pelizzai-domain-modeling` criterion; never record automatically in `pelizzai/`.
+3. Delete the throwaway code, or absorb only the parts that go through the normal
+   implementation/test/review cycle.
+4. Confirm that no prototype, sensitive fixture, dependency, or temporary flag remains before the
+   final review/seal.
 
 ## Red flags
 
 ```text
-- Protótipo sem pergunta falsificável.
-- Virar mini-produto com polish, abstrações e scope creep.
-- Manter código experimental sem decisão explícita.
-- Declarar viabilidade usando mock que remove o risco real.
-- ADR automático ou runtime consumidor em source mode.
-- Pular frontend em protótipo visual ou tratá-lo como QA final de produção.
+- A prototype without a falsifiable question.
+- Becoming a mini-product with polish, abstractions, and scope creep.
+- Keeping experimental code without an explicit decision.
+- Declaring feasibility using a mock that removes the real risk.
+- An automatic ADR, or consumer runtime in source mode.
+- Skipping frontend on a visual prototype, or treating it as final production QA.
 ```

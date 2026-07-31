@@ -1,10 +1,10 @@
-# Candidatos à Refatoração
+# Refactoring Candidates
 
-Após o ciclo de TDD, busque por:
+After the TDD cycle, look for:
 
-- **Duplicação** → Extrair função/classe
-- **Métodos longos** → Dividir em métodos auxiliares privados (mantenha os testes na interface pública)
-- **Módulos superficiais** → Combinar ou aprofundar
-- **Inveja de funcionalidade** → Mover a lógica para onde os dados residem
-- **Obsessão por primitivos** → Introduzir objetos de valor (_value objects_)
-- **Código existente** que o novo código revela ser problemático
+- **Duplication** → Extract a function/class
+- **Long methods** → Split into private helper methods (keep the tests on the public interface)
+- **Shallow modules** → Combine or deepen
+- **Feature envy** → Move the logic to where the data lives
+- **Primitive obsession** → Introduce _value objects_
+- **Existing code** that the new code reveals to be problematic

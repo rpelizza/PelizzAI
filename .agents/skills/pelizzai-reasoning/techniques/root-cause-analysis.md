@@ -1,901 +1,901 @@
 # Root Cause Analysis
 
-## Objetivo
+## Purpose
 
-Use Root Cause Analysis para identificar por que um problema ocorreu, quais condições permitiram sua ocorrência e qual correção reduz a chance de repetição.
+Use Root Cause Analysis to identify why a problem occurred, which conditions allowed it to happen, and which fix reduces the chance of recurrence.
 
-A técnica deve evitar correções superficiais que apenas escondem o sintoma.
+The technique must avoid superficial fixes that merely hide the symptom.
 
-Ela é especialmente útil para:
-
-```text
-- Bugs recorrentes.
-- Falhas de integração.
-- Dados duplicados ou inconsistentes.
-- Erros intermitentes.
-- Lentidão ou degradação de performance.
-- Incidentes em produção.
-- Regressões após deploy.
-- Falhas de autenticação, autorização ou permissões.
-- Problemas envolvendo filas, retries, cache ou concorrência.
-- Comportamento diferente entre ambientes.
-```
-
-Root Cause Analysis não significa procurar uma única causa perfeita em todos os casos.
-
-Problemas reais podem possuir:
+It is especially useful for:
 
 ```text
-- Um sintoma observável.
-- Uma causa imediata.
-- Uma ou mais causas raiz.
-- Fatores contribuintes.
-- Falhas de detecção.
-- Lacunas de prevenção.
+- Recurring bugs.
+- Integration failures.
+- Duplicate or inconsistent data.
+- Intermittent errors.
+- Slowness or performance degradation.
+- Production incidents.
+- Regressions after a deploy.
+- Authentication, authorization, or permission failures.
+- Problems involving queues, retries, cache, or concurrency.
+- Behavior that differs between environments.
 ```
 
-Causas raiz **múltiplas ou sistêmicas** são caso de primeira classe, não exceção. Quando duas ou mais condições estruturais contribuem de forma independente para o sintoma, trate cada uma como causa raiz própria, com sua própria correção e prevenção. Forçar uma única causa quando há várias é um erro de modelagem (ver Fault Tree Analysis e os anti-padrões abaixo).
+Root Cause Analysis does not mean hunting for a single perfect cause in every case.
 
-## Princípio central
+Real problems can have:
 
-> Não corrija apenas o primeiro ponto que parece errado. Confirme qual mecanismo produziu o problema, quais condições permitiram sua ocorrência e como evitar recorrência.
+```text
+- An observable symptom.
+- An immediate cause.
+- One or more root causes.
+- Contributing factors.
+- Detection failures.
+- Prevention gaps.
+```
+
+**Multiple or systemic** root causes are a first-class case, not an exception. When two or more structural conditions independently contribute to the symptom, treat each one as a root cause in its own right, with its own fix and its own prevention. Forcing a single cause when there are several is a modeling error (see Fault Tree Analysis and the anti-patterns below).
+
+## Core principle
+
+> Do not just fix the first thing that looks wrong. Confirm which mechanism produced the problem, which conditions allowed it to happen, and how to prevent recurrence.
 
 ```mermaid
 flowchart TD
-    A[Sintoma observado] --> B[Definir impacto e escopo]
-    B --> C[Coletar evidências]
-    C --> D[Formular hipóteses concorrentes]
-    D --> E[Testar hipótese mais informativa]
-    E --> F{Hipótese confirmada?}
+    A[Observed symptom] --> B[Define impact and scope]
+    B --> C[Collect evidence]
+    C --> D[Formulate competing hypotheses]
+    D --> E[Test the most informative hypothesis]
+    E --> F{Hypothesis confirmed?}
 
-    F -- Não --> G[Refutar ou ajustar hipótese]
+    F -- No --> G[Refute or adjust hypothesis]
     G --> D
 
-    F -- Sim --> H[Identificar causas e fatores contribuintes]
-    H --> I[Definir contenção imediata]
-    I --> J[Definir correção estrutural]
-    J --> K[Validar prevenção de recorrência]
+    F -- Yes --> H[Identify causes and contributing factors]
+    H --> I[Define immediate containment]
+    I --> J[Define structural fix]
+    J --> K[Validate recurrence prevention]
 ```
 
-## Quando usar
+## When to use
 
-Use Root Cause Analysis quando:
+Use Root Cause Analysis when:
 
 ```text
-- O problema é recorrente ou possui impacto relevante.
-- A causa não é evidente.
-- Há múltiplas hipóteses plausíveis.
-- Uma correção superficial já falhou antes.
-- O erro ocorre apenas em certos ambientes, horários, dados ou usuários.
-- O problema envolve concorrência, retries, cache, integrações ou estado compartilhado.
-- Existe risco de regressão, perda de dados, falha de segurança ou indisponibilidade.
-- O incidente precisa gerar correção duradoura, documentação ou prevenção.
+- The problem is recurring or has significant impact.
+- The cause is not evident.
+- There are multiple plausible hypotheses.
+- A superficial fix has already failed before.
+- The error occurs only in certain environments, times, data, or users.
+- The problem involves concurrency, retries, cache, integrations, or shared state.
+- There is risk of regression, data loss, security failure, or unavailability.
+- The incident must produce a lasting fix, documentation, or prevention.
 ```
 
-Exemplos adequados:
+Good examples:
 
 ```text
-- Pedidos são duplicados.
-- Usuários são deslogados aleatoriamente.
-- Um endpoint ficou lento após deploy.
-- Arquivos enviados desaparecem em alguns casos.
-- Uma integração funciona localmente, mas falha em produção.
-- Um job é processado duas vezes.
-- O frontend exibe dados desatualizados.
+- Orders are duplicated.
+- Users get logged out at random.
+- An endpoint became slow after a deploy.
+- Uploaded files disappear in some cases.
+- An integration works locally but fails in production.
+- A job is processed twice.
+- The frontend shows stale data.
 ```
 
-O esforço de investigação deve ser proporcional ao risco e ao impacto, conforme o orçamento de esforço definido na skill [pelizzai-reasoning](../SKILL.md).
+Investigation effort must be proportional to risk and impact, per the effort budget defined in the [pelizzai-reasoning](../SKILL.md) skill.
 
-## Quando evitar
+## When to avoid
 
-Não use Root Cause Analysis completa para problemas simples e localizados.
+Do not use full Root Cause Analysis for simple, localized problems.
 
-Evite ou reduza a técnica quando:
+Avoid or scale down the technique when:
 
 ```text
-- Existe erro explícito, reproduzível e com causa direta evidente.
-- A alteração é pequena, reversível e sem impacto relevante.
-- Um teste, contrato ou compilador já aponta claramente o problema.
-- A investigação custaria mais do que corrigir e validar.
-- O problema não possui recorrência, risco ou dependência relevante.
+- There is an explicit, reproducible error with an evident direct cause.
+- The change is small, reversible, and without significant impact.
+- A test, contract, or compiler already points clearly at the problem.
+- Investigating would cost more than fixing and validating.
+- The problem has no relevant recurrence, risk, or dependency.
 ```
 
-Exemplos:
+Examples:
 
 ```text
-- Import com caminho incorreto.
-- Erro de sintaxe.
-- Variável inexistente claramente apontada pelo compilador.
-- Texto incorreto em uma interface.
-- Configuração local ausente e facilmente identificável.
+- An import with a wrong path.
+- A syntax error.
+- A nonexistent variable clearly flagged by the compiler.
+- Wrong text in an interface.
+- A missing, easily identified local configuration.
 ```
 
-## Relação com outras técnicas
+## Relationship with other techniques
 
-| Técnica             | Responsabilidade                                                     |
-| ------------------- | -------------------------------------------------------------------- |
-| Root Cause Analysis | Investiga por que um problema ocorreu e como impedir recorrência     |
-| ReAct               | Executa ações de investigação e atualiza hipóteses                   |
-| Assumption Tracking | Registra hipóteses e premissas ainda não confirmadas                 |
-| Evidence Synthesis  | Combina logs, testes, código, documentação e observações             |
-| Decision Making     | Escolhe entre estratégias de correção quando os caminhos são interdependentes |
-| Verification        | Confirma ou refuta a causa identificada                              |
-| Critique and Refine | Corrige a solução quando a validação revela lacunas                  |
-| Plan and Execute    | Organiza investigação, contenção, correção e prevenção               |
+| Technique           | Responsibility                                                        |
+| ------------------- | --------------------------------------------------------------------- |
+| Root Cause Analysis | Investigates why a problem occurred and how to prevent recurrence     |
+| ReAct               | Executes investigation actions and updates hypotheses                 |
+| Assumption Tracking | Records hypotheses and premises not yet confirmed                     |
+| Evidence Synthesis  | Combines logs, tests, code, documentation, and observations           |
+| Decision Making     | Chooses between fix strategies when the paths are interdependent      |
+| Verification        | Confirms or refutes the identified cause                              |
+| Critique and Refine | Fixes the solution when validation reveals gaps                       |
+| Plan and Execute    | Organizes investigation, containment, fix, and prevention             |
 
-## Conceitos fundamentais
+## Fundamental concepts
 
-### Sintoma
+### Symptom
 
-É o comportamento visível que revela um problema.
+The visible behavior that reveals a problem.
 
 ```text
-Exemplos:
-- Usuários recebem erro 500.
-- Pedido aparece duas vezes.
-- Tela permanece carregando.
-- API responde lentamente.
-- Arquivo não aparece após upload.
+Examples:
+- Users get a 500 error.
+- An order appears twice.
+- A screen stays loading.
+- The API responds slowly.
+- A file does not appear after upload.
 ```
 
-O sintoma não é necessariamente a causa.
+The symptom is not necessarily the cause.
 
-### Causa imediata
+### Immediate cause
 
-É o mecanismo técnico diretamente responsável pelo resultado observado.
+The technical mechanism directly responsible for the observed result.
 
 ```text
-Exemplo:
-Sintoma:
-- Pedido duplicado.
+Example:
+Symptom:
+- Duplicate order.
 
-Causa imediata:
-- O endpoint persistiu duas requisições idênticas.
+Immediate cause:
+- The endpoint persisted two identical requests.
 ```
 
-A causa imediata pode ainda não explicar por que a duplicidade foi permitida.
+The immediate cause may still not explain why the duplication was allowed.
 
-### Causa raiz
+### Root cause
 
-É uma condição estrutural que, se corrigida, reduz a probabilidade de recorrência do problema.
+A structural condition that, once fixed, reduces the probability of the problem recurring.
 
 ```text
-Exemplo:
-Causa raiz:
-- O endpoint não possui chave de idempotência nem restrição de unicidade para impedir persistência duplicada durante retries.
+Example:
+Root cause:
+- The endpoint has neither an idempotency key nor a uniqueness constraint to prevent duplicate persistence during retries.
 ```
 
-Uma causa raiz deve ser sustentada por evidência, não escolhida por intuição. Um mesmo sintoma pode ter mais de uma causa raiz independente; nesse caso, registre todas.
+A root cause must be backed by evidence, not picked by intuition. The same symptom can have more than one independent root cause; in that case, record them all.
 
-### Fator contribuinte
+### Contributing factor
 
-É uma condição que aumenta a probabilidade ou o impacto do problema, mas não é suficiente sozinha para causá-lo.
+A condition that increases the probability or impact of the problem but is not sufficient on its own to cause it.
 
 ```text
-Exemplos:
-- Clique duplo no botão.
-- Retry automático do cliente.
-- Falta de monitoramento.
-- Timeout curto.
-- Cache desatualizado.
-- Ausência de teste de regressão.
+Examples:
+- Double click on the button.
+- Automatic client retry.
+- Lack of monitoring.
+- Short timeout.
+- Stale cache.
+- Missing regression test.
 ```
 
-### Falha de detecção
+### Detection failure
 
-É o motivo pelo qual o problema não foi percebido antes ou não foi interceptado corretamente.
+The reason the problem was not noticed earlier or was not intercepted correctly.
 
 ```text
-Exemplos:
-- Não havia alerta para crescimento de erros.
-- Testes não cobriam cenário concorrente.
-- Logs não incluíam ID de correlação.
-- A interface escondia erro do backend.
+Examples:
+- There was no alert for growing error rates.
+- Tests did not cover the concurrent scenario.
+- Logs lacked a correlation ID.
+- The interface hid the backend error.
 ```
 
-## Modelo causal
+## Causal model
 
-Use esta estrutura para não confundir camadas do problema.
+Use this structure to avoid conflating the problem's layers.
 
 ```text
-Sintoma:
-- O que foi observado?
+Symptom:
+- What was observed?
 
-Impacto:
-- Quem ou o que foi afetado?
+Impact:
+- Who or what was affected?
 
-Causa imediata:
-- Qual mecanismo produziu o erro?
+Immediate cause:
+- Which mechanism produced the error?
 
-Causa raiz:
-- Qual falha estrutural permitiu que isso ocorresse? (pode haver mais de uma)
+Root cause:
+- Which structural failure allowed it to happen? (there can be more than one)
 
-Fatores contribuintes:
-- Quais condições aumentaram a chance ou impacto?
+Contributing factors:
+- Which conditions increased the likelihood or the impact?
 
-Falha de detecção:
-- Por que o problema não foi identificado antes?
+Detection failure:
+- Why was the problem not identified earlier?
 
-Correção:
-- O que elimina ou reduz a causa raiz?
+Fix:
+- What eliminates or reduces the root cause?
 
-Prevenção:
-- O que reduz probabilidade, impacto ou tempo de detecção?
+Prevention:
+- What reduces probability, impact, or time to detection?
 ```
 
 ```mermaid
 flowchart TD
-    A[Causa raiz] --> B[Causa imediata]
-    C[Fator contribuinte] --> B
-    B --> D[Sintoma]
-    E[Falha de detecção] --> F[Impacto ampliado]
+    A[Root cause] --> B[Immediate cause]
+    C[Contributing factor] --> B
+    B --> D[Symptom]
+    E[Detection failure] --> F[Amplified impact]
     D --> F
 ```
 
-## Processo de investigação
+## Investigation process
 
-### 1. Definir o problema com precisão
+### 1. Define the problem precisely
 
-Comece descrevendo o comportamento observável, sem assumir causa.
+Start by describing the observable behavior, without assuming a cause.
 
 ```text
-Ruim:
-"O botão salva duas vezes."
+Bad:
+"The button saves twice."
 
-Melhor:
-"Dois pedidos são criados quando a ação de salvar é acionada duas vezes em menos de dois segundos."
+Better:
+"Two orders are created when the save action is triggered twice within less than two seconds."
 ```
 
-Registre:
+Record:
 
 ```text
-- Quando ocorre.
-- Onde ocorre.
-- Quem é afetado.
-- Frequência.
-- Impacto.
-- Ambiente.
-- Versão ou deploy relacionado.
-- Dados ou condições necessárias.
-- Evidências já disponíveis.
+- When it occurs.
+- Where it occurs.
+- Who is affected.
+- Frequency.
+- Impact.
+- Environment.
+- Related version or deploy.
+- Required data or conditions.
+- Evidence already available.
 ```
 
-### 2. Delimitar escopo e impacto
+### 2. Bound scope and impact
 
-Antes de investigar causa, determine o tamanho do problema.
+Before investigating a cause, size the problem.
 
 ```text
-Perguntas:
-- O erro ocorre para todos ou apenas alguns usuários?
-- O problema começou após mudança específica?
-- Acontece em produção, homologação ou localmente?
-- Existe padrão por navegador, dispositivo, região, tenant ou tipo de dado?
-- Há perda, duplicidade, exposição ou indisponibilidade?
-- O impacto continua ativo?
+Questions:
+- Does the error affect all users or only some?
+- Did the problem start after a specific change?
+- Does it happen in production, staging, or locally?
+- Is there a pattern by browser, device, region, tenant, or data type?
+- Is there loss, duplication, exposure, or unavailability?
+- Is the impact still active?
 ```
 
-Não investigue com premissa de que todos os casos possuem a mesma causa.
+Do not investigate under the premise that every case has the same cause.
 
-### 3. Conter antes de corrigir
+### 3. Contain before fixing
 
-Quando houver risco de dano contínuo, priorize contenção reversível.
+When there is risk of ongoing damage, prioritize reversible containment.
 
 ```text
-Exemplos:
-- Desativar feature por feature flag.
-- Bloquear ação repetida temporariamente.
-- Pausar job defeituoso.
-- Reduzir taxa de processamento.
-- Reverter deploy.
-- Isolar integração externa.
-- Impedir operação destrutiva.
+Examples:
+- Disable the feature via feature flag.
+- Temporarily block the repeated action.
+- Pause the faulty job.
+- Reduce the processing rate.
+- Roll back the deploy.
+- Isolate the external integration.
+- Prevent the destructive operation.
 ```
 
-A contenção não substitui correção estrutural (ver a tabela em "Correção, contenção e prevenção").
+Containment does not replace a structural fix (see the table under "Fix, containment, and prevention").
 
-### 4. Coletar evidências antes de alterar
+### 4. Collect evidence before changing anything
 
-Colete o mínimo de evidência necessário para formular hipóteses úteis.
+Collect the minimum evidence needed to formulate useful hypotheses.
 
-Fontes comuns:
+Common sources:
 
 ```text
-- Logs e traces.
-- Métricas e dashboards.
-- Requests e responses.
-- Testes automatizados.
-- Código e diff recente.
-- Configuração de ambiente.
-- Eventos de fila.
-- Dados persistidos.
-- Telemetria.
-- Relatos de usuários.
-- Documentação e contratos.
+- Logs and traces.
+- Metrics and dashboards.
+- Requests and responses.
+- Automated tests.
+- Code and the recent diff.
+- Environment configuration.
+- Queue events.
+- Persisted data.
+- Telemetry.
+- User reports.
+- Documentation and contracts.
 ```
 
-Não altere código antes de preservar evidência importante, especialmente em incidentes intermitentes ou produção.
+Do not change code before preserving important evidence, especially in intermittent incidents or in production.
 
 ```text
-Regra:
-O que foi observado diretamente deve ser separado do que está sendo inferido.
+Rule:
+Keep what was directly observed separate from what is being inferred.
 ```
 
-### 5. Construir linha do tempo
+### 5. Build a timeline
 
-Uma linha do tempo ajuda a localizar mudança, gatilho ou sequência causal.
+A timeline helps locate the change, trigger, or causal sequence.
 
 ```text
-Formato:
+Format:
 
 T0:
-- Último comportamento conhecido como correto.
+- Last known-good behavior.
 
 T1:
-- Mudança, deploy, configuração, evento externo ou aumento de carga.
+- Change, deploy, configuration, external event, or load increase.
 
 T2:
-- Primeiro sintoma observado.
+- First observed symptom.
 
 T3:
-- Impacto confirmado.
+- Impact confirmed.
 
 T4:
-- Contenção aplicada.
+- Containment applied.
 
 T5:
-- Hipótese validada ou refutada.
+- Hypothesis validated or refuted.
 ```
 
-Não conclua que uma alteração recente é a causa apenas porque ocorreu antes do incidente. Use-a como hipótese inicial.
+Do not conclude that a recent change is the cause merely because it happened before the incident. Use it as an initial hypothesis.
 
-### 6. Formular hipóteses concorrentes
+### 6. Formulate competing hypotheses
 
-Crie hipóteses que expliquem os fatos observados. Hipóteses não são mutuamente exclusivas: mais de uma pode ser confirmada simultaneamente.
+Create hypotheses that explain the observed facts. Hypotheses are not mutually exclusive: more than one can be confirmed at the same time.
 
 ```text
-Problema:
-- Pedidos duplicados.
+Problem:
+- Duplicate orders.
 
-Hipóteses:
-A. Interface envia duas requisições.
-B. Cliente faz retry após timeout.
-C. Gateway repete request.
-D. Backend não é idempotente.
-E. Worker processa mensagem duas vezes.
-F. Banco permite duplicidade por falta de restrição.
+Hypotheses:
+A. The interface sends two requests.
+B. The client retries after a timeout.
+C. The gateway repeats the request.
+D. The backend is not idempotent.
+E. The worker processes the message twice.
+F. The database allows duplicates due to a missing constraint.
 ```
 
-Para cada hipótese, registre:
+For each hypothesis, record:
 
 ```text
-Hipótese:
-- [explicação possível]
+Hypothesis:
+- [possible explanation]
 
-Evidência a favor:
-- [fatos compatíveis]
+Evidence for:
+- [compatible facts]
 
-Evidência contra:
-- [fatos incompatíveis]
+Evidence against:
+- [incompatible facts]
 
-Teste ou observação:
-- [menor ação que confirma ou refuta]
+Test or observation:
+- [smallest action that confirms or refutes it]
 
-Resultado esperado:
-- [o que deve aparecer se for verdadeira]
+Expected result:
+- [what should appear if it is true]
 
-Critério de descarte:
-- [o que a torna improvável ou falsa]
+Discard criterion:
+- [what makes it unlikely or false]
 
-Impacto:
-- [o que muda se for confirmada]
+Impact:
+- [what changes if it is confirmed]
 ```
 
-## Investigação orientada por hipótese
+## Hypothesis-driven investigation
 
-Não busque "tudo".
+Do not go looking for "everything".
 
-Escolha a próxima ação pelo maior valor informacional.
+Choose the next action by highest informational value.
 
 ```mermaid
 flowchart TD
-    A[Hipóteses concorrentes] --> B[Selecionar hipótese com maior impacto e incerteza]
-    B --> C[Executar teste ou observação]
-    C --> D{Resultado é compatível?}
-    D -- Sim --> E[Fortalecer hipótese]
-    D -- Não --> F[Refutar ou enfraquecer hipótese]
-    E --> G[Investigar mecanismo causal]
-    F --> H[Selecionar próxima hipótese]
+    A[Competing hypotheses] --> B[Select the hypothesis with the highest impact and uncertainty]
+    B --> C[Run a test or observation]
+    C --> D{Is the result compatible?}
+    D -- Yes --> E[Strengthen hypothesis]
+    D -- No --> F[Refute or weaken hypothesis]
+    E --> G[Investigate the causal mechanism]
+    F --> H[Select the next hypothesis]
 ```
 
-Exemplo:
+Example:
 
 ```text
-Hipótese:
-- O frontend faz request duplicado.
+Hypothesis:
+- The frontend sends a duplicate request.
 
-Ação útil:
-- Inspecionar logs com request ID e timestamp.
+Useful action:
+- Inspect logs by request ID and timestamp.
 
-Ação pouco útil:
-- Refatorar o botão antes de confirmar requisições duplicadas.
+Low-value action:
+- Refactor the button before confirming duplicate requests.
 ```
 
-## Técnicas de investigação
+## Investigation techniques
 
 ### 5 Whys
 
-Use 5 Whys para aprofundar uma cadeia causal simples, não como ritual obrigatório.
+Use 5 Whys to go deeper along a simple causal chain, not as a mandatory ritual.
 
 ```text
-Problema:
-- Usuários recebem erro ao gerar relatório.
+Problem:
+- Users get an error when generating a report.
 
-Por quê?
-- O worker falha ao processar arquivo grande.
+Why?
+- The worker fails when processing a large file.
 
-Por quê?
-- O arquivo inteiro é carregado em memória.
+Why?
+- The whole file is loaded into memory.
 
-Por quê?
-- A implementação usa processamento síncrono em lote.
+Why?
+- The implementation uses synchronous batch processing.
 
-Por quê?
-- Não havia requisito explícito de limite de memória ou streaming.
+Why?
+- There was no explicit requirement for a memory limit or streaming.
 
-Por quê?
-- A análise inicial não considerou volume real de dados.
+Why?
+- The initial analysis did not consider the real data volume.
 
-Possível causa raiz:
-- Ausência de requisito e validação de volume para processamento de relatórios.
+Possible root cause:
+- Missing volume requirement and validation for report processing.
 ```
 
-Limitações:
+Limitations:
 
 ```text
-- Não funciona bem para sistemas com múltiplas causas.
-- Pode induzir causalidade linear artificial.
-- Não deve substituir logs, testes ou evidência real.
+- Does not work well for systems with multiple causes.
+- Can induce artificial linear causality.
+- Must not replace logs, tests, or real evidence.
 ```
 
 ### Fault Tree Analysis
 
-Use árvore de falhas quando um sintoma pode resultar de combinações de causas. É a ferramenta natural para causas raiz múltiplas ou sistêmicas.
+Use a fault tree when a symptom can result from combinations of causes. It is the natural tool for multiple or systemic root causes.
 
 ```mermaid
 flowchart TD
-    A[Pedido duplicado] --> B[Request duplicado]
-    A --> C[Processamento duplicado]
-    A --> D[Persistência sem proteção]
+    A[Duplicate order] --> B[Duplicate request]
+    A --> C[Duplicate processing]
+    A --> D[Unprotected persistence]
 
-    B --> E[Clique duplo]
-    B --> F[Retry de cliente]
-    B --> G[Retry de gateway]
+    B --> E[Double click]
+    B --> F[Client retry]
+    B --> G[Gateway retry]
 
-    C --> H[Worker reprocessa mensagem]
-    C --> I[Fila entrega ao menos uma vez]
+    C --> H[Worker reprocesses message]
+    C --> I[Queue delivers at least once]
 
-    D --> J[Sem chave de idempotência]
-    D --> K[Sem restrição de unicidade]
+    D --> J[No idempotency key]
+    D --> K[No uniqueness constraint]
 ```
 
-Use quando:
+Use when:
 
 ```text
-- Há múltiplos caminhos causais.
-- O sistema é distribuído.
-- Existem retries, filas, cache ou concorrência.
-- Uma falha depende de combinação de eventos.
+- There are multiple causal paths.
+- The system is distributed.
+- There are retries, queues, cache, or concurrency.
+- A failure depends on a combination of events.
 ```
 
-### Comparação de estados
+### State comparison
 
-Use quando o problema ocorre apenas em alguns ambientes, usuários ou dados.
+Use when the problem occurs only in some environments, users, or data.
 
 ```text
 Compare:
 
-- Ambiente que funciona versus ambiente que falha.
-- Request bem-sucedido versus request com erro.
-- Usuário afetado versus não afetado.
-- Dados válidos versus dados problemáticos.
-- Antes versus depois de deploy.
-- Configuração antiga versus configuração nova.
+- Working environment versus failing environment.
+- Successful request versus failing request.
+- Affected user versus unaffected user.
+- Valid data versus problematic data.
+- Before versus after a deploy.
+- Old configuration versus new configuration.
 ```
 
-### Reprodução controlada
+### Controlled reproduction
 
-Sempre que possível, transforme relato em cenário reproduzível.
-
-```text
-Uma boa reprodução define:
-- entrada;
-- estado inicial;
-- ambiente;
-- sequência de ações;
-- resultado esperado;
-- resultado observado;
-- logs ou evidências associadas.
-```
+Whenever possible, turn a report into a reproducible scenario.
 
 ```text
-Ruim:
-"Às vezes falha."
-
-Melhor:
-"Após alterar filtro na página 3 e clicar em exportar, a API recebe `page=3`, gera arquivo vazio e retorna sucesso."
-```
-
-## Identificação da causa raiz
-
-Uma hipótese só deve ser tratada como causa raiz quando:
-
-```text
-[ ] Explica o sintoma observado.
-[ ] É compatível com evidências disponíveis.
-[ ] Pode ser reproduzida, observada ou testada.
-[ ] A correção reduz a chance de recorrência.
-[ ] Não depende de outra causa mais fundamental ainda não investigada.
-[ ] Não é apenas um efeito secundário.
+A good reproduction defines:
+- input;
+- initial state;
+- environment;
+- sequence of actions;
+- expected result;
+- observed result;
+- associated logs or evidence.
 ```
 
 ```text
-Regra:
-A causa raiz não precisa explicar todos os problemas possíveis.
-Ela precisa explicar o problema investigado dentro do escopo definido.
-Pode haver mais de uma causa raiz; cada uma deve passar pelos mesmos critérios.
+Bad:
+"It fails sometimes."
+
+Better:
+"After changing the filter on page 3 and clicking export, the API receives `page=3`, generates an empty file, and returns success."
 ```
 
-## Correção estrutural
+## Identifying the root cause
 
-A correção deve atacar o mecanismo confirmado, não apenas esconder o sintoma. Quando há mais de uma causa raiz, cada uma precisa de sua própria correção.
-
-Uma boa correção pode combinar camadas:
+A hypothesis should be treated as a root cause only when:
 
 ```text
-- Interface: evita ação repetida e melhora feedback.
-- API: aplica idempotência e valida contrato.
-- Banco: impede duplicidade estrutural.
-- Worker: trata reprocessamento de forma idempotente.
-- Observabilidade: monitora tentativas duplicadas.
+[ ] It explains the observed symptom.
+[ ] It is compatible with the available evidence.
+[ ] It can be reproduced, observed, or tested.
+[ ] Fixing it reduces the chance of recurrence.
+[ ] It does not depend on a more fundamental cause not yet investigated.
+[ ] It is not merely a secondary effect.
 ```
 
-## Prevenção e detecção
+```text
+Rule:
+The root cause does not need to explain every possible problem.
+It needs to explain the problem under investigation within the defined scope.
+There can be more than one root cause; each must pass the same criteria.
+```
 
-Depois da correção, identifique como evitar ou detectar recorrência.
+## Structural fix
 
-### Prevenção
+The fix must attack the confirmed mechanism, not merely hide the symptom. When there is more than one root cause, each one needs its own fix.
+
+A good fix can combine layers:
 
 ```text
-- Teste de regressão.
-- Validação de entrada.
-- Idempotência.
-- Restrição de banco.
-- Retry com política segura.
-- Controle de concorrência.
-- Contrato explícito.
+- Interface: prevents repeated action and improves feedback.
+- API: applies idempotency and validates the contract.
+- Database: structurally prevents duplicates.
+- Worker: handles reprocessing idempotently.
+- Observability: monitors duplicate attempts.
+```
+
+## Prevention and detection
+
+After the fix, identify how to prevent or detect recurrence.
+
+### Prevention
+
+```text
+- Regression test.
+- Input validation.
+- Idempotency.
+- Database constraint.
+- Retry with a safe policy.
+- Concurrency control.
+- Explicit contract.
 - Feature flag.
-- Limites de recurso.
-- Revisão de arquitetura.
+- Resource limits.
+- Architecture review.
 ```
 
-### Detecção
+### Detection
 
 ```text
-- Logs estruturados.
+- Structured logs.
 - Correlation ID.
-- Métricas.
-- Alertas.
+- Metrics.
+- Alerts.
 - Dashboards.
-- Auditoria.
+- Auditing.
 - Health checks.
-- Monitoramento de taxa de erro.
-- Monitoramento de duplicidade.
+- Error-rate monitoring.
+- Duplicate monitoring.
 ```
 
-## Correção, contenção e prevenção
+## Fix, containment, and prevention
 
-| Tipo      | Objetivo                       | Exemplo                               |
-| --------- | ------------------------------ | ------------------------------------- |
-| Contenção | Reduzir impacto agora          | Desativar feature defeituosa          |
-| Correção  | Eliminar causa confirmada      | Adicionar idempotência no endpoint    |
-| Prevenção | Reduzir recorrência futura     | Criar teste de retry e regra de banco |
-| Detecção  | Descobrir problema rapidamente | Alertar duplicidade acima do limite   |
+| Type        | Goal                          | Example                                  |
+| ----------- | ----------------------------- | ---------------------------------------- |
+| Containment | Reduce impact now             | Disable the faulty feature               |
+| Fix         | Eliminate the confirmed cause | Add idempotency to the endpoint          |
+| Prevention  | Reduce future recurrence      | Add a retry test and a database rule     |
+| Detection   | Discover the problem quickly  | Alert on duplicates above the threshold  |
 
-Não confunda contenção com resolução definitiva.
+Do not mistake containment for a definitive resolution.
 
-## Validação da correção
+## Validating the fix
 
-Uma correção não está concluída apenas porque o sintoma desapareceu uma vez.
+A fix is not complete just because the symptom disappeared once.
 
-Valide:
+Validate:
 
 ```text
-[ ] O cenário original foi reproduzido antes da correção, quando possível.
-[ ] A causa identificada foi testada ou observada diretamente.
-[ ] A correção impede o cenário original.
-[ ] Casos relacionados não sofreram regressão.
-[ ] Fatores contribuintes relevantes foram tratados.
-[ ] Testes de regressão foram adicionados ou atualizados.
-[ ] Monitoramento ou logs permitem detectar recorrência.
-[ ] A solução respeita contratos, restrições e segurança.
+[ ] The original scenario was reproduced before the fix, when possible.
+[ ] The identified cause was tested or observed directly.
+[ ] The fix prevents the original scenario.
+[ ] Related cases did not regress.
+[ ] Relevant contributing factors were addressed.
+[ ] Regression tests were added or updated.
+[ ] Monitoring or logs make recurrence detectable.
+[ ] The solution respects contracts, constraints, and security.
 ```
 
 ```mermaid
 flowchart TD
-    A[Correção aplicada] --> B[Reproduzir cenário original]
-    B --> C{Sintoma desapareceu?}
-    C -- Não --> D[Reavaliar hipótese]
-    C -- Sim --> E[Testar regressões e casos relacionados]
-    E --> F{Sem regressão?}
-    F -- Não --> G[Ajustar correção]
-    F -- Sim --> H[Concluir e monitorar]
+    A[Fix applied] --> B[Reproduce original scenario]
+    B --> C{Symptom gone?}
+    C -- No --> D[Reassess hypothesis]
+    C -- Yes --> E[Test regressions and related cases]
+    E --> F{No regression?}
+    F -- No --> G[Adjust fix]
+    F -- Yes --> H[Finish and monitor]
 ```
 
-## Regras de parada
+## Stopping rules
 
-Encerre a investigação quando:
+Stop the investigation when:
 
 ```text
-- A causa raiz foi confirmada com evidência suficiente.
-- A contenção está ativa ou o impacto cessou.
-- A correção estrutural foi implementada e validada.
-- Testes de regressão foram adicionados quando aplicável.
-- Riscos remanescentes foram identificados e comunicados.
-- Não há hipótese concorrente material não investigada.
+- The root cause was confirmed with sufficient evidence.
+- Containment is active or the impact has ceased.
+- The structural fix was implemented and validated.
+- Regression tests were added where applicable.
+- Remaining risks were identified and communicated.
+- No material competing hypothesis remains uninvestigated.
 ```
 
-Declare investigação inconclusiva quando:
+Declare the investigation inconclusive when:
 
 ```text
-- Não há evidência suficiente.
-- O problema não pode ser reproduzido.
-- Logs, acesso ou contexto são insuficientes.
-- Hipóteses relevantes permanecem igualmente plausíveis.
-- A ação necessária depende de outro responsável ou ambiente indisponível.
+- There is not enough evidence.
+- The problem cannot be reproduced.
+- Logs, access, or context are insufficient.
+- Relevant hypotheses remain equally plausible.
+- The required action depends on another owner or an unavailable environment.
 ```
 
-Não invente causa raiz para encerrar um incidente.
+Do not invent a root cause to close an incident.
 
-## Anti-padrões
+## Anti-patterns
 
-### 1. Corrigir o sintoma
+### 1. Fixing the symptom
 
 ```text
-Ruim:
-Adicionar delay para evitar duplicidade.
+Bad:
+Add a delay to avoid duplicates.
 
-Melhor:
-Verificar retries, idempotência, unicidade e processamento concorrente.
+Better:
+Check retries, idempotency, uniqueness, and concurrent processing.
 ```
 
-### 2. Escolher a primeira hipótese plausível
+### 2. Picking the first plausible hypothesis
 
 ```text
-Ruim:
-"É problema de cache porque os dados estão desatualizados."
+Bad:
+"It's a cache problem because the data is stale."
 
-Melhor:
-Comparar API, cache, banco, browser e invalidação antes de concluir.
+Better:
+Compare API, cache, database, browser, and invalidation before concluding.
 ```
 
-### 3. Confundir correlação com causalidade
+### 3. Mistaking correlation for causation
 
 ```text
-Ruim:
-"O bug começou após deploy, então o deploy causou o bug."
+Bad:
+"The bug started after the deploy, so the deploy caused the bug."
 
-Melhor:
-"Deploy é uma hipótese temporal; comparar diff, métricas e comportamento antes e depois."
+Better:
+"The deploy is a temporal hypothesis; compare the diff, metrics, and behavior before and after."
 ```
 
-### 4. Ignorar fatores contribuintes ou causas raiz adicionais
+### 4. Ignoring contributing factors or additional root causes
 
 ```text
-Ruim:
-Corrigir só o clique duplo e encerrar, mesmo havendo outra causa estrutural.
+Bad:
+Fix only the double click and close, even though another structural cause exists.
 
-Melhor:
-Também verificar retries, idempotência, worker e banco, tratando cada causa raiz confirmada.
+Better:
+Also check retries, idempotency, the worker, and the database, addressing every confirmed root cause.
 ```
 
-### 5. Não preservar evidência
+### 5. Not preserving evidence
 
 ```text
-Ruim:
-Alterar logs e configuração antes de capturar requests, traces e estado atual.
+Bad:
+Change logs and configuration before capturing requests, traces, and the current state.
 
-Melhor:
-Preservar evidências relevantes antes de modificar o sistema.
+Better:
+Preserve relevant evidence before modifying the system.
 ```
 
-### 6. Usar 5 Whys mecanicamente
+### 6. Using 5 Whys mechanically
 
 ```text
-Ruim:
-Forçar cinco perguntas em um problema com causas paralelas.
+Bad:
+Force five questions onto a problem with parallel causes.
 
-Melhor:
-Usar 5 Whys apenas quando houver cadeia causal linear plausível.
+Better:
+Use 5 Whys only when a plausible linear causal chain exists.
 ```
 
-### 7. Declarar causa raiz sem validação
+### 7. Declaring a root cause without validation
 
 ```text
-Ruim:
-"A causa raiz é falta de teste."
+Bad:
+"The root cause is a missing test."
 
-Melhor:
-"Ausência de teste é falha de prevenção; a causa técnica precisa explicar como o comportamento incorreto ocorreu."
+Better:
+"A missing test is a prevention failure; the technical cause must explain how the incorrect behavior occurred."
 ```
 
-### 8. Não adicionar prevenção
+### 8. Not adding prevention
 
 ```text
-Ruim:
-Corrigir bug sem teste, monitoramento ou ajuste de processo.
+Bad:
+Fix the bug without a test, monitoring, or process adjustment.
 
-Melhor:
-Adicionar mecanismos proporcionais para impedir ou detectar recorrência.
+Better:
+Add proportional mechanisms to prevent or detect recurrence.
 ```
 
-## Exemplos
+## Examples
 
-### Exemplo 1 — Pedidos duplicados (duas causas raiz)
+### Example 1 — Duplicate orders (two root causes)
 
 ```text
-Sintoma:
-- Alguns pedidos são criados duas vezes.
+Symptom:
+- Some orders are created twice.
 
-Impacto:
-- Cobrança duplicada e inconsistência operacional.
+Impact:
+- Duplicate billing and operational inconsistency.
 
-Hipóteses:
-A. Clique duplo na interface.
-B. Retry automático do cliente.
-C. Endpoint sem idempotência.
-D. Worker reprocessa mensagem.
-E. Banco permite duplicidade.
+Hypotheses:
+A. Double click in the interface.
+B. Automatic client retry.
+C. Endpoint without idempotency.
+D. Worker reprocesses the message.
+E. Database allows duplicates.
 
-Evidências:
-- Logs mostram requests próximos com mesmo payload.
-- Endpoint não recebe chave de idempotência.
-- Banco não possui unicidade para o identificador externo.
+Evidence:
+- Logs show close-together requests with the same payload.
+- The endpoint receives no idempotency key.
+- The database has no uniqueness constraint on the external identifier.
 
-Causa imediata:
-- Duas requisições idênticas persistem dois registros.
+Immediate cause:
+- Two identical requests persist two records.
 
-Causas raiz (independentes):
-1. API sem chave de idempotência: aceita requisições repetidas como novas.
-2. Banco sem restrição de unicidade: não rejeita o segundo registro.
-   Cada uma sozinha já permite duplicidade; ambas precisam de correção.
+Root causes (independent):
+1. API without an idempotency key: accepts repeated requests as new ones.
+2. Database without a uniqueness constraint: does not reject the second record.
+   Each one alone already allows duplication; both need fixing.
 
-Fatores contribuintes:
-- Interface permite clique repetido.
-- Retry de rede não é distinguido de nova solicitação.
+Contributing factors:
+- The interface allows repeated clicks.
+- A network retry is not distinguished from a new submission.
 
-Correção:
-- Chave de idempotência na API + restrição de unicidade no banco + teste de requests duplicados.
+Fix:
+- Idempotency key in the API + uniqueness constraint in the database + duplicate-request test.
 
-Prevenção:
-- Métrica de duplicidade, logs com correlation ID e teste de regressão.
+Prevention:
+- Duplicate metric, logs with correlation ID, and a regression test.
 ```
 
-### Exemplo 2 — Endpoint lento
+### Example 2 — Slow endpoint
 
 ```text
-Sintoma:
-- Endpoint de busca responde em mais de 10 segundos para alguns clientes.
+Symptom:
+- The search endpoint takes over 10 seconds to respond for some clients.
 
-Hipóteses:
-A. Consulta sem índice.
+Hypotheses:
+A. Query without an index.
 B. N+1 queries.
-C. Serialização excessiva.
-D. Integração externa lenta.
-E. Cache ineficiente.
+C. Excessive serialization.
+D. Slow external integration.
+E. Ineffective cache.
 
-Evidências a coletar:
-- Tempo de banco.
-- Tempo de serialização.
-- Traces de chamadas externas.
-- Plano de execução da query.
-- Volume de registros retornados.
+Evidence to collect:
+- Database time.
+- Serialization time.
+- Traces of external calls.
+- Query execution plan.
+- Volume of returned records.
 
-Causa raiz:
-- Só deve ser declarada após medir qual componente concentra a latência.
+Root cause:
+- Should only be declared after measuring which component concentrates the latency.
 
-Correção possível:
-- Índice, paginação, redução de payload, batch de queries ou timeout controlado.
+Possible fix:
+- Index, pagination, payload reduction, query batching, or a controlled timeout.
 
-Regra:
-- Não adicionar cache antes de confirmar o gargalo.
+Rule:
+- Do not add a cache before confirming the bottleneck.
 ```
 
-### Exemplo 3 — Investigação inconclusiva
+### Example 3 — Inconclusive investigation
 
 ```text
-Sintoma:
-- Alguns uploads desaparecem de forma intermitente em produção.
+Symptom:
+- Some uploads disappear intermittently in production.
 
-Impacto:
-- Poucos usuários por semana; sem padrão claro de tenant ou região.
+Impact:
+- A few users per week; no clear tenant or region pattern.
 
-Hipóteses:
-A. Falha silenciosa no storage externo.
-B. Worker descarta evento sob carga.
-C. Race condition entre upload e move final.
+Hypotheses:
+A. Silent failure in the external storage.
+B. Worker drops the event under load.
+C. Race condition between the upload and the final move.
 
-Evidências disponíveis:
-- Sem correlation ID nos logs do período afetado.
-- Retenção de logs do storage já expirou para os casos relatados.
-- Não foi possível reproduzir localmente nem em homologação.
+Available evidence:
+- No correlation ID in the logs for the affected period.
+- Storage log retention has already expired for the reported cases.
+- Could not reproduce locally or in staging.
 
 Status:
-- INCONCLUSIVA. As hipóteses A, B e C permanecem igualmente plausíveis;
-  nenhuma evidência distingue entre elas.
+- INCONCLUSIVE. Hypotheses A, B, and C remain equally plausible;
+  no evidence distinguishes between them.
 
-Ação tomada (sem inventar causa raiz):
-- Contenção: confirmação de recebimento ao usuário e fila de reprocessamento manual.
-- Instrumentação: adicionar correlation ID e ampliar retenção de logs.
-- Reabrir a investigação quando ocorrer o próximo caso com evidência completa.
+Action taken (without inventing a root cause):
+- Containment: acknowledge receipt to the user and add a manual reprocessing queue.
+- Instrumentation: add a correlation ID and extend log retention.
+- Reopen the investigation when the next case arrives with complete evidence.
 ```
 
-## Formato de registro
+## Record format
 
-Use este formato ao registrar uma investigação:
+Use this format when recording an investigation:
 
 ```text
-Problema:
-- [sintoma observável]
+Problem:
+- [observable symptom]
 
-Impacto e escopo:
-- [quem, onde, quando e quanto foi afetado]
+Impact and scope:
+- [who, where, when, and how much was affected]
 
-Evidências confirmadas:
-- [fatos observados]
+Confirmed evidence:
+- [observed facts]
 
-Hipóteses:
-1. [hipótese]
-   - Evidência a favor:
-   - Evidência contra:
-   - Validação:
-   - Critério de descarte:
+Hypotheses:
+1. [hypothesis]
+   - Evidence for:
+   - Evidence against:
+   - Validation:
+   - Discard criterion:
 
-Causa imediata:
-- [mecanismo confirmado]
+Immediate cause:
+- [confirmed mechanism]
 
-Causa raiz:
-- [falha(s) estrutural(is) confirmada(s) — liste todas]
+Root cause:
+- [confirmed structural failure(s) — list them all]
 
-Fatores contribuintes:
-- [condições que aumentaram probabilidade ou impacto]
+Contributing factors:
+- [conditions that increased probability or impact]
 
-Contenção:
-- [ação temporária]
+Containment:
+- [temporary action]
 
-Correção:
-- [mudança estrutural por causa raiz]
+Fix:
+- [structural change per root cause]
 
-Prevenção e detecção:
-- [testes, métricas, alertas ou controles]
+Prevention and detection:
+- [tests, metrics, alerts, or controls]
 
-Validação:
-- [como confirmar que a recorrência foi reduzida]
+Validation:
+- [how to confirm recurrence was reduced]
 
-Limitações:
-- [o que ainda não foi confirmado]
+Limitations:
+- [what has not been confirmed yet]
 ```
 
-## Lembretes para o agente
+## Reminders for the agent
 
 ```text
-- Não exponha cadeia de pensamento detalhada; comunique problema, evidências, hipóteses relevantes, causa(s) confirmada(s), correção, prevenção e limitações.
-- Trate causas raiz múltiplas ou sistêmicas como caso normal: liste e corrija todas.
-- Não confunda correlação com causalidade nem ausência de teste com causa raiz técnica.
-- Corrija o mecanismo confirmado e não apenas o sintoma; adicione prevenção e detecção proporcionais ao risco.
-- Quando a evidência não basta, declare investigação inconclusiva em vez de inventar causa.
+- Do not expose detailed chain of thought; communicate the problem, evidence, relevant hypotheses, confirmed cause(s), fix, prevention, and limitations.
+- Treat multiple or systemic root causes as the normal case: list and fix them all.
+- Do not mistake correlation for causation, nor a missing test for a technical root cause.
+- Fix the confirmed mechanism, not just the symptom; add prevention and detection proportional to the risk.
+- When the evidence is not enough, declare the investigation inconclusive instead of inventing a cause.
 ```
 
-## Técnicas relacionadas
+## Related techniques
 
 - [ReAct](react.md)
 - [Assumption Tracking](assumption-tracking.md)
@@ -905,4 +905,4 @@ Limitações:
 - [Critique and Refine](critique-and-refine.md)
 - [Plan and Execute](plan-and-execute.md)
 
-Voltar a skill [pelizzai-reasoning](../SKILL.md).
+Back to the [technique catalog](../SKILL.md).

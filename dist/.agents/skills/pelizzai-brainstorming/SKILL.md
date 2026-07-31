@@ -1,262 +1,262 @@
 ---
 name: pelizzai-brainstorming
-description: Explora e ratifica design antes de implementar um produto/projeto greenfield ou feature, refactor e mudança estrutural com trade-offs, requisitos, arquitetura, UX, dados ou risco ainda abertos. Greenfield usa modo completo mesmo com stack definida; mudança existente pode usar modo compacto. Não use para design já aprovado, ajuste trivial ou bug em investigação.
+description: Explores and ratifies design before implementing a greenfield product/project, or a feature, refactor, or structural change with trade-offs, requirements, architecture, UX, data, or risk still open. Greenfield uses full mode even with a defined stack; a change to an existing system may use compact mode. Do not use for already-approved design, a trivial tweak, or a bug under investigation.
 ---
 
 # PelizzAI Brainstorming
 
-## Objetivo
+## Goal
 
-Transformar intenção em design decidido pelo usuário antes da implementação. A skill investiga,
-expõe alternativas e recomenda; nunca preenche uma decisão de produto para ganhar velocidade.
+Turn intent into a design decided by the user before implementation. The skill investigates,
+surfaces alternatives, and recommends; it never fills in a product decision to gain speed.
 
-**Anuncie:** "Usando a skill PelizzAI Brainstorming em modo `<compacto|completo>` para resolver as decisões de design antes de implementar."
+**Announce:** "Using the PelizzAI Brainstorming skill in `<compact|full>` mode to resolve the design decisions before implementing."
 
 <HARD-GATE>
-NÃO acione skill de implementação, não escreva código, não crie scaffold e não tome nenhuma ação de
-implementação até ter apresentado o design e o usuário tê-lo aprovado. **Isso se aplica a TODOS os
-projetos, independentemente da simplicidade aparente** — o design pode ser curto (algumas frases num
-escopo realmente simples), mas precisa ser apresentado e aprovado.
+Do NOT invoke an implementation skill, write code, create scaffolding, or take any implementation
+action until the design has been presented and the user has approved it. **This applies to ALL
+projects, regardless of apparent simplicity** — the design can be short (a few sentences for a
+truly simple scope), but it must be presented and approved.
 
-A única saída é anterior a esta skill: correção pontual e lane `bounded` já especificada pelo usuário
-são resolvidas pelo `pelizzai-router` ANTES do brainstorming (ver Pré-condições). Uma vez dentro
-desta fase, a regra vale integralmente — "é simples demais para precisar de design" não é
-justificativa, é o antipadrão que a regra existe para barrar.
+The only exit lies before this skill: a pinpoint fix and a `bounded` lane already specified by the user
+are resolved by `pelizzai-router` BEFORE brainstorming (see Preconditions). Once inside
+this phase, the rule holds in full — "too simple to need design" is not a
+justification; it is the anti-pattern the rule exists to block.
 </HARD-GATE>
 
-## Pré-condições
+## Preconditions
 
-- O router já classificou efeito, risco, incerteza e overlays.
-- Para qualquer escrita de spec/ADR/protótipo, a task/planning branch já existe.
-- Na lane `bounded` de um produto existente, com objetivo, aceite e abordagem já fornecidos pelo
-  usuário, volte ao router e siga sem brainstorming. Greenfield nunca usa essa exceção.
-- Nas lanes `standard`/`exploratory` nenhuma implementação começa antes de a spec de design existir e ter sido apresentada na borda de design — salvo dispensa explícita do usuário. A profundidade escala pela lane (enxuta no `standard` de aceite claro, completa no `exploratory`); o classificador não conclui sozinho "não há trade-off, pulo a spec".
+- The router has already classified effect, risk, uncertainty, and overlays.
+- For any spec/ADR/prototype write, the task/planning branch already exists.
+- In the `bounded` lane of an existing product, with goal, acceptance, and approach already supplied
+  by the user, return to the router and proceed without brainstorming. Greenfield never uses this exception.
+- In the `standard`/`exploratory` lanes, no implementation starts before the design spec exists and has been presented at the design edge — barring an explicit waiver from the user. Depth scales with the lane (lean for a `standard` with clear acceptance, full for `exploratory`); the classifier never concludes on its own "no trade-off here, I'll skip the spec".
 
-## Escolher profundidade
+## Choosing depth
 
-| Modo | Quando | Saída |
+| Mode | When | Output |
 | --- | --- | --- |
-| `compacto` | incerteza média, poucas decisões, escopo coeso | contexto focal → design curto → uma aprovação → spec enxuta. |
-| `completo` | alta incerteza, arquitetura aberta ou decisões sensíveis acopladas | exploração, alternativas reais, stress proporcional, spec detalhada. |
+| `compact` | medium uncertainty, few decisions, cohesive scope | focused context → short design → one approval → lean spec. |
+| `full` | high uncertainty, open architecture, or coupled sensitive decisions | exploration, real alternatives, proportional stress, detailed spec. |
 
-Produto/projeto greenfield sempre começa em `completo`. Informar qualquer combinação de linguagem,
-framework, runtime, banco, serviço ou plataforma reduz incerteza técnica, mas não resolve atores,
-jornadas, estados, regras, exceções nem aceite.
+A greenfield product/project always starts in `full`. Naming any combination of language,
+framework, runtime, database, service, or platform reduces technical uncertainty, but does not
+settle actors, journeys, states, rules, exceptions, or acceptance.
 
-Complexidade visual ou número de arquivos não basta para escolher modo; use custo de decisão errada e incerteza real. Em `standard`/`exploratory` a spec é o artefato-padrão: o modo escolhe a profundidade da spec (enxuta vs completa), não se ela existe.
+Visual complexity or file count is not enough to pick a mode; use the cost of a wrong decision and real uncertainty. In `standard`/`exploratory` the spec is the default artifact: the mode picks the spec's depth (lean vs full), not whether it exists.
 
-## Fluxo comum
+## Common flow
 
-### 1. Explorar contexto focal
+### 1. Explore focused context
 
-Leia apenas o necessário para responder:
+Read only what you need to answer:
 
 ```text
-- Onde a mudança se encaixa?
-- Quais contratos/padrões existentes ela precisa preservar?
-- Há prior art de teste e implementação?
-- Quais decisões já estão registradas em ADR/out-of-scope?
-- Quais skills de domínio e overlays se aplicam?
+- Where does the change fit?
+- Which existing contracts/patterns must it preserve?
+- Is there testing and implementation prior art?
+- Which decisions are already recorded in ADR/out-of-scope?
+- Which domain skills and overlays apply?
 ```
 
-Use subagent read-only somente quando a busca tem frentes independentes. Não faça repo scan completo por reflexo.
+Use a read-only subagent only when the search has independent fronts. Do not run a full repo scan by reflex.
 
-Quando tecnologia externa afetar viabilidade ou opções, identifique a versão em manifests/lockfiles
-e consulte Context7 antes de formular a pergunta correspondente. Em greenfield sem dependências
-instaladas, consulte a documentação atual da stack informada ou das candidatas que pretende
-recomendar. Use essa evidência para descartar opções incompatíveis e explicar trade-offs; a escolha
-continua no gate do usuário.
+When external technology affects feasibility or options, identify the version in manifests/lockfiles
+and consult Context7 before formulating the corresponding question. In greenfield with no
+dependencies installed, consult the current documentation of the stated stack or of the candidates
+you intend to recommend. Use that evidence to discard incompatible options and explain trade-offs;
+the choice stays at the user's gate.
 
-### 2. Fixar objetivo e fronteiras
+### 2. Fix goal and boundaries
 
-Defina:
+Define:
 
-- resultado e usuário/consumidor;
-- critérios de aceite observáveis;
-- fora de escopo;
-- restrições e compatibilidade;
-- decisões reversíveis vs difíceis de reverter.
+- outcome and user/consumer;
+- observable acceptance criteria;
+- out of scope;
+- constraints and compatibility;
+- reversible vs hard-to-reverse decisions.
 
-Consulte evidência antes de perguntar para não pedir fatos já observáveis. Para decisões do usuário,
-faça **uma pergunta por vez**, mesmo quando pareçam independentes: a resposta pode alterar prioridade,
-vocabulário e opções das seguintes. Cada turno de descoberta contém:
+Consult evidence before asking so you never request facts already observable. For user decisions,
+ask **one question at a time**, even when they seem independent: the answer can change the priority,
+vocabulary, and options of the next ones. Each discovery turn contains:
 
 ```text
-Decisão: <por que isso muda a solução>
-Opções reais: <2–3 quando ajudarem>
-Recomendação: <melhor opção> — <motivo em uma linha>
-Pergunta: <uma única pergunta>
+Decision: <why this changes the solution>
+Real options: <2–3 when they help>
+Recommendation: <best option> — <one-line reason>
+Question: <a single question>
 ```
 
-Pergunta aberta é válida quando opções enviesariam a resposta. Nunca esconda uma decisão dentro de
-uma “premissa segura”.
+An open question is valid when options would bias the answer. Never hide a decision inside a
+"safe assumption".
 
-### 3. Conduzir a descoberta quando houver lacuna material
+### 3. Run discovery when there is a material gap
 
-Quando contexto e objetivo revelarem lacunas de escopo, UX, arquitetura, segurança ou dados, não as
-resolva por suposição. Ordene internamente as lacunas por dependência e impacto, mas apresente
-somente a próxima decisão. Exemplo:
+When context and goal reveal gaps in scope, UX, architecture, security, or data, do not resolve
+them by assumption. Order the gaps internally by dependency and impact, but present only the next
+decision. Example:
 
 ```text
-Encontrei decisões de produto ainda abertas. A primeira condiciona as demais:
+I found product decisions still open. The first conditions the others:
 
-Decisão: <lacuna> — muda <escopo|UX|arquitetura|segurança|dados>.
-Opções: A) <...> · B) <...> · C) <...>.
-Recomendação: <B> — <motivo>.
-Pergunta: qual opção você escolhe?
+Decision: <gap> — changes <scope|UX|architecture|security|data>.
+Options: A) <...> · B) <...> · C) <...>.
+Recommendation: <B> — <reason>.
+Question: which option do you choose?
 ```
 
-O turno para após a pergunta. Silêncio, recomendação e Context7 não valem como resposta. Depois da
-escolha, registre a decisão, recalcule as lacunas e faça somente a próxima pergunta. Pular a
-descoberta inteira exige pedido explícito; nesse caso, não invente respostas: registre as decisões
-não tomadas como limitações e confirme se ainda existe uma spec implementável.
+The turn stops after the question. Silence, a recommendation, and Context7 do not count as an
+answer. After the choice, record the decision, recompute the gaps, and ask only the next question.
+Skipping the entire discovery requires an explicit request; in that case, do not invent answers:
+record the untaken decisions as limitations and confirm an implementable spec still exists.
 
-Não reabra o que o gate de kickoff do router já ratificou: agrupe apenas as lacunas materiais ainda em aberto. Em `bounded` sem lacuna material, o gate não aparece.
+Do not reopen what the router's kickoff gate has already ratified: group only the material gaps still open. In `bounded` with no material gap, the gate does not appear.
 
-Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing e escale ao coordenador o que exigir decisão.
+Under a closed briefing (SUBAGENT-STOP), do not produce route analyses or open gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
-### 4. Explorar alternativas quando existirem
+### 4. Explore alternatives when they exist
 
-Apresente 2–3 abordagens somente se forem realmente válidas e materialmente diferentes. Compare
-pelo que importa e recomende uma. Peça a escolha do usuário antes de incorporá-la ao design.
+Present 2–3 approaches only if they are genuinely valid and materially different. Compare by what
+matters and recommend one. Ask for the user's choice before folding it into the design.
 
-Se há uma única abordagem compatível com os contratos, explique-a diretamente; não invente alternativas para cumprir ritual.
+If a single approach is compatible with the contracts, explain it directly; do not invent alternatives to satisfy ritual.
 
-### 5. Desenhar a solução
+### 5. Design the solution
 
-Cubra proporcionalmente:
+Cover proportionally:
 
 ```text
-responsabilidades e fronteiras
-interfaces/contratos e fluxo de dados
-estados e tratamento de erro
-compatibilidade/migração/rollback quando aplicável
-estratégia de validação e seams reais
-observabilidade/security quando o risco exigir
+responsibilities and boundaries
+interfaces/contracts and data flow
+states and error handling
+compatibility/migration/rollback when applicable
+validation strategy and real seams
+observability/security when risk demands it
 ```
 
-Para UI, aplique o overlay `pelizzai-frontend` já no design: fluxo real, estados, conteúdo, sistema existente, acessibilidade e direção visual. Isso não autoriza implementar antes da aprovação.
+For UI, apply the `pelizzai-frontend` overlay at design time: real flow, states, content, existing system, accessibility, and visual direction. This does not authorize implementing before approval.
 
-Para módulos, use `pelizzai-codebase-design` apenas quando fronteiras/seams ainda são uma decisão. Para domínio, use `pelizzai-domain-modeling` quando o vocabulário/ADR realmente mudar — não para apenas ler o glossário.
+For modules, use `pelizzai-codebase-design` only when boundaries/seams are still a decision. For the domain, use `pelizzai-domain-modeling` when the vocabulary/ADR actually changes — not merely to read the glossary.
 
-### 6. Stress proporcional
+### 6. Proportional stress
 
-Ao estressar o design, cace ATIVAMENTE as lacunas e apresente-as como lista numerada — não deixe uma passar só porque o usuário não a citou. Procure apenas as falhas plausíveis para a superfície real:
+When stress-testing the design, hunt gaps ACTIVELY and present them as a numbered list — do not let one slip by just because the user did not mention it. Look only for the failures plausible for the real surface:
 
 ```text
-casos não tratados e estados indefinidos
-validação ausente
-falha de autorização/segurança ou exposição de dados
-compatibilidade/migração/rollback
-premissa de escala ou integração não confirmada
-contradição entre spec, plano e código
+unhandled cases and undefined states
+missing validation
+authorization/security failure or data exposure
+compatibility/migration/rollback
+unconfirmed scale or integration assumption
+contradiction between spec, plan, and code
 ```
 
-Modo completo/greenfield: o stress com `pelizzai-interview-me` é **OBRIGATÓRIO**, não uma oferta.
-Anuncie na linguagem do usuário ("vou te entrevistar para estressar este design e expor os pontos
-fracos antes de seguir") e conduza a entrevista. Toda nova decisão que pertence ao usuário volta como
-uma pergunta por vez, com recomendação. Cada lacuna é resolvida, explicitamente aceita ou convertida
-em tarefa de investigação antes de sair da borda de design.
+Full mode/greenfield: the stress with `pelizzai-interview-me` is **MANDATORY**, not an offer.
+Announce it in the user's language ("I'm going to interview you to stress-test this design and
+expose the weak points before moving on") and run the interview. Every new decision that belongs to
+the user comes back one question at a time, with a recommendation. Each gap is resolved, explicitly
+accepted, or converted into an investigation task before leaving the design edge.
 
-Modo compacto: faça uma passada curta de contraexemplos. Escale para entrevista somente se encontrar ambiguidade material.
+Compact mode: do a short counterexample pass. Escalate to an interview only if you find material ambiguity.
 
-Não exija stress duas vezes sobre as mesmas decisões. Writing Plans testa executabilidade do plano,
-sem reabrir o design aprovado salvo evidência nova.
+Do not require stress twice on the same decisions. Writing Plans tests the plan's executability
+without reopening the approved design absent new evidence.
 
-### 7. Aprovar na borda certa
+### 7. Approve at the right edge
 
-Apresente o design inteiro em tamanho proporcional e faça **uma pergunta de aprovação** na borda.
-Em greenfield/`standard`/`exploratory`, a spec é o artefato apresentado antes de qualquer plano ou
-implementação. O usuário aprova, pede ajuste ou dispensa explicitamente; a dispensa fica registrada.
+Present the whole design at proportional size and ask **one approval question** at the edge.
+In greenfield/`standard`/`exploratory`, the spec is the artifact presented before any plan or
+implementation. The user approves, requests an adjustment, or explicitly waives; the waiver is recorded.
 
-O usuário não precisa aprovar cada parágrafo, cada seam e depois o mesmo conteúdo na spec.
+The user does not need to approve every paragraph, every seam, and then the same content again in the spec.
 
-### 8. Persistir a spec
+### 8. Persist the spec
 
-A spec é o artefato-padrão de `standard`/`exploratory`; produza-a por default e use `templates/spec.md` na escala da lane (enxuta no `standard`, completa no `exploratory`). Pular a spec é decisão do usuário, registrada no state/execution record — nunca do classificador. Depois da aprovação:
+The spec is the default artifact of `standard`/`exploratory`; produce it by default and use `templates/spec.md` at the lane's scale (lean for `standard`, full for `exploratory`). Skipping the spec is the user's decision, recorded in the state/execution record — never the classifier's. After approval:
 
-- consumidor: salve em `pelizzai/specs/AAAA-MM-DD-<topico>-design.md` na task branch;
-- source mode: registre o design no plano/execution record nativo, sem criar `pelizzai/`, de forma verificável no record; ofereça materializar como arquivo no caminho nativo do repo quando o usuário quiser durabilidade;
-- arquivo versionado no repo-fonte só quando for um artefato explicitamente pedido, no caminho
-  nativo do projeto e depois do gate de primeira escrita.
+- consumer: save to `pelizzai/specs/YYYY-MM-DD-<topic>-design.md` on the task branch;
+- source mode: record the design in the native plan/execution record, without creating `pelizzai/`, verifiably in the record; offer to materialize it as a file at the repo's native path when the user wants durability;
+- a versioned file in the source repo only when it is an explicitly requested artifact, at the
+  project's native path, and after the first-write gate.
 
-Inclua somente conteúdo durável (ver `templates/spec.md`):
+Include only durable content (see `templates/spec.md`):
 
 ```text
-Objetivo e critérios de aceite
-Contexto/constraints relevantes
-Design e contratos
-Estados/falhas/segurança aplicáveis
+Goal and acceptance criteria
+Relevant context/constraints
+Design and contracts
+Applicable states/failures/security
 Testing & Validation Decisions
-Fora de escopo
-Decisões difíceis de reverter
+Out of scope
+Hard-to-reverse decisions
 ```
 
-Registre ADR apenas para decisão aprovada que seja difícil de reverter, surpreendente sem contexto e carregue trade-off real. A spec pode apontar para o ADR; não duplique a explicação inteira.
+Record an ADR only for an approved decision that is hard to reverse, surprising without context, and carries a real trade-off. The spec may point to the ADR; do not duplicate the whole explanation.
 
-Faça autoavaliação inline: placeholders, contradições, ambiguidade, scope creep e requisitos não verificáveis. Corrija o documento; não crie um ritual separado.
+Self-review inline: placeholders, contradictions, ambiguity, scope creep, and unverifiable requirements. Fix the document; do not create a separate ritual.
 
-### 9. Transição
+### 9. Transition
 
-- Fluxo normal: entregue a spec aprovada a `pelizzai-writing-plans`.
-- Projeto novo — checklist de fechamento da borda de design, cada passo obrigatório antes de sair do design:
-  1. Design aprovado → acione `pelizzai-audit` (Gate proativo de domain skills): proponha o conjunto para a stack decidida, com context7; a decisão é do usuário.
-  2. Crie somente as ratificadas e registre no catálogo/ledger.
-  3. Siga para `pelizzai-writing-plans` quando o pedido original inclui construir o produto; pare após design/bootstrap apenas quando esse era o escopo pedido.
+- Normal flow: hand the approved spec to `pelizzai-writing-plans`.
+- New project — design-edge closeout checklist, each step mandatory before leaving design:
+  1. Design approved → invoke `pelizzai-audit` (proactive domain skills gate): propose the set for the decided stack, with context7; the decision is the user's.
+  2. Create only the ratified ones and record them in the catalog/ledger.
+  3. Proceed to `pelizzai-writing-plans` when the original request includes building the product; stop after design/bootstrap only when that was the requested scope.
 
-## Protótipos
+## Prototypes
 
-Use `pelizzai-prototype` apenas quando uma pergunta de estado/lógica/forma visual não pode ser respondida economicamente por análise. O protótipo:
+Use `pelizzai-prototype` only when a state/logic/visual-form question cannot be answered economically by analysis. The prototype:
 
-- nasce na task branch ou em diretório efêmero ignorado;
-- responde uma pergunta explícita;
-- não recebe polish/abstração de produção;
-- é absorvido ou removido antes da validação final.
+- is born on the task branch or in an ignored ephemeral directory;
+- answers one explicit question;
+- gets no production polish/abstraction;
+- is absorbed or removed before final validation.
 
 ## Visual Companion
 
-Ofereça somente quando o usuário entenderá melhor vendo do que lendo. Exemplos: wireframes, layouts, diagramas ou comparações visuais. Não o use para escolhas textuais ou requisitos.
+Offer it only when the user will understand better by seeing than by reading. Examples: wireframes, layouts, diagrams, or visual comparisons. Do not use it for textual choices or requirements.
 
-Oferta curta:
+Short offer:
 
-> "Esta decisão fica mais clara visualmente. Quer que eu abra um companion com as opções?"
+> "This decision is clearer visually. Want me to open a companion with the options?"
 
-Se aceitar, leia [visual-companion.md](visual-companion.md), use apenas flags documentadas/testadas e encerre a sessão ao fechar a fase.
+If accepted, read [visual-companion.md](visual-companion.md), use only documented/tested flags, and stop the session when the phase closes.
 
-## Anti-padrões
+## Anti-patterns
 
 ```text
-- Brainstorming completo para feature bounded.
-- Tratar projeto greenfield como bounded porque a stack foi informada.
-- Repo scan completo sem pergunta concreta.
-- Pergunta cuja resposta já está no código/spec.
-- Sempre inventar três alternativas.
-- Fazer várias perguntas de descoberta no mesmo turno.
-- Oferecer uma recomendação e tratá-la como escolha do usuário.
-- Interview obrigatório em design de baixa incerteza.
-- Tratar o stress com `pelizzai-interview-me` como oferta opcional em greenfield/modo completo.
-- Implementar, scaffoldar ou "só adiantar" código antes da aprovação do design, alegando simplicidade.
-- Escrever spec/protótipo antes da task branch.
-- Usar frontend só como QA tardio em vez de overlay de design.
-- Reabrir decisão aprovada sem evidência nova.
-- Assumir em silêncio decisão de escopo/UX/arquitetura com lacuna material em vez de propor a descoberta.
-- Usar Context7 para inventar requisito, persona, regra de negócio ou critério de aceite.
-- Suprimir a spec de uma lane standard/exploratory sem dispensa explícita do usuário.
-- Fechar a borda de design em projeto novo sem apresentar a proposta de domain skills.
+- Full brainstorming for a bounded feature.
+- Treating a greenfield project as bounded because the stack was stated.
+- Full repo scan without a concrete question.
+- A question whose answer is already in the code/spec.
+- Always inventing three alternatives.
+- Asking several discovery questions in the same turn.
+- Offering a recommendation and treating it as the user's choice.
+- Mandatory interview on a low-uncertainty design.
+- Treating the stress with `pelizzai-interview-me` as an optional offer in greenfield/full mode.
+- Implementing, scaffolding, or "just getting a head start" on code before design approval, claiming simplicity.
+- Writing a spec/prototype before the task branch.
+- Using frontend only as late QA instead of as a design overlay.
+- Reopening an approved decision without new evidence.
+- Silently assuming a scope/UX/architecture decision with a material gap instead of proposing discovery.
+- Using Context7 to invent a requirement, persona, business rule, or acceptance criterion.
+- Suppressing the spec of a standard/exploratory lane without the user's explicit waiver.
+- Closing the design edge on a new project without presenting the domain skills proposal.
 ```
 
 ## Definition of Done
 
 ```text
-[ ] lacunas materiais foram expostas e cada uma está resolvida ou explicitamente aceita;
-[ ] modo completo/greenfield: o stress com `pelizzai-interview-me` aconteceu e o design foi aprovado
-    pelo usuário antes de qualquer ação de implementação;
-[ ] critérios de aceite e fora de escopo são verificáveis;
-[ ] overlays e estratégia de validação estão identificados;
-[ ] standard/exploratory: a spec proporcional foi produzida por default e apresentada na borda, ou
-    o usuário a dispensou explicitamente (dispensa registrada); consumidor salva na task branch,
-    source mode registra no execution record nativo sem runtime consumidor;
-[ ] projeto novo: a proposta de domain skills da stack foi apresentada na borda (Gate proativo da
-    `pelizzai-audit`) antes de seguir para o plano, e a decisão do usuário está registrada;
-[ ] a próxima skill recebe contexto suficiente sem repetir a entrevista.
+[ ] material gaps were exposed and each is resolved or explicitly accepted;
+[ ] full mode/greenfield: the stress with `pelizzai-interview-me` happened and the design was
+    approved by the user before any implementation action;
+[ ] acceptance criteria and out of scope are verifiable;
+[ ] overlays and validation strategy are identified;
+[ ] standard/exploratory: the proportional spec was produced by default and presented at the edge,
+    or the user explicitly waived it (waiver recorded); the consumer saves it on the task branch,
+    source mode records it in the native execution record without consumer runtime;
+[ ] new project: the stack's domain skills proposal was presented at the edge (the proactive gate
+    of `pelizzai-audit`) before proceeding to the plan, and the user's decision is recorded;
+[ ] the next skill receives enough context without repeating the interview.
 ```

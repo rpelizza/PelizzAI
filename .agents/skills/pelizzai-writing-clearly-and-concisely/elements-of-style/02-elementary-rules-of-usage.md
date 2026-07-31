@@ -1,232 +1,230 @@
-## II. Regras Elementares de Uso
+## II. Elementary Rules of Usage
 
-### Regra 1. Forme o possessivo no singular acrescentando 's.
+### Rule 1. Form the possessive singular of nouns by adding 's.
 
-> Nota de adaptação: esta regra é específica do inglês e **não se aplica ao português do Brasil**. Em português não existe possessivo com apóstrofo-s ('s); a posse se exprime com a preposição **de**, contraída ou não com o artigo (do, da, dos, das).
+Thus write:
 
-Portanto, escreva:
+John's car
 
-o carro de João
+the witch's malice
 
-a malícia da bruxa
+Burns's poems
 
-os poemas de Burns
+Do not drop the apostrophe (*Johns car*), and do not use the apostrophe where no possessive is meant. The pronominal possessives — *hers*, *its*, *theirs*, *yours*, *ours* — take no apostrophe; *it's* is the contraction of *it is*, never a possessive.
 
-Não escreva *o carro do João's*, *a bruxa's malícia* nem use o apóstrofo para indicar posse. O apóstrofo, em português, só aparece em casos muito restritos (elisões poéticas ou nomes estrangeiros preservados na grafia original), nunca como marca de genitivo.
+### Rule 2. In a series of three or more terms with a single conjunction, use a comma after each term except the last.
 
-### Regra 2. Em uma enumeração de três ou mais termos com uma única conjunção, separe os termos por vírgula, mas não use vírgula antes da conjunção final.
+The comma before the final *and* or *or* — the serial comma — makes clear that the last two terms are separate items. Thus write:
 
-Diferentemente do inglês, o português **não admite a vírgula antes do "e" ou do "ou" que fecha a enumeração** (a chamada *serial comma* é incorreta em pt-BR). Portanto, escreva:
+red, white, and blue
 
-vermelho, branco e azul
+gold, silver, or copper
 
-ouro, prata ou cobre
+He opened the letter, read it, and made a note of its contents.
 
-Ele abriu a carta, leu-a e anotou o conteúdo.
+> Adaptation note — cases where the comma before "and" does different work, marking a clause boundary or an emphatic pause rather than a series:
 
-> Nota de adaptação — exceções em que a vírgula antes do "e" é necessária em português:
+1. When *and* joins clauses with **different subjects**:
 
-1. Quando o "e" une orações de **sujeitos diferentes**:
+   *The guests arrived, and the party began.*
 
-   *Os convidados chegaram, e a festa começou.*
+2. When *and* carries **adversative** force (it amounts to *but*):
 
-2. Quando o "e" tem valor **adversativo** (equivale a "mas"):
+   *He studied hard, and he failed.*
 
-   *Estudou muito, e não foi aprovado.*
+3. In **polysyndeton**, that is, the emphatic repetition of the conjunction:
 
-3. Em **polissíndeto**, isto é, na repetição enfática da conjunção:
+   *And it rains, and it blows, and the lightning flashes.*
 
-   *E chove, e venta, e relampeja.*
+In these cases the comma marks a pause the sense demands; in a simple series, the comma before the final *and* is the ordinary serial comma required by the rule above.
 
-Nesses casos a vírgula marca uma pausa que o sentido exige; fora deles, a vírgula antes do "e" final de uma enumeração simples é um erro.
+### Rule 3. Enclose parenthetic (incidental) expressions between commas.
 
-### Regra 3. Isole as expressões explicativas (incidentais) entre vírgulas.
+The best way to see a country, unless you are pressed for time, is to travel on foot.
 
-A melhor maneira de conhecer um país, a menos que você esteja com pressa, é percorrê-lo a pé.
+This rule is difficult to apply; it is often hard to decide whether a single word, such as *however*, or a brief phrase, is or is not parenthetic. If the interruption to the flow of the sentence is only slight, the writer may safely omit the commas. But whether the interruption is slight or considerable, he must never insert one comma and omit the other. Punctuation such as:
 
-Esta regra é difícil de aplicar; muitas vezes é difícil decidir se uma palavra isolada, como *contudo*, ou uma expressão breve, é ou não incidental. Se a interrupção no fluxo da frase for muito pequena, o escritor pode omitir as vírgulas com segurança. Mas, seja a interrupção pequena ou considerável, ele nunca deve inserir uma vírgula e omitir a outra. Pontuações como:
+Marjorie's husband, Colonel Nelson paid us a visit yesterday,
 
-O marido de Marjorie, o coronel Nelson visitou-nos ontem,
+or:
 
-ou:
+My brother you will be pleased to hear, is now in perfect health,
 
-Meu irmão você ficará contente em saber, está agora com a saúde perfeita,
+is indefensible: the second comma that would close the parenthetic expression is missing.
 
-não se sustentam: falta a segunda vírgula que fecharia a expressão incidental.
+If a parenthetic expression is preceded by a conjunction, place the first comma before the conjunction, not after it.
 
-Se uma expressão incidental for precedida por uma conjunção, coloque a primeira vírgula antes da conjunção, não depois dela.
+He saw us coming, and unaware that we had learned of his treachery, greeted us with a smile.
 
-Ele nos viu chegar, e sem saber que havíamos descoberto sua traição, recebeu-nos com um sorriso.
+The following should always be regarded as parenthetic and set off between commas (or, at the end of the sentence, between a comma and the final period):
 
-Devem sempre ser consideradas incidentais e colocadas entre vírgulas (ou, no fim da frase, entre vírgula e ponto final) as seguintes formas:
+(1) the year, when it follows the day of the month:
 
-(1) o dia do mês, quando vem depois do dia da semana:
+from February to July, 1916.
 
-de fevereiro a julho de 1916.
+April 6, 1917.
 
-6 de abril de 1917.
+Monday, November 11, 1918.
 
-Segunda-feira, 11 de novembro de 1918.
+> Adaptation note: in the day-month-year style (6 April 1917), no comma sets off the year — the commas above belong to the month-day-year style. The comma separating the day of the week from the date that follows it, as in "Monday, November 11, 1918", is required in either style.
 
-> Nota de adaptação: o original isola também o **ano** dentro de uma data (formato inglês *April 6, 1917*, em que "1917" fica entre vírgulas). Em pt-BR isso não ocorre: o ano se liga ao mês pela preposição **de** e **não** é separado por vírgula — escreve-se "6 de abril de 1917", não "6 de abril, de 1917". A vírgula aparece apenas para separar o dia da semana da data que o segue, como em "Segunda-feira, 11 de novembro de 1918".
+(2) the abbreviations *etc.* and *jr.*
 
-(2) a abreviação *etc.* (Nota de adaptação: o original inclui aqui também *jr.*; isolar "Júnior" por vírgulas é convenção do inglês — em pt-BR "Júnior", "Filho" ou "Neto" integram o nome sem vírgula.)
+(3) **nonrestrictive relative clauses**, that is, those that do not serve to identify or define the antecedent noun, and similar clauses introduced by conjunctions indicating time or place.
 
-(3) as **orações relativas explicativas**, isto é, aquelas que não servem para identificar ou definir o substantivo antecedente, e orações semelhantes introduzidas por conjunções que indicam tempo ou lugar.
+The audience, which had at first been indifferent, became more and more interested.
 
-A plateia, que a princípio se mostrara indiferente, foi ficando cada vez mais interessada.
+In this sentence, the clause introduced by *which* does not serve to say which of several possible audiences is meant; the audience in question is presumed to be already known. The clause adds, by way of explanation, a piece of information that supplements the main clause. The sentence is, in effect, a combination of two statements that might have been made separately:
 
-Nesta frase, a oração introduzida por *que* não serve para dizer qual, entre várias plateias possíveis, está sendo mencionada; presume-se que a plateia em questão já seja conhecida. A oração acrescenta, de modo explicativo, uma informação que complementa a oração principal. A frase é, na prática, a combinação de duas afirmações que poderiam ter sido feitas separadamente:
+The audience was at first indifferent. It became more and more interested.
 
-A plateia a princípio se mostrara indiferente. Foi ficando cada vez mais interessada.
+> Adaptation note: in English the distinction between nonrestrictive and restrictive clauses is marked both by the punctuation and, usually, by the choice of pronoun: nonrestrictive clauses are set off by commas and typically introduced by *which*; restrictive clauses take no commas and are typically introduced by *that*. It is the punctuation that fixes the sense.
 
-> Nota de adaptação: em português, a distinção entre oração explicativa e restritiva é marcada **pela vírgula** (e, por vezes, pela escolha entre *que* e *o qual*), não por palavras diferentes como o *that/which* do inglês. A mesma palavra "que" introduz os dois tipos; é a pontuação que define o sentido.
+Compare the restrictive relative clause, **not set off by commas**, in the sentence:
 
-Compare com a oração relativa restritiva, **não isolada por vírgulas**, na frase:
+The candidate that best meets these requirements will get the position.
 
-O candidato que melhor atender a esses requisitos obterá a vaga.
+Here the clause introduced by *that* does serve to say which of several possible candidates is meant; the sentence cannot be split into two independent statements. Note that removing the commas changes the meaning: "The audience which had at first been indifferent..." would suggest that there was more than one audience.
 
-Aqui, a oração introduzida por *que* serve, sim, para dizer qual, entre vários candidatos possíveis, está sendo mencionado; a frase não pode ser dividida em duas afirmações independentes. Note que retirar as vírgulas muda o sentido: "A plateia que a princípio se mostrara indiferente..." passaria a sugerir que havia mais de uma plateia.
+The difference in punctuation in the two sentences below rests on the same principle:
 
-A diferença de pontuação nas duas frases a seguir se baseia no mesmo princípio:
+Nether Stowey, where Coleridge wrote *The Rime of the Ancient Mariner*, is a few miles from Bridgewater.
 
-Nether Stowey, onde Coleridge escreveu *A Balada do Velho Marinheiro*, fica a poucos quilômetros de Bridgewater.
+The day will come when you will admit your mistake.
 
-Chegará o dia em que você admitirá o seu erro.
+Nether Stowey is completely identified by its name; the statement about Coleridge is therefore supplementary and explanatory. The *day* mentioned is identified only by the clause that follows it, which is therefore restrictive.
 
-Nether Stowey é completamente identificado por seu nome; a afirmação sobre Coleridge é, portanto, suplementar e explicativa. O *dia* mencionado é identificado apenas pela oração que o segue, a qual é, portanto, restritiva.
+Similar in principle to the use of commas to enclose parenthetic expressions is the setting off, by commas, of dependent phrases or clauses that precede or follow the main clause of a sentence.
 
-Semelhante, em princípio, ao uso de vírgulas para isolar expressões incidentais é o isolamento, por vírgulas, de expressões ou orações dependentes que precedem ou seguem a oração principal de uma frase.
+Partly by hard fighting, partly by diplomatic skill, they enlarged their dominions to the east and rose to royal rank with the possession of Sicily, later exchanged for Sardinia.
 
-Em parte pela bravura nos combates, em parte pela habilidade diplomática, eles ampliaram seus domínios para o leste e ascenderam à dignidade real com a posse da Sicília, mais tarde trocada pela Sardenha.
+Other illustrations may be found in the sentences quoted under Rules 4, 5, 6, 7, 16, and 18.
 
-Outras ilustrações podem ser encontradas nas frases citadas nas Regras 4, 5, 6, 7, 16 e 18.
+The writer must take care not to set off independent clauses with commas: see Rule 5.
 
-O escritor deve tomar cuidado para não isolar orações independentes com vírgulas: veja a Regra 5.
+### Rule 4. Place a comma before a conjunction introducing a co-ordinate clause.
 
-### Regra 4. Use vírgula antes da conjunção que introduz uma oração coordenada.
+The early records of the city have disappeared, and the story of its first years can no longer be reconstructed.
 
-Os primeiros registros da cidade desapareceram, e a história de seus primeiros anos já não pode ser reconstituída.
+The situation is perilous, but there is still one chance of escape.
 
-A situação é perigosa, mas ainda há uma chance de escapar.
+> Adaptation note: the typical co-ordinating conjunctions in English are *and*, *but*, *for*, *or*, and *nor*. All of them take the comma when they introduce a full independent clause — including *and*, whatever the subjects of the two clauses.
 
-> Nota de adaptação: em português, as conjunções coordenativas típicas são **e, mas, pois, ou, nem**. As adversativas (mas, porém, contudo, todavia) levam vírgula antes; o **e** leva vírgula quando une orações de sujeitos diferentes ou tem valor adversativo (veja a Regra 2).
+Sentences of this type, isolated from their context, may seem to call for rewriting. Since they make complete sense by the time the comma is reached, the second clause has the appearance of an afterthought. Furthermore, *and* is the least specific of connectives. Used between independent clauses, it indicates only that a relation exists between them, without defining that relation. In the first example above, the relation is one of cause and consequence. The two sentences might be rewritten:
 
-Frases desse tipo, isoladas de seu contexto, podem parecer precisar de reescrita. Como já fazem sentido completo quando se chega à vírgula, a segunda oração tem aparência de acréscimo posterior. Além disso, *e* é o menos específico dos conectivos. Usado entre orações independentes, ele indica apenas que existe uma relação entre elas, sem definir essa relação. No primeiro exemplo acima, a relação é de causa e consequência. As duas frases poderiam ser reescritas:
+As the early records of the city have disappeared, the story of its first years can no longer be reconstructed.
 
-Como os primeiros registros da cidade desapareceram, a história de seus primeiros anos já não pode ser reconstituída.
+Although the situation is perilous, there is still one chance of escape.
 
-Embora a situação seja perigosa, ainda há uma chance de escapar.
+Or the subordinate clauses might be replaced by phrases:
 
-Ou as orações subordinadas poderiam ser substituídas por expressões:
+With the disappearance of the city's early records, the story of its first years can no longer be reconstructed.
 
-Com o desaparecimento dos primeiros registros da cidade, a história de seus primeiros anos já não pode ser reconstituída.
+In this perilous situation, there is still one chance of escape.
 
-Nesta situação perigosa, ainda há uma chance de escapar.
+But a writer may err by making his sentences too uniformly compact and periodic, and an occasional loose sentence keeps the style from becoming too formal and gives the reader a measure of relief. Loose sentences of the type first quoted are therefore common in easy, unaffected writing. Even so, the writer must take care not to build too many of his sentences on this pattern (see Rule 14).
 
-Mas um escritor pode errar ao tornar suas frases uniformemente compactas e periódicas demais, e um período solto ocasional impede que o estilo se torne formal demais e dá certo alívio ao leitor. Por isso, períodos soltos do tipo citado em primeiro lugar são comuns em uma escrita fácil, sem afetação. Ainda assim, o escritor deve tomar cuidado para não construir frases demais segundo esse padrão (veja a Regra 14).
+Two-part sentences of which the second part is introduced by *for* (in the sense of *because*), by *or*, or by *nor* likewise require a comma before the conjunction.
 
-Frases de duas partes em que a segunda parte é introduzida por *pois* (no sentido de *porque*), por *ou* ou por *nem* também exigem uma vírgula antes da conjunção.
+If the second part is introduced by an adverb, a semicolon, not a comma, is required (see Rule 5).
 
-Se a segunda parte for introduzida por um advérbio, exige-se ponto e vírgula, não vírgula (veja a Regra 5).
+> Adaptation note: connectives such as *so* and *yet* can function now as adverb, now as conjunction. The same holds for *therefore* (and for expressions like *for that reason* and *hence*): when such a word links two independent clauses as an adverb, it demands a semicolon, not a comma. See Rule 5.
 
-> Nota de adaptação: o inglês discute aqui conectivos ambíguos como *so* e *yet*, que podem funcionar ora como advérbio, ora como conjunção. O caso correspondente em português é a palavra **portanto** (e expressões como *por isso*, *logo*): quando ela liga duas orações independentes, comporta-se como advérbio e exige ponto e vírgula, não vírgula. Veja a Regra 5.
-
-| Original                                                                                  | Revisão                                                                                  |
+| Original                                                                                  | Revision                                                                                  |
 | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Eu nunca tinha estado naquele lugar antes, portanto tive dificuldade para me orientar.    | Como eu nunca tinha estado naquele lugar antes, tive dificuldade para me orientar.        |
+| I had never been in the place before, so I had difficulty in finding my way about.        | As I had never been in the place before, I had difficulty in finding my way about.        |
 
-Se uma oração dependente, ou uma expressão introdutória que precisa ser isolada por vírgula, preceder a segunda oração independente, não é necessária vírgula depois da conjunção.
+If a dependent clause, or an introductory phrase that must be set off by a comma, precedes the second independent clause, no comma is needed after the conjunction.
 
-A situação é perigosa, mas, se estivermos prontos para agir depressa, ainda há uma chance de escapar.
+The situation is perilous, but if we are prepared to act promptly, there is still one chance of escape.
 
-Quando o sujeito é o mesmo nas duas orações e é expresso apenas uma vez, a vírgula é necessária se o conectivo for *mas*. Se o conectivo for *e*, a vírgula deve ser omitida quando a relação entre as duas afirmações for próxima ou imediata.
+When the subject is the same for both clauses and is expressed only once, the comma is required if the connective is *but*. If the connective is *and*, the comma should be omitted when the relation between the two statements is close or immediate.
 
-Ouvi seus argumentos, mas continuo sem me convencer.
+I have heard his arguments, but am still unconvinced.
 
-Ele tem vários anos de experiência e é plenamente competente.
+He has had several years of experience and is thoroughly competent.
 
-### Regra 5. Não una orações independentes apenas com vírgula.
+### Rule 5. Do not join independent clauses with only a comma.
 
-Se duas ou mais orações, gramaticalmente completas e não unidas por uma conjunção, devem formar uma única frase composta, a marca de pontuação correta é o ponto e vírgula.
+If two or more clauses, grammatically complete and not joined by a conjunction, are to form a single compound sentence, the proper mark of punctuation is the semicolon.
 
-Os romances de Stevenson são divertidos; estão cheios de aventuras emocionantes.
+Stevenson's romances are entertaining; they are full of exciting adventures.
 
-São quase cinco e meia; não conseguiremos chegar à cidade antes de escurecer.
+It is nearly half past five; we cannot reach town before dark.
 
-> Nota de adaptação: a junção indevida de duas orações independentes por uma simples vírgula é o erro que se chama, em inglês, *comma splice*. Em português, o vício é igualmente real e tem o mesmo remédio: o ponto e vírgula ou o ponto final.
+> Adaptation note: joining two independent clauses with a bare comma is the error known as the comma splice. The remedy is the semicolon or the period.
 
-É, naturalmente, igualmente correto escrever os exemplos acima como duas frases cada, substituindo os pontos e vírgulas por pontos finais.
+It is, of course, equally correct to write each of the examples above as two sentences, replacing the semicolons with periods.
 
-Os romances de Stevenson são divertidos. Estão cheios de aventuras emocionantes.
+Stevenson's romances are entertaining. They are full of exciting adventures.
 
-São quase cinco e meia. Não conseguiremos chegar à cidade antes de escurecer.
+It is nearly half past five. We cannot reach town before dark.
 
-Se uma conjunção for inserida, a marca correta é a vírgula (Regra 4).
+If a conjunction is inserted, the proper mark is the comma (Rule 4).
 
-Os romances de Stevenson são divertidos, pois estão cheios de aventuras emocionantes.
+Stevenson's romances are entertaining, for they are full of exciting adventures.
 
-São quase cinco e meia, e não conseguiremos chegar à cidade antes de escurecer.
+It is nearly half past five, and we cannot reach town before dark.
 
-Uma comparação das três formas apresentadas acima mostra com clareza a vantagem da primeira. Ela é, ao menos nos exemplos dados, melhor do que a segunda, porque sugere a relação próxima entre as duas afirmações de um modo que a segunda não tenta fazer, e melhor do que a terceira, porque é mais breve e, portanto, mais enfática. De fato, pode-se dizer que esse modo simples de indicar a relação entre afirmações é um dos recursos mais úteis da composição. A relação, como acima, costuma ser de causa ou consequência.
+A comparison of the three forms given above shows clearly the advantage of the first. It is, at least in the examples given, better than the second, because it suggests the close relation between the two statements in a way the second does not attempt, and better than the third, because it is briefer and therefore more emphatic. Indeed, this simple method of indicating the relation between statements may be said to be one of the most useful devices of composition. The relation, as above, is usually one of cause or of consequence.
 
-Observe que, se a segunda oração for precedida por um advérbio, como *portanto*, *além disso*, *então*, *contudo* ou *assim*, e não por uma conjunção, o ponto e vírgula continua sendo necessário.
+Note that if the second clause is preceded by an adverb, such as *therefore*, *besides*, *then*, *however*, or *thus*, and not by a conjunction, the semicolon is still required.
 
-Duas exceções à regra podem ser admitidas. Se as orações forem muito curtas e semelhantes na forma, a vírgula geralmente é permitida:
+Two exceptions to the rule may be admitted. If the clauses are very short and alike in form, the comma is usually permissible:
 
-O homem propõe, Deus dispõe.
+Man proposes, God disposes.
 
-O portão se abriu, a ponte baixou, a grade foi içada.
+The gate was opened, the bridge was lowered, the portcullis was raised.
 
-Observe que, nesses exemplos, a relação não é de causa nem de consequência. Também na forma coloquial de expressão:
+Note that in these examples the relation is not one of cause or consequence. Also in the colloquial form of expression:
 
-Mal o reconheci, estava tão mudado,
+I hardly recognized him, he was so changed,
 
-usa-se vírgula, não ponto e vírgula. Mas essa forma de expressão é inadequada na escrita, exceto no diálogo de uma história ou peça, ou talvez em uma carta familiar.
+a comma, not a semicolon, is used. But this form of expression is unsuitable in writing, except in the dialogue of a story or play, or perhaps in a familiar letter.
 
-### Regra 6. Não divida uma frase em duas.
+### Rule 6. Do not break sentences in two.
 
-Em outras palavras, não use ponto final no lugar de vírgula.
+In other words, do not use periods for commas.
 
-Eu os conheci a bordo de um transatlântico há alguns anos. Voltando de Liverpool para Nova York.
+I met them aboard an ocean liner some years ago. Coming home from Liverpool to New York.
 
-Ele era um conversador interessante. Um homem que viajara o mundo inteiro e morara em meia dúzia de países.
+He was an interesting talker. A man who had traveled all over the world and lived in half a dozen countries.
 
-Em ambos os exemplos, o primeiro ponto final deve ser substituído por uma vírgula, e a palavra seguinte deve começar com letra minúscula.
+In both examples, the first period should be replaced by a comma, and the following word should begin with a small letter.
 
-É permitido fazer uma palavra ou expressão enfática cumprir a função de uma frase e pontuá-la de acordo:
+It is permissible to make an emphatic word or expression serve the purpose of a sentence and to punctuate it accordingly:
 
-Chamou de novo, e de novo. Nenhuma resposta.
+He called again, and again. No answer.
 
-O escritor, porém, deve ter certeza de que a ênfase se justifica e de que não será suspeito de ter cometido um simples erro de sintaxe ou pontuação.
+The writer must, however, be certain that the emphasis is warranted and that he will not be suspected of a mere blunder in syntax or punctuation.
 
-As Regras 3, 4, 5 e 6 cobrem os princípios mais importantes da pontuação das frases comuns; devem ser dominadas tão completamente que sua aplicação se torne natural.
+Rules 3, 4, 5, and 6 cover the most important principles in the punctuation of ordinary sentences; they should be mastered so thoroughly that their application becomes second nature.
 
-### Regra 7. Uma oração reduzida no início da frase deve referir-se ao sujeito gramatical.
+### Rule 7. A participial phrase at the beginning of a sentence must refer to the grammatical subject.
 
-> Nota de adaptação: o caso típico em português é a **oração reduzida de gerúndio** (e, em menor grau, a de particípio) usada no início da frase. Quando ela abre o período, seu sujeito subentendido deve ser o mesmo da oração principal; caso contrário, o gerúndio "fica solto" e a frase soa errada ou involuntariamente cômica.
+> Adaptation note: the typical offender is the dangling participle (and, less often, other dangling modifiers). When a participial phrase opens the sentence, its implied subject must be the subject of the main clause; otherwise the participle is left dangling and the sentence reads wrong or unintentionally comic.
 
-Caminhando devagar pela estrada, ele viu uma mulher acompanhada de duas crianças.
+Walking slowly down the road, he saw a woman accompanied by two children.
 
-O gerúndio *caminhando* refere-se ao sujeito da frase (ele), não à mulher. Se o escritor quiser fazê-lo referir-se à mulher, deve reescrever a frase:
+The word *walking* refers to the subject of the sentence (he), not to the woman. If the writer wants it to refer to the woman, he must recast the sentence:
 
-Ele viu uma mulher, acompanhada de duas crianças, que caminhava devagar pela estrada.
+He saw a woman, accompanied by two children, walking slowly down the road.
 
-Orações reduzidas de gerúndio ou de particípio precedidas por uma conjunção ou por uma preposição, substantivos em aposto, adjetivos e locuções adjetivas seguem a mesma regra quando iniciam a frase.
+Participial phrases preceded by a conjunction or by a preposition, nouns in apposition, adjectives, and adjective phrases come under the same rule when they begin the sentence.
 
-| Original                                                                | Revisão                                                                            |
+| Original                                                                | Revision                                                                           |
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Ao chegar a Chicago, seus amigos o esperavam na estação.                | Quando ele chegou a Chicago, seus amigos o esperavam na estação.                  |
-| Soldado de comprovada bravura, confiaram-lhe a defesa da cidade.        | Soldado de comprovada bravura, ele recebeu a incumbência de defender a cidade.    |
-| Jovem e inexperiente, a tarefa me pareceu fácil.                        | Jovem e inexperiente, achei a tarefa fácil.                                       |
-| Sem um amigo que o aconselhasse, a tentação se mostrou irresistível.    | Sem um amigo que o aconselhasse, ele achou a tentação irresistível.              |
+| On arriving in Chicago, his friends met him at the station.             | When he arrived in Chicago, his friends met him at the station.                   |
+| A soldier of proved valor, they entrusted him with the defense of the city. | A soldier of proved valor, he was entrusted with the defense of the city.     |
+| Young and inexperienced, the task seemed easy to me.                    | Young and inexperienced, I thought the task easy.                                 |
+| Without a friend to counsel him, the temptation proved irresistible.    | Without a friend to counsel him, he found the temptation irresistible.            |
 
-Frases que violam esta regra muitas vezes ficam ridículas.
+Sentences that violate this rule are often ridiculous.
 
-Estando em péssimo estado de conservação, consegui comprar a casa muito barato.
+Being in a dilapidated condition, I was able to buy the house very cheap.
 
-(quem estava em péssimo estado: a casa, não quem comprou)
+(it was the house, not the buyer, that was dilapidated)
 
-Imaginando sem saber o que fazer em seguida, o relógio bateu meia-noite.
+Wondering irresolutely what to do next, the clock struck midnight.
 
-(o relógio não imagina nada; o gerúndio ficou solto)
+(the clock wonders nothing; the participle is left dangling)

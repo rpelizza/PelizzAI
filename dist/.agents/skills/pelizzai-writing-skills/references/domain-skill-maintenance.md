@@ -1,138 +1,143 @@
-# Manutenção de skills de domínio — mecânica detalhada
+# Domain-skill maintenance — detailed mechanics
 
-Como o PelizzAI mantém as skills de domínio vivas conforme o projeto evolui, com hook opt-in
-somente quando o projeto o autorizou. Este documento descreve a manutenção **proativa**: a detecção
-e a proposta. Uma edição pedida explicitamente pelo usuário dispensa a proposta de cadência, mas
-**não** dispensa a trava anti-sobrescrita — ler a skill atual, mudar só o necessário e mostrar o
-diff antes de gravar vale nos dois casos.
+How PelizzAI keeps domain skills alive as the project evolves, with an opt-in hook only when the
+project has authorized it. This document describes **proactive** maintenance: detection and
+proposal. An edit explicitly requested by the user skips the cadence proposal but does **not**
+skip the anti-overwrite lock — reading the current skill, changing only what is needed, and
+showing the diff before writing applies in both cases.
 
-## Os três eixos de manutenção
+## The three maintenance axes
 
-Dois eixos **atualizam** skills que já existem; um eixo **cria** a primeira skill de uma stack recém-adotada.
+Two axes **update** skills that already exist; one axis **creates** the first skill for a newly adopted stack.
 
-| Eixo                | Disparo                                                              | Ação                                                              |
-| ------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| **Version-driven**  | A versão maior de um item do Stack baseline mudou nos manifests      | Reler a doc da versão atual (`context7`) e **atualizar** a skill existente (refresh) |
-| **Rework-driven**   | O mesmo ajuste foi feito à mão várias vezes no histórico do git      | O padrão repetido vira uma **regra** dentro da skill existente    |
-| **Adoption-driven** | A tarefa adotou dependência/serviço significativo AINDA NÃO coberto por skill do catálogo (top-level novo nos manifests/lockfiles, ausente do Stack baseline de `pelizzai/profile.md` E do catálogo) | **PROPOR CRIAR** a primeira skill dessa stack, fundamentada em context7 ou documentação oficial atual da versão travada — não apenas atualizar |
+| Axis                | Trigger                                                              | Action                                                            |
+| ------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| **Version-driven**  | The major version of a Stack baseline item changed in the manifests   | Re-read the current version's docs (`context7`) and **update** the existing skill (refresh) |
+| **Rework-driven**   | The same fix was made by hand several times in git history            | The repeated pattern becomes a **rule** inside the existing skill |
+| **Adoption-driven** | The task adopted a significant dependency/service NOT YET covered by a catalog skill (new top-level in the manifests/lockfiles, absent from the Stack baseline in `pelizzai/profile.md` AND from the catalog) | **PROPOSE CREATING** the first skill for that stack, grounded in context7 or current official documentation for the pinned version — not just updating |
 
-Os três são **opt-in**: o harness detecta, **propõe**, o usuário decide. Nunca rodam sozinhos.
+All three are **opt-in**: the harness detects, **proposes**, the user decides. They never run on their own.
 
 ### Version-driven (refresh)
 
 ```text
-1. Detecte o drift: compare as versões atuais (manifests, lockfiles) com as registradas no ledger/skill e com o **Stack baseline** de `pelizzai/profile.md` (gravado no bootstrap pela `pelizzai-audit`).
-2. Releia a doc da versão atual via `context7` (sem ele, documentação oficial atual — nunca memória).
-3. Atualize a skill afetada em modo refresh (ver "Refresh nunca sobrescreve às cegas").
-4. Registre no ledger (eixo = version-driven, novo commit/ref, data).
+1. Detect the drift: compare the current versions (manifests, lockfiles) against the ones recorded in the ledger/skill and against the **Stack baseline** in `pelizzai/profile.md` (written at bootstrap by `pelizzai-audit`).
+2. Re-read the current version's docs via `context7` (without it, current official documentation — never memory).
+3. Update the affected skill in refresh mode (see "Refresh never overwrites blindly").
+4. Record in the ledger (axis = version-driven, new commit/ref, date).
 ```
 
-### Adoption-driven (criar do manifest)
+### Adoption-driven (create from the manifest)
 
-Version-driven e rework-driven só **atualizam** o que já existe. Adoption-driven é o único eixo que **cria** fora do bootstrap: ele acompanha a evolução real da stack entre um repo-scan e outro, criando a primeira skill de uma tecnologia que entrou depois. Só dispara quando uma stack nova, significativa e não coberta entra no projeto.
+Version-driven and rework-driven only **update** what already exists. Adoption-driven is the only axis that **creates** outside bootstrap: it tracks the stack's real evolution between one repo-scan and the next, creating the first skill for a technology that arrived later. It only fires when a new, significant, uncovered stack enters the project.
 
 ```text
-1. Detecte a adoção: o diff dos manifests/lockfiles desde `last-review` mostra um top-level novo,
-   ausente do **Stack baseline** de `pelizzai/profile.md` E do catálogo `pelizzai/domain-skills.md`.
-2. Filtre por alavancagem: só proponha para tecnologia externa significativa (framework, ORM/dados,
-   auth, pagamentos, fila/infra sensível). Utilitário trivial não vira skill — o filtro aqui é
-   alavancagem real, não escassez.
-3. No FECHAMENTO da tarefa (nudge read-only da `pelizzai-finish-task`), apresente UMA proposta
-   agrupada — nunca um gate por tarefa: "A tarefa adotou <lib@versão do lockfile>, sem domain skill
-   cobrindo. Criar uma agora, fundamentada em context7 ou documentação oficial atual?
-   [criar · adiar · não criar]". Recomendado: "criar" para libs de alta alavancagem; "adiar" para utilitário.
-4. Só após "sim": crie UMA skill (mini bootstrap-write de uma skill) reutilizando o motor de autoria,
-   fundamentada em context7 ou documentação oficial atual da versão travada — sem doc atual disponível,
-   adie (nunca invente de memória). Catalogue e registre no ledger com eixo = adoption-driven.
+1. Detect the adoption: the manifests/lockfiles diff since `last-review` shows a new top-level,
+   absent from the **Stack baseline** in `pelizzai/profile.md` AND from the catalog
+   `pelizzai/domain-skills.md`.
+2. Filter by leverage: only propose for significant external technology (framework, ORM/data,
+   auth, payments, queue/sensitive infra). A trivial utility does not become a skill — the filter
+   here is real leverage, not scarcity.
+3. At the task's CLOSEOUT (read-only nudge from `pelizzai-finish-task`), present ONE grouped
+   proposal — never a per-task gate: "The task adopted <lib@lockfile version>, with no domain
+   skill covering it. Create one now, grounded in context7 or current official documentation?
+   [create · defer · don't create]". Recommended: "create" for high-leverage libs; "defer" for a
+   utility.
+4. Only after a "yes": create ONE skill (a mini bootstrap-write of one skill) reusing the
+   authoring engine, grounded in context7 or current official documentation for the pinned
+   version — with no current docs available, defer (never invent from memory). Catalog it and
+   record it in the ledger with axis = adoption-driven.
 ```
 
-As lacunas de cobertura sinalizadas durante o consumo (execução inline/subagents/time que toca uma stack sem skill cobrindo) alimentam este eixo: são coletadas e viram UMA proposta agrupada no fechamento, jamais uma criação no meio da tarefa. A detecção do drift/adoção é automática (a inteligência permanece); a escrita da skill exige "sim" e nunca sobrescreve às cegas — o mesmo `propor → confirmar → aplicar → registrar` dos outros eixos.
+Coverage gaps flagged during consumption (inline/subagents/team execution touching a stack with no covering skill) feed this axis: they are collected and become ONE grouped proposal at closeout, never a mid-task creation. Drift/adoption detection is automatic (the intelligence stays); writing the skill requires a "yes" and never overwrites blindly — the same `propose → confirm → apply → record` as the other axes.
 
-### Rework-driven (aprender com o histórico)
+### Rework-driven (learning from history)
 
-O histórico do git é evidência do que o harness fez bem e do que exigiu retrabalho manual.
+Git history is evidence of what the harness did well and of what required manual rework.
 
 ```text
-1. Delimite a janela: do `last-review` do ledger até HEAD (git log --since="<last-review>").
-2. Procure padrões: o mesmo tipo de correção feito à mão repetidas vezes; convenções que o time
-   aplicou consistentemente; erros que se repetem.
-3. Para cada padrão recorrente, proponha transformá-lo em regra dentro da skill de domínio relevante.
-4. Confirme com o usuário, aplique (refresh) e registre no ledger.
+1. Bound the window: from the ledger's `last-review` to HEAD (git log --since="<last-review>").
+2. Look for patterns: the same kind of fix made by hand repeatedly; conventions the team applied
+   consistently; errors that repeat.
+3. For each recurring pattern, propose turning it into a rule inside the relevant domain skill.
+4. Confirm with the user, apply (refresh), and record in the ledger.
 ```
 
-## Refresh nunca sobrescreve às cegas
+## Refresh never overwrites blindly
 
-Regra inegociável ao atualizar uma skill **existente**:
+Non-negotiable rule when updating an **existing** skill:
 
 ```text
-- LEIA a skill atual antes de qualquer mudança.
-- Mude SÓ o que a nova versão/padrão exige.
-- PRESERVE as customizações que o projeto adicionou (não recrie do zero por cima).
-- MOSTRE o diff ao usuário ANTES de gravar.
-- Aprovação é POR skill — nunca em lote, nunca herdada do "sim" dado a outra skill.
-  Sem confirmação, não grava.
+- READ the current skill before any change.
+- Change ONLY what the new version/pattern requires.
+- PRESERVE the customizations the project added (do not recreate from scratch on top).
+- SHOW the diff to the user BEFORE writing.
+- Approval is PER skill — never in bulk, never inherited from the "yes" given to another skill.
+  Without confirmation, nothing is written.
 ```
 
-Recriar uma skill do zero por cima de uma existente apaga customizações e é proibido. O fluxo é
-sempre **propor → confirmar → aplicar → registrar**. Não existe modo "mãos livres" (foi tentado no
-harness anterior e reprovou em campo). Numa edição que o usuário já pediu, a proposta É o diff:
-mostre-o antes de gravar, no escopo pedido, sem reabrir a autorização que ele acabou de dar.
+Recreating a skill from scratch on top of an existing one erases customizations and is forbidden.
+The flow is always **propose → confirm → apply → record**. There is no "hands-free" mode (it was
+tried in the previous harness and failed in the field). In an edit the user already requested, the
+proposal IS the diff: show it before writing, within the requested scope, without reopening the
+authorization they just gave.
 
-## Cadência (gatilhos)
+## Cadence (triggers)
 
-Modelo **híbrido**: núcleo portável na skill + hook de reforço no Claude Code.
+**Hybrid** model: portable core in the skill + reinforcement hook in Claude Code.
 
-### Núcleo portável (ao fechar a tarefa)
+### Portable core (when closing the task)
 
-Vale nos roots de skill ativos (`.claude`/`.agents`); Cursor é apenas adaptador. Este bloco é o
-**disparo primário** da cadência: a `pelizzai-finish-task` o consome no nudge read-only do
-fechamento (§5), um marco natural que não interrompe o fluxo nem bloqueia a entrega. O hook
-(Claude Code) é apenas rede de segurança, a cada 10 interações. Ao concluir uma tarefa que mexeu
-em código:
+Applies in the active skill roots (`.claude`/`.agents`); Cursor is just an adapter. This block is
+the cadence's **primary trigger**: `pelizzai-finish-task` consumes it in the closeout's read-only
+nudge (§5), a natural milestone that neither interrupts the flow nor blocks delivery. The hook
+(Claude Code) is only a safety net, every 10 interactions. When completing a task that touched
+code:
 
 ```bash
-# datas do ledger — parsing ANCORADO no rótulo (robusto à ordem das linhas; lê as DUAS datas)
+# ledger dates — parsing ANCHORED on the label (robust to line order; reads BOTH dates)
 last_review=$(grep -oE 'last-review:[^0-9]*[0-9]{4}-[0-9]{2}-[0-9]{2}' pelizzai/data/review-domain-skills.md | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | head -1)
 last_full_scan=$(grep -oE 'last-full-scan:[^0-9]*[0-9]{4}-[0-9]{2}-[0-9]{2}' pelizzai/data/review-domain-skills.md | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | head -1)
-# commits desde a última revisão
+# commits since the last review
 count=$(git rev-list --count --since="$last_review 00:00" HEAD 2>/dev/null || echo 0)
 ```
 
-> Comandos em sh/Bash; em frota sem POSIX (ex.: só PowerShell), use o equivalente — o hook `.ps1` já implementa a mesma leitura por rótulo.
+> Commands in sh/Bash; in a fleet without POSIX (e.g. PowerShell only), use the equivalent — the `.ps1` hook already implements the same label-anchored read.
 
 ```text
-- Limiar de revisão: count >= 10 commits OU passaram-se > 10 dias desde last_review.
-  O eixo de DIAS é a âncora (cadência curta e previsível); os commits só ANTECIPAM
-  o nudge quando há um burst real de trabalho. Cadência deliberadamente curta: o feedback
-  de campo mostrou que limiares longos deixavam as skills de domínio envelhecerem sem aviso —
-  melhor lembrar cedo (advisory, uma vez, com snooze) do que tarde demais.
-- Cruzou o limiar → proponha UMA vez:
-  "Acumulamos <count> commits / <dias> dias desde a última revisão de skills de domínio.
-   Posso rodar a manutenção (pelizzai-writing-skills) agora? Seguir agora ou deixar para depois?"
-- Abaixo do limiar → não diga nada e finalize.
-- "Avisa uma vez, nunca bloqueia." Se o usuário adiar, não repita na mesma sessão nem
-  nos próximos ~7 dias (o hook persiste essa janela de supressão; ver abaixo).
+- Review threshold: count >= 10 commits OR > 10 days have passed since last_review.
+  The DAYS axis is the anchor (a short, predictable cadence); commits only BRING FORWARD
+  the nudge when there is a real burst of work. The cadence is deliberately short: field
+  feedback showed that long thresholds let domain skills age without warning — better to
+  remind early (advisory, once, with snooze) than too late.
+- Threshold crossed → propose ONCE:
+  "We have accumulated <count> commits / <days> days since the last domain-skill review.
+   May I run maintenance (pelizzai-writing-skills) now? Proceed now or leave it for later?"
+- Below the threshold → say nothing and finish.
+- "Warn once, never block." If the user defers, do not repeat it in the same session nor
+  for the next ~7 days (the hook persists that suppression window; see below).
 ```
 
-Repo-scan completo: se passaram > 15 dias desde `last-full-scan`, proponha um re-scan amplo (reusando a `pelizzai-audit`) e atualize as skills impactadas.
+Full repo-scan: if > 15 days have passed since `last-full-scan`, propose a broad re-scan (reusing `pelizzai-audit`) and update the impacted skills.
 
-### Hook de reforço (a cada 10 interações — só Claude Code)
+### Reinforcement hook (every 10 interactions — Claude Code only)
 
-O hook `.claude/hooks/pelizzai-cadence.mjs` é um `UserPromptSubmit` que conta interações e, a cada 10, checa o delta do git; se o limiar for cruzado, injeta um lembrete curto. Os limiares são os mesmos do núcleo portável (10 commits / 10 dias de revisão / 15 dias de full-scan). Características de segurança:
+The hook `.claude/hooks/pelizzai-cadence.mjs` is a `UserPromptSubmit` that counts interactions and, every 10, checks the git delta; if the threshold is crossed, it injects a short reminder. The thresholds are the same as the portable core's (10 commits / 10 review days / 15 full-scan days). Safety characteristics:
 
 ```text
-- No-op silencioso se não houver ledger (harness ainda não inicializado neste projeto).
-- Só faz a checagem cara (git) a cada 10ª interação; nas demais, só incrementa o contador.
-- SEMPRE termina com exit 0 (nunca bloqueia o prompt do usuário).
-- Engole qualquer erro (git ausente, etc.) sem ruído.
-- Supressão: após emitir um lembrete, silencia por 7 dias (grava `snoozeUntil` no
-  .cadence-state.json) — não repete a cada janela enquanto o limiar continua cruzado.
-- O estado é retrocompatível: um `.cadence-state.json` antigo (só `{count}`) continua válido.
+- Silent no-op if there is no ledger (harness not yet initialized in this project).
+- Only does the expensive check (git) on every 10th interaction; on the others, it only
+  increments the counter.
+- ALWAYS ends with exit 0 (never blocks the user's prompt).
+- Swallows any error (missing git, etc.) without noise.
+- Suppression: after emitting a reminder, it goes silent for 7 days (writes `snoozeUntil` to
+  .cadence-state.json) — it does not repeat every window while the threshold stays crossed.
+- The state is backward-compatible: an old `.cadence-state.json` (just `{count}`) remains valid.
 ```
 
-> **Amostragem ≠ frequência do nudge.** `EVERY=10` decide de quanto em quanto o hook OLHA; quem decide se o nudge APARECE são os limiares (10 commits / 10 dias) + a supressão de 7 dias. Não suba `EVERY` a valores altos (ex.: 100): isso cega o hook em sessões curtas, sem reduzir a frequência real do aviso (que já é governada pelos limiares e pelo snooze).
+> **Sampling ≠ nudge frequency.** `EVERY=10` decides how often the hook LOOKS; whether the nudge APPEARS is decided by the thresholds (10 commits / 10 days) + the 7-day suppression. Do not raise `EVERY` to high values (e.g. 100): that blinds the hook in short sessions without reducing the real warning frequency (already governed by the thresholds and the snooze).
 
-Entrada no `settings.json` (instalada no bootstrap, com confirmação — opt-in):
+Entry in `settings.json` (installed at bootstrap, with confirmation — opt-in):
 
 ```json
 {
@@ -148,26 +153,27 @@ Entrada no `settings.json` (instalada no bootstrap, com confirmação — opt-in
 }
 ```
 
-**Quem instala (opt-in):** no bootstrap, a `pelizzai-writing-skills` **propõe** a instalação; se o usuário aceitar, ela **mescla** a entrada em `.claude/settings.json` preservando hooks e permissões já existentes (fazer merge, **nunca** sobrescrever o arquivo). No Claude Code, a skill `update-config` pode realizar essa edição. Acrescente também `pelizzai/data/.cadence-state.json` ao `.gitignore` — é estado mutável (muda a cada interação) e não deve ser versionado.
+**Who installs it (opt-in):** at bootstrap, `pelizzai-writing-skills` **proposes** the installation; if the user accepts, it **merges** the entry into `.claude/settings.json`, preserving existing hooks and permissions (merge, **never** overwrite the file). In Claude Code, the `update-config` skill can perform this edit. Also add `pelizzai/data/.cadence-state.json` to `.gitignore` — it is mutable state (changes on every interaction) and must not be versioned.
 
-**Variante sem Node:** em frota sem Node, use o hook PowerShell `.claude/hooks/pelizzai-cadence.ps1` (requer pwsh 7+), com o command `pwsh -NoProfile -File "${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-cadence.ps1"`.
+**No-Node variant:** in a fleet without Node, use the PowerShell hook `.claude/hooks/pelizzai-cadence.ps1` (requires pwsh 7+), with the command `pwsh -NoProfile -File "${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-cadence.ps1"`.
 
-**Pressuposto:** o hook localiza o ledger pelo `cwd` e assume `pelizzai/` na raiz do projeto (convenção do harness; em monorepo/workspace, o `pelizzai/` é root-level).
+**Assumption:** the hook locates the ledger from the `cwd` and assumes `pelizzai/` at the project root (harness convention; in a monorepo/workspace, `pelizzai/` is root-level).
 
-> Por que opt-in, e não ligado por padrão: um hook `UserPromptSubmit` ruidoso já "quebrou o fluxo" em harness anterior. O **núcleo portável** (na skill) é a fonte de verdade; o hook é só reforço no Claude Code.
+> Why opt-in rather than on by default: a noisy `UserPromptSubmit` hook already "broke the flow" in a previous harness. The **portable core** (in the skill) is the source of truth; the hook is only reinforcement in Claude Code.
 
-## Seeding e atualização do ledger
+## Seeding and ledger updates
 
 ```text
-- Semeie `last-review` e `last-full-scan` com a DATA DO BOOTSTRAP (hoje) — NÃO com a do 1º commit.
-  O bootstrap acabou de criar as skills de domínio a partir do repo-scan do HEAD atual: elas são
-  a "primeira revisão", então a última revisão é agora. Semear com o 1º commit de um repo maduro
-  faz `daysReview`/`commits` já nascerem estourados → um nudge espúrio na primeira tarefa, sobre
-  skills recém-criadas. `count=0` no dia do bootstrap é o correto (sobe conforme novos commits).
-  (Em repo novo sem commits, a data de hoje já era o valor usado — agora vale para os dois casos.)
-- A cada criação/refresh de skill de domínio, atualize a linha da skill no ledger
-  (data, último commit/ref, eixo) e o `## Log`.
-- Após uma revisão de manutenção, atualize `last-review` para a data da revisão.
+- Seed `last-review` and `last-full-scan` with the BOOTSTRAP DATE (today) — NOT with the 1st
+  commit's. The bootstrap just created the domain skills from the repo-scan of the current HEAD:
+  they are the "first review", so the last review is now. Seeding with a mature repo's 1st commit
+  makes `daysReview`/`commits` born already past the threshold → a spurious nudge on the first
+  task, about freshly created skills. `count=0` on bootstrap day is correct (it climbs as new
+  commits arrive). (In a new repo with no commits, today's date was already the value used — now
+  it applies to both cases.)
+- On every domain-skill creation/refresh, update the skill's row in the ledger
+  (date, last commit/ref, axis) and the `## Log`.
+- After a maintenance review, update `last-review` to the review date.
 ```
 
-Formato do ledger e do catálogo: ver `templates/review-domain-skills.md` e `templates/domain-skills.md`.
+Ledger and catalog format: see `templates/review-domain-skills.md` and `templates/domain-skills.md`.

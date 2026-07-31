@@ -1,741 +1,741 @@
 # Debugging Evals
 
-## Objetivo
+## Objective
 
-Este arquivo avalia se a skill [pelizzai-reasoning](../SKILL.md) conduz debugging e investigação de incidentes de forma confiável.
+This file evaluates whether the [pelizzai-reasoning](../SKILL.md) skill drives debugging and incident investigation reliably.
 
-O agente deve ser capaz de:
-
-```text
-- reconhecer quando um erro é direto e quando exige investigação;
-- diferenciar sintoma, causa imediata, causa raiz e fatores contribuintes;
-- preservar evidência mínima antes de contenção e coletar evidência diagnóstica antes do fix definitivo;
-- formular uma ou mais hipóteses conforme a incerteza, sem quantidade ritual;
-- selecionar testes e observações com alto valor informacional;
-- evitar conclusões baseadas em correlação, memória ou primeira impressão;
-- aplicar contenção proporcional quando houver impacto ativo;
-- corrigir mecanismo causal, não apenas sintoma;
-- validar cenário original, regressões e prevenção de recorrência.
-```
-
-Este eval não mede apenas se o agente encontrou uma resposta plausível. Mede se o processo de investigação foi seguro, verificável e proporcional ao risco.
-
-## Técnicas avaliadas
-
-| Técnica                                                             | Uso esperado                                                |
-| ------------------------------------------------------------------- | ----------------------------------------------------------- |
-| [ReAct](../techniques/react.md)                                     | Inspecionar, testar, observar e atualizar hipóteses         |
-| [Root Cause Analysis](../techniques/root-cause-analysis.md)         | Investigar incidentes, recorrência e causas estruturais     |
-| [Evidence Synthesis](../techniques/evidence-synthesis.md)           | Combinar logs, código, testes, métricas e documentação      |
-| [Assumption Tracking](../techniques/assumption-tracking.md)         | Registrar hipóteses e premissas ainda abertas               |
-| [Verification](../techniques/verification.md)                       | Confirmar causa e validar correção                          |
-| [Critique and Refine](../techniques/critique-and-refine.md)         | Ajustar correção após falha, review ou regressão            |
-| [Constraint Satisfaction](../techniques/constraint-satisfaction.md) | Preservar contratos legados e requisitos de compatibilidade |
-| [Decision Making](../techniques/decision-making.md)                 | Escolher contenção reversível sob dano ativo                 |
-
-## Protocolo de avaliação
-
-O agente deve responder ao cenário com uma estratégia compacta, sem expor cadeia de pensamento detalhada.
-
-Formato esperado:
+The agent must be able to:
 
 ```text
-Classificação:
-- Tipo: bug direto, bug multi-camada, incidente, regressão ou diagnóstico de ambiente.
-- Impacto:
-- Escopo:
-- Urgência:
-- Técnica principal:
-- Técnicas auxiliares:
-
-Fatos confirmados:
-- [somente observações diretas]
-
-Hipóteses relevantes (omita pluralidade quando a causa direta já estiver provada):
-1. [hipótese]
-   - Evidência necessária:
-   - Próxima validação:
-   - Critério de descarte:
-
-Ação imediata:
-- [contenção, investigação, correção direta, rollback ou nenhuma]
-
-Correção esperada:
-- [somente após confirmação suficiente]
-
-Validação:
-- [cenário original, regressões e observabilidade]
+- recognize when an error is direct and when it demands investigation;
+- differentiate symptom, immediate cause, root cause, and contributing factors;
+- preserve minimal evidence before containment and collect diagnostic evidence before the definitive fix;
+- formulate one or more hypotheses according to the uncertainty, with no ritual quantity;
+- select tests and observations with high informational value;
+- avoid conclusions based on correlation, memory, or first impression;
+- apply proportional containment when there is active impact;
+- fix the causal mechanism, not just the symptom;
+- validate the original scenario, regressions, and recurrence prevention.
 ```
 
-Não é obrigatório listar todas as hipóteses possíveis. O agente deve priorizar as materialmente plausíveis.
+This eval does not merely measure whether the agent found a plausible answer. It measures whether the investigation process was safe, verifiable, and proportional to the risk.
 
-## Rubrica
+## Techniques evaluated
 
-Cada cenário vale 10 pontos.
+| Technique                                                           | Expected use                                              |
+| ------------------------------------------------------------------- | --------------------------------------------------------- |
+| [ReAct](../techniques/react.md)                                     | Inspect, test, observe, and update hypotheses             |
+| [Root Cause Analysis](../techniques/root-cause-analysis.md)         | Investigate incidents, recurrence, and structural causes  |
+| [Evidence Synthesis](../techniques/evidence-synthesis.md)           | Combine logs, code, tests, metrics, and documentation     |
+| [Assumption Tracking](../techniques/assumption-tracking.md)         | Record hypotheses and still-open assumptions              |
+| [Verification](../techniques/verification.md)                       | Confirm the cause and validate the fix                    |
+| [Critique and Refine](../techniques/critique-and-refine.md)         | Adjust the fix after a failure, review, or regression     |
+| [Constraint Satisfaction](../techniques/constraint-satisfaction.md) | Preserve legacy contracts and compatibility requirements  |
+| [Decision Making](../techniques/decision-making.md)                 | Choose reversible containment under active damage         |
 
-| Critério      | Pontos | Descrição                                                       |
-| ------------- | -----: | --------------------------------------------------------------- |
-| Classificação |      1 | Distingue erro simples, bug estrutural, incidente ou regressão  |
-| Evidências    |      2 | Separa fatos observados de suposições e busca fontes adequadas  |
-| Hipóteses     |      2 | Usa quantidade proporcional e critérios de confirmação/descarte |
-| Próxima ação  |      1 | Escolhe contenção, investigação ou correção direta proporcional |
-| Correção      |      2 | Ataca mecanismo causal, não apenas sintoma                      |
-| Validação     |      2 | Inclui reprodução, testes relacionados e prevenção de regressão |
+## Evaluation protocol
 
-### Falhas graves
+The agent must answer the scenario with a compact strategy, without exposing detailed chain of thought.
 
-As falhas graves globais (assumir causa raiz sem evidência, alterar produção por tentativa e erro, workaround temporal como correção, ignorar contenção sob impacto ativo, corrigir só o frontend sob risco estrutural, expor segredos etc.) estão catalogadas no índice de evals — ver [README.md](README.md). Acionar qualquer uma delas limita o cenário a no máximo 3 pontos.
-
-## Critérios globais de aprovação
-
-A implementação passa neste conjunto quando:
+Expected format:
 
 ```text
-- Média geral mínima: 8,0 / 10.
-- Nenhuma falha grave nos cenários de produção, segurança, duplicidade ou perda de dados.
-- Em pelo menos 85% dos cenários multi-camada, o agente distingue sintoma de causa provável.
-- Em pelo menos 80% dos cenários, a correção proposta inclui validação de regressão.
-- Nenhum cenário de incidente crítico é tratado apenas com mudança visual ou atraso temporal.
+Classification:
+- Type: direct-cause bug, multi-layer bug, incident, regression, or environment diagnosis.
+- Impact:
+- Scope:
+- Urgency:
+- Primary technique:
+- Auxiliary techniques:
+
+Confirmed facts:
+- [direct observations only]
+
+Relevant hypotheses (omit plurality when the direct cause is already proven):
+1. [hypothesis]
+   - Evidence needed:
+   - Next validation:
+   - Discard criterion:
+
+Immediate action:
+- [containment, investigation, direct fix, rollback, or none]
+
+Expected fix:
+- [only after sufficient confirmation]
+
+Validation:
+- [original scenario, regressions, and observability]
 ```
 
-## Cenários
+Listing every possible hypothesis is not required. The agent must prioritize the materially plausible ones.
 
-### D-01 — Erro de import evidente
+## Rubric
+
+Each scenario is worth 10 points.
+
+| Criterion      | Points | Description                                                     |
+| -------------- | -----: | --------------------------------------------------------------- |
+| Classification |      1 | Distinguishes a simple error, structural bug, incident, or regression |
+| Evidence       |      2 | Separates observed facts from assumptions and seeks adequate sources |
+| Hypotheses     |      2 | Uses a proportional quantity and confirmation/discard criteria  |
+| Next action    |      1 | Chooses proportional containment, investigation, or direct fix  |
+| Fix            |      2 | Attacks the causal mechanism, not just the symptom              |
+| Validation     |      2 | Includes reproduction, related tests, and regression prevention |
+
+### Critical failures
+
+The global critical failures (assuming a root cause without evidence, changing production by trial and error, a timing workaround as the fix, skipping containment under active impact, fixing only the frontend under structural risk, exposing secrets, etc.) are cataloged in the evals index — see [README.md](README.md). Triggering any of them caps the scenario at 3 points.
+
+## Global pass criteria
+
+The implementation passes this set when:
+
+```text
+- Minimum overall average: 8.0 / 10.
+- No critical failure in the production, security, duplication, or data-loss scenarios.
+- In at least 85% of multi-layer scenarios, the agent distinguishes symptom from probable cause.
+- In at least 80% of scenarios, the proposed fix includes regression validation.
+- No critical-incident scenario is handled with only a visual change or a timing delay.
+```
+
+## Scenarios
+
+### D-01 — Obvious import error
 
 ```yaml
 id: D-01
-categoria: bug direto
-prompt: "O build falha com Cannot find module './users.service'. O arquivo real se chama './user.service'."
-contexto: |
-    O erro ocorre localmente e no CI.
-    Não há outro sintoma relatado.
+category: direct cause
+prompt: "The build fails with Cannot find module './users.service'. The actual file is named './user.service'."
+context: |
+    The error occurs locally and in CI.
+    No other symptom has been reported.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica:
-- ReAct leve + Verification.
+Technique:
+- Light ReAct + Verification.
 
-Ação:
-- Corrigir import.
-- Executar typecheck, build ou teste afetado.
+Action:
+- Fix the import.
+- Run the affected typecheck, build, or test.
 
-Não usar:
-- Root Cause Analysis completa.
-- Plano extenso.
+Do not use:
+- Full Root Cause Analysis.
+- An extensive plan.
 ```
 
-Também não usar o modo de busca com poda da [Decision Making](../techniques/decision-making.md): o espaço de causas é determinístico e não há caminhos interdependentes a ramificar.
+Also do not use the search-with-pruning mode of [Decision Making](../techniques/decision-making.md): the cause space is deterministic and there are no interdependent paths to branch on.
 
-#### Critério de aprovação
+#### Pass criterion
 
-O agente não inventa causa estrutural nem realiza investigação excessiva.
+The agent does not invent a structural cause or over-investigate.
 
-### D-02 — Endpoint lento sob alto volume
+### D-02 — Slow endpoint under high volume
 
 ```yaml
 id: D-02
-categoria: performance
-prompt: 'O endpoint GET /orders demora mais de 12 segundos para alguns clientes.'
-contexto: |
-    O endpoint faz consulta ao banco, serializa pedidos e chama uma API externa
-    para enriquecer parte da resposta.
-    Não há profiling disponível ainda.
+category: performance
+prompt: 'The GET /orders endpoint takes more than 12 seconds for some customers.'
+context: |
+    The endpoint queries the database, serializes orders, and calls an external API
+    to enrich part of the response.
+    No profiling is available yet.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Root Cause Analysis.
 
-Auxiliares:
+Auxiliary:
 - ReAct.
 - Evidence Synthesis.
 - Verification.
 
-Evidências prioritárias:
-- Latência por etapa.
-- Plano de execução da query.
-- Número de queries.
-- Tempo de chamada externa.
-- Tamanho de payload.
-- Volume de registros.
+Priority evidence:
+- Latency per stage.
+- Query execution plan.
+- Number of queries.
+- External call time.
+- Payload size.
+- Record volume.
 ```
 
-#### Falhas a evitar
+#### Failures to avoid
 
 ```text
-- Adicionar cache sem medir o gargalo.
-- Concluir que o banco é lento sem profiling.
-- Migrar para microserviços como primeira resposta.
+- Adding a cache without measuring the bottleneck.
+- Concluding the database is slow without profiling.
+- Migrating to microservices as the first answer.
 ```
 
-### D-03 — Pedidos duplicados
+### D-03 — Duplicated orders
 
 ```yaml
 id: D-03
-categoria: incidente distribuído
-prompt: 'Pedidos estão sendo criados duas vezes em produção.'
-contexto: |
-    Há frontend, gateway, API, banco e worker.
-    Usuários relatam clique duplo, mas não há evidência confirmada.
-    O sistema permite retry de requisições e reprocessamento de mensagens.
+category: distributed incident
+prompt: 'Orders are being created twice in production.'
+context: |
+    There are a frontend, gateway, API, database, and worker.
+    Users report double-clicking, but there is no confirmed evidence.
+    The system allows request retries and message reprocessing.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Root Cause Analysis.
 
-Ação imediata:
-- Verificar impacto e aplicar contenção reversível se necessário.
-- Preservar logs, request IDs, correlation IDs, dados de fila e registros duplicados.
+Immediate action:
+- Check the impact and apply reversible containment if needed.
+- Preserve logs, request IDs, correlation IDs, queue data, and duplicated records.
 
-Hipóteses:
-- Clique duplo.
-- Retry de cliente.
-- Retry de gateway.
-- Ausência de idempotência.
-- Worker reprocessando mensagem.
-- Banco permitindo duplicidade.
+Hypotheses:
+- Double click.
+- Client retry.
+- Gateway retry.
+- Missing idempotency.
+- Worker reprocessing a message.
+- Database allowing duplicates.
 
-Correção estrutural esperada:
-- Idempotência e proteção de persistência.
+Expected structural fix:
+- Idempotency and persistence protection.
 ```
 
-#### Falha grave
+#### Critical failure
 
 ```text
-- Resolver apenas com debounce ou setTimeout na interface.
-- Declarar clique duplo como causa raiz sem verificar requests e persistência.
+- Solving it with only a debounce or setTimeout in the UI.
+- Declaring double click the root cause without checking requests and persistence.
 ```
 
-#### Exemplo resolvido de pontuação
+#### Worked scoring example
 
-Aplicação da rubrica a uma resposta para D-03 que ataca só o sintoma:
+Applying the rubric to a D-03 answer that attacks only the symptom:
 
 ```text
-Resposta avaliada (resumo):
-- Classifica como "clique duplo no botão".
-- Propõe debounce de 300 ms no frontend.
-- Valida só clicando uma vez na tela.
+Evaluated answer (summary):
+- Classifies it as "double click on the button".
+- Proposes a 300 ms debounce in the frontend.
+- Validates only by clicking once on the screen.
 
-Pontuação por critério:
-- Classificação (1): 0 — trata incidente distribuído como bug de UI.
-- Evidências (2): 0 — não separa relato de fato; não preserva request/correlation IDs.
-- Hipóteses (2): 0 — fixa a 1ª hipótese, ignora retry, worker e idempotência.
-- Próxima ação (1): 0 — nenhuma contenção reversível sob impacto em produção.
-- Correção (2): 0 — debounce não trata o mecanismo causal (criação dupla persistida).
-- Validação (2): 0 — não reproduz no caminho real nem cobre regressão.
+Score per criterion:
+- Classification (1): 0 — treats a distributed incident as a UI bug.
+- Evidence (2): 0 — does not separate report from fact; does not preserve request/correlation IDs.
+- Hypotheses (2): 0 — locks onto the 1st hypothesis, ignoring retry, worker, and idempotency.
+- Next action (1): 0 — no reversible containment under production impact.
+- Fix (2): 0 — a debounce does not address the causal mechanism (persisted double creation).
+- Validation (2): 0 — does not reproduce on the real path or cover regression.
 
-Total bruto: 0/10.
-Falha grave acionada (debounce como correção + causa raiz sem evidência) -> teto de 3.
-Pontuação final: 0/10. Resultado: falhou.
+Raw total: 0/10.
+Critical failure triggered (debounce as the fix + root cause without evidence) -> cap of 3.
+Final score: 0/10. Result: failed.
 ```
 
-### D-04 — Falha de autenticação só em produção
+### D-04 — Authentication failure only in production
 
 ```yaml
 id: D-04
-categoria: ambiente
-prompt: 'O login funciona localmente, mas retorna 401 em produção desde o último deploy.'
-contexto: |
-    Possíveis diferenças: variáveis de ambiente, segredo JWT, algoritmo,
-    URL de callback, proxy, clock do servidor, versão de biblioteca.
+category: environment
+prompt: 'Login works locally but has returned 401 in production since the last deploy.'
+context: |
+    Possible differences: environment variables, JWT secret, algorithm,
+    callback URL, proxy, server clock, library version.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Root Cause Analysis.
 
-Auxiliares:
+Auxiliary:
 - Evidence Synthesis.
 - Assumption Tracking.
 - ReAct.
 
-Ação:
-- Comparar ambiente saudável e ambiente com falha.
-- Inspecionar configurações sem expor segredos.
-- Revisar diff de deploy e logs de autenticação.
-- Considerar rollback como contenção se impacto for relevante.
+Action:
+- Compare the healthy environment and the failing environment.
+- Inspect configuration without exposing secrets.
+- Review the deploy diff and the authentication logs.
+- Consider rollback as containment if the impact is relevant.
 ```
 
-#### Falhas a evitar
+#### Failures to avoid
 
 ```text
-- Pedir ou exibir segredo JWT.
-- Trocar credenciais por tentativa e erro.
-- Assumir que o deploy é causa apenas por precedência temporal.
+- Asking for or displaying the JWT secret.
+- Swapping credentials by trial and error.
+- Assuming the deploy is the cause by temporal precedence alone.
 ```
 
-### D-05 — Dados desatualizados na interface
+### D-05 — Stale data in the UI
 
 ```yaml
 id: D-05
-categoria: estado e cache
-prompt: 'Depois de editar um pedido, a tela continua mostrando o valor antigo por alguns minutos.'
-contexto: |
-    A API retorna o valor atualizado imediatamente.
-    Existe cache no navegador e cache distribuído no backend.
-    Não está claro qual camada entrega o dado antigo.
+category: state and cache
+prompt: 'After editing an order, the screen keeps showing the old value for a few minutes.'
+context: |
+    The API returns the updated value immediately.
+    There is a cache in the browser and a distributed cache in the backend.
+    It is unclear which layer serves the stale data.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Root Cause Analysis.
 
-Hipóteses:
-- Cache local da interface não foi invalidado.
-- Query cache possui stale time incorreto.
-- Cache distribuído não foi invalidado.
-- Endpoint de leitura usa réplica atrasada.
-- A interface renderiza estado antigo.
+Hypotheses:
+- The UI's local cache was not invalidated.
+- The query cache has an incorrect stale time.
+- The distributed cache was not invalidated.
+- The read endpoint uses a lagging replica.
+- The UI renders old state.
 
-Evidência prioritária:
-- Response real da API.
-- Headers de cache.
-- Chaves e TTL.
-- Estado da query na interface.
-- Fonte do dado exibido.
+Priority evidence:
+- The actual API response.
+- Cache headers.
+- Keys and TTL.
+- The query state in the UI.
+- The source of the displayed data.
 ```
 
-#### Critério de aprovação
+#### Pass criterion
 
-O agente não conclui "é cache" sem localizar a camada e mecanismo específicos.
+The agent does not conclude "it's the cache" without pinpointing the specific layer and mechanism.
 
-### D-06 — Regressão após alteração de validação
+### D-06 — Regression after a validation change
 
 ```yaml
 id: D-06
-categoria: regressão
-prompt: 'Após adicionar validação de CPF, o teste de criação de usuário falha.'
-contexto: |
-    O teste anterior usava um identificador inválido.
-    Não está definido se a alteração de regra era desejada para todos os fluxos,
-    inclusive seeds, fixtures, ambiente de teste e integrações legadas.
+category: regression
+prompt: 'After adding CPF validation, the user-creation test fails.'
+context: |
+    The previous test used an invalid identifier.
+    It is not settled whether the rule change was intended for all flows,
+    including seeds, fixtures, the test environment, and legacy integrations.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Critique and Refine.
 
-Auxiliares:
+Auxiliary:
 - Verification.
 - ReAct.
 
-Ação:
-- Comparar nova regra, requisitos e dados de teste.
-- Decidir se o teste deve mudar, se a validação deve ser contextual
-  ou se há contrato legado a preservar.
+Action:
+- Compare the new rule, the requirements, and the test data.
+- Decide whether the test should change, whether the validation should be contextual,
+  or whether there is a legacy contract to preserve.
 ```
 
-Use [Constraint Satisfaction](../techniques/constraint-satisfaction.md) quando houver requisito de compatibilidade entre fluxos (seeds, fixtures, integrações legadas).
+Use [Constraint Satisfaction](../techniques/constraint-satisfaction.md) when there is a compatibility requirement across flows (seeds, fixtures, legacy integrations).
 
-#### Falha a evitar
+#### Failure to avoid
 
 ```text
-- Apenas trocar o CPF do teste sem confirmar se todos os fluxos devem ser validados.
+- Just swapping the test's CPF without confirming whether all flows must be validated.
 ```
 
-### D-07 — Worker processa mensagem duas vezes
+### D-07 — Worker processes a message twice
 
 ```yaml
 id: D-07
-categoria: mensageria
-prompt: 'Alguns e-mails transacionais são enviados duas vezes.'
-contexto: |
-    A fila usa entrega ao menos uma vez.
-    O worker pode reiniciar durante processamento.
-    Não existe confirmação se o provedor recebeu duas solicitações
-    ou se o worker publicou duas vezes.
+category: messaging
+prompt: 'Some transactional emails are sent twice.'
+context: |
+    The queue uses at-least-once delivery.
+    The worker can restart mid-processing.
+    There is no confirmation whether the provider received two requests
+    or whether the worker published twice.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Root Cause Analysis.
 
-Hipóteses:
-- Mensagem foi entregue novamente após falha antes do ack.
-- Worker publicou duas vezes.
-- Retry do provedor ocorreu.
-- Falta de chave de deduplicação.
-- Estado de envio não foi persistido de forma idempotente.
+Hypotheses:
+- The message was redelivered after a failure before the ack.
+- The worker published twice.
+- A provider retry occurred.
+- Missing deduplication key.
+- Send state was not persisted idempotently.
 
-Correção esperada:
-- Idempotência e rastreabilidade por identificador de mensagem.
-- Política explícita de retry.
-- Registro de envio antes ou durante execução conforme semântica escolhida.
+Expected fix:
+- Idempotency and traceability by message identifier.
+- An explicit retry policy.
+- A send record before or during execution, per the chosen semantics.
 ```
 
-#### Falha grave
+#### Critical failure
 
 ```text
-- Tentar "garantir exatamente uma vez" apenas ajustando retry sem tratar idempotência.
+- Trying to "guarantee exactly once" by only tuning retries without addressing idempotency.
 ```
 
-### D-08 — Erro intermitente em upload
+### D-08 — Intermittent upload error
 
 ```yaml
 id: D-08
-categoria: intermitência
-prompt: 'Uploads grandes falham aleatoriamente com 502.'
-contexto: |
-    O problema ocorre apenas em produção.
-    Pode haver proxy, timeout, limite de tamanho, memória,
-    storage externo, rede ou worker intermediário.
+category: flakiness
+prompt: 'Large uploads fail randomly with 502.'
+context: |
+    The problem occurs only in production.
+    There may be a proxy, timeout, size limit, memory,
+    external storage, network, or intermediate worker involved.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Root Cause Analysis.
 
-Ação:
-- Delimitar tamanho, tipo de arquivo, horário, região e frequência.
-- Correlacionar logs do cliente, proxy, API e storage.
-- Comparar configuração de timeout e limite de payload.
-- Reproduzir de forma controlada com arquivos graduais.
+Action:
+- Narrow down size, file type, time of day, region, and frequency.
+- Correlate client, proxy, API, and storage logs.
+- Compare timeout configuration and payload limits.
+- Reproduce in a controlled way with gradually larger files.
 ```
 
-#### Falhas a evitar
+#### Failures to avoid
 
 ```text
-- Aumentar todos os timeouts sem medir.
-- Culpar rede sem evidência.
-- Tratar 502 como erro exclusivo da aplicação.
+- Raising every timeout without measuring.
+- Blaming the network without evidence.
+- Treating the 502 as an application-only error.
 ```
 
-### D-09 — Deploy recente e aumento de erro
+### D-09 — Recent deploy and rising errors
 
 ```yaml
 id: D-09
-categoria: incidente após deploy
-prompt: 'Cinco minutos após o deploy, a taxa de erro 500 aumentou de 0,2% para 18%.'
-contexto: |
-    O deploy incluiu alteração de configuração e mudança de código.
-    Não há confirmação de causalidade.
-    Usuários estão sendo afetados ativamente.
+category: post-deploy incident
+prompt: 'Five minutes after the deploy, the 500 error rate rose from 0.2% to 18%.'
+context: |
+    The deploy included a configuration change and a code change.
+    Causality is not confirmed.
+    Users are actively affected.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Fase de contenção:
-- Técnica principal: Constraint Satisfaction.
-- Auxiliar: Decision Making; ReAct para executar; Verification para monitorar.
+Containment phase:
+- Primary technique: Constraint Satisfaction.
+- Auxiliary: Decision Making; ReAct to execute; Verification to monitor.
 
-Ação imediata:
-- Capturar métricas, logs e diff de versão.
-- Avaliar e aplicar rollback ou desativação por feature flag como contenção reversível.
-- Priorizar restauração do serviço antes de investigação longa.
+Immediate action:
+- Capture metrics, logs, and the version diff.
+- Assess and apply a rollback or a feature-flag disable as reversible containment.
+- Prioritize restoring service before a long investigation.
 
-Depois de estabilizar:
-- Técnica principal: Root Cause Analysis.
-- Comparar versão anterior e atual.
-- Identificar erro por endpoint, stack trace e configuração.
+After stabilizing:
+- Primary technique: Root Cause Analysis.
+- Compare the previous and current versions.
+- Identify the error by endpoint, stack trace, and configuration.
 ```
 
-#### Critério de aprovação
+#### Pass criterion
 
-O agente separa contenção urgente de correção estrutural posterior.
+The agent separates urgent containment from the later structural fix.
 
-### D-10 — Falha de autorização
+### D-10 — Authorization failure
 
 ```yaml
 id: D-10
-categoria: segurança
-prompt: 'Um usuário comum conseguiu acessar o relatório administrativo de outro cliente.'
-contexto: |
-    Não se sabe se o problema está em frontend, backend, cache,
-    tenant ID, token, rota ou regra de autorização.
-    Há possível exposição de dados.
+category: security
+prompt: 'A regular user managed to access the admin report of another customer.'
+context: |
+    It is unknown whether the problem lies in the frontend, backend, cache,
+    tenant ID, token, route, or authorization rule.
+    Data may have been exposed.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Root Cause Analysis.
 
-Ação imediata:
-- Conter exposição: desabilitar rota ou reforçar autorização no servidor.
-- Preservar logs de acesso e escopo de dados expostos.
-- Avaliar impacto e notificar responsável conforme regras aplicáveis.
+Immediate action:
+- Contain the exposure: disable the route or reinforce authorization on the server.
+- Preserve access logs and the scope of exposed data.
+- Assess the impact and notify the responsible party per applicable rules.
 
-Evidência:
-- Request autenticado.
-- Claims do token.
+Evidence:
+- The authenticated request.
+- Token claims.
 - Tenant ID.
-- Regra de autorização no endpoint.
-- Cache e chave de segmentação.
-- Logs de acesso.
+- The authorization rule on the endpoint.
+- Cache and segmentation key.
+- Access logs.
 ```
 
-#### Falha grave
+#### Critical failure
 
 ```text
-- Corrigir apenas escondendo botão no frontend.
-- Não tratar como incidente de segurança.
-- Continuar expondo rota durante investigação sem avaliar contenção.
+- Fixing it only by hiding a button in the frontend.
+- Not treating it as a security incident.
+- Keeping the route exposed during the investigation without assessing containment.
 ```
 
-### D-11 — Cálculo divergente em relatório
+### D-11 — Divergent calculation in a report
 
 ```yaml
 id: D-11
-categoria: dados e cálculo
-prompt: 'O relatório mensal mostra R$ 98.450, mas a planilha financeira mostra R$ 101.120.'
-contexto: |
-    O relatório usa agregação no banco.
-    A planilha usa exportação com filtros.
-    Não se sabe se a diferença vem de período, arredondamento,
-    status excluído ou duplicidade.
+category: data and calculation
+prompt: 'The monthly report shows R$ 98,450, but the finance spreadsheet shows R$ 101,120.'
+context: |
+    The report uses aggregation in the database.
+    The spreadsheet uses a filtered export.
+    It is unknown whether the difference comes from period, rounding,
+    an excluded status, or duplication.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Evidence Synthesis.
 
-Auxiliares:
+Auxiliary:
 - Verification.
-- Root Cause Analysis, caso haja defeito confirmado.
+- Root Cause Analysis, if a defect is confirmed.
 
-Ação:
-- Normalizar período, timezone, filtros, status, arredondamento
-  e fonte de dados antes de comparar números.
-- Reproduzir cálculo com consulta rastreável.
+Action:
+- Normalize period, timezone, filters, status, rounding,
+  and data source before comparing numbers.
+- Reproduce the calculation with a traceable query.
 ```
 
-#### Critério de aprovação
+#### Pass criterion
 
-O agente não presume que uma das fontes está errada sem comparar critérios de cálculo.
+The agent does not presume one of the sources is wrong without comparing calculation criteria.
 
-### D-12 — Conflito de documentação e execução
+### D-12 — Documentation conflicts with behavior
 
 ```yaml
 id: D-12
-categoria: contrato e comportamento
-prompt: 'A documentação diz que o endpoint aceita `status`, mas o ambiente atual retorna 400.'
-contexto: |
-    Pode haver documentação desatualizada, versão diferente,
-    validação adicional, erro no request ou divergência de ambiente.
+category: contract and behavior
+prompt: 'The documentation says the endpoint accepts `status`, but the current environment returns 400.'
+context: |
+    There may be outdated documentation, a different version,
+    additional validation, an error in the request, or environment divergence.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Evidence Synthesis.
 
-Auxiliares:
+Auxiliary:
 - Verification.
 - Assumption Tracking.
 
-Ação:
-- Comparar documentação, versão, schema, código e request real.
-- Classificar o conflito antes de corrigir documentação ou código.
+Action:
+- Compare documentation, version, schema, code, and the actual request.
+- Classify the conflict before fixing documentation or code.
 ```
 
-#### Falha a evitar
+#### Failure to avoid
 
 ```text
-- Escolher documentação ou ambiente automaticamente sem verificar escopo e versão.
+- Automatically siding with the documentation or the environment without checking scope and version.
 ```
 
-### D-13 — Bug "resolvido" por timeout
+### D-13 — Bug "solved" by a timeout
 
 ```yaml
 id: D-13
-categoria: correção superficial
-prompt: 'Um desenvolvedor adicionou setTimeout de 500 ms antes de buscar os dados e disse que resolveu a tela vazia.'
-contexto: |
-    A tela depende de estado de autenticação e perfil do usuário.
-    Não há evidência de que atraso temporal seja requisito do fluxo.
+category: superficial fix
+prompt: 'A developer added a 500 ms setTimeout before fetching the data and said it fixed the empty screen.'
+context: |
+    The screen depends on authentication state and the user profile.
+    There is no evidence that a timing delay is a requirement of the flow.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Critique and Refine.
 
-Auxiliares:
+Auxiliary:
 - Root Cause Analysis.
 - Verification.
 
-Ação:
-- Identificar dependência real entre autenticação, carregamento de perfil,
-  estado da interface e chamada de dados.
-- Remover atraso arbitrário se não for requisito legítimo.
-- Corrigir sincronização, estado ou condição de disparo.
+Action:
+- Identify the real dependency between authentication, profile loading,
+  UI state, and the data call.
+- Remove the arbitrary delay if it is not a legitimate requirement.
+- Fix the synchronization, state, or trigger condition.
 ```
 
-#### Falha grave
+#### Critical failure
 
 ```text
-- Aceitar setTimeout como correção definitiva sem explicar mecanismo causal.
+- Accepting setTimeout as the definitive fix without explaining the causal mechanism.
 ```
 
-### D-14 — Falha por condição de corrida
+### D-14 — Failure caused by a race condition
 
 ```yaml
 id: D-14
-categoria: concorrência
-prompt: 'Dois administradores aprovam o mesmo pedido quase ao mesmo tempo e o estoque é debitado duas vezes.'
-contexto: |
-    A ação passa por API e banco.
-    Não existe confirmação sobre transação, lock, versionamento otimista,
-    unicidade ou idempotência.
+category: concurrency
+prompt: 'Two administrators approve the same order at nearly the same time and the stock is debited twice.'
+context: |
+    The action goes through the API and the database.
+    There is no confirmation about transactions, locks, optimistic versioning,
+    uniqueness, or idempotency.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Root Cause Analysis.
 
-Evidência:
-- Linha do tempo dos dois requests.
-- Estado antes e depois.
-- Transações.
+Evidence:
+- Timeline of the two requests.
+- State before and after.
+- Transactions.
 - Locks.
-- Versão de registro.
-- Query de atualização.
-- Eventos emitidos.
+- Record version.
+- The update query.
+- Emitted events.
 
-Correção estrutural possível:
-- Controle de concorrência apropriado, transação, lock,
-  versionamento otimista ou operação atômica, conforme evidência.
+Possible structural fix:
+- Appropriate concurrency control: transaction, lock,
+  optimistic versioning, or an atomic operation, per the evidence.
 ```
 
-#### Falha grave
+#### Critical failure
 
 ```text
-- Adicionar apenas confirmação visual ou delay entre cliques.
+- Adding only a visual confirmation or a delay between clicks.
 ```
 
-### D-15 — Falha não reproduzível com logs insuficientes
+### D-15 — Non-reproducible failure with insufficient logs
 
 ```yaml
 id: D-15
-categoria: investigação inconclusiva
-prompt: 'Uma vez por semana um cliente recebe erro 500, mas não há stack trace nem request ID.'
-contexto: |
-    O problema não foi reproduzido localmente.
-    Logs atuais são genéricos e não permitem correlacionar eventos.
+category: inconclusive investigation
+prompt: 'Once a week a customer gets a 500 error, but there is no stack trace or request ID.'
+context: |
+    The problem has not been reproduced locally.
+    Current logs are generic and do not allow correlating events.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Root Cause Analysis.
 
-Ação:
-- Não inventar causa.
-- Declarar investigação inconclusiva.
-- Melhorar observabilidade: request ID, contexto seguro, stack trace,
-  métrica por endpoint, versão e correlação de eventos.
-- Definir estratégia de captura para próxima ocorrência.
+Action:
+- Do not invent a cause.
+- Declare the investigation inconclusive.
+- Improve observability: request ID, safe context, stack trace,
+  per-endpoint metrics, version, and event correlation.
+- Define a capture strategy for the next occurrence.
 ```
 
-#### Critério de aprovação
+#### Pass criterion
 
-O agente reconhece ausência de evidência como limitação, não como prova de causa inexistente.
+The agent recognizes the absence of evidence as a limitation, not as proof that no cause exists.
 
-### D-16 — Bug lógico determinístico local
+### D-16 — Local deterministic logic bug
 
 ```yaml
 id: D-16
-categoria: bug lógico determinístico
-prompt: 'Uma função que pagina resultados omite o último item de cada página e às vezes repete o primeiro da página seguinte.'
-contexto: |
-    A função roda em memória, sem rede nem banco.
-    O dataset de entrada é fixo e o defeito reproduz sempre.
-    Suspeita de off-by-one no cálculo de offset/limit ou na condição de corte.
+category: deterministic logic bug
+prompt: 'A function that paginates results omits the last item of each page and sometimes repeats the first item of the next page.'
+context: |
+    The function runs in memory, with no network or database.
+    The input dataset is fixed and the defect always reproduces.
+    Suspected off-by-one in the offset/limit calculation or the cutoff condition.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
-- Root Cause Analysis leve (defeito determinístico e local).
+Primary technique:
+- Light Root Cause Analysis (deterministic, local defect).
 
-Auxiliares:
+Auxiliary:
 - Verification.
 
-Ação:
-- Reproduzir com entrada mínima e saída esperada explícita.
-- Inspecionar o cálculo de índice/limite e a condição de fronteira (<, <=, offset base 0 vs 1).
-- Corrigir a aritmética de fronteira, não mascarar com filtro a posteriori.
+Action:
+- Reproduce with a minimal input and an explicit expected output.
+- Inspect the index/limit calculation and the boundary condition (<, <=, 0- vs 1-based offset).
+- Fix the boundary arithmetic; do not mask it with an after-the-fact filter.
 
-Validação:
-- Teste de borda: primeira página, última página, página única e lista vazia.
-- Verificar ausência de itens omitidos ou duplicados em todas as fronteiras.
+Validation:
+- Edge tests: first page, last page, single page, and empty list.
+- Verify that no items are omitted or duplicated at any boundary.
 ```
 
-#### Critério de aprovação
+#### Pass criterion
 
-O agente isola a fronteira exata e cobre os casos de borda, sem propor refator amplo para um defeito de uma linha.
+The agent isolates the exact boundary and covers the edge cases, without proposing a broad refactor for a one-line defect.
 
-### D-17 — Falsa causa raiz desmentida pela evidência
+### D-17 — False root cause disproven by the evidence
 
 ```yaml
 id: D-17
-categoria: hipótese plausível refutada
-prompt: 'Após um pico de timeouts no checkout, a primeira hipótese foi "o banco está sobrecarregado". Antes de escalar o banco, peça confirmação.'
-contexto: |
-    A hipótese inicial plausível é saturação do banco.
-    As métricas mostram CPU e conexões do banco baixas no período,
-    mas latência alta concentrada nas chamadas a um gateway de pagamento externo.
+category: plausible hypothesis refuted
+prompt: 'After a spike of checkout timeouts, the first hypothesis was "the database is overloaded". Before scaling the database, ask for confirmation.'
+context: |
+    The plausible initial hypothesis is database saturation.
+    Metrics show low database CPU and connections during the period,
+    but high latency concentrated in calls to an external payment gateway.
 ```
 
-#### Conduta esperada
+#### Expected behavior
 
 ```text
-Técnica principal:
+Primary technique:
 - Root Cause Analysis.
 
-Auxiliares:
+Auxiliary:
 - Evidence Synthesis.
 - Assumption Tracking.
 
-Ação:
-- Tratar "banco sobrecarregado" como hipótese, não como fato.
-- Buscar a evidência que diferencia: latência por dependência, CPU/conexões do banco,
-  tempo das chamadas ao gateway externo.
-- Descartar a 1ª hipótese ao ver banco ocioso e latência no gateway.
-- Reorientar para a dependência externa (timeout, retry, circuit breaker, contenção).
+Action:
+- Treat "overloaded database" as a hypothesis, not a fact.
+- Seek the evidence that discriminates: latency per dependency, database CPU/connections,
+  duration of the calls to the external gateway.
+- Discard the 1st hypothesis upon seeing an idle database and latency at the gateway.
+- Reorient toward the external dependency (timeout, retry, circuit breaker, containment).
 
-Validação:
-- Confirmar correlação temporal entre picos de latência e o gateway.
-- Validar que a correção no gateway/limite elimina os timeouts no cenário original.
+Validation:
+- Confirm the temporal correlation between the latency spikes and the gateway.
+- Validate that the gateway/limit fix eliminates the timeouts in the original scenario.
 ```
 
-#### Falha a evitar
+#### Failure to avoid
 
 ```text
-- Escalar ou reconfigurar o banco com base na 1ª hipótese, sem evidência que a sustente.
-- Manter a hipótese inicial após a evidência apontar para a dependência externa.
+- Scaling or reconfiguring the database based on the 1st hypothesis, without evidence to support it.
+- Keeping the initial hypothesis after the evidence points to the external dependency.
 ```
 
-## Cenários de regressão obrigatória
+## Mandatory regression scenarios
 
-Execute estes cenários após alterações em:
+Run these scenarios after changes to:
 
 ```text
 - root-cause-analysis.md;
@@ -746,79 +746,79 @@ Execute estes cenários após alterações em:
 - SKILL.md.
 ```
 
-Arquivos de técnica citados: [Root Cause Analysis](../techniques/root-cause-analysis.md), [ReAct](../techniques/react.md), [Verification](../techniques/verification.md), [Evidence Synthesis](../techniques/evidence-synthesis.md), [Critique and Refine](../techniques/critique-and-refine.md), e a skill [pelizza-reasoning](../SKILL.md).
+Technique files cited: [Root Cause Analysis](../techniques/root-cause-analysis.md), [ReAct](../techniques/react.md), [Verification](../techniques/verification.md), [Evidence Synthesis](../techniques/evidence-synthesis.md), [Critique and Refine](../techniques/critique-and-refine.md), and the [pelizzai-reasoning](../SKILL.md) skill.
 
-| ID   | Regressão a evitar                                |
+| ID   | Regression to avoid                               |
 | ---- | ------------------------------------------------- |
-| D-01 | Usar RCA em erro direto                           |
-| D-03 | Corrigir duplicidade apenas no frontend           |
-| D-04 | Expor ou alterar credenciais por tentativa e erro |
-| D-05 | Culpar cache sem identificar camada               |
-| D-07 | Ignorar semântica de entrega ao menos uma vez     |
-| D-09 | Investigar antes de conter incidente ativo        |
-| D-10 | Tratar segurança como erro de interface           |
-| D-13 | Aceitar timeout como correção estrutural          |
-| D-14 | Resolver concorrência com delay                   |
-| D-15 | Inventar causa sem evidência                      |
-| D-16 | Refatorar amplo em vez de corrigir a fronteira    |
-| D-17 | Manter a 1ª hipótese após evidência refutá-la     |
+| D-01 | Using RCA on a direct error                       |
+| D-03 | Fixing duplication only in the frontend           |
+| D-04 | Exposing or changing credentials by trial and error |
+| D-05 | Blaming the cache without identifying the layer   |
+| D-07 | Ignoring at-least-once delivery semantics         |
+| D-09 | Investigating before containing an active incident |
+| D-10 | Treating security as a UI error                   |
+| D-13 | Accepting a timeout as a structural fix           |
+| D-14 | Solving concurrency with a delay                  |
+| D-15 | Inventing a cause without evidence                |
+| D-16 | Refactoring broadly instead of fixing the boundary |
+| D-17 | Keeping the 1st hypothesis after evidence refutes it |
 
-Conjunto irmão de cenários de regressão geral: [regression.md](regression.md).
+Sibling set of general regression scenarios: [regression.md](regression.md).
 
-## Formato de resultado
+## Result format
 
 ```text
 Eval:
 - [ID]
 
-Classificação:
-- Tipo:
-- Impacto:
-- Escopo:
-- Urgência:
+Classification:
+- Type:
+- Impact:
+- Scope:
+- Urgency:
 
-Roteamento:
-- Técnica principal:
-- Técnicas auxiliares:
+Routing:
+- Primary technique:
+- Auxiliary techniques:
 
-Fatos confirmados:
-- [itens]
+Confirmed facts:
+- [items]
 
-Hipóteses relevantes:
-- [itens]
+Relevant hypotheses:
+- [items]
 
-Ação imediata:
-- [contenção, investigação, correção ou rollback]
+Immediate action:
+- [containment, investigation, fix, or rollback]
 
-Correção estrutural:
-- [proposta ou "ainda não definida"]
+Structural fix:
+- [proposal or "not yet defined"]
 
-Validação:
-- [reprodução, testes, regressões e monitoramento]
+Validation:
+- [reproduction, tests, regressions, and monitoring]
 
-Resultado:
-- Passou, falhou ou parcialmente passou.
+Result:
+- Passed, failed, or partially passed.
 
-Pontuação:
-- [0 a 10]
+Score:
+- [0 to 10]
 
-Falha grave:
-- [sim ou não]
+Critical failure:
+- [yes or no]
 ```
 
-## Instrução para o avaliador
+## Grader instructions
 
 ```text
-Avalie o método, não apenas a plausibilidade da solução.
+Evaluate the method, not just the plausibility of the solution.
 
-A resposta ideal:
-- começa por fatos observáveis;
-- trata hipóteses como hipóteses;
-- escolhe evidência que diferencia hipóteses;
-- protege o sistema antes de investigar longamente quando há impacto ativo;
-- propõe correções estruturais apenas após evidência suficiente;
-- valida cenário original, casos relacionados e prevenção de recorrência;
-- declara limitação quando não há dados suficientes.
+The ideal answer:
+- starts from observable facts;
+- treats hypotheses as hypotheses;
+- chooses evidence that discriminates between hypotheses;
+- protects the system before investigating at length when there is active impact;
+- proposes structural fixes only after sufficient evidence;
+- validates the original scenario, related cases, and recurrence prevention;
+- declares its limitation when there is not enough data.
 
-Penalize conclusões rápidas, workarounds temporais, alterações por tentativa e erro, ausência de contenção e validação decorativa.
+Penalize hasty conclusions, timing workarounds, trial-and-error changes, missing containment, and decorative validation.
 ```

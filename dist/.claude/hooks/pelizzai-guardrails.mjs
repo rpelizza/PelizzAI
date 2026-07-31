@@ -1,54 +1,55 @@
 #!/usr/bin/env node
 /**
- * PelizzAI — hook de guarda git (PreToolUse, tool Bash). OPT-IN.
+ * PelizzAI — git guard hook (PreToolUse, tool Bash). OPT-IN.
  *
- * Bloqueia, ANTES de rodarem, comandos git destrutivos que os gates do harness já
- * proíbem em prosa — aqui a proibição vira enforcement executável (o único ponto do
- * harness onde a obediência do modelo deixa de ser single point of failure):
- *  - git push --force / -f          (exceto --force-with-lease)
+ * Blocks, BEFORE they run, destructive git commands that the harness gates already
+ * forbid in prose — here the prohibition becomes executable enforcement (the only spot
+ * in the harness where the model's obedience stops being a single point of failure):
+ *  - git push --force / -f          (except --force-with-lease)
  *  - git reset --hard
  *  - git clean -f / -fd / --force
  *  - git branch -D / --delete --force
  *  - git checkout . / checkout -- .
  *  - git checkout -f / --force / -B
  *  - git switch -C / --force-create
- *  - git restore .                  (sem --staged — perda da working tree)
+ *  - git restore .                  (without --staged — working-tree loss)
  *  - git worktree remove --force
  *
- * ESTAS REGRAS SÃO DELIBERADAMENTE ESTREITAS. O hook mira o punhado de comandos que
- * apagam trabalho de forma irrecuperável; ele NÃO tenta cobrir todo git perigoso. Por
- * isso passam sem bloqueio, de propósito: git restore <arquivo>, git checkout -- <arquivo>,
- * git branch -M <nome> (passo canônico do git init), git push --delete/+refspec e
- * qualquer menção a "restore"/"reset" dentro de um path, de uma mensagem de commit ou de
- * um filtro (git add src/restore.ts, git log --grep=restore). Regra larga aqui custa caro:
- * ela trava trabalho legítimo, o agente aprende a contornar o hook e a rede de segurança
- * perde valor. Ao mexer, prefira falso negativo a falso positivo — e teste os dois lados.
+ * THESE RULES ARE DELIBERATELY NARROW. The hook targets the handful of commands that
+ * erase work irrecoverably; it does NOT try to cover everything dangerous in git. That
+ * is why these pass unblocked, on purpose: git restore <file>, git checkout -- <file>,
+ * git branch -M <name> (the canonical git init step), git push --delete/+refspec and
+ * any mention of "restore"/"reset" inside a path, a commit message or a filter
+ * (git add src/restore.ts, git log --grep=restore). A broad rule is costly here: it
+ * blocks legitimate work, the agent learns to route around the hook, and the safety
+ * net loses its value. When touching this, prefer a false negative over a false
+ * positive — and test both sides.
  *
- * O nome do comando é reconhecido sem distinção de maiúsculas ("Git reset --hard" também
- * é bloqueado); as FLAGS continuam case-sensitive, porque -D/-C/-S/-W destroem e
- * -d/-c/-s/-w não.
+ * The command name is matched case-insensitively ("Git reset --hard" is also blocked);
+ * the FLAGS stay case-sensitive, because -D/-C/-S/-W destroy and -d/-c/-s/-w do not.
  *
- * Bloqueio: exit 2 + motivo e caminho seguro no stderr (o agente lê e corrige a rota).
- * Qualquer outro comando: exit 0 silencioso. Erros do PRÓPRIO hook: exit 0 (fail-open —
- * o hook é rede de segurança, não gate primário; um bug aqui nunca trava o usuário).
+ * Block: exit 2 + reason and safe path on stderr (the agent reads it and corrects
+ * course). Any other command: silent exit 0. Errors in the hook ITSELF: exit 0
+ * (fail-open — the hook is a safety net, not the primary gate; a bug here never
+ * locks the user out).
  *
- * Instalação (opt-in, recomendada pela pelizzai-audit no bootstrap), em
- * .claude/settings.json do projeto consumidor:
+ * Installation (opt-in, recommended by pelizzai-audit at bootstrap), in the consumer
+ * project's .claude/settings.json:
  *   { "hooks": { "PreToolUse": [ { "matcher": "Bash", "hooks": [
  *       { "type": "command",
  *         "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-guardrails.mjs\"" } ] } ] } }
  *
- * Teste manual:
+ * Manual test:
  *   echo '{"tool_input":{"command":"git reset --hard"}}' | node pelizzai-guardrails.mjs; echo $?
- *   → motivo no stderr e exit code 2. Comando inofensivo (ex.: "git status") → exit 0.
+ *   → reason on stderr and exit code 2. Harmless command (e.g. "git status") → exit 0.
  *
- * Falso positivo conhecido (fail-closed, aceitável para rede de segurança): texto CITADO
- * que contenha um padrão perigoso — ex.: git commit -m "docs: explica git reset --hard" —
- * é bloqueado. Saída: reformule a mensagem ou rode o commit manualmente.
+ * Known false positive (fail-closed, acceptable for a safety net): QUOTED text that
+ * contains a dangerous pattern — e.g. git commit -m "docs: explains git reset --hard" —
+ * is blocked. Way out: reword the message or run the commit manually.
  *
- * Em frota sem Node, use a variante PowerShell pelizzai-guardrails.ps1 (mesmo matcher).
- * As duas variantes devem bloquear e liberar exatamente os mesmos comandos — a paridade
- * é verificada pelo scripts/test-harness-contracts.ps1.
+ * On fleets without Node, use the PowerShell variant pelizzai-guardrails.ps1 (same matcher).
+ * Both variants must block and allow exactly the same commands — parity is verified by
+ * scripts/test-harness-contracts.ps1.
  */
 
 import { readFileSync } from 'node:fs';
@@ -56,97 +57,97 @@ import { readFileSync } from 'node:fs';
 const RULES = [
   {
     name: 'git push --force / -f',
-    // --force-with-lease NÃO casa com "--force(\s|$)" — a exceção é automática.
-    // Flags curtas podem vir agrupadas (git push -uf origin main) — casar o f dentro do bundle.
+    // --force-with-lease does NOT match "--force(\s|$)" — the exception is automatic.
+    // Short flags may come bundled (git push -uf origin main) — match the f inside the bundle.
     test: (s) =>
       /\bgit\b.*\bpush\b/i.test(s) &&
       (/(^|\s)--force(\s|$)/.test(s) || /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s)),
-    why: 'push forçado reescreve o histórico remoto e pode apagar commits de outras pessoas.',
-    safe: 'use --force-with-lease (só sobrescreve se o remoto estiver onde você espera) — e somente com pedido explícito do usuário.',
+    why: 'a forced push rewrites remote history and can erase other people’s commits.',
+    safe: 'use --force-with-lease (it only overwrites if the remote is where you expect) — and only on the user’s explicit request.',
   },
   {
     name: 'git reset --hard',
     test: (s) => /\bgit\b.*\breset\b/i.test(s) && /(^|\s)--hard\b/.test(s),
-    why: 'descarta commits e mudanças da working tree sem volta.',
-    safe: 'crie um ponto de retorno primeiro (stash nomeado ou commit WIP) e siga o procedimento da skill pelizzai-recovery.',
+    why: 'discards commits and working-tree changes with no way back.',
+    safe: 'create a return point first (named stash or WIP commit) and follow the pelizzai-recovery skill procedure.',
   },
   {
     name: 'git clean -f',
     test: (s) =>
       /\bgit\b.*\bclean\b/i.test(s) &&
       (/(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s) || /(^|\s)--force\b/.test(s)),
-    why: 'apaga arquivos não rastreados de forma irreversível (não há stash nem reflog para eles).',
-    safe: 'liste antes com git clean -n e confirme com o usuário o que será apagado.',
+    why: 'deletes untracked files irreversibly (there is no stash or reflog for them).',
+    safe: 'list first with git clean -n and confirm with the user what will be deleted.',
   },
   {
     name: 'git branch -D / --delete --force',
-    // -D case-sensitive (-d é seguro); pode vir agrupada (git branch -qD nome).
-    // A forma longa `--delete --force` (em qualquer ordem) é a MESMA operação que -D:
-    // sem ela, o hook teria um bypass trivial por simples troca de grafia.
-    // -M NÃO entra: renomear branch é o passo canônico de git init (git branch -M main).
+    // -D is case-sensitive (-d is safe); it may come bundled (git branch -qD name).
+    // The long form `--delete --force` (in any order) is the SAME operation as -D:
+    // without it, the hook would have a trivial bypass via a mere change of spelling.
+    // -M is NOT included: renaming a branch is the canonical git init step (git branch -M main).
     test: (s) =>
       /\bgit\b.*\bbranch\b/i.test(s) &&
       (/(^|\s)-[a-zA-Z]*D[a-zA-Z]*(\s|$)/.test(s) ||
         (/(^|\s)--delete(\s|$)/.test(s) &&
           (/(^|\s)--force(\s|$)/.test(s) || /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s)))),
-    why: 'força a remoção de uma branch NÃO mesclada — os commits dela podem se perder.',
-    safe: 'use -d (só remove branch já mesclada) ou confirme o descarte com o usuário (a pelizzai-finish-task exige o texto "descartar").',
+    why: 'forces the removal of a branch that is NOT merged — its commits may be lost.',
+    safe: 'use -d (it only deletes an already-merged branch) or confirm the discard with the user (pelizzai-finish-task requires the literal text "discard").',
   },
   {
     name: 'git checkout . / checkout [<ref>] -- .',
-    // Cobre "checkout .", "checkout -- .", "checkout <ref> -- ." e a forma "./" (todas descartam a working tree).
-    // checkout -- <arquivo> NÃO entra: descartar um arquivo nomeado é operação rotineira e reversível na prática.
+    // Covers "checkout .", "checkout -- .", "checkout <ref> -- ." and the "./" form (all discard the working tree).
+    // checkout -- <file> is NOT included: discarding a named file is routine and reversible in practice.
     test: (s) =>
       /\bgit\b.*\bcheckout\b(\s+--)?\s+\.\/?(\s|$)/i.test(s) ||
       /\bgit\b.*\bcheckout\b\s+\S+\s+--\s+\.\/?(\s|$)/i.test(s),
-    why: 'sobrescreve TODAS as mudanças não commitadas da working tree.',
-    safe: 'crie um ponto de retorno primeiro (git stash push -u -m "<motivo>") ou restaure só arquivos específicos.',
+    why: 'overwrites ALL uncommitted changes in the working tree.',
+    safe: 'create a return point first (git stash push -u -m "<reason>") or restore only specific files.',
   },
   {
     name: 'git checkout -f / -B',
-    // Mesmas duas destruições que o hook já bloqueia em outra grafia:
-    //  -f/--force  == `git checkout .`      (sobrescreve a working tree inteira)
-    //  -B          == `git switch -C`       (sobrescreve uma branch existente)
-    // Bloquear uma grafia e liberar a outra deixaria o gate com um furo do seu próprio tamanho.
-    // -b minúsculo (criar branch nova) e `checkout -- <arquivo>` NÃO entram: nenhum dos dois destrói.
+    // The same two destructions the hook already blocks under another spelling:
+    //  -f/--force  == `git checkout .`      (overwrites the whole working tree)
+    //  -B          == `git switch -C`       (overwrites an existing branch)
+    // Blocking one spelling while allowing the other would leave a hole in the gate as big as the gate itself.
+    // Lowercase -b (create a new branch) and `checkout -- <file>` are NOT included: neither destroys.
     test: (s) =>
       /\bgit\b.*\bcheckout\b/i.test(s) &&
       (/(^|\s)--force(\s|$)/.test(s) ||
         /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s) ||
         /(^|\s)-[a-zA-Z]*B[a-zA-Z]*(\s|$)/.test(s)),
-    why: '-f descarta TODAS as mudanças não commitadas; -B sobrescreve uma branch existente e os commits que só existiam nela.',
-    safe: 'crie um ponto de retorno primeiro (git stash push -u -m "<motivo>"); para criar branch use -b, que falha se ela já existir.',
+    why: '-f discards ALL uncommitted changes; -B overwrites an existing branch and the commits that only existed there.',
+    safe: 'create a return point first (git stash push -u -m "<reason>"); to create a branch use -b, which fails if it already exists.',
   },
   {
     name: 'git switch -C / --force-create',
-    // -C case-sensitive (-c/--create é seguro: falha se a branch já existir).
+    // -C is case-sensitive (-c/--create is safe: it fails if the branch already exists).
     test: (s) =>
       /\bgit\b.*\bswitch\b/i.test(s) &&
       (/(^|\s)--force-create(\s|$)/.test(s) || /(^|\s)-[a-zA-Z]*C[a-zA-Z]*(\s|$)/.test(s)),
-    why: 'sobrescreve uma branch existente com o ponto de partida atual — os commits que só existiam nela se perdem.',
-    safe: 'use -c/--create (falha se a branch já existir); sobrescrever exige decisão explícita do usuário.',
+    why: 'overwrites an existing branch with the current starting point — the commits that only existed there are lost.',
+    safe: 'use -c/--create (it fails if the branch already exists); overwriting requires an explicit user decision.',
   },
   {
     name: 'git restore . (working tree)',
-    // Sem --staged/-S (ou com --worktree/-W explícito), restore descarta a working tree. "./" == ".".
-    // O alvo "." é obrigatório: git restore <arquivo> é rotina, e exigir o "." mantém o hook
-    // cego para "restore" que aparece em paths, mensagens e filtros (git add src/restore.ts).
+    // Without --staged/-S (or with explicit --worktree/-W), restore discards the working tree. "./" == ".".
+    // The "." target is mandatory: git restore <file> is routine, and requiring the "." keeps the hook
+    // blind to "restore" appearing in paths, messages and filters (git add src/restore.ts).
     test: (s) =>
       /\bgit\b.*\brestore\b/i.test(s) &&
       /(^|\s)\.\/?(\s|$)/.test(s) &&
       (!(/--staged\b/.test(s) || /(^|\s)-S(\s|$)/.test(s)) ||
         /--worktree\b/.test(s) ||
         /(^|\s)-W(\s|$)/.test(s)),
-    why: 'sem --staged, restore descarta as mudanças da working tree sem volta.',
-    safe: 'git restore --staged . apenas tira do stage (seguro); para descartar de verdade, crie um ponto de retorno (stash) e confirme com o usuário.',
+    why: 'without --staged, restore discards working-tree changes with no way back.',
+    safe: 'git restore --staged . only unstages (safe); to truly discard, create a return point (stash) and confirm with the user.',
   },
   {
     name: 'git worktree remove --force',
     test: (s) =>
       /\bgit\b.*\bworktree\b.*\bremove\b/i.test(s) &&
       (/(^|\s)--force(\s|$)/.test(s) || /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s)),
-    why: 'remove um worktree sujo e apaga com ele as mudanças não commitadas que estavam lá.',
-    safe: 'inspecione o worktree, preserve o conteúdo e use git worktree remove sem --force.',
+    why: 'removes a dirty worktree and erases with it the uncommitted changes that lived there.',
+    safe: 'inspect the worktree, preserve its contents and use git worktree remove without --force.',
   },
 ];
 
@@ -170,18 +171,18 @@ function main() {
   const command = data?.tool_input?.command;
   if (typeof command !== 'string' || !/\bgit\b/i.test(command)) return 0;
 
-  // Analisa por segmento de shell (&&, ||, ;, |, quebras de linha) para não atribuir
-  // flags de um comando (ex.: rm -f) ao git de outro segmento.
+  // Parse per shell segment (&&, ||, ;, |, line breaks) so flags from one command
+  // (e.g. rm -f) are not attributed to the git of another segment.
   const segments = command.split(/&&|\|\||;|\||\r?\n/);
   for (const seg of segments) {
     for (const rule of RULES) {
       if (rule.test(seg)) {
         process.stderr.write(
-          `PelizzAI guardrails: comando bloqueado — ${rule.name}.\n` +
-            `Por quê: ${rule.why}\n` +
-            `Caminho seguro: ${rule.safe}\n` +
-            `(Hook opt-in de guarda git. Se o usuário pediu EXPLICITAMENTE esta operação, ` +
-            `peça a ele que a rode manualmente ou que desabilite o hook em .claude/settings.json.)\n`
+          `PelizzAI guardrails: command blocked — ${rule.name}.\n` +
+            `Why: ${rule.why}\n` +
+            `Safe path: ${rule.safe}\n` +
+            `(Opt-in git guard hook. If the user EXPLICITLY asked for this operation, ` +
+            `ask them to run it manually or to disable the hook in .claude/settings.json.)\n`
         );
         return 2;
       }
@@ -194,6 +195,6 @@ let exitCode = 0;
 try {
   exitCode = main();
 } catch {
-  exitCode = 0; // fail-open: erro do hook nunca trava o usuário
+  exitCode = 0; // fail-open: a hook error never locks the user out
 }
 process.exit(exitCode);

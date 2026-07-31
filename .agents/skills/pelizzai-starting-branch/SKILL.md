@@ -1,36 +1,38 @@
 ---
 name: pelizzai-starting-branch
-description: Use antes do primeiro artefato de uma tarefa que poderá gerar commits. Detecta workspace multi-projeto e confirma com o usuário o conjunto afetado, descobre a base real do repositório, cria a branch de tarefa/planejamento e, após o plano, mantém a branch no working tree atual ou a move com segurança para um worktree. Nunca impõe develop nem trabalha em HEAD destacado/protegido.
+description: Use before the first artifact of a task that may produce commits. Detects a multi-project workspace and confirms the affected set with the user, discovers the repository's real base, creates the task/planning branch and, after the plan, keeps the branch in the current working tree or safely moves it to a worktree. Never imposes develop and never works on a detached/protected HEAD.
 ---
 
 # PelizzAI Starting Branch
 
-## Objetivo
+## Goal
 
-Criar o isolamento **antes de spec, plano ou código**, a partir de uma base comprovada. A mesma
-branch começa como branch de tarefa/planejamento; se o usuário escolher worktree depois do plano,
-o worktree é criado **dessa branch**, preservando os artefatos já produzidos.
+Create the isolation **before spec, plan, or code**, from a proven base. The same branch starts as
+the task/planning branch; if the user chooses a worktree after the plan, the worktree is created
+**from that branch**, preserving the artifacts already produced.
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Starting Branch para preparar o isolamento desta tarefa."
+**Announce on start:** "Using the PelizzAI Starting Branch skill to prepare this task's isolation."
 
-## Invariantes
+## Invariants
 
 ```text
-- Uma tarefa = um repositório Git. Monorepo é um repositório; workspace multi-repo abre um
-  state/registro de execução por repositório. Não esconda uma lista no campo project.
-- Workspace é detectado, nunca presumido: marcadores no cwd e um nível acima (§2). O conjunto de
-  projetos afetados é SEMPRE confirmado com o usuário; o `pelizzai/` é root-level do workspace.
-- base-ref e base-sha são resolvidos antes da primeira mudança e não mudam durante a tarefa.
-- branch é criada antes de spec/plano/código. Durante o planejamento, isolation pode ficar pending.
-- Worktree pós-plano reutiliza a branch existente; não cria uma branch vazia a partir da base.
-- Esta skill não usa `git pull`. Atualização remota é `git fetch <remote> <ref>` explícito.
-- Nunca use checkout destacado seguido de pull; remote-only vira start-point ou branch local tracking.
-- Nunca reset/delete/stash automaticamente para “arrumar” uma base ou liberar um worktree.
-- Em source mode, não crie runtime `pelizzai/`; devolva branch/base/isolation ao execution record
-  nativo. Campos de state abaixo valem para projeto consumidor.
+- One task = one Git repository. A monorepo is one repository; a multi-repo workspace opens one
+  state/execution record per repository. Do not hide a list in the project field.
+- The workspace is detected, never assumed: markers in the cwd and one level up (§2). The set of
+  affected projects is ALWAYS confirmed with the user; `pelizzai/` is root-level of the workspace.
+- base-ref and base-sha are resolved before the first change and do not change during the task.
+- The branch is created before spec/plan/code. During planning, isolation may stay pending.
+- The post-plan worktree reuses the existing branch; it does not create an empty branch from the
+  base.
+- This skill never uses `git pull`. Remote update is an explicit `git fetch <remote> <ref>`.
+- Never use a detached checkout followed by pull; remote-only becomes a start-point or a local
+  tracking branch.
+- Never reset/delete/stash automatically to "tidy up" a base or free a worktree.
+- In source mode, do not create `pelizzai/` runtime; return branch/base/isolation to the native
+  execution record. The state fields below apply to consumer projects.
 ```
 
-## 1. Identificar o único repositório
+## 1. Identify the single repository
 
 ```bash
 git rev-parse --show-toplevel
@@ -40,249 +42,252 @@ git worktree list --porcelain
 git remote -v
 ```
 
-Se não for Git, ofereça `git init` antes de escrever. Se a pasta contiver vários repositórios e o
-escopo do pedido não identificar um deles sem ambiguidade, confirme **qual único repositório**
-pertence à tarefa atual; abra tarefas separadas para os demais.
+If it is not Git, offer `git init` before writing. If the folder contains multiple repositories
+and the request's scope does not identify one of them unambiguously, confirm **which single
+repository** belongs to the current task; open separate tasks for the others.
 
-HEAD vazio/destacado, rebase/merge em curso ou branch protegida (`main`, `master`, `develop`,
-`dev` **e o default real descoberto no §3**, como `trunk`) nunca é destino de commits. Se já houver mudanças, preserve-as criando a branch de tarefa a
-partir do HEAD atual após confirmação. Se já houver commits indevidos na protegida, crie a branch
-de resgate e pare: entregue um handoff para o humano reconciliar a protegida. Não rode
-`reset --hard`, não force branch e não apague histórico.
+An empty/detached HEAD, a rebase/merge in progress, or a protected branch (`main`, `master`,
+`develop`, `dev`, **and the real default discovered in §3**, such as `trunk`) is never a commit
+destination. If changes already exist, preserve them by creating the task branch from the current
+HEAD after confirmation. If stray commits already sit on the protected branch, create the rescue
+branch and stop: hand over a handoff for the human to reconcile the protected branch. Do not run
+`reset --hard`, do not force branches, and do not erase history.
 
-Se já estiver numa branch não protegida, confirme se ela é a branch desta tarefa. Reutilize apenas
-quando a resposta e o registro disponível concordarem (`state.md` no consumidor; execution record
-nativo em source mode). Sem registro anterior, use a evidência de Git + titularidade explícita das
-mudanças; branch/sujeira ambígua não é adotada por palpite.
+If already on a non-protected branch, confirm whether it is this task's branch. Reuse it only when
+the answer and the available record agree (`state.md` in a consumer; native execution record in
+source mode). Without a prior record, use Git evidence + explicit ownership of the changes; an
+ambiguous branch or ambiguous dirt is never adopted on a hunch.
 
-## 2. Detectar workspace multi-projeto
+## 2. Detect a multi-project workspace
 
-Uma tarefa continua pertencendo a **um** repositório Git (§1) — isso não muda. O que o harness
-precisa saber antes de criar qualquer coisa é se esse repositório vive dentro de um **workspace**:
-o workspace decide onde o `pelizzai/` mora e quais projetos o pedido realmente toca. Verifique os
-marcadores no cwd e um nível acima:
+A task still belongs to **one** Git repository (§1) — that does not change. What the harness needs
+to know before creating anything is whether that repository lives inside a **workspace**: the
+workspace decides where `pelizzai/` lives and which projects the request actually touches. Check
+the markers in the cwd and one level up:
 
 ```bash
-marcadores="package.json pnpm-workspace.yaml turbo.json lerna.json nx.json pyproject.toml Cargo.toml go.work"
-ls $marcadores 2>/dev/null             # cwd
-(cd .. && ls $marcadores 2>/dev/null)  # um nível acima
-find . -maxdepth 2 -name ".git"        # irmãos com repositório próprio (dir ou arquivo de worktree)
+markers="package.json pnpm-workspace.yaml turbo.json lerna.json nx.json pyproject.toml Cargo.toml go.work"
+ls $markers 2>/dev/null             # cwd
+(cd .. && ls $markers 2>/dev/null)  # one level up
+find . -maxdepth 2 -name ".git"     # siblings with their own repository (dir or worktree file)
 ```
 
-Havendo workspace ou múltiplos projetos:
+When there is a workspace or multiple projects:
 
 ```text
-1. Infira da descrição da tarefa quais projetos são afetados (nome de diretório/pacote, menção a
-   frontend/backend/worker etc.). Inferir serve para montar a lista candidata, nunca para fechá-la.
-2. SEMPRE confirme com o usuário o conjunto afetado antes de prosseguir. O conjunto é decisão
-   dele: apresente a lista inferida com a recomendação e aguarde. Conjunto adivinhado é lacuna
-   material — vai para a `pelizzai-interview-me`, não para um default.
-3. Workspace de múltiplos repositórios Git: cada projeto afetado ganha isolamento próprio. Rode
-   §1 e §3–§8 de forma independente por repositório, e abra um registro de execução (state
-   consumidor ou execution record nativo) por repositório. Não esconda uma lista no campo `project`.
-4. Monorepo (um repositório Git, vários pacotes): o isolamento é único — uma branch cobre os
-   pacotes tocados. A confirmação do conjunto afetado continua valendo; ela delimita o escopo do
-   diff, não o número de branches.
+1. Infer from the task description which projects are affected (directory/package name, mention of
+   frontend/backend/worker, etc.). Inference builds the candidate list, never closes it.
+2. ALWAYS confirm the affected set with the user before proceeding. The set is the user's
+   decision: present the inferred list with a recommendation and wait. A guessed set is a material
+   gap — it goes to `pelizzai-interview-me`, not to a default.
+3. Workspace of multiple Git repositories: each affected project gets its own isolation. Run §1
+   and §3–§8 independently per repository, and open one execution record (consumer state or
+   native execution record) per repository. Do not hide a list in the `project` field.
+4. Monorepo (one Git repository, multiple packages): the isolation is single — one branch covers
+   the touched packages. Confirming the affected set still applies; it bounds the scope of the
+   diff, not the number of branches.
 ```
 
-O `pelizzai/` é **root-level do workspace**, não um por pacote: `domain-skills.md`, `profile.md` e
-`data/` vivem na raiz declarada dona dos artefatos — é essa raiz que a `pelizzai-audit` mapeia e é
-por ela que o hook de cadência localiza o ledger (ele resolve pelo `cwd` assumindo `pelizzai/` na
-raiz). Em workspace com múltiplos repositórios, um state escalar não cobre todos: ou se faz
-bootstrap por repo, ou se declara explicitamente a raiz dona.
+`pelizzai/` is **root-level of the workspace**, not one per package: `domain-skills.md`,
+`profile.md`, and `data/` live in the root declared as owner of the artifacts — that root is what
+`pelizzai-audit` maps and it is how the cadence hook locates the ledger (it resolves via `cwd`
+assuming `pelizzai/` at the root). In a workspace with multiple repositories, one scalar state
+does not cover them all: either bootstrap per repo, or explicitly declare the owning root.
 
-Nomes: use o mesmo `<tipo>/<slug>` em todos os projetos afetados, a menos que o usuário peça nomes
-específicos por projeto.
+Names: use the same `<type>/<slug>` across all affected projects, unless the user asks for
+project-specific names.
 
-## 3. Descobrir a base real
+## 3. Discover the real base
 
-Não use a preferência histórica `develop > dev > main`. Descubra o default do repositório:
+Do not use the historical preference `develop > dev > main`. Discover the repository's default:
 
 ```bash
-# Execute apenas se `origin` existir; falha de rede não invalida refs locais já conhecidas.
+# Run only if `origin` exists; a network failure does not invalidate already-known local refs.
 git fetch origin --prune
 git symbolic-ref --quiet --short refs/remotes/origin/HEAD
 
-# Só se origin/HEAD estiver ausente: consulta o HEAD anunciado pelo remoto, sem checkout.
+# Only if origin/HEAD is absent: queries the HEAD announced by the remote, without checkout.
 git remote show origin
 
-# Fallback local: é apenas um nome candidato e só vale se a ref correspondente existir.
+# Local fallback: just a candidate name, valid only if the corresponding ref exists.
 git config --get init.defaultBranch
 
-# Inventário para confirmar candidatos e evitar adivinhação.
+# Inventory to confirm candidates and avoid guessing.
 git for-each-ref --format='%(refname:short)' refs/heads refs/remotes/origin
 ```
 
-Algoritmo:
+Algorithm:
 
-1. Se `origin/HEAD` resolver para commit, proponha essa ref.
-2. Se estiver ausente, use o `HEAD branch` anunciado por `git remote show origin`, desde que
-   `origin/<nome>` resolva.
-3. Sem default remoto, aceite `init.defaultBranch` somente se `refs/heads/<nome>` ou
-   `refs/remotes/origin/<nome>` existir.
-4. Sem candidato inequívoco, mostre as refs existentes e pergunte a base. Nunca crie `develop`
-   como convenção do harness.
-5. Com candidato inequívoco e atual, apresente ref + SHA com recomendação e faça uma pergunta:
-   "Confirma esta base?". Aguarde. Nos tracks leves (ajuste/bug), não abra pergunta separada:
-   entregue a base recomendada (ref + SHA) e o nome sugerido ao confirm compacto da head skill,
-   que ratifica tudo numa linha só; base sem candidato inequívoco (passo 4) continua parando aqui.
-   Uma base materialmente diferente é um recomeço explícito; `base-ref`/`base-sha` continuam
-   imutáveis durante a tarefa.
+1. If `origin/HEAD` resolves to a commit, propose that ref.
+2. If it is absent, use the `HEAD branch` announced by `git remote show origin`, provided
+   `origin/<name>` resolves.
+3. Without a remote default, accept `init.defaultBranch` only if `refs/heads/<name>` or
+   `refs/remotes/origin/<name>` exists.
+4. Without an unambiguous candidate, show the existing refs and ask for the base. Never create
+   `develop` as a harness convention.
+5. With an unambiguous, current candidate, present ref + SHA with a recommendation and ask one
+   question: "Confirm this base?". Wait. In the light tracks (tweak/bug), do not open a separate
+   question: hand the recommended base (ref + SHA) and the suggested name to the head skill's
+   compact confirm, which ratifies everything in a single line; a base without an unambiguous
+   candidate (step 4) still stops here. A materially different base is an explicit restart;
+   `base-ref`/`base-sha` remain immutable during the task.
 
-O nome apontado pelo default descoberto passa a ser tratado como branch protegida pelo harness,
-mesmo que não se chame main/master/develop/dev.
+The name pointed to by the discovered default is treated as a protected branch by the harness from
+then on, even if it is not called main/master/develop/dev.
 
-Para uma base remota, atualize só ela e use a remote-tracking ref como start-point:
+For a remote base, update only that base and use the remote-tracking ref as the start-point:
 
 ```bash
-git fetch origin <nome-da-base>
-base_ref=origin/<nome-da-base>
+git fetch origin <base-name>
+base_ref=origin/<base-name>
 base_sha=$(git rev-parse "$base_ref^{commit}")
 ```
 
-Para base puramente local:
+For a purely local base:
 
 ```bash
-base_ref=refs/heads/<nome-da-base>
+base_ref=refs/heads/<base-name>
 base_sha=$(git rev-parse "$base_ref^{commit}")
 ```
 
-`base-ref` registra a ref efetivamente usada e `base-sha` registra o SHA completo. Se o fetch
-falhar, apresente a idade/limitação da ref local e peça confirmação; não finja que ela está atual.
+`base-ref` records the ref actually used and `base-sha` records the full SHA. If the fetch fails,
+present the local ref's age/limitation and ask for confirmation; do not pretend it is current.
 
-## 4. Nomear a branch de tarefa/planejamento
+## 4. Name the task/planning branch
 
-Depois de ratificar a base, derive `<tipo>/<slug-kebab>` (ASCII, minúsculo, até 50 caracteres).
-Apresente o nome recomendado com motivo e faça uma única pergunta: "Confirma este nome?". Nos
-tracks leves (ajuste/bug), o nome recomendado viaja no confirm compacto da head skill em vez de
-pergunta separada — o "ok" da linha É a ratificação de base + nome. Só crie a branch após resposta
-afirmativa. Não trave nome/base em silêncio. O tipo vem do efeito real:
+After ratifying the base, derive `<type>/<kebab-slug>` (ASCII, lowercase, up to 50 characters).
+Present the recommended name with the reason and ask a single question: "Confirm this name?". In
+the light tracks (tweak/bug), the recommended name travels in the head skill's compact confirm
+instead of a separate question — the line's "ok" IS the ratification of base + name. Only create
+the branch after an affirmative answer. Never lock in name/base silently. The type comes from the
+real effect:
 
-| Natureza | Tipo sugerido |
+| Nature | Suggested type |
 | --- | --- |
 | feature | `feat` |
 | bug | `fix` |
 | refactor | `refactor` |
-| docs apenas | `docs` |
-| teste apenas | `test` |
-| tooling/config/deps | `chore`, `build` ou `ci` |
+| docs only | `docs` |
+| tests only | `test` |
+| tooling/config/deps | `chore`, `build`, or `ci` |
 | performance | `perf` |
 
-## 5. Abrir a branch antes do planejamento
+## 5. Open the branch before planning
 
-Para tracks com spec/plano, após base e nome ratificados, crie a branch no working tree atual
-**antes** de escrever esses artefatos. A escolha de manter branch ou mover para worktree continua
-pendente até o gate pós-plano:
-
-```bash
-git switch -c <tipo>/<slug> --no-track <base-ref>
-```
-
-Em consumidor, registre imediatamente `project`, `branch`, `base-ref`, `base-sha`,
-`validated-head: <none>`, `isolation: <pending>` e `worktree-path: <none>`. Em source mode,
-devolva esses valores ao execution record sem criar state. Specs/planos persistentes e state
-consumidor agora nascem na branch que futuramente alimentará o worktree.
-
-Para um fluxo direto sem planejamento, aplique já a escolha de isolamento:
-
-- Branch: use o comando acima e registre `isolation: branch`.
-- Worktree: `git worktree add -b <branch> <caminho-fora-do-repo> <base-ref>` e registre o caminho.
-
-Em consumidor, **grave** o `state.md` com suas ferramentas de arquivo e siga — gravar basta. **Não
-crie commit só de metadata** (`chore: inicia tarefa <slug>`): o cursor viaja no primeiro commit de
-conteúdo da tarefa, junto aos paths exatos que ele descreve. Ele é metadata do harness, não conteúdo
-da entrega — se aparecer no pacote de review da Tarefa 1, é ruído conhecido, nunca motivo para um
-commit extra. Em source mode, não há state nem commit de setup; branch/worktree + execution record
-bastam.
-
-## 6. Aplicar o isolamento escolhido após o plano
-
-O nome e a base já foram ratificados antes da branch de planejamento. Se o usuário pedir renomear
-depois, use `git branch -m <novo-nome>` após confirmação; nunca `-M`. A base não é reescrita aqui.
-
-### Manter como branch
-
-Confirme que `git branch --show-current` é a branch registrada e, em consumidor, grave
-`isolation: branch` mais as decisões do gate. Antes da Tarefa 1, faça checkpoint dos artefatos
-intencionais de planejamento/state com paths exatos e exija working tree limpa. Em source mode,
-checkpoint apenas um plano persistente explicitamente pedido; plano nativo não gera arquivo.
-Não recrie a branch nem recalcule a base.
-
-### Mover a branch existente para um worktree
-
-1. Na branch de tarefa, faça checkpoint **somente quando existirem** artefatos persistentes
-   intencionais de planejamento (`plan`, spec/ADR e, no consumidor, `state.md`). Use paths exatos;
-   nunca `git add -A`. Plano nativo em source mode não cria commit vazio.
-2. Se houver artefatos, inspecione `git diff --cached` e crie o commit. Se o usuário não autorizar
-   esse checkpoint, mantenha `isolation: branch`; mudanças não commitadas não atravessam
-   worktrees. Com ou sem novo commit, capture `checkpoint-sha = git rev-parse HEAD`.
-3. Exija `git status --porcelain` vazio. Mudança estranha ou alheia gera handoff/decisão humana;
-   não faça stash automático.
-4. Libere a branch no working tree principal:
-   - base local existente: `git switch <nome-local-da-base>`;
-   - base somente remota: crie a local tracking sem detached HEAD,
-     `git switch -c <nome-da-base> --track <base-ref>`;
-   - base que seja tag/SHA ou nome local colidente: pare e combine uma branch de estacionamento.
-5. Crie o worktree **com a branch existente**, sem `-b`:
+For tracks with a spec/plan, once base and name are ratified, create the branch in the current
+working tree **before** writing those artifacts. The choice between keeping the branch and moving
+to a worktree stays pending until the post-plan gate:
 
 ```bash
-git worktree add <caminho-fora-do-repo> <tipo>/<slug>
+git switch -c <type>/<slug> --no-track <base-ref>
 ```
 
-6. Dentro dele, confirme branch, `HEAD == checkpoint-sha` e presença dos artefatos persistentes,
-   quando existirem.
-7. Em consumidor, grave `isolation: worktree` e `worktree-path` no `state.md` dentro do worktree —
-   sem commit de metadata; esse toque entra no primeiro commit de conteúdo. Antes da Tarefa 1, exija
-   que nada além dele esteja sujo. Em source mode, atualize apenas o execution record nativo; não
-   crie state.
+In a consumer, immediately record `project`, `branch`, `base-ref`, `base-sha`,
+`validated-head: <none>`, `isolation: <pending>`, and `worktree-path: <none>`. In source mode,
+return these values to the execution record without creating state. Persistent specs/plans and the
+consumer state are now born on the branch that will later feed the worktree.
 
-O caminho fica fora da árvore do repositório. Se o ambiente bloquear a criação, informe e peça
-confirmação para permanecer em branch; não degrade em silêncio.
+For a direct flow without planning, apply the isolation choice right away:
 
-## 7. Baseline proporcional
+- Branch: use the command above and record `isolation: branch`.
+- Worktree: `git worktree add -b <branch> <path-outside-the-repo> <base-ref>` and record the path.
 
-Antes da implementação, rode a evidência de baseline apropriada ao artefato e ao perfil do projeto:
-suíte/teste focal para comportamento, characterization para legado, parser/dry-run para config,
-render/lint para docs e aplicação rodando para UI. Baseline falho é reportado antes da mudança; o
-usuário decide investigar ou prosseguir com a falha registrada.
+In a consumer, **write** the `state.md` with your file tools and move on — writing is enough. **Do
+not create a metadata-only commit** (`chore: start task <slug>`): the cursor travels in the task's
+first content commit, alongside the exact paths it describes. It is harness metadata, not delivery
+content — if it shows up in Task 1's review package, it is known noise, never a reason for an
+extra commit. In source mode, there is no state and no setup commit; branch/worktree + execution
+record suffice.
 
-## 8. Estado e reporte
+## 6. Apply the chosen isolation after the plan
 
-Em consumidor, o `state.md` final do setup contém:
+The name and the base were already ratified before the planning branch. If the user asks to rename
+later, use `git branch -m <new-name>` after confirmation; never `-M`. The base is not rewritten
+here.
+
+### Keep as a branch
+
+Confirm that `git branch --show-current` is the recorded branch and, in a consumer, record
+`isolation: branch` plus the gate decisions. Before Task 1, checkpoint the intentional
+planning/state artifacts with exact paths and require a clean working tree. In source mode,
+checkpoint only a persistent plan the user explicitly asked for; a native plan generates no file.
+Do not recreate the branch or recompute the base.
+
+### Move the existing branch to a worktree
+
+1. On the task branch, checkpoint **only when there are** intentional persistent planning
+   artifacts (`plan`, spec/ADR and, in a consumer, `state.md`). Use exact paths; never
+   `git add -A`. A native plan in source mode creates no empty commit.
+2. If there are artifacts, inspect `git diff --cached` and create the commit. If the user does not
+   authorize that checkpoint, keep `isolation: branch`; uncommitted changes do not cross
+   worktrees. With or without a new commit, capture `checkpoint-sha = git rev-parse HEAD`.
+3. Require an empty `git status --porcelain`. A strange or third-party change triggers a
+   handoff/human decision; do not auto-stash.
+4. Free the branch in the main working tree:
+   - existing local base: `git switch <local-base-name>`;
+   - remote-only base: create the local tracking branch without a detached HEAD,
+     `git switch -c <base-name> --track <base-ref>`;
+   - base that is a tag/SHA or a colliding local name: stop and agree on a parking branch.
+5. Create the worktree **with the existing branch**, without `-b`:
+
+```bash
+git worktree add <path-outside-the-repo> <type>/<slug>
+```
+
+6. Inside it, confirm the branch, `HEAD == checkpoint-sha`, and the presence of the persistent
+   artifacts, when they exist.
+7. In a consumer, record `isolation: worktree` and `worktree-path` in the `state.md` inside the
+   worktree — no metadata commit; that touch goes into the first content commit. Before Task 1,
+   require that nothing besides it is dirty. In source mode, update only the native execution
+   record; do not create state.
+
+The path stays outside the repository tree. If the environment blocks the creation, report it and
+ask for confirmation to stay on branch; do not degrade silently.
+
+## 7. Proportional baseline
+
+Before implementation, run the baseline evidence appropriate to the artifact and the project's
+profile: focal suite/test for behavior, characterization for legacy, parser/dry-run for config,
+render/lint for docs, and a running application for UI. A failing baseline is reported before the
+change; the user decides whether to investigate or proceed with the failure on record.
+
+## 8. State and report
+
+In a consumer, the final setup `state.md` contains:
 
 ```text
-project: <raiz deste único repo>
-branch: <tipo>/<slug>
-base-ref: <ref exata>
-base-sha: <SHA completo>
+project: <root of this single repo>
+branch: <type>/<slug>
+base-ref: <exact ref>
+base-sha: <full SHA>
 validated-head: <none>
 isolation: <branch | worktree>
-worktree-path: <none | caminho>
+worktree-path: <none | path>
 ```
 
-Reporte branch, base-ref + base-sha, isolamento, caminho e baseline. Em source mode, este reporte
-é o execution record. Em retomada, compare os dados persistidos/nativos com Git; divergência
-material chama `pelizzai-recovery`, não heurística.
+Report branch, base-ref + base-sha, isolation, path, and baseline. In source mode, this report is
+the execution record. On resumption, compare the persisted/native data with Git; a material
+divergence calls `pelizzai-recovery`, not heuristics.
 
 ## Red flags
 
 ```text
-- Impor/criar develop porque “é a convenção”.
-- `git pull` sem remote/ref explícitos, ou pull em HEAD destacado.
-- Escrever spec/plano na base e só depois criar uma branch vazia/worktree da base.
-- Criar worktree pós-plano com `-b` a partir da base, perdendo a branch de planejamento.
-- Recalcular base-sha no fechamento; ele é um snapshot do início.
-- Pular a detecção de workspace, ou fechar sozinho o conjunto de projetos afetados sem confirmar.
-- Espalhar um `pelizzai/` por pacote em vez de mantê-lo na raiz do workspace.
-- Misturar vários repositórios em um único state.
-- `git add -A`, stash, reset, force-delete ou limpeza automática para liberar o worktree.
-- Criar a branch antes de o usuário ratificar base e nome recomendados.
+- Imposing/creating develop because "it's the convention".
+- `git pull` without an explicit remote/ref, or pull on a detached HEAD.
+- Writing the spec/plan on the base and only then creating an empty branch/worktree from the base.
+- Creating the post-plan worktree with `-b` from the base, losing the planning branch.
+- Recomputing base-sha at closeout; it is a snapshot of the start.
+- Skipping workspace detection, or closing the affected project set alone without confirming.
+- Scattering a `pelizzai/` per package instead of keeping it at the workspace root.
+- Mixing multiple repositories into a single state.
+- `git add -A`, stash, reset, force-delete, or automatic cleanup to free the worktree.
+- Creating the branch before the user ratifies the recommended base and name.
 ```
 
-## Integração
+## Integration
 
-**Chamada por:** router antes de brainstorming/spec/plano; `pelizzai-execution-plans` no gate
-pós-plano; debugging/quick-fix antes de escrever código.
+**Called by:** the router before brainstorming/spec/plan; `pelizzai-execution-plans` at the
+post-plan gate; debugging/quick-fix before writing code.
 
-**Combina com:** `pelizzai-execution-plans`, `pelizzai-recovery`, `pelizzai-finish-task` e
+**Combines with:** `pelizzai-execution-plans`, `pelizzai-recovery`, `pelizzai-finish-task`, and
 `pelizzai-audit`.

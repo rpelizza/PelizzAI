@@ -1,192 +1,188 @@
-## III. Princípios Elementares de Composição
+## III. Elementary Principles of Composition
 
-### Regra 8. Faça do parágrafo a unidade da composição: um parágrafo para cada tópico.
+### Rule 8. Make the paragraph the unit of composition: one paragraph to each topic.
 
-Se o assunto sobre o qual você está escrevendo é de pequena extensão, ou se pretende tratá-lo muito brevemente, talvez não haja necessidade de dividi-lo em tópicos. Assim, uma breve descrição, um breve resumo de uma obra literária, um breve relato de um único incidente, uma narrativa que apenas esboça uma ação, a exposição de uma única ideia: qualquer uma dessas formas é melhor escrita em um único parágrafo. Depois de escrever o parágrafo, examine-o para ver se uma subdivisão não o melhoraria.
+If the subject you are writing about is of small extent, or if you intend to treat it very briefly, there may be no need to divide it into topics. Thus a brief description, a short summary of a literary work, a brief account of a single incident, a narrative that merely outlines an action, the statement of a single idea — any of these is best written in a single paragraph. Once the paragraph is written, examine it to see whether subdivision would improve it.
 
-Normalmente, porém, um assunto exige subdivisão em tópicos, cada um dos quais deve ser transformado no tema de um parágrafo. O objetivo de tratar cada tópico em um parágrafo próprio é, naturalmente, ajudar o leitor. O início de cada parágrafo é um sinal de que uma nova etapa no desenvolvimento do assunto foi alcançada.
+Usually, however, a subject requires subdivision into topics, each of which should be made the subject of a paragraph. The purpose of treating each topic in its own paragraph is, of course, to help the reader. The beginning of each paragraph is a signal that a new step in the development of the subject has been reached.
 
-A extensão da subdivisão variará conforme o tamanho da composição. Por exemplo, uma breve nota sobre um livro ou poema poderia consistir em um único parágrafo. Uma nota um pouco mais longa poderia consistir em dois parágrafos:
+The extent of subdivision will vary with the length of the composition. A short notice of a book or poem, for example, might consist of a single paragraph. A slightly longer one might consist of two paragraphs:
 
-- A. Relato da obra.
-- B. Discussão crítica.
+- A. Account of the work.
+- B. Critical discussion.
 
-Um relatório sobre um poema, escrito para uma aula de literatura, poderia consistir em sete parágrafos:
+A report on a poem, written for a literature class, might consist of seven paragraphs:
 
-- A. Dados de composição e publicação.
-- B. Tipo de poema; forma métrica.
-- C. Assunto.
-- D. Tratamento do assunto.
-- E. Pelo que é principalmente notável.
-- F. Em que é característico do autor.
-- G. Relação com outras obras.
+- A. Facts of composition and publication.
+- B. Kind of poem; metrical form.
+- C. Subject.
+- D. Treatment of the subject.
+- E. What it is chiefly remarkable for.
+- F. In what ways it is characteristic of the author.
+- G. Relationship to other works.
 
-O conteúdo dos parágrafos C e D variaria conforme o poema. Em geral, o parágrafo C indicaria as circunstâncias reais ou imaginadas do poema (a situação), caso elas exigissem explicação, e então apresentaria o assunto e esboçaria seu desenvolvimento. Se o poema for uma narrativa em terceira pessoa do começo ao fim, o parágrafo C não precisa conter mais do que um resumo conciso da ação. O parágrafo D indicaria as ideias principais e mostraria como elas se tornam proeminentes, ou indicaria quais pontos da narrativa recebem maior ênfase.
+The contents of paragraphs C and D would vary with the poem. In general, paragraph C would indicate the actual or imagined circumstances of the poem (the situation), if these call for explanation, and would then state the subject and outline its development. If the poem is a third-person narrative throughout, paragraph C need contain no more than a concise summary of the action. Paragraph D would point out the leading ideas and show how they are made prominent, or would indicate which points of the narrative receive most emphasis.
 
-Um romance poderia ser discutido sob os seguintes tópicos:
+A novel might be discussed under these topics:
 
-- A. Cenário.
-- B. Enredo.
-- C. Personagens.
-- D. Propósito.
+- A. Setting.
+- B. Plot.
+- C. Characters.
+- D. Purpose.
 
-Um acontecimento histórico poderia ser discutido sob os seguintes tópicos:
+A historical event might be discussed under these topics:
 
-- A. O que levou ao acontecimento.
-- B. Relato do acontecimento.
-- C. A que o acontecimento levou.
+- A. What led up to the event.
+- B. Account of the event.
+- C. What the event led to.
 
-Ao tratar qualquer um desses dois últimos assuntos, o escritor provavelmente acharia necessário subdividir um ou mais dos tópicos aqui apresentados.
+In treating either of these last two subjects, the writer would probably find it necessary to subdivide one or more of the topics given here.
 
-Como regra, frases isoladas não devem ser escritas ou impressas como parágrafos. Pode-se abrir exceção para frases de transição, que indicam a relação entre as partes de uma exposição ou argumentação. Exceções frequentes também são necessárias em livros didáticos, guias e outras obras em que muitos tópicos são tratados brevemente.
+As a rule, single sentences should not be written or printed as paragraphs. An exception may be made for sentences of transition, which indicate the relation between the parts of an exposition or argument. Frequent exceptions are also needed in textbooks, guidebooks, and other works in which many topics are treated briefly.
 
-No diálogo, cada fala, ainda que tenha apenas uma palavra, forma um parágrafo próprio; isto é, um novo parágrafo começa a cada mudança de falante. A aplicação desta regra, quando diálogo e narrativa se combinam, é melhor aprendida por meio de exemplos em obras de ficção bem impressas.
+In dialogue, each speech, even a single word, is a paragraph of its own; that is, a new paragraph begins with each change of speaker. How to apply this rule when dialogue and narrative are combined is best learned from examples in well-printed works of fiction.
 
-### Regra 9. Como regra, comece cada parágrafo com uma frase-tópico e termine-o em conformidade com o começo.
+### Rule 9. As a rule, begin each paragraph with a topic sentence, and end it in conformity with the beginning.
 
-Mais uma vez, o objetivo é ajudar o leitor. A prática aqui recomendada permite que ele descubra o propósito de cada parágrafo ao começar a lê-lo, e que mantenha esse propósito em mente ao terminá-lo. Por essa razão, o tipo de parágrafo mais geralmente útil, sobretudo em exposição e argumentação, é aquele em que:
+Again, the object is to help the reader. The practice recommended here lets him discover the purpose of each paragraph as he begins to read it, and hold that purpose in mind as he finishes it. For this reason, the most generally useful kind of paragraph, particularly in exposition and argument, is the one in which:
 
-(a) a frase-tópico aparece no começo ou perto dele;
+(a) the topic sentence comes at or near the beginning;
 
-(b) as frases seguintes explicam, estabelecem ou desenvolvem a afirmação feita na frase-tópico; e
+(b) the following sentences explain, establish, or develop the statement made in the topic sentence; and
 
-(c) a frase final enfatiza o pensamento da frase-tópico ou declara alguma consequência importante.
+(c) the final sentence either drives home the thought of the topic sentence or states some important consequence.
 
-Deve-se evitar especialmente terminar com uma digressão ou com um detalhe sem importância.
+Ending with a digression, or with an unimportant detail, is especially to be avoided.
 
-Se o parágrafo faz parte de uma composição maior, talvez seja necessário expressar sua relação com o que o precede, ou sua função como parte do todo. Às vezes isso pode ser feito por uma simples palavra ou expressão (novamente; portanto; pela mesma razão) na frase-tópico. Em outros casos, porém, convém preceder a frase-tópico com uma ou mais frases de introdução ou transição. Se mais de uma dessas frases for necessária, em geral é melhor separar as frases de transição em um parágrafo próprio.
+If the paragraph is part of a larger composition, its relation to what precedes it, or its function within the whole, may need to be expressed. Sometimes a single word or phrase in the topic sentence does the job (again; therefore; for the same reason). At other times, though, it is better to precede the topic sentence with one or more sentences of introduction or transition. If more than one such sentence is needed, it is generally best to set the transitional sentences apart in a paragraph of their own.
 
-De acordo com seu propósito, o escritor pode, como indicado acima, relacionar o corpo do parágrafo à frase-tópico de uma ou mais maneiras diferentes. Pode tornar mais claro o sentido da frase-tópico reafirmando-a de outras formas, definindo seus termos, negando o contrário, dando ilustrações ou exemplos específicos; pode estabelecê-la por meio de provas; ou pode desenvolvê-la mostrando suas implicações e consequências. Em um parágrafo longo, ele pode executar vários desses processos.
+Depending on his purpose, the writer may, as noted above, relate the body of the paragraph to the topic sentence in one or more of several ways. He may make the meaning of the topic sentence clearer by restating it in other forms, by defining its terms, by denying the contrary, or by giving illustrations or specific instances; he may establish it by proof; or he may develop it by showing its implications and consequences. In a long paragraph he may carry out several of these processes.
 
 > 1 Now, to be properly enjoyed, a walking tour should be gone upon alone. 2 If you go in a company, or even in pairs, it is no longer a walking tour in anything but name; it is something else and more in the nature of a picnic. 3 A walking tour should be gone upon alone, because freedom is of the essence; because you should be able to stop and go on, and follow this way or that, as the freak takes you; and because you must have your own pace, and neither trot alongside a champion walker, nor mince in time with a girl. 4 And you must be open to all impressions and let your thoughts take colour from what you see. 5 You should be as a pipe for any wind to play upon. 6 “I cannot see the wit,” says Hazlitt, “of walking and talking at the same time. 7 When I am in the country, I wish to vegetate like the country,” which is the gist of all that can be said upon the matter. 8 There should be no cackle of voices at your elbow, to jar on the meditative silence of the morning. 9 And so long as a man is reasoning he cannot surrender himself to that fine intoxication that comes of much motion in the open air, that begins in a sort of dazzle and sluggishness of the brain, and ends in a peace that passes comprehension.—Stevenson, Walking Tours.
 
-(Tradução: 1 Para ser apreciada como deve, uma caminhada deve ser feita a sós. 2 Se você vai acompanhado, ou mesmo em dupla, já não é uma caminhada senão no nome; é outra coisa, mais da natureza de um piquenique. 3 Uma caminhada deve ser feita a sós, porque a liberdade é da essência; porque é preciso poder parar e seguir, e tomar este ou aquele rumo, conforme o capricho; e porque você deve ter o seu próprio ritmo, sem trotar ao lado de um andarilho campeão nem miudear o passo no compasso de uma moça. 4 E você deve estar aberto a todas as impressões e deixar que seus pensamentos se tinjam do que você vê. 5 Você deve ser como uma flauta para qualquer vento tocar. 6 “Não vejo a graça”, diz Hazlitt, “de andar e conversar ao mesmo tempo. 7 Quando estou no campo, quero vegetar como o campo”, e isso resume tudo o que se pode dizer sobre o assunto. 8 Não deve haver tagarelice de vozes ao seu lado, a perturbar o silêncio meditativo da manhã. 9 E, enquanto raciocina, o homem não consegue entregar-se àquela fina embriaguez que vem de muito movimento ao ar livre, que começa numa espécie de deslumbramento e torpor da mente e termina numa paz que ultrapassa o entendimento.)
-
-1 Frase-tópico. 2 O sentido se torna mais claro pela negação do contrário. 3 A frase-tópico é repetida, de forma abreviada, e sustentada por três razões; o sentido da terceira (“you must have your own pace”) se torna mais claro pela negação do contrário. 4 Uma quarta razão, apresentada de duas formas. 5 A mesma razão, apresentada ainda de outra forma. 6–7 A mesma razão conforme expressa por Hazlitt. 8 Repetição, em paráfrase, da citação de Hazlitt. 9 Afirmação final da quarta razão, em linguagem ampliada e intensificada para formar uma conclusão forte.
+1 Topic sentence. 2 The meaning is made clearer by denying the contrary. 3 The topic sentence is repeated, in abridged form, and supported by three reasons; the meaning of the third (“you must have your own pace”) is made clearer by denying the contrary. 4 A fourth reason, stated in two forms. 5 The same reason, stated in yet another form. 6–7 The same reason as Hazlitt expresses it. 8 A repetition, in paraphrase, of the quotation from Hazlitt. 9 A final statement of the fourth reason, in language amplified and heightened to form a strong conclusion.
 
 > 1 It was chiefly in the eighteenth century that a very different conception of history grew up. 2 Historians then came to believe that their task was not so much to paint a picture as to solve a problem; to explain or illustrate the successive phases of national growth, prosperity, and adversity. 3 The history of morals, of industry, of intellect, and of art; the changes that take place in manners or beliefs; the dominant ideas that prevailed in successive periods; the rise, fall, and modification of political constitutions; in a word, all the conditions of national well-being became the subject of their works. 4 They sought rather to write a history of peoples than a history of kings. 5 They looked especially in history for the chain of causes and effects. 6 They undertook to study in the past the physiology of nations, and hoped by applying the experimental method on a large scale to deduce some lessons of real value about the conditions on which the welfare of society mainly depend.—Lecky, The Political Value of History.
 
-(Tradução: 1 Foi principalmente no século XVIII que surgiu uma concepção muito diferente da história. 2 Os historiadores passaram então a crer que sua tarefa era menos pintar um quadro do que resolver um problema; explicar ou ilustrar as fases sucessivas de crescimento, prosperidade e adversidade de uma nação. 3 A história dos costumes, da indústria, do intelecto e da arte; as mudanças que ocorrem nos modos ou nas crenças; as ideias dominantes que prevaleceram em períodos sucessivos; a ascensão, a queda e a modificação das constituições políticas; numa palavra, todas as condições do bem-estar nacional tornaram-se o assunto de suas obras. 4 Eles buscaram escrever uma história dos povos, e não uma história dos reis. 5 Procuraram na história, sobretudo, a cadeia de causas e efeitos. 6 Empreenderam estudar no passado a fisiologia das nações e esperavam, aplicando o método experimental em larga escala, deduzir algumas lições de real valor sobre as condições de que depende principalmente o bem-estar da sociedade.)
+1 Topic sentence. 2 The meaning of the topic sentence is made clearer; the new conception of history is defined. 3 The definition is expanded. 4 The definition is explained by contrast. 5 The definition is supplemented: another element of the new conception of history. 6 Conclusion: an important consequence of the new conception of history.
 
-1 Frase-tópico. 2 O sentido da frase-tópico se torna mais claro; a nova concepção de história é definida. 3 A definição é ampliada. 4 A definição é explicada por contraste. 5 A definição é suplementada: outro elemento na nova concepção de história. 6 Conclusão: uma consequência importante da nova concepção de história.
+In narration and description, the paragraph sometimes begins with a concise, comprehensive statement that serves to hold together the details that follow.
 
-Na narração e na descrição, o parágrafo às vezes começa com uma afirmação concisa e abrangente que serve para manter unidos os detalhes que vêm em seguida.
+> The breeze served us admirably.
 
-> A brisa nos serviu admiravelmente.
+> The campaign opened with a series of reverses.
 
-> A campanha começou com uma série de reveses.
+> The next ten or twelve pages were filled with a curious set of entries.
 
-> As dez ou doze páginas seguintes estavam tomadas por um curioso conjunto de anotações.
+But this device, used too often, would become a mannerism. More commonly, the opening sentence simply indicates, through its subject, what the paragraph will chiefly be about.
 
-Mas esse recurso, se usado com frequência demais, se tornaria um maneirismo. Mais comumente, a frase de abertura simplesmente indica, por meio de seu sujeito, aquilo de que o parágrafo tratará principalmente.
+> At length I thought I might return towards the stockade.
 
-> Por fim, pensei que talvez pudesse voltar para a paliçada.
+> He picked up the heavy lamp from the table and began to explore.
 
-> Ele pegou o pesado lampião sobre a mesa e começou a explorar.
+> Another flight of steps, and they emerged on the roof.
 
-> Mais um lance de escadas, e eles surgiram no telhado.
+The brief paragraphs of a lively narrative, however, often lack even this semblance of a topic sentence. The break between them works as a rhetorical pause, throwing some detail of the action into relief.
 
-Os parágrafos breves de uma narrativa animada, porém, muitas vezes não têm nem mesmo essa aparência de frase-tópico. A quebra entre eles cumpre a função de uma pausa retórica, dando destaque a algum detalhe da ação.
+### Rule 10. Use the active voice.
 
-### Regra 10. Use a voz ativa.
+The active voice is usually more direct and vigorous than the passive:
 
-A voz ativa costuma ser mais direta e vigorosa do que a passiva:
+> I shall always remember my first visit to Salvador.
 
-> Sempre me lembrarei da minha primeira visita a Salvador.
+This is much better than:
 
-Isso é muito melhor do que:
+> My first visit to Salvador will always be remembered by me.
 
-> Minha primeira visita a Salvador sempre será lembrada por mim.
+The second sentence is less direct, less bold, and less concise. If the writer tries to make it more concise by omitting "by me":
 
-A segunda frase é menos direta, menos firme e menos concisa. Se o escritor tentar torná-la mais concisa omitindo "por mim":
+> My first visit to Salvador will always be remembered,
 
-> Minha primeira visita a Salvador sempre será lembrada,
+it becomes indefinite: is it the writer, some undisclosed person, or the world at large that will always remember this visit?
 
-ela se torna indefinida: é o escritor, alguma pessoa não revelada, ou o mundo em geral que sempre se lembrará dessa visita?
+This rule does not, of course, mean that the writer should discard the passive voice altogether; it is frequently convenient and sometimes necessary.
 
-Esta regra, naturalmente, não significa que o escritor deva descartar inteiramente a voz passiva, que é frequentemente conveniente e às vezes necessária.
+> The dramatists of the Romantic period are little esteemed today.
 
-> Os dramaturgos do Romantismo são pouco estimados hoje.
+> Today's readers have little esteem for the dramatists of the Romantic period.
 
-> Os leitores de hoje têm pouca estima pelos dramaturgos do Romantismo.
+The first would be the right form in a paragraph about the dramatists of the Romantic period; the second, in a paragraph about the tastes of today's readers. The need to make a particular word the subject of the sentence will often, as in these examples, determine which voice to use.
 
-A primeira seria a forma correta em um parágrafo sobre os dramaturgos do Romantismo; a segunda, em um parágrafo sobre os gostos dos leitores de hoje. A necessidade de transformar uma palavra específica no sujeito da frase muitas vezes, como nesses exemplos, determinará qual voz deve ser usada.
+> Note: when the agent does not matter, the plainest passive is the lightest and most direct choice ("The region was surveyed in 1900"), and it is often preferable to noun-heavy alternatives ("A survey of this region was made in 1900").
 
-> Nota de adaptação (pt-BR): em português, além da passiva perifrástica ("a região foi pesquisada em 1900"), existe a passiva sintética ou pronominal, formada com a partícula apassivadora "se" ("pesquisou-se a região em 1900"). A forma sintética costuma ser mais leve e direta, sobretudo quando o agente não importa, e muitas vezes é preferível à perifrástica.
+As a rule, avoid making one passive depend directly on another.
 
-Como regra, evite fazer uma passiva depender diretamente de outra.
+| Original                                               | Revision                                                              |
+| ------------------------------------------------------ | --------------------------------------------------------------------- |
+| Gold was not allowed to be exported.                   | It was forbidden to export gold. (The export of gold was prohibited.) |
+| He was proved to have been seen entering the building. | It was proved that he was seen to enter the building.                 |
 
-| Original                                                            | Revisão                                                |
-| ----------------------------------------------------------------- | ------------------------------------------------------ |
-| O ouro não era permitido ser exportado.                            | Era proibido exportar ouro. (Proibia-se a exportação de ouro.) |
-| Ele foi provado ter sido visto entrando no prédio.                 | Provou-se que ele foi visto entrar no prédio.          |
+In both examples above, before correction, the word properly belonging to the second passive is made the subject of the first.
 
-Em ambos os exemplos acima, antes da correção, a palavra propriamente relacionada à segunda passiva é transformada em sujeito da primeira.
+A common fault is to use as the subject of a passive construction a noun that expresses the entire action, leaving the verb no function beyond completing the sentence.
 
-Um erro comum é usar como sujeito de uma construção passiva um substantivo que expressa toda a ação, deixando ao verbo nenhuma função além da de completar a frase.
+| Original                                          | Revision                           |
+| ------------------------------------------------- | ---------------------------------- |
+| A survey of this region was made in 1900.         | The region was surveyed in 1900.   |
+| Mobilization of the army was rapidly effected.    | The army was rapidly mobilized.    |
+| Confirmation of these reports cannot be obtained. | These reports cannot be confirmed. |
 
-| Original                                                | Revisão                                  |
-| ------------------------------------------------------ | ---------------------------------------- |
-| Foi feita uma pesquisa desta região em 1900.           | Pesquisou-se a região em 1900.           |
-| A mobilização do exército foi rapidamente efetuada.    | O exército foi rapidamente mobilizado.   |
-| A confirmação destes relatos não pode ser obtida.      | Estes relatos não podem ser confirmados. |
+Compare the sentence "The export of gold was prohibited," in which the predicate "was prohibited" expresses something not implied in "export."
 
-Compare com a frase "Proibiu-se a exportação de ouro", em que o predicado "proibiu-se" expressa algo que não está implícito em "exportação".
+Habitual use of the active voice makes for vigorous writing. This is true not only in narrative concerned mainly with action, but in writing of every kind. Many a limp sentence of description or exposition can be made lively and emphatic by replacing a perfunctory expression such as "there was" or "could be heard" with a verb in the active voice.
 
-O uso habitual da voz ativa contribui para uma escrita vigorosa. Isso é verdade não apenas na narrativa principalmente voltada à ação, mas em qualquer tipo de escrita. Muitas frases frouxas de descrição ou exposição podem se tornar vivas e enfáticas ao substituir expressões protocolares como "havia" ou "podia ser ouvido" por um verbo na voz ativa.
+| Original                                                         | Revision                                            |
+| ----------------------------------------------------------------- | ---------------------------------------------------- |
+| There were a great number of dead leaves lying on the ground.    | Dead leaves covered the ground.                     |
+| The sound of a guitar somewhere in the house could be heard.     | Somewhere in the house, a guitar strummed sleepily. |
+| The reason he left college was that his health became impaired.  | Failing health compelled him to leave college.      |
+| It was not long before he was very sorry about what he had said. | He soon regretted his words.                        |
 
-| Original                                                                 | Revisão                                            |
-| ----------------------------------------------------------------------- | -------------------------------------------------- |
-| Havia uma grande quantidade de folhas mortas espalhadas pelo chão.      | Folhas mortas cobriam o chão.                      |
-| O som de um violão em algum lugar da casa podia ser ouvido.             | Em algum lugar da casa, um violão dedilhava sonolento. |
-| A razão de ele ter deixado a faculdade foi que sua saúde se debilitou.  | A saúde debilitada o obrigou a deixar a faculdade. |
-| Não demorou muito até que ele lamentasse muito o que tinha dito.        | Ele logo se arrependeu das próprias palavras.      |
+### Rule 11. Put statements in positive form.
 
-### Regra 11. Coloque as afirmações em forma positiva.
+Make definite assertions. Avoid weak, colorless, hesitating, evasive language. Use the word "not" as a means of denial or antithesis, never as a means of evasion.
 
-Faça afirmações definidas. Evite linguagem fraca, sem cor, hesitante, evasiva. Use a palavra "não" como meio de negação ou em antítese, nunca como meio de fuga.
+| Original                                                                                                                                            | Revision                                                                                                 |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| He was not very often on time.                                                                                                                      | He usually came late.                                                                                    |
+| He did not think that studying Latin was much use.                                                                                                  | He thought the study of Latin useless.                                                                   |
+| The women in The Taming of the Shrew are not very striking. Katharine is not a very admirable character, nor does Bianca remain long in the memory. | The women in The Taming of the Shrew are unattractive. Katharine is disagreeable; Bianca, insignificant. |
 
-| Original                                                                                                                                                      | Revisão                                                              |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Ele não chegava no horário com muita frequência.                                                                                                            | Ele costumava chegar atrasado.                                      |
-| Ele não achava que estudar latim tivesse muita utilidade.                                                                                                   | Ele achava o estudo do latim inútil.                                |
-| As mulheres em A Megera Domada não são muito marcantes. Catarina não é uma personagem muito admirável, e Bianca tampouco permanece por muito tempo na memória. | As mulheres em A Megera Domada são pouco atraentes. Catarina é desagradável; Bianca, insignificante. |
+The last example, before correction, is indefinite as well as negative; the corrected version is therefore only a guess at the writer's intention.
 
-O último exemplo, antes da correção, é indefinido além de negativo. A versão corrigida, consequentemente, é apenas uma suposição sobre a intenção do escritor.
+All three examples show the weakness inherent in the word "not." Consciously or unconsciously, the reader is dissatisfied at being told only what something is not; he wants to know what it is. Hence, as a rule, it is better to express even a negative in positive form.
 
-Os três exemplos mostram a fraqueza inerente à palavra "não". Consciente ou inconscientemente, o leitor se sente insatisfeito ao receber apenas a informação do que algo não é; ele quer saber o que algo é. Portanto, como regra, é melhor expressar até mesmo uma negativa em forma positiva.
+| Original                        | Revision   |
+| ------------------------------- | ---------- |
+| not honest                      | dishonest  |
+| not important                   | trivial    |
+| did not remember                | forgot     |
+| paid no attention to            | ignored    |
+| did not have much confidence in | distrusted |
 
-| Original                       | Revisão       |
-| ----------------------------- | ------------- |
-| não honesto                   | desonesto     |
-| não importante                | trivial       |
-| não se lembrou                | esqueceu      |
-| não deu nenhuma atenção a     | ignorou       |
-| não tinha muita confiança em  | desconfiava de |
+> Note: English has productive negative affixes (un-, in-/im-, dis-, -less) that turn a roundabout negation into a single, stronger word: "not happy" → "unhappy"; "not usual" → "unusual".
 
-> Nota de adaptação (pt-BR): em português, prefira "não" a qualquer transposição literal do inglês "not". E lembre-se de que existem afixos negativos produtivos (des-, in-/im-, a-) que transformam uma negação perifrástica numa palavra positiva e mais forte: "não feliz" → "infeliz"; "não usual" → "incomum".
+The antithesis of negative and positive is strong:
 
-A antítese entre negativo e positivo é forte:
+> Not charity, but simple justice.
 
-> Não caridade, mas simples justiça.
+> Not that I loved Caesar less, but Rome the more. (Shakespeare, Julius Caesar)
 
-> Não que eu amasse menos a César, mas Roma, mais. (Shakespeare, Júlio César: "Not that I loved Caesar less, but Rome the more.")
+Negative words other than "not" are usually strong:
 
-Palavras negativas que não sejam "não" costumam ser fortes:
+> The sun never sets on British territory.
 
-> O sol nunca se põe sobre o território britânico.
+### Rule 12. Use definite, specific, concrete language.
 
-### Regra 12. Use linguagem definida, específica e concreta.
+Prefer the specific to the general, the definite to the vague, the concrete to the abstract.
 
-Prefira o específico ao geral, o definido ao vago, o concreto ao abstrato.
+| Original                                                                                                     | Revision                                           |
+| -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| A period of unfavorable weather set in.                                                                      | It rained every day for a week.                    |
+| He showed satisfaction as he took possession of his well-earned reward.                                      | He grinned as he pocketed the coin.                |
+| There is general agreement among those who have had the experience that surfing produces great exhilaration. | All who have surfed agree that it is exhilarating. |
 
-| Original                                                                                          | Revisão                                                  |
-| ----------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| Instalou-se um período de tempo desfavorável.                                                    | Choveu todos os dias durante uma semana.                |
-| Ele demonstrou satisfação ao tomar posse de sua merecida recompensa.                            | Ele sorriu ao embolsar a moeda.                         |
-| Há consenso geral, entre os que tiveram a experiência, de que surfar é fonte de grande euforia. | Todos os que já surfaram concordam que é empolgante.    |
-
-Se aqueles que estudaram a arte de escrever concordam em algum ponto, é neste: o método mais seguro de despertar e manter a atenção do leitor é ser específico, definido e concreto. Críticos apontaram o quanto da eficácia dos maiores escritores, Homero, Dante, Shakespeare, resulta de sua constante definição e concretude. Browning, para citar um autor mais moderno, oferece muitos exemplos impressionantes. Tome, por exemplo, os versos de My Last Duchess:
+If those who have studied the art of writing agree on any one point, it is this: the surest way of arousing and holding the reader's attention is to be specific, definite, and concrete. Critics have pointed out how much of the effectiveness of the greatest writers — Homer, Dante, Shakespeare — comes from their constant definiteness and concreteness. Browning, to cite a more modern author, offers many striking examples. Take, for instance, the lines from My Last Duchess:
 
 > Sir, 'twas all one! My favour at her breast,
 > The dropping of the daylight in the west,
@@ -196,216 +192,204 @@ Se aqueles que estudaram a arte de escrever concordam em algum ponto, é neste: 
 > Would draw from her alike the approving speech,
 > Or blush, at least,
 
-(Tradução: Senhor, para ela tanto fazia! O meu broche em seu peito, o cair da luz do dia a oeste, o galho de cerejas que algum tolo solícito quebrou no pomar para ela, a mula branca que ela montava ao redor do terraço — tudo e cada coisa lhe arrancavam por igual a mesma fala de aprovação, ou ao menos um rubor.)
-
-e aqueles que encerram o poema:
+and those that close the poem:
 
 > Notice Neptune, though,
 > Taming a sea-horse, thought a rarity,
 > Which Claus of Innsbruck cast in bronze for me.
 
-(Tradução: Repare, porém, em Netuno domando um cavalo-marinho, tido por raridade, que Claus de Innsbruck fundiu em bronze para mim.)
+These words call up pictures. Recall how in The Bishop Orders his Tomb in St. Praxed's Church "the Renaissance spirit—its worldliness, inconsistency, pride, hypocrisy, ignorance of itself, love of art, of luxury, of good Latin", to quote Ruskin's comment on the poem, is made manifest in specific details and in concrete terms.
 
-Essas palavras evocam imagens. Lembre-se de como, em The Bishop Orders his Tomb in St. Praxed's Church, "the Renaissance spirit—its worldliness, inconsistency, pride, hypocrisy, ignorance of itself, love of art, of luxury, of good Latin" ("o espírito do Renascimento — sua mundanidade, inconsistência, orgulho, hipocrisia, desconhecimento de si, amor à arte, ao luxo, ao bom latim"), para citar o comentário de Ruskin sobre o poema, se manifesta em detalhes específicos e em termos concretos.
+Prose — narrative and descriptive prose in particular — is made vivid by the same means. If the experiences of adventure-story characters have seemed momentarily real to countless readers; if, reading a good historical account, we almost feel physically present at the scene described — it is because of the definiteness of the details and the concreteness of the terms used. It is not a matter of giving every detail; that would be impossible, and useless. It is a matter of giving every significant detail, and not vaguely, but with such precision that the reader can project himself, in imagination, into the scene.
 
-A prosa, em particular a prosa narrativa e descritiva, torna-se vívida pelos mesmos meios. Se as experiências de personagens de aventura pareceram momentaneamente reais a inúmeros leitores; se, ao ler um bom relato histórico, quase temos a sensação de estar fisicamente presentes na cena descrita, isso se deve à definição dos detalhes e à concretude dos termos usados. Não se trata de fornecer todos os detalhes; isso seria impossível e inútil. Trata-se de fornecer todos os detalhes significativos, e não vagamente, mas com tal precisão que o leitor, em imaginação, possa se projetar na cena.
-
-Na exposição e na argumentação, o escritor também nunca deve perder seu contato com o concreto; mesmo quando lida com princípios gerais, deve apresentar exemplos particulares de sua aplicação.
+In exposition and argument, likewise, the writer must never lose hold of the concrete; even when dealing with general principles, he must give particular instances of their application.
 
 > "This superiority of specific expressions is clearly due to the effort required to translate words into thoughts. As we do not think in generals, but in particulars—as whenever any class of things is referred to, we represent it to ourselves by calling to mind individual members of it, it follows that when an abstract word is used, the hearer or reader has to choose, from his stock of images, one or more by which he may figure to himself the genus mentioned. In doing this, some delay must arise, some force be expended; and if by employing a specific term an appropriate image can be at once suggested, an economy is achieved, and a more vivid impression produced."
 
-(Tradução: "Essa superioridade das expressões específicas deve-se claramente ao esforço exigido para traduzir palavras em pensamentos. Como não pensamos em termos gerais, mas em particulares — pois, sempre que se menciona uma classe de coisas, nós a representamos a nós mesmos evocando seus membros individuais —, segue-se que, quando se usa uma palavra abstrata, o ouvinte ou leitor precisa escolher, de seu estoque de imagens, uma ou mais pelas quais possa figurar a si mesmo o gênero mencionado. Ao fazer isso, surge alguma demora e gasta-se alguma energia; e se, ao empregar um termo específico, uma imagem apropriada puder ser sugerida de imediato, alcança-se uma economia e produz-se uma impressão mais vívida.")
+Herbert Spencer, from whose Philosophy of Style the preceding paragraph is quoted, illustrates the principle with the following sentences:
 
-Herbert Spencer, de cuja obra Philosophy of Style foi citado o parágrafo anterior, ilustra o princípio com as seguintes frases:
-
-| Original                                                                                                                                       | Revisão                                                                                                                              |
-| -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Original                                                                                                                                       | Revision                                                                                                                             |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | In proportion as the manners, customs, and amusements of a nation are cruel and barbarous, the regulations of their penal code will be severe. | In proportion as men delight in battles, bull-fights, and combats of gladiators, will they punish by hanging, burning, and the rack. |
 
-(Tradução: "Na medida em que os modos, costumes e diversões de uma nação são cruéis e bárbaros, as normas de seu código penal serão severas" → "Na medida em que os homens se deleitam com batalhas, touradas e lutas de gladiadores, punirão pela forca, pela fogueira e pelo potro.")
+### Rule 13. Omit needless words.
 
-### Regra 13. Omita palavras desnecessárias.
+Vigorous writing is concise. A sentence should contain no unnecessary words, and a paragraph no unnecessary sentences, for the same reason that a drawing should have no unnecessary lines and a machine no unnecessary parts. This does not require the writer to make all his sentences short, or to avoid all detail and treat his subjects only in outline; it requires that every word tell.
 
-A escrita vigorosa é concisa. Uma frase não deve conter palavras desnecessárias; um parágrafo não deve conter frases desnecessárias, pela mesma razão que um desenho não deve ter linhas desnecessárias e uma máquina não deve ter peças desnecessárias. Isso não exige que o escritor torne todas as suas frases curtas, nem que evite todos os detalhes e trate seus assuntos apenas em linhas gerais; exige que faça cada palavra contar.
+Many expressions in common use violate this principle:
 
-Muitas expressões de uso comum violam esse princípio:
+| Original                    | Revision                       |
+| --------------------------- | ------------------------------ |
+| the question as to whether  | whether (the question whether) |
+| there is no doubt but that  | no doubt (doubtless)           |
+| used for fuel purposes      | used for fuel                  |
+| he is a man who             | he                             |
+| in a hasty manner           | hastily                        |
+| this is a subject that      | this subject                   |
+| His story is a strange one. | His story is strange.          |
 
-| Original                                  | Revisão                            |
-| ---------------------------------------- | ---------------------------------- |
-| a questão de saber se                    | se (a questão se)                  |
-| não há dúvida de que                     | sem dúvida                         |
-| utilizado para fins de combustível       | utilizado como combustível         |
-| ele é um homem que                       | ele                                |
-| de maneira apressada                     | apressadamente                     |
-| este é um assunto que                    | este assunto                       |
-| A história dele é uma história estranha. | A história dele é estranha.        |
+In particular, the expression "the fact that" should be eliminated from every sentence in which it occurs.
 
-Em especial, a expressão "o fato de que" deve ser eliminada de toda frase em que ocorrer.
+| Original                               | Revision                               |
+| -------------------------------------- | -------------------------------------- |
+| owing to the fact that                 | because (since)                        |
+| in spite of the fact that              | though (although)                      |
+| I call your attention to the fact that | I remind you (I notify you)            |
+| I was unaware of the fact that         | I was unaware that (did not know that) |
+| the fact that he had not succeeded     | his failure                            |
+| the fact that I had arrived            | my arrival                             |
 
-| Original                             | Revisão                           |
-| ----------------------------------- | --------------------------------- |
-| devido ao fato de que               | porque (como)                     |
-| apesar do fato de que               | embora (ainda que)                |
-| chamo sua atenção para o fato de que | lembro-lhe (informo-lhe)          |
-| eu desconhecia o fato de que        | eu desconhecia que (não sabia que) |
-| o fato de que ele não havia tido êxito | seu fracasso                     |
-| o fato de que eu havia chegado      | minha chegada                     |
+Note: the same goes for empty nouns used as padding, such as "case", "character", "nature", "order", and "type" ("a situation of a delicate character" → "a delicate situation"; "problems of a financial nature" → "financial problems"). See Chapter V.
 
-Nota de adaptação (pt-BR): o mesmo vale para substantivos vazios usados como enchimento, como "caráter", "natureza", "ordem", "sentido" e "tipo" ("uma situação de caráter delicado" → "uma situação delicada"; "problemas de natureza financeira" → "problemas financeiros"). Veja o Capítulo V.
+Trimming "who is", "which was", and similar phrases often removes superfluous words: the nonrestrictive relative clause can become an appositive.
 
-A redução de "que é", "que era" e formas semelhantes muitas vezes elimina palavras supérfluas: a oração relativa explicativa pode virar aposto.
+| Original                                      | Revision                               |
+| --------------------------------------------- | -------------------------------------- |
+| His brother, who is a member of the same firm | His brother, a member of the same firm |
+| The Bastille, which was stormed in 1789       | The Bastille, stormed in 1789          |
 
-| Original                                          | Revisão                                |
-| ----------------------------------------------- | -------------------------------------- |
-| O irmão dele, que é membro da mesma firma        | O irmão dele, membro da mesma firma    |
-| A Bastilha, que foi tomada em 1789               | A Bastilha, tomada em 1789             |
+Since a positive statement is more concise than a negative one, and the active voice more concise than the passive, many of the examples given under Rules 11 and 12 also illustrate this rule.
 
-Como a afirmação positiva é mais concisa que a negativa, e a voz ativa é mais concisa que a passiva, muitos dos exemplos dados nas Regras 11 e 12 também ilustram esta regra.
+A common offense against conciseness is presenting a single complex idea, step by step, in a series of sentences or independent clauses that could, to advantage, be combined into one.
 
-Uma violação comum da concisão é a apresentação de uma única ideia complexa, passo a passo, em uma série de frases ou orações independentes que poderiam, com vantagem, ser combinadas em uma só.
+| Original                                                                                                                                                                                                                                                                               | Revision                                                                                                                                                             |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Macbeth was very ambitious. This led him to wish to become king of Scotland. The witches told him that this wish would come true. The king of Scotland at that time was Duncan. Encouraged by his wife, Macbeth murdered Duncan. He was thus able to succeed Duncan as king. (49 words.) | Encouraged by his wife, Macbeth achieved his ambition and fulfilled the witches' prophecy by murdering Duncan and becoming king of Scotland in his place. (24 words.) |
+| There were several less important courses, but these were the most important, and though they did not come every day, they came often enough to keep you in such a state of mind that you never knew what your next move would be. (43 words.)                                          | These, the most important courses of all, came, if not daily, at least often enough to keep you under constant strain. (21 words.)                                   |
 
-| Original                                                                                                                                                                                                                                                                              | Revisão                                                                                                                                              |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Macbeth era muito ambicioso. Isso o levou a desejar tornar-se rei da Escócia. As bruxas lhe disseram que esse desejo se realizaria. O rei da Escócia naquele tempo era Duncan. Incentivado pela esposa, Macbeth assassinou Duncan. Pôde assim suceder a Duncan como rei. (47 palavras.) | Incentivado pela esposa, Macbeth realizou sua ambição e cumpriu a profecia das bruxas ao assassinar Duncan e tornar-se rei da Escócia em seu lugar. (24 palavras.) |
-| Havia várias disciplinas menos importantes, mas estas eram as mais importantes e, embora não ocorressem todos os dias, ocorriam com frequência suficiente para mantê-lo num estado de espírito em que você nunca sabia qual seria seu próximo passo. (40 palavras.)                  | Estas, as disciplinas mais importantes de todas, ocorriam, se não diariamente, ao menos com frequência suficiente para mantê-lo sob tensão constante. (22 palavras.) |
+### Rule 14. Avoid a succession of loose sentences.
 
-### Regra 14. Evite uma sucessão de períodos soltos.
+This rule refers especially to loose sentences of one particular type: those made up of two coordinate clauses, the second introduced by a conjunction or a relative pronoun. Isolated sentences of this kind may be blameless (see Rule 4), but a series of them soon becomes monotonous and tedious.
 
-Esta regra se refere especialmente a períodos soltos de um tipo particular: aqueles compostos por duas orações coordenadas, sendo a segunda introduzida por uma conjunção ou pronome relativo. Embora frases isoladas desse tipo possam ser irrepreensíveis (veja a Regra 4), uma série delas logo se torna monótona e tediosa.
+An unskilled writer will sometimes build an entire paragraph out of sentences of this kind, using as connectives "and", "but", "so", and, less often, "which", "who", "when", "where", and "while", these last in nonrestrictive senses (see Rule 3).
 
-Um escritor pouco hábil às vezes construirá um parágrafo inteiro com frases desse tipo, usando como conectivos "e", "mas", "então" e, com menos frequência, "que", "o qual", "quando", "onde" e "enquanto", estes últimos em sentidos não restritivos (veja a Regra 3).
+> The third concert of the subscription series was given last evening, and a large audience attended. Mr. Eduardo Antunes was the soloist, and the Symphony Orchestra supplied the instrumental music. The former showed himself an artist of the first rank, while the latter proved fully worthy of its high reputation. The interest aroused by the series has been most gratifying to the Committee, and a similar series is planned for every year hereafter. The fourth concert will be held on Tuesday, May 10, when an equally attractive program will be presented.
 
-> O terceiro concerto da série de assinaturas foi realizado ontem à noite, e um grande público compareceu. O senhor Eduardo Antunes foi o solista, e a Orquestra Sinfônica forneceu a música instrumental. O primeiro mostrou-se um artista de primeira grandeza, enquanto a segunda provou-se plenamente digna de sua alta reputação. O interesse despertado pela série tem sido muito gratificante para a Comissão, e planeja-se oferecer uma série semelhante todos os anos daqui em diante. O quarto concerto será realizado na terça-feira, dia 10 de maio, quando um programa igualmente atraente será apresentado.
+Quite apart from its triteness and emptiness, the paragraph above is weak because of the structure of its sentences — their mechanical symmetry and repetitive singsong. Contrast them with the sentences in the paragraphs quoted under Rule 9, or in any passage of good English prose.
 
-Além de sua banalidade e vazio, o parágrafo acima é fraco por causa da estrutura de suas frases, com sua simetria mecânica e cadência repetitiva. Compare-as com as frases nos parágrafos citados na Regra 9, ou em qualquer trecho de boa prosa em português.
+A writer who finds he has produced a series of sentences of the type described should recast enough of them to remove the monotony, replacing them with simple sentences, with sentences of two clauses joined by a semicolon, with periodic sentences of two clauses, or with sentences, loose or periodic, of three clauses — whichever best represents the real relations of the thought.
 
-Se o escritor perceber que escreveu uma série de frases do tipo descrito, deve reformular um número suficiente delas para remover a monotonia, substituindo-as por frases simples, por frases de duas orações ligadas por ponto e vírgula, por períodos periódicos de duas orações, por frases, soltas ou periódicas, de três orações, conforme melhor representem as relações reais do pensamento.
+### Rule 15. Express coordinate ideas in similar form.
 
-### Regra 15. Expresse ideias coordenadas em forma semelhante.
+This principle — parallel construction — requires that expressions of similar content and function be outwardly similar. The likeness of form lets the reader recognize more readily the likeness of content and function. Familiar instances from the Bible are the Ten Commandments, the Beatitudes, and the petitions of the Lord's Prayer.
 
-Esse princípio, o da construção paralela, exige que expressões de conteúdo e função semelhantes sejam externamente semelhantes. A semelhança de forma permite que o leitor reconheça mais prontamente a semelhança de conteúdo e função. Exemplos familiares da Bíblia são os Dez Mandamentos, as Bem-aventuranças e os pedidos do Pai Nosso.
+The unskilled writer often violates this principle in the mistaken belief that he must constantly vary the form of his expressions. It is true that, in repeating a statement for emphasis, he may need to vary its form; for an illustration, see the paragraph from Stevenson quoted under Rule 9. But apart from that, he should follow the principle of parallel construction.
 
-O escritor pouco hábil frequentemente viola esse princípio, por acreditar equivocadamente que deve variar constantemente a forma de suas expressões. É verdade que, ao repetir uma afirmação para enfatizá-la, ele talvez precise variar sua forma. Como ilustração, veja o parágrafo de Stevenson citado na Regra 9. Mas, fora disso, deve seguir o princípio da construção paralela.
+| Original                                                                                          | Revision                                                                                        |
+| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Formerly, science was taught by the textbook method, whereas now the laboratory method is employed. | Formerly, science was taught by the textbook method; now it is taught by the laboratory method. |
 
-| Original                                                                                       | Revisão                                                                                          |
-| --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Antigamente, a ciência era ensinada pelo método do livro-texto, ao passo que hoje se emprega o método de laboratório. | Antigamente, a ciência era ensinada pelo método do livro-texto; hoje é ensinada pelo método de laboratório. |
+The left-hand version gives the impression that the writer is undecided or timid; he seems unable or afraid to choose one form of expression and hold to it. The right-hand version shows that the writer has at least made his choice and stuck to it.
 
-A versão da esquerda dá a impressão de que o escritor está indeciso ou tímido; ele parece incapaz ou receoso de escolher uma forma de expressão e mantê-la. A versão da direita mostra que o escritor ao menos fez sua escolha e permaneceu fiel a ela.
+By this principle, an article or preposition that applies to all the members of a series must either be used before the first term only or be repeated before every term.
 
-Por esse princípio, um artigo ou uma preposição que se aplica a todos os membros de uma série deve ser usado apenas antes do primeiro termo ou então repetido antes de cada termo.
+| Original                                          | Revision                                                          |
+| ------------------------------------------------- | ----------------------------------------------------------------- |
+| The French, the Italians, Spanish, and Portuguese | The French, the Italians, the Spanish, and the Portuguese         |
+| In spring, summer, or in winter                   | In spring, in summer, or in winter (In spring, summer, or winter) |
 
-| Original                                          | Revisão                                                           |
-| ----------------------------------------------- | --------------------------------------------------------------- |
-| Os franceses, os italianos, espanhóis e portugueses | Os franceses, os italianos, os espanhóis e os portugueses       |
-| Na primavera, verão ou no inverno               | Na primavera, no verão ou no inverno (Na primavera, verão ou inverno) |
+Correlative expressions ("both, and"; "not, but"; "not only, but also"; "either, or"; "first, second, third"; and the like) should be followed by the same grammatical construction — virtually, by the same part of speech. (Combinations such as "both Henry and I", "not silk, but a cheap substitute" are obviously within the rule.) Many violations of this rule (such as the first three below) come from faulty arrangement; others (such as the last) from the use of unlike constructions.
 
-Expressões correlativas ("tanto, como"; "não, mas"; "não só, mas também"; "ou, ou"; "primeiro, segundo, terceiro"; e semelhantes) devem ser seguidas pela mesma construção gramatical, isto é, praticamente pela mesma classe de palavra. (Combinações como "tanto Henrique quanto eu", "não seda, mas um substituto barato" obviamente estão dentro da regra.) Muitas violações dessa regra (como as três primeiras abaixo) surgem de má disposição; outras (como a última) do uso de construções diferentes.
+| Original                                                                                     | Revision                                                                                   |
+| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| It was both a long ceremony and very tedious.                                                | The ceremony was both long and tedious.                                                    |
+| A time not for words, but action.                                                            | A time not for words, but for action.                                                      |
+| Either you must grant his request or incur his ill will.                                     | You must either grant his request or incur his ill will.                                   |
+| My objections are, first, the injustice of the measure; second, that it is unconstitutional. | My objections are, first, that the measure is unjust; second, that it is unconstitutional. |
 
-| Original                                                                              | Revisão                                                                            |
-| ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Foi tanto uma cerimônia longa como muito tediosa.                                    | A cerimônia foi tanto longa quanto tediosa.                                       |
-| Um tempo não para palavras, mas ação.                                                | Um tempo não para palavras, mas para ação.                                        |
-| Ou você atende ao pedido dele ou incorre em sua má vontade.                          | Você ou atende ao pedido dele ou incorre em sua má vontade.                       |
-| Minhas objeções são, primeiro, a injustiça da medida; segundo, que ela é inconstitucional. | Minhas objeções são, primeiro, que a medida é injusta; segundo, que ela é inconstitucional. |
+See also the third example under Rule 12 and the last under Rule 13.
 
-Veja também o terceiro exemplo da Regra 12 e o último da Regra 13.
+It may be asked: what if a writer needs to express a very large number of similar ideas — say, twenty? Must he write twenty consecutive sentences on the same pattern? On closer examination he will probably find the difficulty imaginary: his twenty ideas can be sorted into groups, and the principle need only be applied within each group. Failing that, he had best avoid the difficulty by putting his statements in the form of a table.
 
-Pode-se perguntar: e se um escritor precisa expressar um número muito grande de ideias semelhantes, digamos vinte? Deve ele escrever vinte frases consecutivas no mesmo padrão? Examinando mais de perto, provavelmente descobrirá que a dificuldade é imaginária, que suas vinte ideias podem ser classificadas em grupos, e que só precisa aplicar o princípio dentro de cada grupo. Caso contrário, será melhor evitar a dificuldade colocando suas afirmações em forma de tabela.
+### Rule 16. Keep related words together.
 
-### Regra 16. Mantenha juntas as palavras relacionadas.
+The position of words in a sentence is the principal means of showing their relationship. The writer must therefore, as far as possible, bring together the words and groups of words that are related in thought, and keep apart those that are not.
 
-A posição das palavras em uma frase é o principal meio de mostrar sua relação. O escritor deve, portanto, tanto quanto possível, aproximar as palavras e os grupos de palavras que se relacionam no pensamento, e manter separados aqueles que não se relacionam assim.
+The subject of a sentence and the principal verb should not, as a rule, be separated by a phrase or clause that could be moved to the beginning.
 
-O sujeito de uma frase e o verbo principal, como regra, não devem ser separados por uma expressão ou oração que possa ser transferida para o começo.
+| Original                                                                             | Revision                                                                             |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Machado de Assis, in his best-known novel, gives a minute description of this habit. | In his best-known novel, Machado de Assis gives a minute description of this habit.  |
+| Cast iron, when treated in a Bessemer converter, is changed into steel.              | By treatment in a Bessemer converter, cast iron is changed into steel.               |
 
-| Original                                                                                   | Revisão                                                                                   |
-| ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Machado de Assis, em seu romance mais conhecido, faz uma descrição minuciosa desse hábito. | Em seu romance mais conhecido, Machado de Assis faz uma descrição minuciosa desse hábito. |
-| O ferro fundido, quando tratado num conversor Bessemer, transforma-se em aço.              | Pelo tratamento num conversor Bessemer, o ferro fundido transforma-se em aço.            |
+The objection is that the interposed phrase or clause needlessly interrupts the natural order of the main clause. Usually, though, this objection does not hold when the order is interrupted only by a relative clause or by an expression in apposition. Nor does it hold in periodic sentences in which the interruption is a deliberately used means of creating suspense (see the examples under Rule 18).
 
-A objeção é que a expressão ou oração intercalada interrompe desnecessariamente a ordem natural da oração principal. Em geral, porém, essa objeção não se aplica quando a ordem é interrompida apenas por uma oração relativa ou por uma expressão em aposto. Também não se aplica a períodos periódicos em que a interrupção é um meio deliberadamente usado para criar suspense (veja os exemplos na Regra 18).
+The relative pronoun should come, as a rule, immediately after its antecedent.
 
-O pronome relativo, como regra, deve vir imediatamente depois de seu antecedente.
+| Original                                                                                     | Revision                                                                        |
+| ----------------------------------------------------------------------------------------------| --------------------------------------------------------------------------------- |
+| There was a look in his eye that boded trouble.                                              | In his eye was a look that boded trouble.                                       |
+| He wrote three articles about his adventures in Spain, which were published in the magazine. | He published in the magazine three articles about his adventures in Spain.      |
+| This is a portrait of Benjamin Constant, founder of the party, who died in 1891.             | This is a portrait of Benjamin Constant, founder of the party. He died in 1891. |
 
-| Original                                                                                                 | Revisão                                                                                                 |
-| ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Havia um olhar nos olhos dele que pressagiava encrenca.                                                  | Nos olhos dele havia um olhar que pressagiava encrenca.                                                |
-| Ele escreveu três artigos sobre suas aventuras na Espanha, que foram publicados na revista.             | Ele publicou na revista três artigos sobre suas aventuras na Espanha.                                  |
-| Este é um retrato de Benjamin Constant, fundador do partido, que faleceu em 1891.                       | Este é um retrato de Benjamin Constant, fundador do partido. Ele faleceu em 1891.                      |
+If the antecedent consists of a group of words, the relative comes at the end of the group, unless that would cause ambiguity.
 
-Se o antecedente consistir em um grupo de palavras, o relativo vem ao fim do grupo, a menos que isso cause ambiguidade.
+> The Superintendent of the Northern Division, who...
 
-> O superintendente da Divisão Norte, que...
+| Original                                                                | Revision                                                                 |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| A proposal to amend the Education Act, which has been variously judged. | A proposal, which has been variously judged, to amend the Education Act. |
+| —                                                                       | A proposal to amend the much-debated Education Act.                      |
 
-| Original                                                              | Revisão                                                                |
-| ------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Uma proposta de emenda à Lei de Diretrizes, que foi julgada de modos diversos. | Uma proposta, que foi julgada de modos diversos, de emenda à Lei de Diretrizes. |
-| —                                                                   | Uma proposta de emenda à tão debatida Lei de Diretrizes.            |
+A noun in apposition may stand between antecedent and relative, because in such a combination no real ambiguity can arise.
 
-Um substantivo em aposto pode vir entre o antecedente e o relativo, porque em tal combinação não pode surgir ambiguidade real.
+> The Duke of York, his brother, who was regarded with hostility by his opponents...
 
-> O duque de York, seu irmão, que era visto com hostilidade pelos opositores...
+Modifiers should come, if possible, next to the word they modify. If several expressions modify the same word, they should be arranged so that no wrong relation is suggested.
 
-Os modificadores devem vir, se possível, junto da palavra que modificam. Se várias expressões modificam a mesma palavra, devem ser dispostas de modo que nenhuma relação errada seja sugerida.
+| Original                                                                                                                                                           | Revision                                                                                                                                                 |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| All the members were not present.                                                                                                                                  | Not all the members were present.                                                                                                                        |
+| He only found two mistakes.                                                                                                                                        | He found only two mistakes.                                                                                                                              |
+| Major Joaquim Reis will give a lecture on Tuesday evening in Bandeira Hall, to which the public is invited, on "My Experiences in the Backlands", at eight o'clock. | On Tuesday evening at eight o'clock, Major Joaquim Reis will give in Bandeira Hall a lecture on "My Experiences in the Backlands". The public is invited. |
 
-| Original                                                                                                                                          | Revisão                                                                                                                                     |
-| ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Todos os membros não estavam presentes.                                                                                                          | Nem todos os membros estavam presentes.                                                                                                   |
-| Ele só encontrou dois erros.                                                                                                                     | Ele encontrou apenas dois erros.                                                                                                          |
-| O major Joaquim Reis dará uma palestra na terça-feira à noite no Salão Bandeira, para a qual o público está convidado, sobre "Minhas Experiências no Sertão", às oito horas. | Na terça-feira à noite, às oito horas, o major Joaquim Reis dará no Salão Bandeira uma palestra sobre "Minhas Experiências no Sertão". O público está convidado. |
+### Rule 17. In summaries, keep to one tense.
 
-### Regra 17. Em resumos, mantenha um único tempo verbal.
+In summarizing the action of a drama, the writer should always use the present tense. In summarizing a poem, story, or novel, he should preferably use the present, though he may use the past if he prefers. If the summary is in the present tense, antecedent action should be expressed by the perfect; if in the past, by the past perfect.
 
-Ao resumir a ação de um drama, o escritor deve sempre usar o tempo presente. Ao resumir um poema, conto ou romance, deve preferencialmente usar o presente, embora possa usar o passado se preferir. Se o resumo estiver no presente, uma ação anterior deve ser expressa pelo pretérito perfeito; se estiver no passado, pelo mais-que-perfeito.
+> An unforeseen chance prevents Friar John from delivering Friar Laurence's letter to Romeo. Meanwhile, owing to her father's arbitrary change of the day set for the wedding, Juliet has been compelled to drink the potion on Tuesday night, so that Balthasar informs Romeo of her supposed death before Friar Laurence learns that the letter was never delivered. (A summary of Shakespeare's Romeo and Juliet.)
 
-> Um acaso imprevisto impede que frei João entregue a frei Lourenço a carta destinada a Romeu. Enquanto isso, em razão da mudança arbitrária, feita por seu pai, do dia marcado para o casamento, Julieta foi obrigada a beber a poção na noite de terça-feira, de modo que Baltasar informa Romeu de sua suposta morte antes que frei Lourenço fique sabendo da não entrega da carta. (Resumo de Romeu e Julieta, de Shakespeare.)
+> Note the interplay of tenses in this present-tense summary. The base narration stays in the present ("prevents", "informs"); action prior to that present goes into the perfect ("has been compelled"). If the summary were in the past, the base would shift to the past ("prevented", "informed") and the antecedent action to the past perfect ("had been compelled").
 
-> Nota de adaptação (pt-BR): note o jogo de tempos do português neste resumo no presente. A narração-base fica no presente ("impede", "informa"); o que é anterior a esse presente vai para o pretérito perfeito ou o mais-que-perfeito ("foi obrigada"). Se o resumo fosse no passado, a base iria para o pretérito perfeito ("impediu", "informou") e a anterioridade, para o mais-que-perfeito ("tinha sido obrigada").
+But whichever tense is used in the summary, a past tense in indirect discourse or in an indirect question remains unchanged.
 
-Mas, qualquer que seja o tempo usado no resumo, um tempo passado no discurso indireto ou em pergunta indireta permanece inalterado.
+> The Friar confesses that it was he who married them.
 
-> O frade confessa que foi ele quem os casou.
+These exceptions aside, whichever tense the writer chooses should be used from beginning to end. Shifting from one tense to another gives the appearance of uncertainty and irresolution (compare Rule 15).
 
-Excetuadas as exceções observadas, qualquer que seja o tempo escolhido pelo escritor, ele deve usá-lo do começo ao fim. Alternar de um tempo para outro dá aparência de incerteza e irresolução (compare com a Regra 15).
+In presenting the statements or the thought of someone else, as in summarizing an essay or reporting a speech, the writer should avoid interpolating expressions such as "he said", "he stated", "the speaker added", "the speaker went on to say", "the author also thinks", and the like. He should make clear at the outset, once for all, that what follows is summary, and then waste no words repeating that notice.
 
-Ao apresentar as afirmações ou o pensamento de outra pessoa, como ao resumir um ensaio ou relatar um discurso, o escritor deve evitar intercalar expressões como "ele disse", "ele afirmou", "o orador acrescentou", "o orador prosseguiu dizendo", "o autor também acha", ou semelhantes. Deve indicar claramente no início, de uma vez por todas, que o que segue é resumo, e então não desperdiçar palavras repetindo esse aviso.
+In notebooks, newspapers, and handbooks of literature, summaries of one kind or another may be indispensable; and for children in the early grades, retelling a story in their own words is a useful exercise. But in the criticism or interpretation of literature, the writer should take care not to slide into summary. He may find it necessary to devote a sentence or two to indicating the subject, or the opening situation, of the work he is discussing; he may cite numerous details to illustrate its qualities. But he should aim to write an orderly discussion supported by evidence, not a summary with occasional comment. Likewise, if the scope of his discussion includes several works, he will as a rule do better not to take them up one by one in chronological order, but to work from the start toward general conclusions.
 
-Em cadernos, jornais, manuais de literatura, resumos de um tipo ou outro podem ser indispensáveis; e, para crianças nas séries iniciais, é um exercício útil recontar uma história com suas próprias palavras. Mas, na crítica ou interpretação da literatura, o escritor deve tomar cuidado para não escorregar para o resumo. Pode achar necessário dedicar uma ou duas frases a indicar o assunto, ou a situação inicial, da obra que discute; pode citar numerosos detalhes para ilustrar suas qualidades. Mas deve procurar escrever uma discussão ordenada sustentada por evidências, não um resumo com comentários ocasionais. De modo semelhante, se o escopo de sua discussão inclui várias obras, como regra ele se sairá melhor não as tomando uma a uma em ordem cronológica, mas procurando desde o início estabelecer conclusões gerais.
+### Rule 18. Place the emphatic words of a sentence at the end.
 
-### Regra 18. Coloque as palavras enfáticas de uma frase no fim.
+The proper place in a sentence for the word, or group of words, that the writer wants to make most prominent is usually the end.
 
-O lugar adequado na frase para a palavra, ou grupo de palavras, que o escritor deseja tornar mais proeminente é geralmente o fim.
+| Original                                                                                            | Revision                                                                                           |
+| ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------|
+| Humanity has hardly advanced in courage since that time, though it has advanced in many other ways. | Humanity, since that time, has advanced in many other ways, but it has hardly advanced in courage. |
+| This steel is chiefly used for making blades, because of its hardness.                              | Because of its hardness, this steel is chiefly used for making blades.                             |
 
-| Original                                                                                              | Revisão                                                                                              |
-| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| A humanidade quase não avançou em coragem desde aquele tempo, embora tenha avançado de muitas outras maneiras. | A humanidade, desde aquele tempo, avançou de muitas outras maneiras, mas quase não avançou em coragem. |
-| Este aço é usado principalmente para fabricar lâminas, por causa de sua dureza.                      | Por causa de sua dureza, este aço é usado principalmente para fabricar lâminas.                      |
+The word or group of words entitled to this position of prominence is usually the logical predicate — that is, the new element in the sentence — as in the second example.
 
-A palavra ou grupo de palavras com direito a essa posição de destaque costuma ser o predicado lógico, isto é, o elemento novo da frase, como ocorre no segundo exemplo.
-
-A eficácia do período periódico surge do destaque que ele dá à afirmação principal.
+The effectiveness of the periodic sentence comes from the prominence it gives to the main statement.
 
 > Four centuries ago, Christopher Columbus, one of the Italian mariners whom the decline of their own republics had put at the service of the world and of adventure, seeking for Spain a westward passage to the Indies as a set-off against the achievements of Portuguese discoverers, lighted on America.
 
-(Tradução: Quatro séculos atrás, Cristóvão Colombo, um dos navegadores italianos que a decadência de suas próprias repúblicas havia posto a serviço do mundo e da aventura, buscando para a Espanha uma passagem a oeste rumo às Índias como contrapeso aos feitos dos descobridores portugueses, deparou-se com a América.)
-
 > With these hopes and in this belief I would urge you, laying aside all hindrance, thrusting away all private aims, to devote yourself unswervingly and unflinchingly to the vigorous and successful prosecution of this war.
 
-(Tradução: Com essas esperanças e nessa convicção, eu o exortaria, pondo de lado todo empecilho, afastando todos os interesses particulares, a dedicar-se com firmeza e sem hesitação à condução vigorosa e bem-sucedida desta guerra.)
+The other prominent position in the sentence is the beginning. Any element of the sentence other than the subject can become emphatic when placed first.
 
-A outra posição de destaque na frase é o começo. Qualquer elemento da frase, que não seja o sujeito, pode se tornar enfático quando colocado primeiro.
+> Deceit or treachery he could never forgive.
 
-> Engano ou traição ele jamais conseguia perdoar.
+> So vast and rude, worn by the action of nearly three thousand years, the fragments of this architecture may often seem, at first sight, works of nature.
 
-> Tão vastos e rudes, corroídos pela ação de quase três mil anos, os fragmentos desta arquitetura podem muitas vezes parecer, à primeira vista, obras da natureza.
+A subject that comes first in its sentence may be emphatic, but hardly by its position alone. In the sentence:
 
-Um sujeito que vem primeiro em sua frase pode ser enfático, mas dificilmente apenas por sua posição. Na frase:
+> Great kings worshipped at his shrine,
 
-> Grandes reis adoravam em seu santuário,
+the emphasis on "kings" comes largely from its meaning and from the context. To receive special emphasis, the subject of a sentence must take the position of the predicate.
 
-a ênfase em "reis" surge em grande parte de seu significado e do contexto. Para receber ênfase especial, o sujeito de uma frase deve assumir a posição do predicado.
+> Through the middle of the valley flowed a winding stream.
 
-> Pelo meio do vale corria um riacho sinuoso.
-
-O princípio de que o lugar adequado para aquilo que se quer tornar mais proeminente é o fim aplica-se igualmente às palavras de uma frase, às frases de um parágrafo e aos parágrafos de uma composição.
+The principle that the proper place for what is to be made most prominent is the end applies equally to the words of a sentence, to the sentences of a paragraph, and to the paragraphs of a composition.

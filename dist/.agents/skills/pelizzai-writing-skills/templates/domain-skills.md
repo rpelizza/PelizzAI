@@ -1,18 +1,18 @@
-# PelizzAI — Catálogo de skills de domínio
+# PelizzAI — Domain skill catalog
 
-> Referência viva das skills de domínio deste projeto: o que cada uma faz e quando usá-la.
-> Criado e atualizado pela skill `pelizzai-writing-skills`. A existência deste arquivo sinaliza
-> que o bootstrap do harness já foi concluído neste projeto.
+> Living reference of this project's domain skills: what each one does and when to use it.
+> Created and updated by the `pelizzai-writing-skills` skill. This file's existence signals
+> that the harness bootstrap has been completed in this project.
 >
-> Uma entrada por skill de domínio. Skills com prefixo `pelizzai-` são do harness e NÃO entram aqui.
+> One entry per domain skill. Skills with the `pelizzai-` prefix belong to the harness and do NOT go here.
 
-<!-- Substitua os exemplos abaixo pelas skills reais do projeto. -->
+<!-- Replace the examples below with the project's real skills. -->
 
-## <projeto>-<verbo-descritivo>
+## <project>-<descriptive-verb>
 
-- **O que faz:** <uma frase>
-- **Quando usar:** <frases/contextos que devem acioná-la>
-- **Stack / área:** <lib, framework, módulo ou camada>
-- **Arquivos / áreas cobertas:** <caminhos ou responsabilidades>
-- **Fundamentada em:** <context7: lib@versão / doc / fonte>
-- **Criada / atualizada:** ver `pelizzai/data/review-domain-skills.md`
+- **What it does:** <one sentence>
+- **When to use:** <phrases/contexts that should trigger it>
+- **Stack / area:** <lib, framework, module, or layer>
+- **Files / areas covered:** <paths or responsibilities>
+- **Grounded in:** <context7: lib@version / doc / source>
+- **Created / updated:** see `pelizzai/data/review-domain-skills.md`

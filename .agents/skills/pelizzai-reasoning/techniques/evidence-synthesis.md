@@ -1,787 +1,787 @@
 # Evidence Synthesis
 
-## Objetivo
+## Purpose
 
-Use Evidence Synthesis quando uma resposta, decisão, análise ou recomendação depender de múltiplas fontes de informação.
+Use Evidence Synthesis when an answer, decision, analysis, or recommendation depends on multiple sources of information.
 
-A técnica ajuda a responder perguntas como:
+The technique helps answer questions like:
 
 ```text
-- Quais fontes realmente sustentam esta conclusão?
-- Quais informações são fatos confirmados?
-- Onde as fontes concordam?
-- Onde elas divergem?
-- Qual fonte deve prevalecer?
-- A evidência é suficiente para recomendar uma ação?
-- O que permanece incerto?
+- Which sources actually support this conclusion?
+- Which pieces of information are confirmed facts?
+- Where do the sources agree?
+- Where do they diverge?
+- Which source should prevail?
+- Is the evidence sufficient to recommend an action?
+- What remains uncertain?
 ```
 
-Evidence Synthesis não é apenas resumir fontes. Ela exige:
+Evidence Synthesis is not just summarizing sources. It requires:
 
-1. identificar a pergunta ou decisão;
-2. coletar evidências relevantes;
-3. avaliar qualidade, recência e aplicabilidade;
-4. separar fatos de interpretações;
-5. comparar convergências e conflitos;
-6. produzir uma conclusão proporcional à evidência disponível.
+1. identifying the question or decision;
+2. collecting relevant evidence;
+3. assessing quality, recency, and applicability;
+4. separating facts from interpretations;
+5. comparing convergences and conflicts;
+6. producing a conclusion proportional to the available evidence.
 
-## Princípio central
+## Core principle
 
-> Não trate várias fontes como várias verdades. Avalie o que cada fonte realmente prova, para qual contexto ela vale e quais limitações possui.
+> Do not treat multiple sources as multiple truths. Assess what each source actually proves, which context it applies to, and what limitations it has.
 
 ```mermaid
 flowchart TD
-    A[Pergunta ou decisão] --> B[Definir afirmações a verificar]
-    B --> C[Coletar fontes relevantes]
-    C --> D[Avaliar qualidade e aplicabilidade]
-    D --> E[Extrair fatos e alegações]
-    E --> F[Comparar convergências e conflitos]
-    F --> G[Classificar força da evidência]
-    G --> H[Produzir conclusão proporcional]
-    H --> I[Declarar limitações e lacunas]
+    A[Question or decision] --> B[Define the claims to verify]
+    B --> C[Collect relevant sources]
+    C --> D[Assess quality and applicability]
+    D --> E[Extract facts and claims]
+    E --> F[Compare convergences and conflicts]
+    F --> G[Grade the strength of the evidence]
+    G --> H[Produce a proportional conclusion]
+    H --> I[State limitations and gaps]
 ```
 
-## Quando usar
+## When to use
 
-Use Evidence Synthesis quando a tarefa envolver:
+Use Evidence Synthesis when the task involves:
 
 ```text
-- múltiplas fontes, documentos, arquivos ou páginas;
-- pesquisa técnica;
-- comparação de bibliotecas, ferramentas ou serviços;
-- análise de logs, testes, código e documentação;
-- recomendação com impacto relevante;
-- fatos atuais, regras, preços, políticas ou versões;
-- documentos contraditórios;
-- análise jurídica, financeira, médica ou regulatória;
-- investigação de incidentes;
-- decisão arquitetural;
-- revisão de requisitos dispersos;
-- conclusões baseadas em dados, relatórios ou métricas.
+- multiple sources, documents, files, or pages;
+- technical research;
+- comparing libraries, tools, or services;
+- analyzing logs, tests, code, and documentation;
+- a recommendation with relevant impact;
+- current facts, rules, prices, policies, or versions;
+- contradictory documents;
+- legal, financial, medical, or regulatory analysis;
+- incident investigation;
+- an architectural decision;
+- reviewing scattered requirements;
+- conclusions based on data, reports, or metrics.
 ```
 
-Exemplos adequados:
+Good examples:
 
 ```text
-- Comparar bibliotecas de autenticação para uma stack específica.
-- Avaliar se uma API suporta determinado fluxo.
-- Sintetizar requisitos de README, código, testes e tickets.
-- Identificar causa provável de bug usando logs, testes e código.
-- Elaborar recomendação a partir de documentação oficial e limitações do projeto.
-- Analisar documentos com versões divergentes.
-- Verificar se uma tecnologia continua compatível com a versão usada no projeto.
+- Compare authentication libraries for a specific stack.
+- Assess whether an API supports a given flow.
+- Synthesize requirements from README, code, tests, and tickets.
+- Identify the likely cause of a bug using logs, tests, and code.
+- Build a recommendation from official documentation and project constraints.
+- Analyze documents with diverging versions.
+- Verify that a technology is still compatible with the version used in the project.
 ```
 
-## Quando evitar
+## When to avoid
 
-Não use Evidence Synthesis quando existe uma única fonte de verdade clara e suficiente.
+Do not use Evidence Synthesis when a single, clear, and sufficient source of truth exists.
 
-Evite ou simplifique quando:
+Avoid or simplify when:
 
 ```text
-- o usuário forneceu todo o conteúdo necessário;
-- a tarefa é puramente criativa;
-- há um único contrato, schema ou teste que responde diretamente;
-- a resposta é conceitual, estável e não depende de fonte atual;
-- buscar múltiplas fontes não reduz incerteza relevante;
-- a tarefa é uma tradução, reescrita ou resumo simples.
+- the user has provided all the necessary content;
+- the task is purely creative;
+- a single contract, schema, or test answers the question directly;
+- the answer is conceptual, stable, and does not depend on a current source;
+- consulting multiple sources does not reduce relevant uncertainty;
+- the task is a simple translation, rewrite, or summary.
 ```
 
-Exemplos inadequados:
+Poor examples:
 
 ```text
-- Traduzir uma frase.
-- Renomear uma variável.
-- Explicar conceito básico de programação.
-- Corrigir erro de sintaxe.
-- Resumir um único parágrafo fornecido pelo usuário.
+- Translate a sentence.
+- Rename a variable.
+- Explain a basic programming concept.
+- Fix a syntax error.
+- Summarize a single paragraph provided by the user.
 ```
 
-## Relação com outras técnicas
+## Relationship to other techniques
 
-| Técnica                 | Responsabilidade                                                 |
+| Technique               | Responsibility                                                   |
 | ----------------------- | ---------------------------------------------------------------- |
-| Evidence Synthesis      | Combina e interpreta evidências de múltiplas fontes              |
-| Verification            | Confirma se uma afirmação específica possui evidência suficiente |
-| Assumption Tracking     | Registra premissas ainda não confirmadas                         |
-| Constraint Satisfaction | Garante respeito a requisitos e proibições                       |
-| Decision Making         | Escolhe entre alternativas, inclusive caminhos interdependentes  |
-| ReAct                   | Busca, observa e atualiza o estado                               |
-| Plan and Execute        | Organiza etapas e checkpoints                                    |
-| Critique and Refine     | Corrige conclusões ou artefatos após identificar falhas          |
+| Evidence Synthesis      | Combines and interprets evidence from multiple sources           |
+| Verification            | Confirms whether a specific claim has sufficient evidence        |
+| Assumption Tracking     | Records assumptions not yet confirmed                            |
+| Constraint Satisfaction | Ensures requirements and prohibitions are respected              |
+| Decision Making         | Chooses among alternatives, including interdependent paths       |
+| ReAct                   | Searches, observes, and updates state                            |
+| Plan and Execute        | Organizes steps and checkpoints                                  |
+| Critique and Refine     | Corrects conclusions or artifacts after finding flaws            |
 
 ```mermaid
 flowchart LR
-    A[Fontes e evidências] --> B[Evidence Synthesis]
-    B --> C[Conclusões e lacunas]
+    A[Sources and evidence] --> B[Evidence Synthesis]
+    B --> C[Conclusions and gaps]
     C --> D[Verification]
-    D --> E{Evidência suficiente?}
-    E -- Não --> F[Assumption Tracking ou nova busca]
+    D --> E{Sufficient evidence?}
+    E -- No --> F[Assumption Tracking or new search]
     F --> B
-    E -- Sim --> G[Decisão ou entrega]
+    E -- Yes --> G[Decision or delivery]
 ```
 
-### Regra de integração
+### Integration rule
 
-Use Evidence Synthesis para responder:
+Use Evidence Synthesis to answer:
 
 ```text
-- O que as fontes dizem em conjunto?
-- Quais fontes são mais confiáveis para esta pergunta?
-- Quais conclusões são sustentadas?
-- Onde há conflito ou ausência de evidência?
+- What do the sources say together?
+- Which sources are most reliable for this question?
+- Which conclusions are supported?
+- Where is there conflict or missing evidence?
 ```
 
-Use Verification para responder:
+Use Verification to answer:
 
 ```text
-- Esta afirmação específica foi comprovada o suficiente?
+- Has this specific claim been proven well enough?
 ```
 
-## Tipos de fonte e hierarquia por contexto
+## Source types and context-dependent hierarchy
 
-A qualidade de uma fonte depende da pergunta. Não existe hierarquia universal: a regra geral é **preferir a fonte mais próxima do fato**, atual e aplicável ao contexto.
+The quality of a source depends on the question. There is no universal hierarchy: the general rule is to **prefer the source closest to the fact**, current and applicable to the context.
 
-### Camadas de fonte
+### Source layers
 
-| Camada     | O que é                                          | Exemplos                                                                                                                                                                                                                    |
-| ---------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Primária   | Produz ou registra diretamente o fato analisado  | Código-fonte, testes executados, logs, schema de API, resposta real de endpoint, documento original, lei/contrato/norma, artigo científico original, base de dados oficial, changelog oficial, relatório financeiro oficial |
-| Secundária | Interpreta, resume ou explica fontes primárias   | Artigos técnicos, tutoriais, relatórios de mercado, documentação não oficial, análises de especialistas, reviews                                                                                                            |
-| Terciária  | Organiza ou agrega conhecimento de várias fontes | Wikis, listas comparativas, resumos genéricos, respostas em fóruns, compilações de links                                                                                                                                    |
+| Layer     | What it is                                        | Examples                                                                                                                                                                                                                   |
+| --------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primary   | Directly produces or records the fact under analysis | Source code, executed tests, logs, API schema, real endpoint response, original document, law/contract/standard, original scientific paper, official database, official changelog, official financial report             |
+| Secondary | Interprets, summarizes, or explains primary sources | Technical articles, tutorials, market reports, unofficial documentation, expert analyses, reviews                                                                                                                         |
+| Tertiary  | Organizes or aggregates knowledge from multiple sources | Wikis, comparison lists, generic summaries, forum answers, link compilations                                                                                                                                          |
 
-Fontes terciárias podem ajudar a descobrir caminhos, mas não devem sustentar sozinhas conclusões de alto impacto.
+Tertiary sources can help discover paths, but must not support high-impact conclusions on their own.
 
-### Hierarquia por contexto
+### Context-dependent hierarchy
 
-A ordem de prioridade muda conforme o domínio, mas sempre privilegia a fonte mais próxima do fato.
+The priority order changes with the domain, but always favors the source closest to the fact.
 
 ```text
-Tecnologia e desenvolvimento:
-1. Código, testes, logs, schema e comportamento real.
-2. Documentação oficial da versão usada.
-3. Repositório oficial, changelog e issues oficiais.
-4. Artigos técnicos confiáveis.
-5. Fóruns, blogs e exemplos comunitários.
+Technology and development:
+1. Code, tests, logs, schema, and real behavior.
+2. Official documentation for the version in use.
+3. Official repository, changelog, and official issues.
+4. Reliable technical articles.
+5. Forums, blogs, and community examples.
 
-Integração de API:
-1. Contrato, schema e chamada controlada.
-2. Documentação oficial.
-3. Código do cliente ou servidor.
-4. Logs, telemetria e testes de integração.
-5. Relatos de terceiros.
+API integration:
+1. Contract, schema, and a controlled call.
+2. Official documentation.
+3. Client or server code.
+4. Logs, telemetry, and integration tests.
+5. Third-party reports.
 
-Pesquisa factual atual:
-1. Fonte primária atual ou órgão oficial.
-2. Documento, anúncio ou dado original.
-3. Veículo confiável que cite fontes primárias.
-4. Análise especializada.
-5. Comentários, agregadores ou redes sociais.
+Current factual research:
+1. Current primary source or official body.
+2. Original document, announcement, or data.
+3. Reliable outlet citing primary sources.
+4. Expert analysis.
+5. Comments, aggregators, or social media.
 
-Dados e cálculos:
-1. Dados de origem.
-2. Fórmula, consulta ou processo reproduzível.
-3. Relatório gerado diretamente da fonte.
-4. Resumo ou planilha derivada.
-5. Relato informal.
+Data and calculations:
+1. Source data.
+2. Reproducible formula, query, or process.
+3. Report generated directly from the source.
+4. Derived summary or spreadsheet.
+5. Informal account.
 ```
 
-## Modelo de evidência
+## Evidence model
 
-Para cada evidência relevante, registre:
+For each relevant piece of evidence, record:
 
 ```text
-Fonte:
-- [origem da informação]
+Source:
+- [where the information comes from]
 
-Tipo:
-- Primária, secundária ou terciária.
+Type:
+- Primary, secondary, or tertiary.
 
-Afirmação sustentada:
-- [o que a fonte realmente demonstra]
+Claim supported:
+- [what the source actually demonstrates]
 
-Escopo:
-- [para quais versões, datas, ambientes ou condições vale]
+Scope:
+- [which versions, dates, environments, or conditions it applies to]
 
-Recência:
-- [quando foi produzida, atualizada ou observada]
+Recency:
+- [when it was produced, updated, or observed]
 
-Confiabilidade:
-- [por que a fonte é adequada ou limitada]
+Reliability:
+- [why the source is adequate or limited]
 
-Conflitos:
-- [quais fontes divergem]
+Conflicts:
+- [which sources diverge]
 
-Limitações:
-- [o que a fonte não prova]
+Limitations:
+- [what the source does not prove]
 
 Status:
-- Confirmada, parcial, conflitante, desatualizada, insuficiente ou refutada.
+- Confirmed, partial, conflicting, outdated, insufficient, or refuted.
 ```
 
-Exemplo:
+Example:
 
 ```text
-Fonte:
-- Schema OpenAPI do serviço.
+Source:
+- The service's OpenAPI schema.
 
-Tipo:
-- Primária.
+Type:
+- Primary.
 
-Afirmação sustentada:
-- O endpoint aceita o parâmetro `status`.
+Claim supported:
+- The endpoint accepts the `status` parameter.
 
-Escopo:
-- Versão atual da API exposta no ambiente analisado.
+Scope:
+- Current API version exposed in the analyzed environment.
 
-Recência:
-- Gerado na execução atual.
+Recency:
+- Generated in the current run.
 
-Confiabilidade:
-- Alta; representa contrato formal da API.
+Reliability:
+- High; it represents the API's formal contract.
 
-Limitações:
-- Não confirma como o filtro se comporta com valores inválidos ou grande volume de dados.
+Limitations:
+- Does not confirm how the filter behaves with invalid values or large data volumes.
 
 Status:
-- Confirmada para existência do parâmetro.
+- Confirmed for the parameter's existence.
 ```
 
-## Separação entre fato, inferência e opinião
+## Separating fact, inference, and opinion
 
-Não misture o que uma fonte mostra com a conclusão derivada dela.
+Do not mix what a source shows with the conclusion derived from it.
 
-| Categoria       | Definição                                                   | Exemplo                                                |
-| --------------- | ----------------------------------------------------------- | ------------------------------------------------------ |
-| Fato confirmado | Observado ou sustentado diretamente por evidência confiável | O endpoint retorna HTTP 422 para payload inválido      |
-| Inferência      | Conclusão derivada de fatos confirmados                     | O frontend provavelmente envia campo incompatível      |
-| Opinião         | Avaliação subjetiva ou recomendação                         | A biblioteca parece mais simples de adotar             |
-| Hipótese        | Explicação possível ainda não validada                      | O bug pode estar no cache                              |
-| Desconhecido    | Informação ausente                                          | Não foi confirmado se clientes legados usam o endpoint |
+| Category        | Definition                                                  | Example                                                  |
+| --------------- | ----------------------------------------------------------- | -------------------------------------------------------- |
+| Confirmed fact  | Observed or directly supported by reliable evidence         | The endpoint returns HTTP 422 for an invalid payload     |
+| Inference       | Conclusion derived from confirmed facts                     | The frontend probably sends an incompatible field        |
+| Opinion         | Subjective assessment or recommendation                     | The library seems simpler to adopt                       |
+| Hypothesis      | Possible explanation not yet validated                      | The bug may be in the cache                              |
+| Unknown         | Missing information                                         | Whether legacy clients use the endpoint is not confirmed |
 
 ```text
-Regra:
-Uma inferência pode ser forte, mas não deve ser apresentada como fato direto.
+Rule:
+An inference can be strong, but it must not be presented as a direct fact.
 ```
 
-### Mapeamento entre os eixos de status
+### Mapping between the status axes
 
-Este arquivo usa três vocabulários para classificar evidência. Eles descrevem eixos distintos, mas se alinham assim:
+This file uses three vocabularies to classify evidence. They describe distinct axes, but align like this:
 
-| Categoria epistêmica (fato/inferência) | Status no Modelo de evidência (por fonte) | Força da conclusão (síntese final) |
-| -------------------------------------- | ----------------------------------------- | ---------------------------------- |
-| Fato confirmado                        | Confirmada                                | Confirmado / Fortemente sustentado |
-| Inferência                             | Parcial                                   | Provável                           |
-| Hipótese                               | Insuficiente                              | Possível                           |
-| Desconhecido                           | Insuficiente / conflitante                | Inconclusivo                       |
-| (contradição comprovada)               | Refutada                                  | Refutado                           |
+| Epistemic category (fact/inference) | Status in the Evidence model (per source) | Strength of the conclusion (final synthesis) |
+| ----------------------------------- | ----------------------------------------- | -------------------------------------------- |
+| Confirmed fact                      | Confirmed                                 | Confirmed / Strongly supported               |
+| Inference                           | Partial                                   | Likely                                       |
+| Hypothesis                          | Insufficient                              | Possible                                     |
+| Unknown                             | Insufficient / conflicting                | Inconclusive                                 |
+| (proven contradiction)              | Refuted                                   | Refuted                                      |
 
-"Hipótese" (categoria epistêmica) e "Possível" (força da conclusão) descrevem o mesmo grau: explicação plausível ainda sem validação suficiente.
+"Hypothesis" (epistemic category) and "Possible" (strength of the conclusion) describe the same degree: a plausible explanation without sufficient validation.
 
-## Processo de síntese
+## Synthesis process
 
-### 1. Definir a pergunta
+### 1. Define the question
 
-Comece com uma pergunta verificável.
+Start with a verifiable question.
 
 ```text
-Ruim:
-"Qual biblioteca é melhor?"
+Bad:
+"Which library is best?"
 
-Melhor:
-"Qual biblioteca atende FastAPI atual, OAuth com Google, PostgreSQL, política de sessão definida e manutenção ativa?"
+Better:
+"Which library supports current FastAPI, OAuth with Google, PostgreSQL, the defined session policy, and active maintenance?"
 ```
 
 ```text
-Ruim:
-"Por que a API está lenta?"
+Bad:
+"Why is the API slow?"
 
-Melhor:
-"Qual componente explica a maior parte da latência observada no endpoint X?"
+Better:
+"Which component explains most of the latency observed on endpoint X?"
 ```
 
-### 2. Definir afirmações necessárias
+### 2. Define the necessary claims
 
-Quebre a pergunta em afirmações que precisam ser sustentadas.
+Break the question into claims that need support.
 
 ```text
-Pergunta:
-- Esta biblioteca é adequada para autenticação?
+Question:
+- Is this library adequate for authentication?
 
-Afirmações necessárias:
-- É compatível com a versão atual do framework.
-- Suporta OAuth com Google.
-- Integra com o banco usado no projeto.
-- Possui manutenção ativa.
-- Não exige infraestrutura incompatível.
-- Atende à política de sessão necessária.
+Necessary claims:
+- It is compatible with the current framework version.
+- It supports OAuth with Google.
+- It integrates with the database used in the project.
+- It has active maintenance.
+- It does not require incompatible infrastructure.
+- It meets the required session policy.
 ```
 
-Não busque fontes aleatórias antes de saber o que precisa ser comprovado.
+Do not chase random sources before knowing what needs to be proven.
 
-### 3. Coletar evidência relevante
+### 3. Collect relevant evidence
 
-Colete apenas fontes que possam responder às afirmações necessárias.
+Collect only sources that can answer the necessary claims.
 
 ```text
-Priorize:
-- documentação oficial;
-- código e contratos reais;
-- testes;
+Prioritize:
+- official documentation;
+- real code and contracts;
+- tests;
 - logs;
 - changelogs;
-- fontes primárias;
-- dados diretamente observáveis.
+- primary sources;
+- directly observable data.
 ```
 
-Evite acumular fontes sem propósito.
+Avoid accumulating sources without purpose.
 
 ```text
-Ruim:
-Ler dez artigos genéricos sobre autenticação.
+Bad:
+Read ten generic articles about authentication.
 
-Melhor:
-Consultar documentação da biblioteca, compatibilidade da versão, exemplo oficial de OAuth e contrato atual do projeto.
+Better:
+Check the library's documentation, version compatibility, the official OAuth example, and the project's current contract.
 ```
 
-### 4. Avaliar qualidade e aplicabilidade
+### 4. Assess quality and applicability
 
-Pergunte para cada fonte:
+Ask about each source:
 
 ```text
-- Esta fonte é próxima do fato analisado?
-- Ela é atual para a versão, período ou ambiente relevante?
-- Ela trata exatamente da pergunta?
-- O autor ou sistema possui autoridade sobre o assunto?
-- A fonte possui incentivo ou viés relevante?
-- Há contexto omitido?
-- A fonte pode estar desatualizada?
+- Is this source close to the fact under analysis?
+- Is it current for the relevant version, period, or environment?
+- Does it address exactly this question?
+- Does the author or system have authority on the subject?
+- Does the source have a relevant incentive or bias?
+- Is context being omitted?
+- Could the source be outdated?
 ```
 
 ```mermaid
 flowchart TD
-    A[Fonte] --> B{É relevante para a pergunta?}
-    B -- Não --> C[Descartar ou usar apenas como contexto]
-    B -- Sim --> D{É atual e aplicável?}
-    D -- Não --> E[Marcar limitação]
-    D -- Sim --> F{É próxima do fato?}
-    F -- Sim --> G[Priorizar]
-    F -- Não --> H[Usar como suporte secundário]
+    A[Source] --> B{Relevant to the question?}
+    B -- No --> C[Discard or use only as context]
+    B -- Yes --> D{Current and applicable?}
+    D -- No --> E[Flag the limitation]
+    D -- Yes --> F{Close to the fact?}
+    F -- Yes --> G[Prioritize]
+    F -- No --> H[Use as secondary support]
 ```
 
-### 5. Extrair alegações verificáveis
+### 5. Extract verifiable claims
 
-Não sintetize documentos inteiros de uma vez. Extraia as afirmações que importam.
+Do not synthesize entire documents at once. Extract the claims that matter.
 
 ```text
-Fonte:
-- Documento de API.
+Source:
+- API document.
 
-Alegação:
-- O campo `priority` é opcional.
+Claim:
+- The `priority` field is optional.
 
-Evidência:
-- Schema não o marca como obrigatório.
+Evidence:
+- The schema does not mark it as required.
 
-Limitações:
-- O schema não prova comportamento de clientes antigos.
+Limitations:
+- The schema does not prove the behavior of old clients.
 ```
 
-### 6. Comparar convergências
+### 6. Compare convergences
 
-Convergência existe quando fontes independentes sustentam a mesma conclusão.
+Convergence exists when independent sources support the same conclusion.
 
 ```text
-Exemplo:
-- Schema confirma que o campo existe.
-- Código do backend processa o campo.
-- Teste de integração confirma comportamento real.
+Example:
+- The schema confirms the field exists.
+- The backend code processes the field.
+- An integration test confirms the real behavior.
 
-Síntese:
-- Há evidência forte de que o campo é suportado.
+Synthesis:
+- There is strong evidence that the field is supported.
 ```
 
-A convergência é mais forte quando as fontes possuem métodos ou origens diferentes. Quando há agregação de muitas evidências independentes — de fontes ou de execuções de agentes/lentes distintas — apontando para a mesma resposta, o **cross-check por execuções independentes** da [Verification](verification.md) mede esse acordo.
+Convergence is stronger when the sources have different methods or origins. When many independent pieces of evidence aggregate — from distinct sources or from runs of distinct agents/lenses — pointing to the same answer, the **cross-check across independent runs** in [Verification](verification.md) measures that agreement.
 
-### 7. Tratar conflitos
+### 7. Handle conflicts
 
-Quando fontes divergem, não escolha automaticamente a mais conveniente. Primeiro identifique a natureza do conflito. Em casos de agregação ou evidências conflitantes entre execuções independentes (agentes ou lentes distintas), apoie-se no cross-check da [Verification](verification.md).
+When sources diverge, do not automatically pick the most convenient one. First identify the nature of the conflict. For aggregation cases or conflicting evidence across independent runs (distinct agents or lenses), lean on the cross-check in [Verification](verification.md).
 
-| Tipo de conflito | Exemplo                                           | Tratamento                                 |
-| ---------------- | ------------------------------------------------- | ------------------------------------------ |
-| Temporal         | Documento antigo diverge da versão atual          | Priorizar fonte atual e registrar mudança  |
-| De escopo        | Fonte fala de versão diferente                    | Separar contextos                          |
-| De ambiente      | Funciona localmente, falha em produção            | Investigar configuração e ambiente         |
-| De definição     | Fontes usam termos diferentes                     | Normalizar conceitos                       |
-| De evidência     | Uma fonte é indireta e outra é observação direta  | Priorizar evidência mais próxima do fato   |
-| Real             | Duas fontes confiáveis divergem no mesmo contexto | Declarar incerteza e buscar nova evidência |
+| Conflict type | Example                                            | Handling                                     |
+| ------------- | -------------------------------------------------- | -------------------------------------------- |
+| Temporal      | An old document diverges from the current version  | Prioritize the current source and record the change |
+| Scope         | The source refers to a different version           | Separate the contexts                        |
+| Environment   | Works locally, fails in production                 | Investigate configuration and environment    |
+| Definition    | Sources use different terms                        | Normalize the concepts                       |
+| Evidence      | One source is indirect and the other is direct observation | Prioritize the evidence closest to the fact |
+| Real          | Two reliable sources diverge in the same context   | State the uncertainty and seek new evidence  |
 
 ```mermaid
 flowchart TD
-    A[Conflito entre fontes] --> B{Mesma versão, data e escopo?}
-    B -- Não --> C[Separar contextos]
-    B -- Sim --> D{Uma fonte é mais direta ou confiável?}
-    D -- Sim --> E[Priorizar e documentar motivo]
-    D -- Não --> F[Buscar evidência adicional]
-    F --> G{Conflito resolvido?}
-    G -- Sim --> H[Atualizar conclusão]
-    G -- Não --> I[Declarar inconclusivo]
+    A[Conflict between sources] --> B{Same version, date, and scope?}
+    B -- No --> C[Separate the contexts]
+    B -- Yes --> D{Is one source more direct or reliable?}
+    D -- Yes --> E[Prioritize and document the reason]
+    D -- No --> F[Seek additional evidence]
+    F --> G{Conflict resolved?}
+    G -- Yes --> H[Update the conclusion]
+    G -- No --> I[Declare it inconclusive]
 ```
 
-## Força da conclusão
+## Strength of the conclusion
 
-A conclusão deve refletir a qualidade da evidência. Os rótulos abaixo são o eixo de síntese final (ver mapeamento na seção de fato/inferência).
+The conclusion must reflect the quality of the evidence. The labels below are the final-synthesis axis (see the mapping in the fact/inference section).
 
-| Status                | Uso                                                        |
-| --------------------- | ---------------------------------------------------------- |
-| Confirmado            | Evidência direta e suficiente para o contexto              |
-| Fortemente sustentado | Múltiplas evidências convergentes, com pequenas limitações |
-| Provável              | Evidência relevante, mas indireta ou incompleta            |
-| Possível              | Hipótese plausível sem validação suficiente                |
-| Inconclusivo          | Evidências insuficientes ou conflitantes                   |
-| Refutado              | Evidência confiável contradiz a afirmação                  |
+| Status              | Use                                                           |
+| ------------------- | ------------------------------------------------------------- |
+| Confirmed           | Direct evidence, sufficient for the context                   |
+| Strongly supported  | Multiple converging pieces of evidence, with minor limitations |
+| Likely              | Relevant but indirect or incomplete evidence                  |
+| Possible            | Plausible hypothesis without sufficient validation            |
+| Inconclusive        | Insufficient or conflicting evidence                          |
+| Refuted             | Reliable evidence contradicts the claim                       |
 
-Exemplo:
+Example:
 
 ```text
-Confirmado:
-- O endpoint não aceita campo obrigatório ausente.
+Confirmed:
+- The endpoint does not accept a missing required field.
 
-Provável:
-- A falha da interface decorre de incompatibilidade de payload.
+Likely:
+- The interface failure stems from a payload incompatibility.
 
-Inconclusivo:
-- Não foi possível confirmar se um cliente externo depende do comportamento antigo.
+Inconclusive:
+- It could not be confirmed whether an external client depends on the old behavior.
 
-Refutado:
-- A hipótese de indisponibilidade da API foi descartada pelo log e pela chamada controlada.
+Refuted:
+- The API-unavailability hypothesis was ruled out by the log and the controlled call.
 ```
 
-## Síntese proporcional
+## Proportional synthesis
 
-Uma boa síntese não exagera.
+A good synthesis does not overstate.
 
 ```text
-Ruim:
-"A biblioteca é totalmente compatível e resolve autenticação."
+Bad:
+"The library is fully compatible and solves authentication."
 
-Melhor:
-"A documentação oficial confirma suporte ao fluxo OAuth analisado e compatibilidade com a versão atual do framework. A integração com a política específica de refresh token ainda precisa de prova de conceito."
+Better:
+"The official documentation confirms support for the analyzed OAuth flow and compatibility with the current framework version. Integration with the specific refresh-token policy still needs a proof of concept."
 ```
 
 ```text
-Ruim:
-"Os pedidos duplicam por causa do frontend."
+Bad:
+"Orders are duplicating because of the frontend."
 
-Melhor:
-"Logs confirmam requests repetidos; isso sugere participação do cliente ou de retries. Ainda é necessário verificar idempotência no backend e consumo de mensagens antes de atribuir causa única."
+Better:
+"Logs confirm repeated requests; this suggests involvement of the client or of retries. Backend idempotency and message consumption still need checking before attributing a single cause."
 ```
 
-## Matriz de síntese
+## Synthesis matrix
 
-Use uma matriz quando houver várias afirmações ou fontes relevantes.
+Use a matrix when there are several relevant claims or sources.
 
-| Afirmação                              | Fonte principal      | Evidência adicional | Status         | Limitação                                |
-| -------------------------------------- | -------------------- | ------------------- | -------------- | ---------------------------------------- |
-| API aceita `status`                    | Schema atual         | Teste de integração | Confirmado     | Valores inválidos ainda não testados     |
-| Clientes antigos continuam compatíveis | Telemetria parcial   | Teste local         | Parcial        | Nem todos os clientes foram simulados    |
-| Biblioteca suporta OAuth               | Documentação oficial | Exemplo oficial     | Confirmado     | Fluxo de refresh token precisa validação |
-| Infraestrutura suporta fila            | Configuração local   | Nenhuma             | Não verificado | Produção ainda não confirmada            |
+| Claim                              | Main source            | Additional evidence | Status       | Limitation                               |
+| ---------------------------------- | ---------------------- | ------------------- | ------------ | ---------------------------------------- |
+| API accepts `status`               | Current schema         | Integration test    | Confirmed    | Invalid values not yet tested            |
+| Old clients remain compatible      | Partial telemetry      | Local test          | Partial      | Not all clients were simulated           |
+| Library supports OAuth             | Official documentation | Official example    | Confirmed    | Refresh-token flow needs validation      |
+| Infrastructure supports a queue    | Local configuration    | None                | Not verified | Production not yet confirmed             |
 
-Não use tabelas decorativas. A matriz deve orientar decisão, investigação ou comunicação de limitações.
+Do not use decorative tables. The matrix must guide a decision, an investigation, or the communication of limitations.
 
-## Relevância e recência
+## Relevance and recency
 
-Uma fonte confiável pode ser inadequada se estiver fora de contexto.
+A reliable source can be inadequate if it is out of context.
 
 ```text
-Exemplos:
-- Documentação de versão antiga não confirma comportamento da versão atual.
-- Log de um ambiente não prova comportamento em outro.
-- Benchmark genérico não prova performance no projeto.
-- Artigo acadêmico não prova viabilidade operacional imediata.
-- Documento interno antigo pode não refletir política atual.
+Examples:
+- Documentation for an old version does not confirm the current version's behavior.
+- A log from one environment does not prove behavior in another.
+- A generic benchmark does not prove performance in the project.
+- An academic paper does not prove immediate operational viability.
+- An old internal document may not reflect the current policy.
 ```
 
-Sempre registre, quando relevante:
+Always record, when relevant:
 
 ```text
-- versão;
-- data;
-- ambiente;
-- escopo;
-- configuração;
-- população ou conjunto de dados;
-- limitações conhecidas.
+- version;
+- date;
+- environment;
+- scope;
+- configuration;
+- population or dataset;
+- known limitations.
 ```
 
-## Evidência negativa
+## Negative evidence
 
-Ausência de evidência não é automaticamente evidência de ausência.
+Absence of evidence is not automatically evidence of absence.
 
 ```text
-Ruim:
-"Não encontrei clientes usando endpoint legado, então ninguém usa."
+Bad:
+"I found no clients using the legacy endpoint, so nobody uses it."
 
-Melhor:
-"Não foram encontrados usos nos logs analisados; isso reduz a probabilidade, mas não prova ausência completa de consumidores."
+Better:
+"No usage was found in the analyzed logs; this lowers the probability but does not prove the complete absence of consumers."
 ```
 
-Use evidência negativa apenas quando a fonte ou método teria alta chance de detectar o que está sendo procurado.
+Use negative evidence only when the source or method would have a high chance of detecting what is being looked for.
 
-## Fontes conflitantes e decisão
+## Conflicting sources and decision
 
-Quando não for possível resolver conflito, a decisão deve considerar risco. A escala de risco/impacto (Baixo/Médio/Alto/Crítico) segue o orçamento de esforço da skill [pelizzai-reasoning](../SKILL.md).
+When a conflict cannot be resolved, the decision must account for risk. The risk/impact scale (Low/Medium/High/Critical) follows the effort budget of the [pelizzai-reasoning](../SKILL.md) skill.
 
 ```text
-Baixo:
-- Escolher opção reversível e monitorar.
+Low:
+- Choose a reversible option and monitor.
 
-Médio:
-- Executar prova de conceito ou teste controlado.
+Medium:
+- Run a proof of concept or a controlled test.
 
-Alto:
-- Não avançar sem evidência adicional ou confirmação do responsável.
+High:
+- Do not proceed without additional evidence or the owner's confirmation.
 
-Crítico:
-- Bloquear decisão até obter fonte primária, teste independente ou autorização explícita.
+Critical:
+- Block the decision until a primary source, an independent test, or explicit authorization is obtained.
 ```
 
-## Regras de parada
+## Stopping rules
 
-Pare de coletar e iterar quando qualquer critério objetivo for atendido, sempre dentro do orçamento de esforço da skill [pelizzai-reasoning](../SKILL.md):
+Stop collecting and iterating when any objective criterion is met, always within the effort budget of the [pelizzai-reasoning](../SKILL.md) skill:
 
 ```text
-- Convergência: N fontes independentes (com métodos ou origens diferentes) sustentam a mesma conclusão.
-- Afirmação crítica confirmada por fonte primária (código, schema, teste, log ou documento original).
-- Esgotamento útil: novas fontes não reduzem mais a incerteza relevante.
-- Orçamento de esforço atingido: registrar como inconclusivo e declarar limitações em vez de buscar indefinidamente.
+- Convergence: N independent sources (with different methods or origins) support the same conclusion.
+- A critical claim is confirmed by a primary source (code, schema, test, log, or original document).
+- Useful exhaustion: new sources no longer reduce the relevant uncertainty.
+- Effort budget reached: record it as inconclusive and state the limitations instead of searching indefinitely.
 ```
 
-Calibre N pelo risco: Baixo/Médio podem aceitar convergência de 2 fontes independentes; Alto/Crítico exigem confirmação por fonte primária ou autorização do responsável.
+Calibrate N by risk: Low/Medium can accept convergence of 2 independent sources; High/Critical require confirmation by a primary source or the owner's authorization.
 
-## Evidência para recomendações
+## Evidence for recommendations
 
-Uma recomendação deve conter:
+A recommendation must contain:
 
 ```text
-Recomendação:
-- Qual opção é sugerida.
+Recommendation:
+- Which option is suggested.
 
-Evidências:
-- Fatos que sustentam a escolha.
+Evidence:
+- Facts that support the choice.
 
-Critérios:
-- Requisitos e restrições usados para comparar opções.
+Criteria:
+- Requirements and constraints used to compare options.
 
 Trade-offs:
-- Custos, riscos e preferências sacrificadas.
+- Costs, risks, and preferences sacrificed.
 
-Contra-argumento:
-- Em qual cenário outra opção seria melhor.
+Counter-argument:
+- In which scenario another option would be better.
 
-Limitações:
-- O que não foi confirmado.
+Limitations:
+- What has not been confirmed.
 
-Nível de confiança:
-- Alto, médio ou baixo, com motivo.
+Confidence level:
+- High, medium, or low, with the reason.
 ```
 
-Exemplo:
+Example:
 
 ```text
-Recomendação:
-- Usar fila assíncrona com infraestrutura já existente.
+Recommendation:
+- Use an async queue with the existing infrastructure.
 
-Evidências:
-- O endpoint possui operação pesada; há broker disponível no ambiente analisado.
+Evidence:
+- The endpoint performs a heavy operation; a broker is available in the analyzed environment.
 
 Trade-offs:
-- Maior complexidade operacional e necessidade de idempotência.
+- Higher operational complexity and the need for idempotency.
 
-Contra-argumento:
-- Se o volume for baixo e a resposta imediata for obrigatória, uma otimização síncrona pode ser mais simples.
+Counter-argument:
+- If volume is low and an immediate response is required, a synchronous optimization may be simpler.
 
-Limitações:
-- Capacidade do broker em produção ainda precisa ser confirmada.
+Limitations:
+- The broker's capacity in production still needs confirmation.
 
-Nível de confiança:
-- Médio.
+Confidence level:
+- Medium.
 ```
 
-## Anti-padrões
+## Anti-patterns
 
-### 1. Contar fontes em vez de avaliar qualidade
+### 1. Counting sources instead of assessing quality
 
 ```text
-Ruim:
-"Cinco blogs dizem que a ferramenta é boa."
+Bad:
+"Five blogs say the tool is good."
 
-Melhor:
-"A documentação oficial confirma compatibilidade; dois relatos independentes indicam limitação em cenário específico."
+Better:
+"The official documentation confirms compatibility; two independent reports indicate a limitation in a specific scenario."
 ```
 
-### 2. Usar fonte fora de escopo
+### 2. Using a source out of scope
 
 ```text
-Ruim:
-Usar documentação de versão 2 para afirmar comportamento da versão 4.
+Bad:
+Use version 2 documentation to claim version 4 behavior.
 
-Melhor:
-Confirmar versão, ambiente e contrato antes de usar a fonte.
+Better:
+Confirm the version, environment, and contract before using the source.
 ```
 
-### 3. Confundir citação com evidência
+### 3. Confusing citation with evidence
 
 ```text
-Ruim:
-Adicionar várias referências que não sustentam a afirmação central.
+Bad:
+Add several references that do not support the central claim.
 
-Melhor:
-Citar a fonte que prova exatamente a afirmação feita.
+Better:
+Cite the source that proves exactly the claim being made.
 ```
 
-### 4. Ignorar evidência contrária
+### 4. Ignoring contrary evidence
 
 ```text
-Ruim:
-Selecionar apenas fontes que confirmam a hipótese inicial.
+Bad:
+Select only sources that confirm the initial hypothesis.
 
-Melhor:
-Registrar conflito, investigar causa e ajustar conclusão.
+Better:
+Record the conflict, investigate the cause, and adjust the conclusion.
 ```
 
-### 5. Concluir além do que a fonte prova
+### 5. Concluding beyond what the source proves
 
 ```text
-Ruim:
-"A documentação mostra que o campo existe, então todos os clientes são compatíveis."
+Bad:
+"The documentation shows the field exists, so all clients are compatible."
 
-Melhor:
-"O campo existe no contrato atual; compatibilidade com clientes antigos requer validação separada."
+Better:
+"The field exists in the current contract; compatibility with old clients requires separate validation."
 ```
 
-### 6. Tratar ausência como prova
+### 6. Treating absence as proof
 
 ```text
-Ruim:
-"Não há problema porque não encontrei log de erro."
+Bad:
+"There is no problem because I found no error log."
 
-Melhor:
-"Não foram encontrados erros no período analisado; verificar cobertura de logs e fluxo observado antes de concluir."
+Better:
+"No errors were found in the analyzed period; check log coverage and the observed flow before concluding."
 ```
 
-### 7. Misturar fatos e preferências
+### 7. Mixing facts and preferences
 
 ```text
-Ruim:
-"A biblioteca é melhor porque é popular."
+Bad:
+"The library is better because it is popular."
 
-Melhor:
-"A biblioteca possui comunidade maior; ainda é necessário comparar compatibilidade, manutenção e requisitos do projeto."
+Better:
+"The library has a larger community; compatibility, maintenance, and the project's requirements still need comparison."
 ```
 
-## Exemplos
+## Examples
 
-### Exemplo 1 — Biblioteca técnica
+### Example 1 — Technical library
 
 ```text
-Pergunta:
-- Qual biblioteca usar para autenticação?
+Question:
+- Which library to use for authentication?
 
-Afirmações:
-- Compatibilidade com framework.
-- OAuth com Google.
-- Integração com banco.
-- Manutenção ativa.
-- Política de sessão adequada.
+Claims:
+- Framework compatibility.
+- OAuth with Google.
+- Database integration.
+- Active maintenance.
+- Adequate session policy.
 
-Fontes:
-- Documentação oficial.
+Sources:
+- Official documentation.
 - Changelog.
-- Repositório oficial.
-- Código atual do projeto.
-- Exemplo oficial.
+- Official repository.
+- The project's current code.
+- Official example.
 
-Síntese:
-- Opção A atende compatibilidade e OAuth.
-- Opção B possui integração mais simples, mas depende de versão incompatível.
-- Opção C exige serviço externo pago.
+Synthesis:
+- Option A meets compatibility and OAuth.
+- Option B has simpler integration but depends on an incompatible version.
+- Option C requires a paid external service.
 
-Conclusão:
-- Opção A é a mais adequada para as restrições atuais.
-- A política de refresh token ainda exige prova de conceito.
+Conclusion:
+- Option A is the best fit for the current constraints.
+- The refresh-token policy still requires a proof of concept.
 ```
 
-### Exemplo 2 — Diagnóstico de bug
+### Example 2 — Bug diagnosis
 
 ```text
-Pergunta:
-- Por que pedidos estão duplicando?
+Question:
+- Why are orders duplicating?
 
-Evidências:
-- Logs mostram requests repetidos.
-- Teste de integração permite criação repetida.
-- Backend não possui chave de idempotência.
-- Worker também permite reprocessamento.
+Evidence:
+- Logs show repeated requests.
+- An integration test allows repeated creation.
+- The backend has no idempotency key.
+- The worker also allows reprocessing.
 
-Síntese:
-- Há múltiplas camadas capazes de produzir duplicidade.
-- Não é seguro atribuir causa única ao clique duplo.
+Synthesis:
+- Multiple layers are capable of producing duplication.
+- It is not safe to attribute a single cause to the double click.
 
-Conclusão:
-- A ausência de idempotência no backend é causa estrutural confirmada.
-- O clique duplo pode ser fator contribuinte, mas precisa de validação específica.
+Conclusion:
+- The lack of idempotency in the backend is a confirmed structural cause.
+- The double click may be a contributing factor but needs specific validation.
 ```
 
-## Formato compacto para comunicar a síntese
+## Compact format for communicating the synthesis
 
-Use este formato para comunicar síntese de evidências e para a entrega final ao agente. Ele consolida o checklist do processo: cada campo corresponde a uma etapa já descrita acima.
+Use this format to communicate the evidence synthesis and for the final delivery to the agent. It consolidates the process checklist: each field corresponds to a step already described above.
 
 ```text
-Pergunta:
-- [o que precisa ser respondido]
+Question:
+- [what needs to be answered]
 
-Afirmações analisadas:
-- [itens que precisam de suporte]
+Claims analyzed:
+- [items that need support]
 
-Evidências principais:
-- [fonte]: [o que sustenta]
-- [fonte]: [o que sustenta]
+Main evidence:
+- [source]: [what it supports]
+- [source]: [what it supports]
 
-Convergências:
-- [pontos sustentados por múltiplas evidências independentes]
+Convergences:
+- [points supported by multiple independent pieces of evidence]
 
-Conflitos:
-- [divergências e possível explicação]
+Conflicts:
+- [divergences and a possible explanation]
 
-Limitações:
-- [lacunas, contexto ausente ou fonte desatualizada]
+Limitations:
+- [gaps, missing context, or outdated source]
 
-Conclusão:
-- [confirmada, fortemente sustentada, provável, possível, inconclusiva ou refutada]
+Conclusion:
+- [confirmed, strongly supported, likely, possible, inconclusive, or refuted]
 
-Nível de confiança:
-- [alto, médio ou baixo]
+Confidence level:
+- [high, medium, or low]
 ```
 
-Lembretes que não estão cobertos pelos campos acima:
+Reminders not covered by the fields above:
 
 ```text
-- Priorize qualidade e independência das fontes; nunca conte fontes.
-- Não conclua além da evidência disponível.
-- Use Verification para confirmar afirmações críticas.
-- Não exponha cadeia de pensamento detalhada; comunique apenas evidências relevantes, síntese, conclusão, limitações e decisão.
+- Prioritize source quality and independence; never count sources.
+- Do not conclude beyond the available evidence.
+- Use Verification to confirm critical claims.
+- Do not expose detailed chain of thought; communicate only relevant evidence, synthesis, conclusion, limitations, and the decision.
 ```
 
-## Técnicas relacionadas
+## Related techniques
 
-- [Verification](verification.md) — confirma se uma afirmação crítica possui evidência suficiente.
-- [Assumption Tracking](assumption-tracking.md) — registra premissas ainda não confirmadas.
-- [Constraint Satisfaction](constraint-satisfaction.md) — garante respeito a requisitos e proibições.
-- [Decision Making](decision-making.md) — estrutura a escolha entre opções com critérios e trade-offs, inclusive caminhos interdependentes com poda.
-- [ReAct](react.md) — busca, observa e atualiza o estado.
-- [Plan and Execute](plan-and-execute.md) — organiza etapas e checkpoints.
-- [Critique and Refine](critique-and-refine.md) — corrige conclusões ou artefatos após identificar falhas.
+- [Verification](verification.md) — confirms whether a critical claim has sufficient evidence.
+- [Assumption Tracking](assumption-tracking.md) — records assumptions not yet confirmed.
+- [Constraint Satisfaction](constraint-satisfaction.md) — ensures requirements and prohibitions are respected.
+- [Decision Making](decision-making.md) — structures the choice among options with criteria and trade-offs, including interdependent paths with pruning.
+- [ReAct](react.md) — searches, observes, and updates state.
+- [Plan and Execute](plan-and-execute.md) — organizes steps and checkpoints.
+- [Critique and Refine](critique-and-refine.md) — corrects conclusions or artifacts after finding flaws.
 
-Voltar a skill [pelizzai-reasoning](../SKILL.md).
+Back to the [technique catalog](../SKILL.md).

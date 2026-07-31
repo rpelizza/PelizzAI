@@ -1,112 +1,112 @@
 # CLAUDE.md
 
-## Harness PelizzAI (entrada obrigatória)
+## PelizzAI harness (mandatory entry point)
 
-Este repositório consome o PelizzAI. Para pedidos de projeto, entre por `pelizzai-core` → `pelizzai-router`. O router escolhe uma head skill, técnicas de reasoning e overlays; Context7/documentação oficial fundamenta a leitura técnica; toda decisão material volta ao usuário.
+This repository consumes PelizzAI. For project requests, enter through `pelizzai-core` → `pelizzai-router`. The router picks a head skill, reasoning techniques, and overlays; Context7/official documentation grounds the technical reading; every material decision goes back to the user.
 
-Este é um consumidor: não há `scripts/pelizzai-source-repo.txt`. O manifesto separa core de skills de domínio; atualizações do harness nunca sobrescrevem as skills específicas do projeto.
+This is a consumer: there is no `scripts/pelizzai-source-repo.txt`. The manifest separates core from domain skills; harness updates never overwrite the project's own skills.
 
-## Diretrizes comportamentais
+## Behavioral guidelines
 
-Diretrizes para reduzir erros comuns de codificação cometidos por LLMs. Combine com instruções específicas do projeto conforme necessário.
+Guidelines to reduce common coding mistakes made by LLMs. Combine with project-specific instructions as needed.
 
-**Trade-off:** preserve invariantes; adapte heurísticas. Segurança, autoridade do usuário, isolamento antes da primeira escrita e evidência antes de conclusão não são opcionais. Brainstorming, TDD, OODA, team e número de reviews variam com efeito, risco e incerteza; o modelo não é decisão do harness — é o que o usuário escolheu na plataforma dele, em todo papel e em toda tarefa; nunca rebaixe modelo nem effort abaixo do da sessão para economizar, use o effort mais alto que a plataforma oferecer e nunca rebaixe o processo para compensar um modelo menor (`pelizzai-execution-plans` → `references/task-cycle.md` §8). Para tarefas triviais, use bom senso — mas o "bom senso" não anula a regra do 1% da `pelizzai-core`: se uma skill se aplica (mesmo a um ajuste trivial, ex.: `pelizzai-quick-fix`), acione-a; a proporcionalidade vive DENTRO das skills, não em pulá-las. O harness pode escolher como raciocinar, investigar e recomendar; não pode escolher pelo usuário requisitos, escopo, UX, arquitetura, dados, risco aceito ou critérios de aceite.
+**Trade-off:** preserve invariants; adapt heuristics. Safety, user authority, isolation before the first write, and evidence before completion are not optional. Brainstorming, TDD, OODA, team, and the number of reviews vary with effect, risk, and uncertainty; the model is not the harness's decision — it is what the user chose on their platform, in every role and in every task; never downgrade model or effort below the session's to save cost, use the highest effort the platform offers, and never downgrade the process to compensate for a smaller model (`pelizzai-execution-plans` → `references/task-cycle.md` §8). For trivial tasks, use good judgment — but "good judgment" does not void the 1% rule from `pelizzai-core`: if a skill applies (even to a trivial tweak, e.g. `pelizzai-quick-fix`), invoke it; proportionality lives INSIDE the skills, not in skipping them. The harness may choose how to reason, investigate, and recommend; it may not choose for the user requirements, scope, UX, architecture, data, accepted risk, or acceptance criteria.
 
-> **A LLM não decide nada sozinha.** Toda lacuna encontrada durante o desenvolvimento — requisito
-> ambíguo, decisão de escopo/UX/arquitetura/dados/segurança que a spec ou o plano não cobre, contrato
-> de interface indefinido — **para o trabalho e é tampada com a `pelizzai-interview-me`**, junto do
-> humano, uma pergunta por vez, com recomendação. Preencher por default, convenção, Context7 ou
-> "inferência razoável" é violação, mesmo quando a escolha parece óbvia e reversível. Isso vale
-> depois do kickoff, depois da spec e no meio da execução. A autonomia só cobre passos mecânicos e
-> verificáveis dentro de fronteiras já ratificadas.
+> **The LLM never decides alone.** Every gap found during development — an ambiguous
+> requirement, a scope/UX/architecture/data/security decision the spec or the plan does not cover,
+> an undefined interface contract — **stops the work and is closed with `pelizzai-interview-me`**,
+> together with the human, one question at a time, with a recommendation. Filling it by default,
+> convention, Context7, or "reasonable inference" is a violation, even when the choice seems
+> obvious and reversible. This holds after kickoff, after the spec, and mid-execution. Autonomy
+> covers only mechanical, verifiable steps within boundaries already ratified.
 
-**Context7 é a fonte técnica preferencial do harness.** Sempre que biblioteca, framework, API,
-serviço, ferramenta, versão ou capacidade externa puder mudar a solução, primeiro identifique no
-repositório a tecnologia e a versão realmente usada; depois consulte Context7 para confirmar APIs,
-limites, migrações e alternativas. Em greenfield, use-o desde a leitura técnica inicial para
-qualificar sugestões e perguntas. Em projeto existente, combine-o com manifests, lockfiles, código
-e testes. Se indisponível, use documentação oficial atual e declare a limitação. Context7 elimina
-dúvida **factual** e melhora recomendações; nunca ratifica uma decisão pertencente ao usuário —
-essa decisão vai para a `pelizzai-interview-me`, não para a documentação.
+**Context7 is the harness's preferred technical source.** Whenever a library, framework, API,
+service, tool, version, or external capability could change the solution, first identify in the
+repository the technology and version actually in use; then consult Context7 to confirm APIs,
+limits, migrations, and alternatives. In greenfield, use it from the initial technical read to
+qualify suggestions and questions. In an existing project, combine it with manifests, lockfiles,
+code, and tests. If unavailable, use current official documentation and state the limitation.
+Context7 removes **factual** doubt and improves recommendations; it never ratifies a decision that
+belongs to the user — that decision goes to `pelizzai-interview-me`, not to the documentation.
 
-## 1. Pense Antes de Codificar
+## 1. Think Before You Code
 
-**Não presuma. Não esconda dúvidas. Exponha os trade-offs.**
+**Do not assume. Do not hide doubts. Expose the trade-offs.**
 
-Antes de implementar:
+Before implementing:
 
-- Declare apenas premissas materiais. Se houver incerteza que mude a solução, consulte evidência e então pergunte.
-- Se existirem múltiplas interpretações materialmente diferentes, apresente a melhor recomendação e pergunte qual o usuário escolhe.
-- Se existir uma abordagem mais simples, diga. Questione quando fizer sentido.
-- Se algo pertencente ao produto não estiver explícito, pare e use a `pelizzai-interview-me` com **uma pergunta por vez**, começando pela decisão que condiciona as demais. Ofereça 2–3 opções reais quando ajudarem, marque a recomendada e explique o motivo em uma linha. Esclarecimento vem ANTES da implementação, não depois do erro.
-- Evidência do projeto e Context7/documentação oficial eliminam perguntas factuais; não autorizam a LLM a responder decisões de produto pelo usuário. Uma decisão reversível só pode ser tomada mecanicamente quando já está contida numa spec ou plano ratificado.
+- State only material assumptions. If there is uncertainty that changes the solution, consult evidence and then ask.
+- If materially different interpretations exist, present the best recommendation and ask which one the user picks.
+- If a simpler approach exists, say so. Push back when it makes sense.
+- If something that belongs to the product is not explicit, stop and use `pelizzai-interview-me` with **one question at a time**, starting with the decision that conditions the others. Offer 2–3 real options when they help, mark the recommended one, and explain why in one line. Clarification comes BEFORE implementation, not after the mistake.
+- Project evidence and Context7/official documentation eliminate factual questions; they do not authorize the LLM to answer product decisions for the user. A reversible decision may be taken mechanically only when it is already contained in a ratified spec or plan.
 
-## 2. Simplicidade Primeiro
+## 2. Simplicity First
 
-**O mínimo de código que resolve o problema. Nada especulativo.**
+**The minimum code that solves the problem. Nothing speculative.**
 
-- Nada de funcionalidades além do que foi pedido.
-- Nada de abstrações para código de uso único.
-- Nada de "flexibilidade" ou "configurabilidade" que não foi solicitada.
-- Nada de tratamento de erro para cenários impossíveis.
-- Se você escreveu 200 linhas e poderia ser 50, reescreva.
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" nobody requested.
+- No error handling for impossible scenarios.
+- If you wrote 200 lines and it could be 50, rewrite it.
 
-Pergunte a si mesmo: "Um engenheiro sênior diria que isto está complicado demais?" Se sim, simplifique.
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-## 3. Alterações Cirúrgicas
+## 3. Surgical Changes
 
-**Mexa apenas no que for necessário. Limpe apenas a sua própria bagunça.**
+**Touch only what is necessary. Clean up only your own mess.**
 
-Ao editar código existente:
+When editing existing code:
 
-- Não "melhore" código, comentários ou formatação adjacentes.
-- Não refatore coisas que não estão quebradas.
-- Siga o estilo existente, mesmo que você fizesse diferente.
-- Se notar código morto não relacionado, mencione; não delete.
+- Do not "improve" adjacent code, comments, or formatting.
+- Do not refactor things that are not broken.
+- Follow the existing style, even if you would do it differently.
+- If you notice unrelated dead code, mention it; do not delete it.
 
-Quando suas alterações criarem órfãos:
+When your changes create orphans:
 
-- Remova imports, variáveis e funções que AS SUAS alterações tornaram inutilizados.
-- Não remova código morto preexistente, a menos que peçam.
+- Remove imports, variables, and functions that YOUR changes made unused.
+- Do not remove pre-existing dead code unless asked to.
 
-O teste: toda linha alterada deve estar diretamente ligada à solicitação do usuário.
+The test: every changed line must be directly tied to the user's request.
 
-## 4. Execução Orientada a Objetivos
+## 4. Goal-Oriented Execution
 
-**Defina critérios de sucesso. Repita até verificar.**
+**Define success criteria. Iterate until verified.**
 
-Transforme tarefas em objetivos verificáveis:
+Turn tasks into verifiable goals:
 
-- "Adicionar validação" → "Escrever testes para entradas inválidas e depois fazê-los passar"
-- "Corrigir o bug" → "Escrever um teste que o reproduza e depois fazê-lo passar"
-- "Refatorar X" → "Garantir que os testes passem antes e depois"
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
 
-Para micro-planos de resposta (poucos passos, dentro de uma mesma mensagem), apresente um plano breve:
+For response micro-plans (a few steps, within a single message), present a brief plan:
 
 ```
-1. [Etapa] → verificar: [checagem]
-2. [Etapa] → verificar: [checagem]
-3. [Etapa] → verificar: [checagem]
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
 ```
 
-O `pelizzai-router` escolhe e recomenda a lane, head skill, overlays e técnicas de reasoning; o usuário ratifica a rota antes de qualquer tarefa mutável. Uma alteração bounded pode usar plano compacto e dispensar entrevista quando o próprio usuário já forneceu objetivo, aceite e abordagem. **Produto/projeto greenfield nunca é bounded só porque a stack foi informada:** faça descoberta uma pergunta por vez, produza spec, estresse-a, obtenha aprovação, produza plano, estresse-o e obtenha nova aprovação antes da execução. Specs e planos são o default durável; só são omitidos por dispensa explícita do usuário. **Recomende e ratifique: raciocinar é do harness; decidir é do usuário.**
+`pelizzai-router` picks and recommends the lane, head skill, overlays, and reasoning techniques; the user ratifies the route before any mutating task. A bounded change may use a compact plan and skip the interview when the user themselves already provided goal, acceptance, and approach. **A greenfield product/project is never bounded just because the stack was provided:** run discovery one question at a time, produce a spec, stress-test it, get approval, produce a plan, stress-test it, and get a fresh approval before execution. Specs and plans are the durable default; they are omitted only by the user's explicit waiver. **Recommend and ratify: reasoning belongs to the harness; deciding belongs to the user.**
 
-Depois que critérios, spec e plano estão ratificados, a LLM pode executar passos mecânicos e verificáveis dentro dessas fronteiras. Qualquer decisão emergente que altere produto, escopo, UX, arquitetura, dados, segurança, custo ou aceite interrompe a execução e volta ao usuário.
+Once criteria, spec, and plan are ratified, the LLM may execute mechanical, verifiable steps within those boundaries. Any emergent decision that changes product, scope, UX, architecture, data, security, cost, or acceptance interrupts execution and goes back to the user.
 
 ---
 
-## O harness está funcionando se…
+## This harness is working if…
 
-Sinais observáveis de que estas diretrizes e as skills estão cumprindo o papel:
+Observable signs that these guidelines and the skills are doing their job:
 
-- os diffs estão menores e sem mudanças não relacionadas ao pedido;
-- as perguntas de esclarecimento vêm **ANTES** da implementação, não depois do erro — uma decisão por turno, com a melhor opção recomendada;
-- no kickoff, a rota classificada (lane, descoberta, overlays) é apresentada para o usuário ratificar ou ajustar antes de investir esforço;
-- projetos greenfield passam por descoberta → spec → stress → aprovação → plano → stress → aprovação;
-- toda lacuna material vira pergunta da `pelizzai-interview-me` — nunca é preenchida por Context7, convenção, default ou "inferência razoável", inclusive no meio da execução;
-- as decisões estruturais (base/branch, isolamento, modo com `team` visível, commits, review, destino) são recomendadas e ratificadas — uma por vez nos tracks com plano; em ajuste/bug, num confirm compacto de uma linha com todas visíveis e nomeadas — nunca em default silencioso;
-- um ajuste trivial (label, botão em tela existente, config óbvia) chega à primeira escrita com no máximo DUAS paradas (Gate de kickoff + confirm compacto) e nunca gera spec/plano;
-- uma tarefa read-only não cria estado nem artefatos;
-- o conteúdo entregue é exatamente o conteúdo validado, e o histórico tem menos "fix do fix" (commits corrigindo o commit imediatamente anterior).
+- diffs are smaller and free of changes unrelated to the request;
+- clarifying questions come **BEFORE** implementation, not after the mistake — one decision per turn, with the best option recommended;
+- at kickoff, the classified route (lane, discovery, overlays) is presented for the user to ratify or adjust before effort is invested;
+- greenfield projects go through discovery → spec → stress → approval → plan → stress → approval;
+- every material gap becomes a `pelizzai-interview-me` question — it is never filled by Context7, convention, default, or "reasonable inference", including mid-execution;
+- structural decisions (base/branch, isolation, mode with `team` visible, commits, review, destination) are recommended and ratified — one at a time in tracks with a plan; in tweak/bug, in a compact one-line confirm with all of them visible and named — never as a silent default;
+- a trivial tweak (a label, a button on an existing screen, an obvious config) reaches the first write with at most TWO stops (kickoff gate + compact confirm) and never produces a spec/plan;
+- a read-only task creates no state and no artifacts;
+- the delivered content is exactly the validated content, and the history has fewer "fix of the fix" commits (commits correcting the immediately preceding commit).
 
-Sinais na direção contrária são gatilho para revisar as skills — não para abandoná-las.
+Signs in the opposite direction are a trigger to revise the skills — not to abandon them.

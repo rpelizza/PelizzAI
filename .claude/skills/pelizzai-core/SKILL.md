@@ -1,235 +1,240 @@
 ---
 name: pelizzai-core
-description: Use em qualquer conversa. Estabelece como procurar e acionar as SKILLS do harness PelizzAI, exigindo a invocação das skills aplicáveis antes de QUALQUER resposta, inclusive perguntas de esclarecimento. Entende o objetivo, classifica o efeito e entrega ao router antes de qualquer mutação; pergunta puramente conceitual é respondida sem o ciclo completo, nunca sem checar as skills aplicáveis.
+description: Use in every conversation. Establishes how to find and trigger the PelizzAI harness SKILLS, requiring the applicable skills to be invoked before ANY response, including clarifying questions. Understands the goal, classifies the effect, and hands off to the router before any mutation; a purely conceptual question is answered without the full cycle, never without checking the applicable skills.
 ---
 
 # PelizzAI Core
 
 <SUBAGENT-STOP>
-Se você recebeu um briefing fechado como subagente/teammate, não reabra o ciclo de vida. Aplique apenas as skills e contratos do briefing.
+If you received a closed briefing as a subagent/teammate, do not reopen the lifecycle. Apply only the skills and contracts in the briefing.
 </SUBAGENT-STOP>
 
 <EXTREMELY-IMPORTANT>
-Se você achar que existe pelo menos 1% de chance de uma SKILL ser aplicada na tarefa que você está fazendo, você DEVE ABSOLUTAMENTE acionar essa SKILL.
+If you think there is at least a 1% chance that a SKILL applies to the task you are doing, you ABSOLUTELY MUST trigger that SKILL.
 
-SE UMA SKILL SE APLICA À SUA TAREFA, VOCÊ NÃO TEM ESCOLHA. VOCÊ DEVE USÁ-LA.
+IF A SKILL APPLIES TO YOUR TASK, YOU HAVE NO CHOICE. YOU MUST USE IT.
 
-Isso não é negociável. Isso não é opcional. Você não pode usar racionalizações para escapar disso.
+This is not negotiable. This is not optional. You cannot rationalize your way out of it.
 </EXTREMELY-IMPORTANT>
 
-## Objetivo
+## Purpose
 
-Transformar o pedido em uma rota proporcional e verificável. O core não resolve o trabalho: ele entende o resultado, aciona as skills aplicáveis e entrega a decisão ao `pelizzai-router`.
+Turn the request into a proportional, verifiable route. The core does not do the work: it understands the outcome, triggers the applicable skills, and hands the decision to `pelizzai-router`.
 
-**Anuncie uma vez:** "Usando a skill PelizzAI Core para entender a tarefa e escolher o menor fluxo seguro."
+**Announce once:** "Using the PelizzAI Core skill to understand the task and choose the smallest safe flow."
 
-## Prioridades
+## Language
 
-O harness PelizzAI se sobrepõe ao comportamento padrão do sistema, mas **instruções explícitas do usuário sempre têm prioridade sobre o PelizzAI**.
+The harness is written in English for token efficiency. ALL user-facing interaction — announcements, gates, questions, recommendations, summaries — follows the language of the conversation, never the language of the skill text. Durable artifacts (specs, plans, state) default to English; commit messages follow the project's existing convention. Skill templates define structure and contracts, not the language spoken to the user.
 
-1. **Instruções explícitas do usuário** — pedido direto na conversa, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, regras de IDE. Prioridade máxima.
-2. **Harness PelizzAI** — prevalece sobre o comportamento padrão do modelo em caso de conflito.
-3. **Comportamento padrão do sistema** — prioridade mínima.
+## Priorities
 
-Isso convive com a hierarquia nativa da plataforma: uma skill não redefine instruções de sistema, developer, workspace ou ferramenta — ela ocupa a camada de projeto/usuário, e é aí que prevalece sobre defaults genéricos. Dentro do mesmo nível de autoridade, a instrução específica e mais recente vence o default genérico do harness.
+The PelizzAI harness overrides the system's default behavior, but **explicit user instructions always take priority over PelizzAI**.
 
-## Anúncio de skills (regra global)
+1. **Explicit user instructions** — direct request in the conversation, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, IDE rules. Highest priority.
+2. **PelizzAI harness** — prevails over the model's default behavior on conflict.
+3. **System default behavior** — lowest priority.
 
-Ao acionar qualquer skill do harness, **anuncie** em uma linha o que vai fazer, usando **sempre a grafia exata da marca: "PelizzAI"** (P, A e I maiúsculos — nunca "Pelizzai", "pelizzAI" ou "PELIZZAI" em prosa). Padrão:
+This coexists with the platform's native hierarchy: a skill does not redefine system, developer, workspace, or tool instructions — it occupies the project/user layer, and that is where it prevails over generic defaults. Within the same authority level, the specific, more recent instruction beats the harness's generic default.
 
-> "Usando a skill PelizzAI \<Nome\> para \<objetivo\>."
+## Skill announcements (global rule)
 
-Os identificadores de skill (`pelizzai-core`, `pelizzai-router`, …), caminhos de arquivo e o diretório `pelizzai/` do projeto alvo permanecem em minúsculas — a regra vale para a marca em texto corrido.
+When triggering any harness skill, **announce** in one line what you are going to do, **always using the exact brand spelling: "PelizzAI"** (capital P, A, and I — never "Pelizzai", "pelizzAI", or "PELIZZAI" in prose). Pattern:
 
-Anuncie a head skill e os overlays materiais. Gates internos (Verification, uma técnica auxiliar, re-review) podem rodar sem novo anúncio quando já fazem parte do fluxo comunicado. Anunciar é obrigatório; transformar o anúncio em preâmbulo maior que a tarefa, não.
+> "Using the PelizzAI \<Name\> skill to \<goal\>."
 
-## Regra de ativação
+Skill identifiers (`pelizzai-core`, `pelizzai-router`, …), file paths, and the target project's `pelizzai/` directory stay lowercase — the rule applies to the brand in running text.
 
-São duas perguntas diferentes, nunca confundidas.
+Announce the head skill and the material overlays. Internal gates (Verification, an auxiliary technique, re-review) may run without a new announcement when they are already part of the communicated flow. Announcing is mandatory; turning the announcement into a preamble bigger than the task is not.
 
-**Quais skills acionar — regra do 1%.** Antes de responder ou agir, varra o catálogo. Basta 1% de chance de uma skill ser útil para que ela seja acionada, ANTES de tentar resolver manualmente e ANTES de qualquer resposta, inclusive perguntas de esclarecimento. Os 1% disparam **carregar e avaliar** a candidata, nunca dispensá-la de longe. Depois de lida: se ela se aplica ao caso, o uso é **obrigatório** — a proporcionalidade vive dentro dela. Só a candidata que, já lida, se mostrou não aplicável pode ser dispensada, e **com justificativa explícita** — silêncio não é justificativa. Em dúvida se uma skill de domínio se aplica à tarefa, **inclua-a**: o custo de incluir é menor que o de ignorar uma regra do projeto.
+## Activation rule
 
-**Qual rota seguir — classificação de efeito.** Aqui o critério é determinístico:
+These are two different questions, never conflated.
 
-```text
-1. Pedido conceitual/direto, sem tocar nem precisar inspecionar um projeto
-   → responda diretamente.
+**Which skills to trigger — the 1% rule.** Before responding or acting, sweep the catalog. A 1% chance that a skill is useful is enough to trigger it, BEFORE trying to solve things manually and BEFORE any response, including clarifying questions. The 1% threshold triggers **load and evaluate**: read the candidate, never dismiss it from afar. Once read: if it applies to the case, using it is **mandatory** — proportionality lives inside it. Only a candidate that, once read, proved not applicable may be dismissed, and **with explicit justification** — silence is not justification. When in doubt whether a domain skill applies to the task, **include it**: the cost of including is lower than the cost of ignoring a project rule.
 
-2. Pedido que precisa inspecionar um projeto, mas é read-only
-   → pelizzai-router com effect: read-only.
-
-3. Pedido que pode alterar código/arquivo/configuração
-   → pelizzai-router com effect: write-local, ANTES da primeira escrita.
-
-4. Pedido com efeito externo (push, deploy, mensagem, produção, custo, permissão, exclusão)
-   → pelizzai-router com effect: external; confirme autoridade/alvo no gate adequado.
-```
-
-A classificação de efeito/rota não é decisão silenciosa: o `pelizzai-router` a apresenta como recomendação no **Gate de kickoff**, e o usuário ratifica ou ajusta antes de investir.
-
-O router escolhe:
-
-- exatamente **uma head skill** de ciclo de vida;
-- overlays por sinais observáveis (`frontend`, segurança, documentação, skills de domínio);
-- reasoning, teste, review e delegação na fase em que agregam valor.
-
-Proporcionalidade governa o **tamanho da rota**, não o direito de pular uma skill aplicável.
-
-## Entender o objetivo
-
-Antes de rotear, determine de forma compacta:
+**Which route to follow — effect classification.** Here the criterion is deterministic:
 
 ```text
-Resultado: o que precisa existir, mudar, ser entendido ou decidido?
-Entregável: resposta, análise, diff, plano, documento ou ação?
-Contexto: quais arquivos, regras e evidências já estão disponíveis?
-Restrições: escopo, compatibilidade, segurança, prazo e preferências?
-Sucesso: qual observação prova que terminou?
-Ambiguidade: falta algo que mudaria materialmente o resultado?
+1. Conceptual/direct request that neither touches nor needs to inspect a project
+   → answer directly.
+
+2. Request that needs to inspect a project, but is read-only
+   → pelizzai-router with effect: read-only.
+
+3. Request that may change code/files/configuration
+   → pelizzai-router with effect: write-local, BEFORE the first write.
+
+4. Request with external effect (push, deploy, message, production, cost, permission, deletion)
+   → pelizzai-router with effect: external; confirm authority/target at the appropriate gate.
 ```
 
-Use contexto, código e documentação antes de perguntar para eliminar dúvidas factuais. Não use essa
-evidência para decidir intenção de produto. Pergunte quando a resposta muda requisito, escopo, UX,
-arquitetura, dados, segurança, custo, autoridade, aceite ou solução — o instrumento dessa pergunta é
-a `pelizzai-interview-me`. Faça **uma pergunta por vez**, na ordem de dependência; ofereça 2–3 opções
-reais quando isso ajudar e marque a melhor recomendação com motivo curto. Não adote uma suposição de
-produto para “destravar” o trabalho. Uma escolha reversível só pode ser aplicada mecanicamente quando
-já está contida em spec/plano ratificado ou foi explicitamente delegada pelo usuário. A linha
-`Ambiguidade` acima alimenta a análise do router.
+The effect/route classification is not a silent decision: `pelizzai-router` presents it as a recommendation at the **kickoff gate**, and the user ratifies or adjusts it before investing.
 
-Quando o usuário parecer não-técnico, ou a intenção admitir ≥2 leituras materialmente diferentes,
-**sinalize** isso ao router (`audience` e leituras em aberto). O router reapresenta o entendimento no
-Gate de kickoff; depois, a descoberta resolve cada decisão dependente uma por vez.
+The router chooses:
 
-## Limite de autoridade
+- exactly **one head skill** for the lifecycle;
+- overlays by observable signals (`frontend`, security, documentation, domain skills);
+- reasoning, testing, review, and delegation in the phase where they add value.
+
+Proportionality governs the **size of the route**, not the right to skip an applicable skill.
+
+## Understand the goal
+
+Before routing, determine compactly:
 
 ```text
-O harness decide:
-- classificação, técnica de reasoning, ordem de investigação, evidência e recomendação.
-
-O usuário decide:
-- o que o produto deve fazer e para quem;
-- requisitos, escopo, UX, arquitetura, dados, segurança, custo e risco aceito;
-- critérios de aceite e dispensas de spec/plano/documentação;
-- isolamento, modo de execução, commits e efeitos externos.
-
-O executor decide sozinho apenas:
-- passos mecânicos, locais e reversíveis já cobertos por uma decisão ratificada.
+Outcome: what needs to exist, change, be understood, or be decided?
+Deliverable: answer, analysis, diff, plan, document, or action?
+Context: which files, rules, and evidence are already available?
+Constraints: scope, compatibility, security, deadline, and preferences?
+Success: which observation proves it is done?
+Ambiguity: is something missing that would materially change the outcome?
 ```
 
-Lacuna que cai no bloco do usuário é **tampada com a `pelizzai-interview-me`** — no design, no plano
-e também no meio da execução, quando o trabalho revela uma decisão que a spec ou o plano não cobre.
-Preenchê-la por default, convenção, Context7 ou “inferência razoável” é violação, mesmo quando a
-escolha parece óbvia e reversível.
+Use context, code, and documentation before asking, to eliminate factual doubts. Do not use that
+evidence to decide product intent. Ask when the answer changes requirements, scope, UX,
+architecture, data, security, cost, authority, acceptance, or solution — the instrument for that
+question is `pelizzai-interview-me`. Ask **one question at a time**, in dependency order; offer 2–3
+real options when that helps and mark the best recommendation with a short reason. Do not adopt a
+product assumption to "unblock" the work. A reversible choice may only be applied mechanically when
+it is already contained in a ratified spec/plan or was explicitly delegated by the user. The
+`Ambiguity` line above feeds the router's analysis.
 
-Context7 é a fonte técnica preferencial quando biblioteca, framework, API, serviço, ferramenta,
-versão ou capacidade externa influencia a tarefa. Inspecione primeiro manifests, lockfiles,
-configuração e código para descobrir a versão real; consulte Context7 cedo o bastante para eliminar
-dúvidas factuais e melhorar a rota, as opções e as perguntas. Em greenfield, ele pode informar a
-análise técnica inicial antes do kickoff; em projeto existente, deve ser combinado com o
-comportamento observado no repo. Se não estiver disponível, use documentação oficial atual e
-declare a limitação. Evidência técnica fundamenta a recomendação; nunca ratifica decisão em nome do
-usuário.
+When the user seems non-technical, or the intent admits ≥2 materially different readings,
+**flag** it to the router (`audience` and open readings). The router re-presents the understanding
+at the kickoff gate; afterwards, discovery resolves each dependent decision one at a time.
 
-## Camada global de preferências
+## Authority boundary
 
-Use `pelizzai-preferences` como camada global quando a tarefa envolver comunicação, engenharia, código, validação, segurança, documentação, portabilidade ou decisões de execução. Ela não substitui skills específicas; ela define o **piso de comportamento**. Regras do usuário, `CLAUDE.md`/`AGENTS.md`, skills de domínio e instruções de uma skill especializada continuam tendo prioridade.
+```text
+The harness decides:
+- classification, reasoning technique, investigation order, evidence, and recommendation.
 
-Não acione `pelizzai-preferences` para tarefas triviais que possam ser respondidas diretamente sem risco ou contexto de projeto. Para qualquer tarefa não trivial, considere-a junto do roteamento principal — ela acompanha o fluxo até a validação final.
+The user decides:
+- what the product should do and for whom;
+- requirements, scope, UX, architecture, data, security, cost, and accepted risk;
+- acceptance criteria and waivers of spec/plan/documentation;
+- isolation, execution mode, commits, and external effects.
 
-## Camadas do harness
+The executor decides alone only:
+- mechanical, local, reversible steps already covered by a ratified decision.
+```
+
+A gap that falls in the user's block is **closed with `pelizzai-interview-me`** — in design, in the
+plan, and also mid-execution, when the work reveals a decision that the spec or plan does not cover.
+Filling it with a default, convention, Context7, or "reasonable inference" is a violation, even when
+the choice looks obvious and reversible.
+
+Context7 is the preferred technical source whenever a library, framework, API, service, tool,
+version, or external capability influences the task. Inspect manifests, lockfiles, configuration,
+and code first to discover the real version; consult Context7 early enough to eliminate factual
+doubts and improve the route, the options, and the questions. In greenfield, it can inform the
+initial technical analysis before kickoff; in an existing project, it must be combined with the
+behavior observed in the repo. If unavailable, use current official documentation and state the
+limitation. Technical evidence grounds the recommendation; it never ratifies a decision on the
+user's behalf.
+
+## Global preferences layer
+
+Use `pelizzai-preferences` as the global layer whenever the task involves communication, engineering, code, validation, security, documentation, portability, or execution decisions. It does not replace specific skills; it sets the **behavior floor**. User rules, `CLAUDE.md`/`AGENTS.md`, domain skills, and instructions from a specialized skill keep their priority.
+
+Do not trigger `pelizzai-preferences` for trivial tasks that can be answered directly without risk or project context. For any non-trivial task, consider it alongside the main routing — it follows the flow through final validation.
+
+## Harness layers
 
 ```text
 core
-→ router: effect + intenção + risco + incerteza + superfícies
-→ uma head skill
-→ overlays necessários
-→ execução e quality gates proporcionais
-→ Verification sela o resultado
-→ Finish integra sem alterá-lo
+→ router: effect + intent + risk + uncertainty + surfaces
+→ one head skill
+→ the necessary overlays
+→ proportional execution and quality gates
+→ Verification seals the result
+→ Finish integrates it without altering it
 
-em qualquer ponto, lacuna material → pelizzai-interview-me (uma pergunta por vez) → retoma a fase
+at any point, material gap → pelizzai-interview-me (one question at a time) → resume the phase
 ```
 
 ### Head skills
 
-| Intenção | Head skill |
+| Intent | Head skill |
 | --- | --- |
-| Bootstrap/remapeamento autorizado | `pelizzai-audit` |
-| Produto/projeto greenfield ou feature/refactor/infra com decisão de design | `pelizzai-brainstorming` |
-| Plano/design já claro | `pelizzai-writing-plans` ou `pelizzai-execution-plans` |
-| Bug/comportamento inesperado | `pelizzai-debugging` |
-| Ajuste local sem nova regra/contrato | `pelizzai-quick-fix` |
-| Review de diff/branch/PR | `pelizzai-review` |
-| Revisão arquitetural codebase-wide | `pelizzai-improving-architecture` |
-| Conflito Git | `pelizzai-resolving-merge-conflicts` |
-| Divergência state × Git | `pelizzai-recovery` |
+| Authorized bootstrap/remap | `pelizzai-audit` |
+| Greenfield product/project, or feature/refactor/infra with a design decision | `pelizzai-brainstorming` |
+| Plan/design already clear | `pelizzai-writing-plans` or `pelizzai-execution-plans` |
+| Bug/unexpected behavior | `pelizzai-debugging` |
+| Local tweak without a new rule/contract | `pelizzai-quick-fix` |
+| Review of a diff/branch/PR | `pelizzai-review` |
+| Codebase-wide architectural review | `pelizzai-improving-architecture` |
+| Git conflict | `pelizzai-resolving-merge-conflicts` |
+| State × Git divergence | `pelizzai-recovery` |
 
 ### Overlays
 
-Overlays não substituem a head skill:
+Overlays do not replace the head skill:
 
-- UI/UX/CSS/componente/tela → `pelizzai-frontend`;
-- auth/input/SQL/upload/segredo/dependência/superfície sensível → `pelizzai-oswap` no review;
-- padrões do projeto → skills de domínio do catálogo (em dúvida se uma skill de domínio se aplica à tarefa, inclua-a: o custo de incluir é menor que o de ignorar uma regra do projeto);
-- documentação humana nova → `pelizzai-documenting-features` quando fizer parte do escopo.
+- UI/UX/CSS/component/screen → `pelizzai-frontend`;
+- auth/input/SQL/upload/secret/dependency/sensitive surface → `pelizzai-oswap` at review;
+- project patterns → domain skills from the catalog (when in doubt whether a domain skill applies to the task, include it: the cost of including is lower than the cost of ignoring a project rule);
+- new human documentation → `pelizzai-documenting-features` when it is part of the scope.
 
-`pelizzai-preferences` não é overlay opcional: é o piso de comportamento descrito acima e acompanha toda tarefa não trivial. `pelizzai-reasoning` seleciona heurísticas proporcionais, não adiciona cerimônia por si só.
+`pelizzai-preferences` is not an optional overlay: it is the behavior floor described above and follows every non-trivial task. `pelizzai-reasoning` selects proportional heuristics; it does not add ceremony by itself.
 
-## Mapa de fluxos do harness
+## Harness flow map
 
-A entrada é sempre esta skill (`pelizzai-core`); depois de entender o objetivo, o `pelizzai-router` orquestra. Na primeira interação de um projeto consumidor (ou ao digitar **"bootstrap"**), a `pelizzai-audit` mapeia o projeto e cria as skills de domínio antes de qualquer tarefa. Pergunta **puramente conceitual** não dispara o bootstrap — a `pelizzai-audit` só entra quando a resposta exigir tocar ou entender o projeto. No repo-fonte (sentinela `scripts/pelizzai-source-repo.txt`) não existe catálogo consumidor: o ramo de bootstrap não se aplica.
+The entry point is always this skill (`pelizzai-core`); after understanding the goal, `pelizzai-router` orchestrates. On the first interaction with a consumer project (or when the user types **"bootstrap"**), `pelizzai-audit` maps the project and creates the domain skills before any task. A **purely conceptual** question does not trigger the bootstrap — `pelizzai-audit` only enters when the answer requires touching or understanding the project. In the source repo (sentinel `scripts/pelizzai-source-repo.txt`) there is no consumer catalog: the bootstrap branch does not apply.
 
 ```mermaid
 flowchart TD
-    U(["Mensagem do usuario"]) --> P["pelizzai-core: exigir skill antes de responder"]
-    P --> G["Entender o objetivo e classificar o efeito"]
-    G --> CONC{"Pergunta puramente<br/>conceitual?"}
-    CONC -- "Sim" --> ANSC["Responder direto<br/>sem bootstrap"]
-    CONC -- "Nao" --> RT["pelizzai-router: effect, intencao, risco,<br/>incerteza e superficies"]
-    RT --> BOOT{"Harness inicializado?<br/>pelizzai/domain-skills.md existe?"}
-    BOOT -- "Nao / 1a interacao / 'bootstrap'" --> AUD["pelizzai-audit: mapeia projeto/workspace,<br/>MCPs, git/host, cria skills de dominio + docs"]
+    U(["User message"]) --> P["pelizzai-core: require skill before responding"]
+    P --> G["Understand the goal and classify the effect"]
+    G --> CONC{"Purely conceptual<br/>question?"}
+    CONC -- "Yes" --> ANSC["Answer directly<br/>without bootstrap"]
+    CONC -- "No" --> RT["pelizzai-router: effect, intent, risk,<br/>uncertainty, and surfaces"]
+    RT --> BOOT{"Harness initialized?<br/>pelizzai/domain-skills.md exists?"}
+    BOOT -- "No / 1st interaction / 'bootstrap'" --> AUD["pelizzai-audit: maps project/workspace,<br/>MCPs, git/host, creates domain skills + docs"]
     AUD --> CLS
-    BOOT -- "Sim" --> CLS{"Classificar a intencao e a lane"}
-    CLS --> KICK["Gate de kickoff: rota como recomendacao a ratificar"]
-    KICK --> HEAD["Uma head skill + overlays obrigatorios"]
-    HEAD --> GAP{"Lacuna material<br/>em qualquer fase?"}
-    GAP -- "Sim" --> IV["pelizzai-interview-me:<br/>uma pergunta por vez, com recomendacao"]
+    BOOT -- "Yes" --> CLS{"Classify the intent and the lane"}
+    CLS --> KICK["Kickoff gate: route as a recommendation to ratify"]
+    KICK --> HEAD["One head skill + mandatory overlays"]
+    HEAD --> GAP{"Material gap<br/>in any phase?"}
+    GAP -- "Yes" --> IV["pelizzai-interview-me:<br/>one question at a time, with a recommendation"]
     IV --> HEAD
-    GAP -- "Nao" --> GO["Passo mecanico dentro<br/>do que ja foi ratificado"]
+    GAP -- "No" --> GO["Mechanical step within<br/>what was already ratified"]
 ```
 
-O detalhe de cada track (lanes, gates e encadeamentos) mora na `pelizzai-router`.
+The detail of each track (lanes, gates, and chaining) lives in `pelizzai-router`.
 
-## Higiene de contexto
+## Context hygiene
 
-A janela de contexto é um recurso da tarefa — administre-a de forma deliberada:
+The context window is a task resource — manage it deliberately:
 
-- **Zona segura: ~120k tokens.** Acima disso a qualidade degrada; planeje as fronteiras antes de chegar lá.
-- Use contexto contínuo para design → plano; execução recebe briefing fresco por tarefa.
-- Handoff bifurca; compact continua o mesmo trabalho — e nunca compacte no meio de uma mutação ou antes de registrar estado verificável.
-- Após compaction, valide contra Git o state consumidor ou execution record nativo; não confie na memória.
-- Carregue somente as referências/técnicas necessárias à fase atual.
+- **Safe zone: ~120k tokens.** Beyond that, quality degrades; plan the boundaries before getting there.
+- Use continuous context for design → plan; execution gets a fresh briefing per task.
+- Handoff forks; compact continues the same work — and never compact mid-mutation or before recording verifiable state.
+- After compaction, validate the consumer state or native execution record against Git; do not trust memory.
+- Load only the references/techniques needed for the current phase.
 
-## Como carregar skills
+## How to load skills
 
-Use o mecanismo nativo da plataforma. Sem carregamento nativo, leia `.agents/skills/<nome>/SKILL.md` (ou o root ativo registrado no projeto) e siga-o — a leitura manual é o mecanismo correto nesses ambientes, nunca uma desculpa para pular a skill. Não leia todo o catálogo preventivamente.
+Use the platform's native mechanism. Without native loading, read `.agents/skills/<name>/SKILL.md` (or the active root registered in the project) and follow it — manual reading is the correct mechanism in those environments, never an excuse to skip the skill. Do not preemptively read the whole catalog.
 
-## Anti-padrões
+## Anti-patterns
 
 ```text
-- Resolver manualmente algo que uma skill do harness já cobre.
-- Pular uma skill que, já carregada, se aplica ao caso — ou dispensar uma candidata sem justificar a decisão.
-- Várias head skills competindo pela mesma tarefa.
-- Bootstrap mutável para responder uma análise read-only.
-- Perguntar antes de consultar evidência já disponível.
-- Tampar lacuna do usuário com Context7, convenção, default ou “inferência razoável” em vez de parar
-  na `pelizzai-interview-me`.
-- Tratar stack informada como requisitos/aceite suficientes para um projeto greenfield.
-- Confundir heurística (OODA/TDD/team) com invariante universal.
-- Começar a escrever antes do router e do gate de primeira escrita.
+- Solving manually something a harness skill already covers.
+- Skipping a skill that, once loaded, applies to the case — or dismissing a candidate without
+  justifying the decision.
+- Multiple head skills competing for the same task.
+- A mutating bootstrap to answer a read-only analysis.
+- Asking before consulting evidence already available.
+- Plugging a user-owned gap with Context7, convention, a default, or "reasonable inference"
+  instead of stopping at pelizzai-interview-me.
+- Treating the specified stack as sufficient requirements/acceptance for a greenfield project.
+- Confusing a heuristic (OODA/TDD/team) with a universal invariant.
+- Starting to write before the router and the first-write gate.
 ```
 
-## Instrução final
+## Final instruction
 
-Acione as skills aplicáveis, entenda o objetivo, classifique o efeito e entregue ao router. Use a menor combinação de skills que preserve os invariantes e produza evidência suficiente — menor nunca significa nenhuma.
+Trigger the applicable skills, understand the goal, classify the effect, and hand off to the router. Use the smallest combination of skills that preserves the invariants and produces sufficient evidence — smallest never means none.

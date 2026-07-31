@@ -1,19 +1,19 @@
 ---
 name: pelizzai-recovery
-description: Reconcilia com segurança divergências entre o registro da tarefa e Git após interrupção, crash, worktree órfão ou retomada no diretório errado. Usa state no consumidor e execution record no source mode. Começa read-only, distingue falso alarme de risco real e preserva WIP antes de qualquer operação que possa movê-lo ou descartá-lo. Nunca faz stash/reset/delete/abort automaticamente.
+description: Safely reconciles divergences between the task record and Git after an interruption, crash, orphaned worktree, or resumption in the wrong directory. Uses state in the consumer and execution record in source mode. Starts read-only, distinguishes false alarms from real risk, and preserves WIP before any operation that could move or discard it. Never stashes/resets/deletes/aborts automatically.
 ---
 
 # PelizzAI Recovery
 
-## Objetivo
+## Purpose
 
-Reconstruir a realidade sem perder trabalho nem transformar toda divergência em um menu Git.
+Rebuild reality without losing work and without turning every divergence into a Git menu.
 
-**Anuncie:** "Usando a skill PelizzAI Recovery para reconciliar o registro com o Git sem perder WIP."
+**Announce:** "Using the PelizzAI Recovery skill to reconcile the record with Git without losing WIP."
 
-## 1. Diagnóstico read-only
+## 1. Read-only diagnosis
 
-Não escreva nem mova WIP até classificar a divergência:
+Do not write or move WIP until the divergence is classified:
 
 ```bash
 git rev-parse --show-toplevel
@@ -24,133 +24,133 @@ git log --oneline -10
 git stash list
 ```
 
-Leia `project`, `branch`, `base-ref`, `base-sha`, `validated-head`, `confirmar`, `isolation`,
-`worktree-path`, `phase`, o progresso e `next` do `state.md` consumidor ou execution record nativo.
-State ausente em source mode é normal. Separe:
+Read `project`, `branch`, `base-ref`, `base-sha`, `validated-head`, `confirm`, `isolation`,
+`worktree-path`, `phase`, the progress, and `next` from the consumer `state.md` or the native
+execution record. Missing state in source mode is normal. Separate:
 
-| Classe | Exemplo | Conduta |
+| Class | Example | Conduct |
 | --- | --- | --- |
-| diretório errado | registro aponta worktree válido, mas comando rodou no repo principal | mude para o path correto; zero escrita |
-| cursor atrasado | Git/commits são coerentes e registro perdeu progresso | reconciliar apenas o registro, com evidência |
-| WIP recuperável | working tree suja na branch correta | preservar e retomar; não stash por reflexo |
-| identidade divergente | branch/path/base não correspondem e origem do WIP é incerta | decisão humana após inventário |
-| risco de perda/histórico reescrito | commits sumiram, refs mudaram, worktree órfão sujo | preserve refs/WIP e escale |
+| wrong directory | record points to a valid worktree, but the command ran in the main repo | switch to the correct path; zero writes |
+| lagging cursor | Git/commits are coherent and the record lost progress | reconcile only the record, with evidence |
+| recoverable WIP | dirty working tree on the correct branch | preserve and resume; no reflexive stash |
+| divergent identity | branch/path/base do not match and the WIP's origin is uncertain | human decision after inventory |
+| risk of loss / rewritten history | commits vanished, refs changed, dirty orphaned worktree | preserve refs/WIP and escalate |
 
-Se for falso alarme de diretório, corrija o contexto e retorne ao router sem tocar o registro.
+If it is a directory false alarm, fix the context and return to the router without touching the record.
 
-**Entrega em `delivered` na retomada.** Se o state trouxer `phase: delivered`, a tarefa foi selada e
-seu destino executado, faltando só constatar `done` — isto **não** é divergência de WIP. Aplique a
-mesma reconciliação da `pelizzai-execution-plans` (§Reconciliação da entrega anterior): verifique
-`confirmar:` contra o git (read-only) — `base-ref` contém `validated-head`? PR mergeado? branch
-integrada? (entrega local: o usuário aceita?). Constatada → carimbe a linha de índice do
-`## Histórico` com `done <AAAA-MM-DD>` + evidência de 1 linha e grave `phase: done` — o bloco íntegro
-já migrou para `pelizzai/data/history/<AAAA-MM-DD>-<slug>.md` no selo `delivered`, então aqui não há
-bloco a mover; a escrita de metadata em `pelizzai/` vale em qualquer branch, mas o commit espera a task
-branch nova (nunca em protegida). Falhou (PR fechado sem merge) → não grave `done`; informe e proponha
-retomar a branch ou arquivar como `abandoned`. Nenhum arquivo de trabalho é movido nesta constatação.
-Source mode: a mesma constatação vale no execution record nativo, sem criar `pelizzai/` nem
-`history/`.
+**Delivery in `delivered` on resumption.** If state shows `phase: delivered`, the task was sealed and
+its destination executed, leaving only the observation of `done` — this is **not** WIP divergence.
+Apply the same reconciliation as `pelizzai-execution-plans` (§Reconciling the previous delivery):
+check `confirm:` against git (read-only) — does `base-ref` contain `validated-head`? PR merged?
+branch integrated? (local delivery: does the user accept?). Observed → stamp the `## History` index
+line with `done <YYYY-MM-DD>` + 1-line evidence and record `phase: done` — the full block
+already migrated to `pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` at the `delivered` seal, so
+there is no block to move here; writing metadata in `pelizzai/` is valid on any branch, but the commit waits for
+the new task branch (never on a protected one). Failed (PR closed without merge) → do not record
+`done`; report and propose resuming the branch or archiving as `abandoned`. No working file is moved
+in this observation. Source mode: the same observation applies to the native execution record,
+without creating `pelizzai/` or `history/`.
 
-## 2. Inventariar o WIP
+## 2. Inventory the WIP
 
-Antes de propor qualquer mutação, mostre:
+Before proposing any mutation, show:
 
 ```text
 tracked staged/unstaged
-untracked (nomes, sem ler segredos)
-commits exclusivos da branch
-stashes relevantes
-worktrees/refs que ainda apontam para o conteúdo
+untracked (names, without reading secrets)
+commits exclusive to the branch
+relevant stashes
+worktrees/refs that still point to the content
 ```
 
-Não trate arquivos desconhecidos como pertencentes à tarefa. Descubra origem/escopo antes de
-incluí-los em commit ou stash.
+Do not treat unknown files as belonging to the task. Discover their origin/scope before including
+them in a commit or stash.
 
-## 3. Escolher a menor recuperação
+## 3. Choose the smallest recovery
 
-Use default seguro quando inequívoco:
+Use a safe default when unambiguous:
 
-- cursor comprovadamente atrasado e sem conflito de identidade → atualize apenas os campos
-  evidenciados;
-- registro ativo aponta para worktree válido → execute de lá;
-- WIP coerente **fora** de retomada mid-plan (ajuste/bug avulso na branch certa) → retome no lugar.
+- cursor provably lagging and no identity conflict → update only the evidenced fields;
+- active record points to a valid worktree → run from there;
+- coherent WIP **outside** a mid-plan resumption (standalone tweak/bug on the right branch) →
+  resume in place.
 
-**Retomada mid-plan com WIP sempre abre o gate de recuperação.** Reabrir um plano no meio com working
-tree suja é decisão estrutural: não retome in-place em silêncio só porque o WIP parece coerente.
-Apresente o ponto de retorno e as opções, com a recomendada pré-selecionada:
+**Mid-plan resumption with WIP always opens the recovery gate.** Reopening a plan midway with a
+dirty working tree is a structural decision: do not silently resume in place just because the WIP
+looks coherent. Present the return point and the options, with the recommended one pre-selected:
 
 ```text
-Gate de recuperação — plano "<nome>" retomado no meio (responda "ok" ou escolha outra opção):
-Ponto de retorno: <ref/branch de resgate proposta | "dispensável: retomar in-place não move o WIP">
-1. [recomendado] Retomar in-place — segue de onde parou; não move o WIP.
-2. Voltar ao último estado selado (validated-head <sha>) — descarta/revisa o WIP com confirmação.
-3. Revisar o diff antes de decidir — inventário completo do WIP (§2) e então reescolha.
-4. Descartar o WIP — destrutivo; exige confirmação explícita e ponto de retorno antes (§4).
+Recovery gate — plan "<name>" resumed midway (answer "ok" or pick another option):
+Return point: <proposed rescue ref/branch | "waivable: resuming in place does not move the WIP">
+1. [recommended] Resume in place — continues from where it stopped; does not move the WIP.
+2. Return to the last sealed state (validated-head <sha>) — discards/reviews the WIP with confirmation.
+3. Review the diff before deciding — full WIP inventory (§2), then choose again.
+4. Discard the WIP — destructive; requires explicit confirmation and a return point first (§4).
 ```
 
-Fora da retomada mid-plan, pergunte somente quando há caminhos materialmente diferentes; não mostre
-opções inaplicáveis. Descarte, stash, abort, reset, deleção ou remoção de worktree nunca são
-escolhidos autonomamente.
+Outside a mid-plan resumption, ask only when there are materially different paths; do not show
+inapplicable options. Discard, stash, abort, reset, deletion, or worktree removal are never chosen
+autonomously.
 
-Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing e escale ao coordenador o que exigir decisão.
+Under a closed briefing (SUBAGENT-STOP), do not produce route analyses or open gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
-## 4. Ponto de retorno antes de risco
+## 4. Return point before risk
 
-Se a rota selecionada mover, esconder, reescrever ou descartar WIP:
+If the selected route will move, hide, rewrite, or discard WIP:
 
-1. obtenha confirmação explícita da operação e do escopo;
-2. prefira uma branch/ref de resgate quando os commits já existem;
-3. para working tree arbitrária, use stash **nomeado** somente após listar staged/unstaged/untracked
-   e confirmar que não capturará arquivos alheios/sensíveis;
-4. registre nome/SHA e comando de restauração antes de continuar.
+1. obtain explicit confirmation of the operation and its scope;
+2. prefer a rescue branch/ref when the commits already exist;
+3. for an arbitrary working tree, use a **named** stash only after listing staged/unstaged/untracked
+   and confirming it will not capture unrelated/sensitive files;
+4. record the name/SHA and the restore command before continuing.
 
-Nunca use `reset --hard`, branch `-D`, worktree `--force` ou `git clean -f`. Se o usuário realmente
-quiser uma operação bloqueada pelos guardrails, entregue diagnóstico e instrução manual; não burle
-o hook.
+Never use `reset --hard`, branch `-D`, worktree `--force`, or `git clean -f`. If the user truly
+wants an operation blocked by the guardrails, deliver a diagnosis and manual instructions; do not
+bypass the hook.
 
-## 5. Reconciliar o registro
+## 5. Reconcile the record
 
-Atualize somente campos comprovados. Antes do commit:
+Update only proven fields. Before the commit:
 
-- esteja numa branch segura e não protegida; se necessário, use `pelizzai-starting-branch` sem
-  perder a ref de resgate;
-- consumidor: estagie apenas `pelizzai/data/state.md` quando a recuperação é só cursor;
-- source mode: atualize apenas o execution record nativo; não crie state nem commit de cursor;
-- se WIP legítimo também será consolidado, devolva ao lifecycle normal para review/prova/commit;
-  não misture conteúdo não revisado num “commit de recovery”.
+- be on a safe, non-protected branch; if needed, use `pelizzai-starting-branch` without losing the
+  rescue ref;
+- consumer: stage only `pelizzai/data/state.md` when the recovery is cursor-only;
+- source mode: update only the native execution record; do not create state or a cursor commit;
+- if legitimate WIP will also be consolidated, return it to the normal lifecycle for
+  review/proof/commit; do not mix unreviewed content into a “recovery commit”.
 
-No consumidor, adicione ao Histórico divergência, evidência e recuperação. Em source mode, registre
-o mesmo resumo no mecanismo nativo. Valide novamente contra Git. Se não puder persistir com
-segurança, preserve o ponto de retorno e escale; não invente commit em branch protegida.
+In the consumer, add the divergence, evidence, and recovery to the History. In source mode, record
+the same summary in the native mechanism. Validate against Git again. If you cannot persist safely,
+preserve the return point and escalate; do not invent a commit on a protected branch.
 
-## 6. Retomar
+## 6. Resume
 
-Retorne ao router com:
+Return to the router with:
 
 ```text
-realidade confirmada
-ponto de retorno (se houve)
-registro reconciliado ou razão para não alterá-lo
-próximo passo exato
-limitações/decisão pendente
+confirmed reality
+return point (if any)
+reconciled record or the reason for not changing it
+exact next step
+limitations/pending decision
 ```
 
-Se a tarefa estava selada e qualquer conteúdo mudou, invalide `validated-head` e volte a review +
-Verification. Recovery nunca chama finish-task com um seal antigo.
+If the task was sealed and any content changed, invalidate `validated-head` and go back to review +
+Verification. Recovery never calls finish-task with a stale seal.
 
 ## Red flags
 
 ```text
-- Stash automático apenas porque a working tree está suja.
-- Menu completo para simples execução no diretório errado.
-- Misturar arquivo alheio no checkpoint/commit.
-- Reconciliar state/execution record por memória sem Git.
-- Operação destrutiva sem confirmação e ponto de retorno.
-- Preservar validated-head depois que o conteúdo mudou.
+- Automatic stash just because the working tree is dirty.
+- A full menu for a simple wrong-directory run.
+- Mixing an unrelated file into the checkpoint/commit.
+- Reconciling state/execution record from memory, without Git.
+- Destructive operation without confirmation and a return point.
+- Preserving validated-head after the content changed.
 ```
 
-## Integração
+## Integration
 
-É chamada por router/starting-branch/execution-plans quando o registro e Git divergem. Usa
-`pelizzai-starting-branch` para resgate seguro e devolve o trabalho ao lifecycle; finish-task só
-entra depois de novo conteúdo consolidado e selado.
+Called by router/starting-branch/execution-plans when the record and Git diverge. Uses
+`pelizzai-starting-branch` for safe rescue and returns the work to the lifecycle; finish-task only
+enters after new content is consolidated and sealed.

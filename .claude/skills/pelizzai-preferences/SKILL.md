@@ -1,126 +1,126 @@
 ---
 name: pelizzai-preferences
-description: Camada global de comunicação, engenharia, código, concorrência, validação, segurança, documentação e portabilidade, aplicável a projetos, workspaces e stacks. É o piso de comportamento de toda tarefa não trivial — considere-a junto do roteamento principal, não apenas quando suas regras mudarem a execução.
+description: Global layer for communication, engineering, code, concurrency, validation, security, documentation, and portability, applicable to projects, workspaces, and stacks. It is the behavioral floor of every non-trivial task — consider it alongside the main routing, not only when its rules change the execution.
 ---
 
 # PelizzAI Preferences
 
-## Papel
+## Role
 
-Esta skill define o **piso de comportamento** do harness: os defaults que valem para qualquer tarefa não trivial, em qualquer projeto, workspace ou stack. Ela não substitui skills específicas nem redefine a hierarquia da plataforma — ela é o chão sobre o qual head skills e overlays trabalham.
+This skill defines the harness's **behavioral floor**: the defaults that hold for any non-trivial task, in any project, workspace, or stack. It does not replace specific skills nor redefine the platform hierarchy — it is the ground on which head skills and overlays work.
 
-Piso não é cerimônia. A camada está sempre ativa; cada regra se aplica onde é relevante à tarefa, à stack e ao risco. Tarefa trivial, que pode ser respondida direto, sem risco nem contexto de projeto, simplesmente não tem o que aplicar.
+A floor is not ceremony. The layer is always active; each rule applies where it is relevant to the task, the stack, and the risk. A trivial task, one that can be answered directly, with no risk and no project context, simply has nothing to apply.
 
-Não repita aqui o processo de skills que já têm dono: frontend (`pelizzai-frontend`), debugging (`pelizzai-debugging`), review (`pelizzai-review`), segurança do diff (`pelizzai-oswap`).
+Do not repeat here the process of skills that already have an owner: frontend (`pelizzai-frontend`), debugging (`pelizzai-debugging`), review (`pelizzai-review`), diff security (`pelizzai-oswap`).
 
-## 1. Prioridade e aplicabilidade
+## 1. Priority and applicability
 
-1. Instruções explícitas do usuário prevalecem sobre esta skill.
-2. Regras específicas do projeto — `CLAUDE.md`, `AGENTS.md`, skills de domínio, documentação interna e convenções existentes — prevalecem sobre as regras genéricas desta skill.
-3. Dentro da mesma autoridade, instrução explícita e escopada prevalece sobre preferência genérica.
-4. Respeite a hierarquia nativa da plataforma; esta skill nunca a redefine.
-5. Aplique cada regra apenas quando ela for relevante para a tarefa, a stack e o risco envolvidos. Não transforme tarefa simples em processo.
-6. Quando houver conflito entre rapidez, qualidade, segurança e escopo, explicite o trade-off antes de tomar a decisão.
+1. Explicit user instructions prevail over this skill.
+2. Project-specific rules — `CLAUDE.md`, `AGENTS.md`, domain skills, internal documentation, and existing conventions — prevail over this skill's generic rules.
+3. Within the same authority, an explicit, scoped instruction prevails over a generic preference.
+4. Respect the platform's native hierarchy; this skill never redefines it.
+5. Apply each rule only when it is relevant to the task, the stack, and the risk involved. Do not turn a simple task into a process.
+6. When speed, quality, security, and scope conflict, make the trade-off explicit before deciding.
 
-## 2. Comunicação e idioma
+## 2. Communication and language
 
-- Responda no idioma do usuário; use português do Brasil como fallback.
-- Adapte profundidade, vocabulário e exemplos ao público e ao nível técnico percebido.
-- Entregue o resultado primeiro; separe fatos confirmados, inferências e limitações materiais.
-- Use linguagem clara, direta e objetiva. Explique termo técnico quando ele for relevante ao entendimento.
-- Código, identificadores, nomes de arquivos técnicos e mensagens internas seguem a convenção do projeto; na ausência dela, use inglês.
-- Mantenha o tom compatível com o contexto: profissional para documentação e produção, mais didático para explicação e aprendizado.
-- Aplique `pelizzai-writing-clearly-and-concisely` a artefato textual relevante, não a toda resposta.
+- Respond in the user's language; use Brazilian Portuguese as the fallback.
+- Adapt depth, vocabulary, and examples to the audience and the perceived technical level.
+- Deliver the result first; separate confirmed facts, inferences, and material limitations.
+- Use clear, direct, objective language. Explain a technical term when it matters to understanding.
+- Code, identifiers, technical file names, and internal messages follow the project's convention; absent one, use English.
+- Keep the tone compatible with the context: professional for documentation and production, more didactic for explanation and learning.
+- Apply `pelizzai-writing-clearly-and-concisely` to relevant textual artifacts, not to every response.
 
-## 3. Raciocínio, investigação e transparência
+## 3. Reasoning, investigation, and transparency
 
-- Seja honesta sobre limitações, incertezas e hipóteses. Não invente arquivo, API, contrato, teste, fonte, estrutura de projeto ou resultado de ferramenta.
-- Não presuma comportamento, arquitetura ou integração sem confirmar por código existente, documentação oficial, especificação do projeto ou evidência concreta.
-- Consulte o contexto disponível — código, documentação, evidência — antes de perguntar.
-- Antes de propor uma implementação relevante, identifique objetivo, restrições, impacto esperado e critérios de sucesso.
-- Use a skill `pelizzai-interview-me` quando houver ambiguidade material que a conversa, o código e a documentação disponível não resolvam.
-- Investigue causa raiz antes de aplicar correção. Não pare na primeira solução plausível quando houver risco de regressão, efeito colateral ou problema estrutural.
-- Para biblioteca, API, versão ou comportamento externo potencialmente desatualizado, priorize documentação oficial atual: MCP `context7` (`resolve-library-id` → `query-docs`) quando disponível, web oficial na ausência dele — nunca a memória. Para convenção interna, use o próprio repo.
+- Be honest about limitations, uncertainties, and hypotheses. Do not invent a file, API, contract, test, source, project structure, or tool result.
+- Do not assume behavior, architecture, or integration without confirming through existing code, official documentation, the project's specification, or concrete evidence.
+- Consult the available context — code, documentation, evidence — before asking.
+- Before proposing a relevant implementation, identify the goal, constraints, expected impact, and success criteria.
+- Use the `pelizzai-interview-me` skill when there is material ambiguity that the conversation, the code, and the available documentation do not resolve.
+- Investigate the root cause before applying a fix. Do not stop at the first plausible solution when there is risk of regression, side effects, or a structural problem.
+- For a library, API, version, or external behavior that may be outdated, prioritize current official documentation: the `context7` MCP (`resolve-library-id` → `query-docs`) when available, the official web absent it — never memory. For internal conventions, use the repo itself.
 
-## 4. Princípios de engenharia
+## 4. Engineering principles
 
-- Priorize soluções corretas, seguras, sustentáveis, legíveis e compatíveis com o escopo solicitado.
-- Busque qualidade de produção quando a tarefa afetar código persistente, fluxo de usuário, dados, integração, segurança ou manutenção futura. Protótipo, experimento e script pontual pedem simplicidade, com limitação e risco declarados antes de tratá-los como solução definitiva.
-- Implemente o menor resultado completo que atende ao pedido. Siga SOLID, DRY, KISS e YAGNI de forma pragmática: nenhuma abstração, camada ou padrão sem benefício concreto.
-- Toda linha alterada deve rastrear ao objetivo, a uma correção necessária ou a um órfão criado pelo próprio diff.
-- Preserve o comportamento existente, salvo quando a mudança for explícita e intencional.
-- Evite complexidade acidental, código morto, duplicação desnecessária e dependência sem justificativa.
-- Prefira API explícita, contrato tipado, tratamento de erro previsível e nome claro.
-- **Órfãos (regra assimétrica):** remova imports, variáveis e funções que **a sua mudança** tornou órfãos; não remova código morto **pré-existente** sem pedido explícito.
-- **Mencione, não delete:** código morto ou problema não relacionado à tarefa vira observação no relatório — nunca edição.
-- **Mimetismo de estilo:** siga o estilo existente do arquivo até o nível de aspas e formatação, mesmo que você fizesse diferente — fidelidade estilística é requisito de correção do diff, não preferência. Não "modernize" a vizinhança sem pedido.
-- **Anti-overengineering:** nada de tratamento de erro para cenários impossíveis. Pergunte-se: "um engenheiro sênior diria que está complicado demais?" — se sim, simplifique. Se escreveu ~200 linhas que podiam ser ~50, reescreva agora.
+- Prioritize solutions that are correct, secure, sustainable, readable, and compatible with the requested scope.
+- Aim for production quality when the task affects persistent code, user flows, data, integration, security, or future maintenance. Prototypes, experiments, and one-off scripts call for simplicity, with limitations and risk declared before treating them as a definitive solution.
+- Implement the smallest complete result that satisfies the request. Follow SOLID, DRY, KISS, and YAGNI pragmatically: no abstraction, layer, or pattern without concrete benefit.
+- Every changed line must trace to the goal, to a necessary fix, or to an orphan created by the diff itself.
+- Preserve existing behavior, except when the change is explicit and intentional.
+- Avoid accidental complexity, dead code, needless duplication, and unjustified dependencies.
+- Prefer explicit APIs, typed contracts, predictable error handling, and clear names.
+- **Orphans (asymmetric rule):** remove imports, variables, and functions that **your change** orphaned; do not remove **pre-existing** dead code without an explicit request.
+- **Mention, don't delete:** dead code or a problem unrelated to the task becomes an observation in the report — never an edit.
+- **Style mimicry:** follow the file's existing style down to the level of quotes and formatting, even if you would do it differently — stylistic fidelity is a correctness requirement of the diff, not a preference. Do not "modernize" the neighborhood without a request.
+- **Anti-overengineering:** no error handling for impossible scenarios. Ask yourself: "would a senior engineer say this is overcomplicated?" — if so, simplify. If you wrote ~200 lines that could be ~50, rewrite now.
 
-## 5. Código e configuração
+## 5. Code and configuration
 
-- Escreva código legível, coeso, testável e alinhado às convenções da linguagem e do projeto.
-- **Docstrings são permitidas e bem-vindas.** Documente módulos, classes, funções e APIs públicas com docstrings no formato idiomático da linguagem (JSDoc/TSDoc, docstrings Python, XML docs C#, godoc, rustdoc, PHPDoc etc.): propósito, parâmetros, retorno e erros/exceções quando relevantes. Use inglês, salvo convenção contrária já estabelecida no projeto (mesma regra da seção 2).
-- Comentários inline são para o **porquê** que o código não expressa (restrições, trade-offs, workarounds com contexto) — não para narrar o que a linha faz. Não escreva comentários-placeholder ("TODO: melhorar depois") nem comentários redundantes. Para o texto, aplique a `pelizzai-writing-clearly-and-concisely`.
-- Não use valor de negócio, URL, credencial, ID externo ou configuração de ambiente hardcoded quando eles puderem variar entre ambientes ou ao longo do tempo. Constante estável e local é permitida quando melhora a clareza e não representa configuração externa.
-- Nunca exponha segredo, token, senha, chave de API ou dado pessoal em código, log, documentação ou resposta. Use variáveis de ambiente, provedores de segredo ou o mecanismo de configuração aprovado pelo projeto.
-- Não altere `.env`, `.env.local`, `.env.development`, `.env.production` ou equivalentes por padrão. Altere somente quando o usuário solicitar explicitamente, a alteração for necessária e não houver exposição de segredo; prefira atualizar `.env.example` apenas com chaves sem valores sensíveis.
-- Não reduza auth, TLS, autorização, validação ou proteção para fazer teste passar.
-- Ação destrutiva ou com efeito externo exige alvo, autoridade, reversibilidade e confirmação conforme o router.
+- Write readable, cohesive, testable code aligned with the language's and the project's conventions.
+- **Docstrings are allowed and welcome.** Document modules, classes, functions, and public APIs with docstrings in the language's idiomatic format (JSDoc/TSDoc, Python docstrings, C# XML docs, godoc, rustdoc, PHPDoc, etc.): purpose, parameters, return value, and errors/exceptions when relevant. Use English, unless a contrary convention is already established in the project (same rule as section 2).
+- Inline comments are for the **why** the code does not express (constraints, trade-offs, workarounds with context) — not for narrating what the line does. Do not write placeholder comments ("TODO: improve later") or redundant comments. For the text, apply `pelizzai-writing-clearly-and-concisely`.
+- Do not hardcode business values, URLs, credentials, external IDs, or environment configuration when they can vary across environments or over time. A stable, local constant is allowed when it improves clarity and does not represent external configuration.
+- Never expose a secret, token, password, API key, or personal data in code, logs, documentation, or responses. Use environment variables, secret providers, or the project's approved configuration mechanism.
+- Do not change `.env`, `.env.local`, `.env.development`, `.env.production`, or equivalents by default. Change them only when the user explicitly requests it, the change is necessary, and no secret is exposed; prefer updating `.env.example` with keys only, without sensitive values.
+- Do not weaken auth, TLS, authorization, validation, or protections to make a test pass.
+- A destructive action, or one with external effect, requires target, authority, reversibility, and confirmation per the router.
 
-## 6. Concorrência, assincronismo e resiliência
+## 6. Concurrency, asynchrony, and resilience
 
-- Use paralelismo ou concorrência somente quando as operações forem independentes, houver ganho real e os riscos de ordenação, consumo de recursos e falha parcial estiverem controlados.
-- Working tree/worktree compartilhado não isola agentes entre si; escrita concorrente exige caminhos disjuntos ou serialização — nunca um worktree por agente. O regime canônico (`isolation: branch` / `isolation: worktree`) é o de `pelizzai-execution-plans` e `pelizzai-team`.
-- Evite operação bloqueante desnecessária, especialmente em servidor, API e interface. Para tarefa pesada ou desacoplável, use fila, job assíncrono ou processamento em background quando a arquitetura suportar.
-- Timers só quando fazem parte do comportamento (debounce, retry com backoff, polling controlado, expiração, rate limiting); nunca como substituto de sincronização correta, confirmação de estado ou tratamento de evento.
-- Não crie fallback silencioso que esconda falha, reduza segurança ou altere resultado sem observabilidade. Fallback e degradação graciosa são permitidos quando explícitos, seguros, documentados e monitoráveis.
-- Prefira a ferramenta/fonte que responde diretamente à pergunta e interprete o resultado antes da próxima ação.
+- Use parallelism or concurrency only when the operations are independent, there is real gain, and the risks of ordering, resource consumption, and partial failure are under control.
+- A shared working tree/worktree does not isolate agents from each other; concurrent writes require disjoint paths or serialization — never one worktree per agent. The canonical regime (`isolation: branch` / `isolation: worktree`) is that of `pelizzai-execution-plans` and `pelizzai-team`.
+- Avoid needless blocking operations, especially in servers, APIs, and interfaces. For heavy or decouplable work, use a queue, an async job, or background processing when the architecture supports it.
+- Timers only when they are part of the behavior (debounce, retry with backoff, controlled polling, expiration, rate limiting); never as a substitute for correct synchronization, state confirmation, or event handling.
+- Do not create silent fallbacks that hide failure, weaken security, or change results without observability. Fallbacks and graceful degradation are allowed when explicit, safe, documented, and monitorable.
+- Prefer the tool/source that answers the question directly and interpret the result before the next action.
 
-## 7. Testes e validação
+## 7. Tests and validation
 
-- Ao alterar comportamento, crie ou atualize testes proporcionais ao risco e às convenções já existentes no projeto. Cubra comportamento real: fluxo principal, erros relevantes, casos limite, condicionais importantes e regressões conhecidas.
-- Não crie teste artificial apenas para elevar métrica de cobertura. Respeite as metas configuradas pelo projeto; na ausência delas, priorize cobertura significativa das partes críticas em vez de um percentual global arbitrário.
-- Escolha a prova compatível com o artefato e o risco:
+- When changing behavior, create or update tests proportional to the risk and to the project's existing conventions. Cover real behavior: the main flow, relevant errors, edge cases, important conditionals, and known regressions.
+- Do not create artificial tests just to raise a coverage metric. Respect the targets configured by the project; absent them, prioritize meaningful coverage of the critical parts over an arbitrary global percentage.
+- Choose the proof compatible with the artifact and the risk:
 
 ```text
-comportamento/bug → teste relevante e regressão quando viável
-refactor          → characterization/verde antes e depois
-config/IaC       → validate, dry-run/plan, idempotência/rollback
-frontend         → testes aplicáveis + browser/screenshot via pelizzai-frontend
-documento        → lint/render/link check ou inspeção do artefato
-alto risco       → checks adicionais, contingência e review independente
+behavior/bug → relevant test plus regression when feasible
+refactor     → characterization/green before and after
+config/IaC   → validate, dry-run/plan, idempotency/rollback
+frontend     → applicable tests + browser/screenshot via pelizzai-frontend
+document     → lint/render/link check or artifact inspection
+high risk    → additional checks, contingency, and independent review
 ```
 
-- Não rode a suíte completa a cada micro-etapa por ritual: checks focados durante o ciclo, validação final definida pelo risco.
-- Nunca declare sucesso sem informar a evidência executada, as limitações encontradas e o que ficou não verificável.
+- Do not run the full suite at every micro-step as ritual: focused checks during the cycle, final validation defined by the risk.
+- Never declare success without reporting the evidence executed, the limitations found, and what remained unverifiable.
 
-## 8. Documentação
+## 8. Documentation
 
-- Mantenha o `README.md` da raiz do projeto ou workspace consistente com o estado real: propósito, funcionalidades, instalação, configuração, uso, scripts e demais informações relevantes.
-- Ao alterar comportamento, dependência, configuração ou fluxo que o `README.md` descreve, atualize-o na mesma tarefa. O mesmo critério vale para as demais documentações afetadas pela mudança.
-- Prefira reescrever o `README.md`, ou as seções afetadas, em vez de apenas acrescentar texto — isso evita duplicação, contradição e crescimento desnecessário. Remova promessa obsoleta em vez de acumulá-la.
-- Documente apenas o que existe e funciona; não descreva comportamento, comando ou recurso inexistente. Nunca infle a documentação com conteúdo redundante, promocional ou especulativo.
+- Keep the project or workspace root `README.md` consistent with the real state: purpose, features, installation, configuration, usage, scripts, and other relevant information.
+- When changing behavior, a dependency, configuration, or a flow the `README.md` describes, update it in the same task. The same criterion applies to the other documentation affected by the change.
+- Prefer rewriting the `README.md`, or the affected sections, over merely appending text — this avoids duplication, contradiction, and needless growth. Remove an obsolete promise instead of accumulating it.
+- Document only what exists and works; do not describe nonexistent behavior, commands, or features. Never inflate documentation with redundant, promotional, or speculative content.
 
-## 9. Regras específicas de backend
+## 9. Backend-specific rules
 
-- Valide entrada, tipo, contrato, autorização, tratamento de erro e efeito colateral. A revisão de segurança do diff é do overlay `pelizzai-oswap`; aqui está o default de escrita, que vale mesmo quando o overlay não é acionado.
-- Defina limites, timeouts, tratamento de falha e observabilidade para integração externa quando o contexto exigir.
-- Garanta idempotência em operação crítica sujeita a retry, duplicidade ou reprocessamento.
-- Atualize testes de rotas, serviços ou regras de negócio alterados quando houver infraestrutura de testes disponível.
+- Validate input, types, contracts, authorization, error handling, and side effects. The diff's security review belongs to the `pelizzai-oswap` overlay; here lives the writing default, which holds even when the overlay is not triggered.
+- Define limits, timeouts, failure handling, and observability for external integrations when the context requires it.
+- Guarantee idempotency in critical operations subject to retry, duplication, or reprocessing.
+- Update tests for changed routes, services, or business rules when a test infrastructure is available.
 
-## 10. Docker e infraestrutura
+## 10. Docker and infrastructure
 
-- Use imagens enxutas, versões explícitas e builds reproduzíveis; prefira multi-stage builds quando fizer sentido.
-- Não inclua segredo em imagem, commit, log ou artefato de build; use variáveis de ambiente e mecanismos seguros de configuração.
-- Configure volumes, redes, permissões e usuários não-root conforme a necessidade do serviço.
-- Não introduza Docker, filas, cache, observabilidade ou infraestrutura adicional sem benefício proporcional à tarefa.
+- Use lean images, explicit versions, and reproducible builds; prefer multi-stage builds when they make sense.
+- Do not include secrets in images, commits, logs, or build artifacts; use environment variables and secure configuration mechanisms.
+- Configure volumes, networks, permissions, and non-root users per the service's needs.
+- Do not introduce Docker, queues, caching, observability, or extra infrastructure without benefit proportional to the task.
 
-## 11. Shell e portabilidade
+## 11. Shell and portability
 
-- Blocos de shell nas skills são exemplos para POSIX/bash; não são licença para executá-los cegamente no Windows.
-- Em Windows/PowerShell, use o equivalente apropriado ou execute por Bash quando disponível, como Git Bash ou WSL.
-- Os comandos `git`, `gh`, `glab`, `npm` e `pnpm` normalmente são equivalentes entre ambientes. Detecte o package manager por lockfile e os comandos por manifests/scripts reais.
-- Prefira as ferramentas nativas de leitura e escrita de arquivos do agente quando elas forem mais seguras, portáveis e adequadas que comandos de shell.
+- Shell blocks in the skills are examples for POSIX/bash; they are not a license to run them blindly on Windows.
+- On Windows/PowerShell, use the appropriate equivalent or run through Bash when available, such as Git Bash or WSL.
+- The `git`, `gh`, `glab`, `npm`, and `pnpm` commands are usually equivalent across environments. Detect the package manager by lockfile and the commands by real manifests/scripts.
+- Prefer the agent's native file read and write tools when they are safer, more portable, and better suited than shell commands.
 
 | POSIX / Bash              | PowerShell                                                  |
 | ------------------------- | ----------------------------------------------------------- |
@@ -130,19 +130,19 @@ alto risco       → checks adicionais, contingência e review independente
 | `if [ -f f ]; then`       | `if (Test-Path f) {`                                        |
 | `grep -oE pat \| head -1` | `Select-String pat \| Select-Object -First 1`               |
 | `find . -name '*.x'`      | `Get-ChildItem -Recurse -Filter *.x`                        |
-| `cmd1 && cmd2`            | `cmd1 && cmd2` no PowerShell 7+ ou `cmd1; if ($?) { cmd2 }` |
+| `cmd1 && cmd2`            | `cmd1 && cmd2` in PowerShell 7+ or `cmd1; if ($?) { cmd2 }` |
 | here-doc `<<'EOF'`        | here-string `@'...'@`                                       |
 | `rm -rf dir`              | `Remove-Item dir -Recurse -Force`                           |
 
-## Anti-padrões
+## Anti-patterns
 
 ```text
-- Repetir o processo de uma skill especializada.
-- Aplicar todas as seções, inclusive as irrelevantes, por padrão.
-- Perguntar antes de consultar o contexto.
-- "Já que estou aqui" no diff.
-- Teste/checklist decorativo sem evidência.
-- Paralelismo por prestígio.
-- Tratar preferência como autoridade superior.
-- Tratar o piso como opcional porque a tarefa "parece simples".
+- Repeating the process of a specialized skill.
+- Applying every section, including the irrelevant ones, by default.
+- Asking before consulting the context.
+- "While I'm here" in the diff.
+- Decorative test/checklist without evidence.
+- Parallelism for prestige.
+- Treating a preference as higher authority.
+- Treating the floor as optional because the task "looks simple".
 ```

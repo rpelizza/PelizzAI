@@ -1,12 +1,12 @@
-# Testes Bons e Ruins
+# Good and Bad Tests
 
-## Bons Testes
+## Good Tests
 
-**Estilo de integração**: Teste através de interfaces reais, não de mocks de partes internas.
+**Integration style**: Test through real interfaces, not mocks of internals.
 
 ```typescript
-// BOM: Testa o comportamento observável
-test('usuário finaliza a compra com um carrinho válido', async () => {
+// GOOD: Tests the observable behavior
+test('user checks out with a valid cart', async () => {
 	const cart = createCart();
 	cart.add(product);
 	const result = await checkout(cart, paymentMethod);
@@ -14,65 +14,65 @@ test('usuário finaliza a compra com um carrinho válido', async () => {
 });
 ```
 
-Características:
+Characteristics:
 
-- Testa comportamentos relevantes para usuários/chamadores
-- Utiliza apenas a API pública
-- Resiste a refatorações internas
-- Descreve O QUE, não COMO
-- Uma asserção lógica por teste
+- Tests behaviors that matter to users/callers
+- Uses only the public API
+- Survives internal refactors
+- Describes WHAT, not HOW
+- One logical assertion per test
 
-## Testes Ruins
+## Bad Tests
 
-**Testes de detalhes de implementação**: Acoplados à estrutura interna.
+**Implementation-detail tests**: Coupled to internal structure.
 
 ```typescript
-// RUIM: Testa detalhes de implementação
-test('checkout chama paymentService.process', async () => {
+// BAD: Tests implementation details
+test('checkout calls paymentService.process', async () => {
 	const processSpy = jest.spyOn(paymentService, 'process');
 	await checkout(cart);
 	expect(processSpy).toHaveBeenCalledWith(cart.total);
 });
 ```
 
-Sinais de alerta:
+Warning signs:
 
-- Mockar colaboradores internos
-- Testar métodos privados
-- Verificar contagens/ordem de chamadas
-- O teste quebra ao refatorar sem mudança de comportamento
-- O nome do teste descreve COMO, não O QUE
-- Verificação por meios externos em vez da interface
+- Mocking internal collaborators
+- Testing private methods
+- Asserting call counts/order
+- The test breaks on a refactor with no behavior change
+- The test name describes HOW, not WHAT
+- Verifying through external means instead of the interface
 
 ```typescript
-// RUIM: Ignora a interface para verificar
-test('createUser grava no banco de dados', async () => {
+// BAD: Bypasses the interface to verify
+test('createUser writes to the database', async () => {
 	await createUser({ name: 'Alice' });
 	const row = await db.query('SELECT * FROM users WHERE name = ?', ['Alice']);
 	expect(row).toBeDefined();
 });
 
-// BOM: Verifica por meio da interface
-test('createUser torna o usuário recuperável', async () => {
+// GOOD: Verifies through the interface
+test('createUser makes the user retrievable', async () => {
 	const user = await createUser({ name: 'Alice' });
 	const retrieved = await getUser(user.id);
 	expect(retrieved.name).toBe('Alice');
 });
 ```
 
-## Antipadrão: Teste Tautológico
+## Anti-pattern: Tautological Test
 
-O valor esperado deve vir de **fonte independente** da implementação: um literal conhecido, um exemplo trabalhado à mão, a spec. Se o esperado é calculado pela mesma lógica sob teste (ou copiado da saída atual do código), o teste só prova que o código faz o que o código faz — e passa para sempre, inclusive com o bug.
+The expected value must come from a **source independent** of the implementation: a known literal, a hand-worked example, the spec. If the expected value is computed by the same logic under test (or copied from the code's current output), the test only proves that the code does what the code does — and passes forever, bug included.
 
 ```typescript
-// RUIM: esperado derivado da própria lógica sob teste
-test('calcula o total com desconto', () => {
-	const esperado = aplicarDesconto(subtotal(carrinho), cupom); // mesma lógica!
-	expect(calcularTotal(carrinho, cupom)).toBe(esperado);
+// BAD: expected value derived from the very logic under test
+test('computes the discounted total', () => {
+	const expected = applyDiscount(subtotal(cart), coupon); // same logic!
+	expect(computeTotal(cart, coupon)).toBe(expected);
 });
 
-// BOM: esperado de fonte independente (exemplo trabalhado: 100 − 10% = 90)
-test('calcula o total com desconto', () => {
-	expect(calcularTotal(carrinhoDe100, cupom10PorCento)).toBe(90);
+// GOOD: expected value from an independent source (worked example: 100 − 10% = 90)
+test('computes the discounted total', () => {
+	expect(computeTotal(cartOf100, tenPercentCoupon)).toBe(90);
 });
 ```

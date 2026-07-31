@@ -2,18 +2,18 @@
 
 <#
 .SYNOPSIS
-  Wrapper Windows/PowerShell do sync portátil do PelizzAI.
+  Windows/PowerShell wrapper for the portable PelizzAI sync.
 
 .DESCRIPTION
-  A implementação canônica vive em scripts/sync-harness.mjs e requer Node.js 18+.
-  Este wrapper preserva a interface PowerShell histórica sem duplicar a lógica.
+  The canonical implementation lives in scripts/sync-harness.mjs and requires Node.js 18+.
+  This wrapper preserves the historical PowerShell interface without duplicating the logic.
 
 .EXAMPLE
   pwsh scripts/sync-harness.ps1
   pwsh scripts/sync-harness.ps1 -Check -SourceMode
   pwsh scripts/sync-harness.ps1 -UpdateManifest
-  pwsh scripts/sync-harness.ps1 -ExportConsumer C:\projetos\meu-app
-  pwsh scripts/sync-harness.ps1 -ExportConsumer C:\projetos\meu-app -InstallHooks
+  pwsh scripts/sync-harness.ps1 -ExportConsumer C:\projetos\my-app
+  pwsh scripts/sync-harness.ps1 -ExportConsumer C:\projetos\my-app -InstallHooks
   pwsh scripts/sync-harness.ps1 -BuildDist
 #>
 param(

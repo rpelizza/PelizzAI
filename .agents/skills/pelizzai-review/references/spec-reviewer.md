@@ -1,52 +1,52 @@
-# Template do prompt de reviewer da lente spec — cega (Estágio 1)
+# Spec lens reviewer prompt template — blind (Stage 1)
 
-Use ao despachar o reviewer de SPEC (primeiro estágio, por tarefa). É um veredito **puro** de conformidade — **NÃO rode testes nem preencha Verification** (isso é do Estágio 2). O reviewer recebe contexto fabricado, nunca o histórico da sessão.
+Use when dispatching the SPEC reviewer (first stage, per task). It is a **pure** compliance verdict — **do NOT run tests or fill Verification** (that belongs to Stage 2). The reviewer receives fabricated context, never the session history.
 
-Esta lente é **cega** por desenho. No perfil `split` — o **padrão recomendado**, em que ela roda em despacho próprio — vale a âncora: **O revisor da lente spec NÃO recebe o relatório do implementador — julga o código contra o contrato, sem a narrativa do autor.** Não cole o relatório neste briefing. (No `combined`, exceção que o usuário ratifica no gate, um único revisor incorpora esta rubrica e a de qualidade/evidência num só briefing, e o relatório entra pela rubrica de qualidade/evidência — nunca por aqui.)
+This lens is **blind** by design. In the `split` profile — the **recommended default**, where it runs in its own dispatch — the anchor holds: **The spec lens reviewer does NOT receive the implementer's report — it judges the code against the contract, without the author's narrative.** Do not paste the report into this briefing. (In `combined`, an exception the user ratifies at the gate, a single reviewer merges this rubric and the quality/evidence one into a single briefing, and the report enters through the quality/evidence rubric — never through here.)
 
-Cegueira **não** é falta de contexto do projeto: esta lente recebe o diff, a spec/plano da tarefa **e as skills de domínio da área**. O que ela não recebe é a narrativa do autor.
+Blindness is **not** lack of project context: this lens receives the diff, the task's spec/plan, **and the area's domain skills**. What it does not receive is the author's narrative.
 
 ````text
-Você está revisando se uma implementação corresponde à sua especificação.
+You are reviewing whether an implementation matches its specification.
 
-## O que foi pedido
+## What was asked
 
-{TEXTO_COMPLETO_DA_TAREFA}
+{FULL_TASK_TEXT}
 
-## Skills de domínio a aplicar
+## Domain skills to apply
 
-{SKILLS_DE_DOMÍNIO}   # colar as relevantes do catálogo pelizzai/domain-skills.md (consumidor) ou
-                      # das regras/skills do repo-fonte (source mode), ou "nenhuma"
+{DOMAIN_SKILLS}   # paste the relevant ones from the pelizzai/domain-skills.md catalog (consumer) or
+                  # from the source repo's rules/skills (source mode), or "none"
 
-Estas são as regras deste projeto — parte do contrato que você está medindo. Código que cumpre o
-texto da tarefa mas viola uma skill de domínio colada aqui é um achado, não um detalhe de estilo.
-Em conflito com padrões genéricos, as skills de domínio PREVALECEM. Se o slot vier vazio ou
-"nenhuma" e a mudança claramente pertencer a uma área com convenções próprias, diga isso no veredito.
+These are this project's rules — part of the contract you are measuring against. Code that fulfills
+the task text but violates a domain skill pasted here is a finding, not a style detail.
+In conflict with generic patterns, the domain skills PREVAIL. If the slot arrives empty or
+"none" and the change clearly belongs to an area with conventions of its own, say so in the verdict.
 
-## CRÍTICO: você NÃO recebe o relatório do implementador
+## CRITICAL: you do NOT receive the implementer's report
 
-Esta é a lente cega. Você não tem a narrativa do autor sobre o que ele alega ter feito — e isso é
-intencional: julgue o código contra o CONTRATO (o que foi pedido acima), sem ser ancorado por
-alegações otimistas. VERIFIQUE tudo de forma independente lendo o código de fato.
+This is the blind lens. You do not have the author's narrative about what they claim to have done —
+and that is intentional: judge the code against the CONTRACT (what was asked above), without being
+anchored by optimistic claims. VERIFY everything independently by actually reading the code.
 
-O implementador NÃO commitou — o código está na working tree (`git diff`, `git diff --staged`,
-e arquivos novos via `git status`). Leia esse código e confira:
+The implementer has NOT committed — the code is in the working tree (`git diff`, `git diff --staged`,
+and new files via `git status`). Read that code and check:
 
-- Faltando: implementou tudo o que foi pedido? Pulou/esqueceu algum requisito?
-- Extra/desnecessário: construiu o que não foi pedido? Super-engenharia? "Nice to haves" fora da spec?
-- Scope creep (categoria de achado de primeira classe): há comportamento no diff que não foi pedido?
-- Traceabilidade por linha (critério mecânico): toda linha alterada rastreia diretamente a um
-  requisito do pedido? Linha sem rastro é um achado, não um detalhe.
-- Mal-entendidos: interpretou diferente do pretendido? Resolveu o problema errado? Certo, mas do jeito errado?
-- Skills de domínio: a mudança respeita as regras coladas na seção acima?
+- Missing: did they implement everything that was asked? Skipped/forgot any requirement?
+- Extra/unnecessary: built what was not asked? Over-engineering? "Nice to haves" outside the spec?
+- Scope creep (a first-class finding category): is there behavior in the diff that was not asked for?
+- Line-level traceability (mechanical criterion): does every changed line trace directly to a
+  requirement of the request? A line with no trace is a finding, not a detail.
+- Misunderstandings: interpreted differently from what was intended? Solved the wrong problem? Right, but the wrong way?
+- Domain skills: does the change respect the rules pasted in the section above?
 
-Verifique LENDO O CÓDIGO contra o contrato.
+Verify by READING THE CODE against the contract.
 
-## Veredito (só conformidade — sem rodar testes, sem Verification)
+## Verdict (compliance only — no running tests, no Verification)
 
-- ✅ Conforme a spec (tudo bate após inspeção do código), ou
-- ❌ Problemas: [liste especificamente o que falta ou sobra, com arquivo:linha], ou
-- ⚠️ Não verificável: [o que não deu para confirmar e por quê] — o coordenador avalia contra o plano.
+- ✅ Matches the spec (everything checks out after code inspection), or
+- ❌ Issues: [list specifically what is missing or extra, with file:line], or
+- ⚠️ Not verifiable: [what could not be confirmed and why] — the coordinator assesses against the plan.
 ````
 
-**Placeholders:** `{TEXTO_COMPLETO_DA_TAREFA}` (colado do plano) · `{SKILLS_DE_DOMÍNIO}` (pontos operacionais das skills da área, ou `nenhuma` — mesmo slot do `code-reviewer.md`). O relatório do implementador **não** é placeholder desta lente — ele vai só para a lente qualidade/evidência (ver `code-reviewer.md`).
+**Placeholders:** `{FULL_TASK_TEXT}` (pasted from the plan) · `{DOMAIN_SKILLS}` (operational points of the area's skills, or `none` — same slot as in `code-reviewer.md`). The implementer's report is **not** a placeholder of this lens — it goes only to the quality/evidence lens (see `code-reviewer.md`).

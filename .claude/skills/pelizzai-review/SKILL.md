@@ -1,365 +1,367 @@
 ---
 name: pelizzai-review
-description: Skill de code review do harness PelizzAI. Use após CADA tarefa na execução de um plano, ao concluir uma feature relevante, antes de integrar uma entrega ou quando o usuário pedir review de working tree, branch ou PR. Aplica as lentes spec (cega) e qualidade/evidência — por padrão em dois despachos (`split`) — e orienta como receber feedback com rigor técnico. Para segurança/OWASP, componha `pelizzai-oswap`.
+description: Code review skill of the PelizzAI harness. Use after EVERY task during plan execution, when a relevant feature is complete, before integrating a delivery, or when the user asks for a review of a working tree, branch, or PR. Applies the (blind) spec lens and the quality/evidence lens — by default in two dispatches (`split`) — and teaches how to receive feedback with technical rigor. For security/OWASP, compose `pelizzai-oswap`.
 ---
 
 # PelizzAI Review
 
-## Objetivo
+## Goal
 
-Pegar problemas antes que eles se propaguem. O reviewer recebe **contexto fabricado** — descrição, requisitos/plano e o diff — **nunca o histórico da sua sessão**. Isso mantém o reviewer focado no produto, não no seu raciocínio, e preserva o seu contexto para continuar.
+Catch problems before they propagate. The reviewer receives **fabricated context** — description, requirements/plan, and the diff — **never your session history**. That keeps the reviewer focused on the product, not on your reasoning, and preserves your context to continue.
 
-**Anuncie ao iniciar:** "Usando a skill PelizzAI Review para revisar o código."
-
----
-
-## Princípio central
-
-> Revise cedo e sempre. Um review é uma verificação independente do produto: leia o código de fato,
-> não confie no relatório de quem implementou e dê um veredito claro com evidência — nunca um
-> "parece bom". A **profundidade** de cada lente é proporcional ao risco; a **existência** do review
-> não é.
+**Announce on start:** "Using the PelizzAI Review skill to review the code."
 
 ---
 
-## Quando revisar
+## Core principle
+
+> Review early and often. A review is an independent verification of the product: actually read the
+> code, do not trust the implementer's report, and give a clear verdict with evidence — never a
+> "seems fine". The **depth** of each lens is proportional to risk; the **existence** of the review
+> is not.
+
+---
+
+## When to review
 
 ```text
-Obrigatório:
-- Após CADA tarefa na execução de um plano (pelizzai-execution-plans) — sem exceção por "é simples".
-  O perfil registrado (`split` por padrão, `combined` só por ratificação) muda a FORMA do review,
-  nunca se ele acontece.
-- Ao concluir uma feature relevante.
-- No candidato final de uma entrega planejada, antes de `validated-head` — e antes de integrar à base.
-- Quando o usuário pede review.
+Mandatory:
+- After EVERY task during plan execution (pelizzai-execution-plans) — no exception for "it's simple".
+  The recorded profile (`split` by default, `combined` only by ratification) changes the FORM of the
+  review, never whether it happens.
+- When a relevant feature is complete.
+- On the final candidate of a planned delivery, before `validated-head` — and before integrating into the base.
+- When the user asks for a review.
 
-Opcional, mas valioso:
-- Quando travado (perspectiva nova).
-- Antes de uma refatoração (baseline).
-- Depois de corrigir um bug complexo.
+Optional, but valuable:
+- When stuck (fresh perspective).
+- Before a refactor (baseline).
+- After fixing a complex bug.
 ```
 
 ---
 
-## Perfis de review por tarefa
+## Review profiles per task
 
-Na execução de um plano, cada tarefa passa por **duas lentes com cegueira assimétrica** — a lente
-**spec** e a lente **qualidade/evidência**, nesta ordem. O implementador **não commitou** — o código
-está na working tree. A assimetria é deliberada:
+During plan execution, each task passes through **two lenses with asymmetric blindness** — the
+**spec** lens and the **quality/evidence** lens, in that order. The implementer has **not
+committed** — the code is in the working tree. The asymmetry is deliberate:
 
-- **Lente spec (cega):** recebe SOMENTE o diff, a spec/plano da tarefa e as domain skills da área.
-  **O revisor da lente spec NÃO recebe o relatório do implementador — julga o código contra o contrato, sem a narrativa do autor.**
-  Sem a história de quem escreveu, ela mede a implementação real contra o pedido, linha a linha, sem
-  ser ancorada pelas alegações otimistas do autor.
-- **Lente qualidade/evidência:** recebe o relatório do autor e **verifica as alegações** — os testes
-  rodaram mesmo? A prova é fresca (comando + saída + exit code)? Os desvios do plano foram
-  declarados? Roda de fato os checks aplicáveis para confirmar ou derrubar o que o relatório afirma,
-  além de avaliar a qualidade do código.
+- **Spec lens (blind):** receives ONLY the diff, the task's spec/plan, and the area's domain skills.
+  **The spec lens reviewer does NOT receive the implementer's report — it judges the code against the contract, without the author's narrative.**
+  Without the writer's story, it measures the real implementation against the request, line by line,
+  without being anchored by the author's optimistic claims.
+- **Quality/evidence lens:** receives the author's report and **verifies the claims** — did the tests
+  actually run? Is the proof fresh (command + output + exit code)? Were deviations from the plan
+  declared? It actually runs the applicable checks to confirm or refute what the report asserts,
+  besides assessing code quality.
 
-O plano escolhe o perfil, que decide se as lentes usam um ou dois despachos. **O padrão recomendado
-é `split`** — só com dois despachos a cegueira existe de fato; num despacho só ela vira mera ordem
-de leitura, e um revisor que já leu o relatório não desconhece a narrativa do autor. `combined` é
-**exceção**, e o usuário a ratifica explicitamente no passo 4 do gate de setup
-(`pelizzai-execution-plans`).
+The plan picks the profile, which decides whether the lenses use one or two dispatches. **The
+recommended default is `split`** — only with two dispatches does the blindness actually exist; in a
+single dispatch it becomes mere reading order, and a reviewer who has already read the report cannot
+unknow the author's narrative. `combined` is the **exception**, and the user ratifies it explicitly
+at step 4 of the setup gate (`pelizzai-execution-plans`).
 
-| Perfil | Predicado | Forma |
+| Profile | Predicate | Form |
 | --- | --- | --- |
-| `split` (**recomendado por padrão**) | o caso normal, inclusive tarefa bounded; **obrigatório** em risco médio/alto, superfície sensível, contrato público, dados, migração, múltiplas partes | a lente spec **cega** aprova antes de despachar a lente qualidade/evidência; despachos independentes |
-| `combined` (exceção ratificada) | tarefa bounded, low-risk, coesa, sem segurança/dados/migração/contrato público — **e** o usuário ratificou o perfil no gate | um despacho e um relatório; spec primeiro, qualidade/evidência depois — a cegueira aqui é só lógica (uma passada, o revisor vê tudo) |
+| `split` (**recommended by default**) | the normal case, including bounded tasks; **mandatory** for medium/high risk, sensitive surface, public contract, data, migration, multiple parts | the **blind** spec lens approves before the quality/evidence lens is dispatched; independent dispatches |
+| `combined` (ratified exception) | bounded, low-risk, cohesive task, with no security/data/migration/public contract — **and** the user ratified the profile at the gate | one dispatch and one report; spec first, quality/evidence second — the blindness here is only logical (one pass, the reviewer sees everything) |
 
-**Proporcionalidade sem afrouxar a cegueira:** a cegueira assimétrica das duas lentes entra no
-`split`, que é o perfil **recomendado por padrão** — inclusive para tarefa bounded, em qualquer lane.
-O que a proporcionalidade regula é a **profundidade** de cada lente (quanto se investiga, quantos
-checks se roda), não se o review acontece nem se ele é cego. O perfil reduz handoffs, não critérios.
-Se o diff revelar risco maior ou o `combined` sofrer rejeição estrutural, promova para `split` sem
-pedir nova ratificação; rebaixar para `combined` sempre exige uma escolha explícita do usuário.
+**Proportionality without loosening the blindness:** the asymmetric blindness of the two lenses lives in
+`split`, which is the profile **recommended by default** — including for bounded tasks, in any lane.
+What proportionality regulates is the **depth** of each lens (how much gets investigated, how many
+checks get run), not whether the review happens nor whether it is blind. The profile reduces
+handoffs, not criteria. If the diff reveals higher risk or `combined` takes a structural rejection,
+promote to `split` without asking for a new ratification; downgrading to `combined` always requires
+an explicit choice by the user.
 
-**Consolidação e conflito são do coordenador:** ele cruza os verdicts das duas lentes e, quando elas
-divergem, decide com evidência própria (rodando ele mesmo o check em disputa) ou escala ao usuário.
-O coordenador **nunca** é a lente cega — ele já viu o relatório e o raciocínio do autor, então não
-pode julgar às cegas; a lente spec cega é sempre um revisor independente.
+**Consolidation and conflict belong to the coordinator:** it crosses the verdicts of the two lenses
+and, when they diverge, decides with its own evidence (running the disputed check itself) or
+escalates to the user. The coordinator is **never** the blind lens — it has already seen the author's
+report and reasoning, so it cannot judge blind; the blind spec lens is always an independent reviewer.
 
-### Estágio 1 — Lente spec (conformidade, cega)
+### Stage 1 — Spec lens (compliance, blind)
 
-Verifique que o implementador construiu **exatamente** o que foi pedido — nada a mais, nada a menos.
-No `split` (o padrão), esta lente é **cega**: você não recebe o relatório do implementador — julga o
-diff contra o contrato, sem a narrativa do autor. No `combined` ratificado, o único revisor enxerga o
-relatório, mas aplica esta rubrica **primeiro**, medindo o código contra o pedido antes de ler
-qualquer alegação. Em ambos: **leia o código de fato**, não aceite alegações.
-
-```text
-- Faltando: implementou tudo o que foi pedido? Pulou ou esqueceu algum requisito?
-  Alegou que algo funciona mas não implementou?
-- Extra/desnecessário: construiu o que não foi pedido? Super-engenharia? "Nice to haves" fora da spec?
-- Mal-entendidos: interpretou diferente do pretendido? Resolveu o problema errado? Certo, mas do jeito errado?
-- Traceabilidade por linha: toda linha alterada rastreia diretamente a um requisito do pedido?
-  Linha sem rastro é scope creep — achado de primeira classe, não observação.
-```
-
-Use o template **[references/spec-reviewer.md](references/spec-reviewer.md)** (sem rodar testes — Verification é do Estágio 2). Resultado: **✅ Conforme a spec** (tudo bate após inspeção do código), **❌ Problemas** (liste o que falta/sobra, com `arquivo:linha`), ou **⚠️ Não verificável** → exige avaliação do coordenador contra o plano antes de concluir (ver `pelizzai-execution-plans` → `references/task-cycle.md` §3-§4).
-
-### Estágio 2 — Lente qualidade/evidência
-
-No perfil `split`, só despache esta lente após spec passar. No `combined`, aplique-a na segunda
-parte do mesmo relatório. **Esta é a lente que recebe o relatório do implementador** e verifica as
-alegações contra evidência fresca — os testes rodaram mesmo? A prova é fresca (comando + saída + exit
-code)? Os desvios do plano foram declarados no campo `Desvios do plano:`? Uma alegação que você não
-conseguiu confirmar rodando o check é **UNVERIFIED**, nunca ✅. Use a rubrica completa em
-**[references/code-reviewer.md](references/code-reviewer.md)**. Avalie: separação de responsabilidades, tratamento de erro, segurança de tipos, DRY sem abstração prematura, edge cases, arquitetura, segurança, testes (verificam comportamento real, não mocks), prontidão para produção. Além disso:
+Verify that the implementer built **exactly** what was asked — nothing more, nothing less.
+In `split` (the default), this lens is **blind**: you do not receive the implementer's report — you
+judge the diff against the contract, without the author's narrative. In a ratified `combined`, the
+single reviewer does see the report, but applies this rubric **first**, measuring the code against
+the request before reading any claim. In both: **actually read the code**, do not accept claims.
 
 ```text
-- Cada arquivo tem UMA responsabilidade clara e interface bem definida?
-- As unidades são decompostas para serem entendidas e testadas de forma independente?
-- A implementação segue a estrutura de arquivos do plano?
-- Esta mudança criou arquivos já grandes, ou inchou demais arquivos existentes?
-  (Não aponte tamanho pré-existente — foque no que ESTA mudança contribuiu.)
-- Julgue a mudança também contra as SKILLS DE DOMÍNIO do projeto (`pelizzai/domain-skills.md` no
-  consumidor; em source mode, as regras/skills do próprio repo-fonte). Em conflito com padrões
-  genéricos, as skills de domínio e as regras do projeto PREVALECEM.
+- Missing: did they implement everything that was asked? Skipped or forgot any requirement?
+  Claimed something works but never implemented it?
+- Extra/unnecessary: built what was not asked? Over-engineering? "Nice to haves" outside the spec?
+- Misunderstandings: interpreted differently from what was intended? Solved the wrong problem? Right, but the wrong way?
+- Line-level traceability: does every changed line trace directly to a requirement of the request?
+  A line with no trace is scope creep — a first-class finding, not a remark.
 ```
 
-Se o reviewer sinalizar **superfície sensível** (auth, input do usuário, query/SQL, segredos, upload, novas dependências), acione `pelizzai-oswap` (OWASP) antes de concluir — não deixe a segurança só como item de lista.
+Use the **[references/spec-reviewer.md](references/spec-reviewer.md)** template (without running tests — Verification belongs to Stage 2). Outcome: **✅ Matches the spec** (everything checks out after code inspection), **❌ Issues** (list what is missing/extra, with `file:line`), or **⚠️ Not verifiable** → requires the coordinator's assessment against the plan before concluding (see `pelizzai-execution-plans` → `references/task-cycle.md` §3-§4).
+
+### Stage 2 — Quality/evidence lens
+
+In the `split` profile, only dispatch this lens after spec passes. In `combined`, apply it in the
+second part of the same report. **This is the lens that receives the implementer's report** and
+verifies the claims — did the tests actually run? Is the proof fresh (command + output + exit
+code)? Were deviations from the plan declared in the `Plan deviations:` field? A claim you could not
+confirm by running the check is **UNVERIFIED**, never ✅. Use the full rubric in
+**[references/code-reviewer.md](references/code-reviewer.md)**. Assess: separation of concerns, error handling, type safety, DRY without premature abstraction, edge cases, architecture, security, tests (they verify real behavior, not mocks), production readiness. Additionally:
+
+```text
+- Does each file have ONE clear responsibility and a well-defined interface?
+- Are units decomposed so they can be understood and tested independently?
+- Does the implementation follow the plan's file structure?
+- Did this change create already-large files, or bloat existing files too much?
+  (Do not flag pre-existing size — focus on what THIS change contributed.)
+- Judge the change also against the project's DOMAIN SKILLS (`pelizzai/domain-skills.md` in a
+  consumer; in source mode, the source repo's own rules/skills). In conflict with generic
+  patterns, the domain skills and the project's rules PREVAIL.
+```
+
+If the reviewer flags a **sensitive surface** (auth, user input, query/SQL, secrets, upload, new dependencies), trigger `pelizzai-oswap` (OWASP) before concluding — do not leave security as a mere checklist item.
 
 ---
 
-## Evidência fresca (bloco Verification, obrigatório)
+## Fresh evidence (Verification block, mandatory)
 
-O reviewer de qualidade seleciona e **roda de fato** os checks que podem provar o artefato
-(teste, lint, build, parser, render, dry-run ou cenário), colando comando, saída e exit code num
-bloco `### Verification`. Não imponha test/lint/build quando não há diff executável ou relação
-causal; review arquitetural codebase-wide usa `pelizzai-improving-architecture`. **Não infira**
-passa/falha lendo o diff. Check relevante que não pôde rodar é **UNVERIFIED — nunca ✅**.
+The quality reviewer selects and **actually runs** the checks that can prove the artifact
+(test, lint, build, parser, render, dry-run, or scenario), pasting command, output, and exit code
+into a `### Verification` block. Do not impose test/lint/build when there is no executable diff or
+causal relation; codebase-wide architectural review uses `pelizzai-improving-architecture`. **Do not
+infer** pass/fail by reading the diff. A relevant check that could not run is **UNVERIFIED — never ✅**.
 
 ---
 
-## Como despachar o reviewer
+## How to dispatch the reviewer
 
-Use um **reviewer independente** — é o default: no `split` a lente spec cega precisa ser outro
-agente, e o coordenador nunca a encarna. Só com `combined` ratificado o coordenador pode aplicar as
-duas rubricas inline, e ainda assim na ordem spec → qualidade. A lente spec usa
-**[references/spec-reviewer.md](references/spec-reviewer.md)**; qualidade/evidência e review final usam
-**[references/code-reviewer.md](references/code-reviewer.md)**. Em `combined`, incorpore as duas
-rubricas num único briefing, mantendo a ordem. Preencha com:
+Use an **independent reviewer** — it is the default: in `split` the blind spec lens must be another
+agent, and the coordinator never embodies it. Only with a ratified `combined` may the coordinator
+apply the two rubrics inline, and even then in the order spec → quality. The spec lens uses
+**[references/spec-reviewer.md](references/spec-reviewer.md)**; quality/evidence and the final review use
+**[references/code-reviewer.md](references/code-reviewer.md)**. In `combined`, merge the two
+rubrics into a single briefing, keeping the order. Fill in with:
 
 ```text
-- Descrição: o que foi construído.
-- Requisitos/Plano: o que deveria fazer (texto da tarefa ou caminho do plano em pelizzai/plans/).
-- Relatório do implementador: as alegações do autor (testes rodados, prova, desvios do plano). Vai
-  SOMENTE para a lente qualidade/evidência (que o verifica) e para o revisor único do `combined`.
-  NUNCA para a lente spec cega do `split` — ela julga o código contra o contrato, sem a narrativa.
-- Diff a revisar:
-  - Por tarefa (spec E qualidade/evidência, combined ou split) → gere `review-package --working-tree`. O pacote contém,
-    separadamente, `git diff --cached`, `git diff` e o conteúdo dos untracked. Não use range:
-    a tarefa ainda não foi commitada e um range vazio esconderia todo o trabalho.
-  - Review final → gere `review-package <base-sha> <HEAD_SHA>` e use o range commitado.
-    `base-sha` vem do `state.md` consumidor ou execution record nativo; não redescubra a base.
-- SKILLS DE DOMÍNIO da área (coladas) — do catálogo `pelizzai/domain-skills.md` no consumidor, ou
-  das regras/skills do repo-fonte em source mode. Preenchem o slot `{SKILLS_DE_DOMÍNIO}` **dos dois
-  templates**: a lente spec cega recebe diff + spec/plano + domain skills; a lente qualidade/evidência
-  recebe as mesmas skills além do relatório. Skill de domínio prometida e não colada é lente cega sem
-  contrato — cole os pontos operacionais, não só os nomes. Sem cobertura na área, escreva "nenhuma"
-  e peça que o reviewer sinalize a lacuna.
-- Skills transversais/overlays registradas no state/execution record (coladas) — frontend, segurança,
-  documentação ou outra restrição aplicável também fazem parte do contrato de review.
+- Description: what was built.
+- Requirements/Plan: what it should do (task text or plan path in pelizzai/plans/).
+- Implementer's report: the author's claims (tests run, proof, plan deviations). It goes
+  ONLY to the quality/evidence lens (which verifies it) and to the single reviewer of `combined`.
+  NEVER to the blind spec lens of `split` — it judges the code against the contract, without the narrative.
+- Diff to review:
+  - Per task (spec AND quality/evidence, combined or split) → generate `review-package --working-tree`. The package contains,
+    separately, `git diff --cached`, `git diff`, and the content of the untracked files. Do not use a range:
+    the task has not been committed yet, and an empty range would hide all the work.
+  - Final review → generate `review-package <base-sha> <HEAD_SHA>` and use the committed range.
+    `base-sha` comes from the consumer `state.md` or the native execution record; do not rediscover the base.
+- DOMAIN SKILLS for the area (pasted) — from the `pelizzai/domain-skills.md` catalog in a consumer, or
+  from the source repo's rules/skills in source mode. They fill the `{DOMAIN_SKILLS}` slot **of both
+  templates**: the blind spec lens receives diff + spec/plan + domain skills; the quality/evidence lens
+  receives the same skills plus the report. A domain skill promised but not pasted is a blind lens
+  without a contract — paste the operational points, not just the names. With no coverage for the
+  area, write "none" and ask the reviewer to flag the gap.
+- Cross-cutting skills/overlays recorded in the state/execution record (pasted) — frontend, security,
+  documentation, or any other applicable constraint is also part of the review contract.
 ```
 
-Use `pwsh scripts/review-package.ps1 --working-tree` ou
-`sh scripts/review-package.sh --working-tree`. O helper grava um nome único no handoff dir
-gitignored do consumidor ou no temp do sistema em source mode; passe esse arquivo ao reviewer. O
-modo `<BASE> <HEAD>` é usado no review final da entrega; fora do lifecycle, somente quando o
-usuário pediu explicitamente um range avulso.
+Use `pwsh scripts/review-package.ps1 --working-tree` or
+`sh scripts/review-package.sh --working-tree`. The helper writes a unique name into the consumer's
+gitignored handoff dir, or into the system temp in source mode; pass that file to the reviewer. The
+`<BASE> <HEAD>` mode is used in the delivery's final review; outside the lifecycle, only when the
+user explicitly asked for a standalone range.
 
-O reviewer **nunca** recebe o histórico da sessão.
+The reviewer **never** receives the session history.
 
 ---
 
-## Anti-corrupção do pipeline de review
+## Review-pipeline anti-corruption
 
-Estas regras protegem a independência do review (as demais skills referenciam esta seção):
+These rules protect the review's independence (the other skills reference this section):
 
 ```text
-- NUNCA instrua o reviewer sobre o que NÃO flagrar, nem pré-classifique severidade no prompt —
-  se o prompt que você está escrevendo contém "não aponte…", você está pré-julgando o review.
-- Finding causado pelo PRÓPRIO plano (a implementação seguiu o que o plano mandou) sobe ao
-  humano — quem escreveu o plano não dá nota no próprio trabalho.
-- Minors acumulam num LEDGER e são triados no review final — um roll-up que ninguém lê é um
-  descarte silencioso.
-- Os findings do review final são corrigidos por UM único fixer (um despacho com todos os
-  achados) — nunca um fixer por finding.
+- NEVER instruct the reviewer about what NOT to flag, nor pre-classify severity in the prompt —
+  if the prompt you are writing contains "do not flag…", you are pre-judging the review.
+- A finding caused by the plan ITSELF (the implementation followed what the plan mandated) goes up
+  to the human — whoever wrote the plan does not grade their own work.
+- Minors accumulate in a LEDGER and are triaged at the final review — a roll-up nobody reads is a
+  silent discard.
+- The final review's findings are fixed by ONE single fixer (one dispatch with all the
+  findings) — never one fixer per finding.
 ```
 
 ---
 
-## Severidade e formato de saída
+## Severity and output format
 
-O reviewer devolve, nesta estrutura (detalhe em `references/code-reviewer.md`):
+The reviewer returns, in this structure (detail in `references/code-reviewer.md`):
 
 ```text
-### Strengths        — o que está bem feito (específico; elogio preciso gera confiança no resto)
+### Strengths        — what is well done (specific; accurate praise builds trust in the rest)
 ### Issues
-  #### Critical      — bugs, segurança, perda de dados, funcionalidade quebrada (corrigir já)
-  #### Important     — arquitetura, feature faltando, erro mal tratado, lacuna de teste (corrigir antes de seguir)
-  #### Minor         — estilo, otimização, polimento de doc (anotar para depois)
-  (cada issue: arquivo:linha, o que está errado, por que importa, como corrigir)
+  #### Critical      — bugs, security, data loss, broken functionality (fix now)
+  #### Important     — architecture, missing feature, mishandled error, test gap (fix before moving on)
+  #### Minor         — style, optimization, doc polish (note for later)
+  (each issue: file:line, what is wrong, why it matters, how to fix)
 ### Recommendations
-### Verification     — checks aplicáveis RODADOS + saída + exit code; check relevante não rodado = UNVERIFIED
-### Assessment       — Pronto para mergear? [Sim | Não | Com correções] + 1-2 frases de justificativa
+### Verification     — applicable checks actually RUN + output + exit code; relevant check not run = UNVERIFIED
+### Assessment       — Ready to merge? [Yes | No | With fixes] + 1-2 sentences of rationale
 ```
 
-Categorize pela severidade REAL — nem tudo é Critical; um nitpick não é Critical.
+Categorize by REAL severity — not everything is Critical; a nitpick is not Critical.
 
 ---
 
-## Review final da branch
+## Final branch review
 
-Ao concluir todas as tarefas, revise a **branch inteira** no range commitado
-`<base-sha>..<HEAD>` — depois da consolidação `squash-final`, quando escolhida — e não só por
-tarefa. Use um reviewer independente, com o **modelo da sessão** — o que o usuário escolheu, nunca
-um menor — e o **effort mais alto que a plataforma permitir**: review final é o último filtro antes
-do seal, não lugar de economizar por conta própria nem de afinar o processo para compensar modelo
-menor. É o passo 1 da
-**validação final da entrega** do coordenador (`pelizzai-execution-plans` → "Validação final da
-entrega") e acontece **depois** dos overlays que podem escrever (segurança, frontend e documentação)
-e antes da suíte completa, checklist e `pelizzai-verification-before-completion`. Critical/Important
-abertos bloqueiam a conclusão.
+When all tasks are complete, review the **entire branch** over the committed range
+`<base-sha>..<HEAD>` — after the `squash-final` consolidation, when chosen — and not only per
+task. Use an independent reviewer, with the **session's model** — the one the user chose, never
+a lesser one — and the **highest effort the platform allows**: the final review is the last filter
+before the seal, not a place to economize on your own initiative nor to tune the process to
+compensate for a lesser model. It is step 1 of the coordinator's
+**final delivery validation** (`pelizzai-execution-plans` → "Final delivery
+validation") and happens **after** the overlays that may write (security, frontend, and documentation)
+and before the full suite, checklist, and `pelizzai-verification-before-completion`. Open
+Critical/Important findings block completion.
 
-Exceção de reutilização (estreita, e nunca o caminho padrão): plano de **uma única tarefa bounded**,
-com efeito `read-only` ou `write-local`, risco baixo, perfil `combined` ratificado pelo usuário, sem
-findings e sem mutação de conteúdo posterior pode tratar o review da tarefa como review final quando
-o tree SHA pós-commit é exatamente o tree SHA candidato revisado. Continue checks, checklist e
-Verification. Basta **um** desses itens faltar — efeito `write-shared`/produção, risco médio/alto,
-superfície sensível (segurança, dados, migração, contrato público), perfil `split` (o padrão),
-múltiplas tarefas, overlay/fix posterior, compaction sem evidência ou qualquer dúvida — e o review
-final normal volta a ser obrigatório. A exceção existe para não duplicar um review comprovadamente
-idêntico, não para dispensar a validação final.
+Reuse exception (narrow, and never the default path): a plan of **a single bounded task**,
+with `read-only` or `write-local` effect, low risk, `combined` profile ratified by the user, with no
+findings and no later content mutation may treat the task's review as the final review when
+the post-commit tree SHA is exactly the reviewed candidate tree SHA. Keep the checks, checklist, and
+Verification. If even **one** of these items is missing — `write-shared`/production effect,
+medium/high risk, sensitive surface (security, data, migration, public contract), `split` profile
+(the default), multiple tasks, a later overlay/fix, compaction without evidence, or any doubt — the
+normal final review becomes mandatory again. The exception exists to avoid duplicating a provably
+identical review, not to waive the final validation.
 
-Qualquer fix — de finding, overlay, teste, checklist ou verificação visual — altera o candidato:
-invalide `validated-head`, consolide o fix, rode novamente os overlays afetados e **reabra o
-review final** sobre o novo HEAD. “Já foi revisado antes do fix” não vale como aprovação.
+Any fix — from a finding, overlay, test, checklist, or visual verification — changes the candidate:
+invalidate `validated-head`, consolidate the fix, re-run the affected overlays, and **reopen the
+final review** over the new HEAD. "It was reviewed before the fix" does not count as approval.
 
-**Quem dispara o review final:** `pelizzai-execution-plans` (fechamento de plano). O fix de bug
-(`pelizzai-debugging`) usa o **review de mudança avulsa** abaixo ainda na working tree; depois o
-debugging consolida o conteúdo, roda Verification contra o HEAD e só então chama finish-task.
-O track de ajuste (`pelizzai-quick-fix`) dispensa review formal enquanto continuar trivial.
+**Who triggers the final review:** `pelizzai-execution-plans` (plan closeout). A bug fix
+(`pelizzai-debugging`) uses the **standalone change review** below while still in the working tree;
+then debugging consolidates the content, runs Verification against the HEAD, and only then calls
+finish-task. The tweak track (`pelizzai-quick-fix`) waives formal review as long as it stays trivial.
 
-**Review de mudança avulsa** (bug fora de plano, ou ajuste reclassificado antes do commit): use
-`review-package --working-tree` (staged + unstaged + untracked) e aplique o **Estágio 2**
-(qualidade) com o bloco `Verification`, **sem** a maquinaria por-tarefa / review-final /
-circuit-breaker.
+**Standalone change review** (a bug outside a plan, or a tweak reclassified before the commit): use
+`review-package --working-tree` (staged + unstaged + untracked) and apply **Stage 2**
+(quality) with the `Verification` block, **without** the per-task / final-review /
+circuit-breaker machinery.
 
-Quick-fix válido não entra nesse procedimento. Se o diff elevar o risco, reclassifique pelo router
-e aplique o review da nova rota antes do commit.
+A valid quick-fix does not enter this procedure. If the diff raises the risk, reclassify through the
+router and apply the new route's review before the commit.
 
-**Track de review avulso:** recomende o escopo derivado do pedido e do Git e **confirme quando for
-ambíguo** — working tree, range `<BASE>..<HEAD>` e PR são interpretações materialmente diferentes;
-não revise o alvo errado por suposição. Com uma só leitura plausível, siga sem perguntar. Aplique a
-lente de qualidade + Verification. Este track é read-only e não cria state. Achado Critical não se
-corrige dentro do review: vira um novo track de bug/ajuste via router; os demais achados são
-entregues para decisão do usuário.
+**Standalone review track:** recommend the scope derived from the request and from Git, and
+**confirm when it is ambiguous** — working tree, `<BASE>..<HEAD>` range, and PR are materially
+different interpretations; do not review the wrong target on an assumption. With a single plausible
+reading, proceed without asking. Apply the quality lens + Verification. This track is read-only and
+creates no state. A Critical finding is not fixed inside the review: it becomes a new bug/tweak
+track via the router; the remaining findings are handed to the user for decision.
 
-Quando o usuário autoriza **aplicar** os achados, aplique **todos** — Critical, Important e Minor
-(must/should/nice) num despacho consolidado, não só os Critical; roll-up que ninguém corrige é
-descarte silencioso. Cada achado que vira escrita segue a rota do router (quick-fix/tdd/debugging) e,
-depois dos fixes, **reabra o review** sobre o novo conteúdo — "já revisei antes do fix" não vale.
+When the user authorizes **applying** the findings, apply **all of them** — Critical, Important, and
+Minor (must/should/nice) in one consolidated dispatch, not only the Criticals; a roll-up nobody
+fixes is a silent discard. Each finding that becomes a write follows the router's route
+(quick-fix/tdd/debugging) and, after the fixes, **reopen the review** over the new content — "I
+already reviewed before the fix" does not count.
 
-Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing e escale ao coordenador o que exigir decisão.
+Under a closed briefing (SUBAGENT-STOP), produce no route analyses and open no gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 ---
 
-## Agir sobre o feedback
+## Acting on the feedback
 
 ```text
-- Critical → corrija imediatamente.
-- Important → corrija antes de prosseguir.
-- Minor → anote para o review final.
-- Reviewer errado → faça push back com raciocínio técnico (mostre código/testes que provam).
+- Critical → fix immediately.
+- Important → fix before moving on.
+- Minor → note for the final review.
+- Reviewer wrong → push back with technical reasoning (show code/tests that prove it).
 ```
 
-Isso alimenta o circuit breaker da `pelizzai-execution-plans` (3 ciclos por lente, por tarefa;
-detalhe e resets em `pelizzai-execution-plans` → `references/task-cycle.md` §5). **Handback de
-branch protegida:** se agir sobre o feedback significa escrever código e não há isolamento no state
-consumidor ou execution record nativo, passe por `pelizzai-starting-branch` antes — para os fixes
-não caírem em branch protegida.
+This feeds the `pelizzai-execution-plans` circuit breaker (3 cycles per lens, per task;
+detail and resets in `pelizzai-execution-plans` → `references/task-cycle.md` §5).
+**Protected-branch handback:** if acting on the feedback means writing code and there is no
+isolation in the consumer state or native execution record, go through `pelizzai-starting-branch`
+first — so the fixes do not land on a protected branch.
 
 ---
 
-## Receber feedback de review (rigor técnico, não performance)
+## Receiving review feedback (technical rigor, not performance)
 
 ```text
-Padrão de resposta: LER → ENTENDER (reformule o requisito ou pergunte) → VERIFICAR contra o código →
-AVALIAR (é tecnicamente correto para ESTE projeto?) → RESPONDER (reconhecimento técnico ou push back
-fundamentado) → IMPLEMENTAR um item de cada vez, testando cada um.
+Response pattern: READ → UNDERSTAND (restate the requirement or ask) → VERIFY against the code →
+ASSESS (is it technically correct for THIS project?) → RESPOND (technical acknowledgement or
+grounded push back) → IMPLEMENT one item at a time, testing each one.
 
-NUNCA: "você está certíssimo", "ótimo ponto", "ótimo feedback", nem agradecer — ações falam.
-       Não implemente antes de verificar. Não implemente parcialmente quando há itens não entendidos
-       (peça esclarecimento de TODOS primeiro — itens podem estar relacionados).
-QUANDO acertar: "Corrigido. [o que mudou]" — e o código mostra que você ouviu.
-YAGNI: se o reviewer sugere "implementar direito", faça grep do uso real; se não é usado, proponha remover.
-Push back quando: quebra algo existente, reviewer sem contexto completo, viola YAGNI, incorreto para a stack,
-       ou conflita com decisão de arquitetura do usuário — com raciocínio técnico, não defensividade.
-Não consegue verificar? Diga: "Não consigo verificar isto sem [X] — investigo / pergunto / sigo?"
-       (nunca implemente às cegas).
-Em PR no GitHub, responda no THREAD do comentário inline (não como comentário top-level do PR).
-```
-
----
-
-## Anti-padrões / red flags
-
-```text
-- Pular o review porque "é simples" — a profundidade é proporcional; a existência do review não é.
-- Pular um review exigido pela lane/perfil ou rebaixar o perfil apesar de risco novo.
-- Usar `combined` por conta própria: o padrão é `split`, e o downgrade exige ratificação explícita
-  do usuário no gate.
-- Prometer skills de domínio ao reviewer e despachar o briefing com o slot `{SKILLS_DE_DOMÍNIO}`
-  vazio — a lente cega fica sem o contrato do projeto contra o qual deveria julgar.
-- Rebaixar modelo ou effort abaixo do da sessão num review (por tarefa ou final) para economizar —
-  capacidade é escolha do usuário, e o harness nunca a reduz em silêncio.
-- Ignorar Critical, ou seguir com Important em aberto.
-- Dar feedback sobre código que não leu de fato.
-- Marcar nitpick como Critical, ou ser vago ("melhorar o tratamento de erro").
-- Relatar como ✅ um check que não rodou (evidência inferida do diff).
-- Passar o histórico da sessão ao reviewer (ele recebe só o contexto fabricado).
-- Concordância performática ao receber feedback ("você está certíssimo", agradecer).
-- No perfil split, despachar qualidade/evidência antes de spec passar; no combined, inverter as lentes.
-- Entregar o relatório do implementador à lente spec cega do split — ela julga o código contra o
-  contrato, sem a narrativa do autor; quem recebe e verifica o relatório é a lente qualidade/evidência.
-- O coordenador se despachar como lente spec cega: ele já viu o relatório e o raciocínio do autor,
-  então não pode julgar às cegas — a lente cega é sempre um revisor independente.
-- Instruir o reviewer sobre o que NÃO flagrar, ou pré-classificar severidade no prompt.
-- Corrigir os findings do review final com um fixer por finding (é UM fixer para todos).
-- Usar `<BASE>..<HEAD>` no review por tarefa; antes do commit, o escopo é sempre `--working-tree`.
-- Aceitar como final um review anterior ao último fix ou overlay que escreveu arquivos.
+NEVER: "you're absolutely right", "great point", "great feedback", nor thanking — actions speak.
+       Do not implement before verifying. Do not implement partially while items remain not understood
+       (ask for clarification of ALL of them first — items may be related).
+WHEN you fix it: "Fixed. [what changed]" — and the code shows you listened.
+YAGNI: if the reviewer suggests "implementing it properly", grep the real usage; if it is unused, propose removing it.
+Push back when: it breaks something existing, the reviewer lacks full context, it violates YAGNI, it is incorrect for the stack,
+       or it conflicts with a user architecture decision — with technical reasoning, not defensiveness.
+Cannot verify? Say: "I cannot verify this without [X] — investigate / ask / proceed?"
+       (never implement blind).
+On a GitHub PR, reply in the inline comment THREAD (not as a top-level PR comment).
 ```
 
 ---
 
-## Integração
+## Anti-patterns / red flags
 
-**Combina com:**
-
-- `pelizzai-execution-plans` — review por tarefa (combined/split) e review final; ver `task-cycle.md`.
-- `pelizzai-tdd` — os testes que o review confere nascem do ciclo TDD.
-- `pelizzai-starting-branch` — handback quando agir sobre feedback vira escrever código.
-- `pelizzai-reasoning` — *Critique and Refine* (agir sobre o feedback) e *Verification* (evidência fresca).
-- `pelizzai-oswap` — dimensão de segurança (OWASP) do review.
-- `pelizzai-verification-before-completion` / `pelizzai-finish-task` — conclusão após o review final.
+```text
+- Skipping the review because "it's simple" — depth is proportional; the existence of the review is not.
+- Skipping a review required by the lane/profile, or downgrading the profile despite new risk.
+- Using `combined` on your own: the default is `split`, and the downgrade requires the user's
+  explicit ratification at the gate.
+- Promising domain skills to the reviewer and dispatching the briefing with the `{DOMAIN_SKILLS}` slot
+  empty — the blind lens is left without the project contract it should judge against.
+- Downgrading model or effort below the session's in a review (per-task or final) to save cost —
+  capacity is the user's choice, and the harness never reduces it silently.
+- Ignoring a Critical, or moving on with an Important open.
+- Giving feedback on code you did not actually read.
+- Marking a nitpick as Critical, or being vague ("improve error handling").
+- Reporting as ✅ a check that did not run (evidence inferred from the diff).
+- Passing the session history to the reviewer (it receives only fabricated context).
+- Performative agreement when receiving feedback ("you're absolutely right", thanking).
+- In the split profile, dispatching quality/evidence before spec passes; in combined, inverting the lenses.
+- Handing the implementer's report to the blind spec lens of split — it judges the code against the
+  contract, without the author's narrative; the lens that receives and verifies the report is quality/evidence.
+- The coordinator dispatching itself as the blind spec lens: it has already seen the author's report
+  and reasoning, so it cannot judge blind — the blind lens is always an independent reviewer.
+- Instructing the reviewer about what NOT to flag, or pre-classifying severity in the prompt.
+- Fixing the final review's findings with one fixer per finding (it is ONE fixer for all).
+- Using `<BASE>..<HEAD>` in the per-task review; before the commit, the scope is always `--working-tree`.
+- Accepting as final a review older than the last fix or overlay that wrote files.
+```
 
 ---
 
-## Instrução final para o agente
+## Integration
+
+**Combines with:**
+
+- `pelizzai-execution-plans` — per-task review (combined/split) and final review; see `task-cycle.md`.
+- `pelizzai-tdd` — the tests the review checks are born from the TDD cycle.
+- `pelizzai-starting-branch` — handback when acting on feedback turns into writing code.
+- `pelizzai-reasoning` — *Critique and Refine* (acting on the feedback) and *Verification* (fresh evidence).
+- `pelizzai-oswap` — the review's security (OWASP) dimension.
+- `pelizzai-verification-before-completion` / `pelizzai-finish-task` — completion after the final review.
+
+---
+
+## Final instruction for the agent
 
 ```text
-Revise o produto, não o raciocínio. Leia o código; não confie no relatório.
+Review the product, not the reasoning. Read the code; do not trust the report.
 
-Prefira:
-- evidência fresca (comandos rodados) a "parece que passa";
-- veredito claro (Sim/Não/Com correções) a "looks good";
-- severidade real a marcar tudo como Critical;
-- rigor técnico a concordância performática ao receber feedback.
+Prefer:
+- fresh evidence (commands actually run) over "seems to pass";
+- a clear verdict (Yes/No/With fixes) over "looks good";
+- real severity over marking everything Critical;
+- technical rigor over performative agreement when receiving feedback.
 
-Revise cedo e sempre: a profundidade é proporcional ao risco, a existência do review não.
-Spec primeiro, qualidade/evidência depois — em DOIS despachos por padrão (`split`); um só despacho (`combined`) apenas com ratificação explícita do usuário. Critical/Important antes de seguir; Minor para o final.
-No split, a lente spec é cega (sem o relatório) e recebe diff + spec/plano + skills de domínio da área; a lente qualidade/evidência recebe e verifica o relatório. O coordenador cruza as lentes e nunca é a lente cega.
-Nunca passe o histórico da sessão ao reviewer. Para segurança, use pelizzai-oswap.
+Review early and often: depth is proportional to risk, the existence of the review is not.
+Spec first, quality/evidence second — in TWO dispatches by default (`split`); a single dispatch (`combined`) only with the user's explicit ratification. Critical/Important before moving on; Minor for the end.
+In split, the spec lens is blind (no report) and receives diff + spec/plan + the area's domain skills; the quality/evidence lens receives and verifies the report. The coordinator crosses the lenses and is never the blind lens.
+Never pass the session history to the reviewer. For security, use pelizzai-oswap.
 ```

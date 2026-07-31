@@ -1,78 +1,77 @@
-# Política de segurança
+# Security policy
 
-## Onde está a superfície de risco
+## Where the risk surface is
 
-O PelizzAI é majoritariamente markdown, mas **não é só markdown**. Os componentes executáveis
-distribuídos são estes, e é neles que mora o risco real:
+PelizzAI is mostly markdown, but it is **not just markdown**. The executable components it
+distributes are these, and that is where the real risk lives:
 
-| O quê | Quando roda | O que faz |
+| What | When it runs | What it does |
 | --- | --- | --- |
-| `.claude/hooks/*.mjs` e `*.ps1` | a cada prompt ou antes de uma ferramenta, **se você instalar** | leem o comando/caminho pretendido e podem bloqueá-lo |
-| `scripts/sync-harness.mjs` e wrappers | quando você roda o sync ou exporta para um projeto | escrevem arquivos no repositório de destino |
-| `scripts/install-hooks.mjs` | quando você registra os hooks | edita o seu `.claude/settings.json` |
-| `scripts/task-brief.*` e `scripts/review-package.*` | quando você (ou o agente) despacha briefing de tarefa ou pacote de review | leem plano/diff do repositório e gravam arquivos em `pelizzai/data/handoffs/` (ou no temp do sistema) |
+| `.claude/hooks/*.mjs` and `*.ps1` | on every prompt or before a tool, **if you install them** | read the intended command/path and may block it |
+| `scripts/sync-harness.mjs` and wrappers | when you run the sync or export to a project | write files into the target repository |
+| `scripts/install-hooks.mjs` | when you register the hooks | edits your `.claude/settings.json` |
+| `scripts/task-brief.*` and `scripts/review-package.*` | when you (or the agent) dispatch a task briefing or a review package | read the repository's plan/diff and write files under `pelizzai/data/handoffs/` (or the system temp) |
 
-Os hooks são **opt-in**: são copiados na instalação, mas só passam a rodar depois de registrados —
-seja com `--install-hooks`, seja respondendo "sim" à proposta da `pelizzai-audit`. Você pode ver o
-que está registrado com `node scripts/install-hooks.mjs --check` e desfazer com `--remove`.
+The hooks are **opt-in**: they are copied on install, but they only start running once registered —
+either with `--install-hooks` or by answering "yes" to the `pelizzai-audit` proposal. You can see
+what is registered with `node scripts/install-hooks.mjs --check` and undo it with `--remove`.
 
-As skills em si não executam nada por conta própria: são texto que orienta um agente. Mas orientam um
-agente que **tem** acesso ao seu shell e aos seus arquivos — então uma instrução maliciosa numa skill
-é um vetor legítimo, e a tratamos como tal.
+The skills themselves execute nothing on their own: they are text that guides an agent. But they
+guide an agent that **does** have access to your shell and your files — so a malicious instruction
+in a skill is a legitimate vector, and we treat it as such.
 
-## Como reportar uma vulnerabilidade
+## How to report a vulnerability
 
-Mande um e-mail para **rafael.pelizza@gmail.com**, de preferência com `[PelizzAI][security]` no
-assunto para não se perder na caixa de entrada.
+Send an e-mail to **rafael.pelizza@gmail.com**, preferably with `[PelizzAI][security]` in the
+subject so it does not get lost in the inbox.
 
-**Não abra issue pública** para algo explorável — uma issue com passos de reprodução é um exploit
-publicado. Issue pública é o canal certo para bug comum, inclusive falso positivo de hook (veja
-abaixo).
+**Do not open a public issue** for anything exploitable — an issue with reproduction steps is a
+published exploit. A public issue is the right channel for an ordinary bug, including a hook false
+positive (see below).
 
-Ao reportar, inclua: versão/commit do harness, plataforma e versão do agente, os passos exatos de
-reprodução, e o impacto que você conseguiu demonstrar. Prova de conceito mínima ajuda mais que
-descrição longa.
+When reporting, include: harness version/commit, agent platform and version, the exact
+reproduction steps, and the impact you managed to demonstrate. A minimal proof of concept helps
+more than a long description.
 
-Este é um projeto mantido por uma pessoa, sem SLA contratual. O compromisso é confirmar o
-recebimento e responder com uma avaliação inicial assim que possível; correção de algo explorável
-tem prioridade sobre qualquer outro trabalho em andamento.
+This is a project maintained by one person, with no contractual SLA. The commitment is to confirm
+receipt and reply with an initial assessment as soon as possible; fixing anything exploitable
+takes priority over any other work in progress.
 
-## O que conta como vulnerabilidade aqui
+## What counts as a vulnerability here
 
-**Conta:**
+**Counts:**
 
-- instrução numa skill que leve o agente a exfiltrar segredo, executar comando destrutivo ou
-  contornar a confirmação do usuário;
-- bypass do `pelizzai-writegate` que permita escrever em branch protegida ou sem o kickoff
-  ratificado;
-- injeção de comando ou path traversal nos scripts de sync/export — especialmente algo que escreva
-  **fora** do diretório de destino;
-- `--export-consumer` levando a sentinela `scripts/pelizzai-source-repo.txt` para o destino (isso
-  promove o consumidor a repo-fonte e desliga proteções);
-- qualquer caminho em que um repositório ou prompt hostil consiga fazer o harness agir contra o
-  usuário.
+- an instruction in a skill that leads the agent to exfiltrate a secret, run a destructive
+  command, or bypass the user's confirmation;
+- a `pelizzai-writegate` bypass that allows writing to a protected branch or without a ratified
+  kickoff;
+- command injection or path traversal in the sync/export scripts — especially anything that writes
+  **outside** the target directory;
+- `--export-consumer` carrying the sentinel `scripts/pelizzai-source-repo.txt` to the target (this
+  promotes the consumer to source repo and turns protections off);
+- any path by which a hostile repository or prompt can make the harness act against the user.
 
-**Não conta** (mas mande mesmo assim, como issue normal):
+**Does not count** (but send it anyway, as a normal issue):
 
-- **Falso positivo do `guardrails`** — um comando legítimo sendo bloqueado. É bug de usabilidade,
-  e levamos a sério, mas não é vulnerabilidade.
-- **Falso negativo do `guardrails`** dentro do escopo declarado. As regras são deliberadamente
-  estreitas: o hook mira o punhado de comandos que apagam trabalho de forma irrecuperável e **não**
-  tenta cobrir todo Git perigoso. `git push --delete`, `git restore <arquivo>` e afins passam de
-  propósito, e isso está documentado no cabeçalho do hook. Regra larga trava trabalho legítimo e
-  ensina o agente a contornar a rede — o que piora a segurança real.
-- **Fail-open em erro interno de hook.** Se o próprio hook quebra, ele sai com 0 e deixa a ação
-  seguir. É decisão de projeto: o hook é rede de segurança de segundo nível, não gate primário, e um
-  bug nele nunca pode sequestrar a ferramenta de quem usa. Os gates primários vivem nas skills, com
-  o usuário.
+- **A `guardrails` false positive** — a legitimate command being blocked. It is a usability bug,
+  and we take it seriously, but it is not a vulnerability.
+- **A `guardrails` false negative** within the declared scope. The rules are deliberately narrow:
+  the hook targets the handful of commands that erase work irrecoverably and does **not** try to
+  cover everything dangerous in Git. `git push --delete`, `git restore <file>`, and the like pass
+  on purpose, and this is documented in the hook's header. A broad rule blocks legitimate work and
+  teaches the agent to route around the net — which makes real security worse.
+- **Fail-open on a hook's internal error.** If the hook itself breaks, it exits with 0 and lets
+  the action proceed. This is a design decision: the hook is a second-level safety net, not a
+  primary gate, and a bug in it must never hijack the user's tool. The primary gates live in the
+  skills, with the user.
 
-## O modelo de confiança, dito na cara
+## The trust model, stated plainly
 
-Os hooks **reduzem** a chance de um agente fazer estrago; eles não a eliminam, e não foram desenhados
-para conter um agente adversário. Um agente com acesso a shell tem muitos caminhos para contornar um
-matcher de string, e o `guardrails` nunca pretendeu ser sandbox.
+The hooks **reduce** the chance of an agent doing damage; they do not eliminate it, and they were
+not designed to contain an adversarial agent. An agent with shell access has many ways around a
+string matcher, and `guardrails` never claimed to be a sandbox.
 
-O que o harness realmente oferece é: gates explícitos onde a decisão é do usuário, isolamento antes
-da primeira escrita, e evidência antes de qualquer alegação de conclusão. Se você precisa de garantia
-forte contra ação hostil, isso vem da sandbox e das permissões do seu agente e do seu sistema — não
-daqui.
+What the harness actually offers is: explicit gates where the decision is the user's, isolation
+before the first write, and evidence before any claim of completion. If you need a strong
+guarantee against hostile action, that comes from your agent's and your system's sandbox and
+permissions — not from here.

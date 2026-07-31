@@ -1,535 +1,535 @@
 # Verification
 
-## Objetivo
+## Purpose
 
-Use Verification para confirmar que uma conclusão, alteração, resposta ou ação está correta o suficiente para o contexto.
+Use Verification to confirm that a conclusion, change, answer, or action is correct enough for the context.
 
-A técnica existe para evitar erros como:
+The technique exists to avoid errors such as:
 
-- tratar hipótese como fato;
-- confiar em uma única fonte fraca;
-- concluir que código funciona apenas porque compila;
-- assumir que um teste passou porque executou;
-- validar apenas o caminho feliz;
-- ignorar regressões, efeitos colaterais ou requisitos não funcionais;
-- apresentar uma recomendação como certeza quando a evidência é insuficiente.
+- treating a hypothesis as fact;
+- trusting a single weak source;
+- concluding code works just because it compiles;
+- assuming a test passed because it ran;
+- validating only the happy path;
+- ignoring regressions, side effects, or non-functional requirements;
+- presenting a recommendation as certainty when the evidence is insufficient.
 
-Verification não é uma etapa burocrática obrigatória para toda tarefa. Ela deve ser proporcional ao impacto, à incerteza, à reversibilidade e ao custo de errar (ver o orçamento de esforço na skill [pelizzai-reasoning](../SKILL.md)).
+Verification is not a mandatory bureaucratic step for every task. It must be proportional to impact, uncertainty, reversibility, and the cost of being wrong (see the effort budget in the [pelizzai-reasoning](../SKILL.md) skill).
 
-## Princípio central
+## Core principle
 
-> Uma conclusão só é confiável quando a evidência utilizada é adequada ao risco da decisão.
+> A conclusion is only trustworthy when the evidence behind it matches the risk of the decision.
 
-Não use confiança subjetiva como substituto de validação.
+Do not use subjective confidence as a substitute for validation.
 
 ```mermaid
 flowchart TD
-    A[Afirmação, alteração ou decisão] --> B[Identificar risco e impacto]
-    B --> C[Definir evidência necessária]
-    C --> D[Executar validação]
-    D --> E[Interpretar resultado]
-    E --> F{Evidência suficiente?}
+    A[Claim, change, or decision] --> B[Identify risk and impact]
+    B --> C[Define the evidence needed]
+    C --> D[Run the validation]
+    D --> E[Interpret the result]
+    E --> F{Sufficient evidence?}
 
-    F -- Não --> G[Reduzir incerteza ou comunicar limitação]
+    F -- No --> G[Reduce uncertainty or state the limitation]
     G --> C
 
-    F -- Sim --> H[Classificar conclusão no status canônico]
+    F -- Yes --> H[Classify the conclusion under the canonical status]
 ```
 
-## Status canônico da conclusão
+## Canonical conclusion status
 
-Toda conclusão e toda informação relevante recebe exatamente um destes status. Este é o conjunto único usado no frontmatter, na classificação de informação, no registro e na decisão final — não introduza variações locais.
+Every conclusion and every relevant piece of information receives exactly one of these statuses. This is the single set used in frontmatter, in information classification, in the record, and in the final decision — do not introduce local variations.
 
-| Status                  | Significado                                                           | Como comunicar                                 |
-| ----------------------- | --------------------------------------------------------------------- | ---------------------------------------------- |
-| Confirmado              | Observado diretamente ou sustentado por evidência suficiente ao risco | Pode ser afirmado com segurança compatível     |
-| Parcialmente confirmado | Cenário principal validado, mas há lacunas conhecidas                 | Afirmar só o coberto; declarar as lacunas      |
-| Inferido                | Conclusão derivada de fatos confirmados, sem prova direta suficiente  | Deve ser apresentado como inferência           |
-| Hipótese                | Explicação possível ainda não validada                                | Deve ser testada ou explicitamente sinalizada  |
-| Refutado                | Afirmação contrariada por evidência                                   | Não deve orientar a decisão sem nova evidência |
-| Bloqueado               | Não foi possível validar por falta de acesso, contexto ou ferramenta  | Declarar o bloqueio e o que falta              |
-| Inconclusivo            | Evidências insuficientes ou conflitantes                              | Não forçar conclusão; declarar incerteza       |
-| Desconhecido            | Informação ausente ou não verificável                                 | Não deve ser inventada                         |
+| Status                | Meaning                                                               | How to communicate                             |
+| --------------------- | --------------------------------------------------------------------- | ---------------------------------------------- |
+| Confirmed             | Directly observed or backed by evidence sufficient for the risk       | May be stated with matching confidence         |
+| Partially confirmed   | Main scenario validated, but known gaps remain                        | State only what is covered; declare the gaps   |
+| Inferred              | Conclusion derived from confirmed facts, without sufficient direct proof | Must be presented as an inference           |
+| Hypothesis            | Possible explanation not yet validated                                | Must be tested or explicitly flagged           |
+| Refuted               | Claim contradicted by evidence                                        | Must not guide the decision without new evidence |
+| Blocked               | Could not be validated for lack of access, context, or tooling        | Declare the blocker and what is missing        |
+| Inconclusive          | Insufficient or conflicting evidence                                  | Do not force a conclusion; declare the uncertainty |
+| Unknown               | Information absent or unverifiable                                    | Must not be invented                           |
 
-Exemplo de classificação de informação:
+Example of information classification:
 
 ```text
-Confirmado:
-- O endpoint retorna HTTP 422 quando recebe payload inválido.
+Confirmed:
+- The endpoint returns HTTP 422 when it receives an invalid payload.
 
-Inferido:
-- A falha da interface provavelmente decorre de campo enviado com nome diferente.
+Inferred:
+- The UI failure most likely stems from a field sent under a different name.
 
-Hipótese:
-- O problema pode ocorrer apenas quando o formulário possui campo opcional vazio.
+Hypothesis:
+- The problem may occur only when the form has an empty optional field.
 
-Desconhecido:
-- Não foi confirmado se clientes externos consomem o mesmo endpoint.
+Unknown:
+- Whether external clients consume the same endpoint has not been confirmed.
 
-Refutado:
-- A hipótese de indisponibilidade da API foi descartada porque a rota respondeu normalmente.
+Refuted:
+- The API-unavailability hypothesis was discarded because the route responded normally.
 ```
 
-Quando a tarefa é categorizada como Hipótese ou Desconhecido, registre e rastreie a suposição com [Assumption Tracking](assumption-tracking.md).
+When a conclusion is categorized as Hypothesis or Unknown, record and track the assumption with [Assumption Tracking](assumption-tracking.md).
 
-## Quando usar
+## When to use
 
-Use Verification quando a tarefa envolver:
+Use Verification when the task involves:
 
-- código alterado;
-- testes, builds, lint, typecheck ou execução de comandos;
-- dados, números, cálculos ou métricas;
-- arquivos enviados pelo usuário;
-- APIs, integrações, bancos de dados ou contratos;
-- pesquisa factual, técnica, jurídica, financeira, médica ou atual;
-- decisões arquiteturais;
-- recomendações com impacto relevante;
-- segurança, permissões, autenticação ou dados sensíveis;
-- ações irreversíveis ou difíceis de reverter;
-- conclusões derivadas de múltiplas fontes;
-- bugs, regressões ou comportamento inesperado.
+- changed code;
+- tests, builds, lint, typecheck, or command execution;
+- data, numbers, calculations, or metrics;
+- files uploaded by the user;
+- APIs, integrations, databases, or contracts;
+- factual, technical, legal, financial, medical, or time-sensitive research;
+- architectural decisions;
+- recommendations with relevant impact;
+- security, permissions, authentication, or sensitive data;
+- irreversible or hard-to-reverse actions;
+- conclusions drawn from multiple sources;
+- bugs, regressions, or unexpected behavior.
 
-Exemplos:
+Examples:
 
 ```text
-- Confirmar que uma feature funciona após alterar frontend e backend.
-- Verificar se uma biblioteca suporta determinado recurso.
-- Conferir se um cálculo está correto.
-- Validar se uma API retornou o formato esperado.
-- Confirmar se uma afirmação atual ainda é verdadeira.
-- Revisar se uma refatoração preservou o comportamento existente.
-- Verificar se uma recomendação se sustenta em fontes confiáveis.
+- Confirm a feature works after changing frontend and backend.
+- Check whether a library supports a given capability.
+- Check that a calculation is correct.
+- Validate that an API returned the expected format.
+- Confirm that a time-sensitive claim still holds.
+- Review whether a refactor preserved existing behavior.
+- Check whether a recommendation rests on reliable sources.
 ```
 
-## Quando simplificar ou evitar
+## When to simplify or skip
 
-Não transforme tarefas simples em processos de validação desproporcionais.
+Do not turn simple tasks into disproportionate validation processes.
 
-Simplifique quando:
+Simplify when:
 
-- a tarefa é criativa;
-- o usuário forneceu todo o conteúdo necessário;
-- a resposta é conceitual e estável;
-- não há ação externa, fato atual ou risco relevante;
-- a alteração é local, reversível e facilmente inspecionável;
-- não existe mecanismo de validação adicional que gere informação útil.
+- the task is creative;
+- the user supplied all the content needed;
+- the answer is conceptual and stable;
+- there is no external action, current fact, or relevant risk;
+- the change is local, reversible, and easy to inspect;
+- no additional validation mechanism would produce useful information.
 
-Exemplos: reescrever um parágrafo, traduzir uma frase, sugerir nomes para um projeto, ajustar formatação, explicar um conceito básico e estável.
+Examples: rewriting a paragraph, translating a sentence, suggesting names for a project, adjusting formatting, explaining a basic, stable concept.
 
-Mesmo em tarefas simples, não invente resultados, fontes, testes ou observações.
+Even in simple tasks, never invent results, sources, tests, or observations.
 
-## Regras de parada
+## Stop rules
 
-Pare a verificação quando qualquer condição abaixo for atingida (espelha o "Pare quando" da skill [pelizzai-reasoning](../SKILL.md)):
+Stop verifying when any condition below is met (mirrors the "Stop when" of the [pelizzai-reasoning](../SKILL.md) skill):
 
-- a evidência obtida já é suficiente para o risco da decisão;
-- novas validações repetiriam a mesma hipótese, ambiente e entrada sem ganho de informação;
-- o resultado está bloqueado por falta de acesso, contexto ou ferramenta — registre como Bloqueado e comunique;
-- o custo de validar adicional supera o custo de errar no contexto.
+- the evidence gathered is already sufficient for the risk of the decision;
+- further validations would repeat the same hypothesis, environment, and input with no information gain;
+- the result is blocked by lack of access, context, or tooling — record it as Blocked and communicate;
+- the cost of further validation outweighs the cost of being wrong in the context.
 
-## Relação com outras técnicas
+## Relationship to other techniques
 
-| Técnica             | Papel                                                                  |
+| Technique           | Role                                                                   |
 | ------------------- | ---------------------------------------------------------------------- |
-| Plan and Execute    | Define o plano, etapas, dependências e checkpoints                     |
-| ReAct               | Escolhe a próxima ação, observa o resultado e atualiza o estado        |
-| Verification        | Define o que precisa ser provado e qual evidência é suficiente         |
-| Critique and Refine | Melhora um resultado quando há critério objetivo ou evidência de falha |
-| Decision Making     | Escolhe entre caminhos de solução, inclusive interdependentes com poda |
+| Plan and Execute    | Defines the plan, steps, dependencies, and checkpoints                 |
+| ReAct               | Chooses the next action, observes the result, and updates the state    |
+| Verification        | Defines what must be proven and what evidence is sufficient            |
+| Critique and Refine | Improves a result when there is an objective criterion or evidence of failure |
+| Decision Making     | Chooses between solution paths, including interdependent ones with pruning |
 
-### Regra de integração e handoffs
+### Integration rule and handoffs
 
-- Use [Plan and Execute](plan-and-execute.md) para definir o que precisa ser feito.
-- Use [ReAct](react.md) para executar e observar cada etapa.
-- Use Verification para decidir se a evidência obtida é suficiente para concluir.
-- Quando a validação **falha** ou expõe inconsistência, passe para [Critique and Refine](critique-and-refine.md) para revisar o resultado.
-- Quando há um **bug ou comportamento inesperado** cuja causa precisa ser entendida, passe para [Root Cause Analysis](root-cause-analysis.md).
-- Quando surge **conflito entre fontes** na validação de pesquisa, passe para [Evidence Synthesis](evidence-synthesis.md).
-- Quando há **múltiplos caminhos de solução com decisões interdependentes**, use [Decision Making](decision-making.md) no modo de busca com poda e backtracking.
+- Use [Plan and Execute](plan-and-execute.md) to define what needs to be done.
+- Use [ReAct](react.md) to execute and observe each step.
+- Use Verification to decide whether the evidence gathered is sufficient to conclude.
+- When validation **fails** or exposes an inconsistency, hand off to [Critique and Refine](critique-and-refine.md) to revise the result.
+- When there is a **bug or unexpected behavior** whose cause must be understood, hand off to [Root Cause Analysis](root-cause-analysis.md).
+- When **sources conflict** during research validation, hand off to [Evidence Synthesis](evidence-synthesis.md).
+- When there are **multiple solution paths with interdependent decisions**, use [Decision Making](decision-making.md) in search mode with pruning and backtracking.
 
-## Hierarquia de evidências
+## Evidence hierarchy
 
-Prefira evidências diretas, específicas e verificáveis. Da mais forte para a mais fraca:
+Prefer direct, specific, verifiable evidence. From strongest to weakest:
 
-1. observação direta e reproduzível;
-2. teste automatizado ou execução controlada;
-3. código-fonte, contrato, schema ou configuração real;
-4. documentação oficial atualizada;
-5. fonte primária, dado público ou registro oficial;
-6. fonte secundária confiável;
-7. relato de terceiros;
-8. memória, intuição ou suposição.
+1. direct, reproducible observation;
+2. automated test or controlled execution;
+3. actual source code, contract, schema, or configuration;
+4. up-to-date official documentation;
+5. primary source, public data, or official record;
+6. reliable secondary source;
+7. third-party account;
+8. memory, intuition, or supposition.
 
-A evidência mais forte depende do contexto.
+The strongest evidence depends on the context.
 
-| Pergunta                             | Evidência preferida                                |
-| ------------------------------------ | -------------------------------------------------- |
-| "Esse endpoint aceita esse campo?"   | Contrato, schema, código ou chamada real           |
-| "Essa feature funciona?"             | Teste, execução controlada e inspeção de resultado |
-| "Essa biblioteca suporta recurso X?" | Documentação oficial e código da versão usada      |
-| "Esse cálculo está correto?"         | Fórmula, dados de entrada e cálculo reproduzível   |
-| "Esse fato é atual?"                 | Fonte primária atual ou fonte oficial recente      |
-| "Essa alteração gerou regressão?"    | Teste de regressão, diff e comportamento observado |
+| Question                              | Preferred evidence                                 |
+| ------------------------------------- | -------------------------------------------------- |
+| "Does this endpoint accept this field?" | Contract, schema, code, or a real call           |
+| "Does this feature work?"             | Test, controlled execution, and result inspection  |
+| "Does this library support capability X?" | Official documentation and the code of the version in use |
+| "Is this calculation correct?"        | Formula, input data, and a reproducible calculation |
+| "Is this fact current?"               | Current primary source or recent official source   |
+| "Did this change cause a regression?" | Regression test, diff, and observed behavior       |
 
-## Proporcionalidade de validação
+## Validation proportionality
 
-A profundidade da verificação deve ser proporcional ao risco (Baixo, Médio, Alto, Crítico — alinhado ao orçamento de esforço da skill [pelizzai-reasoning](../SKILL.md)).
+The depth of verification must be proportional to the risk (Low, Medium, High, Critical — aligned with the effort budget of the [pelizzai-reasoning](../SKILL.md) skill).
 
-| Nível   | Características                                                           | Validação esperada                                                                          |
-| ------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Baixo   | Alteração local, reversível, sem impacto externo                          | Revisão direta e verificação simples                                                        |
-| Médio   | Código funcional, integração limitada ou decisão relevante                | Testes focados, revisão de contratos e efeitos colaterais                                   |
-| Alto    | Dados persistentes, segurança, integração crítica ou produção             | Testes abrangentes, validação de contratos, rollback e evidência independente               |
-| Crítico | Financeiro, jurídico, médico, segurança sensível ou produção irreversível | Fontes primárias, revisão rigorosa, validação redundante e comunicação explícita de limites |
+| Level    | Characteristics                                                           | Expected validation                                                                          |
+| -------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Low      | Local, reversible change with no external impact                          | Direct review and a simple check                                                             |
+| Medium   | Functional code, limited integration, or a relevant decision              | Focused tests, review of contracts and side effects                                          |
+| High     | Persistent data, security, critical integration, or production            | Comprehensive tests, contract validation, rollback, and independent evidence                 |
+| Critical | Financial, legal, medical, sensitive security, or irreversible production | Primary sources, rigorous review, redundant validation, and explicit communication of limits |
 
-Regra prática — quanto maior o custo de errar: mais forte deve ser a evidência; mais independente deve ser a validação; mais explícitas devem ser as limitações; mais cuidadosa deve ser a comunicação da conclusão.
+Rule of thumb — the higher the cost of being wrong: the stronger the evidence must be; the more independent the validation must be; the more explicit the limitations must be; the more careful the communication of the conclusion must be.
 
-## Tipos de validação por tarefa
+## Validation types by task
 
-Cada tipo de validação confirma uma propriedade diferente. A tabela abaixo cruza tipo de tarefa, validação mínima e validação reforçada; as seções seguintes detalham o que cada tipo cobre.
+Each validation type confirms a different property. The table below crosses task type, minimum validation, and reinforced validation; the following sections detail what each type covers.
 
-| Tipo de tarefa            | Validação mínima                             | Validação reforçada                                 |
+| Task type                 | Minimum validation                           | Reinforced validation                               |
 | ------------------------- | -------------------------------------------- | --------------------------------------------------- |
-| Alteração local de código | Revisão de diff e teste focado               | Lint, typecheck e build                             |
-| Nova feature frontend     | Fluxo principal e erro relevante             | Testes, lint, typecheck e build                     |
-| Nova feature backend      | Teste de rota ou serviço                     | Testes de integração, contrato e tratamento de erro |
-| Refatoração               | Testes existentes e revisão de comportamento | Testes de regressão e comparação de saída           |
-| Integração externa        | Contrato e resposta controlada               | Retry, timeout, falhas e observabilidade            |
-| Migração de banco         | Schema e dados de teste                      | Backup, rollback, performance e impacto em produção |
-| Pesquisa técnica          | Documentação oficial                         | Comparação de versões, fontes e limitações          |
-| Recomendação relevante    | Critérios explícitos                         | Contra-argumento, riscos e alternativas             |
-| Cálculo ou relatório      | Reproduzir resultado                         | Conferência independente e auditoria de entradas    |
-| Segurança                 | Validação de acesso e entrada                | Revisão de ameaça, testes negativos e logs          |
+| Local code change         | Diff review and a focused test               | Lint, typecheck, and build                          |
+| New frontend feature      | Main flow and relevant error                 | Tests, lint, typecheck, and build                   |
+| New backend feature       | Route or service test                        | Integration, contract, and error-handling tests     |
+| Refactor                  | Existing tests and behavior review           | Regression tests and output comparison              |
+| External integration      | Contract and controlled response             | Retry, timeout, failures, and observability         |
+| Database migration        | Schema and test data                         | Backup, rollback, performance, and production impact |
+| Technical research        | Official documentation                       | Comparison of versions, sources, and limitations    |
+| Relevant recommendation   | Explicit criteria                            | Counter-argument, risks, and alternatives           |
+| Calculation or report     | Reproduce the result                         | Independent cross-check and input audit             |
+| Security                  | Access and input validation                  | Threat review, negative tests, and logs             |
 
-### Estrutural
+### Structural
 
-Confirma que a forma do resultado está correta: sintaxe, tipos, schema, imports, contratos, formato de payload, configuração e estrutura de arquivos (ex.: typecheck passa, JSON segue o schema, imports existem). Atenção: validação estrutural não prova comportamento correto.
+Confirms the shape of the result is correct: syntax, types, schema, imports, contracts, payload format, configuration, and file structure (e.g., typecheck passes, the JSON follows the schema, imports exist). Caution: structural validation does not prove correct behavior.
 
-### Comportamental
+### Behavioral
 
-Confirma que o sistema faz o que deveria: regras de negócio, fluxos de usuário, respostas de API, permissões, erros esperados, eventos e estados de interface (ex.: usuário autorizado exporta CSV; usuário sem permissão recebe resposta adequada; sistema bloqueia envio duplicado).
+Confirms the system does what it should: business rules, user flows, API responses, permissions, expected errors, events, and UI states (e.g., an authorized user exports CSV; a user without permission gets the proper response; the system blocks a duplicate submission).
 
-### Regressão
+### Regression
 
-Confirma que a alteração não quebrou comportamento existente. Use ao corrigir bug, refatorar, alterar contrato, trocar dependência, mexer em lógica compartilhada, componente reutilizado, autenticação, cache ou estado global (ex.: testes anteriores continuam passando; novo campo não quebra clientes existentes).
+Confirms the change did not break existing behavior. Use when fixing a bug, refactoring, changing a contract, swapping a dependency, or touching shared logic, a reused component, authentication, cache, or global state (e.g., previous tests keep passing; the new field does not break existing clients).
 
-### Integração
+### Integration
 
-Confirma que componentes distintos funcionam juntos: frontend e backend, API e banco, filas e workers, autenticação externa, serviços de terceiros, cache, webhooks e armazenamento externo (ex.: frontend envia payload compatível; worker consome mensagem esperada; webhook processado com assinatura válida).
+Confirms distinct components work together: frontend and backend, API and database, queues and workers, external authentication, third-party services, cache, webhooks, and external storage (e.g., the frontend sends a compatible payload; the worker consumes the expected message; the webhook is processed with a valid signature).
 
-### Segurança
+### Security
 
-Confirma que o resultado não expõe dados, permissões ou comportamento perigoso. Verifique, quando aplicável:
-
-```text
-- autenticação;
-- autorização;
-- validação de entrada;
-- exposição de segredos;
-- logs com dados sensíveis;
-- permissões excessivas;
-- injeção;
-- acesso indevido entre usuários;
-- tratamento seguro de erros;
-- rate limiting e abuso previsível.
-```
-
-Não conclua que algo é seguro apenas porque não apresentou erro funcional. Para validação antes de ações de alto impacto, ver também [Constraint Satisfaction](constraint-satisfaction.md).
-
-### Dados e cálculos
-
-Use quando houver valores numéricos, planilhas, relatórios, agregações, filtros, indicadores, cálculos financeiros, percentuais, datas ou conversões. Verifique origem dos dados, período, fórmula, unidades, arredondamentos, valores ausentes, duplicidades, soma de totais, coerência entre resultado e entradas e possibilidade de reprodução.
+Confirms the result does not expose data, permissions, or dangerous behavior. When applicable, check:
 
 ```text
-Ruim:
-"O total parece correto."
-
-Melhor:
-"O total foi recalculado a partir das linhas de origem; a soma confere, exceto pelo item X, que usa arredondamento diferente."
+- authentication;
+- authorization;
+- input validation;
+- secret exposure;
+- logs with sensitive data;
+- excessive permissions;
+- injection;
+- improper cross-user access;
+- safe error handling;
+- rate limiting and foreseeable abuse.
 ```
 
-### Pesquisa e fatos externos
+Do not conclude something is secure just because it showed no functional error. For validation before high-impact actions, see also [Constraint Satisfaction](constraint-satisfaction.md).
 
-Use para afirmações atuais, técnicas, legais, médicas, financeiras ou potencialmente controversas. Verifique data da informação, autoridade e proximidade da fonte ao fato, escopo e contexto, conflitos entre fontes, versão da tecnologia, se a fonte trata exatamente da pergunta e se a conclusão é fato ou interpretação.
+### Data and calculations
 
-Priorize documentação oficial; legislação, órgãos oficiais ou decisões primárias; artigos científicos e dados públicos; repositórios e changelogs oficiais; e veículos reconhecidos quando fontes primárias não existirem. Não use fonte antiga para responder pergunta atual sem declarar a limitação.
-
-Quando há **conflito entre fontes**, reconcilie com [Evidence Synthesis](evidence-synthesis.md) antes de concluir.
-
-## Verificação por refutação
-
-Para afirmações de alto impacto, não basta acumular evidência a favor: derive 1 a 3 perguntas cuja resposta **refutaria** a conclusão e procure ativamente por elas. Se nenhuma refutação se sustentar após busca genuína, a confiança aumenta; se alguma se sustentar, a conclusão cai para Refutado, Parcialmente confirmado ou Inconclusivo.
+Use when there are numeric values, spreadsheets, reports, aggregations, filters, indicators, financial calculations, percentages, dates, or conversions. Check the data's origin, period, formula, units, rounding, missing values, duplicates, totals adding up, coherence between result and inputs, and reproducibility.
 
 ```text
-Conclusão sob teste:
-- "A migração é segura para rodar em produção."
+Bad:
+"The total looks right."
 
-Perguntas que refutariam:
-1. Existe alguma tabela grande sem índice que travaria sob lock durante a migração?
-2. Algum cliente em produção depende da coluna que será removida?
-3. O rollback foi testado e restaura o estado anterior sem perda?
-
-Resultado:
-- Se qualquer resposta for "sim/indeterminado", a conclusão não é Confirmado.
+Better:
+"The total was recalculated from the source rows; the sum checks out, except for item X, which uses different rounding."
 ```
 
-## Processo de verificação
+### Research and external facts
 
-### 1. Definir a afirmação verificável
+Use for current, technical, legal, medical, financial, or potentially controversial claims. Check the information's date, the source's authority and proximity to the fact, scope and context, conflicts between sources, the technology version, whether the source addresses the exact question, and whether the conclusion is fact or interpretation.
 
-Transforme conclusões vagas em afirmações testáveis.
+Prioritize official documentation; legislation, official bodies, or primary rulings; scientific papers and public data; official repositories and changelogs; and recognized outlets when primary sources do not exist. Do not use an old source to answer a current question without declaring the limitation.
+
+When **sources conflict**, reconcile with [Evidence Synthesis](evidence-synthesis.md) before concluding.
+
+## Verification by refutation
+
+For high-impact claims, piling up supporting evidence is not enough: derive 1 to 3 questions whose answer would **refute** the conclusion and actively hunt for them. If no refutation holds after a genuine search, confidence rises; if any holds, the conclusion drops to Refuted, Partially confirmed, or Inconclusive.
 
 ```text
-Ruim:
-"A feature está pronta."
+Conclusion under test:
+- "The migration is safe to run in production."
 
-Melhor:
-"O usuário com permissão pode exportar CSV respeitando filtros ativos; usuários sem permissão não acessam a ação; testes, lint e build aplicáveis passam."
+Questions that would refute it:
+1. Is there any large unindexed table that would stall under lock during the migration?
+2. Does any production client depend on the column being removed?
+3. Was the rollback tested, and does it restore the previous state without loss?
+
+Result:
+- If any answer is "yes/indeterminate", the conclusion is not Confirmed.
 ```
 
-### 2. Identificar o risco de estar errado
+## Verification process
 
-Pergunte: o que acontece se esta conclusão estiver errada? Há impacto em dados, usuários, segurança ou dinheiro? A ação é reversível? Quem depende deste resultado? Há integração externa? O erro pode permanecer oculto por muito tempo? A resposta define o nível de evidência necessário.
+### 1. Define the verifiable claim
 
-### 3. Escolher a evidência adequada
+Turn vague conclusions into testable claims.
 
-Escolha a menor validação que seja suficiente para o risco.
+```text
+Bad:
+"The feature is done."
+
+Better:
+"A user with permission can export CSV honoring the active filters; users without permission cannot reach the action; applicable tests, lint, and build pass."
+```
+
+### 2. Identify the risk of being wrong
+
+Ask: what happens if this conclusion is wrong? Is there impact on data, users, security, or money? Is the action reversible? Who depends on this result? Is there an external integration? Could the error stay hidden for a long time? The answer sets the level of evidence required.
+
+### 3. Choose the right evidence
+
+Choose the smallest validation that is sufficient for the risk.
 
 ```mermaid
 flowchart TD
-    A[Afirmação] --> B{Pode ser observada diretamente?}
-    B -- Sim --> C[Executar observação ou teste controlado]
-    B -- Não --> D{Existe contrato, fonte oficial ou evidência primária?}
-    D -- Sim --> E[Consultar evidência primária]
-    D -- Não --> F[Usar fontes secundárias e declarar limitação]
-    C --> G[Interpretar resultado]
+    A[Claim] --> B{Can it be observed directly?}
+    B -- Yes --> C[Run an observation or controlled test]
+    B -- No --> D{Is there a contract, official source, or primary evidence?}
+    D -- Yes --> E[Consult the primary evidence]
+    D -- No --> F[Use secondary sources and declare the limitation]
+    C --> G[Interpret the result]
     E --> G
     F --> G
 ```
 
-Não use validações irrelevantes. Para "campo de formulário não é salvo", executar o build é irrelevante; o útil é inspecionar o payload enviado, verificar o schema da API e confirmar resposta e persistência.
+Do not use irrelevant validations. For "a form field is not being saved", running the build is irrelevant; what helps is inspecting the payload sent, checking the API schema, and confirming the response and persistence.
 
-### 4. Executar e registrar resultado
+### 4. Execute and record the result
 
-Para validações relevantes, registre de forma compacta com o formato abaixo — usado tanto durante a execução quanto na comunicação final. Não registre apenas "validado" sem indicar o que foi verificado.
-
-```text
-Afirmação:
-- [o que está sendo confirmado]
-
-Validação:
-- [teste, fonte, observação ou ferramenta utilizada]
-
-Resultado:
-- [o que foi observado]
-
-Limitações:
-- [o que não foi verificado ou permanece incerto]
-
-Conclusão:
-- [um status canônico]
-```
-
-### 5. Interpretar sem exagerar
-
-Uma evidência confirma apenas o que ela realmente cobre. Um teste que passou confirma o cenário testado, mas não confirma automaticamente todos os cenários, segurança, performance, compatibilidade, ausência de regressões ou comportamento em produção.
+For relevant validations, record compactly in the format below — used both during execution and in the final communication. Never record just "validated" without stating what was checked.
 
 ```text
-Ruim:
-"O sistema está seguro porque o login funciona."
+Claim:
+- [what is being confirmed]
 
-Melhor:
-"O fluxo de login foi validado. Ainda é necessário avaliar autorização, exposição de tokens, rate limiting e cenários de ataque relevantes."
+Validation:
+- [test, source, observation, or tool used]
+
+Result:
+- [what was observed]
+
+Limitations:
+- [what was not verified or remains uncertain]
+
+Conclusion:
+- [one canonical status]
 ```
 
-### 6. Decidir a conclusão
+### 5. Interpret without overreaching
 
-Ao final, atribua exatamente um dos status definidos em a seção **Status canônico da conclusão**.
-
-## Validação negativa
-
-Não valide apenas o caminho feliz. Quando aplicável, teste também entrada inválida, ausência de campos, permissões insuficientes, dados duplicados, timeout, indisponibilidade externa, concorrência, estado vazio, valores extremos, formatos inesperados, rollback, retry e tentativa de uso indevido.
-
-A validação negativa deve ser proporcional ao risco. Não é necessário testar todos os cenários possíveis em toda alteração.
-
-## Independência de validação
-
-Quanto maior o risco, menos a validação deve depender da mesma suposição usada na implementação.
+A piece of evidence confirms only what it actually covers. A passing test confirms the tested scenario, but does not automatically confirm every scenario, security, performance, compatibility, absence of regressions, or behavior in production.
 
 ```text
-Fraco:
-- Implementar regra e validar apenas lendo o próprio código.
-Mais forte:
-- Implementar regra, executar teste independente e observar resultado real.
+Bad:
+"The system is secure because login works."
 
-Fraco:
-- Confirmar um cálculo usando a mesma fórmula e os mesmos valores sem revisão.
-Mais forte:
-- Recalcular por método independente ou conferir com fonte de dados original.
-
-Fraco:
-- Validar afirmação técnica com blog que repete a documentação.
-Mais forte:
-- Consultar documentação oficial, changelog ou código da versão usada.
+Better:
+"The login flow was validated. Authorization, token exposure, rate limiting, and relevant attack scenarios still need assessment."
 ```
 
-## Cross-check por execuções independentes
+### 6. Decide the conclusion
 
-Gerar N tentativas independentes para a mesma pergunta e medir a convergência entre elas é caro e, em
-agente único, redundante: o raciocínio estendido nativo já faz essa consistência interna antes de
-responder. Repetir a mesma pergunta "em voz alta" três vezes e contar a maioria não cria evidência —
-só custo. Não use convergência entre tentativas próprias como prova.
+At the end, assign exactly one of the statuses defined in the **Canonical conclusion status** section.
 
-O cross-check só agrega quando as execuções são **genuinamente independentes** porque vêm de agentes
-ou lentes distintas, não da mesma cabeça no mesmo turno:
+## Negative validation
+
+Do not validate only the happy path. When applicable, also test invalid input, missing fields, insufficient permissions, duplicate data, timeout, external unavailability, concurrency, empty state, extreme values, unexpected formats, rollback, retry, and attempted misuse.
+
+Negative validation must be proportional to the risk. Not every possible scenario needs testing on every change.
+
+## Validation independence
+
+The higher the risk, the less the validation should rest on the same assumption used in the implementation.
 
 ```text
-- pelizzai-team / pelizzai-subagents: vários membros chegam ao mesmo resultado por caminhos
-  diferentes (métodos, hipóteses ou fontes distintas);
-- revisores independentes e lentes cegas (ex.: a lente spec cega da pelizzai-review, que julga o
-  código sem a narrativa do autor);
-- recálculo por método ou ferramenta independente contra os mesmos dados.
+Weak:
+- Implement a rule and validate it only by reading your own code.
+Stronger:
+- Implement the rule, run an independent test, and observe the real result.
+
+Weak:
+- Confirm a calculation using the same formula and the same values, unreviewed.
+Stronger:
+- Recalculate by an independent method or check against the original data source.
+
+Weak:
+- Validate a technical claim with a blog post that parrots the documentation.
+Stronger:
+- Consult the official documentation, changelog, or code of the version in use.
 ```
 
-Regra dura: convergência aumenta confiança, nunca substitui validação contra a realidade externa.
-Concordância entre execuções que compartilham a mesma premissa errada é **falsa convergência** — todas
-erram juntas. Quando execuções independentes convergem, ainda confirme com teste, contrato, fonte
-oficial ou dado real; quando divergem, investigue a premissa que as separa com
-[Evidence Synthesis](evidence-synthesis.md), sem escolher a maioria.
+## Cross-check via independent runs
+
+Generating N independent attempts at the same question and measuring their convergence is expensive and,
+in a single agent, redundant: native extended reasoning already performs that internal consistency check
+before answering. Repeating the same question "out loud" three times and counting the majority creates no
+evidence — only cost. Do not use convergence between your own attempts as proof.
+
+Cross-checking only adds value when the runs are **genuinely independent** because they come from
+distinct agents or lenses, not from the same head in the same turn:
+
+```text
+- pelizzai-team / pelizzai-subagents: several members reach the same result by different
+  paths (distinct methods, hypotheses, or sources);
+- independent reviewers and blind lenses (e.g., the blind spec lens of pelizzai-review, which
+  judges the code without the author's narrative);
+- recalculation by an independent method or tool against the same data.
+```
+
+Hard rule: convergence raises confidence, never replaces validation against external reality.
+Agreement between runs that share the same wrong premise is **false convergence** — they are all
+wrong together. When independent runs converge, still confirm with a test, contract, official
+source, or real data; when they diverge, investigate the premise that splits them with
+[Evidence Synthesis](evidence-synthesis.md), without picking the majority.
 
 ## Checklists
 
-### Código (base)
+### Code (base)
 
 ```text
-[ ] O código compila ou passa em typecheck aplicável.
-[ ] Imports, tipos e contratos foram validados.
-[ ] Fluxo principal foi testado ou executado.
-[ ] Erros relevantes possuem tratamento previsível.
-[ ] Mudanças preservam comportamento esperado.
-[ ] Não há segredos, dados sensíveis ou logs indevidos.
-[ ] A alteração não introduziu dependência, complexidade ou efeito colateral desnecessário.
+[ ] The code compiles or passes the applicable typecheck.
+[ ] Imports, types, and contracts were validated.
+[ ] The main flow was tested or executed.
+[ ] Relevant errors have predictable handling.
+[ ] The changes preserve expected behavior.
+[ ] No secrets, sensitive data, or improper logs.
+[ ] The change introduced no unnecessary dependency, complexity, or side effect.
 ```
 
 ### Frontend
 
 ```text
-[ ] A interface renderiza sem erro.
-[ ] Estados de carregamento, vazio e erro foram considerados quando aplicável.
-[ ] Eventos acionam a ação esperada.
-[ ] Acessibilidade e semântica não foram degradadas.
-[ ] Requests enviados seguem o contrato.
-[ ] Testes, lint, typecheck e build aplicáveis foram executados.
+[ ] The UI renders without errors.
+[ ] Loading, empty, and error states were considered when applicable.
+[ ] Events trigger the expected action.
+[ ] Accessibility and semantics were not degraded.
+[ ] Requests sent follow the contract.
+[ ] Applicable tests, lint, typecheck, and build were run.
 ```
 
 ### Backend
 
 ```text
-[ ] Entrada é validada.
-[ ] Autorização foi considerada.
-[ ] Respostas de sucesso e erro seguem contrato.
-[ ] Integrações externas possuem tratamento de falha adequado.
-[ ] Operações críticas são idempotentes quando necessário.
-[ ] Testes de serviço, rota ou integração foram executados quando disponíveis.
+[ ] Input is validated.
+[ ] Authorization was considered.
+[ ] Success and error responses follow the contract.
+[ ] External integrations have proper failure handling.
+[ ] Critical operations are idempotent when needed.
+[ ] Service, route, or integration tests were run when available.
 ```
 
-### Pesquisas e recomendações
+### Research and recommendations
 
 ```text
-[ ] O problema real foi entendido.
-[ ] Os critérios de comparação estão explícitos.
-[ ] As fontes tratam da versão e do contexto corretos.
-[ ] A recomendação não se baseia apenas em popularidade.
-[ ] Riscos, custos e limitações foram considerados.
-[ ] Há pelo menos uma alternativa plausível.
-[ ] Existe um contra-argumento relevante.
-[ ] A conclusão diferencia fato, inferência e preferência.
+[ ] The real problem was understood.
+[ ] The comparison criteria are explicit.
+[ ] The sources address the correct version and context.
+[ ] The recommendation does not rest on popularity alone.
+[ ] Risks, costs, and limitations were considered.
+[ ] There is at least one plausible alternative.
+[ ] There is a relevant counter-argument.
+[ ] The conclusion distinguishes fact, inference, and preference.
 ```
 
-Formato recomendado de recomendação: opção sugerida; evidências (fatos e fontes); trade-offs (custos, limitações, riscos); contra-argumento (cenário em que outra opção seria melhor); nível de confiança (alto/médio/baixo) e motivo.
+Recommended format for a recommendation: suggested option; evidence (facts and sources); trade-offs (costs, limitations, risks); counter-argument (scenario where another option would be better); confidence level (high/medium/low) and why.
 
-### Antes de ações de alto impacto
+### Before high-impact actions
 
-Antes de executar ações que possam gerar perda, custo, exposição ou alteração difícil de reverter (excluir arquivos, alterar banco, publicar em produção, enviar e-mails, modificar permissões, atualizar infraestrutura, executar migração, processar dados sensíveis, realizar transações):
+Before executing actions that can cause loss, cost, exposure, or hard-to-reverse change (deleting files, altering a database, publishing to production, sending e-mails, modifying permissions, updating infrastructure, running a migration, processing sensitive data, performing transactions):
 
 ```text
-[ ] O objetivo do usuário está explícito.
-[ ] O recurso-alvo foi confirmado.
-[ ] A ação é necessária e proporcional.
-[ ] O escopo foi limitado ao mínimo necessário.
-[ ] Há backup, rollback ou alternativa reversível quando aplicável.
-[ ] Permissões foram conferidas.
-[ ] Impactos colaterais foram avaliados.
-[ ] Existe método de validação após a execução.
+[ ] The user's goal is explicit.
+[ ] The target resource was confirmed.
+[ ] The action is necessary and proportional.
+[ ] The scope was limited to the minimum necessary.
+[ ] There is a backup, rollback, or reversible alternative when applicable.
+[ ] Permissions were checked.
+[ ] Side impacts were assessed.
+[ ] There is a validation method for after the execution.
 ```
 
-Trate as restrições inegociáveis dessas ações com [Constraint Satisfaction](constraint-satisfaction.md), e aplique a **verificação por refutação** antes de prosseguir.
+Handle these actions' non-negotiable constraints with [Constraint Satisfaction](constraint-satisfaction.md), and apply **verification by refutation** before proceeding.
 
-## Anti-padrões
+## Anti-patterns
 
-1. **Confundir execução com validação.** "Rodei o comando, então está correto" → "O comando executou sem erro, mas ainda preciso verificar se o resultado atende ao requisito."
-2. **Validar só o caminho feliz.** "Cadastro funciona porque um usuário foi criado" → "Validado para entrada válida, duplicidade, campos obrigatórios e erro de integração."
-3. **Tratar fonte única como verdade absoluta.** "Um blog diz que a biblioteca suporta isso" → "A documentação oficial da versão usada confirma o suporte; há limitação X para o ambiente Y."
-4. **Usar métricas como prova completa.** "A cobertura está alta, então o código é confiável" → "A cobertura indica cenários exercitados, mas não prova qualidade dos casos, segurança ou correção da regra."
-5. **Ignorar evidência contrária.** "O teste que falhou deve estar errado" → "Verificar se há regressão, expectativa desatualizada ou ambiente inconsistente antes de descartar o resultado."
-6. **Declarar certeza onde há limitação.** "Está resolvido" → "O cenário principal foi validado. Não foi possível testar a integração externa porque as credenciais não estavam disponíveis."
-7. **Repetir validações sem ganho.** Executar o mesmo teste sem alterar hipótese, ambiente ou entrada → executar nova validação apenas quando houver nova hipótese, alteração ou condição relevante.
+1. **Confusing execution with validation.** "I ran the command, so it's correct" → "The command ran without errors, but I still need to check that the result meets the requirement."
+2. **Validating only the happy path.** "Signup works because one user was created" → "Validated for valid input, duplicates, required fields, and integration error."
+3. **Treating a single source as absolute truth.** "A blog says the library supports this" → "The official documentation for the version in use confirms the support; limitation X applies to environment Y."
+4. **Using metrics as full proof.** "Coverage is high, so the code is reliable" → "Coverage shows which scenarios were exercised, but does not prove case quality, security, or rule correctness."
+5. **Ignoring contrary evidence.** "The failing test must be wrong" → "Check for a regression, an outdated expectation, or an inconsistent environment before discarding the result."
+6. **Declaring certainty where there is a limitation.** "It's fixed" → "The main scenario was validated. The external integration could not be tested because the credentials were unavailable."
+7. **Repeating validations with no gain.** Running the same test without changing hypothesis, environment, or input → run a new validation only when there is a new hypothesis, change, or relevant condition.
 
-## Exemplos
+## Examples
 
-### Alteração de API compatível com clientes existentes
+### API change compatible with existing clients
 
 ```text
-Afirmação:
-- O novo campo `priority` é compatível com clientes existentes.
+Claim:
+- The new `priority` field is compatible with existing clients.
 
-Validação:
-1. Confirmar contrato atualizado.
-2. Executar teste com cliente antigo sem o campo.
-3. Executar teste com cliente novo usando o campo.
-4. Verificar comportamento com valor inválido.
-5. Confirmar documentação e schema.
+Validation:
+1. Confirm the updated contract.
+2. Run a test with an old client without the field.
+3. Run a test with a new client using the field.
+4. Check the behavior with an invalid value.
+5. Confirm documentation and schema.
 
-Conclusão:
-- Confirmado apenas se clientes antigos continuarem funcionando conforme esperado;
-  caso contrário, Refutado.
+Conclusion:
+- Confirmed only if old clients keep working as expected;
+  otherwise, Refuted.
 ```
 
-### Validação de segurança end-to-end (exportação restrita)
+### End-to-end security validation (restricted export)
 
 ```text
-Afirmação:
-- O endpoint de exportação só permite exportar dados do próprio tenant a usuários autorizados.
+Claim:
+- The export endpoint only lets authorized users export their own tenant's data.
 
-Risco:
-- Alto (exposição de dados entre clientes).
+Risk:
+- High (data exposure across customers).
 
-Validação:
-1. Autenticação: requisição sem token é rejeitada (401).
-2. Autorização: usuário sem a permissão `export` recebe 403.
-3. Isolamento: usuário do tenant A tenta exportar recurso do tenant B -> negado.
-4. Entrada: filtro malicioso (injeção/IDs forjados) é validado e não vaza outros tenants.
-5. Logs: resposta e logs não contêm segredos nem dados sensíveis de terceiros.
-6. Refutação: existe rota alternativa (caminho, parâmetro herdado, cache) que ignore a checagem? Buscar e testar.
+Validation:
+1. Authentication: a request without a token is rejected (401).
+2. Authorization: a user without the `export` permission gets 403.
+3. Isolation: a tenant A user tries to export a tenant B resource -> denied.
+4. Input: a malicious filter (injection/forged IDs) is validated and leaks no other tenants.
+5. Logs: response and logs contain no secrets or third-party sensitive data.
+6. Refutation: is there an alternative route (path, inherited parameter, cache) that skips the check? Search and test.
 
-Resultado:
-- 1 a 5 passaram; a busca por (6) não encontrou rota alternativa após inspeção de roteamento e cache.
+Result:
+- 1 through 5 passed; the search for (6) found no alternative route after inspecting routing and cache.
 
-Limitação:
-- Rate limiting sob abuso sustentado não foi testado.
+Limitation:
+- Rate limiting under sustained abuse was not tested.
 
-Conclusão:
-- Parcialmente confirmado: isolamento e autorização confirmados; controle de abuso pendente.
+Conclusion:
+- Partially confirmed: isolation and authorization confirmed; abuse control pending.
 ```
 
-## Técnicas relacionadas
+## Related techniques
 
-- [Plan and Execute](plan-and-execute.md) — define plano, etapas e checkpoints.
-- [ReAct](react.md) — executa e observa cada etapa.
-- [Critique and Refine](critique-and-refine.md) — revisa o resultado após falha ou inconsistência.
-- [Decision Making](decision-making.md) — escolhe entre caminhos de solução, inclusive interdependentes com poda.
-- [Evidence Synthesis](evidence-synthesis.md) — reconcilia fontes em conflito na validação de pesquisa.
-- [Assumption Tracking](assumption-tracking.md) — rastreia hipóteses e desconhecidos.
-- [Constraint Satisfaction](constraint-satisfaction.md) — garante restrições antes de ações de alto impacto.
+- [Plan and Execute](plan-and-execute.md) — defines the plan, steps, and checkpoints.
+- [ReAct](react.md) — executes and observes each step.
+- [Critique and Refine](critique-and-refine.md) — revises the result after a failure or inconsistency.
+- [Decision Making](decision-making.md) — chooses between solution paths, including interdependent ones with pruning.
+- [Evidence Synthesis](evidence-synthesis.md) — reconciles conflicting sources in research validation.
+- [Assumption Tracking](assumption-tracking.md) — tracks hypotheses and unknowns.
+- [Constraint Satisfaction](constraint-satisfaction.md) — enforces constraints before high-impact actions.
 
-Voltar a skill [pelizzai-reasoning](../SKILL.md).
+Back to the [technique catalog](../SKILL.md).

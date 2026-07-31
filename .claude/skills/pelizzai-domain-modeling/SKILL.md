@@ -1,120 +1,122 @@
 ---
 name: pelizzai-domain-modeling
-description: Overlay para tornar explícito e consistente o modelo de domínio durante design ou documentação autorizada. Use quando a tarefa realmente muda terminologia, relações, invariantes, bounded contexts, ADRs ou uma rejeição durável. Apenas ler o glossário não aciona esta skill. Respeita source mode e nunca cria documentação consumer por reflexo.
+description: Overlay that makes the domain model explicit and consistent during design or authorized documentation. Use when the task actually changes terminology, relationships, invariants, bounded contexts, ADRs, or a durable rejection. Merely reading the glossary does not trigger this skill. Respects source mode and never creates consumer documentation by reflex.
 ---
 
 # PelizzAI Domain Modeling
 
-## Objetivo
+## Goal
 
-Fazer código, especificação e linguagem do produto expressarem o mesmo modelo, usando cenários
-concretos para revelar ambiguidade — sem transformar cada substantivo em cerimônia de DDD.
+Make code, spec, and product language express the same model, using concrete scenarios
+to expose ambiguity — without turning every noun into DDD ceremony.
 
-**Anuncie quando material:** "Usando PelizzAI Domain Modeling para resolver a mudança de modelo."
+**Announce when material:** "Using PelizzAI Domain Modeling to resolve the model change."
 
-## Gate de efeito e persistência
+## Effect and persistence gate
 
-Ler termos/ADRs existentes é investigação normal. Esta skill entra quando o modelo será **mudado**;
-a task branch já deve existir antes de editar documentação.
+Reading existing terms/ADRs is normal investigation. This skill enters when the model will be **changed**;
+the task branch must already exist before documentation is edited.
 
-| Modo | Onde ler/escrever |
+| Mode | Where to read/write |
 | --- | --- |
-| Consumidor | glossário em `pelizzai/context.md` ou `pelizzai/context/`; ADRs em `pelizzai/adr/`; rejeições em `pelizzai/out-of-scope/`, criados somente quando necessários |
-| Source mode | documentação nativa já adotada pelo repo ou plano/execution record; nunca crie `pelizzai/`. Se não houver path nativo e um arquivo não foi pedido, mantenha a decisão no artefato de design nativo |
+| Consumer | glossary in `pelizzai/context.md` or `pelizzai/context/`; ADRs in `pelizzai/adr/`; rejections in `pelizzai/out-of-scope/`, created only when needed |
+| Source mode | native documentation already adopted by the repo, or the plan/execution record; never create `pelizzai/`. If there is no native path and no file was requested, keep the decision in the native design artifact |
 
-Registro de ADR/rejeição segue o gate, nunca o reflexo:
+ADR/rejection recording follows the gate, never reflex:
 
-- **Decisão já ratificada num gate de design/plano**, dentro de um fluxo de escrita autorizado (task
-  branch aberta): REGISTRE o ADR automaticamente quando os três critérios do §3 forem verdade e
-  anuncie em uma linha ("Registrei ADR-000N: <título> — avise se quiser ajustar ou remover"). O
-  harness apenas memoriza uma decisão que o usuário já tomou; não decide nada novo.
-- **Decisão arquitetural emergente** — surgida na execução, numa lane sem gate de design, ou numa
-  causa-raiz de debugging: não grave em silêncio. Apresente-a ao usuário na borda de
-  validação/conclusão (que já é gate) antes de gravar o ADR.
-- A criação do ADR é ação do **coordenador**; um membro de time apenas sinaliza a decisão no
-  relatório, sem gravar.
-- **Nunca** grave ADR depois de `candidate-head`/`validated-head`: doc escrito após o seal invalida
-  o candidato. Fixe a escrita ao ciclo da tarefa onde a decisão é tomada (pré-seal).
-- Em análise read-only, apenas **proponha** o registro; a escrita volta ao gate de primeira escrita.
+- **Decision already ratified at a design/plan gate**, inside an authorized write flow (task
+  branch open): RECORD the ADR automatically when the three criteria of §3 hold, and
+  announce it in one line ("Recorded ADR-000N: <title> — let me know if you want to adjust or
+  remove it"). The harness is only recording a decision the user already made; it decides
+  nothing new.
+- **Emergent architectural decision** — arising during execution, in a lane without a design gate, or
+  in a debugging root cause: do not record it silently. Present it to the user at the
+  validation/completion edge (which is already a gate) before writing the ADR.
+- Creating the ADR is the **coordinator's** action; a team member only flags the decision in
+  the report, without writing.
+- **Never** write an ADR after `candidate-head`/`validated-head`: a doc written after the seal
+  invalidates the candidate. Pin the write to the cycle of the task where the decision is made
+  (pre-seal).
+- In read-only analysis, only **propose** the record; the write returns to the first-write gate.
 
-Sob briefing fechado (SUBAGENT-STOP), não produza análises de rota nem abra gates: aplique o briefing
-e escale ao coordenador o que exigir decisão.
+Under a closed briefing (SUBAGENT-STOP), produce no route analyses and open no gates: apply the
+briefing and escalate to the coordinator whatever requires a decision.
 
-## Processo
+## Process
 
-### 1. Localize o vocabulário real
+### 1. Locate the real vocabulary
 
-Leia glossário/ADRs/specs existentes e procure os termos no código, schemas, APIs e UI. Separe:
+Read the existing glossary/ADRs/specs and look for the terms in code, schemas, APIs, and UI. Separate:
 
-- nome oficial;
-- sinônimo legítimo por contexto;
-- colisão/sobrecarga;
-- divergência entre documentação e comportamento.
+- official name;
+- legitimate per-context synonym;
+- collision/overload;
+- divergence between documentation and behavior.
 
-### 2. Force precisão com cenários
+### 2. Force precision with scenarios
 
-Use poucos exemplos que mudam a resposta:
+Use a few examples that change the answer:
 
 ```text
-- identidade: duas entidades podem existir separadamente?
-- ciclo de vida: qual transição é válida, proibida ou reversível?
-- ownership: quem pode criar, alterar, cancelar ou observar?
-- tempo: o que acontece antes/depois, expira ou é historizado?
-- fronteira: este termo significa a mesma coisa em todos os contextos?
+- identity: can two entities exist separately?
+- lifecycle: which transition is valid, forbidden, or reversible?
+- ownership: who may create, change, cancel, or observe?
+- time: what happens before/after, expires, or is historized?
+- boundary: does this term mean the same thing in every context?
 ```
 
-Pergunte somente quando a evidência não resolve uma decisão pertencente ao usuário. Não invente
-termos novos se o vocabulário atual já é preciso.
+Ask only when evidence cannot settle a decision that belongs to the user. Do not invent
+new terms if the current vocabulary is already precise.
 
-### 3. Atualize o menor artefato durável
+### 3. Update the smallest durable artifact
 
-- Glossário: definição, contexto e distinção necessária; sem detalhes de implementação.
-- ADR: quando a decisão é difícil de reverter, surpreendente sem contexto **e** fruto de trade-off
-  real (os três juntos). Use `templates/adr.md` — arquivo numerado (ADR-000N) com contexto, decisão,
-  alternativas rejeitadas e consequências, sem frontmatter. No consumidor grave em `pelizzai/adr/`;
-  em source mode, registre no execution record/artefato de design nativo e **ofereça** materializar
-  como arquivo no path de ADR nativo do repo quando o usuário quiser durabilidade (default: manter no
-  registro), sem criar `pelizzai/`.
-- Out-of-scope: apenas rejeição durável; adiamento/capacidade momentânea não é rejeição.
+- Glossary: definition, context, and the necessary distinction; no implementation details.
+- ADR: when the decision is hard to reverse, surprising without context, **and** the product of a
+  real trade-off (all three together). Use `templates/adr.md` — a numbered file (ADR-000N) with
+  context, decision, rejected alternatives, and consequences, no frontmatter. In a consumer, write
+  it in `pelizzai/adr/`; in source mode, record it in the execution record/native design artifact
+  and **offer** to materialize it as a file at the repo's native ADR path when the user wants
+  durability (default: keep it in the record), without creating `pelizzai/`.
+- Out-of-scope: durable rejection only; deferral/momentary capacity is not rejection.
 
-Um conceito atualiza o registro existente; não crie arquivo por conversa. Algo já implementado não
-vira out-of-scope. Mudança de vocabulário precisa propagar aos artefatos em escopo ou deixar uma
-migração explícita — não renomeie silenciosamente metade do sistema.
+One concept updates the existing record; do not create a file per conversation. Something already
+implemented does not become out-of-scope. A vocabulary change must propagate to the in-scope
+artifacts or leave an explicit migration — do not silently rename half the system.
 
-### 4. Verifique
+### 4. Verify
 
-Procure contradições nos consumidores relevantes e valide render/lint/links quando aplicável.
-Registre no plano/briefing os termos e invariantes que a implementação/review devem preservar.
+Look for contradictions in the relevant consumers and validate render/lint/links when applicable.
+Record in the plan/briefing the terms and invariants the implementation/review must preserve.
 
-## Integração
+## Integration
 
-`pelizzai-brainstorming` usa este overlay somente quando o modelo muda; `pelizzai-writing-plans`
-propaga os invariantes; `pelizzai-codebase-design` traduz as fronteiras para módulos; reasoning útil
-é Constraint Satisfaction + Assumption Tracking.
+`pelizzai-brainstorming` uses this overlay only when the model changes; `pelizzai-writing-plans`
+propagates the invariants; `pelizzai-codebase-design` translates the boundaries into modules; useful
+reasoning is Constraint Satisfaction + Assumption Tracking.
 
-Pontos de registro de ADR (todos filtrados pelo critério triplo, todos ação do coordenador):
-`pelizzai-brainstorming` ao salvar a spec de um design ratificado (auto + anúncio de 1 linha);
-`pelizzai-execution-plans` ao consolidar uma decisão arquitetural durável — já ratificada no gate de
-design (auto, pré-seal) ou emergente (apresenta ao usuário antes de gravar); `pelizzai-debugging` numa
-causa-raiz durável (emergente → apresenta); `pelizzai-improving-architecture` apenas **oferece**, por
-ser read-only.
+ADR recording points (all filtered by the triple criterion, all the coordinator's action):
+`pelizzai-brainstorming` when saving the spec of a ratified design (auto + one-line announcement);
+`pelizzai-execution-plans` when consolidating a durable architectural decision — already ratified at
+the design gate (auto, pre-seal) or emergent (presents it to the user before writing);
+`pelizzai-debugging` on a durable root cause (emergent → presents); `pelizzai-improving-architecture`
+only **offers**, being read-only.
 
 ## Red flags
 
 ```text
-- Criar `pelizzai/context.md` ou ADR no repo-fonte.
-- ADR para decisão fácil/reversível ou sem trade-off.
-- Registrar rejeição/ADR durante read-only sem autorização.
-- Usar DDD como renomeação cosmética.
-- Duplicar a spec inteira no glossário.
-- Termos diferentes para o mesmo conceito sem contexto explícito.
+- Creating `pelizzai/context.md` or an ADR in the source repo.
+- An ADR for an easy/reversible decision or one without a trade-off.
+- Recording a rejection/ADR during read-only without authorization.
+- Using DDD as cosmetic renaming.
+- Duplicating the entire spec in the glossary.
+- Different terms for the same concept without explicit context.
 ```
 
 ## Definition of Done
 
 ```text
-[ ] termos e invariantes estão inequívocos nos contextos afetados;
-[ ] artefatos duráveis são mínimos e estão no path correto do modo;
-[ ] ADR/rejeição atende ao critério e pertence ao escopo autorizado;
-[ ] plano/implementação/review receberam o vocabulário atualizado.
+[ ] terms and invariants are unambiguous in the affected contexts;
+[ ] durable artifacts are minimal and at the mode's correct path;
+[ ] the ADR/rejection meets the criterion and belongs to the authorized scope;
+[ ] plan/implementation/review received the updated vocabulary.
 ```

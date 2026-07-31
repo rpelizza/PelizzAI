@@ -1,221 +1,221 @@
 ---
 name: pelizzai-reasoning
-description: Seleciona técnicas de raciocínio quando há incerteza material, investigação, decisão entre alternativas, síntese de evidência, planejamento não trivial ou validação de alto impacto. Use dentro da head skill para atacar a pergunta dominante; não é obrigatória para ação mecânica direta cujo contrato e prova já estão claros.
+description: Selects reasoning techniques when there is material uncertainty, an investigation, a decision between alternatives, evidence synthesis, non-trivial planning, or high-impact validation. Use it inside the head skill to attack the dominant question; it is not mandatory for direct mechanical action whose contract and proof are already clear.
 ---
 
 # PelizzAI Reasoning
 
-## Objetivo
+## Purpose
 
-Use esta skill para selecionar, combinar e aplicar técnicas de raciocínio de forma proporcional à tarefa: quando investigar, quando agir direto, quando planejar, quando buscar evidências, quando comparar alternativas, quando pedir esclarecimento, quando validar, quando concluir e quando bloquear ou escalar uma decisão.
+Use this skill to select, combine, and apply reasoning techniques in proportion to the task: when to investigate, when to act directly, when to plan, when to gather evidence, when to compare alternatives, when to ask for clarification, when to validate, when to conclude, and when to block or escalate a decision.
 
-Esta skill não substitui skills de domínio, regras do projeto, documentação técnica, ferramentas ou instruções explícitas do usuário. Ela orquestra o raciocínio; o catálogo e a matriz abaixo definem operacionalmente cada decisão.
-
----
-
-## Princípio central
-
-> Use a menor quantidade de raciocínio estruturado necessária para diagnosticar, recomendar e
-> verificar. Reasoning escolhe **como pensar**; não concede autoridade para escolher **o produto**.
-
-Não carregue todas as técnicas por padrão. Não transforme tarefas simples em processos longos. Não use uma técnica apenas porque ela existe.
+This skill does not replace domain skills, project rules, technical documentation, tools, or explicit user instructions. It orchestrates the reasoning; the catalog and the matrix below define each decision operationally.
 
 ---
 
-## Prioridades
+## Core principle
 
-Siga esta ordem de prioridade:
+> Use the least structured reasoning needed to diagnose, recommend, and verify. Reasoning chooses
+> **how to think**; it grants no authority to choose **the product**.
 
-1. Instruções explícitas do usuário.
-2. Regras obrigatórias do sistema e do ambiente.
-3. Regras específicas do projeto, workspace ou repositório.
-4. Requisitos de segurança, privacidade, permissões e compatibilidade.
-5. Esta skill e suas técnicas.
-6. Preferências técnicas, estéticas ou de implementação.
+Do not load every technique by default. Do not turn simple tasks into long processes. Do not use a technique just because it exists.
 
 ---
 
-## Ativação
+## Priorities
 
-Use esta skill quando a tarefa envolver ao menos uma destas condições:
+Follow this order of priority:
 
-- múltiplas etapas;
-- código, ferramentas ou integrações com incerteza, dependências ou risco material;
-- fatos verificáveis ou potencialmente atuais;
-- incerteza material;
-- decisão entre alternativas;
-- requisitos, restrições ou proibições;
-- risco de regressão, perda de dados, custo ou impacto externo;
-- bug, incidente, diagnóstico ou comportamento inesperado;
-- recomendação técnica relevante;
-- necessidade de validar uma resposta antes de concluir.
+1. Explicit user instructions.
+2. Mandatory system and environment rules.
+3. Rules specific to the project, workspace, or repository.
+4. Security, privacy, permission, and compatibility requirements.
+5. This skill and its techniques.
+6. Technical, aesthetic, or implementation preferences.
 
-Não aplique fluxo completo para tarefas simples, criativas, diretas ou puramente editoriais.
+---
 
-Exemplos que normalmente não exigem técnicas adicionais:
+## Activation
+
+Use this skill when the task involves at least one of these conditions:
+
+- multiple steps;
+- code, tools, or integrations with uncertainty, dependencies, or material risk;
+- verifiable or potentially current facts;
+- material uncertainty;
+- a decision between alternatives;
+- requirements, constraints, or prohibitions;
+- risk of regression, data loss, cost, or external impact;
+- a bug, incident, diagnosis, or unexpected behavior;
+- a relevant technical recommendation;
+- the need to validate an answer before concluding.
+
+Do not apply the full flow to simple, creative, direct, or purely editorial tasks.
+
+Examples that normally require no extra techniques:
 
 ```text
-- Traduzir uma frase.
-- Reescrever um parágrafo.
-- Corrigir typo.
-- Explicar conceito estável e básico.
-- Renomear variável local.
+- Translate a sentence.
+- Rewrite a paragraph.
+- Fix a typo.
+- Explain a stable, basic concept.
+- Rename a local variable.
 ```
 
 ---
 
-## Triagem inicial
+## Initial triage
 
-Antes de escolher uma técnica, determine:
+Before choosing a technique, determine:
 
 ```text
-Objetivo:
-- O que o usuário quer receber ou alcançar?
+Goal:
+- What does the user want to receive or achieve?
 
-Escopo:
-- O que está incluído e excluído?
+Scope:
+- What is included and excluded?
 
-Risco:
-- O que acontece se a resposta ou ação estiver errada?
+Risk:
+- What happens if the answer or action is wrong?
 
-Incerteza:
-- O que ainda não está confirmado?
+Uncertainty:
+- What is not yet confirmed?
 
-Dependências:
-- Há arquivos, código, ferramentas, APIs, fontes ou permissões necessárias?
+Dependencies:
+- Are files, code, tools, APIs, sources, or permissions required?
 
-Impacto:
-- A tarefa altera dados, código, configuração, custo, segurança ou usuários?
+Impact:
+- Does the task change data, code, configuration, cost, security, or users?
 
-Critério de conclusão:
-- Como saber que a tarefa foi concluída corretamente?
+Completion criterion:
+- How will you know the task was completed correctly?
 ```
 
-Não faça perguntas factuais por reflexo. Primeiro use contexto, arquivos, documentação, código e
-ferramentas. Quando restar decisão de requisito, escopo, UX, arquitetura, dados, segurança, custo,
-risco aceito ou aceite, pergunte ao usuário uma decisão por vez e recomende a melhor opção.
+Do not ask factual questions by reflex. First use context, files, documentation, code, and tools.
+When a decision of requirement, scope, UX, architecture, data, security, cost, accepted risk, or
+acceptance remains, ask the user one decision at a time and recommend the best option.
 
-Para um pedido novo de feature/refactor com efeito mutável e incerteza material, produza a **Análise da proposta** com [Proposal Stress (Assumption Tracking aplicado)](techniques/proposal-stress.md) antes de rotear — premissas, lacunas materiais, riscos e alternativas — como resultado apresentado pelo `pelizzai-router`, não como pergunta. Read-only e ajuste trivial não a disparam; risco alto isolado eleva prova e gates, não a incerteza.
+For a new feature/refactor request with mutating effect and material uncertainty, produce the **Proposal Analysis** with [Proposal Stress (Assumption Tracking applied)](techniques/proposal-stress.md) before routing — assumptions, material gaps, risks, and alternatives — as a result presented by `pelizzai-router`, not as a question. Read-only work and trivial tweaks do not trigger it; high risk alone raises proof and gates, not uncertainty.
 
-Use `pelizzai-interview-me` em todo greenfield e quando houver decisão humana material. Evidência
-resolve fatos; não resolve preferência, política ou intenção do usuário.
+Use `pelizzai-interview-me` in every greenfield and whenever there is a material human decision.
+Evidence resolves facts; it does not resolve the user's preference, policy, or intent.
 
 ---
 
-## Seletor operacional: método e prova pelo efeito
+## Operational selector: method and proof by effect
 
-Classifique separadamente **o efeito da tarefa**, **a incerteza** e **o dinamismo do ambiente**. A head skill define o ciclo de vida; esta skill escolhe as heurísticas. Nenhuma head skill deve impor OODA, RCA ou TDD sem o gatilho correspondente.
+Classify separately **the task's effect**, **the uncertainty**, and **the environment's dynamism**. The head skill defines the lifecycle; this skill picks the heuristics. No head skill may impose OODA, RCA, or TDD without the corresponding trigger.
 
-| Efeito predominante | Estratégia de implementação e validação |
+| Predominant effect | Implementation and validation strategy |
 | --- | --- |
-| Comportamento novo ou alterado | `pelizzai-tdd`: teste comportamental red→green pelo contrato público |
-| Bug comportamental | Regressão red→green quando houver seam automatizável; outro oráculo reproduzível quando não houver |
-| Refatoração sem mudança de comportamento | Suíte/cobertura de caracterização verde antes; refatorar em passos pequenos; mesma suíte verde depois |
-| Configuração, IaC ou migração | `validate`/`plan`/`dry-run`, compatibilidade e estratégia de rollback; teste unitário só para lógica separável |
-| UI/UX/visual | Overlay obrigatório `pelizzai-frontend`, teste de comportamento quando aplicável e verificação visual real |
-| Documentação/copy | Checagem estática proporcional: lint, links, exemplos, build/render ou inspeção do diff |
+| New or changed behavior | `pelizzai-tdd`: red→green behavioral test against the public contract |
+| Behavioral bug | Red→green regression when there is an automatable seam; another reproducible oracle when there is not |
+| Refactoring with no behavior change | Green characterization suite/coverage before; refactor in small steps; same suite green after |
+| Configuration, IaC, or migration | `validate`/`plan`/`dry-run`, compatibility, and rollback strategy; unit tests only for separable logic |
+| UI/UX/visual | Mandatory overlay `pelizzai-frontend`, behavioral tests where applicable, and real visual verification |
+| Documentation/copy | Proportional static checks: lint, links, examples, build/render, or diff inspection |
 
-Uma tarefa pode combinar estratégias: um formulário novo usa TDD para comportamento **e** `pelizzai-frontend` para estados, acessibilidade, responsividade e QA visual. Registre a combinação no plano; não force um teste vermelho artificial para provar CSS, Markdown ou um `terraform plan`.
-
----
-
-## Carregamento progressivo de técnicas
-
-1. Escolha a técnica que responde à **pergunta dominante** da fase.
-2. Leia apenas o arquivo dessa técnica e as auxiliares que fecham uma lacuna distinta.
-3. Adicione ou troque técnica quando nova evidência mudar a pergunta; não mantenha um pipeline por inércia.
-4. Considere o custo de contexto: cada técnica precisa justificar uma decisão ou prova observável.
-
-Não há quota fixa. Em geral uma principal basta; alto impacto pode exigir várias lentes, enquanto
-uma tarefa direta pode exigir nenhuma. Um pipeline (ver **Composições recomendadas**) encadeia
-fases ao longo do tempo — não carrega todo o catálogo simultaneamente.
+A task can combine strategies: a new form uses TDD for behavior **and** `pelizzai-frontend` for states, accessibility, responsiveness, and visual QA. Record the combination in the plan; do not force an artificial red test to prove CSS, Markdown, or a `terraform plan`.
 
 ---
 
-## Catálogo de técnicas
+## Progressive technique loading
 
-Leia a técnica correspondente antes de aplicá-la.
+1. Choose the technique that answers the phase's **dominant question**.
+2. Read only that technique's file plus the auxiliaries that close a distinct gap.
+3. Add or swap techniques when new evidence changes the question; do not keep a pipeline out of inertia.
+4. Consider the context cost: every technique must justify a decision or an observable proof.
 
-| Técnica                  | Quando usar                                                                      | Arquivo                                                               |
+There is no fixed quota. Usually one main technique is enough; high impact may require several
+lenses, while a direct task may require none. A pipeline (see **Recommended compositions**) chains
+phases over time — it does not load the whole catalog at once.
+
+---
+
+## Technique catalog
+
+Read the corresponding technique before applying it.
+
+| Technique                | When to use                                                                      | File                                                                  |
 | ------------------------ | -------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| ReAct                    | Executar ações, usar ferramentas, observar resultados e ajustar próximo passo    | [react.md](techniques/react.md)                                       |
-| OODA                     | Loop macro Observar→Orientar→Decidir→Agir: situações dinâmicas, execução longa, re-observar a realidade a cada iteração | [ooda.md](techniques/ooda.md)                                         |
-| Plan and Execute         | Tarefas multi-etapa, dependências, checkpoints e replanejamento                  | [plan-and-execute.md](techniques/plan-and-execute.md)                 |
-| Structured Decomposition | Dividir problema complexo em partes, responsabilidades, contratos e dependências | [structured-decomposition.md](techniques/structured-decomposition.md) |
-| Constraint Satisfaction  | Garantir requisitos, proibições, compatibilidade e limites                       | [constraint-satisfaction.md](techniques/constraint-satisfaction.md)   |
-| Assumption Tracking      | Rastrear premissas, hipóteses e condições ainda não confirmadas                  | [assumption-tracking.md](techniques/assumption-tracking.md)           |
-| Evidence Synthesis       | Comparar documentos, fontes, logs, testes, dados e evidências conflitantes       | [evidence-synthesis.md](techniques/evidence-synthesis.md)             |
-| Verification             | Confirmar código, fatos, cálculos, contratos, resultados e limitações; inclui cross-check por execuções independentes (multi-agente) | [verification.md](techniques/verification.md)                         |
-| Decision Making          | Escolher entre alternativas válidas, com trade-offs e reversibilidade; inclui busca com poda/backtracking para caminhos interdependentes | [decision-making.md](techniques/decision-making.md)                   |
-| Root Cause Analysis      | Investigar causa incerta, recorrência, flakiness, incidentes e falhas entre sistemas | [root-cause-analysis.md](techniques/root-cause-analysis.md)        |
-| Critique and Refine      | Melhorar artefato após feedback, falha, inconsistência ou requisito não atendido | [critique-and-refine.md](techniques/critique-and-refine.md)           |
+| ReAct                    | Execute actions, use tools, observe results, and adjust the next step            | [react.md](techniques/react.md)                                       |
+| OODA                     | Macro loop Observe→Orient→Decide→Act: dynamic situations, long executions, re-observing reality on every iteration | [ooda.md](techniques/ooda.md)                                         |
+| Plan and Execute         | Multi-step tasks, dependencies, checkpoints, and replanning                      | [plan-and-execute.md](techniques/plan-and-execute.md)                 |
+| Structured Decomposition | Split a complex problem into parts, responsibilities, contracts, and dependencies | [structured-decomposition.md](techniques/structured-decomposition.md) |
+| Constraint Satisfaction  | Guarantee requirements, prohibitions, compatibility, and limits                  | [constraint-satisfaction.md](techniques/constraint-satisfaction.md)   |
+| Assumption Tracking      | Track assumptions, hypotheses, and conditions not yet confirmed                  | [assumption-tracking.md](techniques/assumption-tracking.md)           |
+| Evidence Synthesis       | Compare documents, sources, logs, tests, data, and conflicting evidence          | [evidence-synthesis.md](techniques/evidence-synthesis.md)             |
+| Verification             | Confirm code, facts, calculations, contracts, results, and limitations; includes cross-check via independent runs (multi-agent) | [verification.md](techniques/verification.md)                         |
+| Decision Making          | Choose between valid alternatives, with trade-offs and reversibility; includes search with pruning/backtracking for interdependent paths | [decision-making.md](techniques/decision-making.md)                   |
+| Root Cause Analysis      | Investigate uncertain causes, recurrence, flakiness, incidents, and cross-system failures | [root-cause-analysis.md](techniques/root-cause-analysis.md)        |
+| Critique and Refine      | Improve an artifact after feedback, a failure, an inconsistency, or an unmet requirement | [critique-and-refine.md](techniques/critique-and-refine.md)           |
 
-> A skill `pelizzai-interview-me` é uma **skill irmã**, não uma das técnicas do catálogo: acione-a para resolver ambiguidade material por entrevista, conforme a Triagem inicial e a matriz.
+> The `pelizzai-interview-me` skill is a **sister skill**, not one of the catalog's techniques: invoke it to resolve material ambiguity by interview, per the Initial triage and the matrix.
 
-> **Proposal Stress** é a rotina de [Assumption Tracking](techniques/assumption-tracking.md) aplicada a um pedido novo, documentada em [proposal-stress.md](techniques/proposal-stress.md): produz a **Análise da proposta** que o `pelizzai-router` apresenta antes de rotear. Não é uma técnica extra do catálogo — é a mesma máquina de premissas com lente de premortem de escopo.
+> **Proposal Stress** is the [Assumption Tracking](techniques/assumption-tracking.md) routine applied to a new request, documented in [proposal-stress.md](techniques/proposal-stress.md): it produces the **Proposal Analysis** that `pelizzai-router` presents before routing. It is not an extra catalog technique — it is the same assumption machine with a scope-premortem lens.
 
 ---
 
-## Matriz de seleção
+## Selection matrix
 
-| Situação                                                     | Técnica principal        | Técnicas auxiliares possíveis                                 |
+| Situation                                                    | Main technique           | Possible auxiliary techniques                                 |
 | ------------------------------------------------------------ | ------------------------ | ------------------------------------------------------------- |
-| Tarefa simples com ação clara                                | Nenhuma ou ReAct leve    | Verification                                                  |
-| Execução longa/dinâmica em loop até a entrega (plano, ambiente que muda) | OODA        | Plan and Execute, Verification                                |
-| Feature com múltiplas partes                                 | Plan and Execute         | Structured Decomposition, Verification                        |
-| Código existente com partes/contratos desconhecidos          | Structured Decomposition | Plan and Execute, Verification                                |
-| Refatoração preservando comportamento                        | Structured Decomposition | Verification de regressão, Constraint Satisfaction            |
-| Erro explícito com causa direta                              | ReAct                    | Verification                                                  |
-| Bug determinístico com causa incerta                         | Root Cause Analysis leve | ReAct, Verification                                           |
-| Bug flaky, recorrente ou distribuído                         | Root Cause Analysis      | Evidence Synthesis, Assumption Tracking, Verification         |
-| Incidente com dano ativo                                     | Constraint Satisfaction  | Decision Making, ReAct, Verification; RCA após conter         |
-| Escolha entre bibliotecas ou arquiteturas                    | Decision Making          | Constraint Satisfaction, Evidence Synthesis                   |
-| Pesquisa com várias fontes                                   | Evidence Synthesis       | Verification, Assumption Tracking                             |
-| Novo pedido de feature/refactor com incerteza material, antes de rotear | Assumption Tracking + Proposal Stress | Constraint Satisfaction, pelizzai-interview-me |
-| Requisitos ambíguos ou incompletos                           | Assumption Tracking      | Constraint Satisfaction, pelizzai-interview-me                |
-| Plano dependente de premissa não confirmada                  | Assumption Tracking      | Plan and Execute, Verification                                |
-| Múltiplas alternativas interdependentes com impacto material | Decision Making (busca com poda/backtracking) | Constraint Satisfaction, Evidence Synthesis    |
-| Cálculo, diagnóstico ou extração crítica                     | Verification             | Evidence Synthesis; cross-check multi-agente quando houver revisores independentes |
-| Resultado falhou em teste, review ou checklist               | Critique and Refine      | Verification, ReAct                                           |
-| Mudança de alto impacto                                      | Constraint Satisfaction  | Assumption Tracking, Decision Making, Verification            |
+| Simple task with a clear action                              | None, or light ReAct     | Verification                                                  |
+| Long/dynamic looped execution until delivery (plan, changing environment) | OODA        | Plan and Execute, Verification                                |
+| Feature with multiple parts                                  | Plan and Execute         | Structured Decomposition, Verification                        |
+| Existing code with unknown parts/contracts                   | Structured Decomposition | Plan and Execute, Verification                                |
+| Refactoring while preserving behavior                        | Structured Decomposition | Regression Verification, Constraint Satisfaction              |
+| Explicit error with a direct cause                           | ReAct                    | Verification                                                  |
+| Deterministic bug with an uncertain cause                    | Light Root Cause Analysis | ReAct, Verification                                          |
+| Flaky, recurring, or distributed bug                         | Root Cause Analysis      | Evidence Synthesis, Assumption Tracking, Verification         |
+| Incident with active damage                                  | Constraint Satisfaction  | Decision Making, ReAct, Verification; RCA after containment   |
+| Choosing between libraries or architectures                  | Decision Making          | Constraint Satisfaction, Evidence Synthesis                   |
+| Research across several sources                              | Evidence Synthesis       | Verification, Assumption Tracking                             |
+| New feature/refactor request with material uncertainty, before routing | Assumption Tracking + Proposal Stress | Constraint Satisfaction, pelizzai-interview-me |
+| Ambiguous or incomplete requirements                         | Assumption Tracking      | Constraint Satisfaction, pelizzai-interview-me                |
+| Plan depending on an unconfirmed assumption                  | Assumption Tracking      | Plan and Execute, Verification                                |
+| Multiple interdependent alternatives with material impact    | Decision Making (search with pruning/backtracking) | Constraint Satisfaction, Evidence Synthesis    |
+| Critical calculation, diagnosis, or extraction               | Verification             | Evidence Synthesis; multi-agent cross-check when there are independent reviewers |
+| Result failed a test, review, or checklist                   | Critique and Refine      | Verification, ReAct                                           |
+| High-impact change                                           | Constraint Satisfaction  | Assumption Tracking, Decision Making, Verification            |
 
 ---
 
-## Fronteiras entre técnicas próximas
+## Boundaries between neighboring techniques
 
-Use estas distinções quando duas técnicas parecerem candidatas à principal:
+Use these distinctions when two techniques look like candidates for the main one:
 
-- **OODA vs ReAct:** [ReAct](techniques/react.md) é o **micro-ciclo** de uma ação (pensar → agir com ferramenta → observar o resultado imediato). [OODA](techniques/ooda.md) é o **macro-loop** de uma execução inteira: re-**Observar** a realidade externa (git, testes, reviews, o que mudou no mundo), re-**Orientar** contra o objetivo/plano/DoD, **Decidir** a próxima iteração e **Agir** — repetindo até a Definition of Done. Um loop OODA contém muitos ciclos ReAct dentro da fase Agir.
-- **RCA vs causa direta:** use [Root Cause Analysis](techniques/root-cause-analysis.md) quando ainda houver uma pergunta causal material. Erro explícito cujo contrato, stack trace ou compilador já identifica a causa usa ReAct + Verification; não invente hipóteses concorrentes. Em incidente com dano ativo, contenção reversível e preservação mínima de evidência precedem a RCA.
-- **Comparação linear vs caminhos interdependentes:** [Decision Making](techniques/decision-making.md) é a técnica para escolher entre alternativas. O caso padrão compara opções fechadas por trade-offs num único passo; quando os caminhos são **interdependentes** e o viável só aparece construindo solução parcial, avaliando, podando e voltando atrás, use o **modo de busca com poda e backtracking** da própria Decision Making — e reserve-o ao backtracking externo e auditável (arquiteturas parciais em arquivos/protótipos), já que o thinking nativo ramifica internamente.
-- **Structured Decomposition vs Plan and Execute:** decomponha com [Structured Decomposition](techniques/structured-decomposition.md) quando **partes, responsabilidades ou contratos ainda são desconhecidos**; passe a [Plan and Execute](techniques/plan-and-execute.md) quando as partes já são conhecidas e o que falta é ordená-las e executá-las.
-- **Cross-check multi-agente é de Verification:** cruzar execuções independentes para medir convergência é caro e redundante em agente único (o thinking nativo já faz consistência interna). Reserve-o a múltiplos agentes/lentes (`pelizzai-team`, revisores independentes, lentes cegas) e trate como o modo **cross-check por execuções independentes** da [Verification](techniques/verification.md); convergência nunca substitui o cálculo, a fonte ou o teste real.
-- **Verification + Critique and Refine:** combine [Verification](techniques/verification.md) com [Critique and Refine](techniques/critique-and-refine.md) apenas quando a **causa da falha ainda não está confirmada**. Falha com causa direta usa Critique and Refine com verificação inline, sem dupla leitura ritual.
+- **OODA vs ReAct:** [ReAct](techniques/react.md) is the **micro-cycle** of a single action (think → act with a tool → observe the immediate result). [OODA](techniques/ooda.md) is the **macro loop** of an entire execution: re-**Observe** external reality (git, tests, reviews, what changed in the world), re-**Orient** against the goal/plan/DoD, **Decide** the next iteration, and **Act** — repeating until the Definition of Done. One OODA loop contains many ReAct cycles inside the Act phase.
+- **RCA vs direct cause:** use [Root Cause Analysis](techniques/root-cause-analysis.md) when a material causal question still remains. An explicit error whose contract, stack trace, or compiler already identifies the cause uses ReAct + Verification; do not invent competing hypotheses. In an incident with active damage, reversible containment and minimal evidence preservation precede the RCA.
+- **Linear comparison vs interdependent paths:** [Decision Making](techniques/decision-making.md) is the technique for choosing between alternatives. The standard case compares closed options by trade-offs in a single pass; when the paths are **interdependent** and the viable one only emerges by building a partial solution, evaluating, pruning, and backtracking, use Decision Making's own **search mode with pruning and backtracking** — and reserve it for external, auditable backtracking (partial architectures in files/prototypes), since native thinking already branches internally.
+- **Structured Decomposition vs Plan and Execute:** decompose with [Structured Decomposition](techniques/structured-decomposition.md) when **parts, responsibilities, or contracts are still unknown**; move to [Plan and Execute](techniques/plan-and-execute.md) when the parts are already known and what remains is ordering and executing them.
+- **Multi-agent cross-check belongs to Verification:** crossing independent runs to measure convergence is expensive and redundant in a single agent (native thinking already does internal consistency). Reserve it for multiple agents/lenses (`pelizzai-team`, independent reviewers, blind lenses) and treat it as the **cross-check via independent runs** mode of [Verification](techniques/verification.md); convergence never replaces the calculation, the source, or the real test.
+- **Verification + Critique and Refine:** combine [Verification](techniques/verification.md) with [Critique and Refine](techniques/critique-and-refine.md) only when the **cause of the failure is not yet confirmed**. A failure with a direct cause uses Critique and Refine with inline verification, without ritual double reading.
 
 ---
 
-## Composições recomendadas
+## Recommended compositions
 
-Cada seta é uma **transição de fase**: a técnica seguinte assume quando a anterior cumpre seu papel. Carregue uma fase por vez — a técnica entra quando a pergunta dela domina e sai quando a responde. Não há teto numérico; há a exigência de que cada técnica justifique uma decisão ou uma prova observável.
+Each arrow is a **phase transition**: the next technique takes over when the previous one has done its job. Load one phase at a time — a technique enters when its question dominates and leaves when it answers it. There is no numeric cap; there is the requirement that every technique justify a decision or an observable proof.
 
-### Implementação de feature
+### Feature implementation
 
 ```text
-Assumption Tracking + Constraint Satisfaction na descoberta
-→ Decision Making para recomendar alternativas ao usuário
-→ Structured Decomposition após decisões ratificadas
+Assumption Tracking + Constraint Satisfaction during discovery
+→ Decision Making to recommend alternatives to the user
+→ Structured Decomposition after ratified decisions
 → Plan and Execute
-→ ReAct na execução
-→ [OODA somente se houver macro-loop com realidade reobservada]
+→ ReAct during execution
+→ [OODA only when there is a macro loop with re-observed reality]
 → Verification
 ```
 
-Use Constraint Satisfaction quando houver requisitos rígidos, compatibilidade, segurança ou
-proibições. OODA só governa `pelizzai-loop`/`pelizzai-execution-plans` quando existem múltiplas
-iterações e a realidade (git, testes, review, ambiente) pode mudar a próxima decisão. Uma tarefa
-linear ou um plano de uma fatia não ganha OODA só por ter ferramentas.
+Use Constraint Satisfaction when there are hard requirements, compatibility, security, or
+prohibitions. OODA only governs `pelizzai-loop`/`pelizzai-execution-plans` when there are multiple
+iterations and reality (git, tests, review, environment) can change the next decision. A linear
+task or a single-slice plan does not earn OODA just for using tools.
 
-### Pesquisa ou recomendação técnica
+### Research or technical recommendation
 
 ```text
 Constraint Satisfaction
@@ -224,20 +224,20 @@ Constraint Satisfaction
 → Verification
 ```
 
-Use Assumption Tracking quando a recomendação depender de informações ainda não confirmadas.
+Use Assumption Tracking when the recommendation depends on information not yet confirmed.
 
-### Debugging ou incidente
+### Debugging or incident
 
 ```text
-Causa direta: ReAct → Verification
-Causa determinística incerta: RCA leve → ReAct → Verification
-Flaky/recorrente/distribuído: RCA + Evidence Synthesis → [OODA só se houver rodadas] → Verification
-Dano ativo: Constraint Satisfaction + Decision Making → contenção reversível → RCA após estabilizar → Verification
+Direct cause: ReAct → Verification
+Uncertain deterministic cause: light RCA → ReAct → Verification
+Flaky/recurring/distributed: RCA + Evidence Synthesis → [OODA only if there are rounds] → Verification
+Active damage: Constraint Satisfaction + Decision Making → reversible containment → RCA after stabilizing → Verification
 ```
 
-O número de hipóteses acompanha a incerteza: uma hipótese direta e falsificável pode bastar; mantenha múltiplas apenas quando causas materialmente plausíveis competirem. Não trate o primeiro sintoma como causa raiz nem transforme um erro explícito em investigação cerimonial.
+The number of hypotheses tracks the uncertainty: one direct, falsifiable hypothesis may be enough; keep several only when materially plausible causes compete. Do not treat the first symptom as the root cause, and do not turn an explicit error into a ceremonial investigation.
 
-### Decisão arquitetural
+### Architectural decision
 
 ```text
 Constraint Satisfaction
@@ -245,9 +245,9 @@ Constraint Satisfaction
 → Verification
 ```
 
-Quando as alternativas forem interdependentes e exigirem poda e backtracking, use o modo de busca da própria Decision Making; caso contrário, compare as opções fechadas diretamente.
+When the alternatives are interdependent and require pruning and backtracking, use Decision Making's own search mode; otherwise, compare the closed options directly.
 
-### Alteração de alto impacto
+### High-impact change
 
 ```text
 Constraint Satisfaction
@@ -257,253 +257,253 @@ Constraint Satisfaction
 → Verification
 ```
 
-Aplica-se às ações listadas na seção **Ações de alto impacto**.
+Applies to the actions listed in the **High-impact actions** section.
 
 ---
 
-## Orçamento de esforço
+## Effort budget
 
-A profundidade da investigação deve ser proporcional ao risco.
+Investigation depth must be proportional to risk.
 
-| Nível   | Característica                                                                          | Conduta                                                             |
-| ------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Baixo   | Mudança local, reversível e sem efeito externo                                          | Executar e validar de forma simples                                 |
-| Médio   | Código funcional, integração limitada ou decisão relevante                              | Planejar brevemente, validar fluxo principal e erros relevantes     |
-| Alto    | Dados, segurança, produção, contratos ou múltiplos sistemas                             | Usar evidência, checkpoints, testes e contingência                  |
-| Crítico | Ação irreversível, financeira, jurídica, médica, segurança sensível ou produção crítica | Não avançar sem validação forte, autorização e plano de recuperação |
+| Level    | Characteristic                                                                          | Conduct                                                             |
+| -------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Low      | Local, reversible change with no external effect                                        | Execute and validate simply                                         |
+| Medium   | Functional code, limited integration, or a relevant decision                            | Plan briefly, validate the main flow and relevant errors            |
+| High     | Data, security, production, contracts, or multiple systems                              | Use evidence, checkpoints, tests, and contingency                   |
+| Critical | Irreversible, financial, legal, medical, sensitive-security, or critical-production action | Do not proceed without strong validation, authorization, and a recovery plan |
 
-Não investigue indefinidamente.
+Do not investigate indefinitely.
 
-Pare quando:
-
-```text
-- o objetivo foi atendido;
-- os critérios de conclusão foram validados;
-- não há incerteza material restante;
-- a próxima ação não reduz risco nem gera informação útil;
-- falta autorização, ferramenta ou contexto indispensável;
-- o custo de continuar é maior que o benefício.
-```
-
----
-
-## Uso de ferramentas
-
-Antes de usar uma ferramenta, defina:
+Stop when:
 
 ```text
-- Qual pergunta essa ferramenta deve responder?
-- Qual resultado seria suficiente?
-- A ferramenta é a fonte mais confiável?
-- A ação gera efeito colateral?
-- Existe alternativa menos invasiva?
-```
-
-Depois de usar uma ferramenta:
-
-```text
-- Interprete o resultado real.
-- Atualize fatos, hipóteses e premissas.
-- Não invente resultado de ferramenta.
-- Não afirme que algo foi testado sem teste real.
-- Não continue com plano desatualizado após evidência contrária.
-```
-
-Use fontes e ferramentas conforme a natureza da pergunta:
-
-```text
-Código e comportamento:
-- Código-fonte, testes, logs, contratos e execução controlada.
-
-Tecnologia:
-- Documentação oficial via MCP `context7` quando disponível (`resolve-library-id` → `query-docs`);
-  sem ele, changelog, repositório oficial e web. Prova de conceito quando a doc não bastar.
-  Primeiro derive tecnologia e versão de manifests, lockfiles, config e código. Em greenfield sem
-  versão instalada, consulte a versão atual da stack informada ou de cada candidata real.
-  Use Context7 desde o reconhecimento inicial, e novamente quando design, plano, implementação,
-  debugging, upgrade ou manutenção de skill trouxer uma pergunta técnica nova.
-  Nunca responda de memória sobre API/versão de lib externa quando o Context7 puder confirmar.
-  Context7 pode confirmar capacidade e restrição técnica; nunca escolhe requisito, persona, fluxo,
-  política, arquitetura preferida ou critério de aceite em nome do usuário.
-
-Fatos atuais:
-- Fonte primária ou oficial atual.
-
-Dados:
-- Fonte original, cálculo reproduzível e conferência de consistência.
-
-Arquivos enviados:
-- Leitura direta, trechos relevantes e validação contra o conteúdo.
+- the goal has been met;
+- the completion criteria have been validated;
+- no material uncertainty remains;
+- the next action neither reduces risk nor produces useful information;
+- an indispensable authorization, tool, or piece of context is missing;
+- the cost of continuing exceeds the benefit.
 ```
 
 ---
 
-## Perguntas de esclarecimento
+## Tool use
 
-Pergunte quando a resposta muda materialmente requisito, plano, UX, arquitetura, dados, segurança,
-custo, risco aceito ou resultado. Em greenfield, presuma que essas decisões ainda precisam ser
-obtidas até que a spec mostre o contrário.
-
-Antes de perguntar, verifique:
+Before using a tool, define:
 
 ```text
-- O contexto já responde?
-- O código ou arquivo responde?
-- A documentação responde?
-- O usuário já delegou explicitamente esta categoria de decisão?
+- What question should this tool answer?
+- What result would be sufficient?
+- Is the tool the most reliable source?
+- Does the action have side effects?
+- Is there a less invasive alternative?
 ```
 
-Pergunte quando:
+After using a tool:
 
 ```text
-- há conflito entre requisitos;
-- falta autorização para ação relevante;
-- a escolha altera escopo ou custo;
-- uma premissa crítica não pode ser verificada;
-- a decisão pertence ao usuário ou responsável externo;
-- não existe solução válida com as restrições atuais.
+- Interpret the actual result.
+- Update facts, hypotheses, and assumptions.
+- Do not invent a tool result.
+- Do not claim something was tested without a real test.
+- Do not continue with an outdated plan after contrary evidence.
 ```
 
-Faça uma pergunta por vez. Quando houver opções reais, mostre 2–3, destaque a recomendada e explique
-o motivo em uma linha. Não agrupe decisões para reduzir turnos; use a resposta para recalcular a
-próxima pergunta.
-
----
-
-## Ações de alto impacto
-
-Antes de executar ação com efeito externo relevante:
+Use sources and tools according to the nature of the question:
 
 ```text
-[ ] O objetivo do usuário está claro.
-[ ] O alvo foi confirmado.
-[ ] Restrições e proibições foram identificadas.
-[ ] Impactos foram avaliados.
-[ ] Existe rollback, backup ou contingência quando aplicável.
-[ ] Permissões foram verificadas.
-[ ] Ação é necessária e proporcional.
-[ ] Existe validação após execução.
-```
+Code and behavior:
+- Source code, tests, logs, contracts, and controlled execution.
 
-São ações de alto impacto, entre outras:
+Technology:
+- Official documentation via the `context7` MCP when available (`resolve-library-id` → `query-docs`);
+  without it, changelog, official repository, and the web. Proof of concept when the docs are not enough.
+  First derive technology and version from manifests, lockfiles, config, and code. In greenfield with
+  no installed version, look up the current version of the stated stack or of each real candidate.
+  Use Context7 from the initial reconnaissance on, and again whenever design, planning, implementation,
+  debugging, upgrades, or skill maintenance raises a new technical question.
+  Never answer from memory about an external lib's API/version when Context7 can confirm it.
+  Context7 can confirm technical capability and constraints; it never chooses a requirement, persona, flow,
+  policy, preferred architecture, or acceptance criterion on the user's behalf.
 
-```text
-- Alterar banco de dados.
-- Mudar contrato público.
-- Publicar em produção.
-- Alterar permissões.
-- Enviar mensagens ou e-mails.
-- Excluir dados.
-- Criar custo recorrente.
-- Processar dados sensíveis.
-```
+Current facts:
+- Current primary or official source.
 
-Não execute ação destrutiva, irreversível, financeira, de produção ou que exponha dados sensíveis sem confirmação adequada.
+Data:
+- Original source, reproducible calculation, and consistency checks.
 
----
-
-## Regras de comunicação
-
-Na resposta ao usuário:
-
-- entregue resultado, não cadeia de pensamento detalhada;
-- diferencie fatos confirmados, inferências e hipóteses;
-- informe validações realmente executadas;
-- declare limitações e premissas abertas quando forem materiais;
-- explique trade-offs apenas quando forem relevantes;
-- não alegue certeza maior que a evidência permite;
-- seja proporcional ao pedido e ao nível técnico do usuário.
-
-Formato recomendado para tarefas relevantes:
-
-```text
-Resultado:
-- [entrega principal]
-
-Validação:
-- [testes, fontes, build, logs ou conferências realizadas]
-
-Decisões e trade-offs:
-- [somente quando relevantes]
-
-Limitações:
-- [o que não foi confirmado ou depende de contexto externo]
+Uploaded files:
+- Direct reading, relevant excerpts, and validation against the content.
 ```
 
 ---
 
-## Anti-padrões de roteamento
+## Clarifying questions
 
-Não faça isto:
+Ask when the answer materially changes a requirement, plan, UX, architecture, data, security, cost,
+accepted risk, or outcome. In greenfield, assume these decisions still need to be obtained until
+the spec shows otherwise.
+
+Before asking, check:
 
 ```text
-- Usar o modo de busca com poda/backtracking (Decision Making) para uma escolha linear entre opções fechadas.
-- Cruzar execuções independentes (cross-check de Verification) em agente único, para resposta simples.
-- Criar plano extenso para ajuste local.
-- Fazer Root Cause Analysis para erro de sintaxe evidente.
-- Impor OODA a uma sequência curta sem re-observação macro útil.
-- Impor TDD a refatoração, CSS, documentação, configuração, IaC ou migração sem comportamento automatizável.
-- Pesquisar múltiplas fontes quando existe contrato direto.
-- Usar Critique and Refine sem feedback ou problema concreto.
-- Usar Verification apenas como checklist decorativo.
-- Perguntar antes de consultar evidência disponível.
-- Fazer várias perguntas de descoberta no mesmo turno.
-- Usar uma técnica, Context7 ou “default seguro” para ratificar uma decisão do usuário.
-- Continuar investigando após critérios de conclusão serem atendidos.
-- Carregar todas as técnicas sem necessidade.
+- Does the context already answer it?
+- Does the code or a file answer it?
+- Does the documentation answer it?
+- Has the user already explicitly delegated this category of decision?
+```
+
+Ask when:
+
+```text
+- requirements conflict;
+- authorization for a relevant action is missing;
+- the choice changes scope or cost;
+- a critical assumption cannot be verified;
+- the decision belongs to the user or an external owner;
+- no valid solution exists under the current constraints.
+```
+
+Ask one question at a time. When there are real options, show 2–3, highlight the recommended one,
+and explain why in one line. Do not batch decisions to save turns; use the answer to recompute the
+next question.
+
+---
+
+## High-impact actions
+
+Before executing an action with a relevant external effect:
+
+```text
+[ ] The user's goal is clear.
+[ ] The target has been confirmed.
+[ ] Constraints and prohibitions have been identified.
+[ ] Impacts have been assessed.
+[ ] Rollback, backup, or contingency exists where applicable.
+[ ] Permissions have been verified.
+[ ] The action is necessary and proportional.
+[ ] There is validation after execution.
+```
+
+High-impact actions include, among others:
+
+```text
+- Changing a database.
+- Changing a public contract.
+- Publishing to production.
+- Changing permissions.
+- Sending messages or e-mails.
+- Deleting data.
+- Creating recurring cost.
+- Processing sensitive data.
+```
+
+Do not execute a destructive, irreversible, financial, or production action, or one that exposes sensitive data, without proper confirmation.
+
+---
+
+## Communication rules
+
+In the answer to the user:
+
+- deliver the result, not a detailed chain of thought;
+- distinguish confirmed facts, inferences, and hypotheses;
+- report the validations actually executed;
+- state limitations and open assumptions when they are material;
+- explain trade-offs only when they are relevant;
+- do not claim more certainty than the evidence allows;
+- be proportional to the request and to the user's technical level.
+
+Recommended format for relevant tasks:
+
+```text
+Result:
+- [main deliverable]
+
+Validation:
+- [tests, sources, build, logs, or checks performed]
+
+Decisions and trade-offs:
+- [only when relevant]
+
+Limitations:
+- [what was not confirmed or depends on external context]
 ```
 
 ---
 
-## Avaliação (Evals)
+## Routing anti-patterns
 
-As suítes de avaliação medem se esta skill **decide, protege e é proporcional e confiável** — não eloquência. Rode-as ao criar, revisar ou alterar o `SKILL.md` ou qualquer técnica.
-
-| Suíte                                                     | O que valida                                                           |
-| --------------------------------------------------------- | ---------------------------------------------------------------------- |
-| [README](evals/README.md)                                 | Índice, ordem de execução, falhas graves globais e metas de qualidade  |
-| [routing](evals/routing.md)                               | Seleção da técnica certa e ausência de técnicas redundantes            |
-| [planning-and-execution](evals/planning-and-execution.md) | Planejamento, decomposição, dependências, checkpoints e replanejamento |
-| [debugging](evals/debugging.md)                           | Investigação de bugs, incidentes, causa raiz e contenção               |
-| [research](evals/research.md)                             | Pesquisa atual, fontes primárias, conflitos, versões e limitações      |
-| [high-impact-actions](evals/high-impact-actions.md)       | Ações destrutivas, financeiras, de produção, segurança e privacidade   |
-| [regression](evals/regression.md)                         | Suíte compacta com cenários críticos de todas as áreas                 |
-
-Após alterar uma técnica, rode a suíte especializada correspondente e a `regression` antes de aprovar a mudança.
-
----
-
-## Fluxo operacional resumido
+Do not do this:
 
 ```text
-1. Entenda objetivo, escopo, risco e critério de conclusão.
-2. Verifique contexto, regras do projeto e evidências disponíveis.
-3. Classifique o efeito e escolha a estratégia de implementação/validação correspondente.
-4. Escolha a técnica dominante e somente auxiliares com função distinta.
-5. Leia os arquivos Markdown correspondentes.
-6. Execute com ReAct quando houver ferramenta, observação ou incerteza.
-7. Valide proporcionalmente ao risco e ao efeito.
-8. Replaneje somente se nova evidência invalidar o caminho atual.
-9. Conclua quando os critérios de conclusão forem atendidos.
+- Use the search mode with pruning/backtracking (Decision Making) for a linear choice between closed options.
+- Cross independent runs (Verification's cross-check) in a single agent, for a simple answer.
+- Create an extensive plan for a local tweak.
+- Run Root Cause Analysis on an obvious syntax error.
+- Impose OODA on a short sequence with no useful macro re-observation.
+- Impose TDD on refactoring, CSS, documentation, configuration, IaC, or migrations with no automatable behavior.
+- Research multiple sources when there is a direct contract.
+- Use Critique and Refine without feedback or a concrete problem.
+- Use Verification as a merely decorative checklist.
+- Ask before consulting available evidence.
+- Ask several discovery questions in the same turn.
+- Use a technique, Context7, or a "safe default" to ratify a decision that belongs to the user.
+- Keep investigating after the completion criteria are met.
+- Load every technique without need.
 ```
 
 ---
 
-## Instrução final para o agente
+## Evaluation (Evals)
+
+The eval suites measure whether this skill **decides, protects, and is proportional and reliable** — not eloquence. Run them when creating, reviewing, or changing `SKILL.md` or any technique.
+
+| Suite                                                     | What it validates                                                       |
+| --------------------------------------------------------- | ----------------------------------------------------------------------- |
+| [README](evals/README.md)                                 | Index, execution order, global critical failures, and quality targets   |
+| [routing](evals/routing.md)                               | Selecting the right technique and the absence of redundant techniques   |
+| [planning-and-execution](evals/planning-and-execution.md) | Planning, decomposition, dependencies, checkpoints, and replanning      |
+| [debugging](evals/debugging.md)                           | Bug investigation, incidents, root cause, and containment               |
+| [research](evals/research.md)                             | Current research, primary sources, conflicts, versions, and limitations |
+| [high-impact-actions](evals/high-impact-actions.md)       | Destructive, financial, production, security, and privacy actions       |
+| [regression](evals/regression.md)                         | Compact suite with critical scenarios from every area                   |
+
+After changing a technique, run the matching specialized suite plus `regression` before approving the change.
+
+---
+
+## Condensed operational flow
 
 ```text
-Use PelizzAI Reasoning para orquestrar técnicas de raciocínio, não para tornar toda tarefa complexa.
+1. Understand goal, scope, risk, and completion criterion.
+2. Check context, project rules, and available evidence.
+3. Classify the effect and choose the matching implementation/validation strategy.
+4. Choose the dominant technique and only auxiliaries with a distinct function.
+5. Read the corresponding Markdown files.
+6. Execute with ReAct when there are tools, observation, or uncertainty.
+7. Validate in proportion to risk and effect.
+8. Replan only if new evidence invalidates the current path.
+9. Conclude when the completion criteria are met.
+```
 
-Escolha a menor combinação de técnicas que reduza incerteza, respeite restrições, produza evidência suficiente e permita concluir com segurança.
+---
 
-Prefira:
-- evidência a suposição;
-- recomendação reversível a compromisso prematuro, sem decidir pelo usuário;
-- validação real a confiança subjetiva;
-- técnicas específicas a raciocínio genérico;
-- conclusão proporcional a investigação infinita.
+## Final instruction to the agent
 
-Não exponha cadeia de pensamento detalhada.
-Não invente observações, testes, fontes, alterações ou resultados.
-Não use técnica sem gatilho real.
+```text
+Use PelizzAI Reasoning to orchestrate reasoning techniques, not to make every task complex.
+
+Choose the smallest combination of techniques that reduces uncertainty, respects constraints, produces sufficient evidence, and allows a safe conclusion.
+
+Prefer:
+- evidence over assumption;
+- a reversible recommendation over premature commitment, without deciding for the user;
+- real validation over subjective confidence;
+- specific techniques over generic reasoning;
+- proportional conclusion over infinite investigation.
+
+Do not expose a detailed chain of thought.
+Do not invent observations, tests, sources, changes, or results.
+Do not use a technique without a real trigger.
 ```

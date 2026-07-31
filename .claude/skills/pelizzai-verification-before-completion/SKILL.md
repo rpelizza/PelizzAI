@@ -1,282 +1,285 @@
 ---
 name: pelizzai-verification-before-completion
-description: Use SEMPRE que estiver prestes a afirmar que algo está pronto, corrigido, passando ou funcionando — antes de commitar, integrar, dar push ou abrir PR, e antes de passar para a próxima tarefa. Exige RODAR a prova e LER a saída (exit code, contagem de falhas) ANTES de qualquer alegação de sucesso: evidência antes de afirmação, sempre. Escolhe prova proporcional ao efeito, invalida evidência após mutação relevante, exige verificação visual quando há frontend e sela o SHA exato do conteúdo validado em validated-head. Não repete checks por mudança de mensagem nem transforma toda ação intermediária em validação final.
+description: Use WHENEVER you are about to claim that something is done, fixed, passing, or working — before committing, integrating, pushing, or opening a PR, and before moving to the next task. Requires RUNNING the proof and READING the output (exit code, failure counts) BEFORE any claim of success: evidence before assertion, always. Chooses proof proportional to the effect, invalidates evidence after a relevant mutation, requires visual verification when there is frontend, and seals the exact SHA of the validated content in validated-head. Does not repeat checks over a message-only change nor turn every intermediate action into final validation.
 ---
 
 # PelizzAI Verification Before Completion
 
-## Objetivo
+## Goal
 
-Afirmar que um trabalho está concluído sem verificar é desonestidade, não eficiência. Esta skill é o
-gate que exige **evidência fresca** antes de qualquer alegação de sucesso e faz a força da afirmação
-corresponder à evidência. Verification é um gate de causalidade: a prova precisa observar o efeito
-alegado **depois da última mutação que poderia alterá-lo**.
+Claiming work is complete without verifying is dishonesty, not efficiency. This skill is the gate
+that requires **fresh evidence** before any claim of success and makes the strength of the
+assertion match the evidence. Verification is a causality gate: the proof must observe the claimed
+effect **after the last mutation that could alter it**.
 
-**Anuncie** somente quando for uma fase explícita ("Usando a skill PelizzAI Verification Before
-Completion para confirmar com evidência antes de declarar pronto."); como gate embutido de outra
-skill, rode sem novo preâmbulo.
+**Announce** only when it is an explicit phase ("Using the PelizzAI Verification Before
+Completion skill to confirm with evidence before declaring done."); as an embedded gate of another
+skill, run without a new preamble.
 
-## Princípio central
+## Core principle
 
-> Evidência antes de afirmação, sempre. Violar a letra desta regra é violar o espírito dela.
+> Evidence before assertion, always. Violating the letter of this rule is violating its spirit.
 
-## A Lei de Ferro
-
-```text
-NENHUMA ALEGAÇÃO DE CONCLUSÃO SEM EVIDÊNCIA FRESCA DE VERIFICAÇÃO.
-```
-
-Se você não tem a saída de uma prova **desta rodada de mudanças**, você **não pode** afirmar que
-passa.
-
-## O gate
+## The Iron Law
 
 ```text
-ANTES de afirmar qualquer status ou expressar satisfação:
-
-1. IDENTIFIQUE: qual é a alegação exata, e qual é o menor oráculo que realmente a observa?
-   (em consumidor, use os comandos do projeto-alvo — pelizzai/data/state.md, campo project:, e
-   pelizzai/profile.md; em source mode, o manifest/script real.)
-2. RODE: execute a prova COMPLETA e fresca, depois da última mutação que poderia alterar o resultado.
-3. LEIA: a saída inteira — confira o exit code, conte as falhas, olhe o delta e as limitações.
-4. VERIFIQUE: a saída confirma a alegação?
-   - Se NÃO: declare o status REAL com a evidência, ou reduza a alegação ao que foi provado.
-   - Se SIM: faça a alegação JUNTO com a evidência.
-5. SÓ ENTÃO: faça a alegação. Em entrega Git, sele o mesmo HEAD que será integrado.
-
-Pular qualquer passo = mentir, não verificar.
+NO CLAIM OF COMPLETION WITHOUT FRESH VERIFICATION EVIDENCE.
 ```
 
-“Fresh” não significa “na mesma mensagem”: não re-rode a suíte inteira a cada frase. Significa que a
-evidência:
+If you do not have the output of a proof **from this round of changes**, you **cannot** claim it
+passes.
 
-- foi produzida nesta rodada de mudanças ou é um artefato verificável identificado;
-- é posterior ao último código/config/doc/overlay/fix que afeta o resultado;
-- corresponde ao mesmo ambiente, inputs e HEAD relevantes;
-- não foi invalidada por commit, amend, merge, rebase, codegen, formatter ou teste que escreve.
+## The gate
 
-Mudança apenas de conversa não invalida prova. Mudança do produto invalida.
+```text
+BEFORE asserting any status or expressing satisfaction:
 
-## Prova por efeito
+1. IDENTIFY: what is the exact claim, and what is the smallest oracle that actually observes it?
+   (in a consumer, use the target project's commands — pelizzai/data/state.md, the project: field,
+   and pelizzai/profile.md; in source mode, the real manifest/script.)
+2. RUN: execute the COMPLETE, fresh proof, after the last mutation that could alter the result.
+3. READ: the entire output — check the exit code, count the failures, look at the delta and the limitations.
+4. VERIFY: does the output confirm the claim?
+   - If NO: state the REAL status with the evidence, or reduce the claim to what was proven.
+   - If YES: make the claim TOGETHER with the evidence.
+5. ONLY THEN: make the claim. In a Git delivery, seal the same HEAD that will be integrated.
 
-| Alegação/efeito | Evidência adequada | Não basta |
+Skipping any step = lying, not verifying.
+```
+
+“Fresh” does not mean “in the same message”: do not re-run the whole suite for every sentence. It
+means the evidence:
+
+- was produced in this round of changes or is an identified verifiable artifact;
+- postdates the last code/config/doc/overlay/fix that affects the result;
+- matches the same relevant environment, inputs, and HEAD;
+- was not invalidated by a commit, amend, merge, rebase, codegen, formatter, or a test that writes.
+
+A conversation-only change does not invalidate proof. A product change does.
+
+## Proof by effect
+
+| Claim/effect | Adequate evidence | Not enough |
 | --- | --- | --- |
-| bug corrigido | oráculo do sintoma agora verde + regressão relevante | diff “parece certo” |
-| comportamento novo/alterado | teste do contrato; RED observado quando TDD foi a estratégia | teste tautológico ou só snapshot |
-| refactor preservativo | characterization/suíte equivalente antes e depois | teste novo inventado no verde |
-| build/type/lint | comando canônico correspondente + exit code | extrapolar um check para outro |
-| config/schema/migração/IaC | parser/validate/plan/dry-run, delta e rollback aplicável | teste unitário sem observar o artefato |
-| integração | fixture/sandbox/contrato real na fronteira | mock que remove a fronteira |
-| UI | `pelizzai-frontend`: app rodando, estados, viewports, acessibilidade/visual | build verde ou screenshot única sem fluxo |
-| docs/prompt/policy | lint/render/links/schema/grep ou cenário de consumo | fabricar teste unitário |
-| requisitos do plano | traceabilidade requisito → tarefa/diff/prova | “os testes passam” |
+| bug fixed | the symptom's oracle now green + relevant regression | diff “looks right” |
+| new/changed behavior | contract test; RED observed when TDD was the strategy | tautological test or snapshot only |
+| preserving refactor | characterization/equivalent suite before and after | new test invented on green |
+| build/type/lint | the matching canonical command + exit code | extrapolating one check to another |
+| config/schema/migration/IaC | parser/validate/plan/dry-run, delta, and applicable rollback | unit test without observing the artifact |
+| integration | real fixture/sandbox/contract at the boundary | mock that removes the boundary |
+| UI | `pelizzai-frontend`: app running, states, viewports, accessibility/visual | green build or a single screenshot without the flow |
+| docs/prompt/policy | lint/render/links/schema/grep or a consumption scenario | fabricating a unit test |
+| plan requirements | traceability requirement → task/diff/proof | “the tests pass” |
 
-Combine linhas em tarefas mistas. Rode suíte completa quando risco, perfil ou mudança transversal
-justificarem; use teste focal para iteração local. Não rode checks sem relação apenas para aumentar
-volume de saída.
+Combine rows for mixed tasks. Run the full suite when risk, profile, or a cross-cutting change
+justifies it; use a focal test for local iteration. Do not run unrelated checks just to inflate
+output volume.
 
-## Falhas comuns
+## Common failures
 
-A matriz acima escolhe a prova. Esta tabela lista as alegações em que a mentira acontece com mais
-frequência:
+The matrix above picks the proof. This table lists the claims where the lying happens most
+often:
 
-| Alegação                  | Exige                                   | Não basta                            |
+| Claim                     | Requires                                | Not enough                           |
 | ------------------------- | --------------------------------------- | ------------------------------------ |
-| Testes passam             | Saída do comando de teste: 0 falhas     | Execução anterior, "deveria passar"  |
-| Linter limpo              | Saída do linter: 0 erros                | Check parcial, extrapolação          |
-| Build funciona            | Comando de build: exit 0                | Linter passou, "os logs parecem ok"  |
-| Bug corrigido             | Testar o sintoma original: passa        | Código mudou, presumido corrigido    |
-| Teste de regressão válido | Ciclo red-green verificado              | O teste passa uma vez                |
-| Subagente concluiu        | Diff do git mostra as mudanças          | O agente reportou "sucesso"          |
-| Requisitos atendidos      | Checklist linha a linha contra o plano  | Os testes passam                     |
+| Tests pass                | Test command output: 0 failures         | A previous run, "it should pass"     |
+| Linter clean              | Linter output: 0 errors                 | Partial check, extrapolation         |
+| Build works               | Build command: exit 0                   | Linter passed, "the logs look ok"    |
+| Bug fixed                 | Testing the original symptom: passes    | Code changed, presumed fixed         |
+| Valid regression test     | Verified red-green cycle                | The test passes once                 |
+| Subagent finished         | Git diff shows the changes              | The agent reported "success"         |
+| Requirements met          | Line-by-line checklist against the plan | The tests pass                       |
 
-## Padrões-chave
+## Key patterns
 
 ```text
-Testes:
-✅ [rode o comando] [veja: 34/34 passam] "Todos os testes passam"
-❌ "Agora deve passar" / "Parece correto"
+Tests:
+✅ [run the command] [see: 34/34 pass] "All tests pass"
+❌ "It should pass now" / "Looks correct"
 
-Teste de regressão (TDD red-green):
-✅ Escreva → Rode (passa) → Reverta o fix → Rode (DEVE FALHAR) → Restaure → Rode (passa)
-❌ "Escrevi um teste de regressão" (sem o ciclo red-green)
+Regression test (TDD red-green):
+✅ Write → Run (passes) → Revert the fix → Run (MUST FAIL) → Restore → Run (passes)
+❌ "I wrote a regression test" (without the red-green cycle)
 
 Build:
-✅ [rode o build] [veja: exit 0] "Build passa"
-❌ "O linter passou" (linter não verifica compilação)
+✅ [run the build] [see: exit 0] "Build passes"
+❌ "The linter passed" (a linter does not verify compilation)
 
-Requisitos:
-✅ Releia o plano → crie um checklist → verifique cada item → reporte lacunas ou conclusão
-❌ "Os testes passam, fase concluída"
+Requirements:
+✅ Re-read the plan → build a checklist → verify each item → report gaps or completion
+❌ "The tests pass, phase complete"
 
-Delegação a subagente:
-✅ Subagente reporta sucesso → confira o diff do git → verifique as mudanças → reporte o estado REAL
-❌ Confiar no relatório do subagente
+Subagent delegation:
+✅ Subagent reports success → check the git diff → verify the changes → report the REAL state
+❌ Trusting the subagent's report
 ```
 
-## TDD e regressão
+## TDD and regression
 
-Se o ciclo RED→GREEN já foi observado e registrado nesta rodada, antes do fix, ele já é a prova: não
-reverta o conteúdo final para encenar outro RED — reexecute GREEN e os checks de regressão afetados.
-Quando não existe evidência de que o teste detecta o defeito, o ciclo acima é obrigatório e deve ser
-obtido por meio seguro (reverter o fix no editor, mutation controlada, branch/patch temporário ou
-reprodução anterior preservada), sempre restaurando e reverificando o estado. Não use reversão
-destrutiva nem deixe a working tree ambígua.
+If the RED→GREEN cycle was already observed and recorded in this round, before the fix, it already
+is the proof: do not revert the final content to stage another RED — re-run GREEN and the affected
+regression checks. When there is no evidence that the test detects the defect, the cycle above is
+mandatory and must be obtained by safe means (reverting the fix in the editor, controlled mutation,
+a temporary branch/patch, or a preserved earlier reproduction), always restoring and re-verifying
+the state. Do not use destructive reversion or leave the working tree ambiguous.
 
-## Sinais de alerta — PARE
+## Warning signs — STOP
 
 ```text
-- Usar "deveria", "provavelmente", "parece que".
-- Expressar satisfação antes de verificar ("Ótimo!", "Perfeito!", "Pronto!").
-- Prestes a commitar/push/PR sem verificação.
-- Confiar no relatório de sucesso de um subagente.
-- Apoiar-se em verificação parcial.
-- Pensar "só desta vez".
-- Cansaço e vontade de terminar.
-- QUALQUER frase que implique sucesso sem ter rodado a verificação.
+- Using "should", "probably", "it seems".
+- Expressing satisfaction before verifying ("Great!", "Perfect!", "Done!").
+- About to commit/push/PR without verification.
+- Trusting a subagent's success report.
+- Leaning on partial verification.
+- Thinking "just this once".
+- Fatigue and the urge to finish.
+- ANY phrase that implies success without having run the verification.
 ```
 
 ```text
-- Usar uma prova parcial para uma alegação ampla.
-- Forçar TDD/mutation test em artefato sem comportamento automatizável.
-- Declarar UI pronta sem overlay frontend e limite visual explícito.
-- Gravar validated-head antes de squash/overlays/fixes/review final.
-- Entregar HEAD diferente do conteúdo validado.
-- Reexecutar checks só porque mudou a mensagem, sem mutação relevante.
+- Using a partial proof for a broad claim.
+- Forcing TDD/mutation testing on an artifact with no automatable behavior.
+- Declaring UI done without the frontend overlay and an explicit visual limit.
+- Recording validated-head before squash/overlays/fixes/final review.
+- Delivering a HEAD different from the validated content.
+- Re-running checks just because the message changed, without a relevant mutation.
 ```
 
-## Prevenção de racionalização
+## Rationalization prevention
 
-| Desculpa                                  | Realidade                |
+| Excuse                                    | Reality                  |
 | ----------------------------------------- | ------------------------ |
-| "Agora deve funcionar"                    | RODE a verificação       |
-| "Estou confiante"                         | Confiança ≠ evidência    |
-| "Só desta vez"                            | Sem exceções             |
-| "O linter passou"                         | Linter ≠ compilador      |
-| "O subagente disse que deu certo"         | Verifique você mesmo     |
-| "Estou cansado"                           | Exaustão ≠ desculpa      |
-| "Um check parcial basta"                  | Parcial não prova nada   |
-| "Palavras diferentes, a regra não vale"   | Espírito acima da letra  |
+| "It should work now"                      | RUN the verification     |
+| "I am confident"                          | Confidence ≠ evidence    |
+| "Just this once"                          | No exceptions            |
+| "The linter passed"                       | Linter ≠ compiler        |
+| "The subagent said it worked"             | Verify it yourself       |
+| "I am tired"                              | Exhaustion ≠ excuse      |
+| "A partial check is enough"               | Partial proves nothing   |
+| "Different words, the rule does not apply" | Spirit above the letter  |
 
-## Delegação e review
+## Delegation and review
 
-Relatório de agente não é prova por si só. Confira o artefato/diff e execute a evidência cuja
-responsabilidade é do coordenador. No review por tarefa, o bloco Verification cobre a lente de
-qualidade; no candidato final, o coordenador revalida o range/HEAD consolidado conforme risco.
+An agent's report is not proof by itself. Check the artifact/diff and run the evidence that is the
+coordinator's responsibility. In the per-task review, the Verification block covers the quality
+lens; on the final candidate, the coordinator revalidates the consolidated range/HEAD according to risk.
 
-`UNVERIFIED` é um estado válido e honesto. Diga o que não pôde rodar e limite a conclusão; não
-converta ausência de ferramenta em aprovação.
+`UNVERIFIED` is a valid, honest state. Say what could not run and limit the conclusion; do not
+convert a missing tool into approval.
 
 ## Frontend
 
-Qualquer mudança de página, componente, CSS, layout, estado visual ou UX aplica
-`pelizzai-frontend` como overlay: testes verdes e build ok **não** provam que a página renderiza
-certo. Spec/Figma/design system aprovados prevalecem sobre heurísticas; anti-AI-slop, estados,
-responsividade, acessibilidade e QA visual continuam parte da prova.
+Any change to a page, component, CSS, layout, visual state, or UX applies
+`pelizzai-frontend` as an overlay: green tests and an ok build do **not** prove the page renders
+correctly. Approved spec/Figma/design system prevail over heuristics; anti-AI-slop, states,
+responsiveness, accessibility, and visual QA remain part of the proof.
 
-Playwright, browser e screenshot são ferramentas, não substitutos do contrato frontend. Se a UI
-não puder rodar, faça a revisão estática prevista e declare que a validação visual ficou pendente.
+Playwright, the browser, and screenshots are tools, not substitutes for the frontend contract. If
+the UI cannot run, do the planned static review and declare that visual validation remains pending.
 
-## Selagem do conteúdo Git
+## Sealing the Git content
 
-Depois de todas as mutações de produto e da estratégia de commits final:
+After all product mutations and the final commit strategy:
 
 ```text
-1. Confirme working tree limpa e validated-head: <none>.
+1. Confirm a clean working tree and validated-head: <none>.
 2. Capture candidate-head = git rev-parse HEAD.
-3. Confirme a evidência dos overlays já concluídos e rode review final, checks/checklist e esta
-   Verification contra candidate-head; qualquer fix ou overlay reaberto reinicia o candidato.
-4. Confirme que HEAD ainda é candidate-head.
-5. Consumidor: grave candidate-head completo em state como validated-head, sem commit.
-   Source mode: grave-o no execution record e mantenha a working tree limpa.
-6. Entregue a pelizzai-finish-task.
+3. Confirm the evidence of the overlays already completed and run the final review,
+   checks/checklist, and this Verification against candidate-head; any fix or reopened overlay
+   restarts the candidate.
+4. Confirm HEAD is still candidate-head.
+5. Consumer: record the full candidate-head in state as validated-head, without committing.
+   Source mode: record it in the execution record and keep the working tree clean.
+6. Hand over to pelizzai-finish-task.
 ```
 
-A finish-task encerra em `phase: delivered` (conteúdo selado + destino executado), nunca em `done`;
-`done` é constatação posterior contra `confirmar:`, na próxima abertura/retomada. Verification sela o
-conteúdo, não declara `done`.
+Finish-task closes out in `phase: delivered` (sealed content + destination executed), never in `done`;
+`done` is a later observation against `confirm:`, on the next open/resumption. Verification seals
+the content; it does not declare `done`.
 
-Ao gravar `validated-head`, confirme que o state/execution record carrega `kickoff: ratificado`: o
-conteúdo selado nasceu de uma rota estrutural ratificada, não de defaults silenciosos. Se o marcador
-está `pendente` numa entrega planejada, a rota não foi ratificada — resolva no gate certo antes de
-selar. É uma âncora de uma linha, não um checklist novo; read-only/trivial não sela e não a exige.
+When recording `validated-head`, confirm that the state/execution record carries `kickoff: ratified`:
+the sealed content was born from a ratified structural route, not from silent defaults. If the
+marker is `pending` on a planned delivery, the route was not ratified — resolve it at the right
+gate before sealing. It is a one-line anchor, not a new checklist; read-only/trivial does not seal
+and does not require it.
 
-Na entrada da finish-task em consumidor:
+At finish-task entry in a consumer:
 
 - `git rev-parse HEAD == validated-head`;
-- a única sujeira é `pelizzai/data/state.md` com o seal pendente;
-- nenhuma evidência é anterior ao último fix/overlay.
+- the only dirt is `pelizzai/data/state.md` with the pending seal;
+- no evidence predates the last fix/overlay.
 
-A finish-task cria exatamente um closure commit metadata-only. Antes de push/PR, ela prova que
-`validated-head..closure-head` contém somente metadata do harness: `pelizzai/data/state.md` e o
-arquivo `pelizzai/data/history/<AAAA-MM-DD>-<slug>.md` gerado pela migração do selo. Esse commit não
-muda o conteúdo validado.
+Finish-task creates exactly one metadata-only closure commit. Before push/PR, it proves that
+`validated-head..closure-head` contains only harness metadata: `pelizzai/data/state.md` and the
+`pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` file generated by the seal migration. That commit
+does not change the validated content.
 
-Em source mode, finish-task recebe `validated-head` do execution record, exige HEAD igual e working
-tree limpa e **não** cria state/closure commit.
+In source mode, finish-task receives `validated-head` from the execution record, requires an equal
+HEAD and a clean working tree, and does **not** create a state/closure commit.
 
-Qualquer mutação de produto após o seal invalida `validated-head`: volte aos overlays/review/provas,
-commite o novo candidato e sele novamente. Nunca “corrija só mais uma coisa” na finish-task.
+Any product mutation after the seal invalidates `validated-head`: go back to the
+overlays/review/proofs, commit the new candidate, and seal again. Never “fix just one more thing”
+in finish-task.
 
-## Quando aplicar
-
-```text
-SEMPRE antes de:
-- Qualquer variação de alegação de sucesso/conclusão ou de que algo está funcionando.
-- Qualquer expressão de satisfação.
-- Qualquer afirmação positiva sobre o estado do trabalho.
-- Commitar, selar uma entrega Git, dar push, abrir PR, integrar ou concluir a tarefa.
-- Qualquer efeito externo cuja segurança dependa do resultado.
-- Incorporar como pronto o trabalho devolvido por um subagente/membro.
-- Passar para a próxima tarefa, e no gate de tarefa/fase quando a head skill o exige.
-
-A regra vale para: frases exatas, paráfrases e sinônimos, implicações de sucesso —
-qualquer comunicação que sugira conclusão ou correção.
-```
-
-Não acione uma validação final para cada tool call, pergunta intermediária ou despacho de
-delegação. Evidência local pode orientar a próxima ação sem alegação de conclusão.
-
-## Por que isso importa
-
-Alegar conclusão sem evidência quebra a confiança e gera retrabalho: função indefinida que vai
-quebrar em produção, requisito faltando entregue como pronto, tempo perdido em conclusão falsa →
-redirecionamento → retrabalho. O custo real aparece quando o parceiro humano deixa de acreditar na
-sua palavra ("não acredito em você") — confiança quebrada não se recupera com mais uma alegação, e
-sim com evidência. Honestidade é valor central do harness: declare o que você **provou**, não o que
-você espera.
-
-## Integração
-
-- `pelizzai-execution-plans` — gate antes de declarar a tarefa/plano concluído (review final →
-  verificação → `pelizzai-finish-task`).
-- `pelizzai-finish-task` — verifica antes de consolidar e antes de qualquer push/PR; recebe o
-  conteúdo já selado.
-- `pelizzai-review` — o bloco `Verification` do reviewer é esta mesma disciplina (evidência fresca;
-  UNVERIFIED nunca ✅), por tarefa e no review final; esta skill é o gate da entrega inteira.
-- `pelizzai-tdd` — o red-green produz o teste; a PROVA de regressão (reverter o fix → DEVE FALHAR →
-  restaurar) é exigida aqui.
-- `pelizzai-frontend` — executa a verificação visual da UI rodando (navegador/screenshot, mobile e
-  desktop) que esta skill exige para mudanças de interface.
-
-A head skill decide quando o gate entra; esta skill decide se a evidência sustenta a conclusão.
-
-## Instrução final
+## When to apply
 
 ```text
-Sem atalhos para a verificação.
+ALWAYS before:
+- Any variation of a claim of success/completion or that something is working.
+- Any expression of satisfaction.
+- Any positive statement about the state of the work.
+- Committing, sealing a Git delivery, pushing, opening a PR, integrating, or completing the task.
+- Any external effect whose safety depends on the result.
+- Incorporating as done the work returned by a subagent/member.
+- Moving to the next task, and at the task/phase gate when the head skill requires it.
 
-Rode a prova. Leia a saída. SÓ ENTÃO afirme o resultado.
-
-Prefira:
-- evidência fresca a "deveria funcionar";
-- exit code e contagem de falhas a "parece ok";
-- estado real a relatório de subagente;
-- checklist contra o plano a "os testes passam";
-- prova do efeito a ritual, e o conteúdo selado ao conteúdo entregue por engano.
-
-Isto não é negociável.
+The rule covers: exact phrases, paraphrases and synonyms, implications of success —
+any communication that suggests completion or a fix.
 ```
 
-Prove o efeito, não o ritual: reuse evidência ainda válida, invalide-a quando o produto mudar e sele
-exatamente o conteúdo que será entregue.
+Do not trigger a final validation for every tool call, intermediate question, or delegation
+dispatch. Local evidence may guide the next action without a claim of completion.
+
+## Why this matters
+
+Claiming completion without evidence breaks trust and creates rework: an undefined function that
+will break in production, a missing requirement delivered as done, time lost on false completion →
+redirection → rework. The real cost shows up when the human partner stops believing your word
+("I don't believe you") — broken trust is not recovered with one more claim, but with evidence.
+Honesty is a core value of the harness: state what you **proved**, not what you hope.
+
+## Integration
+
+- `pelizzai-execution-plans` — gate before declaring the task/plan complete (final review →
+  verification → `pelizzai-finish-task`).
+- `pelizzai-finish-task` — verifies before consolidating and before any push/PR; receives the
+  content already sealed.
+- `pelizzai-review` — the reviewer's `Verification` block is this same discipline (fresh evidence;
+  UNVERIFIED never ✅), per task and in the final review; this skill is the gate for the whole delivery.
+- `pelizzai-tdd` — red-green produces the test; the regression PROOF (revert the fix → MUST FAIL →
+  restore) is required here.
+- `pelizzai-frontend` — performs the visual verification of the running UI (browser/screenshot,
+  mobile and desktop) that this skill requires for interface changes.
+
+The head skill decides when the gate enters; this skill decides whether the evidence supports the
+conclusion.
+
+## Final instruction
+
+```text
+No shortcuts to verification.
+
+Run the proof. Read the output. ONLY THEN state the result.
+
+Prefer:
+- fresh evidence over "it should work";
+- exit code and failure counts over "looks ok";
+- the real state over a subagent's report;
+- a checklist against the plan over "the tests pass";
+- proof of the effect over ritual, and the sealed content over content delivered by mistake.
+
+This is non-negotiable.
+```
+
+Prove the effect, not the ritual: reuse evidence that is still valid, invalidate it when the
+product changes, and seal exactly the content that will be delivered.

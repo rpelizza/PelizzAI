@@ -1,747 +1,747 @@
 # Assumption Tracking
 
-## Objetivo
+## Purpose
 
-Use Assumption Tracking para impedir que decisões importantes dependam de premissas ocultas, não verificadas ou incorretas.
+Use Assumption Tracking to keep important decisions from resting on hidden, unverified, or incorrect assumptions.
 
-Uma premissa é algo tratado temporariamente como verdadeiro para permitir que uma análise, plano ou implementação avance.
+An assumption is something treated temporarily as true so that an analysis, plan, or implementation can move forward.
 
-Exemplos:
-
-```text
-- O ambiente possui Redis disponível.
-- A API aceita o parâmetro `status`.
-- Clientes antigos toleram ausência do novo campo.
-- O volume de dados cabe no limite de memória definido.
-- O usuário possui permissão para executar determinada ação.
-- A biblioteca é compatível com a versão atual do framework.
-```
-
-Premissas técnicas podem ser necessárias para orientar investigação. Decisões de produto não são
-premissas que a LLM pode adotar: requisito, escopo, UX, arquitetura preferida, dados, segurança,
-risco aceito e aceite pertencem ao usuário.
-
-O problema é:
+Examples:
 
 ```text
-- assumir sem registrar;
-- implementar antes de validar premissa crítica;
-- apresentar hipótese como fato;
-- ignorar evidência contrária;
-- não saber o que fazer quando a premissa falha.
+- The environment has Redis available.
+- The API accepts the `status` parameter.
+- Old clients tolerate the absence of the new field.
+- The data volume fits within the defined memory limit.
+- The user has permission to perform a given action.
+- The library is compatible with the current framework version.
 ```
 
-## Princípio central
+Technical assumptions can be necessary to guide investigation. Product decisions are not
+assumptions the LLM may adopt: requirement, scope, UX, preferred architecture, data, security,
+accepted risk, and acceptance belong to the user.
 
-> Toda decisão relevante deve deixar claro quais condições ainda precisam ser verdadeiras para que ela continue válida.
+The problem is:
+
+```text
+- assuming without recording;
+- implementing before validating a critical assumption;
+- presenting a hypothesis as fact;
+- ignoring contrary evidence;
+- not knowing what to do when the assumption fails.
+```
+
+## Core principle
+
+> Every relevant decision must make clear which conditions still need to be true for it to remain valid.
 
 ```mermaid
 flowchart TD
-    A[Objetivo ou decisão] --> B[Identificar premissas]
-    B --> C[Classificar impacto e incerteza]
-    C --> D{Premissa é crítica?}
+    A[Goal or decision] --> B[Identify assumptions]
+    B --> C[Classify impact and uncertainty]
+    C --> D{Is the assumption critical?}
 
-    D -- Sim --> E[Validar antes de comprometer execução]
-    D -- Não --> F[Registrar e monitorar]
+    D -- Yes --> E[Validate before committing execution]
+    D -- No --> F[Record and monitor]
 
-    E --> G{Premissa confirmada?}
-    G -- Sim --> H[Promover a fato confirmado]
-    G -- Não --> I[Invalidar caminho e replanejar]
+    E --> G{Assumption confirmed?}
+    G -- Yes --> H[Promote to confirmed fact]
+    G -- No --> I[Invalidate the path and replan]
 
-    F --> J[Executar com checkpoint]
-    J --> K{Nova evidência afeta a premissa?}
-    K -- Sim --> G
-    K -- Não --> L[Continuar]
+    F --> J[Execute with a checkpoint]
+    J --> K{Does new evidence affect the assumption?}
+    K -- Yes --> G
+    K -- No --> L[Continue]
 ```
 
-## Quando usar
+## When to use
 
-Use Assumption Tracking quando a tarefa envolver:
+Use Assumption Tracking when the task involves:
 
 ```text
-- requisitos incompletos ou ambíguos;
-- decisões arquiteturais;
-- dependências externas;
-- APIs, bibliotecas ou ferramentas ainda não verificadas;
-- integrações com outros sistemas;
-- migrações;
-- segurança, permissões ou dados sensíveis;
-- estimativas de custo, volume, performance ou prazo;
-- múltiplos ambientes;
-- comportamento legado;
-- regras de negócio pouco documentadas;
-- hipóteses de causa raiz em debugging;
-- ações com alto custo de reversão.
+- incomplete or ambiguous requirements;
+- architectural decisions;
+- external dependencies;
+- APIs, libraries, or tools not yet verified;
+- integrations with other systems;
+- migrations;
+- security, permissions, or sensitive data;
+- estimates of cost, volume, performance, or deadlines;
+- multiple environments;
+- legacy behavior;
+- poorly documented business rules;
+- root-cause hypotheses in debugging;
+- actions with a high cost of reversal.
 ```
 
-Exemplos adequados:
+Good examples:
 
 ```text
-- Planejar processamento assíncrono assumindo que existe broker disponível.
-- Alterar contrato de API assumindo compatibilidade com clientes existentes.
-- Escolher banco de dados assumindo determinado volume de carga.
-- Criar integração assumindo que o fornecedor suporta webhook.
-- Corrigir bug assumindo que a duplicidade vem de clique duplo.
-- Recomendação técnica baseada em versão ainda não confirmada.
+- Planning asynchronous processing assuming a broker is available.
+- Changing an API contract assuming compatibility with existing clients.
+- Choosing a database assuming a given load volume.
+- Building an integration assuming the vendor supports webhooks.
+- Fixing a bug assuming the duplication comes from a double click.
+- A technical recommendation based on a version not yet confirmed.
 ```
 
-## Quando evitar
+## When to avoid
 
-Não crie um registro formal de premissas para tarefas triviais.
+Do not create a formal assumption record for trivial tasks.
 
-Evite ou simplifique quando:
+Avoid or simplify when:
 
 ```text
-- não há incerteza relevante;
-- a resposta depende apenas de conteúdo fornecido pelo usuário;
-- existe fonte de verdade direta e fácil de consultar;
-- a tarefa é pequena, reversível e local;
-- registrar premissas custa mais do que executar e validar.
+- there is no relevant uncertainty;
+- the answer depends only on content supplied by the user;
+- there is a direct, easy-to-consult source of truth;
+- the task is small, reversible, and local;
+- recording assumptions costs more than executing and validating.
 ```
 
-Exemplos em que a técnica é desnecessária:
+Examples where the technique is unnecessary:
 
 ```text
-- Corrigir erro de sintaxe evidente.
-- Traduzir um texto.
-- Reescrever um parágrafo.
-- Renomear variável local sem impacto externo.
-- Ajustar um título ou uma descrição.
+- Fixing an obvious syntax error.
+- Translating a text.
+- Rewriting a paragraph.
+- Renaming a local variable with no external impact.
+- Adjusting a title or a description.
 ```
 
-## Relação com outras técnicas
+## Relationship to other techniques
 
-| Técnica                                              | Responsabilidade                                                     |
-| ---------------------------------------------------- | -------------------------------------------------------------------- |
-| [Constraint Satisfaction](constraint-satisfaction.md) | Organiza requisitos, proibições e limites                            |
-| Assumption Tracking                                  | Registra condições ainda não confirmadas                             |
-| [Plan and Execute](plan-and-execute.md)              | Define etapas e checkpoints                                          |
-| [ReAct](react.md)                                    | Executa ações para reduzir incerteza                                 |
-| [Verification](verification.md)                      | Confirma, limita ou refuta premissas                                 |
-| [Decision Making](decision-making.md)                | Escolhe entre estratégias quando premissas distintas produzem caminhos interdependentes |
-| [Critique and Refine](critique-and-refine.md)        | Corrige plano ou solução após premissa inválida                      |
+| Technique                                             | Responsibility                                                       |
+| ----------------------------------------------------- | -------------------------------------------------------------------- |
+| [Constraint Satisfaction](constraint-satisfaction.md) | Organizes requirements, prohibitions, and limits                     |
+| Assumption Tracking                                   | Records conditions not yet confirmed                                 |
+| [Plan and Execute](plan-and-execute.md)               | Defines steps and checkpoints                                        |
+| [ReAct](react.md)                                     | Executes actions to reduce uncertainty                               |
+| [Verification](verification.md)                       | Confirms, bounds, or refutes assumptions                             |
+| [Decision Making](decision-making.md)                 | Chooses between strategies when distinct assumptions produce interdependent paths |
+| [Critique and Refine](critique-and-refine.md)         | Fixes the plan or solution after an invalid assumption               |
 
-### Regra de integração
+### Integration rule
 
-- Use **Constraint Satisfaction** para separar o que é obrigatório do que é desejável.
-- Use **Assumption Tracking** para identificar o que ainda não é fato.
-- Use **Verification** para confirmar ou refutar premissas.
-- Use **Plan and Execute** para inserir checkpoints antes de ações dependentes de premissas críticas.
-- Use **Decision Making** quando diferentes premissas levam a estratégias materialmente distintas (modo de busca com poda quando os caminhos são interdependentes).
+- Use **Constraint Satisfaction** to separate what is mandatory from what is desirable.
+- Use **Assumption Tracking** to identify what is not yet fact.
+- Use **Verification** to confirm or refute assumptions.
+- Use **Plan and Execute** to insert checkpoints before actions that depend on critical assumptions.
+- Use **Decision Making** when different assumptions lead to materially distinct strategies (search-with-pruning mode when the paths are interdependent).
 
-## Categorias de informação
+## Information categories
 
-Não misture estes conceitos.
+Do not mix these concepts.
 
-| Categoria       | Definição                                                            | Tratamento                                  |
-| --------------- | -------------------------------------------------------------------- | ------------------------------------------- |
-| Fato confirmado | Informação observada, testada ou sustentada por evidência confiável  | Pode orientar decisões                      |
-| Premissa        | Condição tratada temporariamente como verdadeira, mas não comprovada | Deve ser rastreada                          |
-| Hipótese        | Explicação possível para um problema ou comportamento                | Deve ser testada                            |
-| Restrição       | Condição obrigatória ou limite que a solução precisa respeitar       | Deve ser atendida                           |
-| Preferência     | Característica desejável, mas negociável                             | Só otimizar após atender obrigatórios       |
-| Risco           | Consequência caso algo dê errado                                     | Deve ser mitigado ou aceito conscientemente |
-| Desconhecido    | Informação ausente sem hipótese suficiente                           | Não deve ser inventada                      |
+| Category        | Definition                                                           | Treatment                                    |
+| --------------- | -------------------------------------------------------------------- | -------------------------------------------- |
+| Confirmed fact  | Information observed, tested, or supported by reliable evidence      | Can drive decisions                          |
+| Assumption      | Condition treated temporarily as true, but not proven                | Must be tracked                              |
+| Hypothesis      | Possible explanation for a problem or behavior                       | Must be tested                               |
+| Constraint      | Mandatory condition or limit the solution must respect               | Must be met                                  |
+| Preference      | Desirable but negotiable characteristic                              | Optimize only after meeting the mandatory    |
+| Risk            | Consequence if something goes wrong                                  | Must be mitigated or consciously accepted    |
+| Unknown         | Missing information without a sufficient hypothesis                  | Must not be invented                         |
 
-Exemplo:
+Example:
 
 ```text
-Fato confirmado:
-- A API atual usa PostgreSQL.
+Confirmed fact:
+- The current API uses PostgreSQL.
 
-Premissa:
-- O banco possui capacidade suficiente para nova consulta analítica.
+Assumption:
+- The database has enough capacity for the new analytical query.
 
-Hipótese:
-- A lentidão é causada por ausência de índice.
+Hypothesis:
+- The slowness is caused by a missing index.
 
-Restrição:
-- Não pode haver downtime.
+Constraint:
+- No downtime allowed.
 
-Preferência:
-- Evitar adicionar infraestrutura nova.
+Preference:
+- Avoid adding new infrastructure.
 
-Risco:
-- A migração pode bloquear tabela em produção.
+Risk:
+- The migration may lock a table in production.
 
-Desconhecido:
-- Não foi medido o volume real de registros afetados.
+Unknown:
+- The real volume of affected records has not been measured.
 ```
 
-## Modelo de uma premissa
+## Assumption template
 
-Registre premissas relevantes no formato canônico abaixo. Use o conjunto completo de campos para premissas críticas; em registros mais leves, omita campos que não agregam, mas mantenha sempre Premissa, Criticidade, Validação necessária, Gatilho de invalidação e Status.
+Record relevant assumptions in the canonical format below. Use the full field set for critical assumptions; in lighter records, omit fields that add nothing, but always keep Assumption, Criticality, Required validation, Invalidation trigger, and Status.
 
 ```text
-Premissa:
-- [condição assumida]
+Assumption:
+- [assumed condition]
 
-Tipo:
-- Técnica, funcional, infraestrutura, externa, segurança, compatibilidade, custo, volume ou prazo.
+Type:
+- Technical, functional, infrastructure, external, security, compatibility, cost, volume, or deadline.
 
-Impacto se estiver errada:
-- [consequência]
+Impact if wrong:
+- [consequence]
 
-Criticidade:
-- Baixo, Médio, Alto ou Crítico.
+Criticality:
+- Low, Medium, High, or Critical.
 
-Evidência atual:
-- [por que a premissa parece plausível]
+Current evidence:
+- [why the assumption seems plausible]
 
-Validação necessária:
-- [teste, contrato, documentação, medição, acesso ou confirmação]
+Required validation:
+- [test, contract, documentation, measurement, access, or confirmation]
 
-Gatilho de invalidação:
-- [o que provaria que a premissa não é válida]
+Invalidation trigger:
+- [what would prove the assumption is not valid]
 
-Ação de contingência:
-- [o que fazer se a premissa falhar]
+Contingency action:
+- [what to do if the assumption fails]
 
 Status:
-- Não verificada, em validação, confirmada, parcialmente confirmada, refutada, obsoleta, bloqueada ou aceita como risco.
+- Unverified, under validation, confirmed, partially confirmed, refuted, obsolete, blocked, or accepted as risk.
 ```
 
-Exemplo:
+Example:
 
 ```text
-Premissa:
-- Redis está disponível e aprovado para uso no ambiente de produção.
+Assumption:
+- Redis is available and approved for use in the production environment.
 
-Tipo:
-- Infraestrutura.
+Type:
+- Infrastructure.
 
-Impacto se estiver errada:
-- A estratégia de fila assíncrona baseada em Redis não é viável.
+Impact if wrong:
+- The Redis-based asynchronous queue strategy is not viable.
 
-Criticidade:
-- Alto.
+Criticality:
+- High.
 
-Evidência atual:
-- O projeto possui configuração local de Redis.
+Current evidence:
+- The project has a local Redis configuration.
 
-Validação necessária:
-- Confirmar disponibilidade, capacidade e política de uso em produção.
+Required validation:
+- Confirm availability, capacity, and usage policy in production.
 
-Gatilho de invalidação:
-- Ambiente de produção não possui Redis ou não permite novo uso.
+Invalidation trigger:
+- The production environment has no Redis or does not allow new usage.
 
-Ação de contingência:
-- Avaliar infraestrutura de fila já existente ou executar processamento controlado por outro mecanismo.
+Contingency action:
+- Evaluate existing queue infrastructure or run controlled processing through another mechanism.
 
 Status:
-- Não verificada.
+- Unverified.
 ```
 
-## Identificação de premissas
+## Identifying assumptions
 
-Procure por linguagem que indique incerteza, condição ou dependência implícita.
+Look for language that signals uncertainty, condition, or implicit dependency.
 
-Sinais comuns:
+Common signals:
 
 ```text
-- "provavelmente"
-- "deve existir"
-- "talvez"
-- "aparentemente"
-- "imagino que"
-- "se suportar"
-- "desde que"
-- "assumindo que"
-- "deve funcionar"
-- "parece compatível"
-- "normalmente"
-- "em teoria"
+- "probably"
+- "there should be"
+- "maybe"
+- "apparently"
+- "I imagine"
+- "if it supports"
+- "as long as"
+- "assuming that"
+- "it should work"
+- "seems compatible"
+- "usually"
+- "in theory"
 ```
 
-Também procure premissas escondidas em decisões aparentemente simples.
+Also look for assumptions hidden in seemingly simple decisions.
 
 ```text
-Decisão:
-"Vamos adicionar cache."
+Decision:
+"Let's add caching."
 
-Premissas ocultas:
-- Existe gargalo mensurável.
-- O dado pode ficar desatualizado por algum período.
-- Há mecanismo de invalidação viável.
-- O ambiente suporta cache.
-- O ganho justifica a complexidade.
+Hidden assumptions:
+- There is a measurable bottleneck.
+- The data can be stale for some period.
+- A viable invalidation mechanism exists.
+- The environment supports caching.
+- The gain justifies the complexity.
 ```
 
-## Classificação por criticidade
+## Classification by criticality
 
-A criticidade depende de impacto e incerteza.
+Criticality depends on impact and uncertainty.
 
 ```mermaid
 flowchart TD
-    A[Premissa] --> B{Impacto se falhar}
-    B -- Baixo --> C[Baixa criticidade]
-    B -- Médio --> D{Incerteza relevante?}
-    D -- Não --> E[Média criticidade]
-    D -- Sim --> F[Alta criticidade]
-    B -- Alto ou irreversível --> G[Crítica]
+    A[Assumption] --> B{Impact if it fails}
+    B -- Low --> C[Low criticality]
+    B -- Medium --> D{Relevant uncertainty?}
+    D -- No --> E[Medium criticality]
+    D -- Yes --> F[High criticality]
+    B -- High or irreversible --> G[Critical]
 ```
 
-| Criticidade | Característica                                                   | Tratamento                                         |
-| ----------- | ---------------------------------------------------------------- | -------------------------------------------------- |
-| Baixo       | Falha gera pequeno retrabalho e é facilmente reversível          | Registrar apenas se útil                           |
-| Médio       | Afeta parte da solução ou exige ajuste localizado                | Validar antes da etapa dependente                  |
-| Alto        | Pode invalidar arquitetura, integração ou plano relevante        | Validar cedo, antes de implementação significativa |
-| Crítico     | Pode gerar perda, exposição, indisponibilidade ou violação grave | Não avançar sem validação suficiente               |
+| Criticality | Characteristic                                                    | Treatment                                          |
+| ----------- | ----------------------------------------------------------------- | -------------------------------------------------- |
+| Low         | Failure causes minor rework and is easily reversible              | Record only if useful                              |
+| Medium      | Affects part of the solution or requires a localized adjustment   | Validate before the dependent step                 |
+| High        | Can invalidate architecture, integration, or a relevant plan      | Validate early, before significant implementation  |
+| Critical    | Can cause loss, exposure, unavailability, or a serious violation  | Do not proceed without sufficient validation       |
 
-### Regra prática
+### Rule of thumb
 
 ```text
-Quanto maior o custo de a premissa estar errada,
-mais cedo ela deve ser validada.
+The higher the cost of the assumption being wrong,
+the earlier it must be validated.
 ```
 
-## Premissas críticas
+## Critical assumptions
 
-Premissas críticas exigem atenção especial.
+Critical assumptions demand special attention.
 
-Considere crítica uma premissa que, se errada:
+Consider an assumption critical if, when wrong, it:
 
 ```text
-- invalida a arquitetura escolhida;
-- bloqueia requisito obrigatório;
-- expõe dados, segredos ou permissões;
-- gera perda ou corrupção de dados;
-- quebra compatibilidade;
-- cria custo financeiro relevante;
-- exige retrabalho em muitas partes;
-- impede rollback;
-- torna o prazo inviável;
-- depende de sistema externo fora do controle do projeto.
+- invalidates the chosen architecture;
+- blocks a mandatory requirement;
+- exposes data, secrets, or permissions;
+- causes data loss or corruption;
+- breaks compatibility;
+- creates relevant financial cost;
+- forces rework across many parts;
+- prevents rollback;
+- makes the deadline unfeasible;
+- depends on an external system outside the project's control.
 ```
 
-Exemplos:
+Examples:
 
 ```text
-- Serviço externo permite o volume de chamadas necessário.
-- Migração pode ocorrer sem downtime.
-- Provedor de autenticação atende requisito regulatório.
-- Biblioteca é compatível com runtime obrigatório.
-- Cliente legado suporta novo contrato.
+- The external service allows the required call volume.
+- The migration can happen without downtime.
+- The authentication provider meets the regulatory requirement.
+- The library is compatible with the mandatory runtime.
+- The legacy client supports the new contract.
 ```
 
-Não implemente longamente com base em premissa crítica não verificada.
+Do not implement at length on top of an unverified critical assumption.
 
-## Ordem de validação
+## Validation order
 
-Valide primeiro premissas com maior combinação de impacto e incerteza.
+Validate first the assumptions with the highest combination of impact and uncertainty.
 
 ```mermaid
 quadrantChart
-    title Prioridade de validação
-    x-axis Baixa incerteza --> Alta incerteza
-    y-axis Baixo impacto --> Alto impacto
-    quadrant-1 Validar imediatamente
-    quadrant-2 Validar antes da etapa dependente
-    quadrant-3 Monitorar
-    quadrant-4 Registrar e validar quando conveniente
-    "Redis em produção": [0.82, 0.85]
-    "Formato de botão": [0.15, 0.12]
-    "Compatibilidade de clientes legados": [0.65, 0.90]
-    "Nome de variável": [0.10, 0.08]
+    title Validation priority
+    x-axis Low uncertainty --> High uncertainty
+    y-axis Low impact --> High impact
+    quadrant-1 Validate immediately
+    quadrant-2 Validate before the dependent step
+    quadrant-3 Monitor
+    quadrant-4 Record and validate when convenient
+    "Redis in production": [0.82, 0.85]
+    "Button format": [0.15, 0.12]
+    "Legacy client compatibility": [0.65, 0.90]
+    "Variable name": [0.10, 0.08]
 ```
 
-Use esta ordem:
+Use this order:
 
 ```text
-1. Premissas críticas e incertas.
-2. Premissas que definem arquitetura ou contrato.
-3. Premissas que afetam segurança, compatibilidade ou dados.
-4. Premissas que afetam custo, performance ou prazo.
-5. Premissas locais e facilmente reversíveis.
+1. Critical and uncertain assumptions.
+2. Assumptions that define architecture or contracts.
+3. Assumptions that affect security, compatibility, or data.
+4. Assumptions that affect cost, performance, or deadlines.
+5. Local and easily reversible assumptions.
 ```
 
-## Métodos de validação
+## Validation methods
 
-Escolha a menor ação que confirme ou refute a premissa.
+Choose the smallest action that confirms or refutes the assumption.
 
-| Tipo de premissa        | Validação preferida                                                        |
+| Assumption type         | Preferred validation                                                       |
 | ----------------------- | -------------------------------------------------------------------------- |
-| API ou contrato         | Schema, documentação oficial, código ou chamada controlada                 |
-| Biblioteca ou framework | Documentação oficial da versão usada, changelog ou teste mínimo            |
-| Infraestrutura          | Configuração real, ambiente, time responsável ou execução controlada       |
-| Compatibilidade         | Teste com cliente antigo, contrato versionado ou logs de uso               |
-| Performance             | Métrica, profiling, benchmark ou carga controlada                          |
-| Volume de dados         | Query, relatório, métrica observada ou dado histórico                      |
-| Segurança               | Política, teste de autorização, revisão de configuração ou ameaça modelada |
-| Regra de negócio        | Especificação, usuário responsável, documentos ou comportamento atual      |
-| Causa de bug            | Reprodução, logs, tracing, teste isolado ou experimento controlado         |
+| API or contract         | Schema, official documentation, code, or a controlled call                 |
+| Library or framework    | Official docs for the version in use, changelog, or a minimal test         |
+| Infrastructure          | Real configuration, environment, owning team, or a controlled run          |
+| Compatibility           | Test with an old client, versioned contract, or usage logs                 |
+| Performance             | Metric, profiling, benchmark, or controlled load                           |
+| Data volume             | Query, report, observed metric, or historical data                         |
+| Security                | Policy, authorization test, configuration review, or threat modeling       |
+| Business rule           | Specification, responsible user, documents, or current behavior            |
+| Bug cause               | Reproduction, logs, tracing, isolated test, or a controlled experiment     |
 
 ```text
-Não valide premissa técnica crítica com opinião, memória ou exemplo genérico.
+Do not validate a critical technical assumption with opinion, memory, or a generic example.
 ```
 
-## Premissas encadeadas
+## Chained assumptions
 
-Algumas premissas dependem de outras.
+Some assumptions depend on others.
 
 ```text
-- valide primeiro a premissa mais fundamental;
-- não trate premissa derivada como confirmada;
-- atualize todas as decisões dependentes quando a base mudar.
+- validate the most fundamental assumption first;
+- do not treat a derived assumption as confirmed;
+- update all dependent decisions when the base changes.
 ```
 
-Exemplo:
+Example:
 
 ```text
-Premissa base:
-- O serviço de filas está disponível em produção.
+Base assumption:
+- The queue service is available in production.
 
-Premissa derivada:
-- Podemos gerar relatórios em background.
+Derived assumption:
+- We can generate reports in the background.
 
-Premissa derivada de segundo nível:
-- A interface pode responder imediatamente e consultar status depois.
+Second-level derived assumption:
+- The interface can respond immediately and poll status later.
 ```
 
-Se a primeira falhar, as seguintes devem ser reavaliadas.
+If the first fails, the following ones must be reassessed.
 
-## Premissas temporais
+## Time-bound assumptions
 
-Algumas premissas são verdadeiras apenas em determinado período.
+Some assumptions are true only for a certain period.
 
 ```text
-Exemplos:
-- Clientes antigos ainda consomem a versão anterior da API.
-- A infraestrutura atual suporta o volume presente, mas não a projeção futura.
-- Uma credencial é válida até determinada data.
-- Uma biblioteca é compatível apenas enquanto a versão atual do runtime for mantida.
+Examples:
+- Old clients still consume the previous version of the API.
+- The current infrastructure supports today's volume, but not the future projection.
+- A credential is valid until a certain date.
+- A library is compatible only while the current runtime version is kept.
 ```
 
-Registre:
+Record:
 
 ```text
-- quando a premissa foi verificada;
-- até quando ela deve ser considerada válida;
-- qual evento exige nova validação;
-- quem ou qual sistema pode alterar sua validade.
+- when the assumption was verified;
+- until when it should be considered valid;
+- which event requires revalidation;
+- who or which system can change its validity.
 ```
 
-Exemplo:
+Example:
 
 ```text
-Premissa:
-- Nenhum cliente usa o endpoint legado.
+Assumption:
+- No client uses the legacy endpoint.
 
-Verificada em:
-- Logs dos últimos 30 dias.
+Verified against:
+- Logs from the last 30 days.
 
-Gatilho de revalidação:
-- Novo cliente integrado ou nova versão de aplicativo liberada.
+Revalidation trigger:
+- New client integrated or new app version released.
 
-Ação:
-- Monitorar uso antes de remover endpoint.
+Action:
+- Monitor usage before removing the endpoint.
 ```
 
-## Premissas sobre usuários e requisitos
+## Assumptions about users and requirements
 
-Não transforme ausência de informação em decisão permanente.
+Do not turn missing information into a permanent decision.
 
 ```text
-Ruim:
-"O usuário quer resposta imediata."
+Bad:
+"The user wants an immediate response."
 
-Melhor:
-"Resposta imediata é uma hipótese; validar se o usuário aceita processamento assíncrono com status."
+Better:
+"An immediate response is a hypothesis; validate whether the user accepts asynchronous processing with status."
 ```
 
 ```text
-Ruim:
-"O usuário não precisa de auditoria."
+Bad:
+"The user does not need auditing."
 
-Melhor:
-"Não há requisito de auditoria identificado; verificar se o domínio, segurança ou regras internas exigem rastreabilidade."
+Better:
+"No auditing requirement has been identified; check whether the domain, security, or internal rules require traceability."
 ```
 
-Quando a questão material for factual, valide por contexto, código ou documentação. Quando for
-decisão humana, use [pelizzai-interview-me](../../pelizzai-interview-me/SKILL.md), uma pergunta por
-vez, com recomendação; documentação não decide pelo usuário.
+When the material question is factual, validate it through context, code, or documentation. When it
+is a human decision, use [pelizzai-interview-me](../../pelizzai-interview-me/SKILL.md), one question
+at a time, with a recommendation; documentation does not decide for the user.
 
-## Premissas em debugging
+## Assumptions in debugging
 
-Em diagnóstico de bug, trate cada causa possível como hipótese rastreável. Para investigação sistemática de causa raiz, combine com [Root Cause Analysis](root-cause-analysis.md).
+When diagnosing a bug, treat each possible cause as a trackable hypothesis. For systematic root cause investigation, combine with [Root Cause Analysis](root-cause-analysis.md).
 
 ```text
-Problema:
-- Pedidos duplicados.
+Problem:
+- Duplicate orders.
 
-Hipótese A:
-- Usuário faz clique duplo.
+Hypothesis A:
+- The user double-clicks.
 
-Hipótese B:
-- Cliente faz retry de rede.
+Hypothesis B:
+- The client retries on network failure.
 
-Hipótese C:
-- Backend não aplica idempotência.
+Hypothesis C:
+- The backend does not enforce idempotency.
 
-Hipótese D:
-- Worker consome mensagem mais de uma vez.
+Hypothesis D:
+- The worker consumes a message more than once.
 ```
 
-Para cada hipótese:
+For each hypothesis:
 
 ```text
-- evidência atual;
-- experimento de validação;
-- resultado esperado;
-- condição de descarte;
-- impacto da confirmação.
+- current evidence;
+- validation experiment;
+- expected result;
+- discard condition;
+- impact of confirmation.
 ```
 
-Não corrija a primeira hipótese plausível sem validação.
+Do not fix the first plausible hypothesis without validation.
 
-## Premissas e replanejamento
+## Assumptions and replanning
 
-Quando uma premissa falhar, não apenas altere o detalhe local.
+When an assumption fails, do not just change the local detail.
 
-Verifique o impacto sobre todo o plano.
+Check the impact on the whole plan.
 
 ```mermaid
 flowchart TD
-    A[Premissa refutada] --> B[Identificar decisões dependentes]
-    B --> C{Afeta somente uma etapa?}
-    C -- Sim --> D[Refinar etapa local]
-    C -- Não --> E[Replanejar partes afetadas]
-    E --> F[Preservar trabalho ainda válido]
-    D --> G[Validar novo caminho]
+    A[Assumption refuted] --> B[Identify dependent decisions]
+    B --> C{Affects only one step?}
+    C -- Yes --> D[Refine the local step]
+    C -- No --> E[Replan the affected parts]
+    E --> F[Preserve still-valid work]
+    D --> G[Validate the new path]
     F --> G
 ```
 
-### Regra de impacto
+### Impact rule
 
 ```text
-Premissa refutada:
-- "A API não suporta filtro no servidor."
+Refuted assumption:
+- "The API does not support server-side filtering."
 
-Consequências possíveis:
-- A estratégia de filtro precisa mudar.
-- A paginação pode ficar incorreta se filtrar no cliente.
-- O volume de dados pode tornar fallback inviável.
-- Critérios de performance precisam ser reavaliados.
+Possible consequences:
+- The filtering strategy has to change.
+- Pagination may become incorrect if filtering happens on the client.
+- The data volume may make the fallback unfeasible.
+- Performance criteria need to be reassessed.
 ```
 
-Não aplique workaround local sem verificar se a premissa afeta arquitetura, segurança, compatibilidade ou desempenho.
+Do not apply a local workaround without checking whether the assumption affects architecture, security, compatibility, or performance.
 
-## Registro de decisões condicionais
+## Recording conditional decisions
 
-Quando uma decisão depende de premissa ainda aberta, registre explicitamente.
+When a decision depends on an assumption still open, record it explicitly.
 
 ```text
-Decisão condicional:
-- Usar processamento em fila, desde que a infraestrutura existente suporte o volume e o SLA definido.
+Conditional decision:
+- Use queue-based processing, provided the existing infrastructure supports the volume and the defined SLA.
 
-Premissa:
-- Broker e workers estão disponíveis em produção.
+Assumption:
+- Broker and workers are available in production.
 
-Ação de validação:
-- Confirmar configuração, capacidade e observabilidade.
+Validation action:
+- Confirm configuration, capacity, and observability.
 
-Plano alternativo:
-- Processamento em lote controlado ou nova infraestrutura aprovada.
+Alternative plan:
+- Controlled batch processing or newly approved infrastructure.
 ```
 
-Isso evita que uma recomendação condicional seja interpretada como decisão definitiva.
+This prevents a conditional recommendation from being read as a final decision.
 
-## Estados de uma premissa
+## Assumption states
 
-| Status                  | Significado                                                                 |
-| ----------------------- | --------------------------------------------------------------------------- |
-| Não verificada          | Existe, mas ainda não foi investigada                                       |
-| Em validação            | Há ação em andamento para confirmá-la                                       |
-| Confirmada              | Evidência suficiente para o contexto                                        |
-| Parcialmente confirmada | Válida apenas em parte do escopo ou sob condições                           |
-| Refutada                | Evidência mostra que a premissa é falsa                                     |
-| Obsoleta                | Era válida, mas contexto mudou                                              |
-| Bloqueada               | Não pode ser validada por falta de acesso, permissão ou contexto            |
-| Aceita como risco       | Não foi possível validar, mas a decisão segue conscientemente com mitigação |
+| Status                  | Meaning                                                                      |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| Unverified              | Exists, but has not been investigated yet                                    |
+| Under validation        | An action is in progress to confirm it                                       |
+| Confirmed               | Sufficient evidence for the context                                          |
+| Partially confirmed     | Valid only for part of the scope or under conditions                         |
+| Refuted                 | Evidence shows the assumption is false                                       |
+| Obsolete                | Was valid, but the context changed                                           |
+| Blocked                 | Cannot be validated due to missing access, permission, or context            |
+| Accepted as risk        | Could not be validated, but the decision proceeds consciously with mitigation |
 
-Não trate "aceita como risco" como "confirmada".
+Do not treat "accepted as risk" as "confirmed".
 
-## Aceitação consciente de risco
+## Conscious risk acceptance
 
-Em alguns casos, não será possível validar uma premissa antes de avançar.
+In some cases, it will not be possible to validate an assumption before moving forward.
 
-Só registre risco aceito após ratificação do usuário e quando:
+Only record an accepted risk after user ratification and when:
 
 ```text
-- a premissa não é crítica;
-- a ação é reversível;
-- existe contingência viável;
-- o impacto é conhecido;
-- o custo de validar agora é desproporcional;
-- a limitação é comunicada.
+- the assumption is not critical;
+- the action is reversible;
+- a viable contingency exists;
+- the impact is known;
+- the cost of validating now is disproportionate;
+- the limitation is communicated.
 ```
 
-Formato recomendado:
+Recommended format:
 
 ```text
-Premissa:
-- [condição não verificada]
+Assumption:
+- [unverified condition]
 
-Risco aceito:
-- [impacto possível]
+Accepted risk:
+- [possible impact]
 
-Motivo:
-- [por que não será validada agora]
+Reason:
+- [why it will not be validated now]
 
-Mitigação:
-- [rollback, feature flag, monitoramento, limite ou plano alternativo]
+Mitigation:
+- [rollback, feature flag, monitoring, limit, or alternative plan]
 
-Gatilho de revisão:
-- [evento que exigirá nova validação]
+Review trigger:
+- [event that will require revalidation]
 ```
 
-Nunca aceite como risco uma premissa crítica de segurança, dados ou ação irreversível sem evidência suficiente.
+Never accept as risk a critical assumption about security, data, or an irreversible action without sufficient evidence.
 
-## Anti-padrões
+## Anti-patterns
 
-### 1. Premissa invisível
+### 1. Invisible assumption
 
 ```text
-Ruim:
-"Vamos usar fila porque o processo é pesado."
+Bad:
+"Let's use a queue because the process is heavy."
 
-Premissa oculta:
-- O ambiente possui fila e worker disponíveis.
+Hidden assumption:
+- The environment has a queue and worker available.
 
-Melhor:
-"Fila é uma opção condicionada à disponibilidade do broker e worker em produção."
+Better:
+"A queue is an option conditioned on broker and worker availability in production."
 ```
 
-### 2. Tratar hipótese como fato
+### 2. Treating a hypothesis as fact
 
 ```text
-Ruim:
-"O problema é cache."
+Bad:
+"The problem is the cache."
 
-Melhor:
-"Cache é uma hipótese; medir taxa de acerto, invalidação e comportamento sem cache antes de concluir."
+Better:
+"The cache is a hypothesis; measure hit rate, invalidation, and behavior without the cache before concluding."
 ```
 
-### 3. Validar tarde demais
+### 3. Validating too late
 
 ```text
-Ruim:
-Implementar toda a integração antes de descobrir que o fornecedor não suporta o fluxo necessário.
+Bad:
+Implementing the whole integration before discovering the vendor does not support the required flow.
 
-Melhor:
-Validar capacidade, autenticação e limites da integração antes de construir dependências ao redor dela.
+Better:
+Validating the integration's capabilities, authentication, and limits before building dependencies around it.
 ```
 
-### 4. Não definir contingência
+### 4. No contingency defined
 
 ```text
-Ruim:
-"Se Redis não existir, veremos depois."
+Bad:
+"If Redis doesn't exist, we'll figure it out later."
 
-Melhor:
-"Se Redis não estiver disponível, usar infraestrutura de jobs já existente ou reavaliar estratégia de processamento."
+Better:
+"If Redis is not available, use the existing job infrastructure or reassess the processing strategy."
 ```
 
-### 5. Confundir restrição com premissa
+### 5. Confusing constraint with assumption
 
 ```text
-Ruim:
-"Não usar serviço pago" tratado como algo a validar.
+Bad:
+"Do not use a paid service" treated as something to validate.
 
-Melhor:
-"Não usar serviço pago" é restrição obrigatória; "serviço gratuito suporta volume" é premissa.
+Better:
+"Do not use a paid service" is a mandatory constraint; "the free service supports the volume" is an assumption.
 ```
 
-### 6. Ignorar validade temporal
+### 6. Ignoring temporal validity
 
 ```text
-Ruim:
-"Clientes antigos não usam o endpoint" baseado em observação antiga.
+Bad:
+"Old clients don't use the endpoint" based on an old observation.
 
-Melhor:
-"Não houve uso nos últimos 30 dias; revalidar antes de remover o endpoint."
+Better:
+"No usage in the last 30 days; revalidate before removing the endpoint."
 ```
 
-### 7. Seguir após refutação
+### 7. Continuing after refutation
 
 ```text
-Ruim:
-Teste mostra que o contrato não suporta determinado campo, mas a implementação continua assumindo suporte.
+Bad:
+A test shows the contract does not support a given field, but the implementation keeps assuming support.
 
-Melhor:
-Atualizar plano, remover premissa inválida e escolher alternativa compatível.
+Better:
+Update the plan, remove the invalid assumption, and choose a compatible alternative.
 ```
 
-## Exemplos
+## Examples
 
-### Exemplo 1 — Compatibilidade de API
+### Example 1 — API compatibility
 
 ```text
-Objetivo:
-- Adicionar campo `priority` ao endpoint público.
+Goal:
+- Add a `priority` field to the public endpoint.
 
-Premissa:
-- Clientes existentes toleram campo ausente ou valor padrão.
+Assumption:
+- Existing clients tolerate a missing field or a default value.
 
-Criticidade:
-- Crítico.
+Criticality:
+- Critical.
 
-Evidência atual:
-- Alguns clientes usam versão antiga do SDK.
+Current evidence:
+- Some clients use an old version of the SDK.
 
-Validação:
-- Executar testes de contrato com clientes antigos e revisar telemetria de versões.
+Validation:
+- Run contract tests with old clients and review version telemetry.
 
-Gatilho de invalidação:
-- Cliente antigo falha ao receber ou omitir o campo.
+Invalidation trigger:
+- An old client fails when receiving or omitting the field.
 
-Contingência:
-- Tornar campo opcional, definir padrão compatível e versionar contrato antes de obrigatoriedade.
+Contingency:
+- Make the field optional, define a compatible default, and version the contract before making it mandatory.
 
 Status:
-- Em validação.
+- Under validation.
 ```
 
-### Exemplo 2 — Performance
+### Example 2 — Performance
 
 ```text
-Objetivo:
-- Melhorar tempo de resposta da busca de usuários.
+Goal:
+- Improve the response time of the user search.
 
-Premissa:
-- A consulta ao banco é o gargalo principal.
+Assumption:
+- The database query is the main bottleneck.
 
-Criticidade:
-- Médio.
+Criticality:
+- Medium.
 
-Evidência atual:
-- Usuários relatam lentidão, mas não há profiling.
+Current evidence:
+- Users report slowness, but there is no profiling.
 
-Validação:
-- Medir tempo de API, consulta, serialização e chamadas externas.
+Validation:
+- Measure API time, query time, serialization, and external calls.
 
-Gatilho de invalidação:
-- Banco representa pequena parte da latência total.
+Invalidation trigger:
+- The database accounts for a small share of the total latency.
 
-Contingência:
-- Investigar serialização, rede, cache, frontend ou integração externa.
+Contingency:
+- Investigate serialization, network, cache, frontend, or external integration.
 
 Status:
-- Não verificada.
+- Unverified.
 ```
 
-## Instrução resumida para o agente
+## Summary instruction for the agent
 
 ```text
-- Valide primeiro premissas com maior combinação de impacto e incerteza; não implemente extensamente sobre premissa crítica não verificada.
-- Não trate premissas como fatos nem aceite convergência interna como prova.
-- Atualize decisões e dependências quando uma premissa for confirmada, refutada ou se tornar obsoleta; use replanejamento quando ela afetar mais de uma etapa.
-- Aceite risco apenas quando a premissa não for crítica, a ação for reversível e houver mitigação clara.
-- Antes de concluir, comunique premissas materiais ainda abertas, limitações e contingências.
-- Não exponha cadeia de pensamento detalhada; comunique apenas premissas relevantes, evidências, impacto, decisão e limitações.
+- Validate first the assumptions with the highest combination of impact and uncertainty; do not implement extensively on top of an unverified critical assumption.
+- Do not treat assumptions as facts, and do not accept internal convergence as proof.
+- Update decisions and dependencies when an assumption is confirmed, refuted, or becomes obsolete; replan when it affects more than one step.
+- Accept risk only when the assumption is not critical, the action is reversible, and there is clear mitigation.
+- Before concluding, communicate material assumptions still open, limitations, and contingencies.
+- Do not expose detailed chain of thought; communicate only relevant assumptions, evidence, impact, decision, and limitations.
 ```
 
-## Técnicas relacionadas
+## Related techniques
 
 - [Constraint Satisfaction](constraint-satisfaction.md)
 - [Verification](verification.md)
@@ -751,4 +751,4 @@ Status:
 - [Critique and Refine](critique-and-refine.md)
 - [Root Cause Analysis](root-cause-analysis.md)
 
-Voltar ao [catálogo de técnicas](../SKILL.md).
+Back to the [technique catalog](../SKILL.md).

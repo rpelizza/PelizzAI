@@ -1,89 +1,93 @@
 ---
 name: pelizzai-oswap
-description: Overlay de segurança para mudanças que tocam autenticação/autorização, input não confiável, SQL/query, dados sensíveis, upload, CORS/SSRF, dependências/supply chain, integridade, logging ou exceções. Aplica o OWASP Top 10 atual ao diff e produz fixes/evidência antes do review final e de validated-head. Use também quando o usuário pedir revisão OWASP; nunca adie para finish-task.
+description: Security overlay for changes that touch authentication/authorization, untrusted input, SQL/queries, sensitive data, uploads, CORS/SSRF, dependencies/supply chain, integrity, logging, or exceptions. Applies the current OWASP Top 10 to the diff and produces fixes/evidence before the final review and validated-head. Use also when the user asks for an OWASP review; never defer it to finish-task.
 ---
 
 # PelizzAI OWASP
 
-## Objetivo
+## Goal
 
-Revisar o diff e as trust boundaries afetadas, encontrando caminhos plausíveis de exploração ou
-falha segura antes de integrar.
+Review the diff and the affected trust boundaries, finding plausible paths of exploitation or of
+safe failure before integrating.
 
-Baseline: [OWASP Top 10:2025](https://owasp.org/Top10/2025/0x00_2025-Introduction/). Ao manter esta
-skill, confirme a edição oficial atual; não preserve categorias antigas por memória.
+Baseline: [OWASP Top 10:2025](https://owasp.org/Top10/2025/0x00_2025-Introduction/). When
+maintaining this skill, confirm the current official edition; do not preserve old categories from
+memory.
 
-**Anuncie:** "Usando a skill PelizzAI OWASP para revisar as superfícies de segurança desta mudança."
+**Announce:** "Using the PelizzAI OWASP skill to review this change's security surfaces."
 
-## Quando
+## When
 
-O router/plano registra este overlay assim que o escopo ou diff toca auth, autorização, entrada
-externa, query, segredo/PII, upload, rede/URL, dependência/build, integridade, logging/alerta ou
-tratamento de falha. Review pode promovê-lo quando descobrir uma superfície não prevista.
+The router/plan records this overlay as soon as the scope or diff touches auth, authorization,
+external input, queries, secrets/PII, uploads, network/URLs, dependencies/build, integrity,
+logging/alerting, or failure handling. Review can promote it when it discovers an unanticipated
+surface.
 
-## Escopo
+## Scope
 
-- tarefa ainda não commitada: working tree completa, inclusive staged/untracked;
-- candidato final: `base-sha..candidate-head`;
-- pedido read-only: range/PR explicitamente delimitado, sem criar state.
+- task not yet committed: the full working tree, including staged/untracked;
+- final candidate: `base-sha..candidate-head`;
+- read-only request: an explicitly delimited range/PR, without creating state.
 
-Liste entradas, atores, trust boundaries, ativos e efeitos externos. Não revise o repo inteiro por
-reflexo, mas siga uma cadeia chamada pelo diff quando isso for necessário para provar autorização
-ou sanitização.
+List inputs, actors, trust boundaries, assets, and external effects. Do not review the whole repo
+by reflex, but follow a chain called from the diff when that is necessary to prove authorization
+or sanitization.
 
-## OWASP Top 10:2025 — lentes aplicáveis
+## OWASP Top 10:2025 — applicable lenses
 
-| # | Categoria | Pergunta para o diff |
+| # | Category | Question for the diff |
 | --- | --- | --- |
-| A01 | Broken Access Control | Autorização por objeto/ação? IDOR? SSRF/acesso interno controlado? |
-| A02 | Security Misconfiguration | Defaults, debug, CORS/headers, permissões ou fail-open? |
-| A03 | Software Supply Chain Failures | Dependência/build/publish necessários, pinados e com proveniência/integridade? |
-| A04 | Cryptographic Failures | Segredo/dado em claro? Algoritmo, chave, armazenamento e transporte adequados? |
-| A05 | Injection | Input chega a SQL, shell, template, LDAP ou interpreter sem parametrização/escaping? |
-| A06 | Insecure Design | Trust boundary, abuso, rate/size limit e regra de negócio foram modelados? |
-| A07 | Authentication Failures | Sessão/token, expiração, rotação, brute-force e recuperação estão corretos? |
-| A08 | Software or Data Integrity Failures | Desserialização, update, artefato ou dado cruza boundary sem integridade? |
-| A09 | Security Logging & Alerting Failures | Evento gera log sem segredo/PII e alerta acionável? |
-| A10 | Mishandling of Exceptional Conditions | Erro, timeout, retry, partial failure e estado anormal falham com segurança? |
+| A01 | Broken Access Control | Authorization per object/action? IDOR? SSRF/internal access controlled? |
+| A02 | Security Misconfiguration | Defaults, debug, CORS/headers, permissions, or fail-open? |
+| A03 | Software Supply Chain Failures | Dependencies/build/publish necessary, pinned, and with provenance/integrity? |
+| A04 | Cryptographic Failures | Secret/data in the clear? Algorithm, keys, storage, and transport adequate? |
+| A05 | Injection | Does input reach SQL, shell, template, LDAP, or an interpreter without parameterization/escaping? |
+| A06 | Insecure Design | Were trust boundaries, abuse, rate/size limits, and business rules modeled? |
+| A07 | Authentication Failures | Session/token, expiration, rotation, brute-force, and recovery correct? |
+| A08 | Software or Data Integrity Failures | Does deserialization, an update, an artifact, or data cross a boundary without integrity? |
+| A09 | Security Logging & Alerting Failures | Does the event produce a log without secrets/PII and an actionable alert? |
+| A10 | Mishandling of Exceptional Conditions | Do errors, timeouts, retries, partial failures, and abnormal states fail safely? |
 
-Carregue apenas categorias tocadas. OWASP é uma taxonomia de lentes, não uma lista para marcar sem
-evidência.
+Load only the categories touched. OWASP is a taxonomy of lenses, not a list to tick without
+evidence.
 
-## Achado e prova
+## Finding and proof
 
-Para cada suspeita:
+For each suspicion:
 
 ```text
-categoria + severidade
-arquivo:linha
-precondição → entrada → boundary → efeito → impacto
-evidência observada
-fix mínimo
-teste/check que falha antes e passa depois, quando automatizável
+category + severity
+file:line
+precondition → input → boundary → effect → impact
+observed evidence
+minimal fix
+test/check that fails before and passes after, when automatable
 ```
 
-Sem caminho plausível, rebaixe ou retire; não invente exploit. Nova dependência exige fonte oficial
-e scanner/lockfile disponível, sem alegar ausência de CVE quando a consulta não rodou.
+Without a plausible path, downgrade or withdraw it; do not invent an exploit. A new dependency
+requires an official source and an available scanner/lockfile, without claiming CVE absence when
+the lookup never ran.
 
 ## Lifecycle
 
-Fix de segurança altera o candidato: implemente antes do seal, execute a prova, consolide e reabra
-as categorias/reviews afetados. Critical/High bloqueiam `validated-head`; risco aceito exige decisão
-explícita do dono e registro durável apropriado. Finish-task nunca executa este overlay.
+A security fix changes the candidate: implement before the seal, run the proof, consolidate, and
+reopen the affected categories/reviews. Critical/High block `validated-head`; accepted risk
+requires the owner's explicit decision and an appropriate durable record. Finish-task never runs
+this overlay.
 
 ## Red flags
 
 ```text
-- Oferta tardia na finish-task.
-- Checklist das dez categorias sem relação com o diff.
-- Achado crítico teórico sem boundary/caminho.
-- Aprovar input/autorização sem seguir o dado até o enforcement.
-- Consultar CVE/dependência de memória.
-- Corrigir depois de validated-head sem invalidar o seal.
+- A late offer in finish-task.
+- A ten-category checklist unrelated to the diff.
+- A theoretical critical finding without boundary/path.
+- Approving input/authorization without following the data to the enforcement point.
+- Consulting CVEs/dependencies from memory.
+- Fixing after validated-head without invalidating the seal.
 ```
 
-## Integração
+## Integration
 
-É overlay do router/writing-plans/execution-plans/review e combina com skills de domínio. Use
-Evidence Synthesis quando logs/scanners/fontes divergem; não transforme a taxonomia em reasoning
-universal.
+It is an overlay of the router/writing-plans/execution-plans/review and composes with domain
+skills. Use Evidence Synthesis when logs/scanners/sources diverge; do not turn the taxonomy into
+universal reasoning.
