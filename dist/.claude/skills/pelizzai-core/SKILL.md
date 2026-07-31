@@ -39,13 +39,13 @@ This coexists with the platform's native hierarchy: a skill does not redefine sy
 
 ## Skill announcements (global rule)
 
-When triggering any harness skill, **announce** in one line, **in the conversation's language**, what you are going to do, **always using the exact brand spelling: "PelizzAI"** (capital P, A, and I — never "Pelizzai", "pelizzAI", or "PELIZZAI" in prose). Pattern:
+When triggering a **head skill or a material overlay**, **announce** in one line, **in the conversation's language**, what you are going to do, **always using the exact brand spelling: "PelizzAI"** (capital P, A, and I — never "Pelizzai", "pelizzAI", or "PELIZZAI" in prose). An internal gate of a flow already announced is not an independent trigger and adds no announcement (see below). Pattern:
 
 > State that you are using the PelizzAI \<Name\> skill to \<goal\>. The brand and the skill's name stay verbatim; the rest of the sentence follows the conversation's language — never copy this English wording literally.
 
 Skill identifiers (`pelizzai-core`, `pelizzai-router`, …), file paths, and the target project's `pelizzai/` directory stay lowercase — the rule applies to the brand in running text.
 
-Announce the head skill and the material overlays. Internal gates (Verification, an auxiliary technique, re-review) may run without a new announcement when they are already part of the communicated flow. Announcing is mandatory; turning the announcement into a preamble bigger than the task is not.
+The rule is exhaustive on purpose: head skill and material overlays are announced; internal gates (Verification, an auxiliary technique, re-review) run without a new announcement when they are already part of the communicated flow — they are steps of an announced skill, not triggers of their own. Announcing is mandatory; turning the announcement into a preamble bigger than the task is not.
 
 ## Activation rule
 

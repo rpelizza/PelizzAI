@@ -151,6 +151,9 @@ Triggered in `bootstrap-write`, after `pelizzai-audit` has mapped the context an
    be unnecessary), delegate via `pelizzai-subagents`. Members who WRITE skills need WRITE
    capability (general-purpose or a subagent with write tools) and access to context7/official
    docs — read-only agents serve only for grounding research/reading, not for writing the skill.
+   DISJOINT PATHS: each member writes ONLY its own candidate's file, one writer per file. No
+   member touches the catalog, the ledger, the generated mirrors, or the manifest — those are the
+   coordinator's, serially, in 5.5.
 4. For each skill: follow the authoring rules and validate the frontmatter. CONSUMER ONLY: record
    it in the catalog and the ledger (including the origin: repo-scan or interview). In source mode
    the same facts go to the native execution record — no file under `pelizzai/`.
@@ -160,6 +163,10 @@ Triggered in `bootstrap-write`, after `pelizzai-audit` has mapped the context an
    task. Write the catalog `pelizzai/domain-skills.md` — its existence marks the bootstrap as
    complete. See Templates. In source mode this step does not run: there is no catalog, no ledger,
    and nothing marks a consumer bootstrap.
+5.5. SERIAL, COORDINATOR ONLY, after every member has returned: run the sync ONCE for the whole
+   batch (§Mandatory sync as part of the edit), plus `--update-manifest` before `--check` when a
+   core skill was created in the source repo. Never let members sync in parallel — concurrent runs
+   regenerate the same mirrors and leave divergent hashes.
 6. Offer to install the cadence hook (opt-in; see `references/domain-skill-maintenance.md`).
 7. Present the user the catalog of created skills, with diff and validation — nothing is final
    without their sign-off. Ask for a new decision only for scope/content not covered by the
