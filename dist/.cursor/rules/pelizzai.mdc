@@ -52,7 +52,7 @@ subagents, and interviews are situational as well. The testing strategy depends 
 - Content is only ready when review, overlays, and Verification validate the same commit and
   record its SHA in `validated-head`. Finish may add only the metadata-only commit of `state.md`.
 - Push, PR, deploy, message, discard, and other external actions require the corresponding gate.
-- Code in English; replies to the user in Brazilian Portuguese.
+- Code in English; reply to the user in the language of the conversation.
 - For external libraries, frameworks, and APIs, ground yourself in available official documentation.
 - On Windows, translate POSIX examples to PowerShell when needed.
 - Follow the full guidelines in `AGENTS.md`.

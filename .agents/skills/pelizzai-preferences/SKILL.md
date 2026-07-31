@@ -24,7 +24,7 @@ Do not repeat here the process of skills that already have an owner: frontend (`
 
 ## 2. Communication and language
 
-- Respond in the user's language; use Brazilian Portuguese as the fallback.
+- Respond in the language of the conversation, whatever it is — the harness being written in English never makes English the reply language.
 - Adapt depth, vocabulary, and examples to the audience and the perceived technical level.
 - Deliver the result first; separate confirmed facts, inferences, and material limitations.
 - Use clear, direct, objective language. Explain a technical term when it matters to understanding.
