@@ -10,7 +10,7 @@ description: Overlay that makes the domain model explicit and consistent during 
 Make code, spec, and product language express the same model, using concrete scenarios
 to expose ambiguity — without turning every noun into DDD ceremony.
 
-**Announce when material:** "Using PelizzAI Domain Modeling to resolve the model change."
+**Announce when material**, in the conversation's language: that you are using PelizzAI Domain Modeling to resolve the model change.
 
 ## Effect and persistence gate
 
@@ -26,9 +26,9 @@ ADR/rejection recording follows the gate, never reflex:
 
 - **Decision already ratified at a design/plan gate**, inside an authorized write flow (task
   branch open): RECORD the ADR automatically when the three criteria of §3 hold, and
-  announce it in one line ("Recorded ADR-000N: <title> — let me know if you want to adjust or
-  remove it"). The harness is only recording a decision the user already made; it decides
-  nothing new.
+  announce it in one line, in the conversation's language: that ADR-000N `<title>` was recorded and
+  the user may ask to adjust or remove it (the `ADR-000N` identifier stays verbatim). The harness is
+  only recording a decision the user already made; it decides nothing new.
 - **Emergent architectural decision** — arising during execution, in a lane without a design gate, or
   in a debugging root cause: do not record it silently. Present it to the user at the
   validation/completion edge (which is already a gate) before writing the ADR.

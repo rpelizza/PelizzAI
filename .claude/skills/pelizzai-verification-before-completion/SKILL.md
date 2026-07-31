@@ -12,9 +12,9 @@ that requires **fresh evidence** before any claim of success and makes the stren
 assertion match the evidence. Verification is a causality gate: the proof must observe the claimed
 effect **after the last mutation that could alter it**.
 
-**Announce** only when it is an explicit phase ("Using the PelizzAI Verification Before
-Completion skill to confirm with evidence before declaring done."); as an embedded gate of another
-skill, run without a new preamble.
+**Announce** only when it is an explicit phase — in the conversation's language, that you are
+using the PelizzAI Verification Before Completion skill to confirm with evidence before declaring
+done; as an embedded gate of another skill, run without a new preamble.
 
 ## Core principle
 

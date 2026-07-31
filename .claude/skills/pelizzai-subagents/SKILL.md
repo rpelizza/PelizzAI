@@ -9,7 +9,7 @@ description: Use to delegate a focused, independent task to ONE isolated subagen
 
 Delegate work to an **isolated subagent**: its own context, without polluting yours, that executes and **reports back**. It is the light path — when you need the **result** of a workstream, not a dialogue between roles.
 
-**Announce at start:** "Using the PelizzAI Subagents skill to delegate to a subagent."
+**Announce at start**, in the conversation's language: that you are using the PelizzAI Subagents skill to delegate to a subagent.
 
 > **Boundary with `pelizzai-team`:** use **subagents** for an independent workstream that only
 > reports. Use **team** when multiple roles need to dialogue/coordinate. The task's branch or

@@ -16,7 +16,7 @@ choice looks obvious and reversible.
 Efficiency here means well-ordered questions, not batched decisions or presumed answers.
 The interview does not replace reading the project, nor does it exist to fabricate gaps.
 
-**Announce:** "Using the PelizzAI Interview Me skill to resolve the material decisions still open."
+**Announce**, in the conversation's language: that you are using the PelizzAI Interview Me skill to resolve the material decisions still open.
 
 ## Modes
 

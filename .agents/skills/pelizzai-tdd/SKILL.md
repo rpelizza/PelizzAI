@@ -12,7 +12,7 @@ task: when implementing each task of a plan and whenever a dispatched member wri
 cycle is red → green → refactor per vertical slice. When the task's effect is not behavioral, the
 gate below names the correct proof — the exception is declared, never improvised.
 
-**Announce at start**, in the language of the conversation: "Using the PelizzAI TDD skill to implement this behavior red → green → refactor." The brand spelling "PelizzAI" and the skill's name stay as written; the rest of the sentence follows the conversation.
+**Announce at start**, in the conversation's language: that you are using the PelizzAI TDD skill to implement this behavior red → green → refactor. The brand spelling "PelizzAI" and the skill's name stay as written; the rest of the sentence follows the conversation.
 
 ## Suitability gate
 

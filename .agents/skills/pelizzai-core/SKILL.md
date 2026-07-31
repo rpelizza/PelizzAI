@@ -21,7 +21,7 @@ This is not negotiable. This is not optional. You cannot rationalize your way ou
 
 Turn the request into a proportional, verifiable route. The core does not do the work: it understands the outcome, triggers the applicable skills, and hands the decision to `pelizzai-router`.
 
-**Announce once:** "Using the PelizzAI Core skill to understand the task and choose the smallest safe flow."
+**Announce once**, in the conversation's language: that you are using the PelizzAI Core skill to understand the task and choose the smallest safe flow.
 
 ## Language
 
@@ -39,9 +39,9 @@ This coexists with the platform's native hierarchy: a skill does not redefine sy
 
 ## Skill announcements (global rule)
 
-When triggering any harness skill, **announce** in one line what you are going to do, **always using the exact brand spelling: "PelizzAI"** (capital P, A, and I — never "Pelizzai", "pelizzAI", or "PELIZZAI" in prose). Pattern:
+When triggering any harness skill, **announce** in one line, **in the conversation's language**, what you are going to do, **always using the exact brand spelling: "PelizzAI"** (capital P, A, and I — never "Pelizzai", "pelizzAI", or "PELIZZAI" in prose). Pattern:
 
-> "Using the PelizzAI \<Name\> skill to \<goal\>."
+> State that you are using the PelizzAI \<Name\> skill to \<goal\>. The brand and the skill's name stay verbatim; the rest of the sentence follows the conversation's language — never copy this English wording literally.
 
 Skill identifiers (`pelizzai-core`, `pelizzai-router`, …), file paths, and the target project's `pelizzai/` directory stay lowercase — the rule applies to the brand in running text.
 

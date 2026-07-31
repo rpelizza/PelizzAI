@@ -9,7 +9,7 @@ description: Head skill of the bug track. Use when encountering a bug, test fail
 
 Fix the proven cause with the least process that preserves evidence, safety, and regression coverage.
 
-**Announce on start:** "Using the PelizzAI Debugging skill to classify the failure, contain impact if needed, and fix it with evidence."
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Debugging skill to classify the failure, contain impact if needed, and fix it with evidence.
 
 ## Invariants
 

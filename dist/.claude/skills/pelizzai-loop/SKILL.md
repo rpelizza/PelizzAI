@@ -9,7 +9,7 @@ description: Use to drive macro loops through to delivery — task-by-task execu
 
 Give the harness the discipline of the **loop**: repeat the work cycle until delivery **with an explicit stop criterion** — never quitting early, never iterating forever, never declaring done without the Definition of Done reached and verified.
 
-**Announce on start (when triggered explicitly):** "Using the PelizzAI Loop skill to iterate until the Definition of Done."
+**Announce on start (when triggered explicitly)**, in the conversation's language: that you are using the PelizzAI Loop skill to iterate until the Definition of Done.
 
 ---
 

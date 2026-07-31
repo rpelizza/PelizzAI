@@ -9,7 +9,7 @@ description: Code review skill of the PelizzAI harness. Use after EVERY task dur
 
 Catch problems before they propagate. The reviewer receives **fabricated context** — description, requirements/plan, and the diff — **never your session history**. That keeps the reviewer focused on the product, not on your reasoning, and preserves your context to continue.
 
-**Announce on start:** "Using the PelizzAI Review skill to review the code."
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Review skill to review the code.
 
 ---
 

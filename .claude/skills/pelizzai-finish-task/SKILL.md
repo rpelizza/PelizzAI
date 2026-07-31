@@ -22,7 +22,7 @@ source:   validated-head ──────────────────�
                                      (done observed later, outside this skill)
 ```
 
-**Announce on start:** "Using the PelizzAI Finish Task skill to integrate the already-validated content."
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Finish Task skill to integrate the already-validated content.
 
 ## Source mode — no consumer runtime
 

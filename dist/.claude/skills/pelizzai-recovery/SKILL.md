@@ -9,7 +9,7 @@ description: Safely reconciles divergences between the task record and Git after
 
 Rebuild reality without losing work and without turning every divergence into a Git menu.
 
-**Announce:** "Using the PelizzAI Recovery skill to reconcile the record with Git without losing WIP."
+**Announce**, in the conversation's language: that you are using the PelizzAI Recovery skill to reconcile the record with Git without losing WIP.
 
 ## 1. Read-only diagnosis
 

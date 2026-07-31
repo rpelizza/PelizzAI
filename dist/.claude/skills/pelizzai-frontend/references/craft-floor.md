@@ -24,8 +24,8 @@ Format: **Verify** (how to check, preferably measured in a rendered browser) / *
   Verify: token values. Refuse: neon-saturated large areas.
 - **Text contrast ≥4.5:1** (≥3:1 for large text); **UI component boundaries ≥3:1**.
   Verify: measured contrast in DevTools/Playwright — never by eye. Refuse: any text below floor.
-- **The two brand colors are distinguishable in role** — primary vs accent separated on at least one OKLCH axis: `max(L)/min(L) ≥1.7` **or** `max(C)/min(C) ≥1.7`, computed on the two brand tokens converted to OKLCH. Hue difference alone does not satisfy this.
-  Verify: convert both brand tokens to OKLCH and compute both ratios; at least one must clear 1.7. Refuse: two near-identical brand colors doing the same job.
+- **The two brand colors are distinguishable in role** — primary vs accent separated on at least one OKLCH axis: `max(L)/min(L) ≥1.7` **or** `max(C)/min(C) ≥1.7`, computed on the two brand tokens converted to OKLCH. When the smaller value on an axis is exactly 0, the ratio is undefined and the axis resolves by rule: it **passes** if the larger value is above 0 (pure black against any lighter tone, or an achromatic grey against a chromatic brand color, are maximally separated on that axis) and **fails** if both are 0. Hue difference alone never satisfies this.
+  Verify: convert both brand tokens to OKLCH and evaluate both axes; at least one must clear 1.7 or resolve as a pass by the zero rule. Refuse: two near-identical brand colors doing the same job.
 - **White text on saturated backgrounds: measure, don't trust the eye** — saturated hues read lighter than they measure (Helmholtz–Kohlrausch); the contrast number decides.
 - **One accent doing accent work.** If everything is accented, nothing is.
 

@@ -14,7 +14,7 @@ This skill is the PelizzAI harness's **skill authoring and maintenance engine**.
 | **Authoring**  | The user wants a new skill; or `pelizzai-audit` requests domain skills at bootstrap | One or several well-written, grounded, cataloged skills          |
 | **Maintenance** | The stack changes version; patterns repeat in git; the cadence comes due | Domain skills updated (with diff and confirmation) and recorded |
 
-**Announce on start:** "Using the PelizzAI Writing Skills skill to create/maintain skills."
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Writing Skills skill to create/maintain skills.
 
 <TEAM-MEMBER-STOP>
 If you are a **member** of a team (subagent/teammate) tasked with writing **one** domain skill, write only yours and return the draft to the coordinator — do not orchestrate the whole bootstrap or touch the catalog/ledger. Invoke `pelizzai-reasoning` for your subtask.
@@ -145,18 +145,21 @@ Triggered in `bootstrap-write`, after `pelizzai-audit` has mapped the context an
    If the bootstrap consent already included the candidates' names/scope, do not repeat the
    question; reopen the decision only if the scan materially changed the proposed set.
 3. Write the confirmed candidates in PARALLEL with `pelizzai-team` — one candidate skill per
-   member, each grounding theirs via context7. **Scale with the number of candidates:** 5
+   member, each grounding theirs via context7 or, when it is unavailable, the current official
+   documentation; defer the skill only when neither source is. **Scale with the number of candidates:** 5
    confirmed candidates are 5 fronts, not a queue. With a single candidate (or when a team would
    be unnecessary), delegate via `pelizzai-subagents`. Members who WRITE skills need WRITE
    capability (general-purpose or a subagent with write tools) and access to context7/official
    docs — read-only agents serve only for grounding research/reading, not for writing the skill.
-4. For each skill: follow the authoring rules; validate the frontmatter; record it in the catalog
-   and the ledger (including the origin: repo-scan or interview).
-5. Seed the ledger (`last-review`/`last-full-scan`) with the **bootstrap date (today)** — the
-   skills are born from the repo-scan of the current HEAD, so the bootstrap IS the first review;
-   seeding with a mature repo's 1st commit fires a spurious nudge on the very first task. Write
-   the catalog `pelizzai/domain-skills.md` — its existence marks the bootstrap as complete. See
-   Templates.
+4. For each skill: follow the authoring rules and validate the frontmatter. CONSUMER ONLY: record
+   it in the catalog and the ledger (including the origin: repo-scan or interview). In source mode
+   the same facts go to the native execution record — no file under `pelizzai/`.
+5. CONSUMER ONLY: seed the ledger (`last-review`/`last-full-scan`) with the **bootstrap date
+   (today)** — the skills are born from the repo-scan of the current HEAD, so the bootstrap IS the
+   first review; seeding with a mature repo's 1st commit fires a spurious nudge on the very first
+   task. Write the catalog `pelizzai/domain-skills.md` — its existence marks the bootstrap as
+   complete. See Templates. In source mode this step does not run: there is no catalog, no ledger,
+   and nothing marks a consumer bootstrap.
 6. Offer to install the cadence hook (opt-in; see `references/domain-skill-maintenance.md`).
 7. Present the user the catalog of created skills, with diff and validation — nothing is final
    without their sign-off. Ask for a new decision only for scope/content not covered by the
@@ -224,7 +227,7 @@ exists: the native execution record takes their place and no `pelizzai/` runtime
 - **`pelizzai/domain-skills.md`** — catalog: what each domain skill does and when to use it. Template: [templates/domain-skills.md](templates/domain-skills.md).
 - **`pelizzai/data/review-domain-skills.md`** — ledger: per skill, creation date, last update, last commit/ref reviewed, the axis of the change, and the origin (repo-scan/interview); + global `last-review` and `last-full-scan`. Template: [templates/review-domain-skills.md](templates/review-domain-skills.md).
 
-Seed the ledger with the **bootstrap date (today)**, in new and existing repos alike — the bootstrap just created the skills from the current HEAD, so "last review = now". Seeding with a mature repo's 1st commit makes `daysReview`/`commits` born already past the threshold and fires a spurious nudge on the first task. `count=0` on bootstrap day is correct (it climbs as new commits arrive). See `references/domain-skill-maintenance.md` → "Seeding".
+In a consumer, seed the ledger with the **bootstrap date (today)**, in new and existing repos alike — the bootstrap just created the skills from the current HEAD, so "last review = now". In source mode there is no ledger to seed. Seeding with a mature repo's 1st commit makes `daysReview`/`commits` born already past the threshold and fires a spurious nudge on the first task. `count=0` on bootstrap day is correct (it climbs as new commits arrive). See `references/domain-skill-maintenance.md` → "Seeding".
 
 ---
 

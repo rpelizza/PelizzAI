@@ -10,7 +10,7 @@ description: Overlay for HUMAN documentation of a feature's stable contract, suc
 Explain to humans the delivery's observable, durable contract, without narrating internal details
 that go stale in the next refactor.
 
-**Announce:** "Using the PelizzAI Documenting Features skill to document the feature's contract."
+**Announce**, in the conversation's language: that you are using the PelizzAI Documenting Features skill to document the feature's contract.
 
 ## Where
 

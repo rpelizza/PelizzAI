@@ -23,7 +23,7 @@ workspace, new or existing), what it is built with, what infrastructure already 
 authorized, turn each finding into a useful artifact: the domain skills and documentation that make
 the agent assertive. A versionable, portable bootstrap, never a report for its own sake.
 
-**Announce:** "Using the PelizzAI Audit skill in `<scan-only|bootstrap-write>` mode to map the project proportionally."
+**Announce**, in the conversation's language: that you are using the PelizzAI Audit skill in `<scan-only|bootstrap-write>` mode to map the project proportionally.
 
 ## Choosing the mode
 

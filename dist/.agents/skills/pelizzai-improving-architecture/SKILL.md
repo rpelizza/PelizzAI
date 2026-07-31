@@ -11,7 +11,7 @@ Find where the architecture is charging an **observable** cost and return a few 
 opportunities, without turning aesthetic preference into a refactor or a read-only analysis into
 writes.
 
-**Announce:** "Using the PelizzAI Improving Architecture skill to review the architecture by evidence."
+**Announce**, in the conversation's language: that you are using the PelizzAI Improving Architecture skill to review the architecture by evidence.
 
 ## Effect contract
 

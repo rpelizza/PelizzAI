@@ -14,7 +14,7 @@ consolidated. At the end, overlays that may write run before the content is seal
 review, suite, and checklist. The skill keeps resumable state and prevents integrating content
 different from what was validated.
 
-**Announce on start:** "Using the PelizzAI Execution Plans skill to execute the plan, task by task."
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Execution Plans skill to execute the plan, task by task.
 
 <TEAM-MEMBER-STOP>
 If you are a **member** (teammate/subagent) in charge of **one task**, implement only yours:

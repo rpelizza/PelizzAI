@@ -7,7 +7,7 @@ description: Shared vocabulary for designing deep modules. Use when the user wan
 
 Design **deep modules**: lots of behavior behind a small interface, at a clean seam, testable through the interface itself. Use this language and these principles whenever code is being designed or restructured. The goal is leverage for callers, locality for maintainers, and testability for everyone.
 
-**Announce on start (when triggered explicitly):** "Using the PelizzAI Codebase Design skill to design deep modules."
+**Announce on start (when triggered explicitly)**, in the conversation's language: that you are using the PelizzAI Codebase Design skill to design deep modules.
 
 ## Glossary
 

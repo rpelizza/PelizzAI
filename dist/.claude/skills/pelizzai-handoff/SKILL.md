@@ -10,7 +10,7 @@ description: Prepares a new session or workstream with minimal, verifiable, safe
 Give the next session everything it needs to resume, without copying an entire narrative or
 inventing state that Git can prove.
 
-**Announce:** "Using PelizzAI Handoff to prepare the next session."
+**Announce**, in the conversation's language: that you are using PelizzAI Handoff to prepare the next session.
 
 ## Handoff or compaction?
 

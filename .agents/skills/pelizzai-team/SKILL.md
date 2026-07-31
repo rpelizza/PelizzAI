@@ -16,7 +16,7 @@ This skill works in **two modes** and picks the right one automatically:
 
 The coordination and delegation protocol is **the same in both modes**; only the execution mechanics change.
 
-**Announce on start:** "Using the PelizzAI Team skill to coordinate a team of agents."
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Team skill to coordinate a team of agents.
 
 <TEAM-MEMBER-STOP>
 If you were assigned as a **member** of a team (a teammate or a subagent executing a subtask), **do not invoke this skill** to create a sub-team. There are no nested teams. Execute your subtask, invoke `pelizzai-reasoning` to reason about it, **apply the domain skills pasted into your briefing** (they prevail over generic patterns) and the global layer `pelizzai-preferences`, and return the deliverable in the format agreed in your briefing. **Do not commit** — consolidation (commit) belongs to the coordinator, after the reviews; leave the work in the working tree.

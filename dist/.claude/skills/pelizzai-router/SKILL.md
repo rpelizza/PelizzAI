@@ -13,7 +13,7 @@ If you received a closed subtask, do not route again. Follow the briefing and es
 
 Produce the smallest route that solves the task safely. The router decides the **lifecycle**; `pelizzai-reasoning` decides the **heuristics** within each phase.
 
-**Announce:** "Using the PelizzAI Router skill to classify the task's effect, risk, and flow."
+**Announce**, in the conversation's language: that you are using the PelizzAI Router skill to classify the task's effect, risk, and flow.
 
 ## Decision envelope
 

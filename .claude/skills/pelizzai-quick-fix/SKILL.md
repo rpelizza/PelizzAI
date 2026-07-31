@@ -10,7 +10,7 @@ description: Head skill for a local, cohesive, clear, low-risk tweak — text, l
 A lean path for trivial changes. It avoids the cost of design + plan when there is no architecture
 decision to make — **without** giving up an isolated branch, verification, and closeout.
 
-**Announce at start:** "Using the PelizzAI Quick Fix skill for this one-off tweak."
+**Announce at start**, in the conversation's language: that you are using the PelizzAI Quick Fix skill for this one-off tweak.
 
 > **Principle:** trivial ≠ sloppy. Skip the design, not the discipline.
 

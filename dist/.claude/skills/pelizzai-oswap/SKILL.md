@@ -14,7 +14,7 @@ Baseline: [OWASP Top 10:2025](https://owasp.org/Top10/2025/0x00_2025-Introductio
 maintaining this skill, confirm the current official edition; do not preserve old categories from
 memory.
 
-**Announce:** "Using the PelizzAI OWASP skill to review this change's security surfaces."
+**Announce**, in the conversation's language: that you are using the PelizzAI OWASP skill to review this change's security surfaces.
 
 ## When
 

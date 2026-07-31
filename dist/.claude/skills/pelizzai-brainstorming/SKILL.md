@@ -10,7 +10,7 @@ description: Explores and ratifies design before implementing a greenfield produ
 Turn intent into a design decided by the user before implementation. The skill investigates,
 surfaces alternatives, and recommends; it never fills in a product decision to gain speed.
 
-**Announce:** "Using the PelizzAI Brainstorming skill in `<compact|full>` mode to resolve the design decisions before implementing."
+**Announce**, in the conversation's language: that you are using the PelizzAI Brainstorming skill in `<compact|full>` mode to resolve the design decisions before implementing.
 
 <HARD-GATE>
 Do NOT invoke an implementation skill, write code, create scaffolding, or take any implementation
@@ -153,8 +153,8 @@ contradiction between spec, plan, and code
 ```
 
 Full mode/greenfield: the stress with `pelizzai-interview-me` is **MANDATORY**, not an offer.
-Announce it in the user's language ("I'm going to interview you to stress-test this design and
-expose the weak points before moving on") and run the interview. Every new decision that belongs to
+Announce it in the conversation's language — that you are going to interview the user to
+stress-test this design and expose the weak points before moving on — and run the interview. Every new decision that belongs to
 the user comes back one question at a time, with a recommendation. Each gap is resolved, explicitly
 accepted, or converted into an investigation task before leaving the design edge.
 
