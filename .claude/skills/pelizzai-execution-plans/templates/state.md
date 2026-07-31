@@ -10,7 +10,7 @@
 
 - slug: <none>
 - track: <feature | bug | tweak | refactor | infra | review>
-- lane: <bounded | standard | exploratory | high-risk>   # depth classified by the router, ratified at kickoff
+- lane: <bounded | standard | exploratory>   # depth classified by the router, ratified at kickoff (high risk lands in `exploratory`; severity lives in `risk:`)
 - phase: <brainstorm | plan | exec | review | delivered | done | abandoned | blocked>   # finish-task does NOT declare `done`: it seals `delivered` (content + destination executed); `done` is observed later against git; `abandoned` = archived without merge
 - branch: <branch-name>
 - base-ref: <exact ref used to create the branch, e.g. origin/main or refs/heads/trunk>

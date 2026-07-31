@@ -113,7 +113,7 @@ record the untaken decisions as limitations and confirm an implementable spec st
 
 Do not reopen what the router's kickoff gate has already ratified: group only the material gaps still open. In `bounded` with no material gap, the gate does not appear.
 
-Under a closed briefing (SUBAGENT-STOP), do not produce route analyses or open gates: apply the briefing and escalate to the coordinator whatever requires a decision.
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce route analyses or open gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 ### 4. Explore alternatives when they exist
 

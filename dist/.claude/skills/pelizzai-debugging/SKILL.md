@@ -141,7 +141,7 @@ track `bug`; without it the writegate (Rule B) blocks product writes and resumpt
 recognize the gate. Reversible containment (Step 0) and read-only investigation do not wait for it;
 temporary instrumentation, the regression test, and the fix do — if the Step 2 instrumentation is
 the first product mutation, run the confirm and record the marker before it. Under a closed
-briefing (SUBAGENT-STOP), produce no route analyses and open no gates: apply the briefing and
+briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route analyses and open no gates: apply the briefing and
 escalate to the coordinator whatever requires a decision.
 
 Choose the strategy by the nature of the change, per `pelizzai-reasoning`:

@@ -208,7 +208,7 @@ Present the plan and the stress result at the edge — `bounded`: a summary of t
 content** and wait. Only then move on to setup; approval of the WHAT and decisions about the HOW
 are not compressed into a single answer.
 
-Under a closed briefing (SUBAGENT-STOP), do not produce route analyses or open gates: apply the
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce route analyses or open gates: apply the
 briefing and escalate to the coordinator whatever requires a decision.
 
 ## Handoff
@@ -220,7 +220,7 @@ the set for the decided stack (grounded in Context7); the decision is the user's
 **BEFORE Task 1**. This catches flows that reached the plan without passing through
 `pelizzai-brainstorming`. In source mode there is no consumer catalog: the check falls to the
 source repo's domain skills and never creates `pelizzai/` runtime. Under a closed briefing
-(SUBAGENT-STOP), do not open this gate: flag the coverage gap to the coordinator.
+(SUBAGENT-STOP / TEAM-MEMBER-STOP), do not open this gate: flag the coverage gap to the coordinator.
 
 In the consumer, update the `plan:` field in state and confirm the materialized path
 (`pelizzai/plans/YYYY-MM-DD-<topic>.md`); content approval is recorded in the header of the plan

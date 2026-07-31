@@ -87,7 +87,7 @@ gaps; stated contract: <short list>`. Greenfield never collapses.
 
 ## Subagent carve-out
 
-Under a closed briefing (SUBAGENT-STOP), do NOT produce the always-on analysis and do NOT open the
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do NOT produce the always-on analysis and do NOT open the
 discovery gate: apply the briefing and escalate to the coordinator the scope decision it left open.
 
 ## Relation to other techniques
@@ -107,7 +107,7 @@ discovery gate: apply the briefing and escalate to the coordinator the scope dec
 - Treating reversibility as authorization for the LLM to decide a product preference.
 - Treating high risk as uncertainty and inflating the analysis of a clearly scoped request.
 - Turning the analysis into a question instead of a presented result.
-- Opening the discovery gate under a closed briefing (SUBAGENT-STOP).
+- Opening the discovery gate under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP).
 ```
 
 Back to the [technique catalog](../SKILL.md).

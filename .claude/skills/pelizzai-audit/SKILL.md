@@ -117,7 +117,7 @@ trigger writing by itself; greenfield triggers discovery and, after the spec is 
 proposal. Nothing is written without an explicit answer. Context7 provides the skill's technical
 grounding; it does not decide whether the project wants the skill.
 
-Under a closed briefing (SUBAGENT-STOP), produce no route analyses and open no gates: apply the briefing and escalate to the coordinator whatever requires a decision.
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route analyses and open no gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 **Source mode** (PelizzAI source repo): this gate does NOT run; domain rules, if any, live in the native execution record.
 

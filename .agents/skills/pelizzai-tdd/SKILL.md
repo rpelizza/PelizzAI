@@ -133,7 +133,7 @@ Waived from this gate — with no self-declared "obviousness":
 - light path: a single regression test (`pelizzai-debugging`) or a minimal tweak test
   (`pelizzai-quick-fix`), where the target behavior is already fixed by the root cause or by the
   tweak's criterion;
-- closed briefing (SUBAGENT-STOP): apply the briefing, do not open gates, and escalate to the
+- closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP): apply the briefing, do not open gates, and escalate to the
   coordinator whatever requires a decision.
 ```
 

@@ -79,7 +79,7 @@ contract was stated, the analysis may collapse to zero. In `bounded`, it collaps
 material gaps; stated contract: <short list>". A greenfield project/product never collapses: a
 specified stack does not define users, flows, states, policies, UX, data, or acceptance.
 
-Under a closed briefing (SUBAGENT-STOP), do not produce the Proposal analysis or open Discovery: apply the briefing and escalate to the coordinator whatever requires a decision.
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce the Proposal analysis or open Discovery: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 ## Source mode and bootstrap
 
@@ -377,7 +377,7 @@ show details as context, not as several simultaneous questions:
 ```text
 **Kickoff gate — proposed route:**
 - Understanding: <X> as a <feature|tweak|bug|refactor>
-- Lane: <bounded|standard|exploratory|high-risk> — <one-line justification>
+- Lane: <bounded|standard|exploratory> — <one-line justification>
 - Head + overlays: <head skill> + <overlays or "none">
 - Discovery: <"no material gaps" | numbered list of gaps → I recommend <compact|full pelizzai-brainstorming|focused pelizzai-interview-me>>
 - Artifacts: <spec/plan/ADR expected in this lane | "none beyond the native plan">; in greenfield/exploratory with a missing catalog or a new stack, also list "stack domain skills (proposed at the design edge)"
@@ -403,7 +403,7 @@ records which decisions were left unvalidated; the LLM does not fill those decis
 
 **Setup stays out of this block:** isolation, mode (with `team` always visible), and commit are ratified at the post-plan setup gate of `pelizzai-execution-plans` (tracks with a plan) or in the head skill's one-line confirm (tweak/bug). The router recommends silently and does not repeat the question.
 
-Under a closed briefing (SUBAGENT-STOP), do not produce route analyses or open the kickoff gate: apply the briefing and escalate to the coordinator whatever requires a decision.
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce route analyses or open the kickoff gate: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 ## Regression evaluation
 

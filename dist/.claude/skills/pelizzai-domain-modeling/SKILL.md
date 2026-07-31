@@ -39,7 +39,7 @@ ADR/rejection recording follows the gate, never reflex:
   (pre-seal).
 - In read-only analysis, only **propose** the record; the write returns to the first-write gate.
 
-Under a closed briefing (SUBAGENT-STOP), produce no route analyses and open no gates: apply the
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route analyses and open no gates: apply the
 briefing and escalate to the coordinator whatever requires a decision.
 
 ## Process

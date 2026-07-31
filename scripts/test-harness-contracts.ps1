@@ -196,7 +196,7 @@ try {
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'recommendation to ratify' 'kickoff is a recommendation to ratify'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Applying isolation, execution mode, or commit strategy without user ratification' 'router: anti-silence red flag (isolation/mode/commit)'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Silently assuming a decision that changes scope/UX/architecture' 'router: red flag against silent assumptions'
-    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'SUBAGENT-STOP\), do not produce route analyses or open the kickoff gate' 'kickoff has a SUBAGENT-STOP carve-out'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'SUBAGENT-STOP / TEAM-MEMBER-STOP\), do not produce route analyses or open the kickoff gate' 'kickoff has a SUBAGENT-STOP carve-out'
 
     # -- Proposal analysis + discovery reconnected (router) --
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Proposal analysis' 'router always stresses the proposal (Proposal analysis)'
@@ -221,7 +221,7 @@ try {
     Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'one question at a time' 'brainstorming interviews sequentially'
     Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'Recommendation:' 'brainstorming recommends before asking'
     Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'Skipping the entire\s+discovery requires an explicit request' 'brainstorming: skipping discovery requires a user decision'
-    Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'SUBAGENT-STOP\), do not produce route analyses or open gates' 'brainstorming has the SUBAGENT-STOP carve-out'
+    Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'SUBAGENT-STOP / TEAM-MEMBER-STOP\), do not produce route analyses or open gates' 'brainstorming has the SUBAGENT-STOP carve-out'
     Check-Match '.claude/skills/pelizzai-brainstorming/SKILL.md' 'Do not require stress[^\n]*twice' 'brainstorming keeps the duplicate-stress guard'
 
     # -- interview-me: numbered exposure of the gaps --

@@ -49,7 +49,7 @@ in one line, with the decisions visible and named, and waits:
 One "ok" ratifies base, name, and the three decisions at once — all are named in the line, nothing
 was silent; a named override adjusts only that item and keeps the rest. Only then is the branch
 created. Do not scatter this line across separate questions: the one-decision-per-turn menu
-belongs to the post-plan gate of the tracks with a plan. Under a closed briefing (SUBAGENT-STOP),
+belongs to the post-plan gate of the tracks with a plan. Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP),
 open no gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 ```text

@@ -264,7 +264,7 @@ fixes is a silent discard. Each finding that becomes a write follows the router'
 (quick-fix/tdd/debugging) and, after the fixes, **reopen the review** over the new content — "I
 already reviewed before the fix" does not count.
 
-Under a closed briefing (SUBAGENT-STOP), produce no route analyses and open no gates: apply the briefing and escalate to the coordinator whatever requires a decision.
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route analyses and open no gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 ---
 

@@ -62,7 +62,7 @@ For substantial UI deliveries, dispatch a fresh-context, read-only reviewer carr
 
 ## Harness integration
 
-This skill is a **mandatory overlay** for any task whose diff touches pages, components, styles, layout, visual states, or UX — whatever the head skill. The router records the overlay; `pelizzai-writing-plans` lists it among the plan's cross-cutting harness skills; the executor loads it before implementing and before reviewing. Under a closed briefing (SUBAGENT-STOP), do not open gates or produce route analyses: apply the briefing and escalate to the coordinator anything that requires a decision. Direction ratification and durable visual decisions (dark mode, density, charts/metrics) are recommendations the user ratifies — never silent defaults.
+This skill is a **mandatory overlay** for any task whose diff touches pages, components, styles, layout, visual states, or UX — whatever the head skill. The router records the overlay; `pelizzai-writing-plans` lists it among the plan's cross-cutting harness skills; the executor loads it before implementing and before reviewing. Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not open gates or produce route analyses: apply the briefing and escalate to the coordinator anything that requires a decision. Direction ratification and durable visual decisions (dark mode, density, charts/metrics) are recommendations the user ratifies — never silent defaults.
 
 - `pelizzai-brainstorming` — UI-bearing specs produce the direction contract in their design phase; its visual companion renders the disposable mockups.
 - `pelizzai-writing-plans` — UI tasks carry floor checks in their proof lines.
