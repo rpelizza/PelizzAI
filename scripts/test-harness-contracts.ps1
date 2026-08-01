@@ -295,6 +295,28 @@ try {
     Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' 'node scripts/sync-harness\.mjs[\s\S]*--check' 'writing-skills runs the portable sync and check'
     Check-Match '.claude/skills/pelizzai-writing-skills/references/domain-skill-maintenance.md' '[Aa]doption-driven' 'domain-skill-maintenance has the adoption-driven axis (creates the new-stack skill)'
 
+    # -- writing-skills: the trigger test is the routing gate (under-triggering is the dominant failure) --
+    # The RED baseline proves the rules change behavior once loaded; this gate proves the skill
+    # gets loaded at all. Mandatory for a new domain skill and for any edit to the description.
+    Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' 'TRIGGER TEST' 'writing-skills gates a domain skill on the trigger test'
+    Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' 'references/trigger-test\.md' 'writing-skills points to the trigger-test protocol'
+    Check-Match '.claude/skills/pelizzai-writing-skills/references/trigger-test.md' 'never names the skill' 'trigger test: the probe does not name the skill'
+    Check-Match '.claude/skills/pelizzai-writing-skills/references/trigger-test.md' 'Triggered[\s\S]{0,320}Followed' 'trigger test: both criteria — triggered and followed'
+    Check-Match '.claude/skills/pelizzai-writing-skills/references/trigger-test.md' 'After 3 failed rounds, stop' 'trigger test: 3-round budget, then escalate'
+    Check-Match '.claude/skills/pelizzai-writing-skills/references/trigger-test.md' 'fresh subagent' 'trigger test: dispatches a fresh subagent'
+    Check-Match '.claude/skills/pelizzai-writing-skills/references/trigger-test.md' 'pelizzai-subagents' 'trigger test: the dispatch goes through pelizzai-subagents'
+    Check-Match '.claude/skills/pelizzai-writing-skills/references/trigger-test.md' 'pelizzai-interview-me' 'trigger test: escalation goes to the user via interview-me'
+    Check-NotMatch '.claude/skills/pelizzai-writing-skills/references/trigger-test.md' 'optional gate|when convenient' 'trigger test is not optional'
+    # The probe runs in the task's shared working tree (a worktree does not isolate agents), so a
+    # writing probe would mutate the delivery it is verifying. Read-only is a contract, not advice.
+    Check-Match '.claude/skills/pelizzai-writing-skills/references/trigger-test.md' 'probe is READ-ONLY' 'trigger test: the probe is read-only'
+    Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' 'probe is READ-ONLY' 'writing-skills states the probe is read-only in the flow'
+    # Full mandatory scope must live in BOTH the protocol and the skill body — a scope stated only
+    # in the reference is a scope the operating flow silently drops.
+    Check-Match '.claude/skills/pelizzai-writing-skills/references/trigger-test.md' 'splitting a skill in two, or narrowing/broadening a trigger' 'trigger test: mandatory scope covers split and re-scope'
+    Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' 'splitting one skill in two, and narrowing or\s+broadening a trigger' 'writing-skills propagates the full mandatory scope'
+    Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' 'touches the `description` OR changes[\s\S]{0,60}scope' 'maintenance re-runs the gate on description AND scope changes'
+
     # -- finish-task: proactive destination (local by default, external per task) --
     Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'Ask a single question and wait' 'finish-task asks for the destination and waits'
     Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'never\s+applied from a\s+profile default' 'finish-task: push/PR/discard confirmed per task (destination not inherited)'
