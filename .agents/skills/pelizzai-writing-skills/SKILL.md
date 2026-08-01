@@ -58,6 +58,10 @@ Treat skills as versioned behavior. Use the smallest evidence that detects the r
   create a test file for every wording tweak.
 - Fixed flow/script: executable test. Routing/heuristic: forward-test with clean context.
   Subjective style: contrastive examples and inspection, without faking determinism.
+- ROUTING IS NOT OPTIONAL: a new domain skill, and any edit touching the `description`, passes
+  the TRIGGER TEST before entering the catalog — see [references/trigger-test.md](references/trigger-test.md).
+  The baseline proves the rules change behavior once loaded; the trigger test proves the skill
+  gets loaded at all. Budget: 3 rounds, then escalate the scope decision to the user.
 - Re-run the affected regression and a composite smoke suite. More samples only when the
   observed variance justifies them.
 - If a rule only works with growing prohibitions, revise the activation predicate before
@@ -260,6 +264,9 @@ Once a skill is ready, you can **optimize the `description`** to improve trigger
 - Summarizing the workflow in the description (the agent follows the summary and skips the body).
 - A vague trigger that contends for every request without naming the near misses (skill storm) —
   or one so narrow the skill never fires (under-triggering, the dominant failure).
+- Cataloging a domain skill without the trigger test, or running the probe in the same session
+  that wrote the skill (the context already holds the skill — the test measures nothing).
+- Naming the skill inside the probe: that tests obedience, not triggering.
 - Cutting a true candidate to "keep the set small", or writing N candidates in a queue when the
   team would write them in parallel.
 - Duplicating the same domain skill across roots without verifying parity.
@@ -272,14 +279,17 @@ Once a skill is ready, you can **optimize the `description`** to improve trigger
 ```text
 1. Identify the mode: Authoring (new skill) or Maintenance (update existing ones).
 2. AUTHORING: capture the intent → gather evidence → proportional baseline → write the minimal
-   skill → validate/forward-test → record in catalog and ledger when it is a domain skill.
+   skill → validate/forward-test → TRIGGER TEST for a domain skill (fresh subagent, probe that
+   does not name the skill; 3 rounds, then escalate) → record in catalog and ledger.
 3. BOOTSTRAP: generously enumerate the true candidates → CONFIRM the list with the user
-   (gate 2.5) → write in parallel (team; a subagent when there is just one) → sync roots →
+   (gate 2.5) → write in parallel (team; a subagent when there is just one) → trigger test per
+   skill, AFTER the whole batch exists (sibling overlap only shows up then) → sync roots →
    catalog → seed the ledger → final user acceptance.
 4. MAINTENANCE: detect the axis (version/history/adoption) → version/rework read the existing
    skill and change only what is needed; adoption PROPOSES creating the new stack's skill
    (context7/current official docs) → confirm when the proposal is proactive → validate
-   proportionally → show the diff → record in the ledger with the axis.
+   proportionally, re-running the trigger test when the edit touches the `description` → show
+   the diff → record in the ledger with the axis.
 5. CADENCE: when closing the task, check the ledger and propose a review if the threshold was
    crossed.
 ```
