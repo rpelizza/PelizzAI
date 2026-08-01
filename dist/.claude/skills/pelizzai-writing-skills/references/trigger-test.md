@@ -23,8 +23,9 @@ Maintenance is included: a `refresh` that rewrites the description re-enters thi
 
 ## Protocol
 
-1. **Write the probe task.** A realistic, small task in the skill's domain — a bug fix, a small feature, a question — phrased the way this project's users actually phrase requests. The probe **never names the skill** and should naturally contain some of the tokens the description relies on: that is what makes it realistic, and what makes the test honest.
+1. **Write the probe task.** A realistic, small task in the skill's domain — a bug to diagnose, a small feature to plan, a question — phrased the way this project's users actually phrase requests. The probe **never names the skill** and should naturally contain some of the tokens the description relies on: that is what makes it realistic, and what makes the test honest.
 2. **Dispatch a fresh subagent** via `pelizzai-subagents`, with clean context: the probe task and the repository, and nothing from the conversation where the skill was written. The subagent has to discover the skill through normal routing — never because it was told the skill exists.
+   **The probe is READ-ONLY.** A subagent shares the task's working tree (`pelizzai-subagents`: a worktree does not isolate agents from each other), so a probe allowed to write would mutate the very delivery under review, and the gate would dirty what it is verifying. Brief the subagent to diagnose, plan, and report — never to edit, commit, or clean. Both verdicts below are readable in its report; neither needs a byte written. If a scenario genuinely cannot be answered without executing, run it in a disposable copy outside the task's tree and discard it before judging.
 3. **Judge against both criteria:**
    - **Triggered** — the subagent invoked/read the skill before substantive work on the task.
    - **Followed** — at least one of the skill's rules visibly shaped the output: a convention applied, a trap avoided, the verification run.
@@ -59,6 +60,7 @@ At bootstrap, N candidate skills are written in parallel. The trigger test stays
 
 ## Anti-patterns
 
+- Letting the probe write: a gate that mutates the delivery it is verifying has destroyed its own evidence.
 - Declaring the skill done because the description "reads well" — the description is a routing artifact, and reading well is not evidence that it routes.
 - Running the probe in the same session that wrote the skill: the context already contains the skill, so the test measures nothing.
 - Naming the skill in the probe ("use the X skill to…") — that tests obedience, not triggering.

@@ -58,10 +58,12 @@ Treat skills as versioned behavior. Use the smallest evidence that detects the r
   create a test file for every wording tweak.
 - Fixed flow/script: executable test. Routing/heuristic: forward-test with clean context.
   Subjective style: contrastive examples and inspection, without faking determinism.
-- ROUTING IS NOT OPTIONAL: a new domain skill, and any edit touching the `description`, passes
-  the TRIGGER TEST before entering the catalog — see [references/trigger-test.md](references/trigger-test.md).
-  The baseline proves the rules change behavior once loaded; the trigger test proves the skill
-  gets loaded at all. Budget: 3 rounds, then escalate the scope decision to the user.
+- ROUTING IS NOT OPTIONAL: four changes pass the TRIGGER TEST before entering the catalog — a new
+  domain skill, any edit touching the `description`, splitting one skill in two, and narrowing or
+  broadening a trigger. See [references/trigger-test.md](references/trigger-test.md). The baseline
+  proves the rules change behavior once loaded; the trigger test proves the skill gets loaded at
+  all. The probe is READ-ONLY (a subagent shares the task's working tree). Budget: 3 rounds, then
+  escalate the scope decision to the user via `pelizzai-interview-me`.
 - Re-run the affected regression and a composite smoke suite. More samples only when the
   observed variance justifies them.
 - If a rule only works with growing prohibitions, revise the activation predicate before
@@ -288,8 +290,9 @@ Once a skill is ready, you can **optimize the `description`** to improve trigger
 4. MAINTENANCE: detect the axis (version/history/adoption) → version/rework read the existing
    skill and change only what is needed; adoption PROPOSES creating the new stack's skill
    (context7/current official docs) → confirm when the proposal is proactive → validate
-   proportionally, re-running the trigger test when the edit touches the `description` → show
-   the diff → record in the ledger with the axis.
+   proportionally, re-running the trigger test when the edit touches the `description` OR changes
+   the skill's scope (split, narrowing, broadening) → show the diff → record in the ledger with
+   the axis.
 5. CADENCE: when closing the task, check the ledger and propose a review if the threshold was
    crossed.
 ```
