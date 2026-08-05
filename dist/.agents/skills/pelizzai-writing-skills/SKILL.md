@@ -58,12 +58,6 @@ Treat skills as versioned behavior. Use the smallest evidence that detects the r
   create a test file for every wording tweak.
 - Fixed flow/script: executable test. Routing/heuristic: forward-test with clean context.
   Subjective style: contrastive examples and inspection, without faking determinism.
-- ROUTING IS NOT OPTIONAL: four changes pass the TRIGGER TEST before entering the catalog — a new
-  domain skill, any edit touching the `description`, splitting one skill in two, and narrowing or
-  broadening a trigger. See [references/trigger-test.md](references/trigger-test.md). The baseline
-  proves the rules change behavior once loaded; the trigger test proves the skill gets loaded at
-  all. The probe is READ-ONLY (a subagent shares the task's working tree). Budget: 3 rounds, then
-  escalate the scope decision to the user via `pelizzai-interview-me`.
 - Re-run the affected regression and a composite smoke suite. More samples only when the
   observed variance justifies them.
 - If a rule only works with growing prohibitions, revise the activation predicate before
@@ -85,10 +79,8 @@ Domain skills capture **this project's** patterns, stacks, and conventions, maki
   skill — ground it or defer (never invent from memory). A skill for an internal convention is
   grounded in the project's own code, tests, ADRs, and history, where `context7` is preferred,
   not a blocker.
-- In a CONSUMER, every domain skill created/updated enters the catalog `pelizzai/domain-skills.md`
-  and the ledger `pelizzai/data/review-domain-skills.md` (see Templates). In the PelizzAI source
-  repo (sentinel `scripts/pelizzai-source-repo.txt`) that runtime does not exist: record the same
-  facts in the native execution record and create no `pelizzai/` file.
+- Every domain skill created/updated enters the catalog `pelizzai/domain-skills.md` and the
+  ledger `pelizzai/data/review-domain-skills.md` (see Templates).
 ```
 
 ### Skill roots in the consumer project
@@ -131,14 +123,13 @@ skill and mirrors divergent, and do not hand this step off to the user.
 
 ## Bootstrap mode (called by `pelizzai-audit`)
 
-Triggered in `bootstrap-write`, after `pelizzai-audit` has mapped the context and created the task branch. Scan-only does not call this mode. **Consumer only:** in the PelizzAI source repo there is no consumer bootstrap and no `pelizzai/` runtime — steps 4–5 below write nothing under `pelizzai/`; the equivalent record lives in the native execution record.
+Triggered in `bootstrap-write`, after `pelizzai-audit` has mapped the context and created the task branch. Scan-only does not call this mode.
 
 ```text
 1. Receive the evidenced inventory from pelizzai-audit (stacks, frameworks, modules, conventions,
    MCPs) and the active skill roots. If `context7` is missing, PROPOSE installing it before
-   generating — without it, grounding falls back to the current official documentation exactly
-   where the key MCP would make the difference, and a stack skill with neither source available is
-   deferred, never written from memory.
+   generating — without it, grounding falls back to web/memory exactly where the key MCP would
+   make the difference.
 2. List the CANDIDATE domain skills — the maximum number of useful skills the patterns justify
    (one per recurring flow/responsibility: build/deploy, code generation, tests, migrations,
    integrations, UI conventions, etc.). The filter is TRUTH, not scarcity: do not invent skills
@@ -151,28 +142,18 @@ Triggered in `bootstrap-write`, after `pelizzai-audit` has mapped the context an
    If the bootstrap consent already included the candidates' names/scope, do not repeat the
    question; reopen the decision only if the scan materially changed the proposed set.
 3. Write the confirmed candidates in PARALLEL with `pelizzai-team` — one candidate skill per
-   member, each grounding theirs via context7 or, when it is unavailable, the current official
-   documentation; defer the skill only when neither source is. **Scale with the number of candidates:** 5
+   member, each grounding theirs via context7. **Scale with the number of candidates:** 5
    confirmed candidates are 5 fronts, not a queue. With a single candidate (or when a team would
    be unnecessary), delegate via `pelizzai-subagents`. Members who WRITE skills need WRITE
    capability (general-purpose or a subagent with write tools) and access to context7/official
    docs — read-only agents serve only for grounding research/reading, not for writing the skill.
-   DISJOINT PATHS: each member writes ONLY its own candidate's file, one writer per file. No
-   member touches the catalog, the ledger, the generated mirrors, or the manifest — those are the
-   coordinator's, serially, in 5.5.
-4. For each skill: follow the authoring rules and validate the frontmatter. CONSUMER ONLY: record
-   it in the catalog and the ledger (including the origin: repo-scan or interview). In source mode
-   the same facts go to the native execution record — no file under `pelizzai/`.
-5. CONSUMER ONLY: seed the ledger (`last-review`/`last-full-scan`) with the **bootstrap date
-   (today)** — the skills are born from the repo-scan of the current HEAD, so the bootstrap IS the
-   first review; seeding with a mature repo's 1st commit fires a spurious nudge on the very first
-   task. Write the catalog `pelizzai/domain-skills.md` — its existence marks the bootstrap as
-   complete. See Templates. In source mode this step does not run: there is no catalog, no ledger,
-   and nothing marks a consumer bootstrap.
-5.5. SERIAL, COORDINATOR ONLY, after every member has returned: run the sync ONCE for the whole
-   batch (§Mandatory sync as part of the edit), plus `--update-manifest` before `--check` when a
-   core skill was created in the source repo. Never let members sync in parallel — concurrent runs
-   regenerate the same mirrors and leave divergent hashes.
+4. For each skill: follow the authoring rules; validate the frontmatter; record it in the catalog
+   and the ledger (including the origin: repo-scan or interview).
+5. Seed the ledger (`last-review`/`last-full-scan`) with the **bootstrap date (today)** — the
+   skills are born from the repo-scan of the current HEAD, so the bootstrap IS the first review;
+   seeding with a mature repo's 1st commit fires a spurious nudge on the very first task. Write
+   the catalog `pelizzai/domain-skills.md` — its existence marks the bootstrap as complete. See
+   Templates.
 6. Offer to install the cadence hook (opt-in; see `references/domain-skill-maintenance.md`).
 7. Present the user the catalog of created skills, with diff and validation — nothing is final
    without their sign-off. Ask for a new decision only for scope/content not covered by the
@@ -234,13 +215,12 @@ The thresholds (10 commits / 10 review days / 15 full-scan days / 10 interaction
 
 ## Ledger and catalog
 
-Two artifacts per **consumer** project, created/updated by this skill (in the source repo neither
-exists: the native execution record takes their place and no `pelizzai/` runtime is created):
+Two artifacts per project, created/updated by this skill:
 
 - **`pelizzai/domain-skills.md`** — catalog: what each domain skill does and when to use it. Template: [templates/domain-skills.md](templates/domain-skills.md).
 - **`pelizzai/data/review-domain-skills.md`** — ledger: per skill, creation date, last update, last commit/ref reviewed, the axis of the change, and the origin (repo-scan/interview); + global `last-review` and `last-full-scan`. Template: [templates/review-domain-skills.md](templates/review-domain-skills.md).
 
-In a consumer, seed the ledger with the **bootstrap date (today)**, in new and existing repos alike — the bootstrap just created the skills from the current HEAD, so "last review = now". In source mode there is no ledger to seed. Seeding with a mature repo's 1st commit makes `daysReview`/`commits` born already past the threshold and fires a spurious nudge on the first task. `count=0` on bootstrap day is correct (it climbs as new commits arrive). See `references/domain-skill-maintenance.md` → "Seeding".
+Seed the ledger with the **bootstrap date (today)**, in new and existing repos alike — the bootstrap just created the skills from the current HEAD, so "last review = now". Seeding with a mature repo's 1st commit makes `daysReview`/`commits` born already past the threshold and fires a spurious nudge on the first task. `count=0` on bootstrap day is correct (it climbs as new commits arrive). See `references/domain-skill-maintenance.md` → "Seeding".
 
 ---
 
@@ -266,9 +246,6 @@ Once a skill is ready, you can **optimize the `description`** to improve trigger
 - Summarizing the workflow in the description (the agent follows the summary and skips the body).
 - A vague trigger that contends for every request without naming the near misses (skill storm) —
   or one so narrow the skill never fires (under-triggering, the dominant failure).
-- Cataloging a domain skill without the trigger test, or running the probe in the same session
-  that wrote the skill (the context already holds the skill — the test measures nothing).
-- Naming the skill inside the probe: that tests obedience, not triggering.
 - Cutting a true candidate to "keep the set small", or writing N candidates in a queue when the
   team would write them in parallel.
 - Duplicating the same domain skill across roots without verifying parity.
@@ -281,18 +258,14 @@ Once a skill is ready, you can **optimize the `description`** to improve trigger
 ```text
 1. Identify the mode: Authoring (new skill) or Maintenance (update existing ones).
 2. AUTHORING: capture the intent → gather evidence → proportional baseline → write the minimal
-   skill → validate/forward-test → TRIGGER TEST for a domain skill (fresh subagent, probe that
-   does not name the skill; 3 rounds, then escalate) → record in catalog and ledger.
+   skill → validate/forward-test → record in catalog and ledger when it is a domain skill.
 3. BOOTSTRAP: generously enumerate the true candidates → CONFIRM the list with the user
-   (gate 2.5) → write in parallel (team; a subagent when there is just one) → trigger test per
-   skill, AFTER the whole batch exists (sibling overlap only shows up then) → sync roots →
+   (gate 2.5) → write in parallel (team; a subagent when there is just one) → sync roots →
    catalog → seed the ledger → final user acceptance.
 4. MAINTENANCE: detect the axis (version/history/adoption) → version/rework read the existing
    skill and change only what is needed; adoption PROPOSES creating the new stack's skill
    (context7/current official docs) → confirm when the proposal is proactive → validate
-   proportionally, re-running the trigger test when the edit touches the `description` OR changes
-   the skill's scope (split, narrowing, broadening) → show the diff → record in the ledger with
-   the axis.
+   proportionally → show the diff → record in the ledger with the axis.
 5. CADENCE: when closing the task, check the ledger and propose a review if the threshold was
    crossed.
 ```

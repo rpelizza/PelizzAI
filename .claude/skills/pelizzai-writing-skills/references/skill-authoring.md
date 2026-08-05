@@ -79,7 +79,7 @@ The Iron Law of authoring: **no new skill — and no behavioral edit to an exist
 ```text
 RED      — run the target scenario WITHOUT the skill, in fresh context, and observe the real
            failure. Capture the rationalizations VERBATIM ("the tests here are too trivial to
-           be worth TDD", "I'll write the test afterward so I don't lose the flow") — THEY are
+           be worth TDD", "I'll write the test afterwards so I don't lose the flow") — THEY are
            what the skill must block, not the failures you imagine ahead of time. Without an
            observed failing baseline, you don't know whether the skill changes anything.
 GREEN    — write the MINIMAL skill that blocks exactly the captured failures. Nothing against
