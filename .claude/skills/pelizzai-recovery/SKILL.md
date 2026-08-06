@@ -45,7 +45,9 @@ check `confirm:` against git (read-only) — does `base-ref` contain `validated-
 branch integrated? (local delivery: does the user accept?). Observed → stamp the `## History` index
 line with `done <YYYY-MM-DD>` + 1-line evidence and record `phase: done` — the full block
 already migrated to `pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` at the `delivered` seal, so
-there is no block to move here; writing metadata in `pelizzai/` is valid on any branch, but the commit waits for
+there is no block to move here. On a protected branch this authorization covers ONLY the cursor
+reconciliation just described (the index stamp and `phase`) — it is not a general license to
+write arbitrary `pelizzai/` metadata there; the commit waits for
 the new task branch (never on a protected one). Failed (PR closed without merge) → do not record
 `done`; report and propose resuming the branch or archiving as `abandoned`. No working file is moved
 in this observation. Source mode: the same observation applies to the native execution record,

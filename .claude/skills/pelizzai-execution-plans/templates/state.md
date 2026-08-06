@@ -17,6 +17,7 @@
 - base-sha: <full SHA resolved from base-ref before the first change>
 - validated-head: <none | full SHA of the last content commit approved in the final validation>
 - confirm: <none | observable condition to establish `done` — e.g. "base-ref contains validated-head (PR/branch integrated)" | "local delivery accepted by the user">
+- delivery-status: <none | pending push | pending pr | local | archive>   # destination INTENT sealed in the finish-task closure; what actually happened is OBSERVED against the remote on resumption (never a second cursor commit)
 - kickoff: <pending | ratified YYYY-MM-DD>   # consolidated gate (plan content + isolation/mode/commits) ratified by the user
 - isolation: <pending | branch | worktree>   # <pending> until ratification; never written as a silent default
 - worktree-path: <none | path of the worktree, when isolation: worktree>

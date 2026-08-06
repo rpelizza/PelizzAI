@@ -141,10 +141,13 @@ Triggered in `bootstrap-write`, after `pelizzai-audit` has mapped the context an
    face of the proposal — the decision not to create belongs to the user, not to the classifier.
    If the bootstrap consent already included the candidates' names/scope, do not repeat the
    question; reopen the decision only if the scan materially changed the proposed set.
-3. Write the confirmed candidates in PARALLEL with `pelizzai-team` — one candidate skill per
-   member, each grounding theirs via context7. **Scale with the number of candidates:** 5
-   confirmed candidates are 5 fronts, not a queue. With a single candidate (or when a team would
-   be unnecessary), delegate via `pelizzai-subagents`. Members who WRITE skills need WRITE
+3. Ratify the execution mode, then write. The mode is a structural decision of the user —
+   approving the candidate LIST (2.5) does NOT ratify the MODE. Recommend it with the three
+   options visible (inline · subagents · team — team never omitted) and wait for the answer:
+   with several candidates recommend `pelizzai-team` — one candidate skill per member, each
+   grounding theirs via context7 (**scale with the number of candidates:** 5 confirmed
+   candidates are 5 fronts, not a queue); with a single candidate (or when a team would be
+   unnecessary) recommend `pelizzai-subagents`. Members who WRITE skills need WRITE
    capability (general-purpose or a subagent with write tools) and access to context7/official
    docs — read-only agents serve only for grounding research/reading, not for writing the skill.
 4. For each skill: follow the authoring rules; validate the frontmatter; record it in the catalog

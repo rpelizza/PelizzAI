@@ -49,7 +49,12 @@ in one line, with the decisions visible and named, and waits:
 One "ok" ratifies base, name, and the three decisions at once — all are named in the line, nothing
 was silent; a named override adjusts only that item and keeps the rest. Only then is the branch
 created. Do not scatter this line across separate questions: the one-decision-per-turn menu
-belongs to the post-plan gate of the tracks with a plan. Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP),
+belongs to the post-plan gate of the tracks with a plan. This is a DELIBERATE exception to
+one-decision-per-turn, and it is proportionality, not a loophole: in tracks with a plan each
+gate decision reshapes a multi-step execution, so they are weighed one at a time; in a tweak the
+four values are visible defaults in a single line, and four separate stops to swap a label teach
+the user to stop reading gates — which defeats the very thing per-decision ratification protects.
+The rule's substance (nothing silent, every decision named and ratifiable) is fully preserved. Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP),
 open no gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 ```text
