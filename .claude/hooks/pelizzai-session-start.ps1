@@ -50,6 +50,26 @@ try {
     } catch {}
   }
 
+  # Anchored-entrypoint self-orientation: in a consumer where the harness is installed (core
+  # skill present) but CLAUDE.md is missing or lost its pelizzai:contract block, say how to
+  # restore it - the sync recreates/repairs it without touching project content outside the markers.
+  try {
+    $srcModeAnchor = Test-Path -LiteralPath (Join-Path $cwd 'scripts/pelizzai-source-repo.txt')
+    $coreInstalled = Test-Path -LiteralPath (Join-Path $cwd '.claude/skills/pelizzai-core')
+    if ((-not $srcModeAnchor) -and $coreInstalled) {
+      $anchored = $false
+      try {
+        $claudePath = Join-Path $cwd 'CLAUDE.md'
+        if (Test-Path -LiteralPath $claudePath) {
+          $anchored = (Get-Content -LiteralPath $claudePath -Raw).Contains('<!-- pelizzai:contract -->')
+        }
+      } catch { $anchored = $true } # unreadable file: do not nag on a doubt
+      if (-not $anchored) {
+        $lines += 'PelizzAI entry files are missing or not anchored (no pelizzai:contract block in CLAUDE.md). Run `node scripts/sync-harness.mjs` (or the bootstrap) to create/restore the harness contract block - project content outside the block is preserved.'
+      }
+    }
+  } catch {}
+
   # Consumer without a domain-skill catalog: suggests ONCE the read-only bootstrap path
   # (propose->confirm; nothing is created without consent). In source mode (source repo)
   # it is a no-op. Creating pelizzai/domain-skills.md (even `_none for now_`) silences the nudge.

@@ -45,20 +45,24 @@ language; the harness classifies each request and recommends the route.
 ### No command line: copy `dist/`
 
 The `dist/` folder is the harness ready for consumption: core skills (`.claude` and `.agents`),
-hooks, the Cursor adapter (`.cursor`), scripts, and the three entrypoints (`CLAUDE.md` already in
-the consumer version, `AGENTS.md`, `GEMINI.md`) — without the source-repo sentinel and without the
-harness's development files.
+hooks, the Cursor adapter (`.cursor`), and scripts — without the source-repo sentinel, without
+the harness's development files, and **without the three entrypoints**: `CLAUDE.md`,
+`AGENTS.md`, and `GEMINI.md` are **anchored at install time**, not shipped. The contract they
+carry travels as an asset inside the core skills
+(`.claude/skills/pelizzai-audit/assets/contract.md`), and the first sync or bootstrap creates
+the files that are missing, appends the `<!-- pelizzai:contract -->` block into the ones that
+exist, and resyncs a tampered block — always preserving the project's own content around it.
 
 1. Download the repository (clone or "Download ZIP" on GitHub).
 2. Copy **the contents** of `dist/` into the root of your project — Ctrl+C, Ctrl+V, done.
-3. Open the agent in the project and type `bootstrap`.
+3. In Claude Code, open the agent in the project and type `bootstrap` — the bootstrap anchors
+   the entrypoints as its own step. On platforms that read `AGENTS.md` natively (Codex, Copilot,
+   Cursor), run `node scripts/sync-harness.mjs` once first to create it.
 
-To **update** later, prefer the export below: it preserves your domain skills, your `pelizzai/`,
-and the project's own content in `CLAUDE.md`/`AGENTS.md`/`GEMINI.md` (the harness manages only
-its anchored contract block), and validates the installation. Copying the new `dist/` over the
-top also works, but it **replaces** those three entry files with the block-only versions, neither
-removes core skills discontinued upstream nor runs the validation — on a project that already has
-its own entry files, use the export.
+To **update** later, prefer the export below: it also removes core skills discontinued upstream
+and runs the validation. Copying the new `dist/` over the top works too — since `dist/` carries
+no entry files, neither path clobbers your `CLAUDE.md`/`AGENTS.md`/`GEMINI.md`: the harness
+manages only its anchored contract block, wherever those files came from.
 
 ### With a command line: install and update are the same command
 
@@ -463,9 +467,11 @@ flowchart TD
     SYNC --> AS[".agents/skills"]
     SYNC --> AG["AGENTS.md"]
     SYNC --> GE["GEMINI.md"]
+    SYNC --> CTR["contract asset<br/>pelizzai-audit/assets/contract.md"]
     SYNC --> MF["manifest<br/>with --update-manifest"]
     SYNC --> EXP["--export-consumer<br/>target project"]
-    SYNC --> DIST["dist/<br/>ready to copy"]
+    SYNC --> DIST["dist/<br/>ready to copy (no entry files)"]
+    CTR -.->|consumer sync anchors<br/>CLAUDE/AGENTS/GEMINI in place| EXP
     CUR[".cursor/rules/pelizzai.mdc<br/>manually authored, distributed by the export"] -.->|points at the entrypoints| AS
 ```
 
@@ -497,6 +503,7 @@ copies it to the consumer project along with the rest of the harness.
 | Quality and security | `pelizzai-review`, `pelizzai-oswap`, `pelizzai-verification-before-completion` | per-task and final review, OWASP on the sensitive surface, fresh evidence before completion |
 | Frontend | `pelizzai-frontend` | product, design, implementation, and visual QA overlay — from design onward |
 | Skill authoring | `pelizzai-writing-skills` | authoring and maintenance of the domain skills |
+| Self-optimization | `pelizzai-evolve` | verification standard + learnings: the project learns from observed failures, with promotion ratified by the user |
 
 ---
 
