@@ -130,13 +130,16 @@ function parseSegment(seg) {
   let cur = '';
   let quote = null; // "'" or '"' when inside quotes
   let expectTarget = false; // the next complete token is a redirection target
-  const flush = () => {
+  const flush = (dueToRedirect = false) => {
     if (cur === '') return;
     if (expectTarget) {
       if (!cur.startsWith('&')) redirects.push(cur); // '&' → fd dup (>&2), not a file
       expectTarget = false;
-    } else if (!/^[0-9]+$|^&$/.test(cur)) {
-      tokens.push(cur); // drop a stray fd prefix (the "2" in "2>")
+    } else if (dueToRedirect && /^[0-9]+$|^&$/.test(cur)) {
+      // drop the fd prefix ONLY when a '>' actually follows (the "2" in "2>"); a bare numeric
+      // token elsewhere is a real argument — `nice -n 10 mv …` must keep the 10.
+    } else {
+      tokens.push(cur);
     }
     cur = '';
   };
@@ -160,7 +163,7 @@ function parseSegment(seg) {
       continue;
     }
     if (ch === '>') {
-      flush(); // closes any pending fd (2, &) before the '>'
+      flush(true); // closes any pending fd (2, &) before the '>'
       if (seg[i + 1] === '>') i++; // '>>' (append) counts as a single redirection
       expectTarget = true;
       continue;
@@ -219,12 +222,36 @@ function isAbsoluteLike(p) {
 // appearing as an argument (`npm install express`, `pip install requests`) is a package
 // manager's subcommand, not a file write, and used to be misread as one.
 const COMMAND_PREFIXES = new Set(['sudo', 'doas', 'env', 'time', 'nohup', 'nice', 'command', 'exec', 'xargs']);
+// Prefix options that CONSUME a value argument: without this table, `sudo -u build cp …` would
+// stop the scan at `build` and miss the real command (false negative on Rules A/B).
+const PREFIX_VALUE_FLAGS = {
+  sudo: new Set(['-u', '-g', '-p', '-h', '-U', '-R', '-T', '-C', '-D', '--user', '--group', '--host', '--prompt', '--chdir', '--chroot']),
+  doas: new Set(['-u']),
+  nice: new Set(['-n', '--adjustment']),
+  env: new Set(['-u', '-S', '-P', '-C', '--unset', '--split-string', '--chdir']),
+  time: new Set(['-f', '-o', '--format', '--output']),
+  xargs: new Set(['-a', '-d', '-E', '-e', '-I', '-i', '-L', '-l', '-n', '-P', '-s']),
+};
 function commandIndex(tokens) {
   let i = 0;
+  let activePrefix = null;
   while (i < tokens.length) {
-    const t = tokens[i].toLowerCase();
-    if (COMMAND_PREFIXES.has(t) || /^[A-Za-z_][A-Za-z0-9_]*=/.test(tokens[i]) || (i > 0 && tokens[i].startsWith('-'))) {
+    const raw = tokens[i];
+    const t = raw.toLowerCase();
+    if (COMMAND_PREFIXES.has(t)) {
+      activePrefix = t;
       i++;
+      continue;
+    }
+    if (/^[A-Za-z_][A-Za-z0-9_]*=/.test(raw)) {
+      i++;
+      continue;
+    }
+    if (i > 0 && raw.startsWith('-')) {
+      const valueFlags = activePrefix ? PREFIX_VALUE_FLAGS[activePrefix] : null;
+      const bare = raw.includes('=') ? raw.slice(0, raw.indexOf('=')) : raw;
+      if (valueFlags && valueFlags.has(bare) && !raw.includes('=') && i + 1 < tokens.length) i += 2;
+      else i += 1;
       continue;
     }
     break;

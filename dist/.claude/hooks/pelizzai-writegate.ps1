@@ -96,12 +96,15 @@ function Test-Inside([string]$child, [string]$root) {
 
 # Closes the current token: redirection target (ignores fd dup >&N) or regular token
 # (drops a stray fd prefix, the "2" in "2>"). Mutations via [ref] (by-reference parameter).
-function Flush-Token([ref]$Cur, $Tokens, $Redirects, [ref]$Expect) {
+function Flush-Token([ref]$Cur, $Tokens, $Redirects, [ref]$Expect, [bool]$DueToRedirect = $false) {
   if ($Cur.Value -eq '') { return }
   if ($Expect.Value) {
     if (-not $Cur.Value.StartsWith('&')) { [void]$Redirects.Add($Cur.Value) }
     $Expect.Value = $false
-  } elseif (-not [regex]::IsMatch($Cur.Value, '^[0-9]+$|^&$')) {
+  } elseif ($DueToRedirect -and [regex]::IsMatch($Cur.Value, '^[0-9]+$|^&$')) {
+    # drop the fd prefix ONLY when a '>' actually follows (the "2" in "2>"); a bare numeric
+    # token elsewhere is a real argument - `nice -n 10 mv ...` must keep the 10.
+  } else {
     [void]$Tokens.Add($Cur.Value)
   }
   $Cur.Value = ''
@@ -132,7 +135,7 @@ function Get-ParsedSegment([string]$seg) {
     }
     if ($ch -eq '"' -or $ch -eq "'") { $quote = $ch; continue }
     if ($ch -eq '>') {
-      Flush-Token ([ref]$cur) $tokens $redirects ([ref]$expectTarget)
+      Flush-Token ([ref]$cur) $tokens $redirects ([ref]$expectTarget) $true
       if (($i + 1) -lt $seg.Length -and $seg.Substring($i + 1, 1) -eq '>') { $i++ } # '>>'
       $expectTarget = $true
       continue
@@ -196,12 +199,29 @@ function Test-AbsoluteLike([string]$p) {
 # as an argument (`npm install express`, `pip install requests`) is a package manager's
 # subcommand, not a file write, and used to be misread as one. Parity with the .mjs.
 $COMMAND_PREFIXES = @('sudo', 'doas', 'env', 'time', 'nohup', 'nice', 'command', 'exec', 'xargs')
+# Prefix options that CONSUME a value argument: without this table, `sudo -u build cp ...` would
+# stop the scan at `build` and miss the real command (false negative on Rules A/B). Parity .mjs.
+$PREFIX_VALUE_FLAGS = @{
+  sudo  = @('-u', '-g', '-p', '-h', '-U', '-R', '-T', '-C', '-D', '--user', '--group', '--host', '--prompt', '--chdir', '--chroot')
+  doas  = @('-u')
+  nice  = @('-n', '--adjustment')
+  env   = @('-u', '-S', '-P', '-C', '--unset', '--split-string', '--chdir')
+  time  = @('-f', '-o', '--format', '--output')
+  xargs = @('-a', '-d', '-E', '-e', '-I', '-i', '-L', '-l', '-n', '-P', '-s')
+}
 function Get-CommandIndex($tokens) {
   $i = 0
+  $activePrefix = $null
   while ($i -lt $tokens.Count) {
-    $t = $tokens[$i].ToLowerInvariant()
-    if (($COMMAND_PREFIXES -contains $t) -or ($tokens[$i] -cmatch '^[A-Za-z_][A-Za-z0-9_]*=') -or ($i -gt 0 -and $tokens[$i].StartsWith('-'))) {
-      $i++
+    $raw = $tokens[$i]
+    $t = $raw.ToLowerInvariant()
+    if ($COMMAND_PREFIXES -contains $t) { $activePrefix = $t; $i++; continue }
+    if ($raw -cmatch '^[A-Za-z_][A-Za-z0-9_]*=') { $i++; continue }
+    if ($i -gt 0 -and $raw.StartsWith('-')) {
+      $bare = if ($raw.Contains('=')) { $raw.Substring(0, $raw.IndexOf('=')) } else { $raw }
+      $valueFlags = if ($activePrefix -and $PREFIX_VALUE_FLAGS.ContainsKey($activePrefix)) { $PREFIX_VALUE_FLAGS[$activePrefix] } else { $null }
+      if ($valueFlags -and ($valueFlags -ccontains $bare) -and (-not $raw.Contains('=')) -and (($i + 1) -lt $tokens.Count)) { $i += 2 }
+      else { $i += 1 }
       continue
     }
     break

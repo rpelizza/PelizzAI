@@ -168,7 +168,12 @@ profile default.
 Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route analyses and open no
 gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
-### 2b. Seal the closure in `delivered` (metadata-only commit)
+### 2b. Seal the closure in `delivered` (metadata-only commit — consumer only)
+
+**Consumer only** (restating the §Source mode rule so this section cannot be read alone): in
+source mode SKIP this entire section — no `pelizzai/` is created or edited, there is no closure
+commit, `delivery-head == validated-head` is required before delivery, and the destination
+status lives in the native execution record.
 
 `delivered` = content sealed + destination executed; it is recorded BEFORE leaving the task branch
 (it rides along in the PR). In the `pelizzai/data/state.md` already modified by the seal:

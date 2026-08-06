@@ -52,12 +52,15 @@ otherwise, measure in a rendered page at 1280px width.
   near-identical colors doing the same job.
 - **Tinted surface share ≤35% of the viewport.** Target shape ≈50% light-neutral / 25%
   dark-neutral / 25% tinted, mirrored in dark themes; the pass line is the single number.
-  Verify: sample the **composited** rendered viewport on a fixed grid (one probe every ~16px —
-  `elementFromPoint` + effective background, or a screenshot's pixels), classify each probe as
-  **tinted** when its composited color is OKLCH C >0.02 and neutral otherwise, and divide
-  tinted probes by total probes. Sampling the final composition counts every visible pixel
-  exactly once — summing element rects would double-count overlapping surfaces and ignore
-  occlusion/transparency. Refuse: >35% — every surface tinted "for warmth".
+  Verify: sample the rendered viewport on a fixed grid (one probe every ~16px). For each probe,
+  take the topmost element at that point (`elementFromPoint`) and resolve its **effective
+  BACKGROUND** — walking up through ancestors with transparent backgrounds — then classify that
+  background as **tinted** when OKLCH C >0.02 and neutral otherwise; divide tinted probes by
+  total probes. Measuring the resolved background (not the raw pixel) keeps text glyphs, icons,
+  brand marks, chart data inks, and images out of the numerator — the floor is about SURFACES;
+  skip probes that land on replaced content (`img`, `video`, `canvas`, data `svg`). Grid
+  sampling counts each visible point once — summing element rects would double-count
+  overlapping surfaces and ignore occlusion. Refuse: >35% — every surface tinted "for warmth".
 - **One token carries call-to-action emphasis per screen.**
   Verify: list the background and border tokens of the buttons and emphasis marks in the rendered
   page, excluding the semantic status set (success / warning / error / info). Refuse: two

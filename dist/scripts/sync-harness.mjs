@@ -85,20 +85,24 @@ function upsertContract(existing, block, { freshHeader = '', legacyStart = null,
   if (legacyStart) {
     const legacyAt = existing.indexOf(legacyStart);
     if (legacyAt >= 0) {
-      let tail = '';
+      let rawTail = '';
       let terminalFound = false;
       if (legacyEnd) {
         const relative = existing.slice(legacyAt).match(legacyEnd);
         if (relative) {
           terminalFound = true;
-          tail = existing.slice(legacyAt + relative.index + relative[0].length).trim();
+          // VERBATIM slice: the tail is project content and keeps its exact whitespace —
+          // trimming would normalize indentation/blank lines the project may care about.
+          rawTail = existing.slice(legacyAt + relative.index + relative[0].length);
         }
       }
+      const hasTail = rawTail.trim().length > 0;
+      const tailPart = hasTail ? `${rawTail.startsWith('\n') ? '' : '\n'}${rawTail}${rawTail.endsWith('\n') ? '' : '\n'}` : '\n';
       return {
         action: 'migrated',
-        content: `${existing.slice(0, legacyAt)}${block}\n${tail ? `\n${tail}\n` : ''}`,
+        content: `${existing.slice(0, legacyAt)}${block}${tailPart}`,
         note: terminalFound
-          ? tail
+          ? hasTail
             ? 'project content found after the legacy body was preserved below the block'
             : null
           : 'legacy body replaced to end of file (terminal line not found — review the diff)',

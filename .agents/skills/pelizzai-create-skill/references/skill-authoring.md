@@ -49,7 +49,7 @@ The goal is to change behavior observably with the least context necessary. A sk
                            limitations; package only if distributing outside the repo.
 ```
 
-Do not re-litigate a decision the user already ratified. When intent, scope, or format are still human decisions, stop and ask with `pelizzai-interview`, one question at a time, in the conversation's language, with the best recommendation marked; do not fill them with defaults. Do not research by reflex when the needed knowledge is in the project. For external facts that may have changed, prefer Context7 or official documentation — it grounds options, it does not decide for the user.
+Do not re-litigate a decision the user already ratified. When intent, scope, format, requirements, UX, architecture, data, security, an interface contract, or acceptance criteria are still human decisions, stop and ask with `pelizzai-interview`, one question at a time, in the conversation's language, with the best recommendation marked; do not fill them with defaults. Do not research by reflex when the needed knowledge is in the project. For external facts that may have changed, prefer Context7 or official documentation — it grounds options, it does not decide for the user.
 
 ### 1. Capture the intent
 

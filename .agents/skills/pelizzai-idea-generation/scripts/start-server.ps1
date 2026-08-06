@@ -113,7 +113,9 @@ for ($i = 0; $i -lt 50; $i++) {
         }
         if (-not $alive) {
             $retry = "$scriptDir\start-server.ps1$(if ($ProjectDir) { " -ProjectDir $ProjectDir" }) -BindHost $BindHost -UrlHost $UrlHost$(if ($AllowInsecureNetwork) { ' -AllowInsecureNetwork' }) -IdleTimeoutMinutes $IdleTimeoutMinutes -Foreground"
-            Write-Output "{`"error`": `"Server started but was killed. Retry in a persistent terminal with: $retry`"}"
+            # ConvertTo-Json escapes backslashes/quotes in Windows paths — hand-interpolating
+            # the command produced invalid JSON for any C:\ path.
+            Write-Output (@{ error = "Server started but was killed. Retry in a persistent terminal with: $retry" } | ConvertTo-Json -Compress)
             exit 1
         }
         (Select-String -Path $logFile -Pattern 'server-started' | Select-Object -First 1).Line

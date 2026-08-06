@@ -160,7 +160,10 @@ for i in {1..50}; do
     if [[ "$alive" != "true" ]]; then
       RETRY_OPTS=""
       [ "$ALLOW_INSECURE" = "true" ] && RETRY_OPTS=" --allow-insecure-network"
-      echo "{\"error\": \"Server started but was killed. Retry in a persistent terminal with: $SCRIPT_DIR/start-server.sh${PROJECT_DIR:+ --project-dir $PROJECT_DIR} --host $BIND_HOST --url-host $URL_HOST$RETRY_OPTS --foreground\"}"
+      RETRY_CMD="$SCRIPT_DIR/start-server.sh${PROJECT_DIR:+ --project-dir $PROJECT_DIR} --host $BIND_HOST --url-host $URL_HOST$RETRY_OPTS --foreground"
+      # JSON-escape backslashes and quotes so paths with special characters keep the response valid.
+      RETRY_JSON=$(printf '%s' "$RETRY_CMD" | sed 's/\\/\\\\/g; s/"/\\"/g')
+      echo "{\"error\": \"Server started but was killed. Retry in a persistent terminal with: $RETRY_JSON\"}"
       exit 1
     fi
     grep "server-started" "$LOG_FILE" | head -1
