@@ -48,8 +48,10 @@ if [[ -f "$PID_FILE" ]]; then
   # Only delete ephemeral /tmp directories. Canonicalize first: a raw
   # "/tmp/../etc" would pass the literal prefix test but rm outside /tmp
   # (the .ps1 counterpart already resolves the full path before comparing).
+  # On macOS /tmp is a symlink to /private/tmp, so realpath resolves the session dir
+  # there — without the second pattern the ephemeral data silently survived the stop.
   resolved_dir="$(realpath -m "$SESSION_DIR" 2>/dev/null || echo "$SESSION_DIR")"
-  if [[ "$resolved_dir" == /tmp/* ]]; then
+  if [[ "$resolved_dir" == /tmp/* || "$resolved_dir" == /private/tmp/* ]]; then
     rm -rf "$resolved_dir"
   fi
 

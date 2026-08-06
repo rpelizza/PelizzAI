@@ -9,7 +9,9 @@
 #   --project-dir <path>  Store session files under <path>/pelizzai/data/mockups/
 #                         instead of /tmp. Files persist after server stops.
 #   --host <bind-host>    Host/interface to bind (default: 127.0.0.1).
-#                         Use 0.0.0.0 in remote/containerized environments.
+#                         Non-loopback binds also require --allow-insecure-network.
+#   --allow-insecure-network  Accept that the session key and events cross the network
+#                         unencrypted (http/ws) on a non-loopback bind. Prefer a TLS proxy.
 #   --url-host <host>     Hostname shown in returned URL JSON.
 #   --open                Open the authenticated URL in the default browser.
 #   --idle-timeout-minutes <n>  Stop after N idle minutes (default: 240).
@@ -27,6 +29,7 @@ BIND_HOST="127.0.0.1"
 URL_HOST=""
 OPEN_BROWSER="false"
 IDLE_TIMEOUT_MINUTES="240"
+ALLOW_INSECURE="false"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --project-dir)
@@ -45,6 +48,10 @@ while [[ $# -gt 0 ]]; do
       OPEN_BROWSER="true"
       shift
       ;;
+    --allow-insecure-network)
+      ALLOW_INSECURE="true"
+      shift
+      ;;
     --idle-timeout-minutes)
       [[ "${2:-}" =~ ^[1-9][0-9]*$ ]] || { echo '{"error": "--idle-timeout-minutes expects a positive integer"}'; exit 1; }
       IDLE_TIMEOUT_MINUTES="$2"
@@ -59,7 +66,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --help|-h)
-      sed -n '2,18p' "$0"
+      sed -n '2,20p' "$0"
       exit 0
       ;;
     *)
@@ -128,12 +135,12 @@ fi
 # Foreground mode for environments that reap detached/background processes.
 if [[ "$FOREGROUND" == "true" ]]; then
   echo "$$" > "$PID_FILE"
-  exec env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" BRAINSTORM_OPEN="$OPEN_BROWSER" BRAINSTORM_IDLE_TIMEOUT_MINUTES="$IDLE_TIMEOUT_MINUTES" node server.cjs
+  exec env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" BRAINSTORM_OPEN="$OPEN_BROWSER" BRAINSTORM_IDLE_TIMEOUT_MINUTES="$IDLE_TIMEOUT_MINUTES" BRAINSTORM_ALLOW_INSECURE_NETWORK="$ALLOW_INSECURE" node server.cjs
 fi
 
 # Start server, capturing output to log file
 # Use nohup to survive shell exit; disown to remove from job table
-nohup env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" BRAINSTORM_OPEN="$OPEN_BROWSER" BRAINSTORM_IDLE_TIMEOUT_MINUTES="$IDLE_TIMEOUT_MINUTES" node server.cjs > "$LOG_FILE" 2>&1 &
+nohup env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" BRAINSTORM_OPEN="$OPEN_BROWSER" BRAINSTORM_IDLE_TIMEOUT_MINUTES="$IDLE_TIMEOUT_MINUTES" BRAINSTORM_ALLOW_INSECURE_NETWORK="$ALLOW_INSECURE" node server.cjs > "$LOG_FILE" 2>&1 &
 SERVER_PID=$!
 disown "$SERVER_PID" 2>/dev/null
 echo "$SERVER_PID" > "$PID_FILE"
