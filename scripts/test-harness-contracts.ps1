@@ -884,14 +884,19 @@ try {
     Check-Match '.github/workflows/check-harness.yml' 'build-dist' 'CI validates the committed dist stays in sync'
     Check (Test-Path (Join-Path $root 'dist/.cursor/rules/pelizzai.mdc')) 'dist contains the Cursor adapter'
     Check (Test-Path (Join-Path $root 'dist/.claude/skills/pelizzai-core/SKILL.md')) 'dist contains the core skills'
-    Check (Test-Path (Join-Path $root 'dist/AGENTS.md')) 'dist contains the generated AGENTS.md'
     Check (-not (Test-Path (Join-Path $root 'dist/scripts/pelizzai-source-repo.txt'))) 'dist does not contain the source-mode sentinel'
     Check (-not (Test-Path (Join-Path $root 'dist/scripts/test-harness-contracts.ps1'))) 'dist does not contain the contract suite'
-    $distClaudePath = Join-Path $root 'dist/CLAUDE.md'
-    Check (Test-Path $distClaudePath) 'dist contains CLAUDE.md'
-    if (Test-Path $distClaudePath) {
-        $distClaude = Get-Content -LiteralPath $distClaudePath -Raw -Encoding utf8
-        Check ($distClaude -match 'This repository consumes PelizzAI') 'dist CLAUDE.md is the consumer bridge'
+    # dist ships NO entry files: the consumer's first sync/bootstrap anchors them in place from
+    # the contract asset shipped with the core skills — that is what makes a copy-install safe
+    # over a project that already has its own CLAUDE.md/AGENTS.md/GEMINI.md.
+    foreach ($entry in @('CLAUDE.md', 'AGENTS.md', 'GEMINI.md')) {
+        Check (-not (Test-Path (Join-Path $root "dist/$entry"))) "dist does not ship $entry (anchored at install)"
+    }
+    $distAssetPath = Join-Path $root 'dist/.claude/skills/pelizzai-audit/assets/contract.md'
+    Check (Test-Path $distAssetPath) 'dist ships the contract asset with the core skills'
+    if (Test-Path $distAssetPath) {
+        $distAsset = Get-Content -LiteralPath $distAssetPath -Raw -Encoding utf8
+        Check ($distAsset -match '<!-- pelizzai:contract -->' -and $distAsset -match 'This repository consumes PelizzAI') 'dist contract asset carries the anchored bridge'
     }
     if (Test-Path (Join-Path $root 'dist/.claude/skills')) {
         $srcSkillFiles = Get-RelativeFiles (Join-Path $root '.claude/skills')
@@ -1426,13 +1431,37 @@ try {
     Check-Match 'scripts/sync-harness.mjs' 'pelizzai:contract' 'sync: contract anchor markers exist'
     Check-Match 'scripts/sync-harness.mjs' 'function upsertContract' 'sync: four-case upsert exists'
     Check-Match 'scripts/sync-harness.mjs' "legacyStart: '## PelizzAI harness \(mandatory entry point\)'" 'sync: pre-anchor CLAUDE.md is migrated in place'
-    Check-Match 'dist/CLAUDE.md' '<!-- pelizzai:contract -->[\s\S]*This repository consumes PelizzAI[\s\S]*<!-- /pelizzai:contract -->' 'dist CLAUDE.md carries the bridge inside the anchored block'
-    Check-Match 'dist/AGENTS.md' '<!-- pelizzai:contract -->' 'dist AGENTS.md carries the anchored block'
-    Check-Match 'dist/GEMINI.md' '<!-- pelizzai:contract -->' 'dist GEMINI.md carries the anchored block'
+    # The contract SEED is a generated asset that ships with the core skills — the consumer
+    # sync derives all three entry files from it, which is why dist carries no entry files.
+    Check (Test-Path (Join-Path $root '.claude/skills/pelizzai-audit/assets/contract.md')) 'source generates the contract asset inside the audit skill'
+    Check-Match '.claude/skills/pelizzai-audit/assets/contract.md' '^<!-- pelizzai:contract -->' 'contract asset opens with the anchor marker'
+    Check-Match '.claude/skills/pelizzai-audit/assets/contract.md' 'This repository consumes PelizzAI' 'contract asset carries the consumer bridge'
+    Check-Match '.claude/skills/pelizzai-audit/assets/contract.md' 'The LLM never decides alone' 'contract asset carries the behavioral guidelines'
+    Check-Match 'scripts/sync-harness.mjs' '--skip-entrypoints' 'sync: dist build skips the entry anchoring'
     # The SOURCE repo's own entry files stay wholly generated — no markers there.
     Check-NotMatch 'CLAUDE.md' 'pelizzai:contract -->' 'source CLAUDE.md is the authority, not an anchored consumer'
     Check-NotMatch 'AGENTS.md' 'pelizzai:contract -->' 'source AGENTS.md stays wholly generated (no markers)'
     Check-Match 'README.md' 'anchors[\s\S]{0,120}marker-delimited block' 'README documents the anchor model'
+    Check-Match 'README.md' 'without the three entrypoints' 'README: dist ships no entry files'
+    Check-Match 'README.md' 'anchored at install time' 'README: entry files are anchored at install'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' '### 2\.5\. Anchor the entrypoints' 'audit anchors the entrypoints as a bootstrap step'
+    foreach ($sh in @('.claude/hooks/pelizzai-session-start.mjs', '.claude/hooks/pelizzai-session-start.ps1')) {
+        Check-Match $sh 'pelizzai:contract' "session-start nudges when the contract block is missing ($(Split-Path -Leaf $sh))"
+    }
+
+    # -- Copy-install end to end: dist has no entry files; the first sync anchors all three --
+    $copyTemp = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-copyinstall-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
+    try {
+        New-Item -ItemType Directory -Path $copyTemp | Out-Null
+        Copy-Item -Path (Join-Path $root 'dist/*') -Destination $copyTemp -Recurse -Force
+        Check (-not (Test-Path (Join-Path $copyTemp 'CLAUDE.md'))) 'copy-install starts with no CLAUDE.md (dist ships none)'
+        Run-Native { node (Join-Path $copyTemp 'scripts/sync-harness.mjs') } 'first sync of a copy-install completes'
+        $created = @('CLAUDE.md', 'AGENTS.md', 'GEMINI.md') | Where-Object { Test-Path (Join-Path $copyTemp $_) }
+        Check ($created.Count -eq 3) 'first sync creates the three entry files from the asset' "created=$($created -join ',')"
+        Run-Native { node (Join-Path $copyTemp 'scripts/sync-harness.mjs') --check } 'copy-install passes the consumer check after anchoring'
+    } finally {
+        if (Test-Path -LiteralPath $copyTemp) { Remove-Item -LiteralPath $copyTemp -Recurse -Force }
+    }
 
     # -- Anchor behavior: preserve → idempotent → resync drift → migrate legacy --
     $anchorTemp = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-anchor-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
@@ -1454,6 +1483,16 @@ try {
         Run-Native { node (Join-Path $root 'scripts/sync-harness.mjs') --export-consumer $anchorTemp } 'export resyncs a drifted block'
         $anchorClaude3 = Get-Content -LiteralPath (Join-Path $anchorTemp 'CLAUDE.md') -Raw -Encoding utf8
         Check ($anchorClaude3 -match 'project-own-claude-sentinel' -and $anchorClaude3 -notmatch 'TAMPERED SENTENCE' -and $anchorClaude3 -match 'The LLM never decides alone') 'drift resync restores the block and keeps the project content'
+        # Self-repair by the CONSUMER'S OWN sync (no export involved): a stripped block is
+        # re-appended, a deleted entry file is recreated — the instructions always come back.
+        $consumerSync = Join-Path $anchorTemp 'scripts/sync-harness.mjs'
+        Set-Content -LiteralPath (Join-Path $anchorTemp 'CLAUDE.md') -Value "# My project`n`nproject-own-claude-sentinel`n" -Encoding utf8
+        Remove-Item -LiteralPath (Join-Path $anchorTemp 'GEMINI.md') -Force
+        Run-Native { node $consumerSync } 'consumer sync self-repairs the entry files'
+        $healedClaude = Get-Content -LiteralPath (Join-Path $anchorTemp 'CLAUDE.md') -Raw -Encoding utf8
+        Check ($healedClaude -match 'project-own-claude-sentinel' -and $healedClaude -match '<!-- pelizzai:contract -->') 'a stripped CLAUDE.md block is re-appended, project content intact'
+        Check (Test-Path (Join-Path $anchorTemp 'GEMINI.md')) 'a deleted GEMINI.md is recreated by the consumer sync'
+        Run-Native { node $consumerSync --check } 'consumer check is green after the self-repair'
     } finally {
         if (Test-Path -LiteralPath $anchorTemp) { Remove-Item -LiteralPath $anchorTemp -Recurse -Force }
     }
@@ -1472,6 +1511,28 @@ try {
         Check ($migratedAgents -match '<!-- pelizzai:contract -->' -and $migratedAgents -notmatch 'old generated body') 'legacy AGENTS.md is replaced by the anchored block'
     } finally {
         if (Test-Path -LiteralPath $legacyTemp) { Remove-Item -LiteralPath $legacyTemp -Recurse -Force }
+    }
+
+    # -- Session-start self-orientation: missing/unanchored block nudges the repair path --
+    $nudgeTemp = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-nudge-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
+    try {
+        New-Item -ItemType Directory -Path (Join-Path $nudgeTemp '.claude/skills/pelizzai-core') -Force | Out-Null
+        $ssHooks2 = @((Join-Path $root '.claude/hooks/pelizzai-session-start.mjs'), (Join-Path $root '.claude/hooks/pelizzai-session-start.ps1'))
+        foreach ($hook in $ssHooks2) {
+            $leaf = Split-Path -Leaf $hook
+            $payload = @{ cwd = $nudgeTemp } | ConvertTo-Json -Compress
+            $emitted = if ($hook.EndsWith('.mjs')) { ($payload | & node $hook 2>$null) -join "`n" } else { ($payload | & pwsh -NoProfile -File $hook 2>$null) -join "`n" }
+            Check ($emitted -match 'missing or not anchored') "session-start nudges the anchor repair without CLAUDE.md ($leaf)"
+        }
+        Set-Content -LiteralPath (Join-Path $nudgeTemp 'CLAUDE.md') -Value "# P`n`n<!-- pelizzai:contract -->`nx`n<!-- /pelizzai:contract -->`n" -Encoding utf8
+        foreach ($hook in $ssHooks2) {
+            $leaf = Split-Path -Leaf $hook
+            $payload = @{ cwd = $nudgeTemp } | ConvertTo-Json -Compress
+            $emitted = if ($hook.EndsWith('.mjs')) { ($payload | & node $hook 2>$null) -join "`n" } else { ($payload | & pwsh -NoProfile -File $hook 2>$null) -join "`n" }
+            Check ($emitted -notmatch 'missing or not anchored') "session-start stays quiet when the block is anchored ($leaf)"
+        }
+    } finally {
+        if (Test-Path -LiteralPath $nudgeTemp) { Remove-Item -LiteralPath $nudgeTemp -Recurse -Force }
     }
 
     # -- Evolve: skill, templates, and the wiring across the readers/writers --

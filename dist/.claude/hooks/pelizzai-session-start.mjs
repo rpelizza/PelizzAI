@@ -73,6 +73,34 @@ function main() {
     /* no resumption warning — carry on with the basic reminder */
   }
 
+  // Anchored-entrypoint self-orientation: in a consumer where the harness is installed (core
+  // skill present) but CLAUDE.md is missing or lost its pelizzai:contract block, say how to
+  // restore it — the block is what keeps every session entering through the harness, and the
+  // sync recreates/repairs it without touching project content outside the markers.
+  try {
+    const sourceMode = existsSync(join(cwd, 'scripts', 'pelizzai-source-repo.txt'));
+    const coreInstalled = existsSync(join(cwd, '.claude', 'skills', 'pelizzai-core'));
+    if (!sourceMode && coreInstalled) {
+      let anchored = false;
+      try {
+        const claudePath = join(cwd, 'CLAUDE.md');
+        anchored =
+          existsSync(claudePath) && readFileSync(claudePath, 'utf8').includes('<!-- pelizzai:contract -->');
+      } catch {
+        anchored = true; // unreadable file: do not nag on a doubt
+      }
+      if (!anchored) {
+        lines.push(
+          'PelizzAI entry files are missing or not anchored (no pelizzai:contract block in CLAUDE.md). ' +
+            'Run `node scripts/sync-harness.mjs` (or the bootstrap) to create/restore the harness ' +
+            'contract block — project content outside the block is preserved.'
+        );
+      }
+    }
+  } catch {
+    /* no anchor nudge — carry on */
+  }
+
   // Consumer without a domain-skill catalog: suggests ONCE the read-only bootstrap path
   // (propose→confirm; nothing is created without consent). In source mode (source repo)
   // it is a no-op — there is no consumer catalog there. Creating pelizzai/domain-skills.md

@@ -26,6 +26,12 @@ const geminiMd = join(root, 'GEMINI.md');
 const coreManifest = join(root, 'scripts', 'pelizzai-core-skills.txt');
 const sourceSentinel = join(root, 'scripts', 'pelizzai-source-repo.txt');
 const distDir = join(root, 'dist');
+// The consumer contract SEED: generated from CLAUDE.md in the source repo and shipped inside
+// the core skills (so it travels in .agents/, dist/, and every export automatically). Every
+// consumer sync reads it to create/append/resync the three entry files — which is why dist/
+// does not ship CLAUDE.md/AGENTS.md/GEMINI.md at all: the first sync (or bootstrap) anchors
+// them in place, preserving whatever the project already has.
+const contractAsset = join(srcSkills, 'pelizzai-audit', 'assets', 'contract.md');
 
 const REF_IGNORE = new Set([
   'pelizzai-cadence',
@@ -102,6 +108,7 @@ function parseArgs(argv) {
     exportConsumer: null,
     installHooks: false,
     buildDist: false,
+    skipEntrypoints: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -132,6 +139,12 @@ function parseArgs(argv) {
       case '--build-dist':
       case '-builddist':
         options.buildDist = true;
+        break;
+      case '--skip-entrypoints':
+      case '-skipentrypoints':
+        // Internal to the dist build: mirror and validate WITHOUT anchoring the three entry
+        // files — dist ships without them; the consumer's first sync creates them in place.
+        options.skipEntrypoints = true;
         break;
       case '--help':
       case '-h':
@@ -289,7 +302,7 @@ function readCoreManifest(path = coreManifest) {
 function testRefs() {
   const skillNames = new Set(listSkillNames());
   const markdown = walkFiles(srcSkills).filter((path) => path.endsWith('.md'));
-  markdown.push(claudeMd);
+  if (existsSync(claudeMd)) markdown.push(claudeMd); // a fresh consumer may not have it yet
   const refs = new Set();
   for (const path of markdown) {
     for (const match of readText(path).matchAll(/pelizzai-[a-z][a-z0-9-]*/g)) refs.add(match[0]);
@@ -313,7 +326,7 @@ function runNode(script, args, cwd) {
   if (result.status !== 0) throw new Error(`${script} failed with exit ${result.status}.`);
 }
 
-function copyConsumerPayload(target) {
+function copyConsumerPayload(target, { anchorEntrypoints = true } = {}) {
   const resolved = resolve(target);
   if (resolved === root) {
     throw new Error('The target cannot be the source repo itself.');
@@ -373,24 +386,14 @@ function copyConsumerPayload(target) {
   mkdirSync(targetCursorRules, { recursive: true });
   cpSync(cursorAdapter, join(targetCursorRules, 'pelizzai.mdc'));
 
-  // Anchor, never overwrite: the consumer's CLAUDE.md keeps whatever the project wrote; the
-  // harness creates/appends/resyncs ONLY the marker-delimited contract block. A file the
-  // PRE-anchor export generated wholesale (bridge header, no markers) is migrated in place.
-  const block = buildConsumerClaudeContract(readText(claudeMd));
-  const targetClaude = join(target, 'CLAUDE.md');
-  const existingClaude = existsSync(targetClaude) ? readText(targetClaude) : null;
-  writeContract(
-    targetClaude,
-    upsertContract(existingClaude, block, {
-      freshHeader: '# CLAUDE.md\n\n',
-      legacyStart: '## PelizzAI harness (mandatory entry point)',
-    }),
-    'consumer CLAUDE.md',
-  );
-
+  // The target's own sync anchors the three entry files from the contract asset just copied
+  // with the skills (create when absent, append when present, resync drift, migrate legacy) —
+  // the same self-repair any later consumer sync performs. The dist build skips the anchoring:
+  // dist ships no entry files, and the consumer's first sync creates them in place.
+  const entryArgs = anchorEntrypoints ? [] : ['--skip-entrypoints'];
   const targetSync = join(targetScripts, 'sync-harness.mjs');
-  runNode(targetSync, [], target);
-  runNode(targetSync, ['--check'], target);
+  runNode(targetSync, [...entryArgs], target);
+  runNode(targetSync, ['--check', ...entryArgs], target);
   return core;
 }
 
@@ -423,39 +426,32 @@ function buildDist({ quiet = false } = {}) {
   }
   rmSync(distDir, { recursive: true, force: true });
   mkdirSync(distDir, { recursive: true });
-  const core = copyConsumerPayload(distDir);
+  const core = copyConsumerPayload(distDir, { anchorEntrypoints: false });
   if (!quiet) {
     console.log(
-      `dist/ regenerated (${core.length} core skills; no sentinel): copy its contents to your project root.`,
+      `dist/ regenerated (${core.length} core skills; no sentinel, no entry files — the first ` +
+        `sync/bootstrap anchors CLAUDE.md/AGENTS.md/GEMINI.md in place): copy its contents to your project root.`,
     );
   }
 }
 
-function check(sourceMode) {
+function check(sourceMode, skipEntrypoints = false) {
   let problems = 0;
   const difference = treeDiffCount(srcSkills, dstSkills);
   if (difference) {
     console.error(`FAIL: .agents/skills out of sync (${difference} file(s)).`);
     problems += 1;
   }
-  // Anchored consumer (markers in CLAUDE.md): only the BLOCK inside AGENTS.md/GEMINI.md must
-  // match what the contract generates — the project owns the rest of those files. Source repo
-  // and legacy consumers (no markers): whole-file equality, as before.
+  const sentinelPresent = existsSync(sourceSentinel);
   const claudeText = existsSync(claudeMd) ? readText(claudeMd) : '';
-  const claudeContract = extractContract(claudeText);
-  if (claudeContract) {
-    const expectedBlock = buildAgentsContractBlock(claudeContract);
-    for (const [path, label] of [
-      [agentsMd, 'AGENTS.md'],
-      [geminiMd, 'GEMINI.md'],
-    ]) {
-      const actualBlock = existsSync(path) ? extractContract(readText(path)) : null;
-      if (actualBlock !== expectedBlock) {
-        console.error(`FAIL: ${label} contract block out of sync with CLAUDE.md.`);
-        problems += 1;
-      }
+  if (sentinelPresent) {
+    // Source repo: the shipped asset must match what CLAUDE.md derives, and the root entry
+    // files stay wholly generated (there they ARE the authority — no markers).
+    const expectedAsset = `${buildConsumerClaudeContract(claudeText)}\n`;
+    if (!existsSync(contractAsset) || readText(contractAsset) !== expectedAsset) {
+      console.error('FAIL: contract asset out of sync with CLAUDE.md (run the sync).');
+      problems += 1;
     }
-  } else {
     const expected = buildAgentsMd();
     if (!existsSync(agentsMd) || readText(agentsMd) !== expected) {
       console.error('FAIL: AGENTS.md out of sync with CLAUDE.md.');
@@ -464,6 +460,41 @@ function check(sourceMode) {
     if (!existsSync(geminiMd) || readText(geminiMd) !== expected) {
       console.error('FAIL: GEMINI.md out of sync with CLAUDE.md.');
       problems += 1;
+    }
+  } else if (!skipEntrypoints && existsSync(contractAsset)) {
+    // Anchored consumer: each of the THREE entry files must carry the block the asset derives
+    // — the project owns everything around it. A missing file or a tampered block is repaired
+    // by the sync itself, so the failure message says exactly that.
+    const block = readText(contractAsset).trimEnd();
+    const expectedAgents = buildAgentsContractBlock(block);
+    for (const [path, label, expectedBlock] of [
+      [claudeMd, 'CLAUDE.md', block],
+      [agentsMd, 'AGENTS.md', expectedAgents],
+      [geminiMd, 'GEMINI.md', expectedAgents],
+    ]) {
+      const actualBlock = existsSync(path) ? extractContract(readText(path)) : null;
+      if (actualBlock !== expectedBlock) {
+        console.error(
+          `FAIL: ${label} contract block missing or out of sync — run node scripts/sync-harness.mjs to anchor/repair it.`,
+        );
+        problems += 1;
+      }
+    }
+  } else if (!skipEntrypoints) {
+    // Legacy consumer without the shipped asset: whole-file equality, as before.
+    if (!existsSync(claudeMd)) {
+      console.error('FAIL: CLAUDE.md missing and no contract asset available (reinstall the core skills).');
+      problems += 1;
+    } else {
+      const expected = buildAgentsMd();
+      if (!existsSync(agentsMd) || readText(agentsMd) !== expected) {
+        console.error('FAIL: AGENTS.md out of sync with CLAUDE.md.');
+        problems += 1;
+      }
+      if (!existsSync(geminiMd) || readText(geminiMd) !== expected) {
+        console.error('FAIL: GEMINI.md out of sync with CLAUDE.md.');
+        problems += 1;
+      }
     }
   }
   const broken = testRefs();
@@ -508,6 +539,16 @@ function check(sourceMode) {
     if (existsSync(join(distDir, 'scripts', 'test-harness-contracts.ps1'))) {
       distProblems.push('contract suite present');
     }
+    // dist ships NO entry files: the consumer's first sync/bootstrap anchors them in place
+    // (create when absent, append/resync when present) from the contract asset it does ship.
+    for (const name of ['CLAUDE.md', 'AGENTS.md', 'GEMINI.md']) {
+      if (existsSync(join(distDir, name))) {
+        distProblems.push(`${name} present (entry files are anchored at install, not shipped)`);
+      }
+    }
+    if (!existsSync(join(distDir, '.claude', 'skills', 'pelizzai-audit', 'assets', 'contract.md'))) {
+      distProblems.push('contract asset missing');
+    }
     const distSkillsDiff = treeDiffCount(srcSkills, join(distDir, '.claude', 'skills'));
     if (distSkillsDiff) distProblems.push(`skills out of sync (${distSkillsDiff} file(s))`);
     if (distProblems.length) {
@@ -523,15 +564,34 @@ function check(sourceMode) {
   return 0;
 }
 
-function generate(updateManifest) {
+function generate(updateManifest, skipEntrypoints = false) {
+  const sourceMode = existsSync(sourceSentinel);
+  if (sourceMode) {
+    // The consumer contract asset is GENERATED from CLAUDE.md and ships with the core skills:
+    // it is the seed every consumer sync uses to create/repair the three entry files. Written
+    // BEFORE the mirror copy so it travels in .agents/, dist/, and every export.
+    mkdirSync(dirname(contractAsset), { recursive: true });
+    writeTextAtomic(contractAsset, `${buildConsumerClaudeContract(readText(claudeMd))}\n`);
+  }
   copyExact(srcSkills, dstSkills);
-  // Anchored consumer: the harness manages only its block inside AGENTS.md/GEMINI.md, derived
-  // from the block CLAUDE.md carries; a file the pre-anchor sync generated wholesale (GENERATED
-  // header, no markers) is migrated in place. Source repo and legacy consumers: whole file.
-  const claudeText = existsSync(claudeMd) ? readText(claudeMd) : '';
-  const claudeContract = existsSync(sourceSentinel) ? null : extractContract(claudeText);
-  if (claudeContract) {
-    const agentsBlock = buildAgentsContractBlock(claudeContract);
+  // Consumer: anchor the THREE entry files from the shipped asset — absent → create; present
+  // without markers → append (files the pre-anchor sync generated wholesale are migrated in
+  // place); identical → skip; drifted/tampered → resync ONLY the block. This is what keeps the
+  // PelizzAI instructions always present in the entry files, whatever happens to them between
+  // syncs. Source repo: whole-file generation (there the files ARE the authority). Dist build
+  // (--skip-entrypoints): no entry files at all — the consumer's first sync anchors them.
+  if (!sourceMode && !skipEntrypoints && existsSync(contractAsset)) {
+    const block = readText(contractAsset).trimEnd();
+    const existingClaude = existsSync(claudeMd) ? readText(claudeMd) : null;
+    writeContract(
+      claudeMd,
+      upsertContract(existingClaude, block, {
+        freshHeader: '# CLAUDE.md\n\n',
+        legacyStart: '## PelizzAI harness (mandatory entry point)',
+      }),
+      'CLAUDE.md',
+    );
+    const agentsBlock = buildAgentsContractBlock(block);
     for (const [path, label] of [
       [agentsMd, 'AGENTS.md'],
       [geminiMd, 'GEMINI.md'],
@@ -545,7 +605,13 @@ function generate(updateManifest) {
         label,
       );
     }
-  } else {
+  } else if (!skipEntrypoints) {
+    if (!existsSync(claudeMd)) {
+      throw new Error(
+        'CLAUDE.md missing and no contract asset available — reinstall the core skills ' +
+          '(.claude/skills/pelizzai-audit/assets/contract.md) and rerun the sync.',
+      );
+    }
     const agents = buildAgentsMd();
     writeTextAtomic(agentsMd, agents);
     writeTextAtomic(geminiMd, agents);
@@ -578,9 +644,9 @@ try {
   } else if (options.buildDist) {
     buildDist();
   } else if (options.check) {
-    process.exitCode = check(options.sourceMode);
+    process.exitCode = check(options.sourceMode, options.skipEntrypoints);
   } else {
-    process.exitCode = generate(options.updateManifest);
+    process.exitCode = generate(options.updateManifest, options.skipEntrypoints);
   }
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));

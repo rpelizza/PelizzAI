@@ -165,6 +165,18 @@ canonical-skill-root: <active root>
 
 `pelizzai-writing-skills` writes domain skills to the active root; if both are installed, it keeps byte-for-byte copies and verifies parity.
 
+### 2.5. Anchor the entrypoints
+
+Run `node scripts/sync-harness.mjs` once. It anchors the harness contract — the
+`<!-- pelizzai:contract -->` block derived from the shipped asset
+(`.claude/skills/pelizzai-audit/assets/contract.md`) — into `CLAUDE.md`, `AGENTS.md`, and
+`GEMINI.md`: **absent → created; present → the block is appended, the project's own content
+untouched; block tampered or outdated → resynced in place**. `dist/` ships no entry files on
+purpose — this step (or any later sync) is what creates them, so a copy-install works on a
+virgin project AND on a project that already has its own entry files, without clobbering either.
+The same command is the repair path whenever a session notices the block missing (the
+session-start hook nudges exactly that).
+
 ### 3. Propose the maximum of useful domain skills
 
 In an existing project or workspace, first do the **full repo-scan** — patterns, stacks,
@@ -321,6 +333,8 @@ that changes the environment waits for confirmation:
 Before declaring the bootstrap done:
 
 ```text
+[ ] entrypoints anchored: CLAUDE.md, AGENTS.md, and GEMINI.md carry the pelizzai:contract block
+    (node scripts/sync-harness.mjs --check passes);
 [ ] the catalog exists and matches the real skills;
 [ ] ledger/profile have no placeholders (`<unset>` fields in *Ratified execution defaults* are valid state — policy not yet ratified —, not a placeholder to fill);
 [ ] commands came from real manifests/scripts;
@@ -340,6 +354,9 @@ finish-task to consolidate it.
 - catalog exists, ledger missing → propose/repair only the ledger in write mode;
 - `verification-standard.md`/`learnings.md` missing (consumer bootstrapped before the evolve
   cycle) → propose creating only them from `pelizzai-evolve/templates/` in write mode;
+- an entry file (`CLAUDE.md`/`AGENTS.md`/`GEMINI.md`) missing or without the
+  `pelizzai:contract` block → run `node scripts/sync-harness.mjs` (creates/repairs only the
+  block; project content outside the markers is preserved);
 - a skill exists outside the catalog → catalog it after confirming origin/content;
 - outdated profile → update only the affected fields;
 - read-only → just report the inconsistency.

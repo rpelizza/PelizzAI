@@ -1,6 +1,4 @@
 <!-- pelizzai:contract -->
-<!-- PelizzAI harness block — managed by scripts/sync-harness.mjs; edit outside the markers only. -->
-
 ## PelizzAI harness (mandatory entry point)
 
 This repository consumes PelizzAI. For project requests, enter through `pelizzai-core` → `pelizzai-router`. The router picks a head skill, reasoning techniques, and overlays; Context7/official documentation grounds the technical reading; every material decision goes back to the user.
@@ -111,22 +109,4 @@ Observable signs that these guidelines and the skills are doing their job:
 - the delivered content is exactly the validated content, and the history has fewer "fix of the fix" commits (commits correcting the immediately preceding commit).
 
 Signs in the opposite direction are a trigger to revise the skills — not to abandon them.
-
----
-
-## Skills harness (PelizzAI)
-
-This project uses the **PelizzAI** skills harness. Skills live in `.agents/skills/<name>/SKILL.md`, a mirror of `.claude/skills/`. Read and follow the relevant skill before acting.
-
-**Entry:** start with `pelizzai-core` and `pelizzai-router`. The router classifies effect, risk, uncertainty, and surfaces; it picks a head skill and overlays. Read-only operations initialize no state. Before the first write, confirm isolation and branch. In the source repo, use the native plan/execution record; in a consumer, state/specs/plans follow the lifecycle.
-
-**Branch protection:** never commit to `main`/`master`/`develop`/`dev` or on a detached HEAD. Isolate via `pelizzai-starting-branch`.
-
-**User authority:** the harness classifies, reasons, researches with Context7/official documentation, and recommends; the user decides requirements, scope, UX, architecture, data, accepted risk, and acceptance criteria. Ask one question at a time, with the best option recommended. Greenfield goes through discovery, spec, and plan — stress-tested and ratified.
-
-**Context7:** treat it as the preferred technical source whenever libraries, frameworks, APIs, versions, or external capabilities influence the task. Inspect manifests/lockfiles first, consult the documentation for the relevant version, and use the evidence to improve questions and recommendations; never turn it into the user's vote.
-
-**Ratification gate:** isolation, execution mode (with `team` always visible), and commit strategy are recommendations ratified before being applied; `squash-final` only on explicit request. Push/PR/publication are confirmed per task.
-
-Available skills (32): pelizzai-audit, pelizzai-brainstorming, pelizzai-codebase-design, pelizzai-core, pelizzai-debugging, pelizzai-documenting-features, pelizzai-domain-modeling, pelizzai-evolve, pelizzai-execution-plans, pelizzai-finish-task, pelizzai-frontend, pelizzai-handoff, pelizzai-improving-architecture, pelizzai-interview-me, pelizzai-loop, pelizzai-oswap, pelizzai-preferences, pelizzai-prototype, pelizzai-quick-fix, pelizzai-reasoning, pelizzai-recovery, pelizzai-resolving-merge-conflicts, pelizzai-review, pelizzai-router, pelizzai-starting-branch, pelizzai-subagents, pelizzai-tdd, pelizzai-team, pelizzai-verification-before-completion, pelizzai-writing-clearly-and-concisely, pelizzai-writing-plans, pelizzai-writing-skills.
 <!-- /pelizzai:contract -->

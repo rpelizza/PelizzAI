@@ -1,5 +1,3 @@
-# CLAUDE.md
-
 <!-- pelizzai:contract -->
 ## PelizzAI harness (mandatory entry point)
 
