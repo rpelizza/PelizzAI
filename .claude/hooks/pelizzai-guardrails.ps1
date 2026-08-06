@@ -96,7 +96,13 @@ try {
        Safe = 'create a return point first (git stash push -u -m "<reason>"); to create a branch use -b, which fails if it already exists.' },
     @{ Name = 'git switch -C / --force-create'
        # -C is case-sensitive (-c/--create is safe: it fails if the branch already exists).
-       Test = { param($s) ($s -match '\bgit\b.*\bswitch\b') -and (($s -cmatch '(^|\s)--force-create(\s|$)') -or ($s -cmatch '(^|\s)-[a-zA-Z]*C[a-zA-Z]*(\s|$)')) }
+       # The flag is searched only AFTER `switch`: `git -C <path> switch <branch>` is a legitimate
+       # branch change in another working tree (`-C` there selects the repo, not force-create).
+       Test = { param($s)
+         $m = [regex]::Match($s, '(?is)\bgit\b.*?\bswitch\b(.*)$')
+         if (-not $m.Success) { return $false }
+         $rest = $m.Groups[1].Value
+         return (($rest -cmatch '(^|\s)--force-create(\s|$)') -or ($rest -cmatch '(^|\s)-[a-zA-Z]*C[a-zA-Z]*(\s|$)')) }
        Why  = 'overwrites an existing branch with the current starting point - the commits that only existed there are lost.'
        Safe = 'use -c/--create (it fails if the branch already exists); overwriting requires an explicit user decision.' },
     @{ Name = 'git restore . (working tree)'

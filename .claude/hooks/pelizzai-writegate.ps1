@@ -118,6 +118,14 @@ function Get-ParsedSegment([string]$seg) {
   $expectTarget = $false
   for ($i = 0; $i -lt $seg.Length; $i++) {
     $ch = $seg.Substring($i, 1)
+    # POSIX: inside DOUBLE quotes, a backslash escapes only " \ $ and `. Without this, an odd
+    # number of \" before a '>' desynchronized the quote state and a '>' INSIDE the string was
+    # read as a real redirection (parity with the .mjs fix).
+    if ($quote -eq '"' -and $ch -eq '\' -and ($i + 1) -lt $seg.Length -and $seg.Substring($i + 1, 1) -match '^["\\$`]$') {
+      $cur += $seg.Substring($i + 1, 1)
+      $i++
+      continue
+    }
     if ($null -ne $quote) {
       if ($ch -eq $quote) { $quote = $null } else { $cur += $ch }
       continue
@@ -178,14 +186,42 @@ function Expand-ShellVars([string]$target) {
   return $out
 }
 
+# True for POSIX absolutes (/x, \x) and Windows drive paths (C:\x, C:/x) on any host platform.
+function Test-AbsoluteLike([string]$p) {
+  return ($p -match '^[\\/]') -or ($p -match '^[A-Za-z]:[\\/]')
+}
+
 # Write targets of a shell command (Bash sibling matcher). Best-effort and honest:
-# covers the common cases; what it cannot parse safely does not block.
+# covers the common cases; what it cannot parse safely does not block. Besides redirection,
+# tee, Set-Content/Add-Content/Out-File, and sed -i, it recognizes the common copy/download
+# verbs (cp, mv, install, curl -o/-O, wget -O, dd of=, ln) and git apply/am — reducing, not
+# closing, the Bash surface (deliberate fail-open posture; see the header).
 function Get-ShellTargets([string]$command) {
   $targets = [System.Collections.Generic.List[string]]::new()
+  # Segment-local `cd` tracking: in `cd .claude && printf x > ../src/a.py` the target must be
+  # resolved against the directory the shell is actually in, not the initial cwd. `prefix`
+  # accumulates the cd chain ('' = initial cwd); a cd that cannot be resolved safely (variable,
+  # `cd -`, popd) makes later RELATIVE targets undecidable -> they are dropped (the same
+  # fail-open honesty as the rest of the matcher; absolutes still count).
+  $prefix = ''
+  $prefixUnknown = $false
+  $push = {
+    param($raw)
+    if (-not $raw) { return }
+    if ($raw.StartsWith('-')) { return }
+    if (Test-NullSink $raw) { return }
+    $expanded = Expand-ShellVars $raw
+    if (-not $expanded) { return }
+    if (Test-NullSink $expanded) { return }
+    if (Test-AbsoluteLike $expanded) { [void]$targets.Add($expanded); return }
+    if ($prefixUnknown) { return }
+    if ($prefix) { [void]$targets.Add([System.IO.Path]::Combine($prefix, $expanded)) }
+    else { [void]$targets.Add($expanded) }
+  }
   foreach ($seg in ($command -split '&&|\|\||;|\||\r?\n')) {
     $parsed = Get-ParsedSegment $seg
     $tokens = $parsed.Tokens
-    foreach ($r in $parsed.Redirects) { [void]$targets.Add($r) }
+    foreach ($r in $parsed.Redirects) { & $push $r }
     for ($i = 0; $i -lt $tokens.Count; $i++) {
       $t = $tokens[$i].ToLowerInvariant()
       # tee [-flags] file...  /  Tee-Object -FilePath file
@@ -193,9 +229,9 @@ function Get-ShellTargets([string]$command) {
         for ($j = $i + 1; $j -lt $tokens.Count; $j++) {
           $a = $tokens[$j]
           if ([regex]::IsMatch($a, '^-(?:literal)?(?:file)?path$', 'IgnoreCase') -and ($j + 1) -lt $tokens.Count) {
-            [void]$targets.Add($tokens[$j + 1]); $j++; continue
+            & $push $tokens[$j + 1]; $j++; continue
           }
-          if (-not $a.StartsWith('-')) { [void]$targets.Add($a) }
+          if (-not $a.StartsWith('-')) { & $push $a }
         }
       }
       # Set-Content / Add-Content / Out-File: -Path/-LiteralPath or first positional.
@@ -204,9 +240,9 @@ function Get-ShellTargets([string]$command) {
         for ($j = $i + 1; ($j -lt $tokens.Count) -and (-not $took); $j++) {
           $a = $tokens[$j]
           if ([regex]::IsMatch($a, '^-(?:literal)?(?:file)?path$', 'IgnoreCase') -and ($j + 1) -lt $tokens.Count) {
-            [void]$targets.Add($tokens[$j + 1]); $took = $true
+            & $push $tokens[$j + 1]; $took = $true
           } elseif (-not $a.StartsWith('-')) {
-            [void]$targets.Add($a); $took = $true
+            & $push $a; $took = $true
           }
         }
       }
@@ -219,25 +255,118 @@ function Get-ShellTargets([string]$command) {
         }
         if ($inPlace) {
           for ($j = $tokens.Count - 1; $j -gt $i; $j--) {
-            if (-not $tokens[$j].StartsWith('-')) { [void]$targets.Add($tokens[$j]); break }
+            if (-not $tokens[$j].StartsWith('-')) { & $push $tokens[$j]; break }
           }
         }
       }
+      # cp / mv / install / ln: the write lands on the LAST non-flag operand (destination/link).
+      if ($t -eq 'cp' -or $t -eq 'mv' -or $t -eq 'install' -or $t -eq 'ln') {
+        for ($j = $tokens.Count - 1; $j -gt $i; $j--) {
+          if (-not $tokens[$j].StartsWith('-')) { & $push $tokens[$j]; break }
+        }
+      }
+      # curl -o/--output <file>; -O/--remote-name writes the URL's basename into the current dir.
+      if ($t -eq 'curl') {
+        for ($j = $i + 1; $j -lt $tokens.Count; $j++) {
+          $a = $tokens[$j]
+          if (($a -ceq '-o' -or $a -eq '--output') -and ($j + 1) -lt $tokens.Count) {
+            & $push $tokens[$j + 1]; $j++
+          } elseif ($a -ceq '-O' -or $a -eq '--remote-name') {
+            $url = $null
+            for ($k = $i + 1; $k -lt $tokens.Count; $k++) {
+              if ([regex]::IsMatch($tokens[$k], '^[a-z][a-z0-9+.-]*://', 'IgnoreCase')) { $url = $tokens[$k]; break }
+            }
+            if ($url) {
+              $base = (($url -split '[?#]')[0] -split '/')[-1]
+              if ($base) { & $push $base }
+            }
+          }
+        }
+      }
+      # wget -O <file> / --output-document=<file>
+      if ($t -eq 'wget') {
+        for ($j = $i + 1; $j -lt $tokens.Count; $j++) {
+          $a = $tokens[$j]
+          if ($a -ceq '-O' -and ($j + 1) -lt $tokens.Count) {
+            & $push $tokens[$j + 1]; $j++
+          } elseif ($a.StartsWith('--output-document=')) {
+            & $push $a.Substring('--output-document='.Length)
+          }
+        }
+      }
+      # dd of=<file>
+      if ($t -eq 'dd') {
+        for ($j = $i + 1; $j -lt $tokens.Count; $j++) {
+          if ([regex]::IsMatch($tokens[$j], '^of=', 'IgnoreCase')) { & $push $tokens[$j].Substring(3) }
+        }
+      }
+      # git apply / git am rewrite tracked files; the patch decides which, so the conservative
+      # target is the current directory itself. Dry-run/metadata forms are excluded.
+      if ($t -eq 'git' -and ($i + 1) -lt $tokens.Count) {
+        $sub = $tokens[$i + 1].ToLowerInvariant()
+        if ($sub -eq 'apply' -or $sub -eq 'am') {
+          $dry = $false
+          for ($k = $i + 2; $k -lt $tokens.Count; $k++) {
+            if ($tokens[$k] -cmatch '^--(check|stat|numstat|summary|abort|quit|show-current-patch)$') { $dry = $true; break }
+          }
+          if (-not $dry) { & $push '.' }
+        }
+      }
+    }
+    # `cd`-like first token updates the prefix for the NEXT segments (redirections of this very
+    # segment open before the cd takes effect, so they were pushed with the previous prefix).
+    $head = if ($tokens.Count) { $tokens[0].ToLowerInvariant() } else { '' }
+    if ($head -in @('cd', 'chdir', 'set-location', 'pushd')) {
+      $arg = if ($tokens.Count -gt 1) { $tokens[1] } else { $null }
+      $expanded = if ($arg -and -not $arg.StartsWith('-')) { Expand-ShellVars $arg } else { $null }
+      if (-not $expanded) {
+        $prefixUnknown = $true  # `cd` alone, `cd -`, or an unresolvable variable
+      } elseif (Test-AbsoluteLike $expanded) {
+        $prefix = $expanded
+        $prefixUnknown = $false
+      } elseif (-not $prefixUnknown) {
+        $prefix = if ($prefix) { [System.IO.Path]::Combine($prefix, $expanded) } else { $expanded }
+      }
+    } elseif ($head -eq 'popd') {
+      $prefixUnknown = $true  # no directory stack tracking - undecidable from here on
     }
   }
-  # Drops flags, null sinks, and targets with an unresolvable variable; expands the rest so
-  # that the comparison against the repo root sees the REAL path, not the shell literal.
-  $clean = [System.Collections.Generic.List[string]]::new()
-  foreach ($t in $targets) {
-    if (-not $t) { continue }
-    if ($t.StartsWith('-')) { continue }
-    if (Test-NullSink $t) { continue }
-    $expanded = Expand-ShellVars $t
-    if (-not $expanded) { continue }
-    if (Test-NullSink $expanded) { continue }
-    [void]$clean.Add($expanded)
-  }
-  return @($clean)
+  return @($targets)
+}
+
+# Resolves symlinks/junctions in the already-materialized part of the path (the non-existing
+# tail is re-appended), segment by segment so intermediate links are seen too. Closes the
+# carve-out bypass `pelizzai/link -> ../src`: the metadata-vs-product classification sees the
+# REAL destination, not the lexical path. Fail-open: any error returns the lexical path.
+function Resolve-RealPath([string]$p) {
+  try {
+    $base = $p
+    $tail = [System.Collections.Generic.List[string]]::new()
+    while (-not (Test-Path -LiteralPath $base)) {
+      $parent = [System.IO.Path]::GetDirectoryName($base)
+      if (-not $parent -or $parent -eq $base) { return $p } # nothing materialized
+      $tail.Insert(0, [System.IO.Path]::GetFileName($base))
+      $base = $parent
+    }
+    $full = [System.IO.Path]::GetFullPath($base)
+    $rootPart = [System.IO.Path]::GetPathRoot($full)
+    $rest = @($full.Substring($rootPart.Length) -split '[\\/]' | Where-Object { $_ })
+    $resolved = $rootPart
+    $guard = 0
+    foreach ($seg in $rest) {
+      $resolved = Join-Path $resolved $seg
+      while ($guard -lt 64) {
+        $guard++
+        $item = $null
+        try { $item = Get-Item -LiteralPath $resolved -Force -ErrorAction Stop } catch { break }
+        $final = $null
+        try { $final = $item.ResolveLinkTarget($true) } catch {}
+        if ($final) { $resolved = $final.FullName } else { break }
+      }
+    }
+    foreach ($t in $tail) { $resolved = Join-Path $resolved $t }
+    return $resolved
+  } catch { return $p }
 }
 
 # Blocks: reason + safe path on stderr and exit 2.
@@ -285,17 +414,21 @@ try {
   if (-not $gitRoot) { exit 0 } # outside a git repo (scratchpad/external) or git missing -> allow
 
   # Only targets INSIDE the root matter; scratchpad/temp outside the root never blocks.
+  # Resolve-RealPath on BOTH sides: a symlinked temp dir (macOS /tmp) compares correctly, and a
+  # symlink inside the repo is classified by its real destination.
+  $realRoot = Resolve-RealPath ([System.IO.Path]::GetFullPath($gitRoot))
   $inRoot = [System.Collections.Generic.List[string]]::new()
   foreach ($t in $targets) {
     $abs = if ([System.IO.Path]::IsPathRooted($t)) { $t } else { Join-Path $cwd $t }
     try { $abs = [System.IO.Path]::GetFullPath($abs) } catch { continue }
-    if (Test-Inside $abs $gitRoot) { [void]$inRoot.Add($abs) }
+    $abs = Resolve-RealPath $abs
+    if (Test-Inside $abs $realRoot) { [void]$inRoot.Add($abs) }
   }
   if ($inRoot.Count -eq 0) { exit 0 }
 
   # Harness metadata (pelizzai/**) vs. PRODUCT (outside pelizzai/). Both Rule A's carve-out
   # and Rule B rest on this separation.
-  $pelizzaiDir = Join-Path $gitRoot 'pelizzai'
+  $pelizzaiDir = Join-Path $realRoot 'pelizzai'
   $products = @($inRoot | Where-Object { -not (Test-Inside $_ $pelizzaiDir) })
 
   # -- Rule A (both modes): protected/detached branch blocks in-root PRODUCT writes.
@@ -306,12 +439,11 @@ try {
   # product or commit loophole - product (outside pelizzai/) stays blocked by this same Rule A;
   # the metadata is only COMMITTED in the first commit of the new task branch (the flow never
   # requires a commit on a protected branch); and pelizzai-guardrails keeps blocking destructive
-  # git. LIMIT (symlink): the metadata-vs-product classification is by PATH - GetFullPath normalizes
-  # `..` (which is why `pelizzai/../src` correctly counts as product) but does NOT follow symlinks.
-  # A symlink inside pelizzai/ pointing outside (e.g. `pelizzai/link -> ../src`) could make a real
-  # product write be read as metadata and allowed on a protected branch. The carve-out is NOT
-  # airtight against symlinks; the compensating controls remain: pelizzai-guardrails blocks
-  # destructive git and human review sees the real target.
+  # git. LIMIT (symlink): the classification resolves symlinks in the already-materialized part
+  # of the path (Resolve-RealPath), so `pelizzai/link -> ../src` is read as PRODUCT, not
+  # metadata. Residual limit (TOCTOU): a link created between this check and the write - e.g.
+  # by the same command - is not seen; the compensating controls remain: pelizzai-guardrails
+  # blocks destructive git and human review sees the real target.
   $branch = Invoke-Git $cwd @('branch', '--show-current') # '' = detached HEAD (or no branch)
   $isProtected = ($branch -eq '') -or ($PROTECTED -contains $branch)
   if (-not $isProtected) {
