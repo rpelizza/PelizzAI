@@ -1,6 +1,6 @@
 ---
 name: pelizzai-evolve
-description: The harness's self-optimization cycle over two consumer artifacts — pelizzai/data/verification-standard.md (what "correct" means here) and pelizzai/data/learnings.md (what execution already learned). Use when a failure recurs and a standing rule might prevent it; when pelizzai-finish-task flags a recurrence at closeout; when a better path found mid-task must be proposed instead of adopted; when either artifact is missing or over budget; or when the user asks to promote a learning, update the verification standard, or make the project "learn" from a defect.
+description: The harness's self-optimization cycle over two consumer artifacts — pelizzai/data/verification-standard.md (what "correct" means here) and pelizzai/data/learnings.md (what execution already learned). Use when a failure recurs and a standing rule might prevent it; when pelizzai-finish flags a recurrence at closeout; when a better path found mid-task must be proposed instead of adopted; when either artifact is missing or over budget; or when the user asks to promote a learning, update the verification standard, or make the project "learn" from a defect.
 ---
 
 # PelizzAI Evolve
@@ -28,7 +28,7 @@ in the native execution record.
 | File | Holds | Read by, and when | Written by, and when |
 | --- | --- | --- | --- |
 | `pelizzai/data/verification-standard.md` | what *correct* means here | `pelizzai-verification-before-completion` before judging a delivery · `pelizzai-review` when briefing reviewers · `pelizzai-writing-plans` when drafting validation | `pelizzai-audit` at bootstrap · here, in its own ratified change — **never during a correction** |
-| `pelizzai/data/learnings.md` | what execution already learned | `pelizzai-writing-plans` and `pelizzai-execution-plans` before proposing approaches | incident entries at root-cause confirmation (usually `pelizzai-debugging`, in the fix's own commit) · `pelizzai-finish-task` counts recurrences at closeout · here, on promotion and retirement |
+| `pelizzai/data/learnings.md` | what execution already learned | `pelizzai-writing-plans` and `pelizzai-execute` before proposing approaches | incident entries at root-cause confirmation (usually `pelizzai-debug`, in the fix's own commit) · `pelizzai-finish` counts recurrences at closeout · here, on promotion and retirement |
 
 Either one missing in a consumer → propose creating it from [templates/](templates/verification-standard.md)
 (`pelizzai-audit` seeds both at bootstrap; both are **versioned**, like the rest of
@@ -52,7 +52,7 @@ that decides what counts as a lesson.
 **Read-only during any correction.** If an output fails, fix the **output**. Editing a
 criterion, the procedure, or the baseline so a failing output passes is the guardrail violation
 under a friendlier name. The standard changes only in a deliberate change of its own, ratified
-through `pelizzai-interview-me`.
+through `pelizzai-interview`.
 
 **Budget: 150 lines hard — Baseline at most 25 rows.** Past 25 rows the criteria are describing
 more surfaces than one standard can hold: split it per package before dropping a row.
@@ -66,10 +66,10 @@ explicitly `n/a — one-off` · **scope** · **revert** (one line) · **status**
 `candidate → promoted → retired`.
 
 **Promotion:** a learning becomes a standing rule only after it **recurred 2–3 times**. The
-first occurrence is an incident (`candidate`); the repeat is the evidence. `pelizzai-finish-task`
+first occurrence is an incident (`candidate`); the repeat is the evidence. `pelizzai-finish`
 counts — writing a closeout for a task that fixed a confirmed defect, it checks whether that
 root cause is already in the log, and a match routes here. The promotion itself happens here and
-is **ratified by the user** via `pelizzai-interview-me`: flip the entries to `promoted`, write
+is **ratified by the user** via `pelizzai-interview`: flip the entries to `promoted`, write
 the one-line imperative into **Active rules** with its scope, and propose an edit to the
 project's `CLAUDE.md` only when the rule must hold before any skill loads — in the **project's
 own section, never inside the `pelizzai:contract` block** (the anchored block belongs to the
@@ -83,7 +83,7 @@ happen (code gone, dependency dropped, rule absorbed by a domain skill or a lint
 
 | Channel | What it is | What you may do | Gate |
 | --- | --- | --- | --- |
-| **Defect** | an observed failure | fix it, inside the guardrails | none, once confirmed (`pelizzai-debugging` proves it is real and repeatable) |
+| **Defect** | an observed failure | fix it, inside the guardrails | none, once confirmed (`pelizzai-debug` proves it is real and repeatable) |
 | **Opportunity** | a better path noticed mid-task | measure it, propose it | human adoption, always |
 
 **Defect — confirm before fixing.** An anomaly that does not reproduce is **logged, not fixed**
@@ -112,8 +112,8 @@ consumes.
   learning whose natural home is a domain skill is proposed THERE, and its incident entries are
   retired here once the skill absorbs the rule.
 - **A lasting user preference** is recorded via `pelizzai-preferences`, not as a learning.
-- **The cursor and the history** (`state.md`, `history/`) stay with `pelizzai-execution-plans`
-  and `pelizzai-finish-task`; this cycle only reads them as evidence.
+- **The cursor and the history** (`state.md`, `history/`) stay with `pelizzai-execute`
+  and `pelizzai-finish`; this cycle only reads them as evidence.
 
 ## Red flags
 
@@ -131,12 +131,12 @@ consumes.
 
 ## Integration
 
-**Called by:** `pelizzai-finish-task` (recurrence or budget flagged at closeout), the user
-directly, and `pelizzai-debugging` when a confirmed root cause deserves more than an incident
+**Called by:** `pelizzai-finish` (recurrence or budget flagged at closeout), the user
+directly, and `pelizzai-debug` when a confirmed root cause deserves more than an incident
 entry.
 
-**Combines with:** `pelizzai-interview-me` — one ratification per promotion, standard change, or
+**Combines with:** `pelizzai-interview` — one ratification per promotion, standard change, or
 opportunity adoption; `pelizzai-verification-before-completion` and `pelizzai-review` — the
-standard's readers; `pelizzai-writing-plans`/`pelizzai-execution-plans` — the learnings'
+standard's readers; `pelizzai-writing-plans`/`pelizzai-execute` — the learnings'
 readers; `pelizzai-audit` — seeds both artifacts at bootstrap; `pelizzai-writing-skills` — the
 home of a lesson that belongs in a domain skill.

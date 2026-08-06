@@ -78,7 +78,7 @@ try {
        # -M is NOT included: renaming a branch is the canonical git init step (git branch -M main).
        Test = { param($s) ($s -match '\bgit\b.*\bbranch\b') -and (($s -cmatch '(^|\s)-[a-zA-Z]*D[a-zA-Z]*(\s|$)') -or (($s -cmatch '(^|\s)--delete(\s|$)') -and (($s -cmatch '(^|\s)--force(\s|$)') -or ($s -cmatch '(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)')))) }
        Why  = 'forces the removal of a branch that is NOT merged - its commits may be lost.'
-       Safe = 'use -d (it only deletes an already-merged branch) or confirm the discard with the user (pelizzai-finish-task requires the literal text "discard").' },
+       Safe = 'use -d (it only deletes an already-merged branch) or confirm the discard with the user (pelizzai-finish requires the literal text "discard").' },
     @{ Name = 'git checkout . / checkout [<ref>] -- .'
        # Covers "checkout .", "checkout -- .", "checkout <ref> -- ." and the "./" form (all discard the working tree).
        # checkout -- <file> is NOT included: discarding a named file is a routine operation.

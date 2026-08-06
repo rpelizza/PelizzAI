@@ -40,7 +40,7 @@ If it is a directory false alarm, fix the context and return to the router witho
 
 **Delivery in `delivered` on resumption.** If state shows `phase: delivered`, the task was sealed and
 its destination executed, leaving only the observation of `done` — this is **not** WIP divergence.
-Apply the same reconciliation as `pelizzai-execution-plans` (§Reconciling the previous delivery):
+Apply the same reconciliation as `pelizzai-execute` (§Reconciling the previous delivery):
 check `confirm:` against git (read-only) — does `base-ref` contain `validated-head`? PR merged?
 branch integrated? (local delivery: does the user accept?). Observed → stamp the `## History` index
 line with `done <YYYY-MM-DD>` + 1-line evidence and record `phase: done` — the full block
@@ -138,7 +138,7 @@ limitations/pending decision
 ```
 
 If the task was sealed and any content changed, invalidate `validated-head` and go back to review +
-Verification. Recovery never calls finish-task with a stale seal.
+Verification. Recovery never calls pelizzai-finish with a stale seal.
 
 ## Red flags
 
@@ -153,6 +153,6 @@ Verification. Recovery never calls finish-task with a stale seal.
 
 ## Integration
 
-Called by router/starting-branch/execution-plans when the record and Git diverge. Uses
-`pelizzai-starting-branch` for safe rescue and returns the work to the lifecycle; finish-task only
+Called by router/starting-branch/pelizzai-execute when the record and Git diverge. Uses
+`pelizzai-starting-branch` for safe rescue and returns the work to the lifecycle; pelizzai-finish only
 enters after new content is consolidated and sealed.

@@ -31,9 +31,9 @@ Where this loop runs in the harness:
 
 | Loop                                    | Driven by                       | What this skill contributes           |
 | --------------------------------------- | ------------------------------- | ------------------------------------- |
-| Task-by-task plan                       | `pelizzai-execution-plans`      | OODA lens + DoD + stop on doubt       |
+| Task-by-task plan                       | `pelizzai-execute`      | OODA lens + DoD + stop on doubt       |
 | fix → re-review                         | `pelizzai-review` + task-cycle  | re-observe (re-review) after each fix |
-| Multi-round investigation               | `pelizzai-team` / `pelizzai-debugging` | reorientation on new evidence   |
+| Multi-round investigation               | `pelizzai-team` / `pelizzai-debug` | reorientation on new evidence   |
 
 RED→GREEN and tool calls are TDD/ReAct micro-cycles inside **Act**; do not repeat the OODA vocabulary on every test. A direct bug with a single repro→fix→verify sequence does not trigger this skill.
 
@@ -56,7 +56,7 @@ The loop only ends when the DoD is reached **and verified** (`pelizzai-verificat
 
 ```text
 1. DoD reached and VERIFIED (fresh evidence) → conclude.
-2. Material decision mid-loop → STOP and trigger `pelizzai-interview-me`; resolve one question
+2. Material decision mid-loop → STOP and trigger `pelizzai-interview`; resolve one question
    at a time, with a recommendation, and only resume when no human decision is pending.
 3. A blocker you cannot resolve (circuit breaker tripped, a decision that belongs to the human)
    → record phase: blocked in the consumer state or native execution record and escalate with
@@ -81,9 +81,9 @@ Outside code execution, a "loop" is also a recurring pattern in the user's life 
 
 ## Integration
 
-- `pelizzai-execution-plans` — drives the macro loop of plans with this lens (OODA + DoD + stop on doubt).
+- `pelizzai-execute` — drives the macro loop of plans with this lens (OODA + DoD + stop on doubt).
 - `pelizzai-reasoning` — the OODA (macro) and ReAct (micro) techniques live there; Verification confirms the DoD.
 - `pelizzai-tdd` — micro-cycle for behavior when that is the selected strategy; does not make OODA mandatory.
-- `pelizzai-interview-me` — mandatory destination of the stop for material doubt.
+- `pelizzai-interview` — mandatory destination of the stop for material doubt.
 - `pelizzai-verification-before-completion` — no loop exit without fresh evidence.
 - `pelizzai-router` — Sync & delta is the Observe at the start of each task.

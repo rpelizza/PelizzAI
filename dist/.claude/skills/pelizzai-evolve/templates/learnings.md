@@ -1,9 +1,9 @@
 # Learnings — PelizzAI
 
 > What execution already learned in this project. Read by `pelizzai-writing-plans` and
-> `pelizzai-execution-plans` BEFORE approaches are proposed — the only moment a rule can still
+> `pelizzai-execute` BEFORE approaches are proposed — the only moment a rule can still
 > change a design. Incidents are written when a defect's root cause is CONFIRMED (usually by
-> `pelizzai-debugging`, inside the fix's own commit); `pelizzai-finish-task` counts recurrences
+> `pelizzai-debug`, inside the fix's own commit); `pelizzai-finish` counts recurrences
 > at closeout; `pelizzai-evolve` promotes and retires, ratified by the user.
 > Budget: **~200 lines hard** — retire before adding; a file too long to read at task start is
 > a file nobody reads.

@@ -5,9 +5,9 @@
 > the *Ratified execution defaults* section, which is NOT detected: it is born `<unset>` and only
 > the user fills it in when ratifying the policy at the post-plan gate.
 > Lives at `pelizzai/profile.md`. Consumed by: `pelizzai-tdd` (test command),
-> `pelizzai-execution-plans` (post-plan gate + final validation), `pelizzai-finish-task`
+> `pelizzai-execute` (post-plan gate + final validation), `pelizzai-finish`
 > (verification and destination), `pelizzai-router` (execution-defaults recommendation),
-> `pelizzai-debugging` (feedback loop), and `pelizzai-writing-skills` (Stack baseline
+> `pelizzai-debug` (feedback loop), and `pelizzai-writing-skills` (Stack baseline
 > → version/adoption-driven axes). Update it when scripts/manifests change; in a
 > workspace, repeat the sections per project.
 

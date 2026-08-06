@@ -38,7 +38,7 @@ Version-driven and rework-driven only **update** what already exists. Adoption-d
 2. Filter by leverage: only propose for significant external technology (framework, ORM/data,
    auth, payments, queue/sensitive infra). A trivial utility does not become a skill — the filter
    here is real leverage, not scarcity.
-3. At the task's CLOSEOUT (read-only nudge from `pelizzai-finish-task`), present ONE grouped
+3. At the task's CLOSEOUT (read-only nudge from `pelizzai-finish`), present ONE grouped
    proposal — never a per-task gate: "The task adopted <lib@lockfile version>, with no domain
    skill covering it. Create one now, grounded in context7 or current official documentation?
    [create · defer · don't create]". Recommended: "create" for high-leverage libs; "defer" for a
@@ -89,7 +89,7 @@ authorization they just gave.
 ### Portable core (when closing the task)
 
 Applies in the active skill roots (`.claude`/`.agents`); Cursor is just an adapter. This block is
-the cadence's **primary trigger**: `pelizzai-finish-task` consumes it in the closeout's read-only
+the cadence's **primary trigger**: `pelizzai-finish` consumes it in the closeout's read-only
 nudge (§5), a natural milestone that neither interrupts the flow nor blocks delivery. The hook
 (Claude Code) is only a safety net, every 10 interactions. When completing a task that touched
 code:

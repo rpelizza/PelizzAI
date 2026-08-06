@@ -11,7 +11,7 @@ This skill defines the harness's **behavioral floor**: the defaults that hold fo
 
 A floor is not ceremony. The layer is always active; each rule applies where it is relevant to the task, the stack, and the risk. A trivial task, one that can be answered directly, with no risk and no project context, simply has nothing to apply.
 
-Do not repeat here the process of skills that already have an owner: frontend (`pelizzai-frontend`), debugging (`pelizzai-debugging`), review (`pelizzai-review`), diff security (`pelizzai-oswap`).
+Do not repeat here the process of skills that already have an owner: frontend (`pelizzai-frontend`), debugging (`pelizzai-debug`), review (`pelizzai-review`), diff security (`pelizzai-oswap`).
 
 ## 1. Priority and applicability
 
@@ -38,7 +38,7 @@ Do not repeat here the process of skills that already have an owner: frontend (`
 - Do not assume behavior, architecture, or integration without confirming through existing code, official documentation, the project's specification, or concrete evidence.
 - Consult the available context — code, documentation, evidence — before asking.
 - Before proposing a relevant implementation, identify the goal, constraints, expected impact, and success criteria.
-- Use the `pelizzai-interview-me` skill when there is material ambiguity that the conversation, the code, and the available documentation do not resolve.
+- Use the `pelizzai-interview` skill when there is material ambiguity that the conversation, the code, and the available documentation do not resolve.
 - Investigate the root cause before applying a fix. Do not stop at the first plausible solution when there is risk of regression, side effects, or a structural problem.
 - For a library, API, version, or external behavior that may be outdated, prioritize current official documentation: the `context7` MCP (`resolve-library-id` → `query-docs`) when available, the official web absent it — never memory. For internal conventions, use the repo itself.
 
@@ -70,7 +70,7 @@ Do not repeat here the process of skills that already have an owner: frontend (`
 ## 6. Concurrency, asynchrony, and resilience
 
 - Use parallelism or concurrency only when the operations are independent, there is real gain, and the risks of ordering, resource consumption, and partial failure are under control.
-- A shared working tree/worktree does not isolate agents from each other; concurrent writes require disjoint paths or serialization — never one worktree per agent. The canonical regime (`isolation: branch` / `isolation: worktree`) is that of `pelizzai-execution-plans` and `pelizzai-team`.
+- A shared working tree/worktree does not isolate agents from each other; concurrent writes require disjoint paths or serialization — never one worktree per agent. The canonical regime (`isolation: branch` / `isolation: worktree`) is that of `pelizzai-execute` and `pelizzai-team`.
 - Avoid needless blocking operations, especially in servers, APIs, and interfaces. For heavy or decouplable work, use a queue, an async job, or background processing when the architecture supports it.
 - Timers only when they are part of the behavior (debounce, retry with backoff, controlled polling, expiration, rate limiting); never as a substitute for correct synchronization, state confirmation, or event handling.
 - Do not create silent fallbacks that hide failure, weaken security, or change results without observability. Fallbacks and graceful degradation are allowed when explicit, safe, documented, and monitorable.

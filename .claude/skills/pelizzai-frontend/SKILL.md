@@ -78,7 +78,7 @@ Bad examples:
 - "A beautiful dashboard."
 ```
 
-When the task comes from `pelizzai-brainstorming` or from an approved spec/screen/Figma, the already
+When the task comes from `pelizzai-ideia-generation` or from an approved spec/screen/Figma, the already
 approved visual direction prevails: execute it faithfully. A local change inherits that direction
 with no gate; do not invent a new aesthetic thesis or a new personality mid-execution.
 
@@ -327,8 +327,8 @@ Playwright, the browser MCP, and screenshots are **tools** for carrying out this
 **Combines with:**
 
 ```text
-- `pelizzai-brainstorming`: to define the spec and the visual direction before creative implementation.
-- `pelizzai-execution-plans`: to execute UI tasks inside approved plans.
+- `pelizzai-ideia-generation`: to define the spec and the visual direction before creative implementation.
+- `pelizzai-execute`: to execute UI tasks inside approved plans.
 - `pelizzai-tdd`: for component, form, route, and regression behavior.
 - `pelizzai-review`: to review adherence to the spec and quality.
 - `pelizzai-verification-before-completion`: for fresh evidence before declaring it done.

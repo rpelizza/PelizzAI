@@ -20,11 +20,11 @@ sentinel along and mistakenly promote the consumer to source repo).
 
 Guidelines to reduce common coding mistakes made by LLMs. Combine with project-specific instructions as needed.
 
-**Trade-off:** preserve invariants; adapt heuristics. Safety, user authority, isolation before the first write, and evidence before completion are not optional. Brainstorming, TDD, OODA, team, and the number of reviews vary with effect, risk, and uncertainty; the model is not the harness's decision — it is what the user chose on their platform, in every role and in every task; never downgrade model or effort below the session's to save cost, use the highest effort the platform offers, and never downgrade the process to compensate for a smaller model (`pelizzai-execution-plans` → `references/task-cycle.md` §8). For trivial tasks, use good judgment — but "good judgment" does not void the 1% rule from `pelizzai-core`: if a skill applies (even to a trivial tweak, e.g. `pelizzai-quick-fix`), invoke it; proportionality lives INSIDE the skills, not in skipping them. The harness may choose how to reason, investigate, and recommend; it may not choose for the user requirements, scope, UX, architecture, data, accepted risk, or acceptance criteria.
+**Trade-off:** preserve invariants; adapt heuristics. Safety, user authority, isolation before the first write, and evidence before completion are not optional. Brainstorming, TDD, OODA, team, and the number of reviews vary with effect, risk, and uncertainty; the model is not the harness's decision — it is what the user chose on their platform, in every role and in every task; never downgrade model or effort below the session's to save cost, use the highest effort the platform offers, and never downgrade the process to compensate for a smaller model (`pelizzai-execute` → `references/task-cycle.md` §8). For trivial tasks, use good judgment — but "good judgment" does not void the 1% rule from `pelizzai-core`: if a skill applies (even to a trivial tweak, e.g. `pelizzai-quick-fix`), invoke it; proportionality lives INSIDE the skills, not in skipping them. The harness may choose how to reason, investigate, and recommend; it may not choose for the user requirements, scope, UX, architecture, data, accepted risk, or acceptance criteria.
 
 > **The LLM never decides alone.** Every gap found during development — an ambiguous
 > requirement, a scope/UX/architecture/data/security decision the spec or the plan does not cover,
-> an undefined interface contract — **stops the work and is closed with `pelizzai-interview-me`**,
+> an undefined interface contract — **stops the work and is closed with `pelizzai-interview`**,
 > together with the human, one question at a time, with a recommendation. Filling it by default,
 > convention, Context7, or "reasonable inference" is a violation, even when the choice seems
 > obvious and reversible. This holds after kickoff, after the spec, and mid-execution. Autonomy
@@ -37,7 +37,7 @@ limits, migrations, and alternatives. In greenfield, use it from the initial tec
 qualify suggestions and questions. In an existing project, combine it with manifests, lockfiles,
 code, and tests. If unavailable, use current official documentation and state the limitation.
 Context7 removes **factual** doubt and improves recommendations; it never ratifies a decision that
-belongs to the user — that decision goes to `pelizzai-interview-me`, not to the documentation.
+belongs to the user — that decision goes to `pelizzai-interview`, not to the documentation.
 
 ## 1. Think Before You Code
 
@@ -48,7 +48,7 @@ Before implementing:
 - State only material assumptions. If there is uncertainty that changes the solution, consult evidence and then ask.
 - If materially different interpretations exist, present the best recommendation and ask which one the user picks.
 - If a simpler approach exists, say so. Push back when it makes sense.
-- If something that belongs to the product is not explicit, stop and use `pelizzai-interview-me` with **one question at a time**, starting with the decision that conditions the others. Offer 2–3 real options when they help, mark the recommended one, and explain why in one line. Clarification comes BEFORE implementation, not after the mistake.
+- If something that belongs to the product is not explicit, stop and use `pelizzai-interview` with **one question at a time**, starting with the decision that conditions the others. Offer 2–3 real options when they help, mark the recommended one, and explain why in one line. Clarification comes BEFORE implementation, not after the mistake.
 - Project evidence and Context7/official documentation eliminate factual questions; they do not authorize the LLM to answer product decisions for the user. A reversible decision may be taken mechanically only when it is already contained in a ratified spec or plan.
 
 ## 2. Simplicity First
@@ -113,7 +113,7 @@ Observable signs that these guidelines and the skills are doing their job:
 - clarifying questions come **BEFORE** implementation, not after the mistake — one decision per turn, with the best option recommended;
 - at kickoff, the classified route (lane, discovery, overlays) is presented for the user to ratify or adjust before effort is invested;
 - greenfield projects go through discovery → spec → stress → approval → plan → stress → approval;
-- every material gap becomes a `pelizzai-interview-me` question — it is never filled by Context7, convention, default, or "reasonable inference", including mid-execution;
+- every material gap becomes a `pelizzai-interview` question — it is never filled by Context7, convention, default, or "reasonable inference", including mid-execution;
 - structural decisions (base/branch, isolation, mode with `team` visible, commits, review, destination) are recommended and ratified — one at a time in tracks with a plan; in tweak/bug, in a compact one-line confirm with all of them visible and named — never as a silent default;
 - a trivial tweak (a label, a button on an existing screen, an obvious config) reaches the first write with at most TWO stops (kickoff gate + compact confirm) and never produces a spec/plan;
 - a read-only task creates no state and no artifacts;
@@ -137,4 +137,4 @@ This project uses the **PelizzAI** skills harness. Skills live in `.agents/skill
 
 **Ratification gate:** isolation, execution mode (with `team` always visible), and commit strategy are recommendations ratified before being applied; `squash-final` only on explicit request. Push/PR/publication are confirmed per task.
 
-Available skills (32): pelizzai-audit, pelizzai-brainstorming, pelizzai-codebase-design, pelizzai-core, pelizzai-debugging, pelizzai-documenting-features, pelizzai-domain-modeling, pelizzai-evolve, pelizzai-execution-plans, pelizzai-finish-task, pelizzai-frontend, pelizzai-handoff, pelizzai-improving-architecture, pelizzai-interview-me, pelizzai-loop, pelizzai-oswap, pelizzai-preferences, pelizzai-prototype, pelizzai-quick-fix, pelizzai-reasoning, pelizzai-recovery, pelizzai-resolving-merge-conflicts, pelizzai-review, pelizzai-router, pelizzai-starting-branch, pelizzai-subagents, pelizzai-tdd, pelizzai-team, pelizzai-verification-before-completion, pelizzai-writing-clearly-and-concisely, pelizzai-writing-plans, pelizzai-writing-skills.
+Available skills (32): pelizzai-architecture-refinement, pelizzai-audit, pelizzai-codebase-architecture, pelizzai-core, pelizzai-debug, pelizzai-documentation, pelizzai-domain-modeling, pelizzai-evolve, pelizzai-execute, pelizzai-finish, pelizzai-frontend, pelizzai-handoff, pelizzai-ideia-generation, pelizzai-interview, pelizzai-loop, pelizzai-merge-conflict-resolution, pelizzai-oswap, pelizzai-preferences, pelizzai-prototype, pelizzai-quick-fix, pelizzai-reasoning, pelizzai-recovery, pelizzai-review, pelizzai-router, pelizzai-starting-branch, pelizzai-subagents, pelizzai-tdd, pelizzai-team, pelizzai-verification-before-completion, pelizzai-writing-clearly-and-concisely, pelizzai-writing-plans, pelizzai-writing-skills.

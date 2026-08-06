@@ -95,7 +95,7 @@ Ambiguity: is something missing that would materially change the outcome?
 Use context, code, and documentation before asking, to eliminate factual doubts. Do not use that
 evidence to decide product intent. Ask when the answer changes requirements, scope, UX,
 architecture, data, security, cost, authority, acceptance, or solution — the instrument for that
-question is `pelizzai-interview-me`. Ask **one question at a time**, in dependency order; offer 2–3
+question is `pelizzai-interview`. Ask **one question at a time**, in dependency order; offer 2–3
 real options when that helps and mark the best recommendation with a short reason. Do not adopt a
 product assumption to "unblock" the work. A reversible choice may only be applied mechanically when
 it is already contained in a ratified spec/plan or was explicitly delegated by the user. The
@@ -121,7 +121,7 @@ The executor decides alone only:
 - mechanical, local, reversible steps already covered by a ratified decision.
 ```
 
-A gap that falls in the user's block is **closed with `pelizzai-interview-me`** — in design, in the
+A gap that falls in the user's block is **closed with `pelizzai-interview`** — in design, in the
 plan, and also mid-execution, when the work reveals a decision that the spec or plan does not cover.
 Filling it with a default, convention, Context7, or "reasonable inference" is a violation, even when
 the choice looks obvious and reversible.
@@ -152,7 +152,7 @@ core
 → Verification seals the result
 → Finish integrates it without altering it
 
-at any point, material gap → pelizzai-interview-me (one question at a time) → resume the phase
+at any point, material gap → pelizzai-interview (one question at a time) → resume the phase
 ```
 
 ### Head skills
@@ -160,13 +160,13 @@ at any point, material gap → pelizzai-interview-me (one question at a time) �
 | Intent | Head skill |
 | --- | --- |
 | Authorized bootstrap/remap | `pelizzai-audit` |
-| Greenfield product/project, or feature/refactor/infra with a design decision | `pelizzai-brainstorming` |
-| Plan/design already clear | `pelizzai-writing-plans` or `pelizzai-execution-plans` |
-| Bug/unexpected behavior | `pelizzai-debugging` |
+| Greenfield product/project, or feature/refactor/infra with a design decision | `pelizzai-ideia-generation` |
+| Plan/design already clear | `pelizzai-writing-plans` or `pelizzai-execute` |
+| Bug/unexpected behavior | `pelizzai-debug` |
 | Local tweak without a new rule/contract | `pelizzai-quick-fix` |
 | Review of a diff/branch/PR | `pelizzai-review` |
-| Codebase-wide architectural review | `pelizzai-improving-architecture` |
-| Git conflict | `pelizzai-resolving-merge-conflicts` |
+| Codebase-wide architectural review | `pelizzai-architecture-refinement` |
+| Git conflict | `pelizzai-merge-conflict-resolution` |
 | State × Git divergence | `pelizzai-recovery` |
 
 ### Overlays
@@ -176,7 +176,7 @@ Overlays do not replace the head skill:
 - UI/UX/CSS/component/screen → `pelizzai-frontend`;
 - auth/input/SQL/upload/secret/dependency/sensitive surface → `pelizzai-oswap` at review;
 - project patterns → domain skills from the catalog (when in doubt whether a domain skill applies to the task, include it: the cost of including is lower than the cost of ignoring a project rule);
-- new human documentation → `pelizzai-documenting-features` when it is part of the scope.
+- new human documentation → `pelizzai-documentation` when it is part of the scope.
 
 `pelizzai-preferences` is not an optional overlay: it is the behavior floor described above and follows every non-trivial task. `pelizzai-reasoning` selects proportional heuristics; it does not add ceremony by itself.
 
@@ -198,7 +198,7 @@ flowchart TD
     CLS --> KICK["Kickoff gate: route as a recommendation to ratify"]
     KICK --> HEAD["One head skill + mandatory overlays"]
     HEAD --> GAP{"Material gap<br/>in any phase?"}
-    GAP -- "Yes" --> IV["pelizzai-interview-me:<br/>one question at a time, with a recommendation"]
+    GAP -- "Yes" --> IV["pelizzai-interview:<br/>one question at a time, with a recommendation"]
     IV --> HEAD
     GAP -- "No" --> GO["Mechanical step within<br/>what was already ratified"]
 ```
@@ -229,7 +229,7 @@ Use the platform's native mechanism. Without native loading, read `.agents/skill
 - A mutating bootstrap to answer a read-only analysis.
 - Asking before consulting evidence already available.
 - Plugging a user-owned gap with Context7, convention, a default, or "reasonable inference"
-  instead of stopping at pelizzai-interview-me.
+  instead of stopping at pelizzai-interview.
 - Treating the specified stack as sufficient requirements/acceptance for a greenfield project.
 - Confusing a heuristic (OODA/TDD/team) with a universal invariant.
 - Starting to write before the router and the first-write gate.

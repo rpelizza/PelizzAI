@@ -4,7 +4,7 @@
  *
  * Reinforcement for domain-skill self-maintenance. It is NOT the source of truth:
  * the cadence core lives in the `pelizzai-writing-skills` skill (portable across IDEs)
- * and fires at task closeout (`pelizzai-finish-task` Step 5). This hook exists only in
+ * and fires at task closeout (`pelizzai-finish` Step 5). This hook exists only in
  * Claude Code and acts as a safety net: it counts interactions and, every N,
  * reminds you to review the skills once the commit/day threshold has been crossed.
  *

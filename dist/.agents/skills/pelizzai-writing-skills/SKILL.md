@@ -282,7 +282,7 @@ Once a skill is ready, you can **optimize the `description`** to improve trigger
 - `pelizzai-audit` — calls this skill at bootstrap; the domain-skill creation engine lives here.
 - `pelizzai-team` — write many candidate skills in parallel; `pelizzai-subagents` for delegation to a single subagent.
 - `pelizzai-reasoning` — reasoning for authoring (Structured Decomposition) and maintenance (Critique and Refine, Evidence Synthesis).
-- `pelizzai-interview-me` / `pelizzai-brainstorming` — the new-project branch, before creating the first skills.
+- `pelizzai-interview` / `pelizzai-ideia-generation` — the new-project branch, before creating the first skills.
 - `pelizzai-writing-clearly-and-concisely` — write skill bodies with clarity.
 
 ---

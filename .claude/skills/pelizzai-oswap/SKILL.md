@@ -1,6 +1,6 @@
 ---
 name: pelizzai-oswap
-description: Security overlay for changes that touch authentication/authorization, untrusted input, SQL/queries, sensitive data, uploads, CORS/SSRF, dependencies/supply chain, integrity, logging, or exceptions. Applies the current OWASP Top 10 to the diff and produces fixes/evidence before the final review and validated-head. Use also when the user asks for an OWASP review; never defer it to finish-task.
+description: Security overlay for changes that touch authentication/authorization, untrusted input, SQL/queries, sensitive data, uploads, CORS/SSRF, dependencies/supply chain, integrity, logging, or exceptions. Applies the current OWASP Top 10 to the diff and produces fixes/evidence before the final review and validated-head. Use also when the user asks for an OWASP review; never defer it to pelizzai-finish.
 ---
 
 # PelizzAI OWASP
@@ -78,7 +78,7 @@ this overlay.
 ## Red flags
 
 ```text
-- A late offer in finish-task.
+- A late offer in pelizzai-finish.
 - A ten-category checklist unrelated to the diff.
 - A theoretical critical finding without boundary/path.
 - Approving input/authorization without following the data to the enforcement point.
@@ -88,6 +88,6 @@ this overlay.
 
 ## Integration
 
-It is an overlay of the router/writing-plans/execution-plans/review and composes with domain
+It is an overlay of the router/writing-plans/pelizzai-execute/review and composes with domain
 skills. Use Evidence Synthesis when logs/scanners/sources diverge; do not turn the taxonomy into
 universal reasoning.

@@ -81,7 +81,7 @@ Each skill lives in `.claude/skills/<name>/SKILL.md` and follows these rules:
 - **Every pointer must exist.** `references/...`, `templates/...`, and every `pelizzai-*` name
   cited in prose are verified; a dead pointer breaks the sync.
 - **Cross-references are qualified.** When citing a file that lives in another skill, write
-  `pelizzai-execution-plans` → `references/task-cycle.md`, never a bare `references/task-cycle.md`
+  `pelizzai-execute` → `references/task-cycle.md`, never a bare `references/task-cycle.md`
   — otherwise the reader searches the wrong directory.
 
 There is a skill dedicated to this: `pelizzai-writing-skills`, with
@@ -130,6 +130,6 @@ The skill `pelizzai-writing-clearly-and-concisely` is the project's style guide.
 The harness classifies, reasons, investigates, and recommends; **the user decides the product**.
 When proposing a change, check that it does not authorize the agent to decide scope, UX,
 architecture, data, accepted risk, or acceptance criteria on its own. A material gap found during
-the work must lead to `pelizzai-interview-me` — never to a silent default.
+the work must lead to `pelizzai-interview` — never to a silent default.
 
 A contribution that breaks this principle will be rejected even if the code is impeccable.

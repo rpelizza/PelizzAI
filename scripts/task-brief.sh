@@ -12,7 +12,7 @@
 #
 # Why a file, not pasting: everything that enters by pasting stays resident in the
 # coordinator's context forever (gain measured at the source: ~2x faster,
-# ~50% fewer tokens). See pelizzai-execution-plans -> references/task-cycle.md, section 1.
+# ~50% fewer tokens). See pelizzai-execute -> references/task-cycle.md, section 1.
 #
 # PowerShell equivalent: scripts/task-brief.ps1.
 

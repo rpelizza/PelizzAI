@@ -9,7 +9,7 @@ Copy to `pelizzai/plans/YYYY-MM-DD-<topic>.md` and replace every bracketed text 
 ```markdown
 # [Name] — Implementation plan
 
-> **For the executor:** MANDATORY SUB-SKILL — use `pelizzai-execution-plans`.
+> **For the executor:** MANDATORY SUB-SKILL — use `pelizzai-execute`.
 
 **Goal:** [one-sentence result]
 
@@ -47,14 +47,14 @@ List the residual assumptions and material gaps **new to the plan** (unhandled c
 
 ## Technical decisions in this plan
 
-**Numbered** list of this plan's material technical decisions — each on one line: **what** was decided, **where it was ratified**, the **rejected alternative**, and the **why**. Every material decision must be ratified before the plan closes: one that emerged while assembling the plan goes to the user as a question with 2–3 options and a recommendation (via `pelizzai-interview-me`), not as a fait accompli. If the plan is purely mechanical and makes no material technical decision, write exactly `no material technical decision — purely mechanical plan`. Never leave the section empty or omit it.
+**Numbered** list of this plan's material technical decisions — each on one line: **what** was decided, **where it was ratified**, the **rejected alternative**, and the **why**. Every material decision must be ratified before the plan closes: one that emerged while assembling the plan goes to the user as a question with 2–3 options and a recommendation (via `pelizzai-interview`), not as a fait accompli. If the plan is purely mechanical and makes no material technical decision, write exactly `no material technical decision — purely mechanical plan`. Never leave the section empty or omit it.
 
 ```text
 1. [decision] — ratified: [spec | design | plan interview | execution interview] — rejected: [alternative] — why: [one-line reason]
 2. [decision] — ratified: [spec | design | plan interview | execution interview] — rejected: [alternative] — why: [one-line reason]
 ```
 
-The post-plan setup gate presents this list: the already-ratified ones (spec/design/interview) as a one-line recap, and any decision with no ratification origin becomes a question with 2–3 options and a recommendation right there — never a block rubber-stamp. During execution the operational deviation test applies — if the decision is not written in the plan or the spec, it is not approved — present it before implementing. A material gap that surfaces later, mid-execution, is plugged by `pelizzai-interview-me` and comes back here as a new line with origin `execution interview` — the list stays alive during execution; it does not freeze at the gate.
+The post-plan setup gate presents this list: the already-ratified ones (spec/design/interview) as a one-line recap, and any decision with no ratification origin becomes a question with 2–3 options and a recommendation right there — never a block rubber-stamp. During execution the operational deviation test applies — if the decision is not written in the plan or the spec, it is not approved — present it before implementing. A material gap that surfaces later, mid-execution, is plugged by `pelizzai-interview` and comes back here as a new line with origin `execution interview` — the list stays alive during execution; it does not freeze at the gate.
 
 ## Structure of each task
 
@@ -135,5 +135,5 @@ Adapt the order without losing the proof:
 ## Forwarding to execution
 
 Plan materialized, stress-tested, and approved → **forward to the sequential post-plan setup gate**
-of `pelizzai-execution-plans`. The plan carries recommendations; the user decides isolation,
+of `pelizzai-execute`. The plan carries recommendations; the user decides isolation,
 branch, mode, commits, and review one question at a time before Task 1.

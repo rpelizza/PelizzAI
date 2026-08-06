@@ -1,6 +1,6 @@
 ---
 name: pelizzai-quick-fix
-description: Head skill for a local, cohesive, clear, low-risk tweak — text, label, color, button, or field on an existing screen, a constant, a mechanical rename/refactor, an obvious configuration. Typical signals: ~1 file and under ~50 lines (scale signals, not hard limits). Public surface = a NEW route, command, endpoint, API, or config — a tweak creates none of them and changes no business rule. Something broken uses `pelizzai-debugging`; a new surface/contract or a design decision reclassifies through the router's lane.
+description: Head skill for a local, cohesive, clear, low-risk tweak — text, label, color, button, or field on an existing screen, a constant, a mechanical rename/refactor, an obvious configuration. Typical signals: ~1 file and under ~50 lines (scale signals, not hard limits). Public surface = a NEW route, command, endpoint, API, or config — a tweak creates none of them and changes no business rule. Something broken uses `pelizzai-debug`; a new surface/contract or a design decision reclassifies through the router's lane.
 ---
 
 # PelizzAI Quick Fix
@@ -82,9 +82,9 @@ open no gates: apply the briefing and escalate to the coordinator whatever requi
    project's relevant suite. Fix before consolidating.
 3.5. Commit the **content** with exact paths and a definitive message
    `<type>(<scope>): <description>`. A quick-fix already produces a single commit; do not create
-   WIP nor leave a squash for finish-task.
+   WIP nor leave a squash for pelizzai-finish.
 4. Seal and close — run `pelizzai-verification-before-completion` against that HEAD, record
-   `validated-head` only after success, and invoke `pelizzai-finish-task`: a consumer adds
+   `validated-head` only after success, and invoke `pelizzai-finish`: a consumer adds
    only the metadata closure (state + the task's history file);
    source mode closes the execution record without a closure file/commit.
 ```
@@ -114,7 +114,7 @@ Never: treat as quick-fix something that creates a new surface or changes a busi
 
 **Uses:** `pelizzai-starting-branch`, local rules/skills, `pelizzai-reasoning` (strategy
 selection), `pelizzai-tdd` only for behavior, `pelizzai-frontend` as the mandatory overlay
-for UI, `pelizzai-verification-before-completion`, and `pelizzai-finish-task`.
+for UI, `pelizzai-verification-before-completion`, and `pelizzai-finish`.
 
-**Escalates to:** `pelizzai-writing-plans` for bounded, `pelizzai-brainstorming` when there is a
-design decision or uncertainty, or `pelizzai-debugging` when it is a bug.
+**Escalates to:** `pelizzai-writing-plans` for bounded, `pelizzai-ideia-generation` when there is a
+design decision or uncertainty, or `pelizzai-debug` when it is a bug.
