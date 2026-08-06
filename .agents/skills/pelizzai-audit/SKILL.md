@@ -92,7 +92,7 @@ user to type `bootstrap`:
   The plan does not start until the user chooses to create, trim, defer, or record zero skills.
 - **plan→execution (existing project):** before fixing the build lane, if a mutating task's stack is not covered by the catalog (absent, OR present but not covering that stack), propose all the domain skills that would close that gap and prevent agent error.
 
-**Who invokes this gate (it is not just the audit's own self-service):** `pelizzai-ideia-generation`
+**Who invokes this gate (it is not just the audit's own self-service):** `pelizzai-idea-generation`
 triggers it at the design→plan edge, as a numbered step of closing the design edge;
 `pelizzai-writing-plans` triggers it as a safety net before Task 1, when the plan's stack has no
 coverage in the catalog (or the catalog is absent). At those two points, the `pelizzai-router`
@@ -132,7 +132,7 @@ flowchart TD
     Gate -- ratified --> Iso
     Iso --> Inv[Inventory: structure, stacks,\nMCPs, git/host, skills, conventions]
     Inv --> New{New or existing project?}
-    New -- New --> Bra[pelizzai-interview + pelizzai-ideia-generation:\ndiscovery, spec, stress, approval]
+    New -- New --> Bra[pelizzai-interview + pelizzai-idea-generation:\ndiscovery, spec, stress, approval]
     Bra --> Wri
     New -- Existing / Workspace --> Rep[Full repo-scan:\npatterns, stacks, frameworks, conventions]
     Rep --> Wri[pelizzai-create-skill:\ncreates the maximum of useful domain skills\nwith context7 + Anthropic rules]
@@ -240,7 +240,7 @@ Create on demand, not at bootstrap: `context.md`, `adr/`, `out-of-scope/`, `spec
 ### 5. New project
 
 With no code/patterns, use the greenfield cycle: `pelizzai-interview` one question at a time →
-full `pelizzai-ideia-generation` → stress → approved spec. Then apply the **Proactive domain skills
+full `pelizzai-idea-generation` → stress → approved spec. Then apply the **Proactive domain skills
 gate** before the plan, create only the ratified ones, and record them in the catalog/ledger. If
 the original request includes building the product, continue to `pelizzai-writing-plans`; if it
 asked only for bootstrap/design, stop at the approved scope.
@@ -403,4 +403,4 @@ In a workspace with multiple repositories, do not pretend one scalar state cover
 
 ## Integration
 
-Uses `pelizzai-starting-branch` and `pelizzai-finish` only in `bootstrap-write`; `pelizzai-create-skill` writes the ratified domain skills — the target is the maximum of useful skills, grounded in `context7`; `pelizzai-team`/`pelizzai-subagents` parallelize the repo-scan when the fronts are independent; `pelizzai-ideia-generation` enters only on the new/uncertain-project branch.
+Uses `pelizzai-starting-branch` and `pelizzai-finish` only in `bootstrap-write`; `pelizzai-create-skill` writes the ratified domain skills — the target is the maximum of useful skills, grounded in `context7`; `pelizzai-team`/`pelizzai-subagents` parallelize the repo-scan when the fronts are independent; `pelizzai-idea-generation` enters only on the new/uncertain-project branch.

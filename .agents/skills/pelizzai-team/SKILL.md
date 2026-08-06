@@ -21,7 +21,7 @@ The coordination and delegation protocol is **the same in both modes**; only the
 <TEAM-MEMBER-STOP>
 If you were assigned as a **member** of a team (a teammate or a subagent executing a subtask), **do not invoke this skill** to create a sub-team. There are no nested teams. Execute your subtask, invoke `pelizzai-reasoning` to reason about it, **apply the domain skills pasted into your briefing** (they prevail over generic patterns) and the global layer `pelizzai-preferences`, and return the deliverable in the format agreed in your briefing. **Do not commit** — consolidation (commit) belongs to the coordinator, after the reviews; leave the work in the working tree.
 
-A member **produces artifacts** (spec, report, diff) as a **deliverable for the coordinator** — it does not run, on its own, flows that require user approval (`pelizzai-ideia-generation`, `pelizzai-writing-plans`). Those flows belong to the coordinator / the main session.
+A member **produces artifacts** (spec, report, diff) as a **deliverable for the coordinator** — it does not run, on its own, flows that require user approval (`pelizzai-idea-generation`, `pelizzai-writing-plans`). Those flows belong to the coordinator / the main session.
 
 Under a closed briefing (TEAM-MEMBER-STOP/SUBAGENT-STOP), do not produce route analyses or open gates: apply the briefing, **flag in your return** (`DONE_WITH_CONCERNS`/`NEEDS_CONTEXT`) if no domain skill covered your task's stack, and escalate to the coordinator whatever requires a decision.
 
@@ -502,7 +502,7 @@ Apply the **effort budget** from `pelizzai-reasoning`: verification depth is pro
 - `pelizzai-router` / `pelizzai-execute` — where the `team` mode arrives from (setup gate); pelizzai-execute defines the per-task cycle each front follows.
 - `pelizzai-interview` — destination of the material gaps named by the members: the coordinator consolidates them and takes them to the human before the front continues.
 - `pelizzai-final-verification` — the evidence gate before accepting an implementation deliverable.
-- `pelizzai-ideia-generation` / `pelizzai-writing-plans` — where the team's task usually comes from.
+- `pelizzai-idea-generation` / `pelizzai-writing-plans` — where the team's task usually comes from.
 
 ---
 

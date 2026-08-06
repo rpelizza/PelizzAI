@@ -27,7 +27,7 @@ The interview does not replace reading the project, nor does it exist to fabrica
 | gap | execution hit a decision the spec and plan do not cover | decision ratified, recorded in the plan, execution resumed |
 | explicit interview | the user asked for questions/an interview | the depth requested, without stretching past usefulness |
 
-`pelizzai-ideia-generation` creates the design. This skill resolves pending human decisions; if there
+`pelizzai-idea-generation` creates the design. This skill resolves pending human decisions; if there
 is no design or concrete options yet, hand back to brainstorming.
 
 ## Where it is mandatory
@@ -36,7 +36,7 @@ At these points the interview is **not an offer**: run it to the end and list th
 handing control back.
 
 1. **Before design** — the request admits two or more materially different readings: interview
-   to fix goal, scope, constraints, and acceptance before `pelizzai-ideia-generation` designs
+   to fix goal, scope, constraints, and acceptance before `pelizzai-idea-generation` designs
    anything.
 2. **After design, before the spec closes** — stress-test the design and **expose the gaps**
    (unhandled cases, missing validation, authorization/security failures, undefined states,
@@ -140,7 +140,7 @@ the named gap, the options, and the recommended one, also declaring it under
 The coordinator conducts the interview; he re-dispatches the task after ratification.
 
 If the gap is large enough to undo the plan, do not close it with a spot question: hand back to
-`pelizzai-writing-plans` (replan) or `pelizzai-ideia-generation` (redesign).
+`pelizzai-writing-plans` (replan) or `pelizzai-idea-generation` (redesign).
 
 ## Proportional stress
 
@@ -204,7 +204,7 @@ Next step:
 ```
 
 If no new risk was found, say so; do not fabricate one, nor declare that every project has a
-gap. Return to the caller (`pelizzai-ideia-generation`, `pelizzai-writing-plans`,
+gap. Return to the caller (`pelizzai-idea-generation`, `pelizzai-writing-plans`,
 `pelizzai-execute`, or the router). In gap mode, the handback is the interrupted task:
 resume it with the decision already written in the plan. This skill does not choose team,
 subagents, branch, or commit strategy.
@@ -229,7 +229,7 @@ subagents, branch, or commit strategy.
 
 ## Integration
 
-- `pelizzai-ideia-generation` — interview before the design and mandatory stress after it.
+- `pelizzai-idea-generation` — interview before the design and mandatory stress after it.
 - `pelizzai-writing-plans` — mandatory stress of the plan; an emergent decision becomes a question here.
 - `pelizzai-execute` / `pelizzai-loop` — destination of the stop for material doubt
   mid-execution (gap mode); `pelizzai-subagents` and `pelizzai-team` escalate to the coordinator.

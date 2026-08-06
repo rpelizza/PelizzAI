@@ -110,7 +110,7 @@ the attempts and summarize the accumulated evidence. Three fixes that do not sol
 the model of the problem is wrong and the next choice is not yours. Trigger `pelizzai-interview`
 to stress-test hypothesis and architecture with the user, one question at a time, with a
 recommendation. If the conversation reveals a structural or design problem, escalate to
-`pelizzai-ideia-generation` (feature track). Without that discussion there is no fix #4.
+`pelizzai-idea-generation` (feature track). Without that discussion there is no fix #4.
 
 ---
 
@@ -228,7 +228,7 @@ User phrases that carry a diagnosis — decode and act, do not argue:
 
 **Routed by:** `pelizzai-router` (track `bug`).
 
-**Uses conditionally:** `pelizzai-reasoning` (selection above), `pelizzai-loop` (macro-loop across rounds only), [feedback-loops.md](references/feedback-loops.md), domain skills, `pelizzai-starting-branch`, `pelizzai-tdd` (automatable behavioral bug), `pelizzai-frontend` (UI), `pelizzai-team` (read-only investigation of independent hypotheses), `pelizzai-interview` (the three-fix circuit breaker and any other material gap), `pelizzai-ideia-generation` (when the interview reveals a structural problem), `pelizzai-final-verification`, `pelizzai-review`, and `pelizzai-finish`.
+**Uses conditionally:** `pelizzai-reasoning` (selection above), `pelizzai-loop` (macro-loop across rounds only), [feedback-loops.md](references/feedback-loops.md), domain skills, `pelizzai-starting-branch`, `pelizzai-tdd` (automatable behavioral bug), `pelizzai-frontend` (UI), `pelizzai-team` (read-only investigation of independent hypotheses), `pelizzai-interview` (the three-fix circuit breaker and any other material gap), `pelizzai-idea-generation` (when the interview reveals a structural problem), `pelizzai-final-verification`, `pelizzai-review`, and `pelizzai-finish`.
 
 For external APIs/libs, derive the version from manifests/lockfiles and consult Context7 before
 committing to a hypothesis; current official documentation is the fallback. For a missing seam, use

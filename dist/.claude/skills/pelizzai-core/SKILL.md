@@ -160,7 +160,7 @@ at any point, material gap → pelizzai-interview (one question at a time) → r
 | Intent | Head skill |
 | --- | --- |
 | Authorized bootstrap/remap | `pelizzai-audit` |
-| Greenfield product/project, or feature/refactor/infra with a design decision | `pelizzai-ideia-generation` |
+| Greenfield product/project, or feature/refactor/infra with a design decision | `pelizzai-idea-generation` |
 | Plan/design already clear | `pelizzai-writing-plans` or `pelizzai-execute` |
 | Bug/unexpected behavior | `pelizzai-debug` |
 | Local tweak without a new rule/contract | `pelizzai-quick-fix` |

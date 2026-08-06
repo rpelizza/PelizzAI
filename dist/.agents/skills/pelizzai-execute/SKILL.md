@@ -187,7 +187,7 @@ their gates into the briefing.
 In the consumer, a missing catalog goes back to `pelizzai-audit`. In source mode, absence is the
 contract — the domain-skill proposal gate does not run; domain rules, if any, live in the native
 execution record. When the plan arrived via PRD/issues (without passing through
-`pelizzai-writing-plans`/`pelizzai-ideia-generation`) and the stack is not covered by the consumer's
+`pelizzai-writing-plans`/`pelizzai-idea-generation`) and the stack is not covered by the consumer's
 catalog, the post-plan setup gate pulls the proactive domain-skill proposal
 (recommend-and-ratify; owner: `pelizzai-router`/
 `pelizzai-writing-plans`/`pelizzai-audit`) before Task 1 — this skill does not re-specify it,

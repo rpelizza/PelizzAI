@@ -29,7 +29,7 @@ job); on their own they do **not** authorize writing the experiment. A throwaway
 structural decision and requires the **user's explicit approval**, ratified at the right gate — not
 at the skill's internal gate:
 
-- with discovery/plan → propose the spike at the discovery gate (`pelizzai-ideia-generation`) or at the post-plan setup gate;
+- with discovery/plan → propose the spike at the discovery gate (`pelizzai-idea-generation`) or at the post-plan setup gate;
 - writing track without a plan → include the spike in the head skill's kickoff confirm.
 
 Recommend and wait: "may I spend `<timebox>` on a throwaway spike to answer `<question>`?

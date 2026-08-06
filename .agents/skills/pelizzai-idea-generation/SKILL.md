@@ -1,5 +1,5 @@
 ---
-name: pelizzai-ideia-generation
+name: pelizzai-idea-generation
 description: Explores and ratifies design before implementing a greenfield product/project, or a feature, refactor, or structural change with trade-offs, requirements, architecture, UX, data, or risk still open. Greenfield uses full mode even with a defined stack; a change to an existing system may use compact mode. Do not use for already-approved design, a trivial tweak, or a bug under investigation.
 ---
 

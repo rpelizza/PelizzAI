@@ -191,7 +191,7 @@ Never create a worktree from the clean base after writing spec/plan in another w
 | Review of a diff, working tree, branch, or PR | `review` → `pelizzai-review` |
 | Codebase-wide review of architecture, debt, or seams | `review` → `pelizzai-architecture-refinement` |
 | Git conflict in progress | `pelizzai-merge-conflict-resolution` |
-| Greenfield product/project, even with the stack specified | `exploratory` → `pelizzai-ideia-generation` + `pelizzai-interview` → spec → plan |
+| Greenfield product/project, even with the stack specified | `exploratory` → `pelizzai-idea-generation` + `pelizzai-interview` → spec → plan |
 | Feature/refactor/infra with design already approved and a plan ready | `pelizzai-execute` |
 | Approved design/spec/Figma, clear acceptance, but no plan | `pelizzai-writing-plans`; brainstorming/pelizzai-interview **proposed** when the Proposal analysis flags a material gap |
 | Stress-test an existing design/plan, resolve a flagged material gap, or an interview request | proposed by the Proposal analysis or by the user → `pelizzai-interview` |
@@ -203,7 +203,7 @@ Never create a worktree from the clean base after writing spec/plan in another w
 | --- | --- | --- |
 | `bounded` | low uncertainty/risk; one cohesive behavior; clear acceptance; no architectural decision | `pelizzai-writing-plans` in compact mode; do not force brainstorming. |
 | `standard` | medium risk and/or a few parts/contracts, with a clear solution and acceptance | `pelizzai-writing-plans`; prepend a compact brainstorming only if a real trade-off remains. |
-| `exploratory` | high uncertainty, or high risk that demands discovery/design mitigation; architecture or sensitive coupled decisions | full `pelizzai-ideia-generation` + proportional stress → plan. |
+| `exploratory` | high uncertainty, or high risk that demands discovery/design mitigation; architecture or sensitive coupled decisions | full `pelizzai-idea-generation` + proportional stress → plan. |
 
 ### Greenfield rule
 
@@ -215,7 +215,7 @@ mandatory route, barring the user's explicit waiver of each artifact, is:
 ```text
 ratified understanding
 → discovery with `pelizzai-interview`: one question at a time, with a recommendation
-→ design/spec (`pelizzai-ideia-generation`)
+→ design/spec (`pelizzai-idea-generation`)
 → spec stress-test with `pelizzai-interview` + approval
 → domain skills proposal and ratification
 → implementation plan
@@ -379,7 +379,7 @@ show details as context, not as several simultaneous questions:
 - Understanding: <X> as a <feature|tweak|bug|refactor>
 - Lane: <bounded|standard|exploratory> — <one-line justification>
 - Head + overlays: <head skill> + <overlays or "none">
-- Discovery: <"no material gaps" | numbered list of gaps → I recommend <compact|full pelizzai-ideia-generation|focused pelizzai-interview>>
+- Discovery: <"no material gaps" | numbered list of gaps → I recommend <compact|full pelizzai-idea-generation|focused pelizzai-interview>>
 - Artifacts: <spec/plan/ADR expected in this lane | "none beyond the native plan">; in greenfield/exploratory with a missing catalog or a new stack, also list "stack domain skills (proposed at the design edge)"
 
 Recommendation: accept this route because <reason>.
@@ -397,7 +397,7 @@ at kickoff that they are coming and decides there.
 
 **Audience:** when the user seems non-technical or the intent admits ≥2 material readings, the block's first line re-presents the understanding (handshake) before routing; record `audience: technical | layperson` (see Execution record). Do not dump jargon; follow `pelizzai-writing-clearly`.
 
-**Discovery:** when there is a material gap, recommend `pelizzai-ideia-generation`/`pelizzai-interview`.
+**Discovery:** when there is a material gap, recommend `pelizzai-idea-generation`/`pelizzai-interview`.
 Accepting starts the sequential interview. Skipping discovery requires an explicit request and
 records which decisions were left unvalidated; the LLM does not fill those decisions on its own.
 

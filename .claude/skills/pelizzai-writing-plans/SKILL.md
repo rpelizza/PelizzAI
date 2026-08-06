@@ -222,7 +222,7 @@ the plan's stack have coverage in the `pelizzai/domain-skills.md` catalog? If no
 catalog is absent — invoke the **proactive domain skills gate** of `pelizzai-audit` to propose
 the set for the decided stack (grounded in Context7); the decision is the user's and happens
 **BEFORE Task 1**. This catches flows that reached the plan without passing through
-`pelizzai-ideia-generation`. In source mode there is no consumer catalog: the check falls to the
+`pelizzai-idea-generation`. In source mode there is no consumer catalog: the check falls to the
 source repo's domain skills and never creates `pelizzai/` runtime. Under a closed briefing
 (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not open this gate: flag the coverage gap to the coordinator.
 
@@ -267,7 +267,7 @@ and keep it local unless an external destination is requested.
 
 ## Integration
 
-Combines with `pelizzai-ideia-generation` when there was design, `pelizzai-reasoning` for
+Combines with `pelizzai-idea-generation` when there was design, `pelizzai-reasoning` for
 decomposition, `pelizzai-interview` for focal stress of a material residual assumption,
 `pelizzai-frontend`/`pelizzai-oswap` as overlays, and `pelizzai-execute` for execution.
 

@@ -90,14 +90,14 @@ Before the first test:
 ```
 
 **Agree the seams before the tests: no test is written on an unconfirmed seam.** In a feature
-flow, the seams already come from the approved spec (`pelizzai-ideia-generation`, validation strategy,
+flow, the seams already come from the approved spec (`pelizzai-idea-generation`, validation strategy,
 and real seams) — confirm them; outside it, agree them here, with the vocabulary of
 `pelizzai-codebase-architecture`.
 
 While agreeing the seam, identify opportunities for deep modules (simple interface, robust
 implementation) using the vocabulary of `pelizzai-codebase-architecture` and `pelizzai-reasoning`'s
 *Structured Decomposition* to map behaviors and testability; in new design, this already comes from
-`pelizzai-ideia-generation`.
+`pelizzai-idea-generation`.
 
 If the needed seam does not exist, that is an architectural signal. Do not contort the test: record the gap and use `pelizzai-architecture-refinement` when it requires a design change.
 
@@ -245,7 +245,7 @@ Follow the triage in `pelizzai-debug`.
 
 **Approval and completion:**
 
-- Confirm interface, behaviors, and seams with `pelizzai-interview`, or in the approved `pelizzai-ideia-generation` design, before writing tests.
+- Confirm interface, behaviors, and seams with `pelizzai-interview`, or in the approved `pelizzai-idea-generation` design, before writing tests.
 - Before declaring done, go through `pelizzai-final-verification` and `pelizzai-review` (exception: the **tweak** track waives the formal review for trivial scope — see `pelizzai-quick-fix`; verification always applies).
 
 > TDD is the default discipline for behavior — not a universal quality proof for an artifact with no automatable behavior.

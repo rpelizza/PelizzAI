@@ -98,7 +98,7 @@ Bad examples:
 - "A beautiful dashboard."
 ```
 
-When the task comes from `pelizzai-ideia-generation` or from an approved spec/screen/Figma, the already
+When the task comes from `pelizzai-idea-generation` or from an approved spec/screen/Figma, the already
 approved visual direction prevails: execute it faithfully. A local change inherits that direction
 with no gate; do not invent a new aesthetic thesis or a new personality mid-execution.
 
@@ -119,7 +119,7 @@ Proposed visual direction (reply "ok" or adjust):
 - A design system/brand guide already decides the language → one recommendation is enough; do not fabricate alternatives.
 - When seeing it first reduces rework, offer mockups/wireframes navigable in the browser before
   implementing — 2-3 **structurally different** variants (slightly adjusted grids are wallpaper,
-  not variants), as scratch files or via the `pelizzai-ideia-generation` visual companion, never
+  not variants), as scratch files or via the `pelizzai-idea-generation` visual companion, never
   committed as product code.
 
 Under a closed briefing (SUBAGENT-STOP), produce no route analyses and open no gates: apply the briefing and escalate to the coordinator whatever requires a decision.
@@ -439,7 +439,7 @@ Playwright, the browser MCP, and screenshots are **tools** for carrying out this
 **Combines with:**
 
 ```text
-- `pelizzai-ideia-generation`: to define the spec and the visual direction before creative implementation.
+- `pelizzai-idea-generation`: to define the spec and the visual direction before creative implementation.
 - `pelizzai-execute`: to execute UI tasks inside approved plans.
 - `pelizzai-tdd`: for component, form, route, and regression behavior.
 - `pelizzai-review`: to review adherence to the spec and quality — on substantial frontend

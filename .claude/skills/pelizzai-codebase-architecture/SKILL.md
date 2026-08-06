@@ -1,6 +1,6 @@
 ---
 name: pelizzai-codebase-architecture
-description: Shared vocabulary for designing deep modules. Use when the user wants to design or improve a module's interface, find deepening opportunities, decide where a seam goes, make code more testable or navigable, or when another skill (`pelizzai-tdd`, `pelizzai-ideia-generation`, `pelizzai-writing-plans`) needs the deep-modules vocabulary. Trigger when designing interfaces, defining unit boundaries, or assessing testability.
+description: Shared vocabulary for designing deep modules. Use when the user wants to design or improve a module's interface, find deepening opportunities, decide where a seam goes, make code more testable or navigable, or when another skill (`pelizzai-tdd`, `pelizzai-idea-generation`, `pelizzai-writing-plans`) needs the deep-modules vocabulary. Trigger when designing interfaces, defining unit boundaries, or assessing testability.
 ---
 
 # PelizzAI Codebase Design
@@ -70,6 +70,6 @@ When the interface's shape is uncertain and the impact is high, **design it in s
 
 ## Integration
 
-**Used by:** `pelizzai-tdd` (planning — deep modules and testability), `pelizzai-ideia-generation` (isolation and clarity), `pelizzai-writing-plans` (file structure), `pelizzai-architecture-refinement` (the deletion test and this vocabulary guide the proactive review; a missing seam caught by `pelizzai-debug` in the regression test is an architectural finding that lands there as a candidate).
+**Used by:** `pelizzai-tdd` (planning — deep modules and testability), `pelizzai-idea-generation` (isolation and clarity), `pelizzai-writing-plans` (file structure), `pelizzai-architecture-refinement` (the deletion test and this vocabulary guide the proactive review; a missing seam caught by `pelizzai-debug` in the regression test is an architectural finding that lands there as a candidate).
 
 **Combines with:** `pelizzai-reasoning` (Structured Decomposition, Decision Making), `pelizzai-domain-modeling` (the domain vocabulary that names these modules).

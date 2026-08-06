@@ -116,5 +116,5 @@ Never: treat as quick-fix something that creates a new surface or changes a busi
 selection), `pelizzai-tdd` only for behavior, `pelizzai-frontend` as the mandatory overlay
 for UI, `pelizzai-final-verification`, and `pelizzai-finish`.
 
-**Escalates to:** `pelizzai-writing-plans` for bounded, `pelizzai-ideia-generation` when there is a
+**Escalates to:** `pelizzai-writing-plans` for bounded, `pelizzai-idea-generation` when there is a
 design decision or uncertainty, or `pelizzai-debug` when it is a bug.

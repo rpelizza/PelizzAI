@@ -169,7 +169,7 @@ try {
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'risk raises proof and gates, it does not create artificial uncertainty' 'router decouples risk from discovery'
     Check-Match '.claude/skills/pelizzai-architecture-refinement/SKILL.md' 'does not create branch, state, HTML, ADR, spec, out-of-scope, or any file' 'read-only architecture does not write'
     Check-NotMatch '.claude/skills/pelizzai-architecture-refinement/SKILL.md' 'record\s+automatically|Build an HTML' 'architecture does not persist by reflex'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/SKILL.md' 'source mode:[^\n]*native plan/execution record[^\n]*without creating `pelizzai/`' 'brainstorming honors source mode'
+    Check-Match '.claude/skills/pelizzai-idea-generation/SKILL.md' 'source mode:[^\n]*native plan/execution record[^\n]*without creating `pelizzai/`' 'brainstorming honors source mode'
     Check-Match '.claude/skills/pelizzai-quick-fix/SKILL.md' 'source mode[^\n]*without a closure file/commit' 'quick-fix respects source mode'
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'source mode[\s\S]{0,180}manifests' 'debugging discovers commands in source mode'
     Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'source mode: use the source repo''s rules/skills' 'TDD respects source mode'
@@ -218,11 +218,11 @@ try {
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'exploratory[\s\S]{0,120}(stress|independent review)' 'writing-plans expects stress for exploratory (positive, without forcing bounded)'
 
     # -- brainstorming/interview: one question at a time, recommendation, spec --
-    Check-Match '.claude/skills/pelizzai-ideia-generation/SKILL.md' 'one question at a time' 'brainstorming interviews sequentially'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/SKILL.md' 'Recommendation:' 'brainstorming recommends before asking'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/SKILL.md' 'Skipping the entire\s+discovery requires an explicit request' 'brainstorming: skipping discovery requires a user decision'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/SKILL.md' 'SUBAGENT-STOP / TEAM-MEMBER-STOP\), do not produce route analyses or open gates' 'brainstorming has the SUBAGENT-STOP carve-out'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/SKILL.md' 'Do not require stress[^\n]*twice' 'brainstorming keeps the duplicate-stress guard'
+    Check-Match '.claude/skills/pelizzai-idea-generation/SKILL.md' 'one question at a time' 'brainstorming interviews sequentially'
+    Check-Match '.claude/skills/pelizzai-idea-generation/SKILL.md' 'Recommendation:' 'brainstorming recommends before asking'
+    Check-Match '.claude/skills/pelizzai-idea-generation/SKILL.md' 'Skipping the entire\s+discovery requires an explicit request' 'brainstorming: skipping discovery requires a user decision'
+    Check-Match '.claude/skills/pelizzai-idea-generation/SKILL.md' 'SUBAGENT-STOP / TEAM-MEMBER-STOP\), do not produce route analyses or open gates' 'brainstorming has the SUBAGENT-STOP carve-out'
+    Check-Match '.claude/skills/pelizzai-idea-generation/SKILL.md' 'Do not require stress[^\n]*twice' 'brainstorming keeps the duplicate-stress guard'
 
     # -- interview-me: numbered exposure of the gaps --
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'ends with the numbered list of gaps and how each one changes the solution' 'interview-me ends with a numbered list of gaps'
@@ -277,8 +277,8 @@ try {
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' '## Material gap during execution' 'router has the Material gap during execution section'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'material gap stops the work and goes back\s+to the user through .pelizzai-interview' 'router: a post-kickoff gap stops work and returns via interview-me'
     Check-Match '.claude/skills/pelizzai-core/SKILL.md' 'closed with .pelizzai-interview' 'core: user-owned gaps are closed with interview-me'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/SKILL.md' 'applies to ALL\s+projects, regardless of apparent simplicity' 'brainstorming: the design hard-gate applies to ALL projects'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/SKILL.md' 'stress with .pelizzai-interview. is \*\*MANDATORY\*\*' 'brainstorming: design stress is mandatory in greenfield/full'
+    Check-Match '.claude/skills/pelizzai-idea-generation/SKILL.md' 'applies to ALL\s+projects, regardless of apparent simplicity' 'brainstorming: the design hard-gate applies to ALL projects'
+    Check-Match '.claude/skills/pelizzai-idea-generation/SKILL.md' 'stress with .pelizzai-interview. is \*\*MANDATORY\*\*' 'brainstorming: design stress is mandatory in greenfield/full'
     Check-Match 'CLAUDE.md' 'The LLM never decides alone' 'CLAUDE.md pins the contract: the LLM never decides alone'
     Check-Match 'CLAUDE.md' 'closed with .pelizzai-interview' 'CLAUDE.md: every gap is closed with interview-me'
     Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'execution interview' 'plan provides the execution interview origin (gap plugged mid-execution)'
@@ -333,7 +333,7 @@ try {
     Check-Match '.claude/skills/pelizzai-router/evals/adaptive-user-control.md' 'F-01.*feature in an existing project' 'eval covers a feature in an existing project'
     Check-Match '.claude/skills/pelizzai-router/evals/adaptive-user-control.md' 'V-01.*skill upgrade and maintenance' 'eval covers skill upgrade and refresh'
     Check-Match '.claude/skills/pelizzai-router/evals/adaptive-user-control.md' 'B-01.*local near miss' 'eval protects the local tweak against inflation'
-    Check-NotMatch '.claude/skills/pelizzai-ideia-generation/SKILL.md' 'React, Express, SQLite' 'normative brainstorming does not overfit the historical prompt'
+    Check-NotMatch '.claude/skills/pelizzai-idea-generation/SKILL.md' 'React, Express, SQLite' 'normative brainstorming does not overfit the historical prompt'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'greenfield product/project[\s\S]{0,120}always `exploratory`' 'router classifies greenfield as exploratory'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Context7/official documentation is read-only technical reconnaissance' 'router uses Context7 early without mutating effect'
     Check-Match '.claude/skills/pelizzai-reasoning/SKILL.md' 'Use Context7 from the initial reconnaissance' 'reasoning makes Context7 cross-cutting'
@@ -506,8 +506,8 @@ try {
     # -- D7: thread of the proactive domain skills gate — three capture points + audit names who invokes it --
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'stack domain skills \(proposed at the design edge\)' 'router (D7.1): kickoff lists the stack domain skills in Artifacts'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'proactive[\s\S]{0,4}domain skills gate' 'router points to the proactive gate at the design→plan edge'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/SKILL.md' '^\s*1\.\s+Design approved' 'brainstorming (D7.2): the proactive gate is a numbered step of the design closeout'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/SKILL.md' 'Closing the design edge on a new project without presenting the domain skills proposal' 'brainstorming: red flag for closing design without proposing domain skills'
+    Check-Match '.claude/skills/pelizzai-idea-generation/SKILL.md' '^\s*1\.\s+Design approved' 'brainstorming (D7.2): the proactive gate is a numbered step of the design closeout'
+    Check-Match '.claude/skills/pelizzai-idea-generation/SKILL.md' 'Closing the design edge on a new project without presenting the domain skills proposal' 'brainstorming: red flag for closing design without proposing domain skills'
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'Domain skill coverage check' 'writing-plans (D7.3): domain skill coverage safety net'
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'BEFORE Task 1' 'writing-plans: domain skill coverage is decided before Task 1'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'Who invokes this gate' 'audit names who invokes the Proactive gate (brainstorming + writing-plans)'
@@ -551,7 +551,7 @@ try {
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'recorded in the COMMIT MESSAGE of the fix' 'debugging: the confirmed cause goes back into the commit message'
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'Three failed definitive fixes stop the track' 'debugging: three failed fixes stop the track'
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'Three fixes that do not solve it \*\*are\*\* a material gap' 'debugging ties the circuit breaker to the material-gap contract'
-    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'Trigger .pelizzai-interview.[\s\S]{0,240}pelizzai-ideia-generation' 'debugging names the interview-me -> brainstorming escalation'
+    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'Trigger .pelizzai-interview.[\s\S]{0,240}pelizzai-idea-generation' 'debugging names the interview-me -> brainstorming escalation'
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'Without that\s+discussion there is no fix #4' 'debugging: no fix #4 without the user discussion'
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'Attempting fix #4 after three failures' 'debugging: red flag makes the circuit breaker observable'
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' '## Signals from the human partner' 'debugging has the human-partner signals table'
@@ -1077,7 +1077,7 @@ try {
 
     # Syntax and interface of the visual scripts.
     Run-Native { node --check .claude/hooks/pelizzai-guardrails.mjs } 'node parse guardrails'
-    Run-Native { node --check .claude/skills/pelizzai-ideia-generation/scripts/server.cjs } 'node parse visual server'
+    Run-Native { node --check .claude/skills/pelizzai-idea-generation/scripts/server.cjs } 'node parse visual server'
     $bash = Get-Command bash -ErrorAction SilentlyContinue
     $bashUsable = $false
     if ($bash -and $bash.Source -notmatch '(?i)[\\/]Windows[\\/]System32[\\/]bash\.exe$') {
@@ -1085,10 +1085,10 @@ try {
         $bashUsable = ($LASTEXITCODE -eq 0)
     }
     if ($bashUsable) {
-        Run-Native { bash -n .claude/skills/pelizzai-ideia-generation/scripts/start-server.sh } 'bash parse visual launcher'
+        Run-Native { bash -n .claude/skills/pelizzai-idea-generation/scripts/start-server.sh } 'bash parse visual launcher'
         Run-Native { bash -n scripts/review-package.sh } 'bash parse review package'
     }
-    $help = & pwsh -NoProfile -File .claude/skills/pelizzai-ideia-generation/scripts/start-server.ps1 -Help 2>&1
+    $help = & pwsh -NoProfile -File .claude/skills/pelizzai-idea-generation/scripts/start-server.ps1 -Help 2>&1
     Check ($LASTEXITCODE -eq 0 -and ($help -join "`n") -match 'IdleTimeoutMinutes') 'PowerShell visual launcher exposes help'
 
     # Fixtures for the handoff/review helpers, in an isolated temporary repo.
@@ -1407,14 +1407,14 @@ try {
     Check-Match 'scripts/task-brief.sh' 'mv -f "\$TMP_OUT" "\$OUT"' 'task-brief.sh writes atomically via temp + mv'
 
     # -- #12: visual companion — loopback guard, payload validation, cleanup, owner PID --
-    Check-Match '.claude/skills/pelizzai-ideia-generation/scripts/server.cjs' 'BRAINSTORM_ALLOW_INSECURE_NETWORK' 'server.cjs refuses a non-loopback bind without the explicit opt-in'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/scripts/server.cjs' 'typeof event !== ''object'' \|\| Array\.isArray\(event\)' 'server.cjs validates the WS payload as a plain object'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/scripts/server.cjs' 'Failed to persist event' 'server.cjs guards the events append against FS errors'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/scripts/stop-server.sh' '/private/tmp' 'stop-server.sh covers the macOS /private/tmp resolution'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/scripts/start-server.ps1' 'GRANDPARENT' 'start-server.ps1 resolves the owner as the grandparent (bash parity)'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/scripts/start-server.sh' '--allow-insecure-network' 'start-server.sh exposes the insecure-network opt-in'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/scripts/start-server.ps1' 'AllowInsecureNetwork' 'start-server.ps1 exposes the insecure-network opt-in'
-    Check-Match '.claude/skills/pelizzai-ideia-generation/visual-companion.md' 'allow-insecure-network' 'visual-companion.md documents the non-loopback opt-in'
+    Check-Match '.claude/skills/pelizzai-idea-generation/scripts/server.cjs' 'BRAINSTORM_ALLOW_INSECURE_NETWORK' 'server.cjs refuses a non-loopback bind without the explicit opt-in'
+    Check-Match '.claude/skills/pelizzai-idea-generation/scripts/server.cjs' 'typeof event !== ''object'' \|\| Array\.isArray\(event\)' 'server.cjs validates the WS payload as a plain object'
+    Check-Match '.claude/skills/pelizzai-idea-generation/scripts/server.cjs' 'Failed to persist event' 'server.cjs guards the events append against FS errors'
+    Check-Match '.claude/skills/pelizzai-idea-generation/scripts/stop-server.sh' '/private/tmp' 'stop-server.sh covers the macOS /private/tmp resolution'
+    Check-Match '.claude/skills/pelizzai-idea-generation/scripts/start-server.ps1' 'GRANDPARENT' 'start-server.ps1 resolves the owner as the grandparent (bash parity)'
+    Check-Match '.claude/skills/pelizzai-idea-generation/scripts/start-server.sh' '--allow-insecure-network' 'start-server.sh exposes the insecure-network opt-in'
+    Check-Match '.claude/skills/pelizzai-idea-generation/scripts/start-server.ps1' 'AllowInsecureNetwork' 'start-server.ps1 exposes the insecure-network opt-in'
+    Check-Match '.claude/skills/pelizzai-idea-generation/visual-companion.md' 'allow-insecure-network' 'visual-companion.md documents the non-loopback opt-in'
 } catch {
     Check $false 'issues #8–#14 batch' $_.Exception.Message
 }

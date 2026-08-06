@@ -495,7 +495,7 @@ copies it to the consumer project along with the rest of the harness.
 | --- | --- | --- |
 | Entry and orchestration | `pelizzai-core`, `pelizzai-router`, `pelizzai-audit`, `pelizzai-preferences` | mandatory entry, route classification and kickoff gate, bootstrap, global behavior floor |
 | Reasoning and conversation | `pelizzai-reasoning`, `pelizzai-interview`, `pelizzai-writing-clearly` | proportional reasoning techniques (including OODA), the interview that resolves every material gap, clear writing |
-| Design, plan, and execution | `pelizzai-ideia-generation`, `pelizzai-writing-plans`, `pelizzai-execute` | ratified design with spec, executable and stress-tested plan, setup gate and task-by-task execution |
+| Design, plan, and execution | `pelizzai-idea-generation`, `pelizzai-writing-plans`, `pelizzai-execute` | ratified design with spec, executable and stress-tested plan, setup gate and task-by-task execution |
 | Per-task execution | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop`, `pelizzai-handoff` | proof strategy per artifact, delegation and teams, macro loop and forking into a new session |
 | Dedicated tracks | `pelizzai-debug`, `pelizzai-quick-fix` | bug with triage and root cause; local tweak without losing isolation, proof, and closeout |
 | Design and exploration | `pelizzai-codebase-architecture`, `pelizzai-domain-modeling`, `pelizzai-prototype`, `pelizzai-architecture-refinement` | deep modules and seams, vocabulary and ADRs, disposable prototype, read-only architectural review |

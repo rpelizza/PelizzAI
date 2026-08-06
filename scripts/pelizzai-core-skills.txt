@@ -14,7 +14,7 @@ pelizzai-final-verification
 pelizzai-finish
 pelizzai-frontend
 pelizzai-handoff
-pelizzai-ideia-generation
+pelizzai-idea-generation
 pelizzai-interview
 pelizzai-loop
 pelizzai-merge-conflict-resolution
