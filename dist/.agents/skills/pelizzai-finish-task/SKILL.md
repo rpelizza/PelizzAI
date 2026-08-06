@@ -188,7 +188,12 @@ gates: apply the briefing and escalate to the coordinator whatever requires a de
    (PR/branch integrated)`; keep local → `local delivery accepted by the user`; discard/archival
    (option 4) → `archived locally, no merge expected` (it is not a delivery onto a base: §3d
    decides archive or discard; the observation becomes `done` when the archive is accepted, or
-   `abandoned` if discarded).
+   `abandoned` if discarded). Also set `delivery-status:` to the destination INTENT from 2a —
+   `pending push`, `pending pr`, `local`, or `archive`. It is sealed in this same closure commit
+   and never edited again by this skill (a second cursor commit is a red flag): what actually
+   happened at §3 is reported in the conversation and OBSERVED on resumption against the remote,
+   with the sealed intent narrowing the reconciliation — remote branch missing = failed before
+   the push; branch at `delivery-head` without a PR = pushed, PR pending.
 3. Check that the `## History` index line (step 1) is dated as `delivered`, without promising
    merge/`done` yet — that stamp comes from the later observation.
 4. Update the date.
@@ -249,9 +254,11 @@ git push origin <delivery-head>:refs/heads/<branch>
 git branch --set-upstream-to=origin/<branch> <branch>
 ```
 
-Then confirm that `refs/heads/<branch>` on the remote points to `delivery-head` and record
-`delivery-status: pushed`. Non-fast-forward, auth, network, or a divergent remote SHA fails
-closed; do not force-push.
+Then confirm that `refs/heads/<branch>` on the remote points to `delivery-head` and report
+`delivery-status: pushed` (in the conversation and the destination report — the cursor keeps the
+sealed intent; a resumption distinguishes "failed before the push" from "pushed" by observing the
+remote branch). Non-fast-forward, auth, network, or a divergent remote SHA fails closed; do not
+force-push.
 
 ### 3b. Publish and open a PR
 
@@ -265,13 +272,15 @@ gh pr create --head <branch> --base <base-name> --title "..." --body "..."
 The body carries the summary and the evidence/how to test. Without authentication, report the
 blocker; do not switch the destination on your own.
 
-On success, capture the returned URL, check the PR's head/base, and record
+On success, capture the returned URL, check the PR's head/base, and report
 `delivery-status: pr-open` + the URL. This same transition closes a resumption that was `partial`.
 
 Push and PR creation are separate checkpoints. If the push was confirmed and `gh pr create`
-fails, record/report `delivery-status: partial`, the remote branch + SHA, and the PR error: the
+fails, report `delivery-status: partial`, the remote branch + SHA, and the PR error: the
 content is already published, but the PR was not created. On resumption, reconcile the remote
-branch and any existing PR; skip the already-confirmed push and repeat only the PR creation. Do
+branch and any existing PR — the OBSERVATION (remote branch at `delivery-head`; PR present or
+not) is what distinguishes `partial` from `pushed`/`pr-open`, since the cursor holds only the
+sealed intent; skip the already-confirmed push and repeat only the PR creation. Do
 not revalidate content, do not create another state commit, and do not change the destination on
 your own.
 

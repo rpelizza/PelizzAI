@@ -314,11 +314,22 @@ function handleMessage(text) {
 		console.error('Failed to parse WebSocket message:', e.message);
 		return;
 	}
+	// JSON.parse('null') (and scalars/arrays) does NOT throw — the property access below would,
+	// outside the catch and inside a socket callback, taking the whole process down. A payload
+	// must be a plain object before it is trusted as an event.
+	if (!event || typeof event !== 'object' || Array.isArray(event)) {
+		console.error('Ignored non-object WebSocket message');
+		return;
+	}
 	touchActivity();
 	console.log(JSON.stringify({ source: 'user-event', ...event }));
 	if (event.choice) {
 		const eventsFile = path.join(STATE_DIR, 'events');
-		fs.appendFileSync(eventsFile, JSON.stringify(event) + '\n');
+		try {
+			fs.appendFileSync(eventsFile, JSON.stringify(event) + '\n');
+		} catch (e) {
+			console.error('Failed to persist event:', e.message);
+		}
 	}
 }
 
@@ -348,7 +359,27 @@ const debounceTimers = new Map();
 
 // ========== Server Startup ==========
 
+// Loopback shapes: 127.0.0.0/8, ::1, localhost.
+const LOOPBACK_HOSTS = /^(127(\.\d{1,3}){0,3}|::1|localhost)$/i;
+
 function startServer() {
+	// The session key travels in the URL and the WS runs over ws:// — beyond loopback both cross
+	// the network in PLAINTEXT, and whoever captures the traffic replays the key to read screens
+	// and inject events. A non-loopback bind therefore requires an explicit opt-in acknowledging
+	// the risk (or a TLS-terminating proxy in front handling https/wss).
+	if (!LOOPBACK_HOSTS.test(String(HOST)) && process.env.BRAINSTORM_ALLOW_INSECURE_NETWORK !== 'true') {
+		console.error(
+			JSON.stringify({
+				type: 'server-refused',
+				message:
+					'BRAINSTORM_HOST=' + HOST + ' is not loopback: the session key and all events would ' +
+					'cross the network unencrypted (http/ws). Put a TLS proxy in front, or set ' +
+					'BRAINSTORM_ALLOW_INSECURE_NETWORK=true to accept the risk explicitly.',
+			})
+		);
+		process.exitCode = 1;
+		return;
+	}
 	if (!fs.existsSync(CONTENT_DIR)) fs.mkdirSync(CONTENT_DIR, { recursive: true });
 	if (!fs.existsSync(STATE_DIR)) fs.mkdirSync(STATE_DIR, { recursive: true });
 

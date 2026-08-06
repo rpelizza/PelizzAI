@@ -165,4 +165,7 @@ try {
 } catch {
   /* never fail the user's prompt */
 }
-process.exit(0);
+// process.exitCode instead of process.exit(0): stdout writes can be asynchronous when the
+// destination is a pipe (exactly a hook's case) and process.exit would cut the pending JSON,
+// silently swallowing the nudge. Letting the event loop drain preserves the never-fail contract.
+process.exitCode = 0;

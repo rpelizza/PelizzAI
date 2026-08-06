@@ -97,13 +97,14 @@ scripts/start-server.sh --project-dir /path/to/project --open --foreground
 
 **Other environments:** The server must keep running in the background across conversation turns. If your environment kills detached processes, use `--foreground` and run the command with your platform's background execution mechanism.
 
-If the URL is unreachable from the browser (common in remote/containerized environments), bind to a non-loopback host:
+If the URL is unreachable from the browser (common in remote/containerized environments), bind to a non-loopback host. Outside loopback the session key and every event cross the network in plaintext (http/ws), so the server refuses a non-loopback bind unless you put a TLS-terminating proxy in front or explicitly accept the risk with `--allow-insecure-network` (PowerShell: `-AllowInsecureNetwork`):
 
 ```bash
 scripts/start-server.sh \
   --project-dir /path/to/project \
   --host 0.0.0.0 \
-  --url-host <browser-reachable-host>
+  --url-host <browser-reachable-host> \
+  --allow-insecure-network
 ```
 
 Use `--url-host` to control which hostname is printed in the returned URL JSON. It must be a host

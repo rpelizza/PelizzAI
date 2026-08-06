@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 #Requires -Version 7.0
 # Start the brainstorm server and output connection info (PowerShell counterpart of start-server.sh)
-# Usage: start-server.ps1 [-ProjectDir <path>] [-BindHost <bind-host>] [-UrlHost <display-host>] [-Open] [-IdleTimeoutMinutes <n>] [-Foreground|-Background]
+# Usage: start-server.ps1 [-ProjectDir <path>] [-BindHost <bind-host>] [-UrlHost <display-host>] [-Open] [-AllowInsecureNetwork] [-IdleTimeoutMinutes <n>] [-Foreground|-Background]
 #
 # Starts server on a random high port, outputs JSON with URL.
 # Each session gets its own directory to avoid conflicts.
@@ -10,7 +10,9 @@
 #   -ProjectDir <path>  Store session files under <path>/pelizzai/data/mockups/
 #                       instead of the temp dir. Files persist after server stops.
 #   -BindHost <host>    Host/interface to bind (default: 127.0.0.1).
-#                       Use 0.0.0.0 in remote/containerized environments.
+#                       Non-loopback binds also require -AllowInsecureNetwork.
+#   -AllowInsecureNetwork  Accept that the session key and events cross the network
+#                       unencrypted (http/ws) on a non-loopback bind. Prefer a TLS proxy.
 #   -UrlHost <host>     Hostname shown in returned URL JSON.
 #   -Open               Open the authenticated URL in the default browser.
 #   -IdleTimeoutMinutes Stop after N idle minutes (default: 240).
@@ -22,6 +24,7 @@ param(
     [string]$BindHost = '127.0.0.1',
     [string]$UrlHost = '',
     [switch]$Open,
+    [switch]$AllowInsecureNetwork,
     [ValidateRange(1, 10080)][int]$IdleTimeoutMinutes = 240,
     [switch]$Foreground,
     [switch]$Background,
@@ -32,7 +35,7 @@ $ErrorActionPreference = 'Stop'
 $scriptDir = $PSScriptRoot
 
 if ($Help) {
-    Get-Content -LiteralPath $PSCommandPath | Select-Object -First 20
+    Get-Content -LiteralPath $PSCommandPath | Select-Object -First 21
     exit 0
 }
 
@@ -63,12 +66,19 @@ if (Test-Path $pidFile) {
 
 Set-Location $scriptDir
 
-# Resolve the harness PID (parent of this pwsh). Same role as the grandparent
-# lookup in start-server.sh: the server auto-exits when this owner dies.
+# Resolve the harness PID (GRANDPARENT of this pwsh — parity with start-server.sh, where the
+# owner is the parent of the shell running the script). The direct parent is often an ephemeral
+# shell the agent spawned just to run this launcher: it dies when the script exits, and the
+# server would shut down on the next lifecycle check, killing the session early. Fallback
+# chain: grandparent alive → grandparent; else parent alive → parent; else this PID.
 $ownerPid = $PID
 try {
     $parent = (Get-CimInstance Win32_Process -Filter "ProcessId=$PID" -ErrorAction Stop).ParentProcessId
-    if ($parent -and (Get-Process -Id $parent -ErrorAction SilentlyContinue)) { $ownerPid = $parent }
+    if ($parent -and (Get-Process -Id $parent -ErrorAction SilentlyContinue)) {
+        $ownerPid = $parent
+        $grand = (Get-CimInstance Win32_Process -Filter "ProcessId=$parent" -ErrorAction Stop).ParentProcessId
+        if ($grand -and $grand -gt 4 -and (Get-Process -Id $grand -ErrorAction SilentlyContinue)) { $ownerPid = $grand }
+    }
 } catch {}
 
 $env:BRAINSTORM_DIR       = $sessionDir
@@ -76,6 +86,7 @@ $env:BRAINSTORM_HOST      = $BindHost
 $env:BRAINSTORM_URL_HOST  = $UrlHost
 $env:BRAINSTORM_OWNER_PID = "$ownerPid"
 $env:BRAINSTORM_OPEN      = if ($Open) { 'true' } else { 'false' }
+$env:BRAINSTORM_ALLOW_INSECURE_NETWORK = if ($AllowInsecureNetwork) { 'true' } else { 'false' }
 $env:BRAINSTORM_IDLE_TIMEOUT_MINUTES = "$IdleTimeoutMinutes"
 
 # Foreground mode for environments that reap detached processes.
