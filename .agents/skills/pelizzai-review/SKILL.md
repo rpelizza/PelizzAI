@@ -157,7 +157,10 @@ rubrics into a single briefing, keeping the order. Fill in with:
 - DOMAIN SKILLS for the area (pasted) — from the `pelizzai/domain-skills.md` catalog in a consumer, or
   from the source repo's rules/skills in source mode. They fill the `{DOMAIN_SKILLS}` slot **of both
   templates**: the blind spec lens receives diff + spec/plan + domain skills; the quality/evidence lens
-  receives the same skills plus the report. A domain skill promised but not pasted is a blind lens
+  receives the same skills plus the report. In a consumer, also paste the acceptance criteria of
+  `pelizzai/data/verification-standard.md` when it exists — the reviewer judges against what
+  "correct" means HERE, not against taste (see `pelizzai-evolve`).
+  A domain skill promised but not pasted is a blind lens
   without a contract — paste the operational points, not just the names. With no coverage for the
   area, write "none" and ask the reviewer to flag the gap.
 - Cross-cutting skills/overlays recorded in the state/execution record (pasted) — frontend, security,

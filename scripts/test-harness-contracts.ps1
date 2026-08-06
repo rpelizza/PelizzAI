@@ -1414,6 +1414,93 @@ try {
     Check $false 'issues #8–#14 batch' $_.Exception.Message
 }
 
+# ---------------------------------------------------------------------------
+# Contract anchor + evolve cycle (2026-08-06).
+# The consumer's CLAUDE.md/AGENTS.md/GEMINI.md stop being harness-owned files: the harness
+# manages only a marker-delimited block, the project keeps everything around it. And the
+# consumer gains the self-optimization pair (verification-standard.md + learnings.md) with
+# pelizzai-evolve as its doctrine. Own handler: a crash must not silence the summary.
+# ---------------------------------------------------------------------------
+try {
+    # -- Anchor: mechanics present, dist in the anchored shape, source repo untouched --
+    Check-Match 'scripts/sync-harness.mjs' 'pelizzai:contract' 'sync: contract anchor markers exist'
+    Check-Match 'scripts/sync-harness.mjs' 'function upsertContract' 'sync: four-case upsert exists'
+    Check-Match 'scripts/sync-harness.mjs' "legacyStart: '## PelizzAI harness \(mandatory entry point\)'" 'sync: pre-anchor CLAUDE.md is migrated in place'
+    Check-Match 'dist/CLAUDE.md' '<!-- pelizzai:contract -->[\s\S]*This repository consumes PelizzAI[\s\S]*<!-- /pelizzai:contract -->' 'dist CLAUDE.md carries the bridge inside the anchored block'
+    Check-Match 'dist/AGENTS.md' '<!-- pelizzai:contract -->' 'dist AGENTS.md carries the anchored block'
+    Check-Match 'dist/GEMINI.md' '<!-- pelizzai:contract -->' 'dist GEMINI.md carries the anchored block'
+    # The SOURCE repo's own entry files stay wholly generated — no markers there.
+    Check-NotMatch 'CLAUDE.md' 'pelizzai:contract -->' 'source CLAUDE.md is the authority, not an anchored consumer'
+    Check-NotMatch 'AGENTS.md' 'pelizzai:contract -->' 'source AGENTS.md stays wholly generated (no markers)'
+    Check-Match 'README.md' 'anchors[\s\S]{0,120}marker-delimited block' 'README documents the anchor model'
+
+    # -- Anchor behavior: preserve → idempotent → resync drift → migrate legacy --
+    $anchorTemp = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-anchor-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
+    try {
+        New-Item -ItemType Directory -Path $anchorTemp | Out-Null
+        Set-Content -LiteralPath (Join-Path $anchorTemp 'CLAUDE.md') -Value "# My project`n`nproject-own-claude-sentinel`n" -Encoding utf8
+        Set-Content -LiteralPath (Join-Path $anchorTemp 'AGENTS.md') -Value "# Project agents`n`nproject-own-agents-sentinel`n" -Encoding utf8
+        Run-Native { node (Join-Path $root 'scripts/sync-harness.mjs') --export-consumer $anchorTemp } 'anchored export completes on a project with its own entry files'
+        $anchorClaude = Get-Content -LiteralPath (Join-Path $anchorTemp 'CLAUDE.md') -Raw -Encoding utf8
+        $anchorAgents = Get-Content -LiteralPath (Join-Path $anchorTemp 'AGENTS.md') -Raw -Encoding utf8
+        Check ($anchorClaude -match 'project-own-claude-sentinel' -and $anchorClaude -match '<!-- pelizzai:contract -->') 'export preserves the project CLAUDE.md and appends the block'
+        Check ($anchorAgents -match 'project-own-agents-sentinel' -and $anchorAgents -match '<!-- pelizzai:contract -->') 'export preserves the project AGENTS.md and appends the block'
+        # Idempotent: a second export leaves the file byte-identical.
+        Run-Native { node (Join-Path $root 'scripts/sync-harness.mjs') --export-consumer $anchorTemp } 'anchored export is re-runnable'
+        $anchorClaude2 = Get-Content -LiteralPath (Join-Path $anchorTemp 'CLAUDE.md') -Raw -Encoding utf8
+        Check ($anchorClaude2 -eq $anchorClaude) 'a second export leaves the anchored CLAUDE.md unchanged'
+        # Drift inside the block: resynced; content outside the block intact.
+        ($anchorClaude2 -replace 'The LLM never decides alone', 'TAMPERED SENTENCE') | Set-Content -LiteralPath (Join-Path $anchorTemp 'CLAUDE.md') -Encoding utf8 -NoNewline
+        Run-Native { node (Join-Path $root 'scripts/sync-harness.mjs') --export-consumer $anchorTemp } 'export resyncs a drifted block'
+        $anchorClaude3 = Get-Content -LiteralPath (Join-Path $anchorTemp 'CLAUDE.md') -Raw -Encoding utf8
+        Check ($anchorClaude3 -match 'project-own-claude-sentinel' -and $anchorClaude3 -notmatch 'TAMPERED SENTENCE' -and $anchorClaude3 -match 'The LLM never decides alone') 'drift resync restores the block and keeps the project content'
+    } finally {
+        if (Test-Path -LiteralPath $anchorTemp) { Remove-Item -LiteralPath $anchorTemp -Recurse -Force }
+    }
+    # Legacy migration: files the pre-anchor export generated wholesale gain markers in place,
+    # without duplicating the contract.
+    $legacyTemp = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-legacy-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
+    try {
+        New-Item -ItemType Directory -Path $legacyTemp | Out-Null
+        $legacyClaude = "# CLAUDE.md`n`n## PelizzAI harness (mandatory entry point)`n`nThis repository consumes PelizzAI. (old wholesale export)`n`n## Behavioral guidelines`n`nold contract body`n"
+        Set-Content -LiteralPath (Join-Path $legacyTemp 'CLAUDE.md') -Value $legacyClaude -Encoding utf8
+        Set-Content -LiteralPath (Join-Path $legacyTemp 'AGENTS.md') -Value "<!-- GENERATED by scripts/sync-harness.mjs from CLAUDE.md — do NOT edit by hand. -->`n`nold generated body`n" -Encoding utf8
+        Run-Native { node (Join-Path $root 'scripts/sync-harness.mjs') --export-consumer $legacyTemp } 'export migrates a legacy consumer in place'
+        $migratedClaude = Get-Content -LiteralPath (Join-Path $legacyTemp 'CLAUDE.md') -Raw -Encoding utf8
+        $migratedAgents = Get-Content -LiteralPath (Join-Path $legacyTemp 'AGENTS.md') -Raw -Encoding utf8
+        Check ($migratedClaude -match '<!-- pelizzai:contract -->' -and ([regex]::Matches($migratedClaude, '## Behavioral guidelines').Count -eq 1)) 'legacy CLAUDE.md gains the anchor without duplicating the contract'
+        Check ($migratedAgents -match '<!-- pelizzai:contract -->' -and $migratedAgents -notmatch 'old generated body') 'legacy AGENTS.md is replaced by the anchored block'
+    } finally {
+        if (Test-Path -LiteralPath $legacyTemp) { Remove-Item -LiteralPath $legacyTemp -Recurse -Force }
+    }
+
+    # -- Evolve: skill, templates, and the wiring across the readers/writers --
+    Check (Test-Path (Join-Path $root '.claude/skills/pelizzai-evolve/SKILL.md')) 'pelizzai-evolve exists'
+    Check (Test-Path (Join-Path $root '.claude/skills/pelizzai-evolve/templates/verification-standard.md')) 'evolve ships the verification-standard template'
+    Check (Test-Path (Join-Path $root '.claude/skills/pelizzai-evolve/templates/learnings.md')) 'evolve ships the learnings template'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'Self-improvement is a side effect' 'evolve: nothing enters without a named observed failure'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'Read-only during any correction' 'evolve: the standard never bends to a failing output'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'recurred 2–3 times' 'evolve: promotion requires recurrence'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'proposal-only, never autonomous' 'evolve: opportunities are proposals, never adoptions'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'never inside the `pelizzai:contract` block' 'evolve: promoted rules go to the project section of CLAUDE.md'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'never create\s+`pelizzai/`|never create `pelizzai/`' 'evolve respects source mode'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/verification-standard.md' '150 lines hard' 'standard template pins its budget'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/verification-standard.md' 'REPLACES its\s+row' 'standard template: baseline replaces, never appends'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' '~200 lines hard' 'learnings template pins its budget'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'candidate → promoted' 'learnings template carries the status ladder'
+    # Wiring: each named reader/writer cites its side of the cycle.
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'verification-standard\.md` and `pelizzai/data/learnings\.md' 'audit seeds the evolve pair at bootstrap'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'pelizzai-evolve/templates' 'audit names the template authority'
+    Check-Match '.claude/skills/pelizzai-finish-task/SKILL.md' 'Learnings recurrence and budgets' 'finish-task counts recurrences and flags budgets'
+    Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'Active rules of `pelizzai/data/learnings\.md` were read BEFORE' 'writing-plans reads the active rules before approaches'
+    Check-Match '.claude/skills/pelizzai-verification-before-completion/SKILL.md' 'read-only during a correction' 'verification judges against the standard without bending it'
+    Check-Match '.claude/skills/pelizzai-debugging/SKILL.md' 'incident entry \(status candidate\)' 'debugging writes the incident at root-cause confirmation'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'verification-standard\.md' 'review pastes the standard criteria into the briefing'
+    Check (Test-Path (Join-Path $root 'dist/.claude/skills/pelizzai-evolve/templates/learnings.md')) 'dist ships the evolve templates'
+} catch {
+    Check $false 'contract anchor + evolve cycle' $_.Exception.Message
+}
+
 Write-Host "`nResult: $passes PASS; $($failures.Count) FAIL."
 if ($failures.Count -gt 0) {
     foreach ($failure in $failures) { Write-Host " - $failure" }

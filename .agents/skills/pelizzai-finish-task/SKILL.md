@@ -338,6 +338,13 @@ is propose-and-confirm and coordinator action; a team member only flags the gap 
 - **Bulky state:** if `pelizzai/data/state.md` grew past ~60 lines, suggest compacting once
   (advisory) — the whole template is ~50. The intact-block migration to `data/history/` at the
   `delivered` seal already slims the state; condensing what remains is propose-and-confirm.
+- **Learnings recurrence and budgets (`pelizzai-evolve`):** when this task fixed a confirmed
+  defect, check `pelizzai/data/learnings.md`: the incident entry should already be there (written
+  at root-cause confirmation, inside the fix's commit) — missing, flag it; and when the same root
+  cause appears 2–3 times, offer ONCE the promotion via `pelizzai-evolve` (ratified by the user,
+  never automatic). Also flag once when `learnings.md` passes ~200 lines or
+  `verification-standard.md` passes 150 — a start-of-task read over budget is a file nobody
+  reads, and the valve (retire / replace baseline rows) belongs to `pelizzai-evolve`.
 
 Source mode, or no hook and no ledger: silent no-op.
 

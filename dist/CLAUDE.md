@@ -1,10 +1,11 @@
 # CLAUDE.md
 
+<!-- pelizzai:contract -->
 ## PelizzAI harness (mandatory entry point)
 
 This repository consumes PelizzAI. For project requests, enter through `pelizzai-core` → `pelizzai-router`. The router picks a head skill, reasoning techniques, and overlays; Context7/official documentation grounds the technical reading; every material decision goes back to the user.
 
-This is a consumer: there is no `scripts/pelizzai-source-repo.txt`. The manifest separates core from domain skills; harness updates never overwrite the project's own skills.
+This is a consumer: there is no `scripts/pelizzai-source-repo.txt`. The manifest separates core from domain skills; harness updates never overwrite the project's own skills, and this block is the only part of this file the harness manages — project content outside the markers is preserved.
 
 ## Behavioral guidelines
 
@@ -110,3 +111,4 @@ Observable signs that these guidelines and the skills are doing their job:
 - the delivered content is exactly the validated content, and the history has fewer "fix of the fix" commits (commits correcting the immediately preceding commit).
 
 Signs in the opposite direction are a trigger to revise the skills — not to abandon them.
+<!-- /pelizzai:contract -->

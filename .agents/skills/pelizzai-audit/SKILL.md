@@ -200,6 +200,10 @@ The persistent bootstrap leaves:
 
 - `pelizzai/domain-skills.md` — the catalog, including `_none for now_` when applicable;
 - `pelizzai/data/review-domain-skills.md` — the ledger seeded with the current date/HEAD;
+- `pelizzai/data/verification-standard.md` and `pelizzai/data/learnings.md` — the
+  self-optimization pair, seeded from `pelizzai-evolve/templates/` (their format authority):
+  what "correct" means here, filled from the REAL commands/criteria confirmed with the user, and
+  the execution memory, born empty — never pre-filled with guesses;
 - `pelizzai/profile.md` — real commands, package manager, **Stack baseline** (the drift anchor for the version/adoption axes), and skill roots; also record the **Ratified execution defaults** section with every field at `<unset>` — the bootstrap does not guess policy; the user ratifies it at the post-plan gate;
 - `pelizzai/.gitignore` — scoped protection of the ephemerals.
 
@@ -334,6 +338,8 @@ finish-task to consolidate it.
 ## Partial state
 
 - catalog exists, ledger missing → propose/repair only the ledger in write mode;
+- `verification-standard.md`/`learnings.md` missing (consumer bootstrapped before the evolve
+  cycle) → propose creating only them from `pelizzai-evolve/templates/` in write mode;
 - a skill exists outside the catalog → catalog it after confirming origin/content;
 - outdated profile → update only the affected fields;
 - read-only → just report the inconsistency.
@@ -351,6 +357,8 @@ pelizzai/
 └── data/
     ├── state.md                    versioned
     ├── review-domain-skills.md     versioned
+    ├── verification-standard.md    versioned (what "correct" means — pelizzai-evolve)
+    ├── learnings.md                versioned (execution memory — pelizzai-evolve)
     ├── history/                    versioned (each task's intact block, migrated at the seal)
     ├── .cadence-state.json         ignored
     ├── handoffs/                   ignored
