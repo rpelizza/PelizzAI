@@ -37,6 +37,10 @@ state is mandatory only in the consumer.
 - Library/API facts that may have changed were verified in Context7 for the observed version;
   current official documentation is the fallback when the tool is unavailable.
 - Greenfield/standard/exploratory has an approved spec, or an explicit waiver on record.
+- In a consumer, the Active rules of `pelizzai/data/learnings.md` were read BEFORE approaches
+  were proposed — this is the only moment a standing rule can still change the design — and
+  `pelizzai/data/verification-standard.md` grounds each task's Validation (see `pelizzai-evolve`).
+  Either file absent is not a blocker: note it and move on.
 ```
 
 If the technical question still cannot be stated precisely, go back to brainstorming. If the

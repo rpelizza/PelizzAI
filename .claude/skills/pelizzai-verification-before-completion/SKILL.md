@@ -36,7 +36,10 @@ BEFORE asserting any status or expressing satisfaction:
 
 1. IDENTIFY: what is the exact claim, and what is the smallest oracle that actually observes it?
    (in a consumer, use the target project's commands — pelizzai/data/state.md, the project: field,
-   and pelizzai/profile.md; in source mode, the real manifest/script.)
+   and pelizzai/profile.md; in source mode, the real manifest/script. When
+   pelizzai/data/verification-standard.md exists, it is what "correct" MEANS here: judge against
+   its criteria and baseline, and never edit it to make a failing output pass — the standard is
+   read-only during a correction; see pelizzai-evolve.)
 2. RUN: execute the COMPLETE, fresh proof, after the last mutation that could alter the result.
 3. READ: the entire output — check the exit code, count the failures, look at the delta and the limitations.
 4. VERIFY: does the output confirm the claim?
