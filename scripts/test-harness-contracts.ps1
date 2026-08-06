@@ -1558,6 +1558,22 @@ try {
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'incident entry \(status candidate\)' 'debugging writes the incident at root-cause confirmation'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'verification-standard\.md' 'review pastes the standard criteria into the briefing'
     Check (Test-Path (Join-Path $root 'dist/.claude/skills/pelizzai-evolve/templates/learnings.md')) 'dist ships the evolve templates'
+
+    # -- Frontend fusion (2026-08-06): the best of the Noetron design node merged in --
+    Check (Test-Path (Join-Path $root '.claude/skills/pelizzai-frontend/references/craft-floor.md')) 'frontend ships the measurable craft floor'
+    Check-Match '.claude/skills/pelizzai-frontend/references/craft-floor.md' 'Verify:[\s\S]{0,200}Refuse:' 'craft floor lines are pass/fail with a procedure'
+    Check-Match '.claude/skills/pelizzai-frontend/references/craft-floor.md' 'BAN — kicker/eyebrow labels' 'craft floor carries the kicker/eyebrow ban'
+    Check-Match '.claude/skills/pelizzai-frontend/references/craft-floor.md' 'Accessibility — hard Refuse lines' 'craft floor: accessibility lines are unexceptable'
+    Check-Match '.claude/skills/pelizzai-frontend/references/craft-floor.md' 'Declared guidance — not floors' 'craft floor separates guidance from measurable lines'
+    Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'commitment beats refinement' 'frontend: commitment beats refinement'
+    Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'if a block reads as vibe' 'frontend: five-block contract with the vibe test'
+    Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'never lands on candidates 1 or 2' 'frontend: sortition never ships the first instincts'
+    Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'extension, not sortition' 'frontend: uncovered blocks extend the system, never re-roll it'
+    Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'accessibility hard lines\s+>\s+approved direction' 'frontend: the precedence ladder tops with accessibility'
+    Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'fidelity matrix' 'frontend: substantial deliveries return a fidelity matrix'
+    Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'computed, not observed' 'frontend: token-computed floors are declared as computed'
+    Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'Kicker/eyebrow labels above headings' 'frontend: the kicker ban is in the hard prohibitions'
+    Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'structurally different[\s\S]{0,60}wallpaper' 'frontend: mockup variants must differ structurally'
 } catch {
     Check $false 'contract anchor + evolve cycle' $_.Exception.Message
 }
