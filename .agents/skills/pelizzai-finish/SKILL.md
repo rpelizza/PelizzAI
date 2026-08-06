@@ -48,8 +48,9 @@ The state/closure sections below apply only to consumer projects.
   doc generator, or fix runs.
 - A coverage gap (security, UI, documentation) becomes an explicit offer in §1.5, never silence;
   accepting it returns the task to the validation cycle — it never becomes a post-seal patch.
-- The single new commit touches only harness metadata: pelizzai/data/state.md and the
-  pelizzai/data/history/<YYYY-MM-DD>-<slug>.md the seal's migration just generated.
+- In consumer mode, the single new commit touches only harness metadata: pelizzai/data/state.md
+  and the pelizzai/data/history/<YYYY-MM-DD>-<slug>.md the seal's migration just generated
+  (source mode creates NO closure commit — §Source mode and §2b).
 - Keeping local is the default recommendation, but it still requires an answer at the gate.
   Push/PR, worktree removal, and discard require an explicit per-task decision: they are never
   applied from a profile default nor inherited from another task.

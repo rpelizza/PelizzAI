@@ -53,14 +53,20 @@ otherwise, measure in a rendered page at 1280px width.
 - **Tinted surface share ≤35% of the viewport.** Target shape ≈50% light-neutral / 25%
   dark-neutral / 25% tinted, mirrored in dark themes; the pass line is the single number.
   Verify: sample the rendered viewport on a fixed grid (one probe every ~16px). For each probe,
-  take the topmost element at that point (`elementFromPoint`) and resolve its **effective
-  BACKGROUND** — walking up through ancestors with transparent backgrounds — then classify that
-  background as **tinted** when OKLCH C >0.02 and neutral otherwise; divide tinted probes by
-  total probes. Measuring the resolved background (not the raw pixel) keeps text glyphs, icons,
-  brand marks, chart data inks, and images out of the numerator — the floor is about SURFACES;
-  skip probes that land on replaced content (`img`, `video`, `canvas`, data `svg`). Grid
-  sampling counts each visible point once — summing element rects would double-count
-  overlapping surfaces and ignore occlusion. Refuse: >35% — every surface tinted "for warmth".
+  resolve the SURFACE under it: take the element stack at the point (`elementsFromPoint`) PLUS a
+  pre-collected list of painted layers that hit testing misses — elements with
+  `pointer-events: none` and `::before`/`::after` pseudo-elements that paint a background —
+  whose rects contain the probe; the topmost painted **background** in that combined set is the
+  probe's surface color (walk up through transparent backgrounds when nothing paints).
+  Classifying the resolved background (not the raw pixel) keeps text glyphs, icons, brand
+  marks, chart data inks, and images out of the numerator — the floor is about SURFACES. A
+  probe whose topmost paint is replaced content (`img`, `video`, `canvas`, data `svg`) is
+  **ineligible**: it leaves the numerator AND the denominator. Classify each eligible probe's
+  surface as tinted when OKLCH C >0.02, neutral otherwise, and divide tinted probes by
+  **eligible** probes; with zero eligible probes, report the floor as *not measurable for this
+  page* (attestation to the user), never as a pass. Grid sampling counts each visible point
+  once — summing element rects would double-count overlapping surfaces and ignore occlusion.
+  Refuse: >35% — every surface tinted "for warmth".
 - **One token carries call-to-action emphasis per screen.**
   Verify: list the background and border tokens of the buttons and emphasis marks in the rendered
   page, excluding the semantic status set (success / warning / error / info). Refuse: two
