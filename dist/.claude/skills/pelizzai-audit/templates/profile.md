@@ -5,9 +5,9 @@
 > the *Ratified execution defaults* section, which is NOT detected: it is born `<unset>` and only
 > the user fills it in when ratifying the policy at the post-plan gate.
 > Lives at `pelizzai/profile.md`. Consumed by: `pelizzai-tdd` (test command),
-> `pelizzai-execution-plans` (post-plan gate + final validation), `pelizzai-finish-task`
+> `pelizzai-execute` (post-plan gate + final validation), `pelizzai-finish`
 > (verification and destination), `pelizzai-router` (execution-defaults recommendation),
-> `pelizzai-debugging` (feedback loop), and `pelizzai-writing-skills` (Stack baseline
+> `pelizzai-debug` (feedback loop), and `pelizzai-create-skill` (Stack baseline
 > → version/adoption-driven axes). Update it when scripts/manifests change; in a
 > workspace, repeat the sections per project.
 
@@ -65,7 +65,7 @@ _Snapshot date: YYYY-MM-DD (bootstrap or last refresh)._
 | `<framework>`     | `<x.y.z>`          |
 | `<key-lib>`       | `<x.y.z>`          |
 
-_Anchor of the version-driven and adoption-driven axes of `pelizzai-writing-skills`:
+_Anchor of the version-driven and adoption-driven axes of `pelizzai-create-skill`:
 version-driven = the version of an item in this baseline changed in the manifests (version drift);
 adoption-driven = there is a new top-level entry in the manifests, absent from this baseline AND
 from the `pelizzai/domain-skills.md` catalog → proposal to CREATE a skill for the new stack._

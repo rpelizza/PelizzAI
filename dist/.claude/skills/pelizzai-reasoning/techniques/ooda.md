@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Run long or dynamic executions as a **macro loop** in which every iteration restarts from **current reality** — not from the previous iteration's snapshot. It is the formal lens of the harness's execution loop (`pelizzai-loop`, `pelizzai-execution-plans`) and of the `pelizzai-router`'s Sync & delta.
+Run long or dynamic executions as a **macro loop** in which every iteration restarts from **current reality** — not from the previous iteration's snapshot. It is the formal lens of the harness's execution loop (`pelizzai-loop`, `pelizzai-execute`) and of the `pelizzai-router`'s Sync & delta.
 
 ## Core principle
 
@@ -38,7 +38,7 @@ Run long or dynamic executions as a **macro loop** in which every iteration rest
 
 3. DECIDE — choose the next highest-value action:
    next task in the plan / fix what failed / replan (evidence invalidated the path)
-   / stop and ask (material doubt → pelizzai-interview-me) / escalate (circuit breaker)
+   / stop and ask (material doubt → pelizzai-interview) / escalate (circuit breaker)
    / conclude (DoD reached — confirm with Verification before declaring it).
 
 4. ACT — execute the decision:
@@ -53,7 +53,7 @@ Run long or dynamic executions as a **macro loop** in which every iteration rest
 - **An iteration never inherits the previous one's snapshot.** Re-observe before deciding; a `git status`/suite costs less than acting on stale reality.
 - **Honest orientation:** if the evidence contradicts the plan, the plan loses — replan or escalate; do not continue with an outdated plan.
 - **Recorded decisions:** during plan execution, every Decide advances the cursor — `pelizzai/data/state.md` in a consumer, the native execution record in source mode — and the loop survives compaction.
-- **Stop criteria:** the canonical list of the loop's legitimate exits lives in `pelizzai-loop` (the five stop criteria: DoD verified; material doubt → `pelizzai-interview-me`; blocked → `phase: blocked` and escalate; evidence invalidated the path → replan; cost exceeds benefit → escalate/ask before insisting). Define the DoD **before** entering the loop.
+- **Stop criteria:** the canonical list of the loop's legitimate exits lives in `pelizzai-loop` (the five stop criteria: DoD verified; material doubt → `pelizzai-interview`; blocked → `phase: blocked` and escalate; evidence invalidated the path → replan; cost exceeds benefit → escalate/ask before insisting). Define the DoD **before** entering the loop.
 - **Do not let it become ritual:** on a trivial task, the loop collapses to a single cycle — observe quickly, act, verify.
 
 ## Anti-patterns
@@ -69,7 +69,7 @@ Run long or dynamic executions as a **macro loop** in which every iteration rest
 ## Harness integration
 
 - `pelizzai-loop` — the DoD and the stop-on-doubt rule are this loop's boundaries.
-- `pelizzai-execution-plans` — the per-task macro loop IS an OODA loop (observe evidence → orient against the plan → decide the next task/fix → act via the recorded strategy + review).
+- `pelizzai-execute` — the per-task macro loop IS an OODA loop (observe evidence → orient against the plan → decide the next task/fix → act via the recorded strategy + review).
 - `pelizzai-router` (Sync & delta) — the task-start Observe: the git delta since the last task.
-- `pelizzai-debugging` — uses OODA only as a macro lens when the investigation genuinely requires rounds; a direct cause or a short deterministic bug does not need it.
+- `pelizzai-debug` — uses OODA only as a macro lens when the investigation genuinely requires rounds; a direct cause or a short deterministic bug does not need it.
 - [ReAct](react.md) — the micro-cycle inside Act. [Verification](verification.md) — confirms the DoD before leaving the loop.

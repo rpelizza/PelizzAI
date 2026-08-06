@@ -1,0 +1,144 @@
+---
+name: pelizzai-evolve
+description: The harness's self-optimization cycle over two consumer artifacts — pelizzai/data/verification-standard.md (what "correct" means here) and pelizzai/data/learnings.md (what execution already learned). Use when a failure recurs and a standing rule might prevent it; when pelizzai-finish flags a recurrence at closeout; when a better path found mid-task must be proposed instead of adopted; when either artifact is missing or over budget; or when the user asks to promote a learning, update the verification standard, or make the project "learn" from a defect.
+---
+
+# PelizzAI Evolve
+
+The self-optimization cycle: two files, two channels, one rule.
+
+<EXTREMELY-IMPORTANT>
+**Self-improvement is a side effect of fixing a real, observed failure — never a reason to go
+looking for something to change.** No sweep, no refresh, no "while I'm here". Nothing enters
+this cycle that cannot name the failure that produced it.
+</EXTREMELY-IMPORTANT>
+
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Evolve
+skill to update the project's verification standard or learnings from an observed failure.
+
+## Source mode — no consumer runtime
+
+In the PelizzAI source repo (sentinel `scripts/pelizzai-source-repo.txt`), never create
+`pelizzai/`. A lesson about the harness itself becomes a proposal against the harness's own
+skills/tests through the normal task flow; a lesson that only matters to one conversation stays
+in the native execution record.
+
+## The two artifacts
+
+| File | Holds | Read by, and when | Written by, and when |
+| --- | --- | --- | --- |
+| `pelizzai/data/verification-standard.md` | what *correct* means here | `pelizzai-final-verification` before judging a delivery · `pelizzai-review` when briefing reviewers · `pelizzai-writing-plans` when drafting validation | `pelizzai-audit` at bootstrap · here, in its own ratified change — **never during a correction** |
+| `pelizzai/data/learnings.md` | what execution already learned | `pelizzai-writing-plans` and `pelizzai-execute` before proposing approaches | incident entries at root-cause confirmation (usually `pelizzai-debug`, in the fix's own commit) · `pelizzai-finish` counts recurrences at closeout · here, on promotion and retirement |
+
+`verification-standard.md` missing in a consumer → propose creating it from
+[templates/verification-standard.md](templates/verification-standard.md); `learnings.md`
+missing → from [templates/learnings.md](templates/learnings.md) — each artifact keeps its own
+schema (`pelizzai-audit` seeds both at bootstrap; both are **versioned**, like the rest of
+`pelizzai/data/`'s durable record). A cycle with no standard has nothing to measure against, and
+a learnings file nobody reads before designing is a log.
+
+**Neither file has one owner doing both halves — deliberately.** The node that observes a
+failure is not the node tempted to soften the standard, and the node that designs is not the one
+that decides what counts as a lesson.
+
+### `verification-standard.md` — three parts
+
+1. **Acceptance criteria: pass/fail, never a 0–5 score.** Concrete, objective, observable.
+2. **The procedure.** Reading the code is not exercising the artifact — review proves intent,
+   execution proves behavior. Name the command and the output that proves each criterion.
+3. **The baseline** — the latest known-good state **per surface**, one row each, with numbers
+   and evidence. A new approval of a surface **replaces its row**; the superseded numbers live
+   in `pelizzai/data/history/`, where "when did p95 move, and which delivery moved it?" is
+   actually answered.
+
+**Read-only during any correction.** If an output fails, fix the **output**. Editing a
+criterion, the procedure, or the baseline so a failing output passes is the guardrail violation
+under a friendlier name. The standard changes only in a deliberate change of its own, ratified
+through `pelizzai-interview`.
+
+**Budget: 150 lines hard — Baseline at most 25 rows.** Past 25 rows the criteria are describing
+more surfaces than one standard can hold: split it per package before dropping a row.
+
+### `learnings.md` — two parts
+
+**Active rules** (semantic): short imperatives applied on every task in their scope. **Incident
+log** (episodic): what happened, once each, newest first. Every entry carries **trigger** ·
+**root cause** (not the symptom) · **smallest durable fix** (`file:line`) · **rule learned**, or
+explicitly `n/a — one-off` · **scope** · **revert** (one line) · **status**
+`candidate → promoted → retired`.
+
+**Promotion:** a learning becomes a standing rule only after it **recurred 2–3 times**. The
+first occurrence is an incident (`candidate`); the repeat is the evidence. `pelizzai-finish`
+counts — writing a closeout for a task that fixed a confirmed defect, it checks whether that
+root cause is already in the log, and a match routes here. The promotion itself happens here and
+is **ratified by the user** via `pelizzai-interview`: flip the entries to `promoted`, write
+the one-line imperative into **Active rules** with its scope, and propose an edit to the
+project's `CLAUDE.md` only when the rule must hold before any skill loads — in the **project's
+own section, never inside the `pelizzai:contract` block** (the anchored block belongs to the
+harness and is overwritten by the next sync).
+
+**Budget ~200 lines hard.** Retire before adding: an entry whose failure mode can no longer
+happen (code gone, dependency dropped, rule absorbed by a domain skill or a linter) goes
+`retired` and out.
+
+## The two channels
+
+| Channel | What it is | What you may do | Gate |
+| --- | --- | --- | --- |
+| **Defect** | an observed failure | fix it, inside the guardrails | none, once confirmed (`pelizzai-debug` proves it is real and repeatable) |
+| **Opportunity** | a better path noticed mid-task | measure it, propose it | human adoption, always |
+
+**Defect — confirm before fixing.** An anomaly that does not reproduce is **logged, not fixed**
+— a fix for a phantom is a change with no oracle. Confirmed → smallest durable change, then the
+*full* standard, not only the part that broke.
+
+**Opportunity — proposal-only, never autonomous.** Finish on the path that already works. Then
+treat the gain as a hypothesis: state it in one line, validate the alternative against the
+**complete** standard, **measure it against the baseline** with the numbers named, and propose.
+Adoption is the user's. An opportunity that cannot be measured against the baseline is an
+opinion — present it as one.
+
+## The worth-it gate
+
+Escalate from a local fix to a structural change only when **both** hold: the defect
+**recurred** (it is in the log at least twice), and a local fix demonstrably does not prevent
+the next one. Otherwise fix locally, log, move on. Every change is **reversible**, its revert
+line written before it lands; nothing structural, shared, or irreversible lands without explicit
+user approval — including the standard, `CLAUDE.md`, shared config, and anything another project
+consumes.
+
+## Boundaries with the existing machinery
+
+- **Domain skills** stay with `pelizzai-create-skill` and its ledger
+  (`pelizzai/data/review-domain-skills.md`) — this cycle does not duplicate that maintenance. A
+  learning whose natural home is a domain skill is proposed THERE, and its incident entries are
+  retired here once the skill absorbs the rule.
+- **A lasting user preference** is recorded via `pelizzai-preferences`, not as a learning.
+- **The cursor and the history** (`state.md`, `history/`) stay with `pelizzai-execute`
+  and `pelizzai-finish`; this cycle only reads them as evidence.
+
+## Red flags
+
+```text
+- A change with no named, observed failure behind it; "fixing" an anomaly nobody reproduced.
+- Touching the standard, a criterion, or the baseline while a correction is open.
+- Adopting an opportunity because it is "obviously better", or proposing one with no measurement.
+- Promoting a learning on its first occurrence — or leaving a second occurrence unpromoted
+  because nobody claimed the edit.
+- A Baseline row appended for a surface that already had one.
+- learnings.md past its budget with nothing retired.
+- Promoting a rule into the pelizzai:contract block of CLAUDE.md (the next sync erases it).
+- Creating pelizzai/ artifacts in the source repo.
+```
+
+## Integration
+
+**Called by:** `pelizzai-finish` (recurrence or budget flagged at closeout), the user
+directly, and `pelizzai-debug` when a confirmed root cause deserves more than an incident
+entry.
+
+**Combines with:** `pelizzai-interview` — one ratification per promotion, standard change, or
+opportunity adoption; `pelizzai-final-verification` and `pelizzai-review` — the
+standard's readers; `pelizzai-writing-plans`/`pelizzai-execute` — the learnings'
+readers; `pelizzai-audit` — seeds both artifacts at bootstrap; `pelizzai-create-skill` — the
+home of a lesson that belongs in a domain skill.

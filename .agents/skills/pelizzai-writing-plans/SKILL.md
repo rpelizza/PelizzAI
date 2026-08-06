@@ -11,7 +11,7 @@ Produce the plan that an executor with **zero context** on this repository execu
 a single question: each task's files, the contracts to honor, the proof of the result, and the
 exact commands. Assume a good engineer who knows little of this toolset, this domain, and the
 house conventions — whatever the plan lacks becomes a material gap that STOPS execution and goes
-back to the user via `pelizzai-interview-me`. Every question execution has to ask is a failure of
+back to the user via `pelizzai-interview`. Every question execution has to ask is a failure of
 the plan, never a license to guess.
 
 Zero context is about **complete context**, not about transcribing the future code: the plan fixes
@@ -37,6 +37,10 @@ state is mandatory only in the consumer.
 - Library/API facts that may have changed were verified in Context7 for the observed version;
   current official documentation is the fallback when the tool is unavailable.
 - Greenfield/standard/exploratory has an approved spec, or an explicit waiver on record.
+- In a consumer, the Active rules of `pelizzai/data/learnings.md` were read BEFORE approaches
+  were proposed — this is the only moment a standing rule can still change the design — and
+  `pelizzai/data/verification-standard.md` grounds each task's Validation (see `pelizzai-evolve`).
+  Either file absent is not a blocker: note it and move on.
 ```
 
 If the technical question still cannot be stated precisely, go back to brainstorming. If the
@@ -91,7 +95,7 @@ trade-off. Each item states, in one line: **what** was decided, **where it was r
   must be locatable in the cited artifact, not a label of convenience. At the gate it is only a
   recap — what the user already decided is not re-asked.
 - **Still open** (emerged now, while decomposing): **do not write the choice as decided.** Before
-  closing the plan, take it to the user via `pelizzai-interview-me`, one question at a time, with
+  closing the plan, take it to the user via `pelizzai-interview`, one question at a time, with
   **2–3 real options + the recommended one marked and a one-line why** (the intelligence lies in
   building the good options and grounding them in repo/Context7 evidence; the decision is the
   user's). Only once ratified does it enter the list, with origin `ratified in the plan interview`.
@@ -106,7 +110,7 @@ it: the absence of decisions is itself a claim to ratify.
 This list is what the post-plan setup gate presents — the ratified ones as a recap, and any
 decision with no ratification origin as a question with options right there, before the "ok". A
 decision that does not fit in one clear line signals a missing human decision (go back to the
-design or to `pelizzai-interview-me`), not that the line should grow.
+design or to `pelizzai-interview`), not that the line should grow.
 
 During execution the **operational deviation test** applies:
 if the decision is not written in the plan or the spec, it is not approved — present it before implementing.
@@ -127,7 +131,7 @@ Mandatory overlays by surface:
 | --- | --- |
 | page, component, CSS, layout, visual state, UX | `pelizzai-frontend` |
 | auth, authorization, untrusted input, SQL, upload, secrets, sensitive data | `pelizzai-oswap` |
-| human documentation that is part of the delivery | `pelizzai-documenting-features` |
+| human documentation that is part of the delivery | `pelizzai-documentation` |
 
 Do not list a skill for a remote possibility. UI never swaps `pelizzai-frontend` for Playwright,
 browser, or screenshots; those are just tools of the overlay.
@@ -197,7 +201,7 @@ Before the handoff:
 
 List residual assumptions **new to the plan**, without re-litigating the approved design. Every
 material gap leaves the edge resolved, accepted by the user, or converted into an investigation.
-When it requires a human decision, use `pelizzai-interview-me` and ask one question at a time,
+When it requires a human decision, use `pelizzai-interview` and ask one question at a time,
 with a recommendation. `bounded` uses a compact stress pass; `standard` uses a focal stress pass;
 `exploratory`/greenfield requires a full stress pass. Context7 can confirm API and version, but
 cannot close a requirement, UX, business rule, or acceptance. Do not reopen an approved design
@@ -218,15 +222,15 @@ the plan's stack have coverage in the `pelizzai/domain-skills.md` catalog? If no
 catalog is absent — invoke the **proactive domain skills gate** of `pelizzai-audit` to propose
 the set for the decided stack (grounded in Context7); the decision is the user's and happens
 **BEFORE Task 1**. This catches flows that reached the plan without passing through
-`pelizzai-brainstorming`. In source mode there is no consumer catalog: the check falls to the
+`pelizzai-idea-generation`. In source mode there is no consumer catalog: the check falls to the
 source repo's domain skills and never creates `pelizzai/` runtime. Under a closed briefing
 (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not open this gate: flag the coverage gap to the coordinator.
 
 In the consumer, update the `plan:` field in state and confirm the materialized path
 (`pelizzai/plans/YYYY-MM-DD-<topic>.md`); content approval is recorded in the header of the plan
 itself (`Plan: approved on YYYY-MM-DD`), not in state. In source mode, hand the native
-plan/execution record to `pelizzai-execution-plans` in a discoverable way. Branch/base are already
-set; **forward to the post-plan setup gate** of `pelizzai-execution-plans` only after content
+plan/execution record to `pelizzai-execute` in a discoverable way. Branch/base are already
+set; **forward to the post-plan setup gate** of `pelizzai-execute` only after content
 approval. The gate ratifies the **how** in sequential decisions — isolation, branch, mode (the
 three options always visible), commits, and review. `pelizzai-writing-plans` carries
 recommendations, not decisions:
@@ -263,9 +267,9 @@ and keep it local unless an external destination is requested.
 
 ## Integration
 
-Combines with `pelizzai-brainstorming` when there was design, `pelizzai-reasoning` for
-decomposition, `pelizzai-interview-me` for focal stress of a material residual assumption,
-`pelizzai-frontend`/`pelizzai-oswap` as overlays, and `pelizzai-execution-plans` for execution.
+Combines with `pelizzai-idea-generation` when there was design, `pelizzai-reasoning` for
+decomposition, `pelizzai-interview` for focal stress of a material residual assumption,
+`pelizzai-frontend`/`pelizzai-oswap` as overlays, and `pelizzai-execute` for execution.
 
 ## Final instruction
 

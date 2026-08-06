@@ -91,7 +91,7 @@ const RULES = [
         (/(^|\s)--delete(\s|$)/.test(s) &&
           (/(^|\s)--force(\s|$)/.test(s) || /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s)))),
     why: 'forces the removal of a branch that is NOT merged — its commits may be lost.',
-    safe: 'use -d (it only deletes an already-merged branch) or confirm the discard with the user (pelizzai-finish-task requires the literal text "discard").',
+    safe: 'use -d (it only deletes an already-merged branch) or confirm the discard with the user (pelizzai-finish requires the literal text "discard").',
   },
   {
     name: 'git checkout . / checkout [<ref>] -- .',
@@ -121,9 +121,14 @@ const RULES = [
   {
     name: 'git switch -C / --force-create',
     // -C is case-sensitive (-c/--create is safe: it fails if the branch already exists).
-    test: (s) =>
-      /\bgit\b.*\bswitch\b/i.test(s) &&
-      (/(^|\s)--force-create(\s|$)/.test(s) || /(^|\s)-[a-zA-Z]*C[a-zA-Z]*(\s|$)/.test(s)),
+    // The flag is searched only AFTER `switch`: `git -C <path> switch <branch>` is a legitimate
+    // branch change in another working tree (`-C` there selects the repo, it does not force-create).
+    test: (s) => {
+      const afterSwitch = /\bgit\b.*?\bswitch\b(.*)$/is.exec(s);
+      if (!afterSwitch) return false;
+      const rest = afterSwitch[1];
+      return /(^|\s)--force-create(\s|$)/.test(rest) || /(^|\s)-[a-zA-Z]*C[a-zA-Z]*(\s|$)/.test(rest);
+    },
     why: 'overwrites an existing branch with the current starting point — the commits that only existed there are lost.',
     safe: 'use -c/--create (it fails if the branch already exists); overwriting requires an explicit user decision.',
   },
@@ -197,4 +202,6 @@ try {
 } catch {
   exitCode = 0; // fail-open: a hook error never locks the user out
 }
-process.exit(exitCode);
+// process.exitCode instead of process.exit(): piped stderr writes can be asynchronous and
+// process.exit would truncate the block reason the agent needs to correct course.
+process.exitCode = exitCode;

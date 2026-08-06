@@ -13,7 +13,7 @@
 #
 # Why a file, not pasting: everything that enters by pasting stays resident in the
 # coordinator's context forever (gain measured at the source: ~2x faster,
-# ~50% fewer tokens). See pelizzai-execution-plans -> references/task-cycle.md, section 1.
+# ~50% fewer tokens). See pelizzai-execute -> references/task-cycle.md, section 1.
 #
 # Requires PowerShell 7+. POSIX variant: scripts/task-brief.sh.
 
@@ -62,7 +62,9 @@ $inFence = $false
 foreach ($line in $lines) {
   if ($line -match '^```') { $inFence = -not $inFence }
   if ($inGc -and -not $inFence -and ($line -match '^---\s*$' -or $line -match '^#')) { break }
-  if (-not $inGc -and $line -match '\*\*Global Constraints') { $inGc = $true }
+  # The marker only opens the block OUTSIDE a code fence and anchored at column zero: a code
+  # example quoting `**Global Constraints` before the real block must not start the capture.
+  if (-not $inGc -and -not $inFence -and $line -match '^\*\*Global Constraints\b') { $inGc = $true }
   if ($inGc) { $gc.Add($line) }
 }
 

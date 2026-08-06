@@ -1,6 +1,6 @@
 ---
 name: pelizzai-frontend
-description: Use for any frontend/UI work in PelizzAI: creating or changing pages, components, flows, visual states, dashboards, forms, landing pages, design systems, CSS, responsiveness, accessibility, microinteractions, and visual QA. Trigger it especially when the task mentions "frontend", "UI", "screen", "component", "layout", "style it", "improve the look", "responsive", "Figma", "design", "avoid AI slop", or whenever an execution task touches the user experience.
+description: Use for any frontend/UI work in PelizzAI: creating or changing pages, components, flows, visual states, dashboards, forms, landing pages, design systems, CSS, responsiveness, accessibility, microinteractions, and visual QA. Carries the direction contract (five ratified blocks), the anti-convergence sortition, and the measurable craft floor (pass/fail Verify/Refuse lines). Trigger it especially when the task mentions "frontend", "UI", "screen", "component", "layout", "style it", "improve the look", "responsive", "Figma", "design", "avoid AI slop", or whenever an execution task touches the user experience.
 ---
 
 # PelizzAI Frontend
@@ -19,6 +19,13 @@ This skill is not only about aesthetics. It is a product, implementation, and vi
 
 > A good interface comes from evidence. First understand the existing product, then choose a specific visual direction, implement it with the project's real patterns, and only declare it done after seeing the screen working.
 
+Two failure modes this skill exists to kill: **generic AI convergence** (the same faces, the
+same gradient hero, the same card grid — measured in the field: a model asked 16 times produced
+30/35 near-identical concepts) and **vibe-only direction** ("modern and clean" is not a
+decision). The operating stance against both: **commitment beats refinement** — a decided
+direction executed firmly beats timid iteration every time, and mid-build aesthetic drift is a
+gap to stop, not iteration.
+
 Acceptable frontend must pass four proofs:
 
 ```text
@@ -33,6 +40,19 @@ Acceptable frontend must pass four proofs:
 An explicit user instruction, an approved spec/Figma, a brand guide, and the product's design system prevail over this skill's **default** preferences and prohibitions. Anti-slop does not mean erasing an intentional direction: a gradient, glassmorphism, a large radius, a hero, or any other normally suspect choice remains valid when it is part of the approved system and serves the flow.
 
 When there is no approved direction, the rules below prevent generic AI defaults. When there is one, execute it faithfully, use the real tokens/components, and flag only functional, accessibility, or technical conflicts — do not redesign out of personal taste.
+
+**The full precedence ladder, when layers conflict:**
+
+```text
+accessibility hard lines  >  approved direction / the project's design system  >
+this skill's defaults and bans (craft floor)  >  the model's taste
+```
+
+A design system whose token pair fails contrast loses that one line: report the finding and ship
+the compliant pair. Everywhere else the system wins — including over this skill's bans, which
+bind **invention, not inheritance**: a house pattern a human wrote is followed on the surfaces
+the system already uses it on, recorded as an inherited exception with its citation, and
+introduced nowhere else.
 
 ---
 
@@ -78,7 +98,7 @@ Bad examples:
 - "A beautiful dashboard."
 ```
 
-When the task comes from `pelizzai-brainstorming` or from an approved spec/screen/Figma, the already
+When the task comes from `pelizzai-idea-generation` or from an approved spec/screen/Figma, the already
 approved visual direction prevails: execute it faithfully. A local change inherits that direction
 with no gate; do not invent a new aesthetic thesis or a new personality mid-execution.
 
@@ -97,9 +117,60 @@ Proposed visual direction (reply "ok" or adjust):
 
 - Real aesthetic ambiguity → 2-3 materially different directions, one recommended.
 - A design system/brand guide already decides the language → one recommendation is enough; do not fabricate alternatives.
-- When seeing it first reduces rework, offer mockups/wireframes navigable in the browser before implementing.
+- When seeing it first reduces rework, offer mockups/wireframes navigable in the browser before
+  implementing — 2-3 **structurally different** variants (slightly adjusted grids are wallpaper,
+  not variants), as scratch files or via the `pelizzai-idea-generation` visual companion, never
+  committed as product code.
 
 Under a closed briefing (SUBAGENT-STOP), produce no route analyses and open no gates: apply the briefing and escalate to the coordinator whatever requires a decision.
+
+### The direction contract — five blocks, for a new screen/flow or a redesign
+
+For a **new screen, component, flow, or product surface** in a track with a plan (standard/
+exploratory), the one-sentence thesis expands into a **direction contract**: five blocks, each a
+**concrete choice**, written before building. A local tweak or polish inherits the recorded
+direction and authors no contract — but still **cites** what it works against (the recorded
+contract, else the design system, else the explicit line "no recorded direction; this change is
+held by the craft floor alone").
+
+| Block | A decision looks like | Not a decision |
+| --- | --- | --- |
+| 1. Concept | the one idea the interface embodies, named | "clean and professional" |
+| 2. Typography | the actual faces, scale, weights | "a nice modern font" |
+| 3. Color & material | the palette with roles — mood lives in the brand colors, not in tinted surfaces | "a fresh palette" |
+| 4. Layout system | grid, density, spacing rhythm | "well spaced" |
+| 5. Motion | what moves, when, how long — or deliberately static | "subtle animations" |
+
+**The test: if a block reads as vibe, the direction was not decided — rewrite it as a choice.**
+Synthesis ≤150 words, ratified by the user through the gate above (direction is a product
+decision; a contested block goes to `pelizzai-interview`). Home: a `### Direction contract`
+block inside the plan's **Technical decisions** section — it travels as that anchor, never
+pasted; a task briefing that names this skill carries the anchor on the same line, and the
+reviewer receives the same anchor. Declared exceptions to the craft floor live in that block,
+one line each: the floor excepted, the surface, and why. Once ratified, execute with commitment.
+
+**An existing design system covers block by block — discovered, never assumed whole.** Map the
+system's tokens, components, and written rules onto the five blocks; "the system covers this" is
+a claim that cites a file:
+
+- **Covered block** — the system **is** the decision. Record it with its citation and follow it;
+  no sortition, no alternatives, no "improvement".
+- **Uncovered block** — decided by **extension, not sortition**: 2-3 concrete options derived
+  from the covered blocks' own logic, ratified by the user, marked `extended — no system coverage`.
+- **No block covered and no brand to inherit** — the direction is open: run the sortition below.
+
+### Anti-convergence sortition — when the direction is truly open
+
+1. **Generate 6-10 candidate directions, genuinely different** — different concept + typography
+   + color + layout, not one grid with ten accents.
+2. **Derive a deterministic index from project facts** — sum the character codes of the task
+   slug; `index = 3 + (sum mod (N − 2))`. The index **never lands on candidates 1 or 2**: the
+   model's first instincts are the convergent ones, and the external seed is what the model
+   cannot fake.
+3. Present the selected candidate with the full list. The user **ratifies or re-rolls** — a
+   re-roll generates new candidates; it never quietly picks the discarded firsts.
+
+Shipping candidate 1 or 2 of a sortition is a red flag, not a shortcut.
 
 ### 3. Make a compact visual plan
 
@@ -136,6 +207,9 @@ Without explicit grounding in the spec/design system/product, do not ship:
 - Animations scattered around to mask a lack of hierarchy.
 - Buttons that change size because of loading, an icon, hover, or translated text.
 - Hand-drawn icons when the project already has an icon library.
+- Kicker/eyebrow labels above headings (the small all-caps label over a title) — the single
+  strongest marker of converged AI layouts. The ban binds INVENTION, not inheritance: a design
+  system that already uses the pattern wins under the ladder, cited as an inherited exception.
 ```
 
 Use fictional data only when the task is a prototype or an isolated story/test. Even then, make the data plausible for the domain and make it clear in the code/test that these are fixtures.
@@ -285,8 +359,27 @@ Animation must help the perception of cause, a state change, or spatial orientat
 
 ## Visual verification
 
-Do not finish a relevant visual/interactive change by reading code alone. The depth of the proof
-follows what can break:
+Do not finish a relevant visual/interactive change by reading code alone. Two kinds of claim,
+two kinds of oracle:
+
+- **Machine-checkable floors** — the pass/fail lines of the
+  **[Craft Floor](references/craft-floor.md)** (contrast ratios, chroma ceilings, tap targets,
+  spacing scale, page overflow at 375px, focus visibility, reduced-motion, chart floors). They
+  are **measured in a real rendered page**, in this order of preference:
+  1. the IDE's/platform's own browser or preview pane, already attached to the project;
+  2. the Playwright MCP, when installed;
+  3. **computed from the tokens**, for floors that arithmetic settles (contrast is a WCAG
+     relative-luminance calculation over two declared colors) — state that the value was
+     computed, not observed;
+  4. **declared unverified** — name the floor, say no rendering surface was available, and hand
+     it to the user as an attestation. Never claim a floor passed because it probably did.
+
+  The first three are machine oracles: iterate freely until they pass. A floor is reported
+  **with the value that was measured and the procedure that produced it** — never "it looks fine".
+- **Aesthetic judgment** is an attestation oracle: screenshots or a live preview presented
+  against the direction contract; the user judges. Presenting evidence is not claiming success.
+
+The depth of the proof follows what can break:
 
 | Change | Minimum proof |
 | --- | --- |
@@ -318,6 +411,25 @@ If running the UI is not possible, state that in the final result and compensate
 
 ---
 
+## Fresh-eyes design review
+
+A frontend delivery is **substantial** when any one of these holds: a route or full page added
+or restructured · **three or more** components with rendered output changed · any change to
+design tokens or a shared layout primitive · any delivery born from the sortition. The third
+clause is blast radius rather than diff size: one token edit can repaint the whole product.
+
+At the trigger, the per-task review of `pelizzai-review` (blind spec lens) receives, besides the
+diff and the plan: the **direction contract anchor**, the screenshots/preview, and the
+**[Craft Floor](references/craft-floor.md)**. It returns a **fidelity matrix** — per contract
+block: `followed / drifted`, with evidence; the typography and color/material lines are
+mandatory — plus floor violations with **measured values**. The coordinator consolidates but
+never softens the verdict, the same rule as `pelizzai-review`'s consolidation.
+
+Below the trigger, run the floor and state checks yourself and report them in one line **with
+the values measured**.
+
+---
+
 ## Harness integration
 
 This skill is a **mandatory overlay** for any task that changes a page, component, CSS, layout, visual states, or UI experience — regardless of whether the head skill is feature, bug, or tweak. The router registers the overlay; `pelizzai-writing-plans` includes it under **Cross-cutting harness skills** and on the task; the executor must load it before implementing and before reviewing.
@@ -327,11 +439,14 @@ Playwright, the browser MCP, and screenshots are **tools** for carrying out this
 **Combines with:**
 
 ```text
-- `pelizzai-brainstorming`: to define the spec and the visual direction before creative implementation.
-- `pelizzai-execution-plans`: to execute UI tasks inside approved plans.
+- `pelizzai-idea-generation`: to define the spec and the visual direction before creative implementation.
+- `pelizzai-execute`: to execute UI tasks inside approved plans.
 - `pelizzai-tdd`: for component, form, route, and regression behavior.
-- `pelizzai-review`: to review adherence to the spec and quality.
-- `pelizzai-verification-before-completion`: for fresh evidence before declaring it done.
+- `pelizzai-review`: to review adherence to the spec and quality — on substantial frontend
+  deliveries the blind lens also returns the fidelity matrix against the direction contract.
+- `pelizzai-final-verification`: for fresh evidence before declaring it done.
+- `pelizzai-interview`: a contested direction-contract block is a product decision — it goes
+  there, one question at a time.
 - The project's domain skills: for the real product, design system, and stack patterns.
 ```
 
@@ -351,6 +466,10 @@ Before saying you are finished, confirm:
 [ ] Responsiveness was checked in the viewports applicable to the change's risk.
 [ ] It has visible focus, accessible names, and adequate contrast.
 [ ] It has no decoration without function and no automatic visual clichés.
+[ ] The craft floor passed with MEASURED values — or each unverifiable floor was declared as
+    such and handed to the user as an attestation.
+[ ] A new screen/redesign followed its ratified direction contract with commitment (no
+    mid-build drift), or cited the direction it inherited.
 [ ] It was verified in the browser/by screenshot when possible.
 [ ] The relevant tests/lint/build were run, or the limitation was stated.
 ```

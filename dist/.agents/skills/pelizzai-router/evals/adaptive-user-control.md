@@ -14,7 +14,7 @@ have an area to call, complete, and track the queue.
 
 Expected:
 
-- `write-local`, `feature/greenfield`, lane `exploratory`, head `pelizzai-brainstorming`;
+- `write-local`, `feature/greenfield`, lane `exploratory`, head `pelizzai-idea-generation`;
 - Context7 may be consulted read-only before kickoff to confirm the stack's current capabilities,
   compatibility, and practices and to improve the questions;
 - the first response presents the analysis and a single route-ratification question;

@@ -38,7 +38,7 @@ A) Committed range — when the work is already in commits:
    git diff --stat <BASE_SHA>..<HEAD_SHA>
    git diff <BASE_SHA>..<HEAD_SHA>
 
-B) Working tree (not committed) — per-task review in pelizzai-execution-plans, where the
+B) Working tree (not committed) — per-task review in pelizzai-execute, where the
    implementer has NOT committed (the review is the gate):
    git status --short
    git diff                 # unstaged

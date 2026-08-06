@@ -3,12 +3,12 @@
  * PelizzAI — cadence hook (UserPromptSubmit).
  *
  * Reinforcement for domain-skill self-maintenance. It is NOT the source of truth:
- * the cadence core lives in the `pelizzai-writing-skills` skill (portable across IDEs)
- * and fires at task closeout (`pelizzai-finish-task` Step 5). This hook exists only in
+ * the cadence core lives in the `pelizzai-create-skill` skill (portable across IDEs)
+ * and fires at task closeout (`pelizzai-finish` Step 5). This hook exists only in
  * Claude Code and acts as a safety net: it counts interactions and, every N,
  * reminds you to review the skills once the commit/day threshold has been crossed.
  *
- * Cadence (calibrated for active teams — see pelizzai-writing-skills →
+ * Cadence (calibrated for active teams — see pelizzai-create-skill →
  * references/domain-skill-maintenance.md):
  *  - Sampling: checks every 10 interactions (not on every message).
  *  - Review due: >= 10 commits OR > 10 days since last-review (the DAYS axis is the
@@ -151,7 +151,7 @@ function main() {
 
   emit(
     `PelizzAI (cadence): ${parts.join('; ')}. ` +
-      `Consider invoking the pelizzai-writing-skills skill (maintenance mode) to review/update ` +
+      `Consider invoking the pelizzai-create-skill skill (maintenance mode) to review/update ` +
       `the domain skills. Suggest it to the user once; do not block the work.`
   );
 
@@ -165,4 +165,7 @@ try {
 } catch {
   /* never fail the user's prompt */
 }
-process.exit(0);
+// process.exitCode instead of process.exit(0): stdout writes can be asynchronous when the
+// destination is a pipe (exactly a hook's case) and process.exit would cut the pending JSON,
+// silently swallowing the nudge. Letting the event loop drain preserves the never-fail contract.
+process.exitCode = 0;

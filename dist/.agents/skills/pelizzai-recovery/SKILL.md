@@ -40,12 +40,17 @@ If it is a directory false alarm, fix the context and return to the router witho
 
 **Delivery in `delivered` on resumption.** If state shows `phase: delivered`, the task was sealed and
 its destination executed, leaving only the observation of `done` — this is **not** WIP divergence.
-Apply the same reconciliation as `pelizzai-execution-plans` (§Reconciling the previous delivery):
-check `confirm:` against git (read-only) — does `base-ref` contain `validated-head`? PR merged?
-branch integrated? (local delivery: does the user accept?). Observed → stamp the `## History` index
+Apply the same reconciliation as `pelizzai-execute` (§Reconciling the previous delivery):
+read the sealed intent in `delivery-status:` to narrow what to observe (`pending push` with no
+remote branch = failed before the push; `pending pr` with the branch at `validated-head` and no
+PR = push confirmed, PR pending) — the field is the INTENT and is never overwritten with the
+observed outcome — and check `confirm:` against git (read-only): does `base-ref` contain
+`validated-head`? PR merged? branch integrated? (local delivery: does the user accept?). Observed → stamp the `## History` index
 line with `done <YYYY-MM-DD>` + 1-line evidence and record `phase: done` — the full block
 already migrated to `pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` at the `delivered` seal, so
-there is no block to move here; writing metadata in `pelizzai/` is valid on any branch, but the commit waits for
+there is no block to move here. On a protected branch this authorization covers ONLY the cursor
+reconciliation just described (the index stamp and `phase`) — it is not a general license to
+write arbitrary `pelizzai/` metadata there; the commit waits for
 the new task branch (never on a protected one). Failed (PR closed without merge) → do not record
 `done`; report and propose resuming the branch or archiving as `abandoned`. No working file is moved
 in this observation. Source mode: the same observation applies to the native execution record,
@@ -136,7 +141,7 @@ limitations/pending decision
 ```
 
 If the task was sealed and any content changed, invalidate `validated-head` and go back to review +
-Verification. Recovery never calls finish-task with a stale seal.
+Verification. Recovery never calls pelizzai-finish with a stale seal.
 
 ## Red flags
 
@@ -151,6 +156,6 @@ Verification. Recovery never calls finish-task with a stale seal.
 
 ## Integration
 
-Called by router/starting-branch/execution-plans when the record and Git diverge. Uses
-`pelizzai-starting-branch` for safe rescue and returns the work to the lifecycle; finish-task only
+Called by router/starting-branch/pelizzai-execute when the record and Git diverge. Uses
+`pelizzai-starting-branch` for safe rescue and returns the work to the lifecycle; pelizzai-finish only
 enters after new content is consolidated and sealed.

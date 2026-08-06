@@ -78,7 +78,7 @@ try {
        # -M is NOT included: renaming a branch is the canonical git init step (git branch -M main).
        Test = { param($s) ($s -match '\bgit\b.*\bbranch\b') -and (($s -cmatch '(^|\s)-[a-zA-Z]*D[a-zA-Z]*(\s|$)') -or (($s -cmatch '(^|\s)--delete(\s|$)') -and (($s -cmatch '(^|\s)--force(\s|$)') -or ($s -cmatch '(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)')))) }
        Why  = 'forces the removal of a branch that is NOT merged - its commits may be lost.'
-       Safe = 'use -d (it only deletes an already-merged branch) or confirm the discard with the user (pelizzai-finish-task requires the literal text "discard").' },
+       Safe = 'use -d (it only deletes an already-merged branch) or confirm the discard with the user (pelizzai-finish requires the literal text "discard").' },
     @{ Name = 'git checkout . / checkout [<ref>] -- .'
        # Covers "checkout .", "checkout -- .", "checkout <ref> -- ." and the "./" form (all discard the working tree).
        # checkout -- <file> is NOT included: discarding a named file is a routine operation.
@@ -96,7 +96,13 @@ try {
        Safe = 'create a return point first (git stash push -u -m "<reason>"); to create a branch use -b, which fails if it already exists.' },
     @{ Name = 'git switch -C / --force-create'
        # -C is case-sensitive (-c/--create is safe: it fails if the branch already exists).
-       Test = { param($s) ($s -match '\bgit\b.*\bswitch\b') -and (($s -cmatch '(^|\s)--force-create(\s|$)') -or ($s -cmatch '(^|\s)-[a-zA-Z]*C[a-zA-Z]*(\s|$)')) }
+       # The flag is searched only AFTER `switch`: `git -C <path> switch <branch>` is a legitimate
+       # branch change in another working tree (`-C` there selects the repo, not force-create).
+       Test = { param($s)
+         $m = [regex]::Match($s, '(?is)\bgit\b.*?\bswitch\b(.*)$')
+         if (-not $m.Success) { return $false }
+         $rest = $m.Groups[1].Value
+         return (($rest -cmatch '(^|\s)--force-create(\s|$)') -or ($rest -cmatch '(^|\s)-[a-zA-Z]*C[a-zA-Z]*(\s|$)')) }
        Why  = 'overwrites an existing branch with the current starting point - the commits that only existed there are lost.'
        Safe = 'use -c/--create (it fails if the branch already exists); overwriting requires an explicit user decision.' },
     @{ Name = 'git restore . (working tree)'

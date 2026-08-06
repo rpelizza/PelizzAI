@@ -1,6 +1,6 @@
 ---
 name: pelizzai-quick-fix
-description: Head skill for a local, cohesive, clear, low-risk tweak — text, label, color, button, or field on an existing screen, a constant, a mechanical rename/refactor, an obvious configuration. Typical signals: ~1 file and under ~50 lines (scale signals, not hard limits). Public surface = a NEW route, command, endpoint, API, or config — a tweak creates none of them and changes no business rule. Something broken uses `pelizzai-debugging`; a new surface/contract or a design decision reclassifies through the router's lane.
+description: Head skill for a local, cohesive, clear, low-risk tweak — text, label, color, button, or field on an existing screen, a constant, a mechanical rename/refactor, an obvious configuration. Typical signals: ~1 file and under ~50 lines (scale signals, not hard limits). Public surface = a NEW route, command, endpoint, API, or config — a tweak creates none of them and changes no business rule. Something broken uses `pelizzai-debug`; a new surface/contract or a design decision reclassifies through the router's lane.
 ---
 
 # PelizzAI Quick Fix
@@ -49,7 +49,12 @@ in one line, with the decisions visible and named, and waits:
 One "ok" ratifies base, name, and the three decisions at once — all are named in the line, nothing
 was silent; a named override adjusts only that item and keeps the rest. Only then is the branch
 created. Do not scatter this line across separate questions: the one-decision-per-turn menu
-belongs to the post-plan gate of the tracks with a plan. Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP),
+belongs to the post-plan gate of the tracks with a plan. This is a DELIBERATE exception to
+one-decision-per-turn, and it is proportionality, not a loophole: in tracks with a plan each
+gate decision reshapes a multi-step execution, so they are weighed one at a time; in a tweak the
+four values are visible defaults in a single line, and four separate stops to swap a label teach
+the user to stop reading gates — which defeats the very thing per-decision ratification protects.
+The rule's substance (nothing silent, every decision named and ratifiable) is fully preserved. Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP),
 open no gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 ```text
@@ -77,9 +82,9 @@ open no gates: apply the briefing and escalate to the coordinator whatever requi
    project's relevant suite. Fix before consolidating.
 3.5. Commit the **content** with exact paths and a definitive message
    `<type>(<scope>): <description>`. A quick-fix already produces a single commit; do not create
-   WIP nor leave a squash for finish-task.
-4. Seal and close — run `pelizzai-verification-before-completion` against that HEAD, record
-   `validated-head` only after success, and invoke `pelizzai-finish-task`: a consumer adds
+   WIP nor leave a squash for pelizzai-finish.
+4. Seal and close — run `pelizzai-final-verification` against that HEAD, record
+   `validated-head` only after success, and invoke `pelizzai-finish`: a consumer adds
    only the metadata closure (state + the task's history file);
    source mode closes the execution record without a closure file/commit.
 ```
@@ -109,7 +114,7 @@ Never: treat as quick-fix something that creates a new surface or changes a busi
 
 **Uses:** `pelizzai-starting-branch`, local rules/skills, `pelizzai-reasoning` (strategy
 selection), `pelizzai-tdd` only for behavior, `pelizzai-frontend` as the mandatory overlay
-for UI, `pelizzai-verification-before-completion`, and `pelizzai-finish-task`.
+for UI, `pelizzai-final-verification`, and `pelizzai-finish`.
 
-**Escalates to:** `pelizzai-writing-plans` for bounded, `pelizzai-brainstorming` when there is a
-design decision or uncertainty, or `pelizzai-debugging` when it is a bug.
+**Escalates to:** `pelizzai-writing-plans` for bounded, `pelizzai-idea-generation` when there is a
+design decision or uncertainty, or `pelizzai-debug` when it is a bug.

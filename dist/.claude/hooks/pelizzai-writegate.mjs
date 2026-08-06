@@ -60,8 +60,8 @@
  * On fleets without Node, use the PowerShell variant pelizzai-writegate.ps1 (identical behavior).
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join, resolve, isAbsolute } from 'node:path';
+import { readFileSync, writeFileSync, existsSync, realpathSync } from 'node:fs';
+import { join, resolve, isAbsolute, dirname, basename } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 
@@ -130,18 +130,29 @@ function parseSegment(seg) {
   let cur = '';
   let quote = null; // "'" or '"' when inside quotes
   let expectTarget = false; // the next complete token is a redirection target
-  const flush = () => {
+  const flush = (dueToRedirect = false) => {
     if (cur === '') return;
     if (expectTarget) {
       if (!cur.startsWith('&')) redirects.push(cur); // '&' → fd dup (>&2), not a file
       expectTarget = false;
-    } else if (!/^[0-9]+$|^&$/.test(cur)) {
-      tokens.push(cur); // drop a stray fd prefix (the "2" in "2>")
+    } else if (dueToRedirect && /^[0-9]+$|^&$/.test(cur)) {
+      // drop the fd prefix ONLY when a '>' actually follows (the "2" in "2>"); a bare numeric
+      // token elsewhere is a real argument — `nice -n 10 mv …` must keep the 10.
+    } else {
+      tokens.push(cur);
     }
     cur = '';
   };
   for (let i = 0; i < seg.length; i++) {
     const ch = seg[i];
+    // POSIX: inside DOUBLE quotes, a backslash escapes only " \ $ and `. Without this, an odd
+    // number of \" before a '>' desynchronized the quote state and a '>' INSIDE the string was
+    // read as a real redirection (e.g. git commit -m "mede 5\" e grava > src/a.txt" blocked).
+    if (quote === '"' && ch === '\\' && i + 1 < seg.length && /["\\$`]/.test(seg[i + 1])) {
+      cur += seg[i + 1];
+      i++;
+      continue;
+    }
     if (quote) {
       if (ch === quote) quote = null;
       else cur += ch;
@@ -152,7 +163,7 @@ function parseSegment(seg) {
       continue;
     }
     if (ch === '>') {
-      flush(); // closes any pending fd (2, &) before the '>'
+      flush(true); // closes any pending fd (2, &) before the '>'
       if (seg[i + 1] === '>') i++; // '>>' (append) counts as a single redirection
       expectTarget = true;
       continue;
@@ -201,13 +212,82 @@ function expandVars(target) {
   return unresolved ? null : expanded;
 }
 
+// True for POSIX absolutes (/x) and Windows drive paths (C:\x, C:/x) on any host platform.
+function isAbsoluteLike(p) {
+  return isAbsolute(p) || /^[A-Za-z]:[\\/]/.test(p);
+}
+
+// Index of the segment's actual COMMAND: skips wrapper prefixes, VAR=value assignments, and
+// their flags. The copy/download verbs below are only recognized AT this index — `install`
+// appearing as an argument (`npm install express`, `pip install requests`) is a package
+// manager's subcommand, not a file write, and used to be misread as one.
+const COMMAND_PREFIXES = new Set(['sudo', 'doas', 'env', 'time', 'nohup', 'nice', 'command', 'exec', 'xargs']);
+// Prefix options that CONSUME a value argument: without this table, `sudo -u build cp …` would
+// stop the scan at `build` and miss the real command (false negative on Rules A/B).
+const PREFIX_VALUE_FLAGS = {
+  sudo: new Set(['-u', '-g', '-p', '-h', '-U', '-R', '-T', '-C', '-D', '--user', '--group', '--host', '--prompt', '--chdir', '--chroot']),
+  doas: new Set(['-u']),
+  nice: new Set(['-n', '--adjustment']),
+  env: new Set(['-u', '-S', '-P', '-C', '--unset', '--split-string', '--chdir']),
+  time: new Set(['-f', '-o', '--format', '--output']),
+  xargs: new Set(['-a', '-d', '-E', '-e', '-I', '-i', '-L', '-l', '-n', '-P', '-s']),
+};
+function commandIndex(tokens) {
+  let i = 0;
+  let activePrefix = null;
+  while (i < tokens.length) {
+    const raw = tokens[i];
+    const t = raw.toLowerCase();
+    if (COMMAND_PREFIXES.has(t)) {
+      activePrefix = t;
+      i++;
+      continue;
+    }
+    if (/^[A-Za-z_][A-Za-z0-9_]*=/.test(raw)) {
+      i++;
+      continue;
+    }
+    if (i > 0 && raw.startsWith('-')) {
+      const valueFlags = activePrefix ? PREFIX_VALUE_FLAGS[activePrefix] : null;
+      const bare = raw.includes('=') ? raw.slice(0, raw.indexOf('=')) : raw;
+      if (valueFlags && valueFlags.has(bare) && !raw.includes('=') && i + 1 < tokens.length) i += 2;
+      else i += 1;
+      continue;
+    }
+    break;
+  }
+  return i;
+}
+
 // Write targets of a shell command (Bash sibling matcher). Best-effort and honest:
-// covers the common cases; what it cannot parse safely does not block.
+// covers the common cases; what it cannot parse safely does not block. Besides redirection,
+// tee, Set-Content/Add-Content/Out-File, and sed -i, it recognizes the common copy/download
+// verbs (cp, mv, install, curl -o/-O, wget -O, dd of=, ln) and git apply/am — reducing, not
+// closing, the Bash surface (deliberate fail-open posture; see the header).
 function extractShellTargets(command) {
   const targets = [];
+  // Segment-local `cd` tracking: in `cd .claude && printf x > ../src/a.py` the target must be
+  // resolved against the directory the shell is actually in, not the initial cwd. `prefix`
+  // accumulates the cd chain ('' = initial cwd); a cd that cannot be resolved safely (variable,
+  // `cd -`, popd) makes later RELATIVE targets undecidable → they are dropped (the same
+  // fail-open honesty as the rest of the matcher; absolutes still count).
+  let prefix = '';
+  let prefixUnknown = false;
+  const push = (raw) => {
+    if (!raw || raw.startsWith('-') || isNullSink(raw)) return;
+    const expanded = expandVars(raw);
+    if (!expanded || isNullSink(expanded)) return;
+    if (isAbsoluteLike(expanded)) {
+      targets.push(expanded);
+      return;
+    }
+    if (prefixUnknown) return;
+    targets.push(prefix ? join(prefix, expanded) : expanded);
+  };
   for (const seg of command.split(/&&|\|\||;|\||\r?\n/)) {
     const { tokens, redirects } = parseSegment(seg);
-    for (const r of redirects) targets.push(r);
+    for (const r of redirects) push(r);
+    const cmdIdx = commandIndex(tokens);
     for (let i = 0; i < tokens.length; i++) {
       const t = tokens[i].toLowerCase();
       // tee [-flags] file...  /  Tee-Object -FilePath file
@@ -215,11 +295,11 @@ function extractShellTargets(command) {
         for (let j = i + 1; j < tokens.length; j++) {
           const a = tokens[j];
           if (/^-(?:literal)?(?:file)?path$/i.test(a) && j + 1 < tokens.length) {
-            targets.push(tokens[j + 1]);
+            push(tokens[j + 1]);
             j++;
             continue;
           }
-          if (!a.startsWith('-')) targets.push(a);
+          if (!a.startsWith('-')) push(a);
         }
       }
       // Set-Content / Add-Content / Out-File: -Path/-LiteralPath or first positional.
@@ -228,10 +308,10 @@ function extractShellTargets(command) {
         for (let j = i + 1; j < tokens.length && !took; j++) {
           const a = tokens[j];
           if (/^-(?:literal)?(?:file)?path$/i.test(a) && j + 1 < tokens.length) {
-            targets.push(tokens[j + 1]);
+            push(tokens[j + 1]);
             took = true;
           } else if (!a.startsWith('-')) {
-            targets.push(a);
+            push(a);
             took = true;
           }
         }
@@ -244,20 +324,107 @@ function extractShellTargets(command) {
         if (inPlace) {
           for (let j = tokens.length - 1; j > i; j--) {
             if (!tokens[j].startsWith('-')) {
-              targets.push(tokens[j]);
+              push(tokens[j]);
               break;
             }
           }
         }
       }
+      // cp / mv / install / ln — only as the segment's COMMAND (see commandIndex): the write
+      // lands on the LAST non-flag operand (destination/link).
+      if ((t === 'cp' || t === 'mv' || t === 'install' || t === 'ln') && i === cmdIdx) {
+        for (let j = tokens.length - 1; j > i; j--) {
+          if (!tokens[j].startsWith('-')) {
+            push(tokens[j]);
+            break;
+          }
+        }
+      }
+      // curl -o/--output <file>; -O/--remote-name writes the URL's basename into the current dir.
+      if (t === 'curl' && i === cmdIdx) {
+        for (let j = i + 1; j < tokens.length; j++) {
+          const a = tokens[j];
+          if ((a === '-o' || a === '--output') && j + 1 < tokens.length) {
+            push(tokens[j + 1]);
+            j++;
+          } else if (a === '-O' || a === '--remote-name') {
+            const url = tokens.slice(i + 1).find((x) => /^[a-z][a-z0-9+.-]*:\/\//i.test(x));
+            const base = url ? url.split(/[?#]/)[0].split('/').pop() : '';
+            if (base) push(base);
+          }
+        }
+      }
+      // wget -O <file> / --output-document=<file>
+      if (t === 'wget' && i === cmdIdx) {
+        for (let j = i + 1; j < tokens.length; j++) {
+          const a = tokens[j];
+          if (a === '-O' && j + 1 < tokens.length) {
+            push(tokens[j + 1]);
+            j++;
+          } else if (a.startsWith('--output-document=')) {
+            push(a.slice('--output-document='.length));
+          }
+        }
+      }
+      // dd of=<file>
+      if (t === 'dd' && i === cmdIdx) {
+        for (let j = i + 1; j < tokens.length; j++) {
+          if (/^of=/i.test(tokens[j])) push(tokens[j].slice(3));
+        }
+      }
+      // git apply / git am rewrite tracked files; the patch decides which, so the conservative
+      // target is the current directory itself. Dry-run/metadata forms are excluded.
+      if (t === 'git' && i === cmdIdx && i + 1 < tokens.length) {
+        const sub = tokens[i + 1].toLowerCase();
+        if (
+          (sub === 'apply' || sub === 'am') &&
+          !tokens
+            .slice(i + 2)
+            .some((x) => /^--(check|stat|numstat|summary|abort|quit|show-current-patch)$/.test(x))
+        ) {
+          push('.');
+        }
+      }
+    }
+    // `cd`-like first token updates the prefix for the NEXT segments (redirections of this very
+    // segment open before the cd takes effect, so they were pushed with the previous prefix).
+    const head = tokens.length ? tokens[0].toLowerCase() : '';
+    if (head === 'cd' || head === 'chdir' || head === 'set-location' || head === 'pushd') {
+      const arg = tokens.length > 1 ? tokens[1] : null;
+      const expanded = arg && !arg.startsWith('-') ? expandVars(arg) : null;
+      if (!expanded) {
+        prefixUnknown = true; // `cd` alone, `cd -`, or an unresolvable variable
+      } else if (isAbsoluteLike(expanded)) {
+        prefix = expanded;
+        prefixUnknown = false;
+      } else if (!prefixUnknown) {
+        prefix = prefix ? join(prefix, expanded) : expanded;
+      }
+    } else if (head === 'popd') {
+      prefixUnknown = true; // no directory stack tracking — undecidable from here on
     }
   }
-  // Drops flags, null sinks, and targets with an unresolvable variable; expands the rest so
-  // that the comparison against the repo root (in main) sees the REAL path, not the shell literal.
-  return targets
-    .filter((p) => p && !p.startsWith('-') && !isNullSink(p))
-    .map(expandVars)
-    .filter((p) => p && !isNullSink(p));
+  return targets;
+}
+
+// Resolves symlinks in the already-materialized part of the path (the non-existing tail is
+// re-appended). Closes the carve-out bypass `pelizzai/link -> ../src`: the metadata-vs-product
+// classification sees the REAL destination, not the lexical path. Fail-open: any error (broken
+// link, permissions) returns the lexical path unchanged.
+function realResolve(p) {
+  try {
+    let base = p;
+    const tail = [];
+    while (!existsSync(base)) {
+      const parent = dirname(base);
+      if (parent === base) return p; // nothing materialized (fully hypothetical path)
+      tail.unshift(basename(base));
+      base = parent;
+    }
+    return join(realpathSync(base), ...tail);
+  } catch {
+    return p;
+  }
 }
 
 function block(reason) {
@@ -315,15 +482,18 @@ function main() {
   if (!gitRoot) return 0; // outside a git repo (scratchpad/external) or git missing → allow
 
   // Only targets INSIDE the root matter; scratchpad/temp outside the root never blocks.
+  // realResolve on BOTH sides: a symlinked temp dir (macOS /tmp) compares correctly, and a
+  // symlink inside the repo is classified by its real destination.
+  const realRoot = realResolve(resolve(gitRoot));
   const inRoot = targets
     .map((t) => (isAbsolute(t) ? t : join(cwd, t)))
-    .map((t) => resolve(t))
-    .filter((t) => eqOrInside(t, gitRoot));
+    .map((t) => realResolve(resolve(t)))
+    .filter((t) => eqOrInside(t, realRoot));
   if (inRoot.length === 0) return 0;
 
   // Harness metadata (pelizzai/**) vs. PRODUCT (outside pelizzai/). Both Rule A's carve-out
   // and Rule B rest on this separation.
-  const pelizzaiDir = join(gitRoot, 'pelizzai');
+  const pelizzaiDir = join(realRoot, 'pelizzai');
   const products = inRoot.filter((t) => !eqOrInside(t, pelizzaiDir));
 
   // ── Rule A (both modes): protected/detached branch blocks in-root PRODUCT writes.
@@ -334,11 +504,10 @@ function main() {
   // product or commit loophole — product (outside pelizzai/) stays blocked by this same Rule A;
   // the metadata is only COMMITTED in the first commit of the new task branch (the flow never
   // requires a commit on a protected branch); and pelizzai-guardrails keeps blocking destructive
-  // git. LIMIT (symlink): the metadata-vs-product classification is by PATH — resolve() normalizes
-  // `..` (which is why `pelizzai/../src` correctly counts as product) but does NOT follow symlinks.
-  // A symlink inside pelizzai/ pointing outside (e.g. `pelizzai/link -> ../src`) could make a real
-  // product write be read as metadata and allowed on a protected branch. The carve-out is NOT
-  // airtight against symlinks; the compensating controls remain: pelizzai-guardrails blocks
+  // git. LIMIT (symlink): the classification resolves symlinks in the already-materialized part
+  // of the path (realResolve), so `pelizzai/link -> ../src` is read as PRODUCT, not metadata.
+  // Residual limit (TOCTOU): a link created between this check and the write — e.g. by the same
+  // command — is not seen; the compensating controls remain: pelizzai-guardrails blocks
   // destructive git and human review sees the real target.
   const branch = git(cwd, ['branch', '--show-current']); // '' = detached HEAD (or no branch)
   let isProtected = branch === '' || PROTECTED.includes(branch);
@@ -397,4 +566,6 @@ try {
 } catch {
   exitCode = 0; // fail-open: an error in the hook ITSELF never locks the user out
 }
-process.exit(exitCode);
+// process.exitCode instead of process.exit(): piped stderr writes can be asynchronous and
+// process.exit would truncate the block reason the agent needs to correct course.
+process.exitCode = exitCode;

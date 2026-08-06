@@ -92,7 +92,7 @@ user to type `bootstrap`:
   The plan does not start until the user chooses to create, trim, defer, or record zero skills.
 - **plan→execution (existing project):** before fixing the build lane, if a mutating task's stack is not covered by the catalog (absent, OR present but not covering that stack), propose all the domain skills that would close that gap and prevent agent error.
 
-**Who invokes this gate (it is not just the audit's own self-service):** `pelizzai-brainstorming`
+**Who invokes this gate (it is not just the audit's own self-service):** `pelizzai-idea-generation`
 triggers it at the design→plan edge, as a numbered step of closing the design edge;
 `pelizzai-writing-plans` triggers it as a safety net before Task 1, when the plan's stack has no
 coverage in the catalog (or the catalog is absent). At those two points, the `pelizzai-router`
@@ -132,10 +132,10 @@ flowchart TD
     Gate -- ratified --> Iso
     Iso --> Inv[Inventory: structure, stacks,\nMCPs, git/host, skills, conventions]
     Inv --> New{New or existing project?}
-    New -- New --> Bra[pelizzai-interview-me + pelizzai-brainstorming:\ndiscovery, spec, stress, approval]
+    New -- New --> Bra[pelizzai-interview + pelizzai-idea-generation:\ndiscovery, spec, stress, approval]
     Bra --> Wri
     New -- Existing / Workspace --> Rep[Full repo-scan:\npatterns, stacks, frameworks, conventions]
-    Rep --> Wri[pelizzai-writing-skills:\ncreates the maximum of useful domain skills\nwith context7 + Anthropic rules]
+    Rep --> Wri[pelizzai-create-skill:\ncreates the maximum of useful domain skills\nwith context7 + Anthropic rules]
     Wri --> Doc[Harness artifacts: domain-skills.md\ncatalog + ledger + profile.md]
     Doc --> Rec[Recommendations: git init, remote,\nstack MCPs, context7, opt-in hooks]
     Rec --> End([Harness ready to act])
@@ -163,14 +163,26 @@ skill-roots:
 canonical-skill-root: <active root>
 ```
 
-`pelizzai-writing-skills` writes domain skills to the active root; if both are installed, it keeps byte-for-byte copies and verifies parity.
+`pelizzai-create-skill` writes domain skills to the active root; if both are installed, it keeps byte-for-byte copies and verifies parity.
+
+### 2.5. Anchor the entrypoints
+
+Run `node scripts/sync-harness.mjs` once. It anchors the harness contract — the
+`<!-- pelizzai:contract -->` block derived from the shipped asset
+(`.claude/skills/pelizzai-audit/assets/contract.md`) — into `CLAUDE.md`, `AGENTS.md`, and
+`GEMINI.md`: **absent → created; present → the block is appended, the project's own content
+untouched; block tampered or outdated → resynced in place**. `dist/` ships no entry files on
+purpose — this step (or any later sync) is what creates them, so a copy-install works on a
+virgin project AND on a project that already has its own entry files, without clobbering either.
+The same command is the repair path whenever a session notices the block missing (the
+session-start hook nudges exactly that).
 
 ### 3. Propose the maximum of useful domain skills
 
 In an existing project or workspace, first do the **full repo-scan** — patterns, stacks,
 frameworks, languages, conventions, and extension points. From the observed patterns comes the
 proposal: the **maximum of useful domain skills** for the agent to work correctly in this project.
-Broad coverage is the target; the filter is "useful", not "few". `pelizzai-writing-skills` writes
+Broad coverage is the target; the filter is "useful", not "few". `pelizzai-create-skill` writes
 each candidate grounded in the `context7` MCP (real documentation of the libs/frameworks at the
 version pinned in the manifest) and in Anthropic's skill-creation rules.
 
@@ -200,6 +212,10 @@ The persistent bootstrap leaves:
 
 - `pelizzai/domain-skills.md` — the catalog, including `_none for now_` when applicable;
 - `pelizzai/data/review-domain-skills.md` — the ledger seeded with the current date/HEAD;
+- `pelizzai/data/verification-standard.md` and `pelizzai/data/learnings.md` — the
+  self-optimization pair, seeded from `pelizzai-evolve/templates/` (their format authority):
+  what "correct" means here, filled from the REAL commands/criteria confirmed with the user, and
+  the execution memory, born empty — never pre-filled with guesses;
 - `pelizzai/profile.md` — real commands, package manager, **Stack baseline** (the drift anchor for the version/adoption axes), and skill roots; also record the **Ratified execution defaults** section with every field at `<unset>` — the bootstrap does not guess policy; the user ratifies it at the post-plan gate;
 - `pelizzai/.gitignore` — scoped protection of the ephemerals.
 
@@ -223,8 +239,8 @@ Create on demand, not at bootstrap: `context.md`, `adr/`, `out-of-scope/`, `spec
 
 ### 5. New project
 
-With no code/patterns, use the greenfield cycle: `pelizzai-interview-me` one question at a time →
-full `pelizzai-brainstorming` → stress → approved spec. Then apply the **Proactive domain skills
+With no code/patterns, use the greenfield cycle: `pelizzai-interview` one question at a time →
+full `pelizzai-idea-generation` → stress → approved spec. Then apply the **Proactive domain skills
 gate** before the plan, create only the ratified ones, and record them in the catalog/ledger. If
 the original request includes building the product, continue to `pelizzai-writing-plans`; if it
 asked only for bootstrap/design, stop at the approved scope.
@@ -237,7 +253,7 @@ the **opt-in Claude Code hooks** — **one by one, with confirmation; never impo
 the effect of each. Do not reopen the offer once the check passes:
 
 - **Cadence hook** (`pelizzai-cadence.mjs`/`.ps1`, `UserPromptSubmit`): non-blocking reminder to
-  review the domain skills (see `pelizzai-writing-skills` →
+  review the domain skills (see `pelizzai-create-skill` →
   `references/domain-skill-maintenance.md`); a no-op without a ledger.
 - **Git guard hook** (`pelizzai-guardrails.mjs`/`.ps1`, `PreToolUse` matcher `Bash`): blocks,
   before they run, `push --force` (except `--force-with-lease`), `reset --hard`, `clean -f`,
@@ -317,6 +333,8 @@ that changes the environment waits for confirmation:
 Before declaring the bootstrap done:
 
 ```text
+[ ] entrypoints anchored: CLAUDE.md, AGENTS.md, and GEMINI.md carry the pelizzai:contract block
+    (node scripts/sync-harness.mjs --check passes);
 [ ] the catalog exists and matches the real skills;
 [ ] ledger/profile have no placeholders (`<unset>` fields in *Ratified execution defaults* are valid state — policy not yet ratified —, not a placeholder to fill);
 [ ] commands came from real manifests/scripts;
@@ -327,13 +345,18 @@ Before declaring the bootstrap done:
 
 Review the whole diff in the `combined` profile (or `split` if hooks/settings/security raise the
 risk), commit the approved artifacts with exact paths, and only then run
-`pelizzai-verification-before-completion` against that HEAD. After recording `validated-head`,
-close the transaction via `pelizzai-finish-task`. Do not leave the bootstrap uncommitted or expect
-finish-task to consolidate it.
+`pelizzai-final-verification` against that HEAD. After recording `validated-head`,
+close the transaction via `pelizzai-finish`. Do not leave the bootstrap uncommitted or expect
+pelizzai-finish to consolidate it.
 
 ## Partial state
 
 - catalog exists, ledger missing → propose/repair only the ledger in write mode;
+- `verification-standard.md`/`learnings.md` missing (consumer bootstrapped before the evolve
+  cycle) → propose creating only them from `pelizzai-evolve/templates/` in write mode;
+- an entry file (`CLAUDE.md`/`AGENTS.md`/`GEMINI.md`) missing or without the
+  `pelizzai:contract` block → run `node scripts/sync-harness.mjs` (creates/repairs only the
+  block; project content outside the markers is preserved);
 - a skill exists outside the catalog → catalog it after confirming origin/content;
 - outdated profile → update only the affected fields;
 - read-only → just report the inconsistency.
@@ -351,6 +374,8 @@ pelizzai/
 └── data/
     ├── state.md                    versioned
     ├── review-domain-skills.md     versioned
+    ├── verification-standard.md    versioned (what "correct" means — pelizzai-evolve)
+    ├── learnings.md                versioned (execution memory — pelizzai-evolve)
     ├── history/                    versioned (each task's intact block, migrated at the seal)
     ├── .cadence-state.json         ignored
     ├── handoffs/                   ignored
@@ -378,4 +403,4 @@ In a workspace with multiple repositories, do not pretend one scalar state cover
 
 ## Integration
 
-Uses `pelizzai-starting-branch` and `pelizzai-finish-task` only in `bootstrap-write`; `pelizzai-writing-skills` writes the ratified domain skills — the target is the maximum of useful skills, grounded in `context7`; `pelizzai-team`/`pelizzai-subagents` parallelize the repo-scan when the fronts are independent; `pelizzai-brainstorming` enters only on the new/uncertain-project branch.
+Uses `pelizzai-starting-branch` and `pelizzai-finish` only in `bootstrap-write`; `pelizzai-create-skill` writes the ratified domain skills — the target is the maximum of useful skills, grounded in `context7`; `pelizzai-team`/`pelizzai-subagents` parallelize the repo-scan when the fronts are independent; `pelizzai-idea-generation` enters only on the new/uncertain-project branch.

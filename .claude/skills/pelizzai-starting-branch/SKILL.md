@@ -79,7 +79,7 @@ When there is a workspace or multiple projects:
    frontend/backend/worker, etc.). Inference builds the candidate list, never closes it.
 2. ALWAYS confirm the affected set with the user before proceeding. The set is the user's
    decision: present the inferred list with a recommendation and wait. A guessed set is a material
-   gap — it goes to `pelizzai-interview-me`, not to a default.
+   gap — it goes to `pelizzai-interview`, not to a default.
 3. Workspace of multiple Git repositories: each affected project gets its own isolation. Run §1
    and §3–§8 independently per repository, and open one execution record (consumer state or
    native execution record) per repository. Do not hide a list in the `project` field.
@@ -286,8 +286,8 @@ divergence calls `pelizzai-recovery`, not heuristics.
 
 ## Integration
 
-**Called by:** the router before brainstorming/spec/plan; `pelizzai-execution-plans` at the
+**Called by:** the router before brainstorming/spec/plan; `pelizzai-execute` at the
 post-plan gate; debugging/quick-fix before writing code.
 
-**Combines with:** `pelizzai-execution-plans`, `pelizzai-recovery`, `pelizzai-finish-task`, and
+**Combines with:** `pelizzai-execute`, `pelizzai-recovery`, `pelizzai-finish`, and
 `pelizzai-audit`.

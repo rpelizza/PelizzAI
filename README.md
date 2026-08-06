@@ -45,17 +45,24 @@ language; the harness classifies each request and recommends the route.
 ### No command line: copy `dist/`
 
 The `dist/` folder is the harness ready for consumption: core skills (`.claude` and `.agents`),
-hooks, the Cursor adapter (`.cursor`), scripts, and the three entrypoints (`CLAUDE.md` already in
-the consumer version, `AGENTS.md`, `GEMINI.md`) — without the source-repo sentinel and without the
-harness's development files.
+hooks, the Cursor adapter (`.cursor`), and scripts — without the source-repo sentinel, without
+the harness's development files, and **without the three entrypoints**: `CLAUDE.md`,
+`AGENTS.md`, and `GEMINI.md` are **anchored at install time**, not shipped. The contract they
+carry travels as an asset inside the core skills
+(`.claude/skills/pelizzai-audit/assets/contract.md`), and the first sync or bootstrap creates
+the files that are missing, appends the `<!-- pelizzai:contract -->` block into the ones that
+exist, and resyncs a tampered block — always preserving the project's own content around it.
 
 1. Download the repository (clone or "Download ZIP" on GitHub).
 2. Copy **the contents** of `dist/` into the root of your project — Ctrl+C, Ctrl+V, done.
-3. Open the agent in the project and type `bootstrap`.
+3. In Claude Code, open the agent in the project and type `bootstrap` — the bootstrap anchors
+   the entrypoints as its own step. On platforms that read `AGENTS.md` natively (Codex, Copilot,
+   Cursor), run `node scripts/sync-harness.mjs` once first to create it.
 
-To **update** later, prefer the export below: it preserves your domain skills and your
-`pelizzai/` and validates the installation. Copying the new `dist/` over the top also works, but it
-neither removes core skills discontinued upstream nor runs the validation.
+To **update** later, prefer the export below: it also removes core skills discontinued upstream
+and runs the validation. Copying the new `dist/` over the top works too — since `dist/` carries
+no entry files, neither path clobbers your `CLAUDE.md`/`AGENTS.md`/`GEMINI.md`: the harness
+manages only its anchored contract block, wherever those files came from.
 
 ### With a command line: install and update are the same command
 
@@ -77,9 +84,13 @@ pwsh scripts/sync-harness.ps1 -ExportConsumer C:\path\to\your-project
 bash scripts/sync-harness.sh --export-consumer /path/to/your-project
 ```
 
-This copies the core skills, the hooks, the Cursor adapter, and the useful scripts, generates the
-consumer's `CLAUDE.md`, and validates the mirrors — **without touching** your domain skills, your
-`pelizzai/`, or your `settings.json`.
+This copies the core skills, the hooks, the Cursor adapter, and the useful scripts, **anchors**
+the harness contract as a marker-delimited block (`<!-- pelizzai:contract -->`) inside the
+consumer's `CLAUDE.md`, `AGENTS.md`, and `GEMINI.md`, and validates the mirrors — **without
+touching** your domain skills, your `pelizzai/`, your `settings.json`, or the project's own
+content in those three files. A project that already has its `CLAUDE.md`/`AGENTS.md` keeps
+everything and gains the block at the end; re-running the export only resyncs the block when the
+contract changed upstream (files written by the pre-anchor export are migrated in place, once).
 
 > **Never copy the repository root by hand** — manual copying is what `dist/` is for. What sets
 > the source repo apart from a consumer is a single sentinel, `scripts/pelizzai-source-repo.txt`.
@@ -209,7 +220,7 @@ review, and Verification.
 | screen, component, CSS, layout, UX, or accessibility | `pelizzai-frontend` |
 | auth, external input, SQL, upload, secret, CORS, SSRF, or a sensitive dependency | `pelizzai-oswap` before the final validation |
 | project-specific convention | domain skill cataloged in `pelizzai/domain-skills.md` |
-| human documentation in scope | `pelizzai-documenting-features` |
+| human documentation in scope | `pelizzai-documentation` |
 
 The frontend overlay applies the existing design system and specification before any generic
 preference. It demands real states, responsiveness, accessibility, and visual QA, and explicitly
@@ -269,7 +280,7 @@ language, and database define neither users, rules, states, UX, data, nor accept
 
 ### Debugging
 
-`pelizzai-debugging` starts with **triage**, not a fixed ritual. The failure class picks the
+`pelizzai-debug` starts with **triage**, not a fixed ritual. The failure class picks the
 method:
 
 | Failure class | Method | Hypotheses |
@@ -288,7 +299,7 @@ gap, not stubbornness.
 
 - `pelizzai-quick-fix` — a local, reversible change with no new rule, contract, or surface.
 - `pelizzai-review` — read-only review of a diff, working tree, branch, or PR.
-- `pelizzai-improving-architecture` — codebase-wide review by friction and evidence, with no
+- `pelizzai-architecture-refinement` — codebase-wide review by friction and evidence, with no
   writes.
 - If a tweak reveals new design, contract, or risk, the router reclassifies before continuing.
 
@@ -330,10 +341,10 @@ flowchart LR
 ```
 
 The final validation happens after squash, overlays, tests, and fixes. When everything passes,
-`pelizzai-verification-before-completion` records the `validated-head`: the exact SHA of the last
+`pelizzai-final-verification` records the `validated-head`: the exact SHA of the last
 validated content commit.
 
-`pelizzai-finish-task` requires `HEAD == validated-head` — **what you receive is exactly what was
+`pelizzai-finish` requires `HEAD == validated-head` — **what you receive is exactly what was
 reviewed**. It then creates a single metadata-only commit to seal the task in `phase: delivered`
 and record `confirm:`, the observable condition that will become `done`. In that seal, the task's
 intact block migrates to `pelizzai/data/history/` and the cursor returns to template size.
@@ -456,9 +467,11 @@ flowchart TD
     SYNC --> AS[".agents/skills"]
     SYNC --> AG["AGENTS.md"]
     SYNC --> GE["GEMINI.md"]
+    SYNC --> CTR["contract asset<br/>pelizzai-audit/assets/contract.md"]
     SYNC --> MF["manifest<br/>with --update-manifest"]
     SYNC --> EXP["--export-consumer<br/>target project"]
-    SYNC --> DIST["dist/<br/>ready to copy"]
+    SYNC --> DIST["dist/<br/>ready to copy (no entry files)"]
+    CTR -.->|consumer sync anchors<br/>CLAUDE/AGENTS/GEMINI in place| EXP
     CUR[".cursor/rules/pelizzai.mdc<br/>manually authored, distributed by the export"] -.->|points at the entrypoints| AS
 ```
 
@@ -481,15 +494,16 @@ copies it to the consumer project along with the rest of the harness.
 | Group | Skills | Responsibility |
 | --- | --- | --- |
 | Entry and orchestration | `pelizzai-core`, `pelizzai-router`, `pelizzai-audit`, `pelizzai-preferences` | mandatory entry, route classification and kickoff gate, bootstrap, global behavior floor |
-| Reasoning and conversation | `pelizzai-reasoning`, `pelizzai-interview-me`, `pelizzai-writing-clearly-and-concisely` | proportional reasoning techniques (including OODA), the interview that resolves every material gap, clear writing |
-| Design, plan, and execution | `pelizzai-brainstorming`, `pelizzai-writing-plans`, `pelizzai-execution-plans` | ratified design with spec, executable and stress-tested plan, setup gate and task-by-task execution |
+| Reasoning and conversation | `pelizzai-reasoning`, `pelizzai-interview`, `pelizzai-writing-clearly` | proportional reasoning techniques (including OODA), the interview that resolves every material gap, clear writing |
+| Design, plan, and execution | `pelizzai-idea-generation`, `pelizzai-writing-plans`, `pelizzai-execute` | ratified design with spec, executable and stress-tested plan, setup gate and task-by-task execution |
 | Per-task execution | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop`, `pelizzai-handoff` | proof strategy per artifact, delegation and teams, macro loop and forking into a new session |
-| Dedicated tracks | `pelizzai-debugging`, `pelizzai-quick-fix` | bug with triage and root cause; local tweak without losing isolation, proof, and closeout |
-| Design and exploration | `pelizzai-codebase-design`, `pelizzai-domain-modeling`, `pelizzai-prototype`, `pelizzai-improving-architecture` | deep modules and seams, vocabulary and ADRs, disposable prototype, read-only architectural review |
-| Isolation and integration | `pelizzai-starting-branch`, `pelizzai-finish-task`, `pelizzai-resolving-merge-conflicts`, `pelizzai-recovery`, `pelizzai-documenting-features` | branch before the first write, `delivered` seal, conflicts, recovery, and human docs |
-| Quality and security | `pelizzai-review`, `pelizzai-oswap`, `pelizzai-verification-before-completion` | per-task and final review, OWASP on the sensitive surface, fresh evidence before completion |
+| Dedicated tracks | `pelizzai-debug`, `pelizzai-quick-fix` | bug with triage and root cause; local tweak without losing isolation, proof, and closeout |
+| Design and exploration | `pelizzai-codebase-architecture`, `pelizzai-domain-modeling`, `pelizzai-prototype`, `pelizzai-architecture-refinement` | deep modules and seams, vocabulary and ADRs, disposable prototype, read-only architectural review |
+| Isolation and integration | `pelizzai-starting-branch`, `pelizzai-finish`, `pelizzai-merge-conflict-resolution`, `pelizzai-recovery`, `pelizzai-documentation` | branch before the first write, `delivered` seal, conflicts, recovery, and human docs |
+| Quality and security | `pelizzai-review`, `pelizzai-oswap`, `pelizzai-final-verification` | per-task and final review, OWASP on the sensitive surface, fresh evidence before completion |
 | Frontend | `pelizzai-frontend` | product, design, implementation, and visual QA overlay — from design onward |
-| Skill authoring | `pelizzai-writing-skills` | authoring and maintenance of the domain skills |
+| Skill authoring | `pelizzai-create-skill` | authoring and maintenance of the domain skills |
+| Self-optimization | `pelizzai-evolve` | verification standard + learnings: the project learns from observed failures, with promotion ratified by the user |
 
 ---
 

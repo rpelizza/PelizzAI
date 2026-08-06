@@ -39,11 +39,38 @@ try {
       $mPhase = [regex]::Match($state, '(?m)^\s*-\s*phase:\s*(\S+)')
       $slug = if ($mSlug.Success) { $mSlug.Groups[1].Value } else { $null }
       $phase = if ($mPhase.Success) { $mPhase.Groups[1].Value } else { $null }
-      if ($slug -and $slug -ne '<none>' -and -not $slug.StartsWith('<') -and $phase -and $phase -ne 'done' -and -not $phase.StartsWith('<')) {
+      # state.md is a VERSIONED file: whatever it carries lands in the agent's context on every
+      # session start. Values are matched against the shape the template documents and the whole
+      # line is DISCARDED on mismatch - untrusted text, not "a different policy" (second-order
+      # prompt injection via a merged commit). Parity with the .mjs fix.
+      $phases = @('brainstorm', 'plan', 'exec', 'review', 'delivered', 'done', 'abandoned', 'blocked')
+      if ($slug -and $slug -cmatch '^[a-z0-9][a-z0-9._-]{0,63}$' -and $phase -and ($phases -ccontains $phase) -and $phase -ne 'done') {
         $lines += "There is an ACTIVE task in pelizzai/data/state.md (slug: $slug, phase: $phase) - resume via pelizzai-router, validating the cursor against git before proceeding."
       }
     } catch {}
   }
+
+  # Anchored-entrypoint self-orientation: in a consumer where the harness is installed (core
+  # skill present) but CLAUDE.md is missing or lost its pelizzai:contract block, say how to
+  # restore it - the sync recreates/repairs it without touching project content outside the markers.
+  try {
+    $srcModeAnchor = Test-Path -LiteralPath (Join-Path $cwd 'scripts/pelizzai-source-repo.txt')
+    $coreInstalled = Test-Path -LiteralPath (Join-Path $cwd '.claude/skills/pelizzai-core')
+    if ((-not $srcModeAnchor) -and $coreInstalled) {
+      $anchored = $false
+      try {
+        $claudePath = Join-Path $cwd 'CLAUDE.md'
+        if (Test-Path -LiteralPath $claudePath) {
+          # -ErrorAction Stop: with SilentlyContinue at file scope a read failure would NOT
+          # reach the catch, and this leg would nag where the .mjs stays silent (parity).
+          $anchored = (Get-Content -LiteralPath $claudePath -Raw -ErrorAction Stop).Contains('<!-- pelizzai:contract -->')
+        }
+      } catch { $anchored = $true } # unreadable file: do not nag on a doubt
+      if (-not $anchored) {
+        $lines += 'PelizzAI entry files are missing or not anchored (no pelizzai:contract block in CLAUDE.md). Run `node scripts/sync-harness.mjs` (or the bootstrap) to create/restore the harness contract block - project content outside the block is preserved.'
+      }
+    }
+  } catch {}
 
   # Consumer without a domain-skill catalog: suggests ONCE the read-only bootstrap path
   # (propose->confirm; nothing is created without consent). In source mode (source repo)
@@ -68,11 +95,15 @@ try {
       $mCommit = [regex]::Match($profile, 'commit-strategy-default:\s*(\S+)')
       # Not ratified = raw `unset` OR any placeholder between <> (the bootstrap writes
       # `<unset>`, and the template ships the `<branch|worktree|unset>` menu) - same convention
-      # as state.md above. Without this, the recap would fire on every freshly bootstrapped consumer.
-      $isRatified = { param($m) $m.Success -and $m.Groups[1].Value -ne 'unset' -and -not $m.Groups[1].Value.StartsWith('<') }
-      if (& $isRatified $mIso) { $ratified += "isolation $($mIso.Groups[1].Value)" }
-      if (& $isRatified $mMode) { $ratified += "mode $($mMode.Groups[1].Value)" }
-      if (& $isRatified $mCommit) { $ratified += "commit $($mCommit.Groups[1].Value)" }
+      # as state.md above. Without this, the recap would fire on every freshly bootstrapped
+      # consumer. The allowlist closes the same injection vector as the slug: profile.md is
+      # versioned, so only the enum values the template documents are echoed.
+      # -ccontains (case-sensitive): the .mjs allowlist uses includes(), which is case-sensitive
+      # — `isolation-default: Branch` must behave identically on both legs.
+      $isRatified = { param($m, $allowed) $m.Success -and $m.Groups[1].Value -ne 'unset' -and -not $m.Groups[1].Value.StartsWith('<') -and ($allowed -ccontains $m.Groups[1].Value) }
+      if (& $isRatified $mIso @('branch', 'worktree')) { $ratified += "isolation $($mIso.Groups[1].Value)" }
+      if (& $isRatified $mMode @('inline', 'subagents', 'team')) { $ratified += "mode $($mMode.Groups[1].Value)" }
+      if (& $isRatified $mCommit @('granular', 'squash-final')) { $ratified += "commit $($mCommit.Groups[1].Value)" }
       if ($ratified.Count -gt 0) {
         $lines += "Ratified execution policy for this project (pelizzai/profile.md): $($ratified -join ', ') - reapply it as a 1-line recap; do not re-ask what has already been ratified (destination remains per task)."
       }

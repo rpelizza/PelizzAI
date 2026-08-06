@@ -12,11 +12,14 @@
 #
 # Why a file, not pasting: everything that enters by pasting stays resident in the
 # coordinator's context forever (gain measured at the source: ~2x faster,
-# ~50% fewer tokens). See pelizzai-execution-plans -> references/task-cycle.md, section 1.
+# ~50% fewer tokens). See pelizzai-execute -> references/task-cycle.md, section 1.
 #
 # PowerShell equivalent: scripts/task-brief.ps1.
 
 set -u
+# The brief can quote plan content; under a permissive umask the handoff directory and file
+# would be readable by other local users. 077 keeps both private.
+umask 077
 
 fail() { echo "task-brief: $1" >&2; exit 1; }
 
@@ -48,7 +51,9 @@ esac
 GC=$(awk '
   /^```/ { in_fence = !in_fence }
   in_block && !in_fence && ($0 ~ /^---[ \t]*$/ || $0 ~ /^#/) { exit }
-  $0 ~ /\*\*Global Constraints/ { in_block = 1 }
+  # The marker only opens the block OUTSIDE a code fence and anchored at column zero: a code
+  # example quoting **Global Constraints before the real block must not start the capture.
+  !in_block && !in_fence && $0 ~ /^\*\*Global Constraints/ { in_block = 1 }
   in_block { print }
 ' "$PLAN")
 
@@ -63,9 +68,16 @@ TASK=$(awk -v n="$N" '
 [ -n "$TASK" ] || fail "Task $N not found in $PLAN (expected a header '### Task $N: ...')"
 
 OUT_DIR=$(handoff_dir)
+# Shared-temp hygiene: never follow a symlink planted at the handoff path, keep the directory
+# private (0700), and require ownership when it pre-existed.
+[ -L "$OUT_DIR" ] && fail "handoff dir is a symlink: $OUT_DIR"
 mkdir -p "$OUT_DIR"
+chmod 700 "$OUT_DIR" 2>/dev/null || true
+[ -n "$(find "$OUT_DIR" -maxdepth 0 -user "$(id -un)" 2>/dev/null)" ] || fail "handoff dir is not owned by the current user: $OUT_DIR"
 OUT="$OUT_DIR/task-$N-brief.md"
 
+# Written to a private temporary (0600 under umask 077) and moved into place atomically.
+TMP_OUT="$OUT.tmp.$$"
 {
   echo "# Brief — Task $N"
   echo
@@ -82,6 +94,7 @@ OUT="$OUT_DIR/task-$N-brief.md"
   echo "---"
   echo
   echo "Report: write the result to \`$OUT_DIR/task-$N-report.md\` (mirroring this brief) and reply in chat in at most 15 lines."
-} > "$OUT"
+} > "$TMP_OUT"
+mv -f "$TMP_OUT" "$OUT"
 
 echo "$OUT"
