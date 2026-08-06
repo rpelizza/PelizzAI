@@ -30,8 +30,10 @@ in the native execution record.
 | `pelizzai/data/verification-standard.md` | what *correct* means here | `pelizzai-final-verification` before judging a delivery · `pelizzai-review` when briefing reviewers · `pelizzai-writing-plans` when drafting validation | `pelizzai-audit` at bootstrap · here, in its own ratified change — **never during a correction** |
 | `pelizzai/data/learnings.md` | what execution already learned | `pelizzai-writing-plans` and `pelizzai-execute` before proposing approaches | incident entries at root-cause confirmation (usually `pelizzai-debug`, in the fix's own commit) · `pelizzai-finish` counts recurrences at closeout · here, on promotion and retirement |
 
-Either one missing in a consumer → propose creating it from [templates/](templates/verification-standard.md)
-(`pelizzai-audit` seeds both at bootstrap; both are **versioned**, like the rest of
+`verification-standard.md` missing in a consumer → propose creating it from
+[templates/verification-standard.md](templates/verification-standard.md); `learnings.md`
+missing → from [templates/learnings.md](templates/learnings.md) — each artifact keeps its own
+schema (`pelizzai-audit` seeds both at bootstrap; both are **versioned**, like the rest of
 `pelizzai/data/`'s durable record). A cycle with no standard has nothing to measure against, and
 a learnings file nobody reads before designing is a log.
 

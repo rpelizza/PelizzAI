@@ -95,7 +95,8 @@ Ambiguity: is something missing that would materially change the outcome?
 Use context, code, and documentation before asking, to eliminate factual doubts. Do not use that
 evidence to decide product intent. Ask when the answer changes requirements, scope, UX,
 architecture, data, security, cost, authority, acceptance, or solution — the instrument for that
-question is `pelizzai-interview`. Ask **one question at a time**, in dependency order; offer 2–3
+question is `pelizzai-interview`. Ask **one question at a time**, in the conversation's language,
+in dependency order; offer 2–3
 real options when that helps and mark the best recommendation with a short reason. Do not adopt a
 product assumption to "unblock" the work. A reversible choice may only be applied mechanically when
 it is already contained in a ratified spec/plan or was explicitly delegated by the user. The

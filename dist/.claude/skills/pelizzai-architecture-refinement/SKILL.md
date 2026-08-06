@@ -3,7 +3,7 @@ name: pelizzai-architecture-refinement
 description: Read-only head skill for PROACTIVE codebase-wide review of architecture, technical debt, and missing seams. Use periodically (every few days of intense work on the project), when the user asks for a broad architectural analysis or what is worth refactoring, and when debugging records a structural gap. Delivers candidates prioritized by evidence; does not edit code, report, ADR, or out-of-scope. Diff/branch/PR review uses pelizzai-review.
 ---
 
-# PelizzAI Improving Architecture
+# PelizzAI Architecture Refinement
 
 ## Goal
 
@@ -11,7 +11,7 @@ Find where the architecture is charging an **observable** cost and return a few 
 opportunities, without turning aesthetic preference into a refactor or a read-only analysis into
 writes.
 
-**Announce**, in the conversation's language: that you are using the PelizzAI Improving Architecture skill to review the architecture by evidence.
+**Announce**, in the conversation's language: that you are using the PelizzAI Architecture Refinement skill to review the architecture by evidence.
 
 ## Effect contract
 

@@ -214,6 +214,24 @@ function isAbsoluteLike(p) {
   return isAbsolute(p) || /^[A-Za-z]:[\\/]/.test(p);
 }
 
+// Index of the segment's actual COMMAND: skips wrapper prefixes, VAR=value assignments, and
+// their flags. The copy/download verbs below are only recognized AT this index — `install`
+// appearing as an argument (`npm install express`, `pip install requests`) is a package
+// manager's subcommand, not a file write, and used to be misread as one.
+const COMMAND_PREFIXES = new Set(['sudo', 'doas', 'env', 'time', 'nohup', 'nice', 'command', 'exec', 'xargs']);
+function commandIndex(tokens) {
+  let i = 0;
+  while (i < tokens.length) {
+    const t = tokens[i].toLowerCase();
+    if (COMMAND_PREFIXES.has(t) || /^[A-Za-z_][A-Za-z0-9_]*=/.test(tokens[i]) || (i > 0 && tokens[i].startsWith('-'))) {
+      i++;
+      continue;
+    }
+    break;
+  }
+  return i;
+}
+
 // Write targets of a shell command (Bash sibling matcher). Best-effort and honest:
 // covers the common cases; what it cannot parse safely does not block. Besides redirection,
 // tee, Set-Content/Add-Content/Out-File, and sed -i, it recognizes the common copy/download
@@ -242,6 +260,7 @@ function extractShellTargets(command) {
   for (const seg of command.split(/&&|\|\||;|\||\r?\n/)) {
     const { tokens, redirects } = parseSegment(seg);
     for (const r of redirects) push(r);
+    const cmdIdx = commandIndex(tokens);
     for (let i = 0; i < tokens.length; i++) {
       const t = tokens[i].toLowerCase();
       // tee [-flags] file...  /  Tee-Object -FilePath file
@@ -284,8 +303,9 @@ function extractShellTargets(command) {
           }
         }
       }
-      // cp / mv / install / ln: the write lands on the LAST non-flag operand (destination/link).
-      if (t === 'cp' || t === 'mv' || t === 'install' || t === 'ln') {
+      // cp / mv / install / ln — only as the segment's COMMAND (see commandIndex): the write
+      // lands on the LAST non-flag operand (destination/link).
+      if ((t === 'cp' || t === 'mv' || t === 'install' || t === 'ln') && i === cmdIdx) {
         for (let j = tokens.length - 1; j > i; j--) {
           if (!tokens[j].startsWith('-')) {
             push(tokens[j]);
@@ -294,7 +314,7 @@ function extractShellTargets(command) {
         }
       }
       // curl -o/--output <file>; -O/--remote-name writes the URL's basename into the current dir.
-      if (t === 'curl') {
+      if (t === 'curl' && i === cmdIdx) {
         for (let j = i + 1; j < tokens.length; j++) {
           const a = tokens[j];
           if ((a === '-o' || a === '--output') && j + 1 < tokens.length) {
@@ -308,7 +328,7 @@ function extractShellTargets(command) {
         }
       }
       // wget -O <file> / --output-document=<file>
-      if (t === 'wget') {
+      if (t === 'wget' && i === cmdIdx) {
         for (let j = i + 1; j < tokens.length; j++) {
           const a = tokens[j];
           if (a === '-O' && j + 1 < tokens.length) {
@@ -320,14 +340,14 @@ function extractShellTargets(command) {
         }
       }
       // dd of=<file>
-      if (t === 'dd') {
+      if (t === 'dd' && i === cmdIdx) {
         for (let j = i + 1; j < tokens.length; j++) {
           if (/^of=/i.test(tokens[j])) push(tokens[j].slice(3));
         }
       }
       // git apply / git am rewrite tracked files; the patch decides which, so the conservative
       // target is the current directory itself. Dry-run/metadata forms are excluded.
-      if (t === 'git' && i + 1 < tokens.length) {
+      if (t === 'git' && i === cmdIdx && i + 1 < tokens.length) {
         const sub = tokens[i + 1].toLowerCase();
         if (
           (sub === 'apply' || sub === 'am') &&

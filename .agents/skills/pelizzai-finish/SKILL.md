@@ -3,7 +3,7 @@ name: pelizzai-finish
 description: Use after overlays, consolidation, and final validation have sealed the content at validated-head. Before the destination, checks as a safety net whether security, UI, or documentation went uncovered and offers — without blocking — to return the delivery to the cycle. In a consumer, closes the task in phase delivered with a metadata-only commit of state.md + the data/history/ file from the migration (done is observed later, not here); in the source repo, validates the seal without creating runtime/closure. Keeps local by default or publishes/opens a PR with authorization. Never alters content or history after the seal.
 ---
 
-# PelizzAI Finish Task
+# PelizzAI Finish
 
 ## Goal
 
@@ -22,7 +22,7 @@ source:   validated-head ──────────────────�
                                      (done observed later, outside this skill)
 ```
 
-**Announce on start**, in the conversation's language: that you are using the PelizzAI Finish Task skill to integrate the already-validated content.
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Finish skill to integrate the already-validated content.
 
 ## Source mode — no consumer runtime
 
@@ -181,16 +181,18 @@ gates: apply the briefing and escalate to the coordinator whatever requires a de
    (`- <date> <slug> — delivered — <result ≤10 words> → data/history/<file>`). The cursor shrinks
    back to template size HERE, at closeout — it does not stay bloated through the whole
    `delivered` window. Preserve `slug`, `phase`, `branch`, `base-ref`, `base-sha`,
-   `validated-head`, `commit-strategy`, `worktree-path`, and `confirm:`: the destination (Step 3)
-   and the later observation still read them.
+   `validated-head`, `commit-strategy`, `worktree-path`, `confirm:`, and `delivery-status:`: the
+   destination (Step 3) and the later observation still read them.
 2. Set `phase: delivered` and record `confirm:` with the observable condition that becomes `done`,
    derived from the destination chosen in 2a: publish/PR → `base-ref contains validated-head
    (PR/branch integrated)`; keep local → `local delivery accepted by the user`; discard/archival
    (option 4) → `archived locally, no merge expected` (it is not a delivery onto a base: §3d
    decides archive or discard; the observation becomes `done` when the archive is accepted, or
    `abandoned` if discarded). Also set `delivery-status:` to the destination INTENT from 2a —
-   `pending push`, `pending pr`, `local`, or `archive`. It is sealed in this same closure commit
-   and never edited again by this skill (a second cursor commit is a red flag): what actually
+   `pending push`, `pending pr`, `local`, or `archive`. In a consumer it is sealed in this same
+   closure commit and never edited again by this skill (a second cursor commit is a red flag) —
+   the rule binds the consumer cursor; source mode records the destination status in the native
+   execution record as §3 describes: what actually
    happened at §3 is reported in the conversation and OBSERVED on resumption against the remote,
    with the sealed intent narrowing the reconciliation — remote branch missing = failed before
    the push; branch at `delivery-head` without a PR = pushed, PR pending.

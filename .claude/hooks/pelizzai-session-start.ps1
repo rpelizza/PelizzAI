@@ -61,7 +61,9 @@ try {
       try {
         $claudePath = Join-Path $cwd 'CLAUDE.md'
         if (Test-Path -LiteralPath $claudePath) {
-          $anchored = (Get-Content -LiteralPath $claudePath -Raw).Contains('<!-- pelizzai:contract -->')
+          # -ErrorAction Stop: with SilentlyContinue at file scope a read failure would NOT
+          # reach the catch, and this leg would nag where the .mjs stays silent (parity).
+          $anchored = (Get-Content -LiteralPath $claudePath -Raw -ErrorAction Stop).Contains('<!-- pelizzai:contract -->')
         }
       } catch { $anchored = $true } # unreadable file: do not nag on a doubt
       if (-not $anchored) {
@@ -96,7 +98,9 @@ try {
       # as state.md above. Without this, the recap would fire on every freshly bootstrapped
       # consumer. The allowlist closes the same injection vector as the slug: profile.md is
       # versioned, so only the enum values the template documents are echoed.
-      $isRatified = { param($m, $allowed) $m.Success -and $m.Groups[1].Value -ne 'unset' -and -not $m.Groups[1].Value.StartsWith('<') -and ($allowed -contains $m.Groups[1].Value) }
+      # -ccontains (case-sensitive): the .mjs allowlist uses includes(), which is case-sensitive
+      # — `isolation-default: Branch` must behave identically on both legs.
+      $isRatified = { param($m, $allowed) $m.Success -and $m.Groups[1].Value -ne 'unset' -and -not $m.Groups[1].Value.StartsWith('<') -and ($allowed -ccontains $m.Groups[1].Value) }
       if (& $isRatified $mIso @('branch', 'worktree')) { $ratified += "isolation $($mIso.Groups[1].Value)" }
       if (& $isRatified $mMode @('inline', 'subagents', 'team')) { $ratified += "mode $($mMode.Groups[1].Value)" }
       if (& $isRatified $mCommit @('granular', 'squash-final')) { $ratified += "commit $($mCommit.Groups[1].Value)" }

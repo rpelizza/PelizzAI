@@ -3,9 +3,9 @@ name: pelizzai-merge-conflict-resolution
 description: Use when there is a git merge/rebase conflict in progress to resolve — the goal is to preserve the intent of BOTH sides. Never uses `--abort` on its own to escape the conflict; if the original intent cannot be safely preserved, it STOPS and escalates to the user. Trigger when the user says "resolve this conflict", "there's a merge conflict", "rebase conflict".
 ---
 
-# PelizzAI Resolving Merge Conflicts
+# PelizzAI Merge Conflict Resolution
 
-**Announce at start**, in the conversation's language: that you are using the PelizzAI Resolving Merge Conflicts skill to resolve the conflicts.
+**Announce at start**, in the conversation's language: that you are using the PelizzAI Merge Conflict Resolution skill to resolve the conflicts.
 
 ## Process
 

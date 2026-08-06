@@ -3,7 +3,7 @@ name: pelizzai-create-skill
 description: Use this skill to create, edit, validate, or optimize a skill **at the user's request**, and as the authoring and maintenance engine for a project's **DOMAIN** skills. Trigger it (a) at bootstrap, called by `pelizzai-audit`, to generously enumerate the candidates the repo's patterns justify — one per recurring flow/responsibility — and write them after the user ratifies the list, grounded in `context7`/official docs and Anthropic's skill rules; (b) for domain-skill maintenance — a stack that changes version, rework that repeats in git, a newly adopted stack with no coverage, or an overdue cadence (≥10 commits, >10 days, repo-scan every 15 days); and (c) when the user says "create a skill", "turn this into a skill", "optimize the description", or "update the domain skills". Proactive maintenance acts ONLY on domain skills — harness skills (`pelizzai-*`) are only created or edited at the user's explicit request. And it NEVER overwrites a skill blindly: the diff goes to the user before writing, with per-skill approval.
 ---
 
-# PelizzAI Writing Skills
+# PelizzAI Create Skill
 
 ## Purpose
 
@@ -14,7 +14,7 @@ This skill is the PelizzAI harness's **skill authoring and maintenance engine**.
 | **Authoring**  | The user wants a new skill; or `pelizzai-audit` requests domain skills at bootstrap | One or several well-written, grounded, cataloged skills          |
 | **Maintenance** | The stack changes version; patterns repeat in git; the cadence comes due | Domain skills updated (with diff and confirmation) and recorded |
 
-**Announce on start**, in the conversation's language: that you are using the PelizzAI Writing Skills skill to create/maintain skills.
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Create Skill skill to create/maintain skills.
 
 <TEAM-MEMBER-STOP>
 If you are a **member** of a team (subagent/teammate) tasked with writing **one** domain skill, write only yours and return the draft to the coordinator — do not orchestrate the whole bootstrap or touch the catalog/ledger. Invoke `pelizzai-reasoning` for your subtask.

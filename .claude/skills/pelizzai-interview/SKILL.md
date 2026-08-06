@@ -3,7 +3,7 @@ name: pelizzai-interview
 description: Canonical gap-closing mechanism with the human — the LLM never fills a decision by default, convention, Context7, or reasonable inference. Mandatory for opening and for stress-testing design and plan (discovery, post-design, post-plan) and whenever execution hits a decision the spec/plan does not cover: an ambiguous requirement, an undefined interface contract, a scope/UX/architecture/data/security/cost/acceptance choice. Use it also when the user asks for questions or stress. Stop the task, ask one question at a time with 2–3 options and the recommended one, record the answer in the plan, and only then resume.
 ---
 
-# PelizzAI Interview Me
+# PelizzAI Interview
 
 ## Goal
 
@@ -16,7 +16,7 @@ choice looks obvious and reversible.
 Efficiency here means well-ordered questions, not batched decisions or presumed answers.
 The interview does not replace reading the project, nor does it exist to fabricate gaps.
 
-**Announce**, in the conversation's language: that you are using the PelizzAI Interview Me skill to resolve the material decisions still open.
+**Announce**, in the conversation's language: that you are using the PelizzAI Interview skill to resolve the material decisions still open.
 
 ## Modes
 

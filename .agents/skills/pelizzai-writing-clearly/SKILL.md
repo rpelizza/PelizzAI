@@ -3,7 +3,7 @@ name: pelizzai-writing-clearly
 description: A skill that applies William Strunk Jr.'s timeless writing principles to produce clearer, more vigorous, professional prose while avoiding common AI writing patterns.
 ---
 
-# Writing Clearly and Concisely
+# Writing Clearly
 
 ## Overview
 

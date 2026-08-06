@@ -112,7 +112,7 @@ for ($i = 0; $i -lt 50; $i++) {
             Start-Sleep -Milliseconds 100
         }
         if (-not $alive) {
-            $retry = "$scriptDir\start-server.ps1$(if ($ProjectDir) { " -ProjectDir $ProjectDir" }) -BindHost $BindHost -UrlHost $UrlHost -IdleTimeoutMinutes $IdleTimeoutMinutes -Foreground"
+            $retry = "$scriptDir\start-server.ps1$(if ($ProjectDir) { " -ProjectDir $ProjectDir" }) -BindHost $BindHost -UrlHost $UrlHost$(if ($AllowInsecureNetwork) { ' -AllowInsecureNetwork' }) -IdleTimeoutMinutes $IdleTimeoutMinutes -Foreground"
             Write-Output "{`"error`": `"Server started but was killed. Retry in a persistent terminal with: $retry`"}"
             exit 1
         }

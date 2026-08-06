@@ -45,13 +45,14 @@ if [[ -f "$PID_FILE" ]]; then
 
   rm -f "$PID_FILE" "${STATE_DIR}/server.log"
 
-  # Only delete ephemeral /tmp directories. Canonicalize first: a raw
-  # "/tmp/../etc" would pass the literal prefix test but rm outside /tmp
-  # (the .ps1 counterpart already resolves the full path before comparing).
-  # On macOS /tmp is a symlink to /private/tmp, so realpath resolves the session dir
-  # there — without the second pattern the ephemeral data silently survived the stop.
-  resolved_dir="$(realpath -m "$SESSION_DIR" 2>/dev/null || echo "$SESSION_DIR")"
-  if [[ "$resolved_dir" == /tmp/* || "$resolved_dir" == /private/tmp/* ]]; then
+  # Only delete ephemeral /tmp directories. Canonicalize with `cd -P` (POSIX, works on the
+  # minimal BSD realpath of macOS, which has no -m): a raw "/tmp/../etc" would pass the
+  # literal prefix test but rm outside /tmp. If the directory cannot be resolved, SKIP the
+  # cleanup entirely — an unresolved path must never reach rm -rf.
+  # On macOS /tmp is a symlink to /private/tmp, so the resolved dir lands there — without the
+  # second pattern the ephemeral data silently survived the stop.
+  resolved_dir="$(cd -P -- "$SESSION_DIR" 2>/dev/null && pwd -P)" || resolved_dir=""
+  if [[ -n "$resolved_dir" && ( "$resolved_dir" == /tmp/* || "$resolved_dir" == /private/tmp/* ) ]]; then
     rm -rf "$resolved_dir"
   fi
 

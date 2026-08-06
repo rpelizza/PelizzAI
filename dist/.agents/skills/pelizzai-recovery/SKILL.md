@@ -41,8 +41,11 @@ If it is a directory false alarm, fix the context and return to the router witho
 **Delivery in `delivered` on resumption.** If state shows `phase: delivered`, the task was sealed and
 its destination executed, leaving only the observation of `done` — this is **not** WIP divergence.
 Apply the same reconciliation as `pelizzai-execute` (§Reconciling the previous delivery):
-check `confirm:` against git (read-only) — does `base-ref` contain `validated-head`? PR merged?
-branch integrated? (local delivery: does the user accept?). Observed → stamp the `## History` index
+read the sealed intent in `delivery-status:` to narrow what to observe (`pending push` with no
+remote branch = failed before the push; `pending pr` with the branch at `validated-head` and no
+PR = push confirmed, PR pending) — the field is the INTENT and is never overwritten with the
+observed outcome — and check `confirm:` against git (read-only): does `base-ref` contain
+`validated-head`? PR merged? branch integrated? (local delivery: does the user accept?). Observed → stamp the `## History` index
 line with `done <YYYY-MM-DD>` + 1-line evidence and record `phase: done` — the full block
 already migrated to `pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` at the `delivered` seal, so
 there is no block to move here. On a protected branch this authorization covers ONLY the cursor

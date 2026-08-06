@@ -3,11 +3,11 @@ name: pelizzai-codebase-architecture
 description: Shared vocabulary for designing deep modules. Use when the user wants to design or improve a module's interface, find deepening opportunities, decide where a seam goes, make code more testable or navigable, or when another skill (`pelizzai-tdd`, `pelizzai-idea-generation`, `pelizzai-writing-plans`) needs the deep-modules vocabulary. Trigger when designing interfaces, defining unit boundaries, or assessing testability.
 ---
 
-# PelizzAI Codebase Design
+# PelizzAI Codebase Architecture
 
 Design **deep modules**: lots of behavior behind a small interface, at a clean seam, testable through the interface itself. Use this language and these principles whenever code is being designed or restructured. The goal is leverage for callers, locality for maintainers, and testability for everyone.
 
-**Announce on start (when triggered explicitly)**, in the conversation's language: that you are using the PelizzAI Codebase Design skill to design deep modules.
+**Announce on start (when triggered explicitly)**, in the conversation's language: that you are using the PelizzAI Codebase Architecture skill to design deep modules.
 
 ## Glossary
 

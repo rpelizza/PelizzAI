@@ -3,14 +3,14 @@ name: pelizzai-documentation
 description: Overlay for HUMAN documentation of a feature's stable contract, such as routes, commands, APIs, and screens. Use when docs are part of the scope, the diff creates a stable surface that needs explaining, or the user asks for usage documentation. Runs before the final review and validated-head; pelizzai-finish does not execute it (it only flags the gap as a safety net), and it does not apply to the harness's specs/plans/ADRs.
 ---
 
-# PelizzAI Documenting Features
+# PelizzAI Documentation
 
 ## Goal
 
 Explain to humans the delivery's observable, durable contract, without narrating internal details
 that go stale in the next refactor.
 
-**Announce**, in the conversation's language: that you are using the PelizzAI Documenting Features skill to document the feature's contract.
+**Announce**, in the conversation's language: that you are using the PelizzAI Documentation skill to document the feature's contract.
 
 ## Where
 
@@ -56,7 +56,7 @@ head skill consolidates with the others **before** the final review. The protect
 `pelizzai-starting-branch` applies: never commit to `main`/`master`/`develop`/`dev` or to the
 actual discovered default.
 
-Finish-task never generates or fixes documentation: after the seal it is too late to write there.
+`pelizzai-finish` never generates or fixes documentation: after the seal it is too late to write there.
 What it does is the safety-net check — if a documentable surface got through without this skill, it
 offers **once** to return the delivery to the cycle (the seal falls and the doc becomes validated
 content again, with the final review redone). Informed refusal ships without docs; the net does not

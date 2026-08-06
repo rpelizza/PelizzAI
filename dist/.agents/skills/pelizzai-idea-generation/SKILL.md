@@ -3,14 +3,14 @@ name: pelizzai-idea-generation
 description: Explores and ratifies design before implementing a greenfield product/project, or a feature, refactor, or structural change with trade-offs, requirements, architecture, UX, data, or risk still open. Greenfield uses full mode even with a defined stack; a change to an existing system may use compact mode. Do not use for already-approved design, a trivial tweak, or a bug under investigation.
 ---
 
-# PelizzAI Brainstorming
+# PelizzAI Idea Generation
 
 ## Goal
 
 Turn intent into a design decided by the user before implementation. The skill investigates,
 surfaces alternatives, and recommends; it never fills in a product decision to gain speed.
 
-**Announce**, in the conversation's language: that you are using the PelizzAI Brainstorming skill in `<compact|full>` mode to resolve the design decisions before implementing.
+**Announce**, in the conversation's language: that you are using the PelizzAI Idea Generation skill in `<compact|full>` mode to resolve the design decisions before implementing.
 
 <HARD-GATE>
 Do NOT invoke an implementation skill, write code, create scaffolding, or take any implementation

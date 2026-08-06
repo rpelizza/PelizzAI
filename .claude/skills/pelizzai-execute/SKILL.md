@@ -3,7 +3,7 @@ name: pelizzai-execute
 description: Executes an approved plan task by task, choosing proportional proof/review, keeping state in the consumer or the execution record in source mode, and sealing the final candidate. Use when a plan/PRD/issues are ready to implement. Never write on a protected branch; starting-branch prepares the isolation before execution.
 ---
 
-# PelizzAI Execution Plans
+# PelizzAI Execute
 
 ## Goal
 
@@ -14,7 +14,7 @@ consolidated. At the end, overlays that may write run before the content is seal
 review, suite, and checklist. The skill keeps resumable state and prevents integrating content
 different from what was validated.
 
-**Announce on start**, in the conversation's language: that you are using the PelizzAI Execution Plans skill to execute the plan, task by task.
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Execute skill to execute the plan, task by task.
 
 <TEAM-MEMBER-STOP>
 If you are a **member** (teammate/subagent) in charge of **one task**, implement only yours:
@@ -366,7 +366,7 @@ Common invariants:
   `pelizzai/profile.md` is not inheritance: it pre-selects the recap's recommendation, re-shown
   and ratifiable at each new task.
 - `phase: delivered` = delivery sealed + destination executed, awaiting the observation of `done`
-  (see Reconciliation of the previous delivery). Finish-task closes in `delivered`, never in `done`.
+  (see Reconciliation of the previous delivery). `pelizzai-finish` closes in `delivered`, never in `done`.
 - `base-ref`/`base-sha` are the initial snapshot and are never recalculated at the end.
 - a content change invalidates `validated-head`; it is only born after the final validation.
 - `project` is exactly one repo; another repo gets another execution record.

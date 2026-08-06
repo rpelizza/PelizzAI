@@ -72,7 +72,7 @@ the lookup never ran.
 
 A security fix changes the candidate: implement before the seal, run the proof, consolidate, and
 reopen the affected categories/reviews. Critical/High block `validated-head`; accepted risk
-requires the owner's explicit decision and an appropriate durable record. Finish-task never runs
+requires the owner's explicit decision and an appropriate durable record. `pelizzai-finish` never runs
 this overlay.
 
 ## Red flags

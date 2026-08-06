@@ -52,10 +52,12 @@ otherwise, measure in a rendered page at 1280px width.
   near-identical colors doing the same job.
 - **Tinted surface share ≤35% of the viewport.** Target shape ≈50% light-neutral / 25%
   dark-neutral / 25% tinted, mirrored in dark themes; the pass line is the single number.
-  Verify: in the rendered page, walk the elements that paint a background, take each one's
-  `getBoundingClientRect()` area, classify its background as **tinted** when OKLCH C >0.02 and
-  neutral otherwise, and divide summed tinted area by viewport area. Refuse: >35% — every
-  surface tinted "for warmth".
+  Verify: sample the **composited** rendered viewport on a fixed grid (one probe every ~16px —
+  `elementFromPoint` + effective background, or a screenshot's pixels), classify each probe as
+  **tinted** when its composited color is OKLCH C >0.02 and neutral otherwise, and divide
+  tinted probes by total probes. Sampling the final composition counts every visible pixel
+  exactly once — summing element rects would double-count overlapping surfaces and ignore
+  occlusion/transparency. Refuse: >35% — every surface tinted "for warmth".
 - **One token carries call-to-action emphasis per screen.**
   Verify: list the background and border tokens of the buttons and emphasis marks in the rendered
   page, excluding the semantic status set (success / warning / error / info). Refuse: two

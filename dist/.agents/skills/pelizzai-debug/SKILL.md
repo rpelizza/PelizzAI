@@ -3,13 +3,13 @@ name: pelizzai-debug
 description: Head skill of the bug track. Use when encountering a bug, test failure, incident, or unexpected behavior — including when the user says "it doesn't work", "it's buggy", "it broke", "strange behavior", or "stop guessing", and when a test breaks in the middle of another task. Triages between direct cause, uncertain deterministic bug, flaky/distributed failure, and incident with active damage; picks proportional reasoning and validation, contains damage reversibly before investigating, and never mandates RCA, OODA, or a fixed number of hypotheses.
 ---
 
-# PelizzAI Debugging
+# PelizzAI Debug
 
 ## Goal
 
 Fix the proven cause with the least process that preserves evidence, safety, and regression coverage.
 
-**Announce on start**, in the conversation's language: that you are using the PelizzAI Debugging skill to classify the failure, contain impact if needed, and fix it with evidence.
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Debug skill to classify the failure, contain impact if needed, and fix it with evidence.
 
 ## Invariants
 

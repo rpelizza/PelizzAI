@@ -191,6 +191,24 @@ function Test-AbsoluteLike([string]$p) {
   return ($p -match '^[\\/]') -or ($p -match '^[A-Za-z]:[\\/]')
 }
 
+# Index of the segment's actual COMMAND: skips wrapper prefixes, VAR=value assignments, and
+# their flags. The copy/download verbs are only recognized AT this index - `install` appearing
+# as an argument (`npm install express`, `pip install requests`) is a package manager's
+# subcommand, not a file write, and used to be misread as one. Parity with the .mjs.
+$COMMAND_PREFIXES = @('sudo', 'doas', 'env', 'time', 'nohup', 'nice', 'command', 'exec', 'xargs')
+function Get-CommandIndex($tokens) {
+  $i = 0
+  while ($i -lt $tokens.Count) {
+    $t = $tokens[$i].ToLowerInvariant()
+    if (($COMMAND_PREFIXES -contains $t) -or ($tokens[$i] -cmatch '^[A-Za-z_][A-Za-z0-9_]*=') -or ($i -gt 0 -and $tokens[$i].StartsWith('-'))) {
+      $i++
+      continue
+    }
+    break
+  }
+  return $i
+}
+
 # Write targets of a shell command (Bash sibling matcher). Best-effort and honest:
 # covers the common cases; what it cannot parse safely does not block. Besides redirection,
 # tee, Set-Content/Add-Content/Out-File, and sed -i, it recognizes the common copy/download
@@ -222,6 +240,7 @@ function Get-ShellTargets([string]$command) {
     $parsed = Get-ParsedSegment $seg
     $tokens = $parsed.Tokens
     foreach ($r in $parsed.Redirects) { & $push $r }
+    $cmdIdx = Get-CommandIndex $tokens
     for ($i = 0; $i -lt $tokens.Count; $i++) {
       $t = $tokens[$i].ToLowerInvariant()
       # tee [-flags] file...  /  Tee-Object -FilePath file
@@ -259,14 +278,15 @@ function Get-ShellTargets([string]$command) {
           }
         }
       }
-      # cp / mv / install / ln: the write lands on the LAST non-flag operand (destination/link).
-      if ($t -eq 'cp' -or $t -eq 'mv' -or $t -eq 'install' -or $t -eq 'ln') {
+      # cp / mv / install / ln - only as the segment's COMMAND (see Get-CommandIndex): the
+      # write lands on the LAST non-flag operand (destination/link).
+      if (($t -eq 'cp' -or $t -eq 'mv' -or $t -eq 'install' -or $t -eq 'ln') -and $i -eq $cmdIdx) {
         for ($j = $tokens.Count - 1; $j -gt $i; $j--) {
           if (-not $tokens[$j].StartsWith('-')) { & $push $tokens[$j]; break }
         }
       }
       # curl -o/--output <file>; -O/--remote-name writes the URL's basename into the current dir.
-      if ($t -eq 'curl') {
+      if ($t -eq 'curl' -and $i -eq $cmdIdx) {
         for ($j = $i + 1; $j -lt $tokens.Count; $j++) {
           $a = $tokens[$j]
           if (($a -ceq '-o' -or $a -eq '--output') -and ($j + 1) -lt $tokens.Count) {
@@ -284,7 +304,7 @@ function Get-ShellTargets([string]$command) {
         }
       }
       # wget -O <file> / --output-document=<file>
-      if ($t -eq 'wget') {
+      if ($t -eq 'wget' -and $i -eq $cmdIdx) {
         for ($j = $i + 1; $j -lt $tokens.Count; $j++) {
           $a = $tokens[$j]
           if ($a -ceq '-O' -and ($j + 1) -lt $tokens.Count) {
@@ -295,14 +315,14 @@ function Get-ShellTargets([string]$command) {
         }
       }
       # dd of=<file>
-      if ($t -eq 'dd') {
+      if ($t -eq 'dd' -and $i -eq $cmdIdx) {
         for ($j = $i + 1; $j -lt $tokens.Count; $j++) {
           if ([regex]::IsMatch($tokens[$j], '^of=', 'IgnoreCase')) { & $push $tokens[$j].Substring(3) }
         }
       }
       # git apply / git am rewrite tracked files; the patch decides which, so the conservative
       # target is the current directory itself. Dry-run/metadata forms are excluded.
-      if ($t -eq 'git' -and ($i + 1) -lt $tokens.Count) {
+      if ($t -eq 'git' -and $i -eq $cmdIdx -and ($i + 1) -lt $tokens.Count) {
         $sub = $tokens[$i + 1].ToLowerInvariant()
         if ($sub -eq 'apply' -or $sub -eq 'am') {
           $dry = $false
@@ -352,9 +372,12 @@ function Resolve-RealPath([string]$p) {
     $rootPart = [System.IO.Path]::GetPathRoot($full)
     $rest = @($full.Substring($rootPart.Length) -split '[\\/]' | Where-Object { $_ })
     $resolved = $rootPart
-    $guard = 0
     foreach ($seg in $rest) {
       $resolved = Join-Path $resolved $seg
+      # The guard protects against link CYCLES per component, never against path depth —
+      # shared across components it silently stopped resolving deep paths (.mjs parity:
+      # realpathSync has no depth limit).
+      $guard = 0
       while ($guard -lt 64) {
         $guard++
         $item = $null
