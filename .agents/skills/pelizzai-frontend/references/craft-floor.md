@@ -56,8 +56,10 @@ otherwise, measure in a rendered page at 1280px width.
   fixed grid (one probe every ~16px). The composited pixel already encodes paint order,
   pseudo-elements, `pointer-events: none` layers, opacity, and occlusion **by construction** —
   no DOM stacking rules to re-derive. To keep foreground out of the numerator (the floor is
-  about SURFACES), mark probes **ineligible** when the point falls inside the client rects of
-  text nodes, replaced content (`img`, `video`, `canvas`, data `svg`), or chart data inks;
+  about SURFACES), mark probes **ineligible** when the point falls inside the rects of visible
+  text (measured with a `Range` spanning each text node — `Range.getClientRects()`; a `Text`
+  node has no `getClientRects` of its own), replaced content (`img`, `video`, `canvas`, data
+  `svg`), or chart data inks — mapping CSS pixels to screenshot pixels via `devicePixelRatio`;
   ineligible probes leave the numerator AND the denominator. Classify each eligible pixel as
   tinted when OKLCH C >0.02, neutral otherwise, and divide tinted probes by **eligible**
   probes; with zero eligible probes, report the floor as *not measurable for this page*
@@ -67,8 +69,10 @@ otherwise, measure in a rendered page at 1280px width.
   `::before`/`::after` that paint a background), the combined set ordered by CSS painting order
   (stacking context, then `z-index`, then DOM order) with each pseudo-element bounded by its
   **own border box**, never the owner's full rect; the topmost painted background wins. Where
-  that order is ambiguous, say the value was **computed with that caveat** — the fallback
-  approximates what the screenshot measures directly. Grid sampling counts each visible point
+  that order is ambiguous the value is an APPROXIMATION: say it was **computed with that
+  caveat**, and when it lands within ±2 percentage points of the 35% line, do not turn it into
+  a pass/fail verdict — report the floor as *not measurable for this page* instead (an
+  approximation never decides a borderline Refuse). Grid sampling counts each visible point
   once — summing element rects would double-count overlapping surfaces and ignore occlusion.
   Refuse: >35% — every surface tinted "for warmth".
 - **One token carries call-to-action emphasis per screen.**
