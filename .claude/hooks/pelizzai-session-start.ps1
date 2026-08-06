@@ -39,7 +39,12 @@ try {
       $mPhase = [regex]::Match($state, '(?m)^\s*-\s*phase:\s*(\S+)')
       $slug = if ($mSlug.Success) { $mSlug.Groups[1].Value } else { $null }
       $phase = if ($mPhase.Success) { $mPhase.Groups[1].Value } else { $null }
-      if ($slug -and $slug -ne '<none>' -and -not $slug.StartsWith('<') -and $phase -and $phase -ne 'done' -and -not $phase.StartsWith('<')) {
+      # state.md is a VERSIONED file: whatever it carries lands in the agent's context on every
+      # session start. Values are matched against the shape the template documents and the whole
+      # line is DISCARDED on mismatch - untrusted text, not "a different policy" (second-order
+      # prompt injection via a merged commit). Parity with the .mjs fix.
+      $phases = @('brainstorm', 'plan', 'exec', 'review', 'delivered', 'done', 'abandoned', 'blocked')
+      if ($slug -and $slug -cmatch '^[a-z0-9][a-z0-9._-]{0,63}$' -and $phase -and ($phases -ccontains $phase) -and $phase -ne 'done') {
         $lines += "There is an ACTIVE task in pelizzai/data/state.md (slug: $slug, phase: $phase) - resume via pelizzai-router, validating the cursor against git before proceeding."
       }
     } catch {}
@@ -68,11 +73,13 @@ try {
       $mCommit = [regex]::Match($profile, 'commit-strategy-default:\s*(\S+)')
       # Not ratified = raw `unset` OR any placeholder between <> (the bootstrap writes
       # `<unset>`, and the template ships the `<branch|worktree|unset>` menu) - same convention
-      # as state.md above. Without this, the recap would fire on every freshly bootstrapped consumer.
-      $isRatified = { param($m) $m.Success -and $m.Groups[1].Value -ne 'unset' -and -not $m.Groups[1].Value.StartsWith('<') }
-      if (& $isRatified $mIso) { $ratified += "isolation $($mIso.Groups[1].Value)" }
-      if (& $isRatified $mMode) { $ratified += "mode $($mMode.Groups[1].Value)" }
-      if (& $isRatified $mCommit) { $ratified += "commit $($mCommit.Groups[1].Value)" }
+      # as state.md above. Without this, the recap would fire on every freshly bootstrapped
+      # consumer. The allowlist closes the same injection vector as the slug: profile.md is
+      # versioned, so only the enum values the template documents are echoed.
+      $isRatified = { param($m, $allowed) $m.Success -and $m.Groups[1].Value -ne 'unset' -and -not $m.Groups[1].Value.StartsWith('<') -and ($allowed -contains $m.Groups[1].Value) }
+      if (& $isRatified $mIso @('branch', 'worktree')) { $ratified += "isolation $($mIso.Groups[1].Value)" }
+      if (& $isRatified $mMode @('inline', 'subagents', 'team')) { $ratified += "mode $($mMode.Groups[1].Value)" }
+      if (& $isRatified $mCommit @('granular', 'squash-final')) { $ratified += "commit $($mCommit.Groups[1].Value)" }
       if ($ratified.Count -gt 0) {
         $lines += "Ratified execution policy for this project (pelizzai/profile.md): $($ratified -join ', ') - reapply it as a 1-line recap; do not re-ask what has already been ratified (destination remains per task)."
       }

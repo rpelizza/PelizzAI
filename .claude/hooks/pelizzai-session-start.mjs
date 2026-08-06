@@ -53,9 +53,15 @@ function main() {
       const state = readFileSync(statePath, 'utf8');
       const slug = (state.match(/^\s*-\s*slug:\s*(.+?)\s*$/m) || [])[1];
       const phase = (state.match(/^\s*-\s*phase:\s*(\S+)/m) || [])[1];
+      // state.md is a VERSIONED file: whatever it carries lands in the agent's context on every
+      // session start. Values are matched against the shape the template documents and the whole
+      // line is DISCARDED on mismatch — untrusted text, not "a different policy" (second-order
+      // prompt injection via a merged commit).
+      const SLUG_SHAPE = /^[a-z0-9][a-z0-9._-]{0,63}$/;
+      const PHASES = ['brainstorm', 'plan', 'exec', 'review', 'delivered', 'done', 'abandoned', 'blocked'];
       const active =
-        slug && slug !== '<none>' && !slug.startsWith('<') &&
-        phase && phase !== 'done' && !phase.startsWith('<');
+        slug && SLUG_SHAPE.test(slug) &&
+        phase && PHASES.includes(phase) && phase !== 'done';
       if (active) {
         lines.push(
           `There is an ACTIVE task in pelizzai/data/state.md (slug: ${slug}, phase: ${phase}) — ` +
@@ -98,12 +104,14 @@ function main() {
       // Not ratified = raw `unset` OR any placeholder between <> (the bootstrap writes
       // `<unset>`, and the template ships the `<branch|worktree|unset>` menu) — same
       // convention as state.md above. Without this, the recap would fire on every freshly
-      // bootstrapped consumer.
-      const isRatified = (value) => Boolean(value) && value !== 'unset' && !value.startsWith('<');
+      // bootstrapped consumer. The allowlist closes the same injection vector as the slug:
+      // profile.md is versioned, so only the enum values the template documents are echoed.
+      const isRatified = (value, allowed) =>
+        Boolean(value) && value !== 'unset' && !value.startsWith('<') && allowed.includes(value);
       const ratified = [];
-      if (isRatified(iso)) ratified.push(`isolation ${iso}`);
-      if (isRatified(mode)) ratified.push(`mode ${mode}`);
-      if (isRatified(commit)) ratified.push(`commit ${commit}`);
+      if (isRatified(iso, ['branch', 'worktree'])) ratified.push(`isolation ${iso}`);
+      if (isRatified(mode, ['inline', 'subagents', 'team'])) ratified.push(`mode ${mode}`);
+      if (isRatified(commit, ['granular', 'squash-final'])) ratified.push(`commit ${commit}`);
       if (ratified.length) {
         lines.push(
           `Ratified execution policy for this project (pelizzai/profile.md): ${ratified.join(', ')} — ` +
@@ -130,4 +138,6 @@ try {
 } catch {
   /* never fail session start */
 }
-process.exit(0);
+// process.exitCode instead of process.exit(0): piped stdout writes can be asynchronous and
+// process.exit would truncate the JSON payload (silent, intermittent loss of the reminder).
+process.exitCode = 0;
