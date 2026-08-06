@@ -60,7 +60,10 @@ otherwise, measure in a rendered page at 1280px width.
   text (measured with a `Range` spanning each text node — `Range.getClientRects()`; a `Text`
   node has no `getClientRects` of its own), replaced content (`img`, `video`, `canvas`, data
   `svg`), or chart data inks — mapping CSS pixels to screenshot pixels via `devicePixelRatio`;
-  ineligible probes leave the numerator AND the denominator. Classify each eligible pixel as
+  ineligible probes leave the numerator AND the denominator. The reference engine for this
+  measurement is **Chromium** (the engine behind the IDE previews and the Playwright MCP);
+  `Range.getClientRects()` fragmentation differs across engines, so a value measured on another
+  engine names that engine alongside the value instead of claiming the reference procedure. Classify each eligible pixel as
   tinted when OKLCH C >0.02, neutral otherwise, and divide tinted probes by **eligible**
   probes; with zero eligible probes, report the floor as *not measurable for this page*
   (attestation to the user), never as a pass.
