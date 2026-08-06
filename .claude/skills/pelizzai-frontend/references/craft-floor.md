@@ -52,19 +52,23 @@ otherwise, measure in a rendered page at 1280px width.
   near-identical colors doing the same job.
 - **Tinted surface share ≤35% of the viewport.** Target shape ≈50% light-neutral / 25%
   dark-neutral / 25% tinted, mirrored in dark themes; the pass line is the single number.
-  Verify: sample the rendered viewport on a fixed grid (one probe every ~16px). For each probe,
-  resolve the SURFACE under it: take the element stack at the point (`elementsFromPoint`) PLUS a
-  pre-collected list of painted layers that hit testing misses — elements with
-  `pointer-events: none` and `::before`/`::after` pseudo-elements that paint a background —
-  whose rects contain the probe; the topmost painted **background** in that combined set is the
-  probe's surface color (walk up through transparent backgrounds when nothing paints).
-  Classifying the resolved background (not the raw pixel) keeps text glyphs, icons, brand
-  marks, chart data inks, and images out of the numerator — the floor is about SURFACES. A
-  probe whose topmost paint is replaced content (`img`, `video`, `canvas`, data `svg`) is
-  **ineligible**: it leaves the numerator AND the denominator. Classify each eligible probe's
-  surface as tinted when OKLCH C >0.02, neutral otherwise, and divide tinted probes by
-  **eligible** probes; with zero eligible probes, report the floor as *not measurable for this
-  page* (attestation to the user), never as a pass. Grid sampling counts each visible point
+  Verify — preferred procedure: screenshot the rendered viewport and sample its **pixels** on a
+  fixed grid (one probe every ~16px). The composited pixel already encodes paint order,
+  pseudo-elements, `pointer-events: none` layers, opacity, and occlusion **by construction** —
+  no DOM stacking rules to re-derive. To keep foreground out of the numerator (the floor is
+  about SURFACES), mark probes **ineligible** when the point falls inside the client rects of
+  text nodes, replaced content (`img`, `video`, `canvas`, data `svg`), or chart data inks;
+  ineligible probes leave the numerator AND the denominator. Classify each eligible pixel as
+  tinted when OKLCH C >0.02, neutral otherwise, and divide tinted probes by **eligible**
+  probes; with zero eligible probes, report the floor as *not measurable for this page*
+  (attestation to the user), never as a pass.
+  Fallback (no screenshot surface available): resolve each probe's surface from the DOM —
+  `elementsFromPoint` plus the layers hit testing misses (`pointer-events: none` elements and
+  `::before`/`::after` that paint a background), the combined set ordered by CSS painting order
+  (stacking context, then `z-index`, then DOM order) with each pseudo-element bounded by its
+  **own border box**, never the owner's full rect; the topmost painted background wins. Where
+  that order is ambiguous, say the value was **computed with that caveat** — the fallback
+  approximates what the screenshot measures directly. Grid sampling counts each visible point
   once — summing element rects would double-count overlapping surfaces and ignore occlusion.
   Refuse: >35% — every surface tinted "for warmth".
 - **One token carries call-to-action emphasis per screen.**
