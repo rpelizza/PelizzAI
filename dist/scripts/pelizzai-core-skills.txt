@@ -4,11 +4,13 @@ pelizzai-architecture-refinement
 pelizzai-audit
 pelizzai-codebase-architecture
 pelizzai-core
+pelizzai-create-skill
 pelizzai-debug
 pelizzai-documentation
 pelizzai-domain-modeling
 pelizzai-evolve
 pelizzai-execute
+pelizzai-final-verification
 pelizzai-finish
 pelizzai-frontend
 pelizzai-handoff
@@ -28,7 +30,5 @@ pelizzai-starting-branch
 pelizzai-subagents
 pelizzai-tdd
 pelizzai-team
-pelizzai-verification-before-completion
-pelizzai-writing-clearly-and-concisely
+pelizzai-writing-clearly
 pelizzai-writing-plans
-pelizzai-writing-skills

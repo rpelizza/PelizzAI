@@ -320,9 +320,9 @@ is propose-and-confirm and coordinator action; a team member only flags the gap 
 - **Cadence due:** this is the **primary trigger** of the domain-skill cadence — the Claude Code
   hook is only a safety net. Check the **two** triggers in the
   `pelizzai/data/review-domain-skills.md` ledger: (a) review — commits since `last-review` or days
-  elapsed; (b) full repo-scan since `last-full-scan`. Thresholds live in `pelizzai-writing-skills`
+  elapsed; (b) full repo-scan since `last-full-scan`. Thresholds live in `pelizzai-create-skill`
   → `references/domain-skill-maintenance.md`. Either one due → suggest **once** invoking
-  `pelizzai-writing-skills` in maintenance mode, saying which trigger is due. Below the
+  `pelizzai-create-skill` in maintenance mode, saying which trigger is due. Below the
   thresholds, say nothing; if the user defers, do not repeat it in the same session.
 - **New stack adoption (adoption-driven):** check in this task's closed range
   (`git diff <base-sha>..<validated-head>` over manifests/lockfiles) whether a significant
@@ -331,7 +331,7 @@ is propose-and-confirm and coordinator action; a team member only flags the gap 
   task adopted `<lib@version>` with no covering domain skill. Create one now? [create · defer ·
   don't create]". Recommend `create` for high-leverage libs (auth, payments, ORM/data, framework,
   queue/sensitive infra) and `defer` for a trivial utility; the writing only happens after the
-  "yes", via `pelizzai-writing-skills`.
+  "yes", via `pelizzai-create-skill`.
 - **Maintenance not armed:** if the cadence hook is installed but the ledger is missing, say so
   ONCE ("cadence inactive: no ledger; run the minimal initialization of `pelizzai-audit` to arm
   it") to distinguish "off" from "broken".
@@ -369,7 +369,7 @@ Source mode, or no hook and no ledger: silent no-op.
 **Called by:** `pelizzai-execute`, `pelizzai-debug`, and `pelizzai-quick-fix`, only
 after their overlays and validation have recorded `validated-head`.
 
-**Combines with:** `pelizzai-starting-branch`, `pelizzai-verification-before-completion`,
+**Combines with:** `pelizzai-starting-branch`, `pelizzai-final-verification`,
 `pelizzai-review`, `pelizzai-recovery`, and `pelizzai-merge-conflict-resolution`. The §1.5 net
 points to `pelizzai-oswap`, `pelizzai-frontend`, and `pelizzai-documentation` — always via
 the return to `pelizzai-execute`, never by running the overlay inside this skill.

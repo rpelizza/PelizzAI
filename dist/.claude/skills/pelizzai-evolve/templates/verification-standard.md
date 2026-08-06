@@ -1,6 +1,6 @@
 # Verification standard — PelizzAI
 
-> What **correct** means in this project. Read by `pelizzai-verification-before-completion`
+> What **correct** means in this project. Read by `pelizzai-final-verification`
 > before judging a delivery, by `pelizzai-review` when briefing reviewers, and by
 > `pelizzai-writing-plans` when drafting validation. Written by `pelizzai-audit` at bootstrap
 > and by `pelizzai-evolve` in its own ratified change — **never during a correction**: if an

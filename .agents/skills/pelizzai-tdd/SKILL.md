@@ -205,7 +205,7 @@ flowchart LR
 [ ] No speculative functionality got in.
 ```
 
-For a regression bug, `pelizzai-verification-before-completion` requires the reinforced proof: green with the fix, failing when only the fix is removed/reverted, green after restoring it.
+For a regression bug, `pelizzai-final-verification` requires the reinforced proof: green with the fix, failing when only the fix is removed/reverted, green after restoring it.
 
 ## When a test fails unexpectedly
 
@@ -230,7 +230,7 @@ Follow the triage in `pelizzai-debug`.
 - `pelizzai-writing-plans` records the proof strategy per task: TDD is the code task's default and the suitability gate names the exception when the effect is not behavioral.
 - `pelizzai-debug` uses red→green regression when there is automatable behavior.
 - `pelizzai-frontend` remains mandatory for UI even when component tests pass.
-- `pelizzai-verification-before-completion` validates the complete result before any claim.
+- `pelizzai-final-verification` validates the complete result before any claim.
 
 **Reasoning — `pelizzai-reasoning`:**
 
@@ -246,6 +246,6 @@ Follow the triage in `pelizzai-debug`.
 **Approval and completion:**
 
 - Confirm interface, behaviors, and seams with `pelizzai-interview`, or in the approved `pelizzai-ideia-generation` design, before writing tests.
-- Before declaring done, go through `pelizzai-verification-before-completion` and `pelizzai-review` (exception: the **tweak** track waives the formal review for trivial scope — see `pelizzai-quick-fix`; verification always applies).
+- Before declaring done, go through `pelizzai-final-verification` and `pelizzai-review` (exception: the **tweak** track waives the formal review for trivial scope — see `pelizzai-quick-fix`; verification always applies).
 
 > TDD is the default discipline for behavior — not a universal quality proof for an artifact with no automatable behavior.

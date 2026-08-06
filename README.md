@@ -341,7 +341,7 @@ flowchart LR
 ```
 
 The final validation happens after squash, overlays, tests, and fixes. When everything passes,
-`pelizzai-verification-before-completion` records the `validated-head`: the exact SHA of the last
+`pelizzai-final-verification` records the `validated-head`: the exact SHA of the last
 validated content commit.
 
 `pelizzai-finish` requires `HEAD == validated-head` — **what you receive is exactly what was
@@ -494,15 +494,15 @@ copies it to the consumer project along with the rest of the harness.
 | Group | Skills | Responsibility |
 | --- | --- | --- |
 | Entry and orchestration | `pelizzai-core`, `pelizzai-router`, `pelizzai-audit`, `pelizzai-preferences` | mandatory entry, route classification and kickoff gate, bootstrap, global behavior floor |
-| Reasoning and conversation | `pelizzai-reasoning`, `pelizzai-interview`, `pelizzai-writing-clearly-and-concisely` | proportional reasoning techniques (including OODA), the interview that resolves every material gap, clear writing |
+| Reasoning and conversation | `pelizzai-reasoning`, `pelizzai-interview`, `pelizzai-writing-clearly` | proportional reasoning techniques (including OODA), the interview that resolves every material gap, clear writing |
 | Design, plan, and execution | `pelizzai-ideia-generation`, `pelizzai-writing-plans`, `pelizzai-execute` | ratified design with spec, executable and stress-tested plan, setup gate and task-by-task execution |
 | Per-task execution | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop`, `pelizzai-handoff` | proof strategy per artifact, delegation and teams, macro loop and forking into a new session |
 | Dedicated tracks | `pelizzai-debug`, `pelizzai-quick-fix` | bug with triage and root cause; local tweak without losing isolation, proof, and closeout |
 | Design and exploration | `pelizzai-codebase-architecture`, `pelizzai-domain-modeling`, `pelizzai-prototype`, `pelizzai-architecture-refinement` | deep modules and seams, vocabulary and ADRs, disposable prototype, read-only architectural review |
 | Isolation and integration | `pelizzai-starting-branch`, `pelizzai-finish`, `pelizzai-merge-conflict-resolution`, `pelizzai-recovery`, `pelizzai-documentation` | branch before the first write, `delivered` seal, conflicts, recovery, and human docs |
-| Quality and security | `pelizzai-review`, `pelizzai-oswap`, `pelizzai-verification-before-completion` | per-task and final review, OWASP on the sensitive surface, fresh evidence before completion |
+| Quality and security | `pelizzai-review`, `pelizzai-oswap`, `pelizzai-final-verification` | per-task and final review, OWASP on the sensitive surface, fresh evidence before completion |
 | Frontend | `pelizzai-frontend` | product, design, implementation, and visual QA overlay — from design onward |
-| Skill authoring | `pelizzai-writing-skills` | authoring and maintenance of the domain skills |
+| Skill authoring | `pelizzai-create-skill` | authoring and maintenance of the domain skills |
 | Self-optimization | `pelizzai-evolve` | verification standard + learnings: the project learns from observed failures, with promotion ratified by the user |
 
 ---

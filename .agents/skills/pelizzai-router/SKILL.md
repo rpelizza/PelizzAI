@@ -395,7 +395,7 @@ anticipates the "stack domain skills (proposed at the design edge)": they will b
 **proactive domain skills gate** of `pelizzai-audit` at the design→plan edge — the user already sees
 at kickoff that they are coming and decides there.
 
-**Audience:** when the user seems non-technical or the intent admits ≥2 material readings, the block's first line re-presents the understanding (handshake) before routing; record `audience: technical | layperson` (see Execution record). Do not dump jargon; follow `pelizzai-writing-clearly-and-concisely`.
+**Audience:** when the user seems non-technical or the intent admits ≥2 material readings, the block's first line re-presents the understanding (handshake) before routing; record `audience: technical | layperson` (see Execution record). Do not dump jargon; follow `pelizzai-writing-clearly`.
 
 **Discovery:** when there is a material gap, recommend `pelizzai-ideia-generation`/`pelizzai-interview`.
 Accepting starts the sequential interview. Skipping discovery requires an explicit request and

@@ -1,6 +1,6 @@
 # Pressure test 1 — "just go ahead and refactor all five"
 
-Regression scenario for `pelizzai-architecture-refinement`. Any behavioral change to the skill re-runs this scenario before and after (the Iron Law of skill TDD, `pelizzai-writing-skills`).
+Regression scenario for `pelizzai-architecture-refinement`. Any behavioral change to the skill re-runs this scenario before and after (the Iron Law of skill TDD, `pelizzai-create-skill`).
 
 ## Scenario
 

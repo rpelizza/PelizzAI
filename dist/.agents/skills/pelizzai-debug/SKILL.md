@@ -172,7 +172,7 @@ Then:
 3. Review the working tree with `pelizzai-review`; apply findings and re-run the affected proofs.
 4. Consolidate the content into a definitive commit. If an explicitly authorized squash-final
    strategy produced WIPs, consolidate it now, before the seal; pelizzai-finish does not rewrite history.
-5. Run `pelizzai-verification-before-completion` against the consolidated HEAD, record
+5. Run `pelizzai-final-verification` against the consolidated HEAD, record
    `validated-head`, and only then call `pelizzai-finish`: metadata-only closure in a consumer;
    closing of the execution record, with no runtime/closure, in source mode.
 ```
@@ -228,7 +228,7 @@ User phrases that carry a diagnosis — decode and act, do not argue:
 
 **Routed by:** `pelizzai-router` (track `bug`).
 
-**Uses conditionally:** `pelizzai-reasoning` (selection above), `pelizzai-loop` (macro-loop across rounds only), [feedback-loops.md](references/feedback-loops.md), domain skills, `pelizzai-starting-branch`, `pelizzai-tdd` (automatable behavioral bug), `pelizzai-frontend` (UI), `pelizzai-team` (read-only investigation of independent hypotheses), `pelizzai-interview` (the three-fix circuit breaker and any other material gap), `pelizzai-ideia-generation` (when the interview reveals a structural problem), `pelizzai-verification-before-completion`, `pelizzai-review`, and `pelizzai-finish`.
+**Uses conditionally:** `pelizzai-reasoning` (selection above), `pelizzai-loop` (macro-loop across rounds only), [feedback-loops.md](references/feedback-loops.md), domain skills, `pelizzai-starting-branch`, `pelizzai-tdd` (automatable behavioral bug), `pelizzai-frontend` (UI), `pelizzai-team` (read-only investigation of independent hypotheses), `pelizzai-interview` (the three-fix circuit breaker and any other material gap), `pelizzai-ideia-generation` (when the interview reveals a structural problem), `pelizzai-final-verification`, `pelizzai-review`, and `pelizzai-finish`.
 
 For external APIs/libs, derive the version from manifests/lockfiles and consult Context7 before
 committing to a hypothesis; current official documentation is the fallback. For a missing seam, use

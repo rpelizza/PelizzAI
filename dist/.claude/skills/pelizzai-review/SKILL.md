@@ -224,7 +224,7 @@ before the seal, not a place to economize on your own initiative nor to tune the
 compensate for a lesser model. It is step 1 of the coordinator's
 **final delivery validation** (`pelizzai-execute` → "Final delivery
 validation") and happens **after** the overlays that may write (security, frontend, and documentation)
-and before the full suite, checklist, and `pelizzai-verification-before-completion`. Open
+and before the full suite, checklist, and `pelizzai-final-verification`. Open
 Critical/Important findings block completion.
 
 Reuse exception (narrow, and never the default path): a plan of **a single bounded task**,
@@ -348,7 +348,7 @@ On a GitHub PR, reply in the inline comment THREAD (not as a top-level PR commen
 - `pelizzai-starting-branch` — handback when acting on feedback turns into writing code.
 - `pelizzai-reasoning` — *Critique and Refine* (acting on the feedback) and *Verification* (fresh evidence).
 - `pelizzai-oswap` — the review's security (OWASP) dimension.
-- `pelizzai-verification-before-completion` / `pelizzai-finish` — completion after the final review.
+- `pelizzai-final-verification` / `pelizzai-finish` — completion after the final review.
 
 ---
 

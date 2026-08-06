@@ -84,7 +84,7 @@ Each skill lives in `.claude/skills/<name>/SKILL.md` and follows these rules:
   `pelizzai-execute` → `references/task-cycle.md`, never a bare `references/task-cycle.md`
   — otherwise the reader searches the wrong directory.
 
-There is a skill dedicated to this: `pelizzai-writing-skills`, with
+There is a skill dedicated to this: `pelizzai-create-skill`, with
 `references/skill-authoring.md`. Worth reading before writing your first one.
 
 ## Touching the hooks
@@ -112,7 +112,7 @@ messages, and PR descriptions.
 The brand is spelled exactly **PelizzAI** in prose — never "Pelizzai", "pelizzAI", or "PELIZZAI".
 
 Write instruction, not an essay: short sentences, active voice, the criterion before the example.
-The skill `pelizzai-writing-clearly-and-concisely` is the project's style guide.
+The skill `pelizzai-writing-clearly` is the project's style guide.
 
 ## Opening a PR
 

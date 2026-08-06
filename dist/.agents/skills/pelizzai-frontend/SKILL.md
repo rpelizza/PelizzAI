@@ -331,7 +331,7 @@ Playwright, the browser MCP, and screenshots are **tools** for carrying out this
 - `pelizzai-execute`: to execute UI tasks inside approved plans.
 - `pelizzai-tdd`: for component, form, route, and regression behavior.
 - `pelizzai-review`: to review adherence to the spec and quality.
-- `pelizzai-verification-before-completion`: for fresh evidence before declaring it done.
+- `pelizzai-final-verification`: for fresh evidence before declaring it done.
 - The project's domain skills: for the real product, design system, and stack patterns.
 ```
 

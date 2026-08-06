@@ -27,7 +27,7 @@ in the native execution record.
 
 | File | Holds | Read by, and when | Written by, and when |
 | --- | --- | --- | --- |
-| `pelizzai/data/verification-standard.md` | what *correct* means here | `pelizzai-verification-before-completion` before judging a delivery · `pelizzai-review` when briefing reviewers · `pelizzai-writing-plans` when drafting validation | `pelizzai-audit` at bootstrap · here, in its own ratified change — **never during a correction** |
+| `pelizzai/data/verification-standard.md` | what *correct* means here | `pelizzai-final-verification` before judging a delivery · `pelizzai-review` when briefing reviewers · `pelizzai-writing-plans` when drafting validation | `pelizzai-audit` at bootstrap · here, in its own ratified change — **never during a correction** |
 | `pelizzai/data/learnings.md` | what execution already learned | `pelizzai-writing-plans` and `pelizzai-execute` before proposing approaches | incident entries at root-cause confirmation (usually `pelizzai-debug`, in the fix's own commit) · `pelizzai-finish` counts recurrences at closeout · here, on promotion and retirement |
 
 Either one missing in a consumer → propose creating it from [templates/](templates/verification-standard.md)
@@ -107,7 +107,7 @@ consumes.
 
 ## Boundaries with the existing machinery
 
-- **Domain skills** stay with `pelizzai-writing-skills` and its ledger
+- **Domain skills** stay with `pelizzai-create-skill` and its ledger
   (`pelizzai/data/review-domain-skills.md`) — this cycle does not duplicate that maintenance. A
   learning whose natural home is a domain skill is proposed THERE, and its incident entries are
   retired here once the skill absorbs the rule.
@@ -136,7 +136,7 @@ directly, and `pelizzai-debug` when a confirmed root cause deserves more than an
 entry.
 
 **Combines with:** `pelizzai-interview` — one ratification per promotion, standard change, or
-opportunity adoption; `pelizzai-verification-before-completion` and `pelizzai-review` — the
+opportunity adoption; `pelizzai-final-verification` and `pelizzai-review` — the
 standard's readers; `pelizzai-writing-plans`/`pelizzai-execute` — the learnings'
-readers; `pelizzai-audit` — seeds both artifacts at bootstrap; `pelizzai-writing-skills` — the
+readers; `pelizzai-audit` — seeds both artifacts at bootstrap; `pelizzai-create-skill` — the
 home of a lesson that belongs in a domain skill.

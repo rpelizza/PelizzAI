@@ -135,7 +135,7 @@ flowchart TD
     New -- New --> Bra[pelizzai-interview + pelizzai-ideia-generation:\ndiscovery, spec, stress, approval]
     Bra --> Wri
     New -- Existing / Workspace --> Rep[Full repo-scan:\npatterns, stacks, frameworks, conventions]
-    Rep --> Wri[pelizzai-writing-skills:\ncreates the maximum of useful domain skills\nwith context7 + Anthropic rules]
+    Rep --> Wri[pelizzai-create-skill:\ncreates the maximum of useful domain skills\nwith context7 + Anthropic rules]
     Wri --> Doc[Harness artifacts: domain-skills.md\ncatalog + ledger + profile.md]
     Doc --> Rec[Recommendations: git init, remote,\nstack MCPs, context7, opt-in hooks]
     Rec --> End([Harness ready to act])
@@ -163,7 +163,7 @@ skill-roots:
 canonical-skill-root: <active root>
 ```
 
-`pelizzai-writing-skills` writes domain skills to the active root; if both are installed, it keeps byte-for-byte copies and verifies parity.
+`pelizzai-create-skill` writes domain skills to the active root; if both are installed, it keeps byte-for-byte copies and verifies parity.
 
 ### 2.5. Anchor the entrypoints
 
@@ -182,7 +182,7 @@ session-start hook nudges exactly that).
 In an existing project or workspace, first do the **full repo-scan** — patterns, stacks,
 frameworks, languages, conventions, and extension points. From the observed patterns comes the
 proposal: the **maximum of useful domain skills** for the agent to work correctly in this project.
-Broad coverage is the target; the filter is "useful", not "few". `pelizzai-writing-skills` writes
+Broad coverage is the target; the filter is "useful", not "few". `pelizzai-create-skill` writes
 each candidate grounded in the `context7` MCP (real documentation of the libs/frameworks at the
 version pinned in the manifest) and in Anthropic's skill-creation rules.
 
@@ -253,7 +253,7 @@ the **opt-in Claude Code hooks** — **one by one, with confirmation; never impo
 the effect of each. Do not reopen the offer once the check passes:
 
 - **Cadence hook** (`pelizzai-cadence.mjs`/`.ps1`, `UserPromptSubmit`): non-blocking reminder to
-  review the domain skills (see `pelizzai-writing-skills` →
+  review the domain skills (see `pelizzai-create-skill` →
   `references/domain-skill-maintenance.md`); a no-op without a ledger.
 - **Git guard hook** (`pelizzai-guardrails.mjs`/`.ps1`, `PreToolUse` matcher `Bash`): blocks,
   before they run, `push --force` (except `--force-with-lease`), `reset --hard`, `clean -f`,
@@ -345,7 +345,7 @@ Before declaring the bootstrap done:
 
 Review the whole diff in the `combined` profile (or `split` if hooks/settings/security raise the
 risk), commit the approved artifacts with exact paths, and only then run
-`pelizzai-verification-before-completion` against that HEAD. After recording `validated-head`,
+`pelizzai-final-verification` against that HEAD. After recording `validated-head`,
 close the transaction via `pelizzai-finish`. Do not leave the bootstrap uncommitted or expect
 pelizzai-finish to consolidate it.
 
@@ -403,4 +403,4 @@ In a workspace with multiple repositories, do not pretend one scalar state cover
 
 ## Integration
 
-Uses `pelizzai-starting-branch` and `pelizzai-finish` only in `bootstrap-write`; `pelizzai-writing-skills` writes the ratified domain skills — the target is the maximum of useful skills, grounded in `context7`; `pelizzai-team`/`pelizzai-subagents` parallelize the repo-scan when the fronts are independent; `pelizzai-ideia-generation` enters only on the new/uncertain-project branch.
+Uses `pelizzai-starting-branch` and `pelizzai-finish` only in `bootstrap-write`; `pelizzai-create-skill` writes the ratified domain skills — the target is the maximum of useful skills, grounded in `context7`; `pelizzai-team`/`pelizzai-subagents` parallelize the repo-scan when the fronts are independent; `pelizzai-ideia-generation` enters only on the new/uncertain-project branch.

@@ -76,4 +76,4 @@ block, and it does not replace the normal path either, which is running here bef
 ## Integration
 
 Router/plan register this overlay; pelizzai-execute runs it before the final review. Combine with
-domain skills and `pelizzai-writing-clearly-and-concisely` when that changes the wording.
+domain skills and `pelizzai-writing-clearly` when that changes the wording.

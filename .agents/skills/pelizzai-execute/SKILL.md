@@ -181,7 +181,7 @@ their gates into the briefing.
    not cover it), record ONE "domain skill gap" in the state/execution record and flag it in the
    task report (a member returns `DONE_WITH_CONCERNS`); do NOT block execution or create a skill
    mid-task. The coordinator accumulates the gaps and forwards them to the adoption-driven axis of
-   `pelizzai-writing-skills` at closeout, in a single grouped proposal — never a gate per task.
+   `pelizzai-create-skill` at closeout, in a single grouped proposal — never a gate per task.
 ```
 
 In the consumer, a missing catalog goes back to `pelizzai-audit`. In source mode, absence is the
@@ -253,7 +253,7 @@ flowchart TD
     OV --> CONS[Freeze history\nsquash-final if chosen]
     CONS --> VAL[Final review + suite + checklist]
     VAL -- Fix --> OV
-    VAL -- Approved --> VC[pelizzai-verification-before-completion]
+    VAL -- Approved --> VC[pelizzai-final-verification]
     VC -- Fix --> OV
     VC -- Approved --> SEAL[validated-head = HEAD]
     SEAL --> FIN[pelizzai-finish\nseals phase delivered + destination]
@@ -552,7 +552,7 @@ After this step, `git status --porcelain` must be empty and `validated-head` rem
    dry-run/visual etc.), from scratch, with output and exit code. Do not invent a suite for a
    static artifact.
 4. Re-read the plan/spec requirement by requirement and point to where each one was delivered.
-5. Run pelizzai-verification-before-completion with the fresh evidence.
+5. Run pelizzai-final-verification with the fresh evidence.
 ```
 
 Any fix in steps 2–5 — including security, UI, or docs — invalidates the candidate: write
@@ -628,7 +628,7 @@ config, or doc may change after the seal.
 - `pelizzai-loop` — OODA when a real loop exists, Definition of Done, and stopping on doubt.
 - `pelizzai-interview` — the mandatory destination of the material-gap stop during execution.
 - `pelizzai-reasoning` — ordering, diagnosis, and verification.
-- `pelizzai-verification-before-completion` / `pelizzai-finish` — completion with gates.
+- `pelizzai-final-verification` / `pelizzai-finish` — completion with gates.
 - `pelizzai-audit` — the `pelizzai/` directory pattern and the domain-skill catalog.
 
 Invoke only the skills required by the task's effect, risk, domain, and overlays; do not turn the

@@ -30,7 +30,7 @@ Do not repeat here the process of skills that already have an owner: frontend (`
 - Use clear, direct, objective language. Explain a technical term when it matters to understanding.
 - Code, identifiers, technical file names, and internal messages follow the project's convention; absent one, use English.
 - Keep the tone compatible with the context: professional for documentation and production, more didactic for explanation and learning.
-- Apply `pelizzai-writing-clearly-and-concisely` to relevant textual artifacts, not to every response.
+- Apply `pelizzai-writing-clearly` to relevant textual artifacts, not to every response.
 
 ## 3. Reasoning, investigation, and transparency
 
@@ -60,7 +60,7 @@ Do not repeat here the process of skills that already have an owner: frontend (`
 
 - Write readable, cohesive, testable code aligned with the language's and the project's conventions.
 - **Docstrings are allowed and welcome.** Document modules, classes, functions, and public APIs with docstrings in the language's idiomatic format (JSDoc/TSDoc, Python docstrings, C# XML docs, godoc, rustdoc, PHPDoc, etc.): purpose, parameters, return value, and errors/exceptions when relevant. Use English, unless a contrary convention is already established in the project (same rule as section 2).
-- Inline comments are for the **why** the code does not express (constraints, trade-offs, workarounds with context) — not for narrating what the line does. Do not write placeholder comments ("TODO: improve later") or redundant comments. For the text, apply `pelizzai-writing-clearly-and-concisely`.
+- Inline comments are for the **why** the code does not express (constraints, trade-offs, workarounds with context) — not for narrating what the line does. Do not write placeholder comments ("TODO: improve later") or redundant comments. For the text, apply `pelizzai-writing-clearly`.
 - Do not hardcode business values, URLs, credentials, external IDs, or environment configuration when they can vary across environments or over time. A stable, local constant is allowed when it improves clarity and does not represent external configuration.
 - Never expose a secret, token, password, API key, or personal data in code, logs, documentation, or responses. Use environment variables, secret providers, or the project's approved configuration mechanism.
 - Do not change `.env`, `.env.local`, `.env.development`, `.env.production`, or equivalents by default. Change them only when the user explicitly requests it, the change is necessary, and no secret is exposed; prefer updating `.env.example` with keys only, without sensitive values.

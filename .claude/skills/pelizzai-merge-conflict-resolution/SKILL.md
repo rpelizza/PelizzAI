@@ -46,4 +46,4 @@ Never: run `git merge --abort`/`git rebase --abort` on your own to escape the co
 
 ## Integration
 
-**Combines with:** `pelizzai-starting-branch` (the base the conflict arises from), `pelizzai-finish` (the integration/PR where the conflict appears), `pelizzai-verification-before-completion` (running the checks after resolving), `pelizzai-reasoning` (Evidence Synthesis to reconcile conflicting intents).
+**Combines with:** `pelizzai-starting-branch` (the base the conflict arises from), `pelizzai-finish` (the integration/PR where the conflict appears), `pelizzai-final-verification` (running the checks after resolving), `pelizzai-reasoning` (Evidence Synthesis to reconcile conflicting intents).

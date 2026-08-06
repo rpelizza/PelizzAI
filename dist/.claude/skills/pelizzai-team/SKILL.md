@@ -419,7 +419,7 @@ Member results are **not** truth until they are cross-checked.
 - **Adversarial verification:** prefer that **another** member (or a dedicated verifier) try to take down a conclusion, rather than the author confirming it.
 - **Cross-check via independent runs (Verification):** when several members reach the same result through independent paths, the convergence increases confidence — but it does not replace a real test/source.
 - **Per-task review (two lenses with asymmetric blindness):** every implementation deliverable goes through `pelizzai-review` — the **blind spec lens** (receives only diff + spec/plan + the area's domain skills, NEVER the author's report: it judges the code against the contract, without the narrative) and the **quality/evidence lens** (receives the report and verifies the claims with fresh proof). The coordinator dispatches independent reviewers — it is **never the blind lens** —, crosses the two verdicts and, on conflict, decides with its own evidence or escalates. The blind/dual profile (`split`) is the default in any lane, including bounded — only with two dispatches does the spec lens not know the author's narrative; `combined` in a single pass is an exception the user ratifies at step 4 of the setup gate. What is proportional is each lens's **depth**, not the review's existence nor the blindness.
-- **Evidence gate:** before accepting an **implementation** deliverable, apply `pelizzai-verification-before-completion` — check the **git diff** and run the test commands yourself, or accept output + exit code from **whoever ran the check** (the quality/evidence lens, an independent reviewer — never the author); the member's report, including output the member pasted itself, is never evidence.
+- **Evidence gate:** before accepting an **implementation** deliverable, apply `pelizzai-final-verification` — check the **git diff** and run the test commands yourself, or accept output + exit code from **whoever ran the check** (the quality/evidence lens, an independent reviewer — never the author); the member's report, including output the member pasted itself, is never evidence.
 - **Synthesis:** cross the deliverables with `Evidence Synthesis` and produce **one** delivery, making clear what is consensus, what was resolved divergence, and what remains open.
 - **Deadlock:** if the confrontation does **not** converge, the coordinator does **not** force an artificial consensus: it decides by the task's dominant criterion (invoking `Decision Making`) and, when the choice belongs to the user or the impact is high, **escalates via `pelizzai-interview`** — naming the gap, with the positions turned into 2–3 real options, the recommended one, and each one's trade-off.
 
@@ -501,7 +501,7 @@ Apply the **effort budget** from `pelizzai-reasoning`: verification depth is pro
 - `pelizzai-subagents` — lightweight delegation to **one** isolated subagent (no team).
 - `pelizzai-router` / `pelizzai-execute` — where the `team` mode arrives from (setup gate); pelizzai-execute defines the per-task cycle each front follows.
 - `pelizzai-interview` — destination of the material gaps named by the members: the coordinator consolidates them and takes them to the human before the front continues.
-- `pelizzai-verification-before-completion` — the evidence gate before accepting an implementation deliverable.
+- `pelizzai-final-verification` — the evidence gate before accepting an implementation deliverable.
 - `pelizzai-ideia-generation` / `pelizzai-writing-plans` — where the team's task usually comes from.
 
 ---

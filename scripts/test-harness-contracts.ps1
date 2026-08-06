@@ -150,14 +150,14 @@ try {
     Check-Match '.claude/skills/pelizzai-oswap/SKILL.md' 'Software Supply Chain Failures[\s\S]*Mishandling of Exceptional Conditions' 'OWASP uses 2025 categories'
     Check-NotMatch '.claude/skills/pelizzai-oswap/SKILL.md' 'Offered by.*pelizzai-finish' 'security is not a late offer'
     Check-NotMatch '.claude/skills/pelizzai-documentation/SKILL.md' 'Offered by.*pelizzai-finish' 'documentation is not a late offer'
-    Check-Match '.claude/skills/pelizzai-verification-before-completion/SKILL.md' 'validated-head' 'Verification seals validated content'
+    Check-Match '.claude/skills/pelizzai-final-verification/SKILL.md' 'validated-head' 'Verification seals validated content'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'metadata-only' 'finish limits closeout to metadata'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Offer the destination[\s\S]{0,180}Keep local[^\n]*recommend' 'finish presents the destination with local recommended'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'never auto-confirmed' 'finish requires an explicit decision even to keep local'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Source mode[\s\S]*not.*state|source mode[\s\S]*not.*state' 'finish creates no runtime in source mode'
-    Check-Match '.claude/skills/pelizzai-quick-fix/SKILL.md' 'Commit[\s\S]*verification-before-completion[\s\S]*pelizzai-finish' 'quick-fix commits before the seal'
-    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'Review[\s\S]*Consolidate[\s\S]*verification-before-completion[\s\S]*pelizzai-finish' 'debugging reviews, commits, and seals in order'
-    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'commit[\s\S]*verification-before-completion[\s\S]*pelizzai-finish' 'bootstrap commits before the seal'
+    Check-Match '.claude/skills/pelizzai-quick-fix/SKILL.md' 'Commit[\s\S]*pelizzai-final-verification[\s\S]*pelizzai-finish' 'quick-fix commits before the seal'
+    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'Review[\s\S]*Consolidate[\s\S]*pelizzai-final-verification[\s\S]*pelizzai-finish' 'debugging reviews, commits, and seals in order'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'commit[\s\S]*pelizzai-final-verification[\s\S]*pelizzai-finish' 'bootstrap commits before the seal'
     Check-Match '.cursor/rules/pelizzai.mdc' 'pelizzai-core/SKILL.md' 'Cursor points to core'
     Check-Match '.cursor/rules/pelizzai.mdc' 'pelizzai-router/SKILL.md' 'Cursor points to router'
     Check-Match '.github/workflows/check-harness.yml' '-Check -SourceMode' 'CI validates source mode'
@@ -290,10 +290,10 @@ try {
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'The plan does not start until' 'domain skills are decided before the greenfield plan'
 
     # -- writing-skills: context7 mandatory on creation + the adoption-driven axis --
-    Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' 'grounded in context7 or current official documentation' 'writing-skills requires context7/official docs when creating a stack skill'
-    Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' 'Mandatory sync as part of the edit' 'writing-skills syncs automatically after an authorized edit'
-    Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' 'node scripts/sync-harness\.mjs[\s\S]*--check' 'writing-skills runs the portable sync and check'
-    Check-Match '.claude/skills/pelizzai-writing-skills/references/domain-skill-maintenance.md' '[Aa]doption-driven' 'domain-skill-maintenance has the adoption-driven axis (creates the new-stack skill)'
+    Check-Match '.claude/skills/pelizzai-create-skill/SKILL.md' 'grounded in context7 or current official documentation' 'writing-skills requires context7/official docs when creating a stack skill'
+    Check-Match '.claude/skills/pelizzai-create-skill/SKILL.md' 'Mandatory sync as part of the edit' 'writing-skills syncs automatically after an authorized edit'
+    Check-Match '.claude/skills/pelizzai-create-skill/SKILL.md' 'node scripts/sync-harness\.mjs[\s\S]*--check' 'writing-skills runs the portable sync and check'
+    Check-Match '.claude/skills/pelizzai-create-skill/references/domain-skill-maintenance.md' '[Aa]doption-driven' 'domain-skill-maintenance has the adoption-driven axis (creates the new-stack skill)'
 
     # -- finish-task: proactive destination (local by default, external per task) --
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Ask a single question and wait' 'finish-task asks for the destination and waits'
@@ -363,7 +363,7 @@ try {
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'seal task as delivered' 'finish-task: closure commit seals as delivered'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Declaring .phase: done. here' 'finish-task: anti-pattern of declaring done inside finish itself'
     Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' 'Set .slug:[\s\S]{0,20}phase: done' 'finish-task no longer closes straight to done'
-    Check-Match '.claude/skills/pelizzai-verification-before-completion/SKILL.md' 'closes out in .phase: delivered' 'verification: finish closes out in delivered, not done'
+    Check-Match '.claude/skills/pelizzai-final-verification/SKILL.md' 'closes out in .phase: delivered' 'verification: finish closes out in delivered, not done'
     Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'Delivery in .delivered. on resumption' 'recovery observes delivered→done on resumption, without moving WIP'
     Check-Match '.claude/skills/pelizzai-handoff/SKILL.md' 'phase: delivered, include confirm' 'handoff propagates confirm so the next session can observe done'
 
@@ -408,7 +408,7 @@ try {
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Migrate the intact block and deflate the cursor' 'finish-task runs the migration when sealing delivered'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- pelizzai/data/state\.md pelizzai/data/history/' 'finish-task stages state + history in the same closure'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' ":\(exclude\)pelizzai/data/history/" 'finish-task: product guard excludes history/ metadata'
-    Check-Match '.claude/skills/pelizzai-verification-before-completion/SKILL.md' 'only harness metadata' 'verification: closure contains state + history, not just state'
+    Check-Match '.claude/skills/pelizzai-final-verification/SKILL.md' 'only harness metadata' 'verification: closure contains state + history, not just state'
     Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'already migrated to .pelizzai/data/history/' 'recovery: on resumption only stamps the outcome (the block already migrated)'
 
     # -- A plan executable by someone with zero context (BASE requirement restored) --
@@ -655,7 +655,7 @@ try {
     # -- C4: the path that ARMS the cadence keeps seeding the ledger/Stack baseline --
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'Stack baseline' 'bootstrap records the Stack baseline (drift anchor)'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'seeds? the ledger|ledger seeded' 'bootstrap seeds the ledger (arms the C4 cadence)'
-    Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' '[Ss]eed the ledger' 'writing-skills seeds the ledger'
+    Check-Match '.claude/skills/pelizzai-create-skill/SKILL.md' '[Ss]eed the ledger' 'writing-skills seeds the ledger'
 
     # -- D1: Accelerated cadence — new thresholds locked on BOTH legs (strict parity) --
     # Field feedback swaps 20/30/14/21 for 10/10/15/10 (sampling / commits / review-days /
@@ -674,11 +674,11 @@ try {
         Check-NotMatch $cad 'DAY_THRESHOLD_SCAN\s*=\s*21\b' "cadence D1: old full-scan threshold (21 days) removed ($leaf)"
     }
     # D1 in the TEXTS that cite the cadence (the doctrine follows the hooks).
-    Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' '10 commits / 10 review days / 15 full-scan days' 'writing-skills cites the new thresholds (10/10/15)'
-    Check-NotMatch '.claude/skills/pelizzai-writing-skills/SKILL.md' '30 commits / 14 days' 'writing-skills does not cite the old thresholds (30/14)'
-    Check-Match '.claude/skills/pelizzai-writing-skills/references/domain-skill-maintenance.md' 'every 10 interactions' 'domain-skill-maintenance cites the new sampling (10 interactions)'
-    Check-Match '.claude/skills/pelizzai-writing-skills/references/domain-skill-maintenance.md' 'count >= 10 commits OR > 10 days have passed' 'domain-skill-maintenance cites the new review threshold (10/10)'
-    Check-NotMatch '.claude/skills/pelizzai-writing-skills/references/domain-skill-maintenance.md' 'every 20 interactions' 'domain-skill-maintenance does not cite the old sampling (20)'
+    Check-Match '.claude/skills/pelizzai-create-skill/SKILL.md' '10 commits / 10 review days / 15 full-scan days' 'writing-skills cites the new thresholds (10/10/15)'
+    Check-NotMatch '.claude/skills/pelizzai-create-skill/SKILL.md' '30 commits / 14 days' 'writing-skills does not cite the old thresholds (30/14)'
+    Check-Match '.claude/skills/pelizzai-create-skill/references/domain-skill-maintenance.md' 'every 10 interactions' 'domain-skill-maintenance cites the new sampling (10 interactions)'
+    Check-Match '.claude/skills/pelizzai-create-skill/references/domain-skill-maintenance.md' 'count >= 10 commits OR > 10 days have passed' 'domain-skill-maintenance cites the new review threshold (10/10)'
+    Check-NotMatch '.claude/skills/pelizzai-create-skill/references/domain-skill-maintenance.md' 'every 20 interactions' 'domain-skill-maintenance does not cite the old sampling (20)'
 
     # -- Writegate: opt-in runtime enforcement (co-lands with the B1 hook package) --
     # EXISTENCE is already locked by the dangling-refs check below (pelizzai-audit cites
@@ -999,7 +999,7 @@ try {
         '.claude/skills/pelizzai-execute/references/task-cycle.md',
         '.claude/skills/pelizzai-writing-plans/SKILL.md',
         '.claude/skills/pelizzai-quick-fix/SKILL.md',
-        '.claude/skills/pelizzai-verification-before-completion/SKILL.md',
+        '.claude/skills/pelizzai-final-verification/SKILL.md',
         '.claude/skills/pelizzai-preferences/SKILL.md'
     )
     $proofAnchors = @(
@@ -1225,7 +1225,7 @@ try {
     Check-Match '.claude/skills/pelizzai-audit/templates/profile.md' 'ANY raw value outside' 'profile.md describes the recap trigger as any raw value'
 
     # The Cursor adapter is manual: calling it a generated mirror makes the author never update it.
-    Check-NotMatch '.claude/skills/pelizzai-writing-skills/references/skill-authoring.md' '`\.cursor/` as generated mirrors' 'skill-authoring does not call the Cursor adapter a generated mirror'
+    Check-NotMatch '.claude/skills/pelizzai-create-skill/references/skill-authoring.md' '`\.cursor/` as generated mirrors' 'skill-authoring does not call the Cursor adapter a generated mirror'
 
     # README: the closeout flow described is the consumer one; source mode carries a caveat.
     Check-Match 'README.md' 'PelizzAI source repo[\s\S]{0,260}does not create\s*\r?\na metadata-only commit' 'README: closeout carries the source mode caveat'
@@ -1291,8 +1291,8 @@ try {
     Check-NotMatch '.claude/skills/pelizzai-recovery/SKILL.md' 'writing metadata in `pelizzai/` is valid on any branch' 'recovery no longer grants a general any-branch metadata license'
 
     # -- #14: writing-skills ratifies the execution mode before parallel writing --
-    Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' 'approving the candidate LIST \(2\.5\) does NOT ratify the MODE' 'writing-skills: candidate approval does not ratify the execution mode'
-    Check-Match '.claude/skills/pelizzai-writing-skills/SKILL.md' 'inline · subagents · team — team never omitted' 'writing-skills presents the three modes with team visible'
+    Check-Match '.claude/skills/pelizzai-create-skill/SKILL.md' 'approving the candidate LIST \(2\.5\) does NOT ratify the MODE' 'writing-skills: candidate approval does not ratify the execution mode'
+    Check-Match '.claude/skills/pelizzai-create-skill/SKILL.md' 'inline · subagents · team — team never omitted' 'writing-skills presents the three modes with team visible'
 
     # -- Advisory: session-start validates slug/phase and allowlists the recap (both legs) --
     foreach ($sh in @('.claude/hooks/pelizzai-session-start.mjs', '.claude/hooks/pelizzai-session-start.ps1')) {
@@ -1554,7 +1554,7 @@ try {
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'pelizzai-evolve/templates' 'audit names the template authority'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Learnings recurrence and budgets' 'finish-task counts recurrences and flags budgets'
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'Active rules of `pelizzai/data/learnings\.md` were read BEFORE' 'writing-plans reads the active rules before approaches'
-    Check-Match '.claude/skills/pelizzai-verification-before-completion/SKILL.md' 'read-only during a correction' 'verification judges against the standard without bending it'
+    Check-Match '.claude/skills/pelizzai-final-verification/SKILL.md' 'read-only during a correction' 'verification judges against the standard without bending it'
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'incident entry \(status candidate\)' 'debugging writes the incident at root-cause confirmation'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'verification-standard\.md' 'review pastes the standard criteria into the briefing'
     Check (Test-Path (Join-Path $root 'dist/.claude/skills/pelizzai-evolve/templates/learnings.md')) 'dist ships the evolve templates'

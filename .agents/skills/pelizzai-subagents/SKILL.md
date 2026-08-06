@@ -91,7 +91,7 @@ user ratified the downgrade at the setup gate). In `split`, the blindness is asy
 **NOT receive the report** of the subagent (it judges the code against the contract, without the
 narrative); the **quality/evidence lens** receives the report and verifies the claims with fresh
 proof. The coordinator (the main session) cross-checks the lenses and is **never** the blind lens.
-Then apply `pelizzai-verification-before-completion` before consolidating. For research,
+Then apply `pelizzai-final-verification` before consolidating. For research,
 cross-check conflicting findings and distrust an unverified report.
 
 If the subagent flagged a domain-skill gap for the task's stack, the coordinator accumulates
@@ -133,5 +133,5 @@ continue.
 - `pelizzai-reasoning` / `pelizzai-preferences` — reasoning layer and global floor instructed in the briefing (domain skills prevail).
 - `pelizzai-execute` — `subagents` mode: one subagent per task, dispatched by the coordinator.
 - `pelizzai-interview` — destination of the material gap the subagent names: the coordinator takes it to the human before re-dispatching.
-- `pelizzai-review` / `pelizzai-verification-before-completion` — check the result before consolidating.
+- `pelizzai-review` / `pelizzai-final-verification` — check the result before consolidating.
 - `pelizzai-audit` — catalog of domain skills pasted into the briefing.

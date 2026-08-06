@@ -39,7 +39,7 @@ RED→GREEN and tool calls are TDD/ReAct micro-cycles inside **Act**; do not rep
 
 ## Definition of Done (DoD)
 
-The loop only ends when the DoD is reached **and verified** (`pelizzai-verification-before-completion`). Define the DoD **before** entering the loop:
+The loop only ends when the DoD is reached **and verified** (`pelizzai-final-verification`). Define the DoD **before** entering the loop:
 
 ```text
 - For a plan: all tasks delivered + the coordinator's final validation (final review of the branch,
@@ -85,5 +85,5 @@ Outside code execution, a "loop" is also a recurring pattern in the user's life 
 - `pelizzai-reasoning` — the OODA (macro) and ReAct (micro) techniques live there; Verification confirms the DoD.
 - `pelizzai-tdd` — micro-cycle for behavior when that is the selected strategy; does not make OODA mandatory.
 - `pelizzai-interview` — mandatory destination of the stop for material doubt.
-- `pelizzai-verification-before-completion` — no loop exit without fresh evidence.
+- `pelizzai-final-verification` — no loop exit without fresh evidence.
 - `pelizzai-router` — Sync & delta is the Observe at the start of each task.
