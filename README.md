@@ -53,9 +53,12 @@ harness's development files.
 2. Copy **the contents** of `dist/` into the root of your project — Ctrl+C, Ctrl+V, done.
 3. Open the agent in the project and type `bootstrap`.
 
-To **update** later, prefer the export below: it preserves your domain skills and your
-`pelizzai/` and validates the installation. Copying the new `dist/` over the top also works, but it
-neither removes core skills discontinued upstream nor runs the validation.
+To **update** later, prefer the export below: it preserves your domain skills, your `pelizzai/`,
+and the project's own content in `CLAUDE.md`/`AGENTS.md`/`GEMINI.md` (the harness manages only
+its anchored contract block), and validates the installation. Copying the new `dist/` over the
+top also works, but it **replaces** those three entry files with the block-only versions, neither
+removes core skills discontinued upstream nor runs the validation — on a project that already has
+its own entry files, use the export.
 
 ### With a command line: install and update are the same command
 
@@ -77,9 +80,13 @@ pwsh scripts/sync-harness.ps1 -ExportConsumer C:\path\to\your-project
 bash scripts/sync-harness.sh --export-consumer /path/to/your-project
 ```
 
-This copies the core skills, the hooks, the Cursor adapter, and the useful scripts, generates the
-consumer's `CLAUDE.md`, and validates the mirrors — **without touching** your domain skills, your
-`pelizzai/`, or your `settings.json`.
+This copies the core skills, the hooks, the Cursor adapter, and the useful scripts, **anchors**
+the harness contract as a marker-delimited block (`<!-- pelizzai:contract -->`) inside the
+consumer's `CLAUDE.md`, `AGENTS.md`, and `GEMINI.md`, and validates the mirrors — **without
+touching** your domain skills, your `pelizzai/`, your `settings.json`, or the project's own
+content in those three files. A project that already has its `CLAUDE.md`/`AGENTS.md` keeps
+everything and gains the block at the end; re-running the export only resyncs the block when the
+contract changed upstream (files written by the pre-anchor export are migrated in place, once).
 
 > **Never copy the repository root by hand** — manual copying is what `dist/` is for. What sets
 > the source repo apart from a consumer is a single sentinel, `scripts/pelizzai-source-repo.txt`.
