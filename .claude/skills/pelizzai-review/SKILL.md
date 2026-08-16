@@ -190,8 +190,9 @@ work, when the cheapest options are already gone. In the `tweak`/`bug` tracks, t
 compact confirm.
 
 ```text
-Name the collision in one line — what the harness requires (two lenses, two dispatches, the blind
-one by an independent agent), what this environment allows, and why they conflict. Then offer:
+Name the collision in one line, IN THE CONVERSATION'S LANGUAGE — what the harness requires (two
+lenses, two dispatches, the blind one by an independent agent), what this environment allows, and
+why they conflict. Then offer:
 
 (a) authorize the independent reviewer for the reviews of this task/delivery — the way out that
     costs nothing in rigor. Ask for it explicitly; the user may simply not know the harness
@@ -208,8 +209,12 @@ one by an independent agent), what this environment allows, and why they conflic
 ```text
 - The coordinator does NOT dispatch itself as "the blind spec lens". Option (b) is not blindness
   under another name: it is an explicitly non-blind review, and it is announced as such.
-- The review does not disappear. The quality/evidence lens and the Verification block are
-  independent of having a second agent — a check that ran is proof no matter who dispatched it.
+- The review does not disappear, and the evidence bar does not move. The quality/evidence lens and
+  its Verification block do not require a second agent, but the proof still requires a FRESH RUN —
+  command, output, and exit code produced now, by whoever is reviewing. Output pasted by whoever
+  implemented is NEVER evidence, and that rule does not relax here (`pelizzai-team` → evidence
+  gate). When the coordinator both implemented and reviews, it RE-RUNS the checks itself: that is
+  weaker than an independent run, and being weaker is part of what `degraded` records.
 - Silence is not an option. A non-blind review presented as a completed two-lens review is
   exactly the defect the whole asymmetry exists to prevent — and it is worse than the missing
   capability, because it is invisible.

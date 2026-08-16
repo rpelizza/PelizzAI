@@ -77,9 +77,10 @@ profile — push/PR/publication are decided per task in `pelizzai-finish`.
    the review. In every mode — inline included — the two lenses go out as TWO INDEPENDENT
    DISPATCHES, because the coordinator can never be the blind lens. `inline` means "no delegation
    to implement", never "no subagents at all".
-   If this environment cannot dispatch an independent reviewer, say so HERE and open the
-   degradation choice (`pelizzai-review` → "When there is no independent reviewer") — not later,
-   with the code already written.
+   Check this for the REVIEWER specifically — being able to dispatch an implementer does not prove
+   a reviewer is dispatchable. If this environment cannot dispatch an independent reviewer, say so
+   HERE, in the conversation's language, and open the degradation choice (`pelizzai-review` →
+   "When there is no independent reviewer") — not later, with the code already written.
    Question: which mode do you choose?
 
 3. Commits (only after 2)
@@ -345,7 +346,7 @@ cycle. Inline is an adequate choice, not an inferior fallback.
 
 **Inline is not "without subagents".** It removes the delegation of the IMPLEMENTATION; the review
 keeps its two independent dispatches, exactly as in the other two modes — the coordinator wrote the
-code here, so it is the last agent able to judge it blind. A session that cannot dispatch a reviewer
+code here, so it is precisely the agent that CANNOT judge it blind. A session that cannot dispatch a reviewer
 is not "inline mode": it is an environment without an independent reviewer, and that goes through
 `pelizzai-review` → "When there is no independent reviewer", declared at the gate.
 
