@@ -1378,7 +1378,12 @@ console.log('contract-shape behavior OK');
 
         # Issue #20 — the .sh was hardened against symlinks and made atomic; the .ps1 was not, so
         # Windows kept the old behavior. Exercised by RUNNING the script, not by grepping it.
-        Check (@(Get-ChildItem -LiteralPath $handoffCleanup -Filter '*.tmp.*' -ErrorAction SilentlyContinue).Count -eq 0) `
+        # Names the temporary the script ACTUALLY creates: `.task-<n>-brief-<rand>.tmp`.
+        # The previous '*.tmp.*' DOES match it on Windows (verified — Win32 wildcard semantics are
+        # looser than they look), so this is precision, not a dead-assertion fix. `-Force` is the
+        # part that matters: on POSIX a leading dot makes the file hidden to Get-ChildItem, and
+        # without it the check would silently see an empty directory on ubuntu/macOS.
+        Check (@(Get-ChildItem -LiteralPath $handoffCleanup -Force -Filter '.task-*-brief-*.tmp' -ErrorAction SilentlyContinue).Count -eq 0) `
             'task-brief.ps1 leaves no temporary behind after the atomic install'
         # Helper: run task-brief.ps1 against a given handoff dir and return exit code + output.
         function Invoke-Brief([string]$HandoffDir) {
@@ -1429,30 +1434,36 @@ console.log('contract-shape behavior OK');
             Check ($r.Out -match 'handoff dir is a reparse point') 'task-brief.ps1 names the reparse point as the reason'
             Check (@(Get-ChildItem -LiteralPath $linkTarget -File -ErrorAction SilentlyContinue).Count -eq 0) `
                 'task-brief.ps1 writes NOTHING through the diverted dir (the brief carries the full task text)'
-
-            # (d) the DESTINATION FILE as a reparse point, inside a real directory.
-            $fileLinkDir = & $newTemp 'filelinkdir'
-            $decoy = & $newTemp 'decoy'
-            New-Item -ItemType Directory -Path $fileLinkDir -Force | Out-Null
-            'decoy-untouched' | Set-Content -LiteralPath $decoy -Encoding utf8
-            $fileLinkError = $null
-            try { New-Item -ItemType SymbolicLink -Path (Join-Path $fileLinkDir 'task-1-brief.md') -Target $decoy -ErrorAction Stop | Out-Null } catch { $fileLinkError = $_.Exception.Message }
-            if ($fileLinkError) {
-                $knownFileIncapacity = $fileLinkError -match 'privilege|not supported|denied|permission|Developer Mode'
-                Check $knownFileIncapacity 'destination-reparse fixture: only a KNOWN incapacity may skip it' $fileLinkError
-                if ($knownFileIncapacity) { Write-Host "SKIP: destination reparse-point check ($fileLinkError)" }
-            } else {
-                $r = Invoke-Brief $fileLinkDir
-                Check ($r.Code -ne 0) 'task-brief.ps1 REFUSES a destination file that is a reparse point' "exit $($r.Code)"
-                Check ($r.Out -match 'handoff file is a reparse point') 'task-brief.ps1 names the destination reparse point'
-                Check ((Get-Content -LiteralPath $decoy -Raw) -match 'decoy-untouched') `
-                    'task-brief.ps1 leaves the symlink target UNTOUCHED (no brief written through it)'
-            }
-            Remove-Item -LiteralPath $fileLinkDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item -LiteralPath $decoy -Force -ErrorAction SilentlyContinue
         }
         Remove-Item -LiteralPath $linkPath -Recurse -Force -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $linkTarget -Recurse -Force -ErrorAction SilentlyContinue
+
+        # (d) the DESTINATION FILE as a reparse point, inside a real directory. INDEPENDENT of (c):
+        # a directory junction and a file symlink are different capabilities, so nesting this inside
+        # the (c) success branch means an environment that cannot make the FIRST silently never
+        # exercises $outPath at all — the protection would ship untested wherever it matters most.
+        $fileLinkDir = & $newTemp 'filelinkdir'
+        $decoy = & $newTemp 'decoy'
+        New-Item -ItemType Directory -Path $fileLinkDir -Force | Out-Null
+        'decoy-untouched' | Set-Content -LiteralPath $decoy -Encoding utf8
+        # Full-content comparison, not a substring: `-match 'decoy-untouched'` still passes if the
+        # brief is APPENDED after the sentinel, which is exactly the leak the check exists to catch.
+        $decoyHashBefore = (Get-FileHash -LiteralPath $decoy).Hash
+        $fileLinkError = $null
+        try { New-Item -ItemType SymbolicLink -Path (Join-Path $fileLinkDir 'task-1-brief.md') -Target $decoy -ErrorAction Stop | Out-Null } catch { $fileLinkError = $_.Exception.Message }
+        if ($fileLinkError) {
+            $knownFileIncapacity = $fileLinkError -match 'privilege|not supported|denied|permission|Developer Mode'
+            Check $knownFileIncapacity 'destination-reparse fixture: only a KNOWN incapacity may skip it' $fileLinkError
+            if ($knownFileIncapacity) { Write-Host "SKIP: destination reparse-point check ($fileLinkError)" }
+        } else {
+            $r = Invoke-Brief $fileLinkDir
+            Check ($r.Code -ne 0) 'task-brief.ps1 REFUSES a destination file that is a reparse point' "exit $($r.Code)"
+            Check ($r.Out -match 'handoff file is a reparse point') 'task-brief.ps1 names the destination reparse point'
+            Check ((Get-FileHash -LiteralPath $decoy).Hash -eq $decoyHashBefore) `
+                'task-brief.ps1 leaves the symlink target BYTE-FOR-BYTE untouched (no brief written through it)'
+        }
+        Remove-Item -LiteralPath $fileLinkDir -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $decoy -Force -ErrorAction SilentlyContinue
 
         Set-Content -LiteralPath 'seed.txt' -Value 'unstaged-review-sentinel' -Encoding utf8
         Set-Content -LiteralPath 'staged.txt' -Value 'staged-review-sentinel' -Encoding utf8
