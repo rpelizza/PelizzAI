@@ -85,8 +85,25 @@ foreach ($line in $lines) {
 if (-not $inTask) { Fail "Task $TaskNumber not found in $PlanPath (expected a header '### Task ${TaskNumber}: ...')" }
 
 $outDir = Get-HandoffDir
-New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+# Shared-temp hygiene, mirroring task-brief.sh: never follow a reparse point (the Windows
+# equivalent of a symlink/junction) planted at the handoff path. The brief carries the task's full
+# text, so a diverted write leaks it somewhere the caller never inspects — and the caller is told
+# only the path it ASKED for, so the divert is invisible from here.
+if (Test-Path -LiteralPath $outDir) {
+  $existing = Get-Item -LiteralPath $outDir -Force
+  if ($existing.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+    Fail "handoff dir is a reparse point (symlink/junction): $outDir"
+  }
+} else {
+  New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+}
 $outPath = Join-Path $outDir "task-$TaskNumber-brief.md"
+if (Test-Path -LiteralPath $outPath) {
+  $existingOut = Get-Item -LiteralPath $outPath -Force
+  if ($existingOut.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+    Fail "handoff file is a reparse point (symlink/junction): $outPath"
+  }
+}
 
 $now = Get-Date -Format 'yyyy-MM-dd HH:mm'
 $content = [System.Collections.Generic.List[string]]::new()
@@ -108,5 +125,15 @@ $content.Add('')
 $reportPath = Join-Path $outDir "task-$TaskNumber-report.md"
 $content.Add("Report: write the result to ``$reportPath`` (mirroring this brief) and reply in chat in at most 15 lines.")
 
-Set-Content -LiteralPath $outPath -Value ($content -join "`n") -Encoding utf8
+# Atomic install, mirroring task-brief.sh's `mv -f`: write to a private temporary in the same
+# directory, then MOVE it into place. Set-Content writes straight to the destination, so a reader
+# that opens the brief mid-write gets a truncated task — and a truncated brief is worse than a
+# missing one, because the member implements what it can see and reports DONE.
+$tmpOut = "$outPath.tmp.$PID"
+try {
+  Set-Content -LiteralPath $tmpOut -Value ($content -join "`n") -Encoding utf8
+  Move-Item -LiteralPath $tmpOut -Destination $outPath -Force
+} finally {
+  if (Test-Path -LiteralPath $tmpOut) { Remove-Item -LiteralPath $tmpOut -Force -ErrorAction SilentlyContinue }
+}
 Write-Output $outPath

@@ -1376,6 +1376,32 @@ console.log('contract-shape behavior OK');
             'task-brief preserves constraints and fence boundaries'
         Check (-not (Test-Path -LiteralPath 'pelizzai/data/handoffs')) 'helper without bootstrap uses temp, not the project runtime'
 
+        # Issue #20 — the .sh was hardened against symlinks and made atomic; the .ps1 was not, so
+        # Windows kept the old behavior. Exercised by RUNNING the script, not by grepping it.
+        Check (@(Get-ChildItem -LiteralPath $handoffCleanup -Filter '*.tmp.*' -ErrorAction SilentlyContinue).Count -eq 0) `
+            'task-brief.ps1 leaves no temporary behind after the atomic install'
+        $linkTarget = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-handoff-real-" + [guid]::NewGuid().ToString('N'))
+        $linkPath = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-handoff-link-" + [guid]::NewGuid().ToString('N'))
+        New-Item -ItemType Directory -Path $linkTarget -Force | Out-Null
+        $linkKind = if ($IsWindows) { 'Junction' } else { 'SymbolicLink' }
+        $linkMade = $false
+        try { New-Item -ItemType $linkKind -Path $linkPath -Target $linkTarget -ErrorAction Stop | Out-Null; $linkMade = $true } catch { }
+        if ($linkMade) {
+            $env:PELIZZAI_HANDOFF_DIR = $linkPath
+            $divertOut = (& pwsh -NoProfile -File (Join-Path $root 'scripts/task-brief.ps1') 'pelizzai/plans/fixture.md' 1 2>&1 | Out-String)
+            $divertCode = $LASTEXITCODE
+            Remove-Item Env:PELIZZAI_HANDOFF_DIR -ErrorAction SilentlyContinue
+            Check ($divertCode -ne 0) 'task-brief.ps1 REFUSES a handoff dir that is a reparse point' "exit $divertCode"
+            Check ($divertOut -match 'reparse point') 'task-brief.ps1 names the reparse point as the reason'
+            Check (@(Get-ChildItem -LiteralPath $linkTarget -File -ErrorAction SilentlyContinue).Count -eq 0) `
+                'task-brief.ps1 writes NOTHING through the diverted path (the brief carries the full task text)'
+        } else {
+            # No silent cap: say which check did not run and why, instead of reporting a green sweep.
+            Write-Host "SKIP: reparse-point check (could not create a $linkKind here — needs privilege/Developer Mode)"
+        }
+        Remove-Item -LiteralPath $linkPath -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $linkTarget -Recurse -Force -ErrorAction SilentlyContinue
+
         Set-Content -LiteralPath 'seed.txt' -Value 'unstaged-review-sentinel' -Encoding utf8
         Set-Content -LiteralPath 'staged.txt' -Value 'staged-review-sentinel' -Encoding utf8
         git add staged.txt
@@ -1653,6 +1679,19 @@ try {
     Check-Match 'scripts/task-brief.sh' '!in_block && !in_fence && \$0 ~ /\^\\\*\\\*Global Constraints/' 'task-brief.sh: the GC marker only opens outside a fence'
     Check-Match 'scripts/review-package.sh' 'mv -f "\$TMP_OUT" "\$OUT"' 'review-package.sh writes atomically via temp + mv'
     Check-Match 'scripts/task-brief.sh' 'mv -f "\$TMP_OUT" "\$OUT"' 'task-brief.sh writes atomically via temp + mv'
+    # Parity with the .sh (issue #20): the two variants must protect the handoff the same way, or
+    # the fleet's OS silently decides whether the protection exists.
+    Check-Match 'scripts/task-brief.ps1' 'ReparsePoint' 'task-brief.ps1 checks for a reparse point (symlink/junction parity with .sh)'
+    Check-Match 'scripts/task-brief.ps1' 'Move-Item -LiteralPath \$tmpOut -Destination \$outPath -Force' 'task-brief.ps1 writes atomically via temp + move'
+
+    # Issue #22 — the delivered seal deflated `kickoff`, which the writegate is fail-closed on:
+    # the cursor reported "never ratified" about a task that had just shipped. The reset belongs to
+    # the NEXT task's opening, and both sides of the boundary must say so.
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'worktree-path, confirm, and `kickoff: ratified`' 'execute: the delivered seal preserves the kickoff'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Why `kickoff` is preserved here' 'execute: the seal explains why the kickoff survives it'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'reset of\s+that field belongs to the \*\*opening of the NEXT task\*\*' 'execute: the kickoff reset belongs to the next opening, not the seal'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '`delivery-status:`, and\s+`kickoff: ratified`' 'finish: the executor of the seal preserves the kickoff too'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'writegate is fail-closed on the kickoff' 'finish names why emptying the kickoff blocks writes'
 
     # -- #12: visual companion — loopback guard, payload validation, cleanup, owner PID --
     Check-Match '.claude/skills/pelizzai-idea-generation/scripts/server.cjs' 'BRAINSTORM_ALLOW_INSECURE_NETWORK' 'server.cjs refuses a non-loopback bind without the explicit opt-in'
