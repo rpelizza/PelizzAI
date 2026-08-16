@@ -1418,16 +1418,36 @@ console.log('contract-shape behavior OK');
         # (c)/(d) Reparse points — dir and destination file. These need privilege/Developer Mode, so
         # they may legitimately not run. An UNEXPECTED failure must fail the suite, never SKIP: a
         # blanket `catch {}` would turn any future breakage of this fixture into a silent green.
+        # Classify by exception TYPE and Win32 code, never by message text: the message is localized,
+        # and this fleet runs Windows in pt-BR ("O cliente não tem um privilégio necessário"). An
+        # English-only regex would turn an EXPECTED incapacity into a suite failure on the very
+        # machines the harness ships to.
+        function Test-LinkIncapacity($Record) {
+            if (-not $Record) { return $false }
+            $ex = $Record.Exception
+            $hr = 0
+            try { $hr = [int]$ex.HResult } catch { }
+            # HResult 0x8007____ carries the Win32 code in the low word:
+            # 1314 = ERROR_PRIVILEGE_NOT_HELD, 5 = ERROR_ACCESS_DENIED, 50 = ERROR_NOT_SUPPORTED.
+            if ($hr -ne 0 -and (($hr -band 0xFFFF) -in @(1314, 5, 50))) { return $true }
+            if ($ex -is [System.UnauthorizedAccessException]) { return $true }
+            if ($ex -is [System.PlatformNotSupportedException]) { return $true }
+            if ($ex -is [System.NotSupportedException]) { return $true }
+            return $Record.CategoryInfo.Category -in @(
+                [System.Management.Automation.ErrorCategory]::PermissionDenied,
+                [System.Management.Automation.ErrorCategory]::NotImplemented
+            )
+        }
         $linkKind = if ($IsWindows) { 'Junction' } else { 'SymbolicLink' }
         $linkTarget = & $newTemp 'real'
         $linkPath = & $newTemp 'link'
         New-Item -ItemType Directory -Path $linkTarget -Force | Out-Null
         $linkError = $null
-        try { New-Item -ItemType $linkKind -Path $linkPath -Target $linkTarget -ErrorAction Stop | Out-Null } catch { $linkError = $_.Exception.Message }
+        try { New-Item -ItemType $linkKind -Path $linkPath -Target $linkTarget -ErrorAction Stop | Out-Null } catch { $linkError = $_ }
         if ($linkError) {
-            $knownIncapacity = $linkError -match 'privilege|not supported|denied|permission|Developer Mode'
-            Check $knownIncapacity 'reparse-point fixture: only a KNOWN environment incapacity may skip it' $linkError
-            if ($knownIncapacity) { Write-Host "SKIP: reparse-point checks (cannot create a $linkKind here: $linkError)" }
+            $knownIncapacity = Test-LinkIncapacity $linkError
+            Check $knownIncapacity 'reparse-point fixture: only a KNOWN environment incapacity may skip it' $linkError.Exception.Message
+            if ($knownIncapacity) { Write-Host "SKIP: reparse-point checks (cannot create a $linkKind here: $($linkError.Exception.Message))" }
         } else {
             $r = Invoke-Brief $linkPath
             Check ($r.Code -ne 0) 'task-brief.ps1 REFUSES a handoff dir that is a reparse point' "exit $($r.Code)"
@@ -1450,11 +1470,11 @@ console.log('contract-shape behavior OK');
         # brief is APPENDED after the sentinel, which is exactly the leak the check exists to catch.
         $decoyHashBefore = (Get-FileHash -LiteralPath $decoy).Hash
         $fileLinkError = $null
-        try { New-Item -ItemType SymbolicLink -Path (Join-Path $fileLinkDir 'task-1-brief.md') -Target $decoy -ErrorAction Stop | Out-Null } catch { $fileLinkError = $_.Exception.Message }
+        try { New-Item -ItemType SymbolicLink -Path (Join-Path $fileLinkDir 'task-1-brief.md') -Target $decoy -ErrorAction Stop | Out-Null } catch { $fileLinkError = $_ }
         if ($fileLinkError) {
-            $knownFileIncapacity = $fileLinkError -match 'privilege|not supported|denied|permission|Developer Mode'
-            Check $knownFileIncapacity 'destination-reparse fixture: only a KNOWN incapacity may skip it' $fileLinkError
-            if ($knownFileIncapacity) { Write-Host "SKIP: destination reparse-point check ($fileLinkError)" }
+            $knownFileIncapacity = Test-LinkIncapacity $fileLinkError
+            Check $knownFileIncapacity 'destination-reparse fixture: only a KNOWN incapacity may skip it' $fileLinkError.Exception.Message
+            if ($knownFileIncapacity) { Write-Host "SKIP: destination reparse-point check ($($fileLinkError.Exception.Message))" }
         } else {
             $r = Invoke-Brief $fileLinkDir
             Check ($r.Code -ne 0) 'task-brief.ps1 REFUSES a destination file that is a reparse point' "exit $($r.Code)"
