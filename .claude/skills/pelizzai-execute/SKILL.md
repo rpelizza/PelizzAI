@@ -449,7 +449,8 @@ Order of operations (lossless → verifiable):
 1. Copy the intact block to data/history/<YYYY-MM-DD>-<slug>.md — a faithful copy, nothing rewritten.
 2. Return `## Active task` to the template placeholders, PRESERVING the fields that the
    destination and the later observation still read: slug, phase: delivered, branch, base-ref,
-   base-sha, validated-head, commit-strategy, worktree-path, and confirm.
+   base-sha, validated-head, commit-strategy, worktree-path, confirm, delivery-status, and
+   `kickoff: ratified`.
 3. Remove the migrated T<n>/next/pending lines from `## Progress` (they return to placeholders).
 4. Insert under `## History`: `- <date> <slug> — delivered — <result ≤10 words> →
    data/history/<file>`.
@@ -458,6 +459,16 @@ Order of operations (lossless → verifiable):
 The migration is only complete after (1)–(4) and is lossless → automatic; CONDENSING the block's
 content (instead of copying it faithfully) is destructive, falls outside the automatic rule →
 propose-confirm only.
+
+**Why `kickoff` is preserved here** (it was not, and the two contracts disagreed): the reset of
+that field belongs to the **opening of the NEXT task** — "overwrite lane/kickoff/…/confirm with the
+placeholders", above — not to this seal. Deflating it here says "this task was never ratified"
+about a task that just shipped, and it is factually wrong for the whole `delivered` window: the
+gate DID happen. It is also load-bearing, because the writegate is fail-closed on this exact marker
+(Rule B): with the field emptied, any product write between the seal and the next opening — a
+follow-up fix, a doc touch, the reconciliation itself — is blocked by a state that misreports its
+own history. Preserving it opens no hole: the next task's opening resets it and its own gate
+re-ratifies it before any product is written.
 
 **Reconciliation of the previous delivery (`delivered` → `done`).** When opening the next task
 (here) or resuming (`pelizzai-recovery`/session-start), if the state carries `phase: delivered`,

@@ -1376,6 +1376,115 @@ console.log('contract-shape behavior OK');
             'task-brief preserves constraints and fence boundaries'
         Check (-not (Test-Path -LiteralPath 'pelizzai/data/handoffs')) 'helper without bootstrap uses temp, not the project runtime'
 
+        # Issue #20 — the .sh was hardened against symlinks and made atomic; the .ps1 was not, so
+        # Windows kept the old behavior. Exercised by RUNNING the script, not by grepping it.
+        # Names the temporary the script ACTUALLY creates: `.task-<n>-brief-<rand>.tmp`.
+        # The previous '*.tmp.*' DOES match it on Windows (verified — Win32 wildcard semantics are
+        # looser than they look), so this is precision, not a dead-assertion fix. `-Force` is the
+        # part that matters: on POSIX a leading dot makes the file hidden to Get-ChildItem, and
+        # without it the check would silently see an empty directory on ubuntu/macOS.
+        Check (@(Get-ChildItem -LiteralPath $handoffCleanup -Force -Filter '.task-*-brief-*.tmp' -ErrorAction SilentlyContinue).Count -eq 0) `
+            'task-brief.ps1 leaves no temporary behind after the atomic install'
+        # Helper: run task-brief.ps1 against a given handoff dir and return exit code + output.
+        function Invoke-Brief([string]$HandoffDir) {
+            $env:PELIZZAI_HANDOFF_DIR = $HandoffDir
+            $text = (& pwsh -NoProfile -File (Join-Path $root 'scripts/task-brief.ps1') 'pelizzai/plans/fixture.md' 1 2>&1 | Out-String)
+            $code = $LASTEXITCODE
+            Remove-Item Env:PELIZZAI_HANDOFF_DIR -ErrorAction SilentlyContinue
+            return @{ Code = $code; Out = $text }
+        }
+        $tmpRoot = [IO.Path]::GetTempPath()
+        $newTemp = { param($tag) $p = Join-Path $tmpRoot ("pelizzai-handoff-$tag-" + [guid]::NewGuid().ToString('N')); $p }
+
+        # (a) A plain FILE where the handoff DIRECTORY belongs. Needs no privilege — always runs.
+        $fileAsDir = & $newTemp 'filedir'
+        'not a directory' | Set-Content -LiteralPath $fileAsDir -Encoding utf8
+        $r = Invoke-Brief $fileAsDir
+        Check ($r.Code -ne 0) 'task-brief.ps1 REFUSES a handoff dir that is a plain file' "exit $($r.Code)"
+        Check ($r.Out -match 'handoff dir is not a directory') 'task-brief.ps1 names the not-a-directory reason'
+        Remove-Item -LiteralPath $fileAsDir -Force -ErrorAction SilentlyContinue
+
+        # (b) A DIRECTORY at the brief's destination path. Without the guard, Move-Item drops the
+        # temp INSIDE it and the script still prints $outPath — a path holding no brief.
+        $dirAsFile = & $newTemp 'dirfile'
+        New-Item -ItemType Directory -Path (Join-Path $dirAsFile 'task-1-brief.md') -Force | Out-Null
+        $r = Invoke-Brief $dirAsFile
+        Check ($r.Code -ne 0) 'task-brief.ps1 REFUSES a destination that is a directory' "exit $($r.Code)"
+        Check ($r.Out -match 'handoff file is a directory') 'task-brief.ps1 names the destination-is-a-directory reason'
+        Check (@(Get-ChildItem -LiteralPath (Join-Path $dirAsFile 'task-1-brief.md') -File -ErrorAction SilentlyContinue).Count -eq 0) `
+            'task-brief.ps1 does not drop the brief inside the destination directory'
+        Remove-Item -LiteralPath $dirAsFile -Recurse -Force -ErrorAction SilentlyContinue
+
+        # (c)/(d) Reparse points — dir and destination file. These need privilege/Developer Mode, so
+        # they may legitimately not run. An UNEXPECTED failure must fail the suite, never SKIP: a
+        # blanket `catch {}` would turn any future breakage of this fixture into a silent green.
+        # Classify by exception TYPE and Win32 code, never by message text: the message is localized,
+        # and this fleet runs Windows in pt-BR ("O cliente não tem um privilégio necessário"). An
+        # English-only regex would turn an EXPECTED incapacity into a suite failure on the very
+        # machines the harness ships to.
+        function Test-LinkIncapacity($Record) {
+            if (-not $Record) { return $false }
+            $ex = $Record.Exception
+            $hr = 0
+            try { $hr = [int]$ex.HResult } catch { }
+            # HResult 0x8007____ carries the Win32 code in the low word:
+            # 1314 = ERROR_PRIVILEGE_NOT_HELD, 5 = ERROR_ACCESS_DENIED, 50 = ERROR_NOT_SUPPORTED.
+            if ($hr -ne 0 -and (($hr -band 0xFFFF) -in @(1314, 5, 50))) { return $true }
+            if ($ex -is [System.UnauthorizedAccessException]) { return $true }
+            if ($ex -is [System.PlatformNotSupportedException]) { return $true }
+            if ($ex -is [System.NotSupportedException]) { return $true }
+            return $Record.CategoryInfo.Category -in @(
+                [System.Management.Automation.ErrorCategory]::PermissionDenied,
+                [System.Management.Automation.ErrorCategory]::NotImplemented
+            )
+        }
+        $linkKind = if ($IsWindows) { 'Junction' } else { 'SymbolicLink' }
+        $linkTarget = & $newTemp 'real'
+        $linkPath = & $newTemp 'link'
+        New-Item -ItemType Directory -Path $linkTarget -Force | Out-Null
+        $linkError = $null
+        try { New-Item -ItemType $linkKind -Path $linkPath -Target $linkTarget -ErrorAction Stop | Out-Null } catch { $linkError = $_ }
+        if ($linkError) {
+            $knownIncapacity = Test-LinkIncapacity $linkError
+            Check $knownIncapacity 'reparse-point fixture: only a KNOWN environment incapacity may skip it' $linkError.Exception.Message
+            if ($knownIncapacity) { Write-Host "SKIP: reparse-point checks (cannot create a $linkKind here: $($linkError.Exception.Message))" }
+        } else {
+            $r = Invoke-Brief $linkPath
+            Check ($r.Code -ne 0) 'task-brief.ps1 REFUSES a handoff dir that is a reparse point' "exit $($r.Code)"
+            Check ($r.Out -match 'handoff dir is a reparse point') 'task-brief.ps1 names the reparse point as the reason'
+            Check (@(Get-ChildItem -LiteralPath $linkTarget -File -ErrorAction SilentlyContinue).Count -eq 0) `
+                'task-brief.ps1 writes NOTHING through the diverted dir (the brief carries the full task text)'
+        }
+        Remove-Item -LiteralPath $linkPath -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $linkTarget -Recurse -Force -ErrorAction SilentlyContinue
+
+        # (d) the DESTINATION FILE as a reparse point, inside a real directory. INDEPENDENT of (c):
+        # a directory junction and a file symlink are different capabilities, so nesting this inside
+        # the (c) success branch means an environment that cannot make the FIRST silently never
+        # exercises $outPath at all — the protection would ship untested wherever it matters most.
+        $fileLinkDir = & $newTemp 'filelinkdir'
+        $decoy = & $newTemp 'decoy'
+        New-Item -ItemType Directory -Path $fileLinkDir -Force | Out-Null
+        'decoy-untouched' | Set-Content -LiteralPath $decoy -Encoding utf8
+        # Full-content comparison, not a substring: `-match 'decoy-untouched'` still passes if the
+        # brief is APPENDED after the sentinel, which is exactly the leak the check exists to catch.
+        $decoyHashBefore = (Get-FileHash -LiteralPath $decoy).Hash
+        $fileLinkError = $null
+        try { New-Item -ItemType SymbolicLink -Path (Join-Path $fileLinkDir 'task-1-brief.md') -Target $decoy -ErrorAction Stop | Out-Null } catch { $fileLinkError = $_ }
+        if ($fileLinkError) {
+            $knownFileIncapacity = Test-LinkIncapacity $fileLinkError
+            Check $knownFileIncapacity 'destination-reparse fixture: only a KNOWN incapacity may skip it' $fileLinkError.Exception.Message
+            if ($knownFileIncapacity) { Write-Host "SKIP: destination reparse-point check ($($fileLinkError.Exception.Message))" }
+        } else {
+            $r = Invoke-Brief $fileLinkDir
+            Check ($r.Code -ne 0) 'task-brief.ps1 REFUSES a destination file that is a reparse point' "exit $($r.Code)"
+            Check ($r.Out -match 'handoff file is a reparse point') 'task-brief.ps1 names the destination reparse point'
+            Check ((Get-FileHash -LiteralPath $decoy).Hash -eq $decoyHashBefore) `
+                'task-brief.ps1 leaves the symlink target BYTE-FOR-BYTE untouched (no brief written through it)'
+        }
+        Remove-Item -LiteralPath $fileLinkDir -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $decoy -Force -ErrorAction SilentlyContinue
+
         Set-Content -LiteralPath 'seed.txt' -Value 'unstaged-review-sentinel' -Encoding utf8
         Set-Content -LiteralPath 'staged.txt' -Value 'staged-review-sentinel' -Encoding utf8
         git add staged.txt
@@ -1653,6 +1762,32 @@ try {
     Check-Match 'scripts/task-brief.sh' '!in_block && !in_fence && \$0 ~ /\^\\\*\\\*Global Constraints/' 'task-brief.sh: the GC marker only opens outside a fence'
     Check-Match 'scripts/review-package.sh' 'mv -f "\$TMP_OUT" "\$OUT"' 'review-package.sh writes atomically via temp + mv'
     Check-Match 'scripts/task-brief.sh' 'mv -f "\$TMP_OUT" "\$OUT"' 'task-brief.sh writes atomically via temp + mv'
+    # Parity with the .sh (issue #20): the two variants must protect the handoff the same way, or
+    # the fleet's OS silently decides whether the protection exists.
+    Check-Match 'scripts/task-brief.ps1' 'ReparsePoint' 'task-brief.ps1 checks for a reparse point (symlink/junction parity with .sh)'
+    # Defense in depth on the destination: the pre-check is exercised behaviorally above (a directory
+    # at $outPath is refused). THIS layer covers the race the pre-check cannot — a directory created
+    # after it — and staging that race deterministically is not practical, so the API is pinned
+    # instead: Move-Item -Force would move INTO the directory; [IO.File]::Move throws.
+    Check-Match 'scripts/task-brief.ps1' '\[IO\.File\]::Move\(\$tmpOut, \$outPath, \$true\)' 'task-brief.ps1 installs with a file-level move that rejects a directory destination'
+    # The lookbehind is load-bearing: without it this matches inside `Remove-Item -LiteralPath
+    # $tmpOut` (Re+move-Item, case-insensitively) — the legitimate cleanup in the finally block.
+    Check-NotMatch 'scripts/task-brief.ps1' '(?<![A-Za-z-])Move-Item -LiteralPath \$tmpOut' 'task-brief.ps1 does not use Move-Item for the install (it would move INTO a directory)'
+    # The checks above the write are a point-in-time snapshot; a predictable temp name closes the
+    # TOCTOU window only by being short. CreateNew + FileShare.None closes it by construction.
+    Check-Match 'scripts/task-brief.ps1' 'GetRandomFileName' 'task-brief.ps1: the temporary name is unpredictable'
+    Check-Match 'scripts/task-brief.ps1' '\[IO\.FileMode\]::CreateNew, \[IO\.FileAccess\]::Write, \[IO\.FileShare\]::None' 'task-brief.ps1 creates the temporary EXCLUSIVELY (a planted link cannot be followed)'
+
+    # Issue #22 — the delivered seal deflated `kickoff`, which the writegate is fail-closed on:
+    # the cursor reported "never ratified" about a task that had just shipped. The reset belongs to
+    # the NEXT task's opening, and both sides of the boundary must say so.
+    # One assertion for the whole tail of the preserve list: it locks the kickoff (issue #22) AND
+    # delivery-status (parity with finish, which always had it) in the order the doctrine writes them.
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'worktree-path, confirm, delivery-status, and\s+`kickoff: ratified`' 'execute: the delivered seal preserves the kickoff AND delivery-status'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Why `kickoff` is preserved here' 'execute: the seal explains why the kickoff survives it'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'reset of\s+that field belongs to the \*\*opening of the NEXT task\*\*' 'execute: the kickoff reset belongs to the next opening, not the seal'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '`delivery-status:`, and\s+`kickoff: ratified`' 'finish: the executor of the seal preserves the kickoff too'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'writegate is fail-closed on the kickoff' 'finish names why emptying the kickoff blocks writes'
 
     # -- #12: visual companion — loopback guard, payload validation, cleanup, owner PID --
     Check-Match '.claude/skills/pelizzai-idea-generation/scripts/server.cjs' 'BRAINSTORM_ALLOW_INSECURE_NETWORK' 'server.cjs refuses a non-loopback bind without the explicit opt-in'

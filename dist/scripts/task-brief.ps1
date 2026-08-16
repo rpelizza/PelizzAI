@@ -85,8 +85,31 @@ foreach ($line in $lines) {
 if (-not $inTask) { Fail "Task $TaskNumber not found in $PlanPath (expected a header '### Task ${TaskNumber}: ...')" }
 
 $outDir = Get-HandoffDir
-New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+# Shared-temp hygiene, mirroring task-brief.sh: never follow a reparse point (the Windows
+# equivalent of a symlink/junction) planted at the handoff path. The brief carries the task's full
+# text, so a diverted write leaks it somewhere the caller never inspects — and the caller is told
+# only the path it ASKED for, so the divert is invisible from here.
+if (Test-Path -LiteralPath $outDir) {
+  $existing = Get-Item -LiteralPath $outDir -Force
+  if ($existing.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+    Fail "handoff dir is a reparse point (symlink/junction): $outDir"
+  }
+  # A plain FILE where the directory belongs is not a divert, but it is not writable either — and
+  # failing here names the real problem instead of surfacing a confusing error further down.
+  if (-not $existing.PSIsContainer) { Fail "handoff dir is not a directory: $outDir" }
+} else {
+  New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+}
 $outPath = Join-Path $outDir "task-$TaskNumber-brief.md"
+if (Test-Path -LiteralPath $outPath) {
+  $existingOut = Get-Item -LiteralPath $outPath -Force
+  if ($existingOut.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+    Fail "handoff file is a reparse point (symlink/junction): $outPath"
+  }
+  # A DIRECTORY at the destination would make Move-Item drop the temp INSIDE it, and the script
+  # would still print $outPath — a path that holds no brief. Silent wrong answer, so: refuse.
+  if ($existingOut.PSIsContainer) { Fail "handoff file is a directory: $outPath" }
+}
 
 $now = Get-Date -Format 'yyyy-MM-dd HH:mm'
 $content = [System.Collections.Generic.List[string]]::new()
@@ -108,5 +131,35 @@ $content.Add('')
 $reportPath = Join-Path $outDir "task-$TaskNumber-report.md"
 $content.Add("Report: write the result to ``$reportPath`` (mirroring this brief) and reply in chat in at most 15 lines.")
 
-Set-Content -LiteralPath $outPath -Value ($content -join "`n") -Encoding utf8
+# Atomic install, mirroring task-brief.sh's `mv -f`: write to a private temporary in the same
+# directory, then MOVE it into place. Writing straight to the destination lets a reader that opens
+# the brief mid-write get a truncated task — worse than a missing one, because the member
+# implements what it can see and reports DONE.
+#
+# The temporary is created EXCLUSIVELY, and that is the security half of this block. The checks
+# above are a point-in-time snapshot: between them and the write, a predictable temp name
+# ("$outPath.tmp.<pid>") could be pre-created as a symlink by anyone sharing the temp dir, and a
+# plain write would follow it — handing over the task's full text. `CreateNew` fails outright if
+# the path exists (a planted link included) and `FileShare.None` keeps it exclusive while open, so
+# the window between validating and writing stops being exploitable instead of merely being short.
+$tmpOut = Join-Path $outDir (".task-$TaskNumber-brief-{0}.tmp" -f [IO.Path]::GetRandomFileName())
+try {
+  $stream = [IO.File]::Open($tmpOut, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
+  try {
+    # LF and no BOM, matching what task-brief.sh writes — the two variants must produce the same file.
+    $writer = [IO.StreamWriter]::new($stream, [Text.UTF8Encoding]::new($false))
+    $writer.Write((($content -join "`n") + "`n"))
+    $writer.Flush()
+    $writer.Dispose()
+  } finally {
+    $stream.Dispose()
+  }
+  # [IO.File]::Move, not Move-Item: the destination check above is also a point-in-time snapshot, and
+  # `Move-Item -Force` onto a directory moves the temp INSIDE it — the script would then print a path
+  # that holds no brief. The file-level API rejects a directory destination and throws, so the race
+  # ends in a loud failure instead of a silent wrong answer.
+  [IO.File]::Move($tmpOut, $outPath, $true)
+} finally {
+  if (Test-Path -LiteralPath $tmpOut) { Remove-Item -LiteralPath $tmpOut -Force -ErrorAction SilentlyContinue }
+}
 Write-Output $outPath

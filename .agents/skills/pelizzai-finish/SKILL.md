@@ -187,8 +187,12 @@ status lives in the native execution record.
    (`- <date> <slug> — delivered — <result ≤10 words> → data/history/<file>`). The cursor shrinks
    back to template size HERE, at closeout — it does not stay bloated through the whole
    `delivered` window. Preserve `slug`, `phase`, `branch`, `base-ref`, `base-sha`,
-   `validated-head`, `commit-strategy`, `worktree-path`, `confirm:`, and `delivery-status:`: the
-   destination (Step 3) and the later observation still read them.
+   `validated-head`, `commit-strategy`, `worktree-path`, `confirm:`, `delivery-status:`, and
+   `kickoff: ratified`: the destination (Step 3) and the later observation still read them, and
+   the writegate is fail-closed on the kickoff — emptying it here would report "never ratified"
+   about a task that just shipped, and block any product write until the next task's gate. The
+   reset of `kickoff` belongs to the NEXT task's opening (`pelizzai-execute` → §State and
+   resumption), not to this seal.
 2. Set `phase: delivered` and record `confirm:` with the observable condition that becomes `done`,
    derived from the destination chosen in 2a: publish/PR → `base-ref contains validated-head
    (PR/branch integrated)`; keep local → `local delivery accepted by the user`; discard/archival
