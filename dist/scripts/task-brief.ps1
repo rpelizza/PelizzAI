@@ -154,7 +154,11 @@ try {
   } finally {
     $stream.Dispose()
   }
-  Move-Item -LiteralPath $tmpOut -Destination $outPath -Force
+  # [IO.File]::Move, not Move-Item: the destination check above is also a point-in-time snapshot, and
+  # `Move-Item -Force` onto a directory moves the temp INSIDE it — the script would then print a path
+  # that holds no brief. The file-level API rejects a directory destination and throws, so the race
+  # ends in a loud failure instead of a silent wrong answer.
+  [IO.File]::Move($tmpOut, $outPath, $true)
 } finally {
   if (Test-Path -LiteralPath $tmpOut) { Remove-Item -LiteralPath $tmpOut -Force -ErrorAction SilentlyContinue }
 }

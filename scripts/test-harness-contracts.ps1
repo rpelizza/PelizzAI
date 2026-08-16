@@ -1734,7 +1734,14 @@ try {
     # Parity with the .sh (issue #20): the two variants must protect the handoff the same way, or
     # the fleet's OS silently decides whether the protection exists.
     Check-Match 'scripts/task-brief.ps1' 'ReparsePoint' 'task-brief.ps1 checks for a reparse point (symlink/junction parity with .sh)'
-    Check-Match 'scripts/task-brief.ps1' 'Move-Item -LiteralPath \$tmpOut -Destination \$outPath -Force' 'task-brief.ps1 writes atomically via temp + move'
+    # Defense in depth on the destination: the pre-check is exercised behaviorally above (a directory
+    # at $outPath is refused). THIS layer covers the race the pre-check cannot — a directory created
+    # after it — and staging that race deterministically is not practical, so the API is pinned
+    # instead: Move-Item -Force would move INTO the directory; [IO.File]::Move throws.
+    Check-Match 'scripts/task-brief.ps1' '\[IO\.File\]::Move\(\$tmpOut, \$outPath, \$true\)' 'task-brief.ps1 installs with a file-level move that rejects a directory destination'
+    # The lookbehind is load-bearing: without it this matches inside `Remove-Item -LiteralPath
+    # $tmpOut` (Re+move-Item, case-insensitively) — the legitimate cleanup in the finally block.
+    Check-NotMatch 'scripts/task-brief.ps1' '(?<![A-Za-z-])Move-Item -LiteralPath \$tmpOut' 'task-brief.ps1 does not use Move-Item for the install (it would move INTO a directory)'
     # The checks above the write are a point-in-time snapshot; a predictable temp name closes the
     # TOCTOU window only by being short. CreateNew + FileShare.None closes it by construction.
     Check-Match 'scripts/task-brief.ps1' 'GetRandomFileName' 'task-brief.ps1: the temporary name is unpredictable'
