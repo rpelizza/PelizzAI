@@ -584,6 +584,17 @@ try {
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'review-integrity: degraded <YYYY-MM-DD>' 'review: the record instruction carries the date'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Discovering only at review time' 'review: anti-pattern of discovering the missing capability late'
 
+    # -- The exception is RATIFIABLE, never self-granted: an escape hatch from an absolute rule that
+    # the agent could take on its own would not be a degradation path, it would be the loophole. --
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'ONLY exception in the whole harness[\s\S]{0,80}not yours to take' 'review: the degradation is the only exception AND is not the agents to take'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'requires the user''s EXPLICIT choice' 'review: option (b) requires the explicit choice of the user'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'the recommendation is not an answer, silence is not an\s+answer' 'review: recommendation and silence do not ratify the degradation'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Without an explicit choice the route is\s+\*\*\(c\)\*\*' 'review: with no answer, the route is defer, never the non-blind review'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'With nobody to ask, \(b\) does not exist' 'review: headless/cron/CI cannot grant itself the exception'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'never grants itself the exception on the grounds that no one was\s+around to deny it' 'review: absence of a human is not authorization'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'does NOT advance to item 3 until the user has chosen' 'gate step 2: the gate blocks until the degradation is ratified'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'a non-blind review is never self-granted' 'gate step 2: the non-blind review is never self-granted'
+
     # -- The marker travels: template, record, resumption, and the seal --
     # The marker's SHAPE is the contract, not the token: without date and reason it degrades into an
     # unauditable flag — you would know something was degraded, never when or why.

@@ -80,7 +80,9 @@ profile — push/PR/publication are decided per task in `pelizzai-finish`.
    Check this for the REVIEWER specifically — being able to dispatch an implementer does not prove
    a reviewer is dispatchable. If this environment cannot dispatch an independent reviewer, say so
    HERE, in the conversation's language, and open the degradation choice (`pelizzai-review` →
-   "When there is no independent reviewer") — not later, with the code already written.
+   "When there is no independent reviewer") — not later, with the code already written. The gate
+   does NOT advance to item 3 until the user has chosen (a), (b), or (c): as with every other
+   item, recommendation and silence are not answers, and a non-blind review is never self-granted.
    Question: which mode do you choose?
 
 3. Commits (only after 2)

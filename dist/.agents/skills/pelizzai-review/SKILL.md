@@ -204,6 +204,18 @@ why they conflict. Then offer:
     unsealed; `validated-head` is not written.
 ```
 
+**(b) is the ONLY exception in the whole harness to the two dispatches and the blindness — and it
+is not yours to take.** It requires the user's EXPLICIT choice, in this turn, under the same rule
+as every other decision at the edges: the recommendation is not an answer, silence is not an
+answer, and "the environment forced it" is not an answer. Without an explicit choice the route is
+**(c)** — the work waits. An agent that reads this section and applies (b) on its own has not
+followed the degradation path; it has taken the exception the path exists to keep ratifiable.
+
+**With nobody to ask, (b) does not exist.** In a headless, cron, or CI run there is no one to
+ratify, so the exception cannot be granted: the run takes (c), consolidates without sealing, and
+reports what it needs. A process never grants itself the exception on the grounds that no one was
+around to deny it.
+
 **What never degrades**, in any of the three:
 
 ```text
