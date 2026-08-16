@@ -28,7 +28,8 @@ in the native execution record.
 | File | Holds | Read by, and when | Written by, and when |
 | --- | --- | --- | --- |
 | `pelizzai/data/verification-standard.md` | what *correct* means here | `pelizzai-final-verification` before judging a delivery · `pelizzai-review` when briefing reviewers · `pelizzai-writing-plans` when drafting validation | `pelizzai-audit` at bootstrap · here, in its own ratified change — **never during a correction** |
-| `pelizzai/data/learnings.md` | what execution already learned | `pelizzai-writing-plans` and `pelizzai-execute` before proposing approaches | incident entries at root-cause confirmation (usually `pelizzai-debug`, in the fix's own commit) · `pelizzai-finish` counts recurrences at closeout · here, on promotion and retirement |
+| `pelizzai/data/learnings.md` (**Active rules**) | what execution already learned | `pelizzai-writing-plans` before approaches · `pelizzai-execute` before Task 1 **and pasted into every task briefing** · `pelizzai-quick-fix` before the change · `pelizzai-debug` on entering the investigation and again when choosing the proof | incident entries at root-cause confirmation (usually `pelizzai-debug`, in the fix's own commit) · `pelizzai-finish` counts recurrences at closeout · here, on promotion and retirement |
+| `pelizzai/data/learnings.md` (**Incident log**) | the evidence that earned each rule | on demand: promotion, recurrence check, and when a rule's origin is in doubt — **not** loaded at task start | same as above |
 
 `verification-standard.md` missing in a consumer → propose creating it from
 [templates/verification-standard.md](templates/verification-standard.md); `learnings.md`
@@ -61,11 +62,22 @@ more surfaces than one standard can hold: split it per package before dropping a
 
 ### `learnings.md` — two parts
 
-**Active rules** (semantic): short imperatives applied on every task in their scope. **Incident
-log** (episodic): what happened, once each, newest first. Every entry carries **trigger** ·
-**root cause** (not the symptom) · **smallest durable fix** (`file:line`) · **rule learned**, or
-explicitly `n/a — one-off` · **scope** · **revert** (one line) · **status**
-`candidate → promoted → retired`.
+**Active rules** (semantic): short imperatives applied on every task in their scope. This is the
+part that is READ AT TASK START, by every track — it is the prevention mechanism, and it is kept
+short precisely so that reading it is never a cost worth skipping. **Incident log** (episodic):
+what happened, once each, newest first; evidence consulted on demand, never loaded at task start.
+Every entry carries **trigger** · **root cause** (not the symptom) · **smallest durable fix**
+(`file:line`) · **rule learned**, or explicitly `n/a — one-off` · **scope** · **revert** (one
+line) · **status** `candidate → promoted → retired`.
+
+**`scope:` names paths or globs, not prose.** `back/**/repository*.py` or
+`front/**/*.spec.ts` — never "anything that touches the database". Whoever reads a rule has to
+decide in one second whether it applies to what they have in hand, and prose forces a judgment
+call that a hurried track will resolve as "probably not mine". This is precision of
+communication, not a filter: **every** Active rule is read, always, and the scope tells the
+reader whether it binds — nothing matches globs mechanically to decide what to load. A filter
+that guesses wrong hides exactly the rule that would have redirected the work, and looks like
+coverage while doing it.
 
 **Promotion:** a learning becomes a standing rule only after it **recurred 2–3 times**. The
 first occurrence is an incident (`candidate`); the repeat is the evidence. `pelizzai-finish`
@@ -77,9 +89,18 @@ project's `CLAUDE.md` only when the rule must hold before any skill loads — in
 own section, never inside the `pelizzai:contract` block** (the anchored block belongs to the
 harness and is overwritten by the next sync).
 
-**Budget ~200 lines hard.** Retire before adding: an entry whose failure mode can no longer
-happen (code gone, dependency dropped, rule absorbed by a domain skill or a linter) goes
-`retired` and out.
+**Two budgets, deliberately separate.** **Active rules: 40 lines hard. Incident log: 160 lines
+hard.** They are NOT one pool of 200. Under a shared budget the log wins by construction — it
+only grows, the rules are few, and "retire before adding" puts the pressure on whichever side has
+less mass. What gets squeezed out is the prevention, and what survives is the history: the exact
+inversion of what the file is for. Separate ceilings mean a full log can never cost a rule a seat.
+
+Retire before adding, **within each section**: an entry whose failure mode can no longer happen
+(code gone, dependency dropped, rule absorbed by a domain skill or a linter) goes `retired` and
+out. A log at its ceiling with nothing retirable moves its OLDEST entries to
+`pelizzai/data/history/learnings-<YYYY>.md` — the evidence is kept, it just stops competing for
+the space that is read at task start. Active rules at their ceiling is a different signal: 40
+lines of standing rules means the project needs a domain skill or a linter, not a longer file.
 
 ## The two channels
 
@@ -126,7 +147,14 @@ consumes.
 - Promoting a learning on its first occurrence — or leaving a second occurrence unpromoted
   because nobody claimed the edit.
 - A Baseline row appended for a surface that already had one.
-- learnings.md past its budget with nothing retired.
+- learnings.md **at or past** either budget with nothing retired or archived — the ceilings are
+  hard, so touching 40/160 already engages the valve; waiting to exceed them means the next
+  promotion has nowhere to land. Each section reacts on its OWN ceiling (a full log is never a
+  reason to retire a rule; a full rules section is never a reason to archive the log).
+- Declaring a reader of the Active rules that does not actually read them. A false declaration is
+  worse than an absent one: whoever audits the harness assumes a coverage that is not there.
+- Writing a `scope:` in prose instead of paths/globs — or building a mechanism that loads only
+  "the matching rules": the section is short so that it is read WHOLE.
 - Promoting a rule into the pelizzai:contract block of CLAUDE.md (the next sync erases it).
 - Creating pelizzai/ artifacts in the source repo.
 ```
@@ -139,6 +167,7 @@ entry.
 
 **Combines with:** `pelizzai-interview` — one ratification per promotion, standard change, or
 opportunity adoption; `pelizzai-final-verification` and `pelizzai-review` — the
-standard's readers; `pelizzai-writing-plans`/`pelizzai-execute` — the learnings'
-readers; `pelizzai-audit` — seeds both artifacts at bootstrap; `pelizzai-create-skill` — the
+standard's readers; `pelizzai-writing-plans`, `pelizzai-execute`, `pelizzai-quick-fix`, and
+`pelizzai-debug` — the readers of the Active rules, one per track, so no route reaches a decision
+without them; `pelizzai-audit` — seeds both artifacts at bootstrap; `pelizzai-create-skill` — the
 home of a lesson that belongs in a domain skill.

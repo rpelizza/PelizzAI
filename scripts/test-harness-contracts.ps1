@@ -1664,8 +1664,87 @@ try {
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'never create\s+`pelizzai/`|never create `pelizzai/`' 'evolve respects source mode'
     Check-Match '.claude/skills/pelizzai-evolve/templates/verification-standard.md' '150 lines hard' 'standard template pins its budget'
     Check-Match '.claude/skills/pelizzai-evolve/templates/verification-standard.md' 'REPLACES its\s+row' 'standard template: baseline replaces, never appends'
-    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' '~200 lines hard' 'learnings template pins its budget'
     Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'candidate → promoted' 'learnings template carries the status ladder'
+    # The ladder's THIRD state is what keeps the file finite; and an entry without all six fields is
+    # an anecdote, not a learning. Scanning the file for each field separately would pass with the
+    # fields scattered across sections, or present only in the explanatory comment — so anchor ONE
+    # regex to the ENTRY, from its `status:` through `revert:`, in order.
+    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'status: candidate → promoted[\s\S]{0,200}→ retired' 'learnings template: the ladder documents the three states'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' '— status: candidate[\s\S]{0,90}- trigger:[\s\S]{0,90}- root cause:[\s\S]{0,90}- smallest durable fix:[\s\S]{0,90}- rule learned:[\s\S]{0,90}- scope: `<path or glob>`[\s\S]{0,90}- revert:' 'learnings template: the incident ENTRY carries status + the six fields, in order'
+
+    # =====================================================================
+    # Issue #23 (2026-08-16) — learnings.md was write-only where it mattered
+    # most. Three defects, all verified in the source:
+    # (1) FALSE DECLARATION: evolve and the template said pelizzai-execute
+    #     read the Active rules; execute had zero mentions of learnings. A
+    #     declared reader that does not read is worse than none — an audit
+    #     assumes coverage that is not there;
+    # (2) the plan-less tracks (tweak/bug) never read them, so the skill that
+    #     WRITES most of the file (debug) was the one that never read it —
+    #     and those are the fastest, least ceremonious routes, the likeliest
+    #     to repeat a catalogued mistake;
+    # (3) ONE budget for two opposite natures: the log only grows, the rules
+    #     are few, and "retire before adding" pressures whichever has less
+    #     mass — the history evicting the prevention.
+    # Plus a fourth the issue did not list: the task BRIEFING never carried
+    # the rules, so members (subagents/team) never saw them in any mode.
+    # Deliberately NOT done: glob-filtering which rules to load. The section
+    # is short by budget, and at read time the file set is often unknown (in
+    # debug it is the investigation's OUTPUT) — a filter that guesses wrong
+    # hides the very rule that would have redirected the work.
+    # =====================================================================
+
+    # -- Separate budgets: the log can never cost a rule its seat --
+    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'Budget: 40 lines hard' 'learnings template: Active rules have their own tight budget'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'Budget: 160 lines hard' 'learnings template: the Incident log has its own budget'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'Two budgets, deliberately separate' 'evolve declares the two budgets as separate'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'They are NOT one pool of 200' 'evolve: the budgets are not a shared pool'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'the log wins by construction' 'evolve names why a shared budget evicts the rules'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'history/learnings-<YYYY>\.md' 'evolve: the log valve is archiving, not retiring a rule'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'per section, never summed' 'finish checks the two learnings budgets separately'
+    Check-NotMatch '.claude/skills/pelizzai-evolve/templates/learnings.md' '~200 lines hard' 'learnings template: the single shared budget is gone'
+
+    # -- Every track reads the Active rules; the declaration matches reality --
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Active rules travel in the package too' 'execute reads the Active rules and propagates them'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Reading them yourself is not enough' 'execute: reading without pasting does not reach the member'
+    # The briefing must carry the rules AND exclude the log: pasting the whole file into every task
+    # would blow the member's context with history and quietly undo the reason the budgets are split.
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Active rules\*\* of `pelizzai/data/learnings\.md`, pasted \(the short section; never the\s+Incident log\)' 'task briefing carries the Active rules and NEVER the incident log'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'paste them into the briefing of EVERY task' 'execute: the rules are pasted into every task briefing, not read once'
+    # ORDER is the contract, not the mere presence of the sentence: the rules have to be read at step
+    # 1.5, BEFORE step 2 changes code. One anchored regex locks step, content, and position at once —
+    # a loose search would still pass with the read moved after the change, or demoted to a footnote.
+    Check-Match '.claude/skills/pelizzai-quick-fix/SKILL.md' '1\.5\. Local rules[\s\S]{0,400}Active rules\*\* of\s+`pelizzai/data/learnings\.md`[\s\S]{0,200}the Incident log is not read here[\s\S]{0,1200}2\. Change' 'quick-fix: step 1.5 reads the Active rules (no incident log) BEFORE step 2 changes code'
+    Check-Match '.claude/skills/pelizzai-quick-fix/SKILL.md' '"It is small" is not a reason to skip them' 'quick-fix: being small is not a waiver'
+    # Both debug reads are locked BY POSITION, not by phrase: a read that drifts out of Step 1 (after
+    # the hypotheses) or out of Step 4 (after the proof is written) is the same as no read at all.
+    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' '## Step 1 — classify[\s\S]{0,200}read the Active rules of `pelizzai/data/learnings\.md`[\s\S]{0,600}Read it BEFORE forming hypotheses[\s\S]{0,400}\| Class \|' 'debug: Step 1 reads the rules BEFORE the hypotheses and before the class table'
+    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'the Incident log is consulted on demand, not now' 'debug: Step 1 loads the rules WITHOUT the incident log'
+    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'what WRITES most of that\s+file' 'debug: the write-read loop is closed where it was open'
+    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' '## Step 4 — implement and prove[\s\S]{0,900}re-read the Active rules here, against the PROOF you are about to write' 'debug: the re-read lives in Step 4, against the proof about to be written'
+    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'OUTPUT of the investigation, not its input' 'debug: the file set is the investigation output (why not to filter/postpone)'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'pelizzai-quick-fix` before the change' 'evolve: the readers table lists the tweak track'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'Declaring a reader of the Active rules that does not actually read them' 'evolve: a false reader declaration is a red flag'
+
+    # -- scope is a glob for PRECISION, never a loading filter --
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' '`scope:` names paths or globs, not prose' 'evolve: scope is a path/glob, not prose'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'nothing matches globs mechanically to decide what to load' 'evolve: no mechanical glob filtering of the rules'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'looks like\s+coverage while doing it' 'evolve: a wrong filter is worse than no filter'
+
+    # -- The ceilings are HARD: touching 40/160 already engages the valve. Reacting only PAST them
+    # lets the file legitimately sit at the ceiling with the next promotion having nowhere to land.
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' '\*\*at or past\*\* either budget' 'evolve: the red flag fires AT the ceiling, not only past it'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '\*\*at or past\*\* the\s+ceiling' 'finish: the budget check fires AT the ceiling'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Incident log at or past 160 \(route the oldest entries' 'finish: at the log ceiling the action is archiving, not retiring a rule'
+
+    # -- Source mode has no consumer runtime: reading learnings there must never create pelizzai/ --
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'CONSUMER ONLY' 'execute: reading the Active rules is qualified as consumer-only'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'In source mode there is no consumer runtime to read' 'execute: source mode uses the source repo rules instead'
+    # Describing source mode is not the same as forbidding the write: a regression could keep the
+    # description and still create consumer state to "satisfy the step". Assert the prohibition itself.
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'do not create `pelizzai/` to satisfy this step' 'execute: source mode never creates consumer runtime to satisfy the read'
+    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'In a consumer, re-read the Active rules here' 'debug: the second read is qualified as consumer-only'
+    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'never create `pelizzai/` for this' 'debug: reading the rules never creates consumer runtime in source mode'
     # Wiring: each named reader/writer cites its side of the cycle.
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'verification-standard\.md` and `pelizzai/data/learnings\.md' 'audit seeds the evolve pair at bootstrap'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'pelizzai-evolve/templates' 'audit names the template authority'

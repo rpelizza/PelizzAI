@@ -54,6 +54,10 @@ Each task's briefing includes:
   the cost of including is lower than the cost of ignoring a project rule. If the task's surface
   touches a stack with NO domain skill covering it, the member applies what they have and FLAGS
   the gap in the return (`DONE_WITH_CONCERNS`); they never create a skill mid-task.
+- The **Active rules** of `pelizzai/data/learnings.md`, pasted (the short section; never the
+  Incident log). They are what this project already paid to learn, and the member has no other way
+  to reach them — a rule the coordinator read but did not paste never reaches the code. Empty
+  section, or source mode: say so explicitly, so nobody assumes coverage that is not there.
 - Cross-cutting skills in `overlays:` in the state (frontend, security, documentation, etc.), with
   the gates each one requires. Propagate them to the implementer **and reviewers**; naming them is
   not enough.
