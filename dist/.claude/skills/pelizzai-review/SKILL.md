@@ -177,6 +177,52 @@ The reviewer **never** receives the session history.
 
 ---
 
+## When there is no independent reviewer
+
+Some environments cannot dispatch one: the platform has no subagent tool, a session instruction
+forbids it, a cost/quota ceiling blocks it, or the run is headless with nobody to ask. The harness
+does not pretend this never happens, and it does not leave the choice to improvisation.
+
+**Detect and declare at the EDGE, not mid-task.** The place is step 2 of the setup gate
+(`pelizzai-execute`), when the mode is being ratified — the capability is already knowable there,
+and the code has not been written yet. Discovering it at review time means discovering it after the
+work, when the cheapest options are already gone. In the `tweak`/`bug` tracks, the place is the
+compact confirm.
+
+```text
+Name the collision in one line — what the harness requires (two lenses, two dispatches, the blind
+one by an independent agent), what this environment allows, and why they conflict. Then offer:
+
+(a) authorize the independent reviewer for the reviews of this task/delivery — the way out that
+    costs nothing in rigor. Ask for it explicitly; the user may simply not know the harness
+    needs it (see the mode note at the gate);
+(b) accept a DECLARED non-blind review — the quality/evidence lens runs normally, with real
+    Verification, and the spec lens is applied by the coordinator KNOWING it is not blind.
+    Record it (below) and state it in the final report;
+(c) defer the integration until there is a reviewer — the work is consolidated and stays
+    unsealed; `validated-head` is not written.
+```
+
+**What never degrades**, in any of the three:
+
+```text
+- The coordinator does NOT dispatch itself as "the blind spec lens". Option (b) is not blindness
+  under another name: it is an explicitly non-blind review, and it is announced as such.
+- The review does not disappear. The quality/evidence lens and the Verification block are
+  independent of having a second agent — a check that ran is proof no matter who dispatched it.
+- Silence is not an option. A non-blind review presented as a completed two-lens review is
+  exactly the defect the whole asymmetry exists to prevent — and it is worse than the missing
+  capability, because it is invisible.
+```
+
+**Record.** With option (b), write `review-integrity: degraded <YYYY-MM-DD>` in the consumer
+`pelizzai/data/state.md` (or the native execution record) and name the reason. The marker travels:
+it appears in the final report, it survives resumption in another session, and it blocks the final
+review from treating that task's verdict as blind. A delivery that carries any `degraded` task
+says so at the seal — the user decides whether to accept it, and decides knowing.
+
+---
+
 ## Review-pipeline anti-corruption
 
 These rules protect the review's independence (the other skills reference this section):
@@ -244,6 +290,13 @@ The blind lens matters more here than anywhere else. A per-task review sees one 
 requirement that fell **between** two tasks passes every per-task review and is only visible against
 the whole plan. That is exactly the finding a reviewer holding the delivery narrative is least
 likely to reach, because the narrative explains the delivery as complete.
+
+**Tasks marked `review-integrity: degraded`** (see "When there is no independent reviewer") do not
+become blind retroactively because the final review was blind: the final range is a different
+object, and it does not re-review each task's contract line by line. List them at the seal, by name,
+so the user accepts the delivery knowing which parts never had an independent spec lens. If the
+capability came back, the honest move is to re-review those tasks before sealing — say so and let
+the user decide.
 
 **There is no reuse exception and no low-risk waiver.** A task's review is never promoted to the
 final review, not even for a single bounded task with an identical tree SHA: the range is a
@@ -335,6 +388,11 @@ On a GitHub PR, reply in the inline comment THREAD (not as a top-level PR commen
   review, it is a review without blindness. There is no `combined` profile to fall back on, and a
   user asking for one does not create it: what it would buy is already served by the `tweak` lane.
 - Running the final review with the quality lens only, or reusing a task's review as the final one.
+- Discovering only at review time that this environment cannot dispatch a reviewer — the capability
+  is checked when the mode is ratified, not after the code is written.
+- Treating a missing reviewer as license to skip the review, or to self-dispatch as "the blind lens"
+  and report a completed two-lens review. Degradation is legitimate; UNDECLARED degradation is the
+  defect — and `review-integrity: degraded` is what makes it visible past this session.
 - Promising domain skills to the reviewer and dispatching the briefing with the `{DOMAIN_SKILLS}` slot
   empty — the blind lens is left without the project contract it should judge against.
 - Downgrading model or effort below the session's in a review (per-task or final) to save cost —

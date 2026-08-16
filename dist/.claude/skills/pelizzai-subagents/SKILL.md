@@ -91,6 +91,9 @@ single-dispatch variant. The blindness is asymmetric: the
 **NOT receive the report** of the subagent (it judges the code against the contract, without the
 narrative); the **quality/evidence lens** receives the report and verifies the claims with fresh
 proof. The coordinator (the main session) cross-checks the lenses and is **never** the blind lens.
+Choosing this mode already proves the environment can dispatch; if the capability is LOST mid-run
+(quota, ceiling, restricted resumption), it does not become an inline review — go through
+`pelizzai-review` → "When there is no independent reviewer".
 Then apply `pelizzai-final-verification` before consolidating. For research,
 cross-check conflicting findings and distrust an unverified report.
 

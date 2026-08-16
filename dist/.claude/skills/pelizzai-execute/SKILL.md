@@ -73,6 +73,13 @@ profile — push/PR/publication are decided per task in `pelizzai-finish`.
 2. Mode (only after 1)
    Options always visible: inline · subagents · team.
    Recommended: <mode> — <why>.
+   Note (say it, do not assume it is known): the mode decides who IMPLEMENTS. It does NOT change
+   the review. In every mode — inline included — the two lenses go out as TWO INDEPENDENT
+   DISPATCHES, because the coordinator can never be the blind lens. `inline` means "no delegation
+   to implement", never "no subagents at all".
+   If this environment cannot dispatch an independent reviewer, say so HERE and open the
+   degradation choice (`pelizzai-review` → "When there is no independent reviewer") — not later,
+   with the code already written.
    Question: which mode do you choose?
 
 3. Commits (only after 2)
@@ -122,6 +129,11 @@ marker `kickoff: ratified <YYYY-MM-DD>` to the consumer state (`pelizzai/data/st
 source mode, to the native execution record with the same keywords. On a real resumption with
 values already ratified and recorded (`kickoff: ratified`), honor them without re-asking.
 Writes/review/commit on the working tree are serialized.
+
+If the degradation choice was opened at step 2 and the user accepted a declared non-blind review,
+also record `review-integrity: degraded <YYYY-MM-DD> — <reason>`. **Read it back on resumption**: a
+session that regains the capability does not inherit blindness for what was reviewed without it —
+offer to re-review those tasks before the seal. Absent the field, assume `blind`, never the reverse.
 
 ---
 
@@ -204,7 +216,7 @@ There is no universal ranking; use the least coordination that preserves quality
 | -------------------- | ------------------ | ---------------------------------------------------------------------------- |
 | **team**             | `pelizzai-team`    | Fronts with dependencies that require coordination and exchange during execution |
 | **subagents**        | `pelizzai-subagents` | Independent tasks that only need to **report**; one fresh subagent per task, isolated context, per-task review |
-| **inline**           | —                  | Small/sequential plan where delegating would cost more than executing |
+| **inline**           | —                  | Small/sequential plan where delegating **the implementation** would cost more than executing it. It does not waive the review's two dispatches — no mode does |
 
 ```text
 Isolation and parallelism (as the user ratified at the gate). The shared working tree does NOT
@@ -330,6 +342,12 @@ Use `pelizzai-subagents`. One **fresh subagent per task**, dispatched by the coo
 
 For a small, sequential plan, the coordinator executes in its own session following the same
 cycle. Inline is an adequate choice, not an inferior fallback.
+
+**Inline is not "without subagents".** It removes the delegation of the IMPLEMENTATION; the review
+keeps its two independent dispatches, exactly as in the other two modes — the coordinator wrote the
+code here, so it is the last agent able to judge it blind. A session that cannot dispatch a reviewer
+is not "inline mode": it is an environment without an independent reviewer, and that goes through
+`pelizzai-review` → "When there is no independent reviewer", declared at the gate.
 
 In any mode, "go all the way" authorizes executing the ratified plan **without asking permission
 at every task**; it does not authorize filling product gaps. A material gap interrupts the loop
