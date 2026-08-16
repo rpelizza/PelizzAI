@@ -1665,13 +1665,12 @@ try {
     Check-Match '.claude/skills/pelizzai-evolve/templates/verification-standard.md' '150 lines hard' 'standard template pins its budget'
     Check-Match '.claude/skills/pelizzai-evolve/templates/verification-standard.md' 'REPLACES its\s+row' 'standard template: baseline replaces, never appends'
     Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'candidate → promoted' 'learnings template carries the status ladder'
-    # The ladder's THIRD state is the one that keeps the file finite; and an entry without all six
-    # fields is an anecdote, not a learning. Lock the schema, not just its first arrow.
-    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'promoted[\s\S]{0,120}retired' 'learnings template: the ladder reaches retired'
-    foreach ($field in @('trigger', 'root cause', 'smallest durable fix', 'rule learned', 'scope', 'revert')) {
-        Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' "- ${field}:" "learnings template: the incident entry requires '$field'"
-    }
-    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'scope: `<path or glob' 'learnings template: the scope placeholder asks for a path/glob, not prose'
+    # The ladder's THIRD state is what keeps the file finite; and an entry without all six fields is
+    # an anecdote, not a learning. Scanning the file for each field separately would pass with the
+    # fields scattered across sections, or present only in the explanatory comment — so anchor ONE
+    # regex to the ENTRY, from its `status:` through `revert:`, in order.
+    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'status: candidate → promoted[\s\S]{0,200}→ retired' 'learnings template: the ladder documents the three states'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' '— status: candidate[\s\S]{0,90}- trigger:[\s\S]{0,90}- root cause:[\s\S]{0,90}- smallest durable fix:[\s\S]{0,90}- rule learned:[\s\S]{0,90}- scope: `<path or glob>`[\s\S]{0,90}- revert:' 'learnings template: the incident ENTRY carries status + the six fields, in order'
 
     # =====================================================================
     # Issue #23 (2026-08-16) — learnings.md was write-only where it mattered
@@ -1709,8 +1708,10 @@ try {
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Active rules travel in the package too' 'execute reads the Active rules and propagates them'
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Reading them yourself is not enough' 'execute: reading without pasting does not reach the member'
     Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Active rules.* of `pelizzai/data/learnings\.md`, pasted' 'task briefing carries the Active rules'
-    Check-Match '.claude/skills/pelizzai-quick-fix/SKILL.md' 'Active rules\*\* of\s+`pelizzai/data/learnings\.md`' 'quick-fix reads the Active rules before the change'
-    Check-Match '.claude/skills/pelizzai-quick-fix/SKILL.md' 'the Incident log is not read here' 'quick-fix loads the rules WITHOUT the incident log'
+    # ORDER is the contract, not the mere presence of the sentence: the rules have to be read at step
+    # 1.5, BEFORE step 2 changes code. One anchored regex locks step, content, and position at once —
+    # a loose search would still pass with the read moved after the change, or demoted to a footnote.
+    Check-Match '.claude/skills/pelizzai-quick-fix/SKILL.md' '1\.5\. Local rules[\s\S]{0,400}Active rules\*\* of\s+`pelizzai/data/learnings\.md`[\s\S]{0,200}the Incident log is not read here[\s\S]{0,1200}2\. Change' 'quick-fix: step 1.5 reads the Active rules (no incident log) BEFORE step 2 changes code'
     Check-Match '.claude/skills/pelizzai-quick-fix/SKILL.md' '"It is small" is not a reason to skip them' 'quick-fix: being small is not a waiver'
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'read the Active rules of `pelizzai/data/learnings\.md`' 'debug reads the Active rules on entering the investigation'
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'what WRITES most of that\s+file' 'debug: the write-read loop is closed where it was open'
@@ -1733,6 +1734,9 @@ try {
     # -- Source mode has no consumer runtime: reading learnings there must never create pelizzai/ --
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'CONSUMER ONLY' 'execute: reading the Active rules is qualified as consumer-only'
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'In source mode there is no consumer runtime to read' 'execute: source mode uses the source repo rules instead'
+    # Describing source mode is not the same as forbidding the write: a regression could keep the
+    # description and still create consumer state to "satisfy the step". Assert the prohibition itself.
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'do not create `pelizzai/` to satisfy this step' 'execute: source mode never creates consumer runtime to satisfy the read'
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'In a consumer, re-read the Active rules here' 'debug: the second read is qualified as consumer-only'
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'never create `pelizzai/` for this' 'debug: reading the rules never creates consumer runtime in source mode'
     # Wiring: each named reader/writer cites its side of the cycle.
