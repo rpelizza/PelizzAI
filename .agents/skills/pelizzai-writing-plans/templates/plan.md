@@ -88,7 +88,8 @@ _If self-contained, write `none`._
 - Command(s): `[complete canonical commands]`
 - Expected evidence: [exit code, delta, visual state, or exact output]
 - Rollback: [when applicable; otherwise, `not applicable`]
-- Review profile: [split (default) | combined (only with a ratified downgrade)] — [justification by risk/surface]
+- Review depth: [what each of the two lenses should dig into, by risk/surface] — the two lenses in
+  two dispatches are invariable; only their depth is a plan decision
 
 - [ ] **Step 1: Establish the baseline/oracle** → verify: [exact result]
 
@@ -106,7 +107,7 @@ non-obvious call; otherwise, name the interface, the invariant, and one short ex
 Run: `[exact command]`
 Expected: `[observable result]`
 
-- [ ] **Step 4: Ready for review → consolidate** — do not commit mid-task; the commit is the coordinator's gate after the spec ✅ + quality ✅ lenses in the recorded profile. → verify: `git status` contains only this task's scope
+- [ ] **Step 4: Ready for review → consolidate** — do not commit mid-task; the commit is the coordinator's gate after the blind spec ✅ + quality/evidence ✅ lenses, in their two dispatches. → verify: `git status` contains only this task's scope
 ````
 
 Adapt the order without losing the proof:
@@ -125,7 +126,7 @@ Adapt the order without losing the proof:
 - An executor with zero context on the repository completes each task without asking a single question.
 - Paths, interfaces, content, commands, and outputs are concrete.
 - Every step has `→ verify:`.
-- Each task records cross-cutting skills, implementation/validation strategy, and review profile.
+- Each task records cross-cutting skills, implementation/validation strategy, and review depth.
 - UI never omits `pelizzai-frontend`; Playwright/browser is a tool, not an overlay.
 - No artificial RED for refactoring, CSS, docs, config, IaC, or migration.
 - No TBD/TODO, "handle edge cases", "same as Task N", or undefined references.
@@ -136,4 +137,5 @@ Adapt the order without losing the proof:
 
 Plan materialized, stress-tested, and approved → **forward to the sequential post-plan setup gate**
 of `pelizzai-execute`. The plan carries recommendations; the user decides isolation,
-branch, mode, commits, and review one question at a time before Task 1.
+branch, mode, and commits one question at a time before Task 1. The review is **not** among them —
+the two lenses in two dispatches are fixed, so there is no question to ask.

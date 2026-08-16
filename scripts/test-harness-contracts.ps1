@@ -140,9 +140,9 @@ try {
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'Do not invent a hypothesis count|never.*fixed number' 'debugging does not fix a hypothesis count'
     Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Test/validation strategy|Primary strategy' 'task-cycle picks proof by artifact'
     Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'Cross-cutting harness skills' 'plan propagates overlays'
-    # The combined→split order was the old default; what matters is the plan RECORDING the profile
-    # with both values named (the default itself lives in the F6 block, below).
-    Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'Review profile[\s\S]{0,400}split[\s\S]{0,400}combined' 'plan records the review profile with both values'
+    # The plan no longer records a review profile (issue #24): the two lenses in two dispatches are
+    # invariable, so the only thing left for the plan to decide is each lens's DEPTH.
+    Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'The review is not a plan decision' 'writing-plans: the review is not a plan decision'
     Check-NotMatch '.claude/skills/pelizzai-writing-plans/SKILL.md' 'pelizzai-interview[^\n]*(MANDATORY|mandatory)' 'bounded plan does not force an interview'
     Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'mandatory overlay' 'frontend is a mandatory overlay for UI'
     Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'approved spec/Figma.*design system' 'frontend honors the spec and the design system'
@@ -440,7 +440,7 @@ try {
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'asymmetric blindness' 'review names the asymmetric blindness of the two lenses'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'never[\s\S]{0,4}the blind lens' 'review: the coordinator is never the blind lens'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'lens that receives the implementer''s report' 'review: the evidence lens receives and verifies the implementer report'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'asymmetric blindness of the two lenses lives in' 'review: the asymmetric blindness of the two lenses lives in split'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Two dispatches are the only place[\s\S]{0,30}blindness actually exists' 'review: the asymmetric blindness lives in the two dispatches'
     Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'spec lens reviewer does NOT receive the implementer''s report' 'spec-reviewer is the blind lens (does not receive the report)'
     Check-NotMatch '.claude/skills/pelizzai-review/references/spec-reviewer.md' '\{IMPLEMENTER_REPORT\}' 'spec-reviewer (blind lens) no longer injects the report placeholder'
     Check-Match '.claude/skills/pelizzai-review/references/code-reviewer.md' '\{IMPLEMENTER_REPORT\}' 'code-reviewer (evidence lens) receives the report placeholder'
@@ -454,30 +454,57 @@ try {
     Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'blind spec lens' 'subagents: review uses the blind spec lens; the coordinator is never it'
 
     # =====================================================================
-    # Pre-2026-07-11 restoration (2026-07-21) — F6: the reviewer is blind
-    # by DEFAULT again. In BASE there was no profile: every task went through
-    # spec → quality in separate stages, and the review was mandatory
-    # after EVERY task. `combined` (post-BASE) stays, but demoted to an
-    # exception the user ratifies at step 4 of the gate — because in a single
-    # dispatch blindness collapses into mere reading order. The other half of the
-    # fix: the blind lens now receives the domain skills, since
+    # Issue #24 (2026-08-16) — the review PROFILE is gone, not merely
+    # un-asked. `split` was already the default AND writing-plans forbade the
+    # plan from recommending `combined` on its own, so gate item 4 had exactly
+    # one valid answer: ritual, not ratification. Deleting the profile also
+    # let the same two lenses cover the FINAL range, which used to be
+    # quality-only — that is the one place a requirement that fell BETWEEN
+    # tasks becomes visible. Casualty by construction: the final-review reuse
+    # exception, whose predicate hung on `combined`.
+    # Preserved from the 2026-07-21 restoration (F6): the review is mandatory
+    # after EVERY task, and the blind lens receives the domain skills —
     # blindness is not seeing the author's NARRATIVE, not going without the
     # project CONTRACT.
     # =====================================================================
 
-    # -- The review is mandatory after EVERY task again (BASE anchors) --
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Review early and often' 'review: BASE core principle restored'
+    # -- The review is mandatory after EVERY task (BASE anchors, preserved) --
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Review early and often' 'review: BASE core principle preserved'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'description:[^\n]*after EVERY task' 'review: the description triggers after EVERY task (BASE trigger)'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'After EVERY task during plan execution[\s\S]{0,60}no exception for' 'review mandatory after every task, no exception for "it is simple"'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'depth is proportional to risk, the existence of the review is not' 'review: proportional is the depth, never the existence of the review'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Skipping the review because .it''s simple' 'review: BASE anti-pattern (skipping because "it is simple") restored'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Skipping the review because .it''s simple' 'review: BASE anti-pattern (skipping because "it is simple") preserved'
 
-    # -- split is the default; combined is a ratified exception (not the other way around) --
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'recommended default[\s\S]{0,20}is .split.' 'review: split is the profile recommended by default'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' '.combined. is[\s\S]{0,20}\*\*exception\*\*' 'review: combined is the exception, not the normal case'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'downgrading to .combined. always requires' 'review: downgrading to combined requires an explicit user choice'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Using .combined. on your own' 'review: anti-pattern of assuming combined without ratification'
-    Check-NotMatch '.claude/skills/pelizzai-review/SKILL.md' 'trivial/bounded task proceeds with .combined.' 'review does not send bounded tasks back to combined by default'
+    # -- Two dispatches are invariable: no profile, no default, nothing to ratify --
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'two lenses always go out in two independent dispatches' 'review: the two lenses always use two dispatches'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'not a profile, a default, or a recommendation' 'review: two dispatches are not a default anyone can override'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'There used to be a .combined. profile[\s\S]{0,400}It is \*\*gone\*\*' 'review: combined is named as REMOVED (tombstone against reintroduction)'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'does not come back by request' 'review: a user asking for combined does not recreate it'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Cutting the second dispatch[\s\S]{0,120}not a proportional review' 'review: cutting a dispatch is not proportionality'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Collapsing the two lenses into a single dispatch' 'review: anti-pattern of collapsing the two lenses'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'This lens is \*\*blind\*\*, without exception' 'review: the spec lens is blind with no exception'
+    Check-NotMatch '.claude/skills/pelizzai-review/SKILL.md' 'ratified .combined.|recommended default' 'review: no ratified-combined path and no profile default survive'
+
+    # -- The gate lost item 4, and records WHY (so it is not re-added as a silent default) --
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'review is deliberately NOT a gate item' 'gate: the review is deliberately not a gate item'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'only valid answer is the recommendation is not\s+ratification, it is ritual' 'gate: a question with one valid answer is named as ritual'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'does not widen the harness.s\s+autonomy' 'gate: omitting the question is not a silent default'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'until steps 0–3 are complete' 'gate: four stops (0-3), the review no longer among them'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Only after the three answers' 'gate: isolation applies after the three answers'
+    Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' '4\. Review \(only after 3\)|Options: split . combined' 'gate: item 4 (review profile) is gone'
+    Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'steps 0–4|the four answers' 'gate: no leftover reference to a five-item gate'
+
+    # -- The final review is the SAME two lenses over the range (it used to be quality-only) --
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'final review uses the SAME two lenses' 'review: the final review runs BOTH lenses'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Blind spec lens over the RANGE' 'review: the final review has a blind spec lens over the range'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'fell \*\*between\*\* two tasks' 'review: names what only the final blind lens can catch'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'no reuse exception and no low-risk waiver' 'review: the reuse exception was REMOVED, not narrowed'
+    Check-NotMatch '.claude/skills/pelizzai-review/SKILL.md' 'Reuse exception \(narrow|may treat the task.s review as the final review' 'review: no reuse exception survives'
+    Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'own dispatch\*\*, with no exception' 'spec-reviewer: always its own dispatch'
+    Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'final review, the same rule covers the delivery narrative' 'spec-reviewer: the final blind lens gets no delivery narrative'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'in the SAME[\s\S]{0,60}two dispatches as a task' 'execution-plans: the final review mirrors the task review'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'NO reuse of a task.s review as the final' 'execution-plans: no reuse of a task review as the final review'
+    Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'Narrow exception' 'execution-plans: the reuse exception is gone'
 
     # -- The blind lens receives the domain skills (blindness ≠ lack of project context) --
     Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' '\{DOMAIN_SKILLS\}' 'spec-reviewer (blind lens) receives the domain skills slot'
@@ -487,21 +514,29 @@ try {
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'pelizzai/domain-skills\.md' 'review names the domain skills catalog (not just "the catalog")'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' '.\{DOMAIN_SKILLS\}. slot\s+empty' 'review: anti-pattern of dispatching a briefing with an empty domain skills slot'
 
-    # -- Reuse exception for the final review: narrowed, not removed --
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Reuse exception \(narrow, and never the default path\)' 'review: the reuse exception is declared narrow'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' '.read-only. or .write-local. effect, low risk' 'review: the exception requires local effect and low risk'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'not to waive the final validation' 'review: the exception does not waive the final validation'
-    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Narrow exception:[\s\S]{0,200}read-only.*write-local' 'execution-plans mirrors the limits of the reuse exception'
+    # -- The invariable propagated: task-cycle, plan, team, subagents, audit, and the contract files --
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '## 3\. Two-lens review, always in two dispatches' 'task-cycle: the section title states the invariable'
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'no profile to pick and no downgrade to ratify' 'task-cycle: no profile and no downgrade'
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Cutting a dispatch is not proportionality' 'task-cycle: cutting a dispatch is not proportionality'
+    Check-NotMatch '.claude/skills/pelizzai-execute/references/task-cycle.md' 'combined' 'task-cycle: no combined profile survives'
+    Check-NotMatch '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'Review profile' 'plan template: no Review profile field'
+    Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'Review depth' 'plan template: records review DEPTH instead of a profile'
+    Check-NotMatch '.claude/skills/pelizzai-writing-plans/SKILL.md' 'universal split review' 'writing-plans does not treat universal split as a red flag'
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'two lenses always go out in \*\*two dispatches\*\*' 'team: two dispatches in any lane'
+    Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'no profile to consult and no\s+single-dispatch variant' 'subagents: no profile and no single-dispatch variant'
+    Check-NotMatch '.claude/skills/pelizzai-audit/templates/profile.md' 'review-policy-default' 'profile.md: no review policy left to pre-select'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'two .pelizzai-review. lenses, in two dispatches' 'audit: the bootstrap diff gets both lenses'
+    Check-Match 'CLAUDE.md' 'review is NOT among them' 'CLAUDE.md: the review is not a ratified structural decision'
+    Check-Match 'README.md' 'The review is\s+not asked' 'README: the gate does not ask about the review'
 
-    # -- The default propagated: gate, plan, task-cycle, team, and subagents teach the SAME thing --
-    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Recommended: split — it is the default' 'gate step 4 recommends split by default'
-    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Downgrading to combined requires[\s\S]{0,80}your choice' 'gate step 4: combined requires an explicit user choice'
-    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '\| .split. \(default\)' 'task-cycle: the profile table opens with split (default)'
-    Check-NotMatch '.claude/skills/pelizzai-execute/references/task-cycle.md' 'trivial/bounded tasks proceed with \*\*combined\*\* review' 'task-cycle does not send bounded tasks back to combined'
-    Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'The default is .split., even for bounded' 'writing-plans records split as the review-profile default'
-    Check-NotMatch '.claude/skills/pelizzai-writing-plans/SKILL.md' 'universal split review' 'writing-plans no longer treats universal split as a red flag'
-    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'blind/dual profile \(.split.\) is the default' 'team: split is the per-task review default'
-    Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' '.split. by default' 'subagents: the recorded profile is split by default'
+    # -- Negative checks for the legacy vocabulary: a leftover sentence re-teaches the removed
+    # contract even when the doctrine sections are correct, and a generated plan carrying one of
+    # these would reopen the very question this change removed.
+    Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'proportional review\s+profile' 'execution-plans: the Goal no longer names a review profile'
+    Check-NotMatch '.claude/skills/pelizzai-execute/references/task-cycle.md' 'reuse of the review|reviewed-tree' 'task-cycle: the reviewed-tree bookkeeping that served the reuse exception is gone'
+    Check-NotMatch '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'recorded profile' 'plan template: task advancement is not gated on a recorded profile'
+    Check-NotMatch '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'commits, and review one question' 'plan template: forwarding no longer sends the review to the gate'
+    Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'review is \*\*not\*\* among them' 'plan template: forwarding states the review is not a gate question'
 
     # -- D7: thread of the proactive domain skills gate — three capture points + audit names who invokes it --
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'stack domain skills \(proposed at the design edge\)' 'router (D7.1): kickoff lists the stack domain skills in Artifacts'

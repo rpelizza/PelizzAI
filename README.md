@@ -256,8 +256,10 @@ born on a protected branch.
 
 Branch, inline execution, and granular commits are the **recommended** defaults; worktree, team,
 and subagents come in when genuinely independent fronts justify the cost. None of it is applied in
-silence — after the plan is approved, isolation, mode (with `team` always visible), commits, and
-review are decided **one question at a time**. `squash-final` happens only on explicit request.
+silence — after the plan is approved, isolation, mode (with `team` always visible), and commits are
+decided **one question at a time**. `squash-final` happens only on explicit request. The review is
+not asked: every task and the final range go through the two lenses of `pelizzai-review` in two
+dispatches, and there is no profile to pick.
 
 Ratified structural decisions can become **project policy** in `pelizzai/profile.md` and
 pre-select future recommendations. They do not auto-confirm a new task, barring your explicit

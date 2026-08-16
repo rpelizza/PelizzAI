@@ -41,7 +41,7 @@ catalog maintenance and never becomes a per-task gate.
 
 The member (teammate/subagent) **never reads the plan file** — this avoids context pollution and keeps the focus. The coordinator is who delivers the context, through one of these two channels:
 
-- **By FILE (preferred, when the script exists **and** a compatible persistent Markdown plan exists):** run `task-brief <plan> <N>` — it extracts Task N + the Global Constraints into the safe handoff dir (gitignored in the consumer; temp in source mode), and the briefing points to THAT file. The report goes to the same directory and the chat reply stays at **≤15 lines**. For review, `review-package --working-tree` includes staged, unstaged, and untracked. The same package serves combined/split. The `<base-sha> <HEAD>` range is final-only. The principle "context is built, never inherited" holds.
+- **By FILE (preferred, when the script exists **and** a compatible persistent Markdown plan exists):** run `task-brief <plan> <N>` — it extracts Task N + the Global Constraints into the safe handoff dir (gitignored in the consumer; temp in source mode), and the briefing points to THAT file. The report goes to the same directory and the chat reply stays at **≤15 lines**. For review, `review-package --working-tree` includes staged, unstaged, and untracked. The same package serves both lenses. The `<base-sha> <HEAD>` range is final-only. The principle "context is built, never inherited" holds.
 - **By pasting (fallback, no script or no persistent plan):** the coordinator extracts the **full text** of the task from the native plan/execution record and pastes it into the member's prompt. Do not create a consumer file just to satisfy the helper.
 
 Each task's briefing includes:
@@ -67,8 +67,8 @@ Each task's briefing includes:
   dominant technique from `pelizzai-reasoning` (decomposition, RCA, comparison, verification —
   see the skill's matrix); omit it for a mechanical task with a clear contract — do not impose a
   technique without a trigger.
-- The review profile recorded in the plan: `split` (default) or ratified `combined`, with the
-  risk rationale.
+- The risk rationale that sets the DEPTH of each review lens (the two lenses and their two
+  dispatches are invariable — there is nothing to record about them).
 - The expected return format and status (see below), including the mandatory field
   `Deviations from plan:` (or `none`).
 - Operational deviation test (canonical phrase, in the briefing TEXT):
@@ -102,23 +102,20 @@ TDD is the primary strategy when the skill's suitability gate passes; being able
 test is not enough. For deletions and purely mechanical changes, use the regression suite +
 proportional static checks. The member tests/validates, self-reviews, and **does not commit**.
 
-## 3. Proportional review with two lenses
+## 3. Two-lens review, always in two dispatches
 
 Every task passes through the **spec** and **quality** lenses, in this order, with **asymmetric
 blindness**: the spec lens judges the code blind against the contract; the quality lens is the
-**evidence** lens and receives the author's report in order to verify it. The profile decides
-whether they use one or two dispatches:
+**evidence** lens and receives the author's report in order to verify it. They always use **two
+independent dispatches**, in any lane, including bounded — the spec stage approves before quality
+is dispatched. There is no profile to pick and no downgrade to ratify: a single pass would collapse
+the blindness into mere reading order, since a reviewer who has already read the report cannot
+unknow the author's narrative.
 
-| Profile | When | Execution |
-| --- | --- | --- |
-| `split` (default) | the normal case, including the bounded lane; **mandatory** for medium/high risk, public contract, security, data, migration, multiple parts, or structural rejection | the spec stage approves before quality is dispatched; independent dispatches |
-| `combined` (ratified exception) | bounded lane, low risk, cohesive scope, no security/data/migration/public contract — **and** the user ratified the profile in step 4 of the setup gate | one reviewer and one report, spec first and quality second |
-
-Proportionality: what varies with risk is the **depth** of each lens, not the existence of the
-review nor the blindness. The **separate lenses with blindness** profile is the default in any
-lane — only with two dispatches does the spec lens not know the author's narrative. If the diff
-reveals a surface that changes the risk, promote `combined` to `split` without a new ratification;
-downgrading to `combined` is always the user's explicit choice, never the saving of one round.
+Proportionality: what varies with risk is the **depth** of each lens — how much gets investigated
+and how many checks get run — never the existence of the review, the number of dispatches, or the
+blindness. Cutting a dispatch is not proportionality, it is removing the only mechanism that makes
+the spec lens independent.
 
 ```text
 (0) Material: generate `review-package --working-tree`; the same package covers staged, unstaged,
@@ -134,10 +131,8 @@ downgrading to `combined` is always the user's explicit choice, never the saving
     check that did not run = UNVERIFIED, never ✅.
 ```
 
-Approval requires **both** verdicts: spec ✅ **and** quality ✅, whether in the same report or in
-separate stages. In the `combined` profile the asymmetry is logical: first the blind judgment
-against the contract, only then the reading of the report to verify the evidence — never the
-reverse. Conflict between the lenses → the coordinator decides with their OWN evidence or
+Approval requires **both** verdicts: spec ✅ **and** quality ✅, in this order and in separate
+stages — quality is not dispatched while spec is open. Conflict between the lenses → the coordinator decides with their OWN evidence or
 escalates; the author's narrative never arbitrates. "⚠️ not verifiable" items require the
 coordinator's assessment against the plan before marking them complete.
 
@@ -166,8 +161,8 @@ Never ignore an escalation nor re-dispatch without changing anything.
 ## 5. Review-loop circuit breaker
 
 ```text
-- Limit: 3 fix→re-review cycles PER LENS, PER TASK. In the `combined` profile, use a shared
-  counter; promote to `split` if it becomes unclear which lens is failing.
+- Limit: 3 fix→re-review cycles PER LENS, PER TASK. The lenses have separate counters because
+  they are separate dispatches: a spec rejection never consumes the quality budget, and vice versa.
 - The same issue rejected 2x → escalate on the 2nd.
 - Structural rejection ("the approach is fundamentally wrong") → escalate immediately.
 - Resets (do not give up too early): zero the spec counter on spec ✅, the quality counter on
@@ -195,10 +190,6 @@ Never ignore an escalation nor re-dispatch without changing anything.
 - Only after spec ✅ and quality ✅ (with fixes applied) does the COORDINATOR consolidate.
 - The coordinator stages the task's exact paths and, in the consumer, the state; inspects
   `git diff --cached` and never uses `git add -A`.
-- To allow safe reuse of the review in a single-task bounded delivery, require that no
-  unstaged/untracked content of the task remains, capture `reviewed-tree = git write-tree` before
-  the commit, and compare it afterward with `git rev-parse HEAD^{tree}`. Divergence invalidates
-  the reuse.
 - Granular: one DEFINITIVE commit per task. In the consumer, the cursor touch goes into the SAME
   commit; in source mode, the native execution record advances with no file. History is kept.
 - Squash-final: one WORK commit per task (`wip(<slug>): <task>`) — never accumulate the entire
@@ -235,8 +226,8 @@ session's.
 
 The harness elevates the reasoning of **any** model via `pelizzai-reasoning`: the right technique,
 a verifiable protocol, and fresh evidence do not depend on the model's capability. Proportionality
-still applies to the depth of the process (interview, brainstorming, TDD, review profile,
-overlays) — and it is **never lowered to compensate for a smaller model**. In architecture, in the
+still applies to the depth of the process (interview, brainstorming, TDD, the depth of each review
+lens, overlays) — and it is **never lowered to compensate for a smaller model**. In architecture, in the
 two review lenses, in the final review, and in the delivery's final validation, a smaller model
 demands an intact process, not a shallower one.
 

@@ -111,7 +111,7 @@ Observable signs that these guidelines and the skills are doing their job:
 - at kickoff, the classified route (lane, discovery, overlays) is presented for the user to ratify or adjust before effort is invested;
 - greenfield projects go through discovery → spec → stress → approval → plan → stress → approval;
 - every material gap becomes a `pelizzai-interview` question — it is never filled by Context7, convention, default, or "reasonable inference", including mid-execution;
-- structural decisions (base/branch, isolation, mode with `team` visible, commits, review, destination) are recommended and ratified — one at a time in tracks with a plan; in tweak/bug, in a compact one-line confirm with all of them visible and named — never as a silent default;
+- structural decisions (base/branch, isolation, mode with `team` visible, commits, destination) are recommended and ratified — one at a time in tracks with a plan; in tweak/bug, in a compact one-line confirm with all of them visible and named — never as a silent default. The review is NOT among them: the two lenses in two dispatches are invariable, so there is no question to ask;
 - a trivial tweak (a label, a button on an existing screen, an obvious config) reaches the first write with at most TWO stops (kickoff gate + compact confirm) and never produces a spec/plan;
 - a read-only task creates no state and no artifacts;
 - the delivered content is exactly the validated content, and the history has fewer "fix of the fix" commits (commits correcting the immediately preceding commit).
