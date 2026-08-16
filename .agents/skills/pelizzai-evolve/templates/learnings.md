@@ -1,21 +1,36 @@
 # Learnings — PelizzAI
 
-> What execution already learned in this project. Read by `pelizzai-writing-plans` and
-> `pelizzai-execute` BEFORE approaches are proposed — the only moment a rule can still
-> change a design. Incidents are written when a defect's root cause is CONFIRMED (usually by
-> `pelizzai-debug`, inside the fix's own commit); `pelizzai-finish` counts recurrences
-> at closeout; `pelizzai-evolve` promotes and retires, ratified by the user.
-> Budget: **~200 lines hard** — retire before adding; a file too long to read at task start is
-> a file nobody reads.
+> What execution already learned in this project. The file has TWO parts with opposite natures
+> and **separate budgets** — they are not one pool.
+>
+> **Active rules** — read at task start by EVERY track: `pelizzai-writing-plans` before
+> approaches · `pelizzai-execute` before Task 1 and pasted into every task briefing (the member
+> does not inherit the coordinator's context) · `pelizzai-quick-fix` before the change ·
+> `pelizzai-debug` on entering the investigation and again when choosing the proof.
+> **Budget: 40 lines hard.**
+>
+> **Incident log** — evidence, consulted ON DEMAND (promotion, recurrence check, doubt about a
+> rule's origin). Never loaded at task start. **Budget: 160 lines hard**; at the ceiling with
+> nothing retirable, the OLDEST entries move to `pelizzai/data/history/learnings-<YYYY>.md`.
+>
+> Incidents are written when a defect's root cause is CONFIRMED (usually by `pelizzai-debug`,
+> inside the fix's own commit); `pelizzai-finish` counts recurrences at closeout;
+> `pelizzai-evolve` promotes and retires, ratified by the user.
 
 ## Active rules
 
 <!-- Short imperatives applied on every task in their scope — the reason this file is read at
-     task start. A rule arrives here by PROMOTION only: the same root cause recurred 2–3
-     times. Each rule keeps a scope (a rule without one fires everywhere) and a pointer to the
-     incidents that earned it. -->
+     task start, and the only part loaded there. A rule arrives here by PROMOTION only: the same
+     root cause recurred 2–3 times. Each rule keeps a scope (a rule without one fires everywhere)
+     and a pointer to the incidents that earned it.
+     BUDGET: 40 lines hard, independent of the log below — a full log never costs a rule its
+     seat. Hitting 40 lines of standing rules is a signal that the project needs a domain skill
+     or a linter, not a longer file.
+     scope: PATHS OR GLOBS, never prose. `back/**/repository*.py`, not "anything touching the
+     database" — the reader has to decide in one second whether the rule binds. Every rule here
+     is read, always: the scope tells the reader if it applies, it does not filter what loads. -->
 
-- <imperative rule> — scope: <where it applies> — from: <incident dates/slugs>
+- <imperative rule> — scope: `<path or glob, e.g. back/**/repository*.py>` — from: <incident dates/slugs>
 
 ## Incident log
 
@@ -23,14 +38,17 @@
      an entry that cannot name its trigger and root cause is an anecdote, not a learning.
      status: candidate → promoted (recurred 2–3×, rule extracted above) → retired (failure
      mode can no longer happen: code gone, dependency dropped, rule absorbed by a domain
-     skill or a linter — retired entries leave the file). -->
+     skill or a linter — retired entries leave the file).
+     BUDGET: 160 lines hard. At the ceiling with nothing retirable, move the OLDEST entries to
+     pelizzai/data/history/learnings-<YYYY>.md: the evidence is kept, it just stops competing
+     for the space that is read at task start. -->
 
 - <YYYY-MM-DD> <slug> — status: candidate
   - trigger: <the observable event>
   - root cause: <the cause, not the symptom>
   - smallest durable fix: <file:line>
   - rule learned: <imperative | n/a — one-off>
-  - scope: <where the rule applies>
+  - scope: `<path or glob>`
   - revert: <one line to undo the fix>
 
 _Last updated: <YYYY-MM-DD>_

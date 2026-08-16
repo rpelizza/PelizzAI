@@ -46,6 +46,13 @@ If no safe containment exists or you lack the authority, escalate immediately wi
 
 ## Step 1 — classify before choosing the reasoning
 
+**First, in a consumer, read the Active rules of `pelizzai/data/learnings.md`** (the short section
+only; the Incident log is consulted on demand, not now). This skill is what WRITES most of that
+file, and reading it here is what closes the loop: without this step the harness records a lesson
+and then walks past it on the next bug. Read it BEFORE forming hypotheses — the file set is the
+OUTPUT of the investigation, not its input, so a rule you postpone until you "know what you are
+touching" arrives after it could have redirected you. If the section is empty, say so and move on.
+
 | Class | Signals | Reasoning | Hypotheses | Path |
 | --- | --- | --- | --- | --- |
 | **Direct cause** | compiler, stack trace, or contract points to an unambiguous local cause | ReAct + Verification | zero or one | reproduce the error → fix → run the same oracle |
@@ -118,7 +125,11 @@ recommendation. If the conversation reveals a structural or design problem, esca
 
 Before any mutation in the repository — test, instrumentation, or fix — use
 `pelizzai-starting-branch`. In a consumer, load the applicable skills from
-`pelizzai/domain-skills.md`; in source mode, use the source repo's own rules/skills. Revert
+`pelizzai/domain-skills.md`; in source mode, use the source repo's own rules/skills.
+**Re-read the Active rules here, against the PROOF you are about to write.** Most learnings are
+about how you know something works, not about the fix itself — a test that passes on the defect's
+own scenario before the fix exists is the classic shape, and it is the one this second reading
+catches. Reading them at Step 1 oriented the diagnosis; reading them now protects the evidence. Revert
 throwaway experiments that do not belong to the fix. Authorized operational containment that does
 not write to the repo does not wait for a branch.
 

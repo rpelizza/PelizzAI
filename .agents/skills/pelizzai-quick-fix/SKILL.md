@@ -61,8 +61,13 @@ open no gates: apply the briefing and escalate to the coordinator whatever requi
 1. Branch — pelizzai-starting-branch discovers the base and proposes `<type>/<slug>`; ratification
    happens in the compact confirm above and only after it is the branch created (never on a
    protected branch).
-1.5. Local rules — in a consumer, check `pelizzai/domain-skills.md`; in source mode, use the repo's
-   own rules/skills. Follow only those applicable to the area.
+1.5. Local rules — in a consumer, check `pelizzai/domain-skills.md` AND the **Active rules** of
+   `pelizzai/data/learnings.md` (the short section only; the Incident log is not read here); in
+   source mode, use the repo's own rules/skills. Follow only those applicable to the area.
+   The Active rules are cheap by design and this track is where they pay off most: a tweak has the
+   least ceremony and the most pressure for speed, which is exactly the shape of repeating a
+   mistake the project already catalogued. "It is small" is not a reason to skip them — it is the
+   reason they exist.
 1.6. Record the ratification (after the compact confirm's "ok") — write the marker `kickoff: ratified <YYYY-MM-DD>`
    (with `isolation`/`execution-mode`/`commit-strategy` ratified) in the consumer state
    `pelizzai/data/state.md` or, in source mode, in the native execution record with the same keyword,
