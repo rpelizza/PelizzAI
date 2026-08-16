@@ -82,7 +82,15 @@ function scanContractRegions(text) {
     regions.push({ start, end: close + CONTRACT_CLOSE.length, orphan: false });
     cursor = close + CONTRACT_CLOSE.length;
   }
-  return regions;
+  // A CLOSE that no pair consumed is orphan too — the mirror of the case above. Scanning only for
+  // OPEN would leave harness syntax loose in project content AND let `--check` approve it; worse,
+  // a later OPEN inserted above it would pair with THAT close and swallow everything in between,
+  // which is issue #17 arriving from the other side.
+  for (let at = text.indexOf(CONTRACT_CLOSE); at >= 0; at = text.indexOf(CONTRACT_CLOSE, at + 1)) {
+    const paired = regions.some((region) => !region.orphan && at >= region.start && at < region.end);
+    if (!paired) regions.push({ start: at, end: at + CONTRACT_CLOSE.length, orphan: true });
+  }
+  return regions.sort((a, b) => a.start - b.start);
 }
 
 // The single well-formed block of `text`, or null when there is none — or when the file carries a

@@ -1010,6 +1010,20 @@ ok('#21 reports the removal', Boolean(collapsed.note) && /duplicate/i.test(colla
 ok('#21 malformed shape does not resolve to a block', extractContract(duplicated) === null);
 ok('#17 malformed shape does not resolve to a block', extractContract(orphaned) === null);
 
+// Orphan CLOSE — the mirror of #17. Scanning only for OPEN would leave harness syntax loose in the
+// project's content and let the check approve it; a later OPEN above it would pair with THAT close.
+for (const [label, strayed] of [
+  ['before', [CLOSE, 'PROJECT LINE', BLOCK].join('\n')],
+  ['after', [BLOCK, 'PROJECT LINE', CLOSE].join('\n')],
+]) {
+  ok('orphan CLOSE ' + label + ' is seen as malformed', extractContract(strayed) === null);
+  const fixed = upsertContract(strayed, BLOCK);
+  ok('orphan CLOSE ' + label + ' is repaired', fixed.action === 'repaired');
+  ok('orphan CLOSE ' + label + ' keeps project content', fixed.content.includes('PROJECT LINE'));
+  ok('orphan CLOSE ' + label + ' leaves no orphan', shape(fixed.content).orphans === 0);
+  ok('orphan CLOSE ' + label + ' leaves one block', shape(fixed.content).blocks === 1);
+}
+
 // The healthy paths must keep behaving: identical stays untouched, drifted resyncs in place.
 const healthy = ['# Project', '', BLOCK, '', 'PROJECT TAIL'].join('\n');
 ok('healthy file is unchanged', upsertContract(healthy, BLOCK).action === 'unchanged');
@@ -1060,6 +1074,31 @@ console.log('contract-shape behavior OK');
         Check (Test-Path (Join-Path $exportTemp 'GEMINI.md')) 'export generates GEMINI.md in the consumer'
         $exportClaude = Get-Content -LiteralPath (Join-Path $exportTemp 'CLAUDE.md') -Raw -Encoding utf8
         Check ($exportClaude -match 'This repository consumes PelizzAI') 'consumer CLAUDE.md is the bridge, not the source repo version'
+
+        # --check on the REAL exported consumer, against each malformed shape. Asserting that the
+        # message exists in the source only proves the string was typed; this proves check() FAILS
+        # and that the sync then repairs WITHOUT losing the project's own line (issues #17/#21).
+        $exportSync = Join-Path $exportTemp 'scripts/sync-harness.mjs'
+        $exportClaudeMd = Join-Path $exportTemp 'CLAUDE.md'
+        $pristine = $exportClaude
+        $cOpen = '<!-- pelizzai:contract -->'
+        $cClose = '<!-- /pelizzai:contract -->'
+        foreach ($case in @(
+            @{ Name = 'orphan OPEN'; Text = "$cOpen`nPROJECT LINE KEPT`n$pristine" },
+            @{ Name = 'orphan CLOSE'; Text = "$cClose`nPROJECT LINE KEPT`n$pristine" },
+            @{ Name = 'duplicate block'; Text = "$pristine`n`nPROJECT LINE KEPT`n$cOpen`nSTALE`n$cClose`n" }
+        )) {
+            Set-Content -LiteralPath $exportClaudeMd -Value $case.Text -NoNewline -Encoding utf8
+            $malformedOut = (& node $exportSync --check 2>&1 | Out-String)
+            Check ($LASTEXITCODE -ne 0) "consumer --check FAILS on a $($case.Name)" "exit $LASTEXITCODE"
+            Check ($malformedOut -match 'malformed contract shape') "consumer --check names the $($case.Name) as a malformed shape"
+            & node $exportSync 2>&1 | Out-Null
+            $healed = Get-Content -LiteralPath $exportClaudeMd -Raw -Encoding utf8
+            Check ($healed -match 'PROJECT LINE KEPT') "sync repairs the $($case.Name) WITHOUT losing project content"
+            & node $exportSync --check 2>&1 | Out-Null
+            Check ($LASTEXITCODE -eq 0) "consumer --check passes again after repairing the $($case.Name)" "exit $LASTEXITCODE"
+            Set-Content -LiteralPath $exportClaudeMd -Value $pristine -NoNewline -Encoding utf8
+        }
     } finally {
         if (Test-Path -LiteralPath $exportTemp) { Remove-Item -LiteralPath $exportTemp -Recurse -Force }
     }
