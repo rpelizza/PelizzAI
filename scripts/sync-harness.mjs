@@ -51,13 +51,46 @@ const REF_IGNORE = new Set([
 const CONTRACT_OPEN = '<!-- pelizzai:contract -->';
 const CONTRACT_CLOSE = '<!-- /pelizzai:contract -->';
 
-// The marked block of `text`, or null when the markers are absent/malformed.
+// Every contract region in `text`, in order, each `{ start, end, orphan }`.
+//
+// A region is WELL-FORMED when its OPEN is closed by a CLOSE with no second OPEN in between. An
+// OPEN that never closes — or that is followed by another OPEN before its CLOSE — is ORPHAN, and
+// it delimits NOTHING: `end` covers the marker line alone, because every byte after it belongs to
+// the PROJECT until proven otherwise.
+//
+// Scanning for pairs instead of `indexOf(OPEN)` + `indexOf(CLOSE)` is what keeps two failures from
+// destroying content. With a lone `indexOf` pair, an orphan OPEN left above a real block makes
+// `start` point at the orphan and `end` at the real CLOSE — and the "resync" then replaces
+// everything in between, project content included, with no note (issue #17). The same shortcut
+// stops at the FIRST block and calls a file with two blocks `unchanged`, shipping two managed
+// contracts to the agent behind a green check (issue #21).
+function scanContractRegions(text) {
+  const regions = [];
+  let cursor = 0;
+  while (cursor < text.length) {
+    const start = text.indexOf(CONTRACT_OPEN, cursor);
+    if (start < 0) break;
+    const after = start + CONTRACT_OPEN.length;
+    const close = text.indexOf(CONTRACT_CLOSE, after);
+    const nextOpen = text.indexOf(CONTRACT_OPEN, after);
+    if (close < 0 || (nextOpen >= 0 && nextOpen < close)) {
+      regions.push({ start, end: after, orphan: true });
+      cursor = after;
+      continue;
+    }
+    regions.push({ start, end: close + CONTRACT_CLOSE.length, orphan: false });
+    cursor = close + CONTRACT_CLOSE.length;
+  }
+  return regions;
+}
+
+// The single well-formed block of `text`, or null when there is none — or when the file carries a
+// malformed shape (an orphan marker, or more than one block). Returning null on a malformed shape
+// is deliberate: the caller's job is to FAIL or REPAIR, never to pick one of several contracts.
 function extractContract(text) {
-  const start = text.indexOf(CONTRACT_OPEN);
-  if (start < 0) return null;
-  const end = text.indexOf(CONTRACT_CLOSE, start);
-  if (end < 0) return null;
-  return text.slice(start, end + CONTRACT_CLOSE.length);
+  const regions = scanContractRegions(text);
+  if (regions.length !== 1 || regions[0].orphan) return null;
+  return text.slice(regions[0].start, regions[0].end);
 }
 
 // Four-case upsert of the contract block into a consumer file:
@@ -72,14 +105,41 @@ function extractContract(text) {
 //     of the file and the migration says so out loud (never a silent loss).
 function upsertContract(existing, block, { freshHeader = '', legacyStart = null, legacyEnd = null } = {}) {
   if (existing === null) return { action: 'created', content: `${freshHeader}${block}\n` };
-  const start = existing.indexOf(CONTRACT_OPEN);
-  const end = existing.indexOf(CONTRACT_CLOSE, start);
-  if (start >= 0 && end > start) {
-    const current = existing.slice(start, end + CONTRACT_CLOSE.length);
-    if (current === block) return { action: 'unchanged', content: existing };
+
+  // Repair the malformed shapes BEFORE deciding anything, and touch no byte outside the markers:
+  // an orphan OPEN is deleted (it delimits nothing) and every block past the first is deleted (the
+  // harness owns exactly one). What sits BETWEEN them is project content and survives verbatim —
+  // which is the whole difference from the old behavior, where it was swallowed by the "resync".
+  const notes = [];
+  const initial = scanContractRegions(existing);
+  const orphans = initial.filter((region) => region.orphan);
+  const extras = initial.filter((region) => !region.orphan).slice(1);
+  if (orphans.length || extras.length) {
+    let repaired = '';
+    let cursor = 0;
+    for (const region of [...orphans, ...extras].sort((a, b) => a.start - b.start)) {
+      repaired += existing.slice(cursor, region.start);
+      cursor = region.end;
+    }
+    existing = repaired + existing.slice(cursor);
+    if (orphans.length) {
+      notes.push(
+        `${orphans.length} orphan contract marker(s) removed — project content around them preserved`,
+      );
+    }
+    if (extras.length) notes.push(`${extras.length} duplicate contract block(s) removed`);
+  }
+  const note = notes.length ? notes.join('; ') : null;
+
+  const blocks = scanContractRegions(existing).filter((region) => !region.orphan);
+  if (blocks.length === 1) {
+    const { start, end } = blocks[0];
+    const current = existing.slice(start, end);
+    if (current === block && !note) return { action: 'unchanged', content: existing };
     return {
-      action: 'resynced',
-      content: existing.slice(0, start) + block + existing.slice(end + CONTRACT_CLOSE.length),
+      action: note ? 'repaired' : 'resynced',
+      content: existing.slice(0, start) + block + existing.slice(end),
+      note,
     };
   }
   if (legacyStart) {
@@ -98,19 +158,21 @@ function upsertContract(existing, block, { freshHeader = '', legacyStart = null,
       }
       const hasTail = rawTail.trim().length > 0;
       const tailPart = hasTail ? `${rawTail.startsWith('\n') ? '' : '\n'}${rawTail}${rawTail.endsWith('\n') ? '' : '\n'}` : '\n';
+      const migrationNote = terminalFound
+        ? hasTail
+          ? 'project content found after the legacy body was preserved below the block'
+          : null
+        : 'legacy body replaced to end of file (terminal line not found — review the diff)';
       return {
         action: 'migrated',
         content: `${existing.slice(0, legacyAt)}${block}${tailPart}`,
-        note: terminalFound
-          ? hasTail
-            ? 'project content found after the legacy body was preserved below the block'
-            : null
-          : 'legacy body replaced to end of file (terminal line not found — review the diff)',
+        // A repair note must never be swallowed by the branch that runs after it.
+        note: [note, migrationNote].filter(Boolean).join('; ') || null,
       };
     }
   }
   const sep = existing.endsWith('\n\n') ? '' : existing.endsWith('\n') ? '\n' : '\n\n';
-  return { action: 'appended', content: `${existing}${sep}${block}\n` };
+  return { action: 'appended', content: `${existing}${sep}${block}\n`, note };
 }
 
 function writeContract(path, result, label) {
@@ -137,6 +199,7 @@ function parseArgs(argv) {
     installHooks: false,
     buildDist: false,
     skipEntrypoints: false,
+    internalStaging: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -170,9 +233,18 @@ function parseArgs(argv) {
         break;
       case '--skip-entrypoints':
       case '-skipentrypoints':
-        // Internal to the dist build: mirror and validate WITHOUT anchoring the three entry
-        // files — dist ships without them; the consumer's first sync creates them in place.
+        // Generation only: mirror WITHOUT anchoring the three entry files. It is REFUSED with
+        // --check below — the entrypoints are the very thing the check exists to prove, and an
+        // OK obtained by skipping them is a green gate that verified nothing (issue #19).
         options.skipEntrypoints = true;
+        break;
+      case '--internal-staging':
+      case '-internalstaging':
+        // INTERNAL to the dist build, and the only way to skip the entrypoints in a --check: dist
+        // ships without them on purpose, so validating the staged tree must not demand them. Not
+        // a user flag — a person proving a consumer's integrity has no reason to reach for it.
+        options.skipEntrypoints = true;
+        options.internalStaging = true;
         break;
       case '--help':
       case '-h':
@@ -418,7 +490,7 @@ function copyConsumerPayload(target, { anchorEntrypoints = true } = {}) {
   // with the skills (create when absent, append when present, resync drift, migrate legacy) —
   // the same self-repair any later consumer sync performs. The dist build skips the anchoring:
   // dist ships no entry files, and the consumer's first sync creates them in place.
-  const entryArgs = anchorEntrypoints ? [] : ['--skip-entrypoints'];
+  const entryArgs = anchorEntrypoints ? [] : ['--internal-staging'];
   const targetSync = join(targetScripts, 'sync-harness.mjs');
   runNode(targetSync, [...entryArgs], target);
   runNode(targetSync, ['--check', ...entryArgs], target);
@@ -500,7 +572,22 @@ function check(sourceMode, skipEntrypoints = false) {
       [agentsMd, 'AGENTS.md', expectedAgents],
       [geminiMd, 'GEMINI.md', expectedAgents],
     ]) {
-      const actualBlock = existsSync(path) ? extractContract(readText(path)) : null;
+      // SHAPE first, content second. A file with an orphan marker or two blocks is a distinct
+      // failure from a stale block: `extractContract` returns null for it precisely so the check
+      // cannot mistake "one of several contracts" for "the contract" (issues #17/#21).
+      const text = existsSync(path) ? readText(path) : null;
+      const regions = text === null ? [] : scanContractRegions(text);
+      const orphans = regions.filter((region) => region.orphan).length;
+      const wellFormed = regions.length - orphans;
+      if (orphans || wellFormed > 1) {
+        console.error(
+          `FAIL: ${label} has a malformed contract shape (${orphans} orphan marker(s), ${wellFormed} block(s)) — ` +
+            'run node scripts/sync-harness.mjs to repair it; project content around the markers is preserved.',
+        );
+        problems += 1;
+        continue;
+      }
+      const actualBlock = text === null ? null : extractContract(text);
       if (actualBlock !== expectedBlock) {
         console.error(
           `FAIL: ${label} contract block missing or out of sync — run node scripts/sync-harness.mjs to anchor/repair it.`,
@@ -667,6 +754,19 @@ function generate(updateManifest, skipEntrypoints = false) {
   return 0;
 }
 
+// The contract-shape helpers are PURE and exported so the contract suite can exercise the real
+// code on the real failure shapes (orphan marker, duplicate block) instead of grepping this file
+// for prose. A regression here silently destroys a consumer's own content, which is exactly the
+// class of bug a text assertion cannot catch.
+export { scanContractRegions, extractContract, upsertContract };
+
+// Only the direct invocation runs the CLI; importing the module must have no side effects.
+const invokedDirectly =
+  Boolean(process.argv[1]) && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
+
+if (invokedDirectly) main();
+
+function main() {
 try {
   const options = parseArgs(process.argv.slice(2));
   if (options.exportConsumer) {
@@ -674,10 +774,22 @@ try {
   } else if (options.buildDist) {
     buildDist();
   } else if (options.check) {
+    // The check is the PROOF that a consumer's entrypoints are anchored — pelizzai-audit closes
+    // the bootstrap on it and the SessionStart hook points at it. Letting it skip them turns the
+    // proof into a green that verified nothing, and the failure is silent: whoever runs the
+    // command sees success. Refuse instead (issue #19); --internal-staging is the dist build's
+    // narrow exception, where there are deliberately no entrypoints to verify.
+    if (options.skipEntrypoints && !options.internalStaging) {
+      throw new Error(
+        '--check cannot be combined with --skip-entrypoints: the entrypoints are what the check exists to verify. ' +
+          'Run the check without the flag, or use --skip-entrypoints on a generation run.',
+      );
+    }
     process.exitCode = check(options.sourceMode, options.skipEntrypoints);
   } else {
     process.exitCode = generate(options.updateManifest, options.skipEntrypoints);
   }
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));
+}
 }

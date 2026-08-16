@@ -944,6 +944,82 @@ try {
     Run-Native { node --check scripts/sync-harness.mjs } 'node parse portable sync'
     Run-Native { node --check scripts/install-hooks.mjs } 'node parse hook installer'
 
+    # =====================================================================
+    # Issues #17 / #21 / #19 (2026-08-16) — the sync IS the delivery tool, so
+    # its defects land in every consumer at once. Exercised on the REAL
+    # exported functions, against the REAL failure shapes: these three
+    # destroy or hide consumer content, and no prose assertion can catch a
+    # regression in them.
+    #  #17 orphan OPEN + a real block below → the old indexOf pair made
+    #      `start` the orphan and `end` the real CLOSE, and the "resync"
+    #      swallowed every byte in between, project content included, silently;
+    #  #21 two well-formed blocks → the scan stopped at the first, answered
+    #      `unchanged`, and shipped two managed contracts behind a green check;
+    #  #19 `--check --skip-entrypoints` returned OK without verifying the very
+    #      thing the check exists to prove.
+    # =====================================================================
+    $syncTest = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-sync-shape-{0}.mjs" -f [guid]::NewGuid().ToString('N'))
+    $syncModule = ((Join-Path $root 'scripts/sync-harness.mjs') -replace '\\', '/')
+    @"
+import { scanContractRegions, extractContract, upsertContract } from 'file:///$syncModule';
+const OPEN = '<!-- pelizzai:contract -->';
+const CLOSE = '<!-- /pelizzai:contract -->';
+const BLOCK = [OPEN, 'NEW BODY', CLOSE].join('\n');
+const failures = [];
+const ok = (name, condition) => { if (!condition) failures.push(name); };
+const shape = (text) => {
+  const regions = scanContractRegions(text);
+  return { blocks: regions.filter((r) => !r.orphan).length, orphans: regions.filter((r) => r.orphan).length };
+};
+
+// #17 — orphan OPEN above a real block: project content in between must SURVIVE.
+const orphaned = [OPEN, 'PROJECT CONTENT MUST SURVIVE', OPEN, 'OLD BODY', CLOSE].join('\n');
+const repaired = upsertContract(orphaned, BLOCK);
+ok('#17 keeps project content', repaired.content.includes('PROJECT CONTENT MUST SURVIVE'));
+ok('#17 installs the new block', repaired.content.includes('NEW BODY'));
+ok('#17 drops the stale body', !repaired.content.includes('OLD BODY'));
+ok('#17 leaves exactly one well-formed block', shape(repaired.content).blocks === 1);
+ok('#17 leaves no orphan marker', shape(repaired.content).orphans === 0);
+ok('#17 reports the repair', Boolean(repaired.note) && /orphan/i.test(repaired.note));
+ok('#17 never reports unchanged', repaired.action !== 'unchanged');
+
+// #21 — a correct block followed by a stale one is NOT 'unchanged'.
+const duplicated = [BLOCK, '', OPEN, 'STALE BODY', CLOSE].join('\n');
+const collapsed = upsertContract(duplicated, BLOCK);
+ok('#21 refuses to call duplicates unchanged', collapsed.action !== 'unchanged');
+ok('#21 removes the duplicate', !collapsed.content.includes('STALE BODY'));
+ok('#21 leaves exactly one block', shape(collapsed.content).blocks === 1);
+ok('#21 reports the removal', Boolean(collapsed.note) && /duplicate/i.test(collapsed.note));
+ok('#21 malformed shape does not resolve to a block', extractContract(duplicated) === null);
+ok('#17 malformed shape does not resolve to a block', extractContract(orphaned) === null);
+
+// The healthy paths must keep behaving: identical stays untouched, drifted resyncs in place.
+const healthy = ['# Project', '', BLOCK, '', 'PROJECT TAIL'].join('\n');
+ok('healthy file is unchanged', upsertContract(healthy, BLOCK).action === 'unchanged');
+const drifted = healthy.replace('NEW BODY', 'OLD BODY');
+const resynced = upsertContract(drifted, BLOCK);
+ok('drifted block resyncs', resynced.action === 'resynced');
+ok('resync keeps the project tail', resynced.content.includes('PROJECT TAIL'));
+ok('resync keeps the project head', resynced.content.startsWith('# Project'));
+
+if (failures.length) { console.error('SHAPE FAILURES: ' + failures.join(' | ')); process.exit(1); }
+console.log('contract-shape behavior OK');
+"@ | Set-Content -LiteralPath $syncTest -Encoding utf8
+    try {
+        Run-Native { node $syncTest } 'sync-harness: contract-shape behavior (orphan #17, duplicate #21, healthy paths)'
+    } finally {
+        Remove-Item -LiteralPath $syncTest -Force -ErrorAction SilentlyContinue
+    }
+
+    # #19 — the check must REFUSE to skip the entrypoints; --internal-staging is the dist exception.
+    $skipOut = (& node (Join-Path $root 'scripts/sync-harness.mjs') --check --skip-entrypoints 2>&1 | Out-String)
+    Check ($LASTEXITCODE -ne 0) 'sync --check --skip-entrypoints fails instead of reporting a green that verified nothing' "exit $LASTEXITCODE"
+    Check ($skipOut -match 'cannot be combined with --skip-entrypoints') 'sync names why the check cannot skip the entrypoints'
+    Check-Match 'scripts/sync-harness.mjs' "anchorEntrypoints \? \[\] : \['--internal-staging'\]" 'dist staging uses the internal flag, not the user-facing skip'
+    Check-Match 'scripts/sync-harness.mjs' 'export \{ scanContractRegions, extractContract, upsertContract \}' 'sync exports the contract-shape helpers so the suite can exercise them'
+    Check-Match 'scripts/sync-harness.mjs' 'importing the module must have no side effects' 'sync only runs the CLI when invoked directly'
+    Check-Match 'scripts/sync-harness.mjs' 'malformed contract shape' 'check reports a malformed shape distinctly from a stale block'
+
     # Real consumer export: Cursor adapter included; sentinel and contract suite excluded.
     Check-Match 'scripts/sync-harness.mjs' "join\(root, '\.cursor', 'rules', 'pelizzai\.mdc'\)" 'portable export copies the Cursor adapter'
     Check-Match 'README.md' 'the `--export-consumer`\s+copies it' 'README: Cursor adapter is distributed by the export'
