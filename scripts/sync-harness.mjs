@@ -7,6 +7,7 @@ import {
   mkdirSync,
   readFileSync,
   readdirSync,
+  realpathSync,
   renameSync,
   rmSync,
   statSync,
@@ -761,8 +762,21 @@ function generate(updateManifest, skipEntrypoints = false) {
 export { scanContractRegions, extractContract, upsertContract };
 
 // Only the direct invocation runs the CLI; importing the module must have no side effects.
+//
+// Both sides go through realpath because Node resolves symlinks for `import.meta.url` by default:
+// invoked through a symlinked path, a plain `resolve()` comparison would differ, `main()` would
+// never run, and the command would exit 0 having synced NOTHING — the same silent green this PR
+// exists to remove. `resolve()` stays as the fallback for a path that cannot be realpath'd.
+const canonicalPath = (candidate) => {
+  try {
+    return realpathSync(candidate);
+  } catch {
+    return resolve(candidate);
+  }
+};
 const invokedDirectly =
-  Boolean(process.argv[1]) && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
+  Boolean(process.argv[1]) &&
+  canonicalPath(process.argv[1]) === canonicalPath(fileURLToPath(import.meta.url));
 
 if (invokedDirectly) main();
 

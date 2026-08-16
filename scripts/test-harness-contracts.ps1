@@ -959,9 +959,16 @@ try {
     #      thing the check exists to prove.
     # =====================================================================
     $syncTest = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-sync-shape-{0}.mjs" -f [guid]::NewGuid().ToString('N'))
-    $syncModule = ((Join-Path $root 'scripts/sync-harness.mjs') -replace '\\', '/')
+    # [System.Uri] percent-encodes spaces/non-ASCII and emits the right number of slashes on all
+    # three OSes — hand-built 'file:///' + path breaks on `C:\Users\João Silva\repo` and produces
+    # `file:////home/...` on POSIX, failing the fixture for a reason that is not the contract.
+    $syncModuleUri = ([System.Uri](Join-Path $root 'scripts/sync-harness.mjs')).AbsoluteUri
     @"
-import { scanContractRegions, extractContract, upsertContract } from 'file:///$syncModule';
+import { scanContractRegions, extractContract, upsertContract } from '$syncModuleUri';
+// Importing must NOT run the CLI: if the direct-invocation guard regressed, generate() would have
+// executed here, with no arguments, and set process.exitCode before this line. Asserting on the
+// guard's COMMENT would keep passing with the guard deleted.
+const importRanTheCli = process.exitCode !== undefined;
 const OPEN = '<!-- pelizzai:contract -->';
 const CLOSE = '<!-- /pelizzai:contract -->';
 const BLOCK = [OPEN, 'NEW BODY', CLOSE].join('\n');
@@ -981,12 +988,16 @@ ok('#17 drops the stale body', !repaired.content.includes('OLD BODY'));
 ok('#17 leaves exactly one well-formed block', shape(repaired.content).blocks === 1);
 ok('#17 leaves no orphan marker', shape(repaired.content).orphans === 0);
 ok('#17 reports the repair', Boolean(repaired.note) && /orphan/i.test(repaired.note));
-ok('#17 never reports unchanged', repaired.action !== 'unchanged');
+// The EXACT action is the contract: 'resynced' also satisfies !== 'unchanged' and would hide the
+// repair in the line writeContract prints — the operator would never learn content was rescued.
+ok('#17 reports the repaired action', repaired.action === 'repaired');
+ok('import does not run the CLI', !importRanTheCli);
 
 // #21 — a correct block followed by a stale one is NOT 'unchanged'.
 const duplicated = [BLOCK, '', OPEN, 'STALE BODY', CLOSE].join('\n');
 const collapsed = upsertContract(duplicated, BLOCK);
 ok('#21 refuses to call duplicates unchanged', collapsed.action !== 'unchanged');
+ok('#21 reports the repaired action', collapsed.action === 'repaired');
 ok('#21 removes the duplicate', !collapsed.content.includes('STALE BODY'));
 ok('#21 leaves exactly one block', shape(collapsed.content).blocks === 1);
 ok('#21 reports the removal', Boolean(collapsed.note) && /duplicate/i.test(collapsed.note));
@@ -1017,7 +1028,10 @@ console.log('contract-shape behavior OK');
     Check ($skipOut -match 'cannot be combined with --skip-entrypoints') 'sync names why the check cannot skip the entrypoints'
     Check-Match 'scripts/sync-harness.mjs' "anchorEntrypoints \? \[\] : \['--internal-staging'\]" 'dist staging uses the internal flag, not the user-facing skip'
     Check-Match 'scripts/sync-harness.mjs' 'export \{ scanContractRegions, extractContract, upsertContract \}' 'sync exports the contract-shape helpers so the suite can exercise them'
-    Check-Match 'scripts/sync-harness.mjs' 'importing the module must have no side effects' 'sync only runs the CLI when invoked directly'
+    # The "import has no side effects" contract is proved INSIDE the node fixture above (it imports
+    # the module and asserts the CLI did not run); here only the symlink hardening is pinned, since
+    # a plain resolve() comparison makes a symlinked invocation exit 0 having synced nothing.
+    Check-Match 'scripts/sync-harness.mjs' 'canonicalPath\(process\.argv\[1\]\) === canonicalPath\(fileURLToPath' 'sync compares realpaths to detect direct invocation (symlink-safe)'
     Check-Match 'scripts/sync-harness.mjs' 'malformed contract shape' 'check reports a malformed shape distinctly from a stale block'
 
     # Real consumer export: Cursor adapter included; sentinel and contract suite excluded.
