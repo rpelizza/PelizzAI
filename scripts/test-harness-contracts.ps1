@@ -944,6 +944,116 @@ try {
     Run-Native { node --check scripts/sync-harness.mjs } 'node parse portable sync'
     Run-Native { node --check scripts/install-hooks.mjs } 'node parse hook installer'
 
+    # =====================================================================
+    # Issues #17 / #21 / #19 (2026-08-16) — the sync IS the delivery tool, so
+    # its defects land in every consumer at once. Exercised on the REAL
+    # exported functions, against the REAL failure shapes: these three
+    # destroy or hide consumer content, and no prose assertion can catch a
+    # regression in them.
+    #  #17 orphan OPEN + a real block below → the old indexOf pair made
+    #      `start` the orphan and `end` the real CLOSE, and the "resync"
+    #      swallowed every byte in between, project content included, silently;
+    #  #21 two well-formed blocks → the scan stopped at the first, answered
+    #      `unchanged`, and shipped two managed contracts behind a green check;
+    #  #19 `--check --skip-entrypoints` returned OK without verifying the very
+    #      thing the check exists to prove.
+    # =====================================================================
+    $syncTest = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-sync-shape-{0}.mjs" -f [guid]::NewGuid().ToString('N'))
+    # The path is handed to Node as an ARGUMENT and converted with Node's own pathToFileURL —
+    # never interpolated into an import specifier. Hand-built 'file:///' + path breaks on
+    # `C:\Users\João Silva\repo` (no percent-encoding) and yields `file:////home/...` on POSIX;
+    # and [System.Uri] is no fix either — on Linux a leading-slash path builds a RELATIVE Uri whose
+    # .AbsoluteUri throws, so the specifier silently interpolates as empty. Node's API is the only
+    # one that is correct on all three OSes, and it is the one that owns the conversion anyway.
+    $syncModulePath = (Join-Path $root 'scripts/sync-harness.mjs')
+    @"
+import { pathToFileURL } from 'node:url';
+const { scanContractRegions, extractContract, upsertContract } = await import(
+  pathToFileURL(process.argv[2]).href
+);
+// Importing must NOT run the CLI: if the direct-invocation guard regressed, generate() would have
+// executed here, with no arguments, and set process.exitCode before this line. Asserting on the
+// guard's COMMENT would keep passing with the guard deleted.
+const importRanTheCli = process.exitCode !== undefined;
+const OPEN = '<!-- pelizzai:contract -->';
+const CLOSE = '<!-- /pelizzai:contract -->';
+const BLOCK = [OPEN, 'NEW BODY', CLOSE].join('\n');
+const failures = [];
+const ok = (name, condition) => { if (!condition) failures.push(name); };
+const shape = (text) => {
+  const regions = scanContractRegions(text);
+  return { blocks: regions.filter((r) => !r.orphan).length, orphans: regions.filter((r) => r.orphan).length };
+};
+
+// #17 — orphan OPEN above a real block: project content in between must SURVIVE.
+const orphaned = [OPEN, 'PROJECT CONTENT MUST SURVIVE', OPEN, 'OLD BODY', CLOSE].join('\n');
+const repaired = upsertContract(orphaned, BLOCK);
+ok('#17 keeps project content', repaired.content.includes('PROJECT CONTENT MUST SURVIVE'));
+ok('#17 installs the new block', repaired.content.includes('NEW BODY'));
+ok('#17 drops the stale body', !repaired.content.includes('OLD BODY'));
+ok('#17 leaves exactly one well-formed block', shape(repaired.content).blocks === 1);
+ok('#17 leaves no orphan marker', shape(repaired.content).orphans === 0);
+ok('#17 reports the repair', Boolean(repaired.note) && /orphan/i.test(repaired.note));
+// The EXACT action is the contract: 'resynced' also satisfies !== 'unchanged' and would hide the
+// repair in the line writeContract prints — the operator would never learn content was rescued.
+ok('#17 reports the repaired action', repaired.action === 'repaired');
+ok('import does not run the CLI', !importRanTheCli);
+
+// #21 — a correct block followed by a stale one is NOT 'unchanged'.
+const duplicated = [BLOCK, '', OPEN, 'STALE BODY', CLOSE].join('\n');
+const collapsed = upsertContract(duplicated, BLOCK);
+ok('#21 refuses to call duplicates unchanged', collapsed.action !== 'unchanged');
+ok('#21 reports the repaired action', collapsed.action === 'repaired');
+ok('#21 removes the duplicate', !collapsed.content.includes('STALE BODY'));
+ok('#21 leaves exactly one block', shape(collapsed.content).blocks === 1);
+ok('#21 reports the removal', Boolean(collapsed.note) && /duplicate/i.test(collapsed.note));
+ok('#21 malformed shape does not resolve to a block', extractContract(duplicated) === null);
+ok('#17 malformed shape does not resolve to a block', extractContract(orphaned) === null);
+
+// Orphan CLOSE — the mirror of #17. Scanning only for OPEN would leave harness syntax loose in the
+// project's content and let the check approve it; a later OPEN above it would pair with THAT close.
+for (const [label, strayed] of [
+  ['before', [CLOSE, 'PROJECT LINE', BLOCK].join('\n')],
+  ['after', [BLOCK, 'PROJECT LINE', CLOSE].join('\n')],
+]) {
+  ok('orphan CLOSE ' + label + ' is seen as malformed', extractContract(strayed) === null);
+  const fixed = upsertContract(strayed, BLOCK);
+  ok('orphan CLOSE ' + label + ' is repaired', fixed.action === 'repaired');
+  ok('orphan CLOSE ' + label + ' keeps project content', fixed.content.includes('PROJECT LINE'));
+  ok('orphan CLOSE ' + label + ' leaves no orphan', shape(fixed.content).orphans === 0);
+  ok('orphan CLOSE ' + label + ' leaves one block', shape(fixed.content).blocks === 1);
+}
+
+// The healthy paths must keep behaving: identical stays untouched, drifted resyncs in place.
+const healthy = ['# Project', '', BLOCK, '', 'PROJECT TAIL'].join('\n');
+ok('healthy file is unchanged', upsertContract(healthy, BLOCK).action === 'unchanged');
+const drifted = healthy.replace('NEW BODY', 'OLD BODY');
+const resynced = upsertContract(drifted, BLOCK);
+ok('drifted block resyncs', resynced.action === 'resynced');
+ok('resync keeps the project tail', resynced.content.includes('PROJECT TAIL'));
+ok('resync keeps the project head', resynced.content.startsWith('# Project'));
+
+if (failures.length) { console.error('SHAPE FAILURES: ' + failures.join(' | ')); process.exit(1); }
+console.log('contract-shape behavior OK');
+"@ | Set-Content -LiteralPath $syncTest -Encoding utf8
+    try {
+        Run-Native { node $syncTest $syncModulePath } 'sync-harness: contract-shape behavior (orphan #17, duplicate #21, healthy paths)'
+    } finally {
+        Remove-Item -LiteralPath $syncTest -Force -ErrorAction SilentlyContinue
+    }
+
+    # #19 — the check must REFUSE to skip the entrypoints; --internal-staging is the dist exception.
+    $skipOut = (& node (Join-Path $root 'scripts/sync-harness.mjs') --check --skip-entrypoints 2>&1 | Out-String)
+    Check ($LASTEXITCODE -ne 0) 'sync --check --skip-entrypoints fails instead of reporting a green that verified nothing' "exit $LASTEXITCODE"
+    Check ($skipOut -match 'cannot be combined with --skip-entrypoints') 'sync names why the check cannot skip the entrypoints'
+    Check-Match 'scripts/sync-harness.mjs' "anchorEntrypoints \? \[\] : \['--internal-staging'\]" 'dist staging uses the internal flag, not the user-facing skip'
+    Check-Match 'scripts/sync-harness.mjs' 'export \{ scanContractRegions, extractContract, upsertContract \}' 'sync exports the contract-shape helpers so the suite can exercise them'
+    # The "import has no side effects" contract is proved INSIDE the node fixture above (it imports
+    # the module and asserts the CLI did not run); here only the symlink hardening is pinned, since
+    # a plain resolve() comparison makes a symlinked invocation exit 0 having synced nothing.
+    Check-Match 'scripts/sync-harness.mjs' 'canonicalPath\(process\.argv\[1\]\) === canonicalPath\(fileURLToPath' 'sync compares realpaths to detect direct invocation (symlink-safe)'
+    Check-Match 'scripts/sync-harness.mjs' 'malformed contract shape' 'check reports a malformed shape distinctly from a stale block'
+
     # Real consumer export: Cursor adapter included; sentinel and contract suite excluded.
     Check-Match 'scripts/sync-harness.mjs' "join\(root, '\.cursor', 'rules', 'pelizzai\.mdc'\)" 'portable export copies the Cursor adapter'
     Check-Match 'README.md' 'the `--export-consumer`\s+copies it' 'README: Cursor adapter is distributed by the export'
@@ -964,6 +1074,31 @@ try {
         Check (Test-Path (Join-Path $exportTemp 'GEMINI.md')) 'export generates GEMINI.md in the consumer'
         $exportClaude = Get-Content -LiteralPath (Join-Path $exportTemp 'CLAUDE.md') -Raw -Encoding utf8
         Check ($exportClaude -match 'This repository consumes PelizzAI') 'consumer CLAUDE.md is the bridge, not the source repo version'
+
+        # --check on the REAL exported consumer, against each malformed shape. Asserting that the
+        # message exists in the source only proves the string was typed; this proves check() FAILS
+        # and that the sync then repairs WITHOUT losing the project's own line (issues #17/#21).
+        $exportSync = Join-Path $exportTemp 'scripts/sync-harness.mjs'
+        $exportClaudeMd = Join-Path $exportTemp 'CLAUDE.md'
+        $pristine = $exportClaude
+        $cOpen = '<!-- pelizzai:contract -->'
+        $cClose = '<!-- /pelizzai:contract -->'
+        foreach ($case in @(
+            @{ Name = 'orphan OPEN'; Text = "$cOpen`nPROJECT LINE KEPT`n$pristine" },
+            @{ Name = 'orphan CLOSE'; Text = "$cClose`nPROJECT LINE KEPT`n$pristine" },
+            @{ Name = 'duplicate block'; Text = "$pristine`n`nPROJECT LINE KEPT`n$cOpen`nSTALE`n$cClose`n" }
+        )) {
+            Set-Content -LiteralPath $exportClaudeMd -Value $case.Text -NoNewline -Encoding utf8
+            $malformedOut = (& node $exportSync --check 2>&1 | Out-String)
+            Check ($LASTEXITCODE -ne 0) "consumer --check FAILS on a $($case.Name)" "exit $LASTEXITCODE"
+            Check ($malformedOut -match 'malformed contract shape') "consumer --check names the $($case.Name) as a malformed shape"
+            & node $exportSync 2>&1 | Out-Null
+            $healed = Get-Content -LiteralPath $exportClaudeMd -Raw -Encoding utf8
+            Check ($healed -match 'PROJECT LINE KEPT') "sync repairs the $($case.Name) WITHOUT losing project content"
+            & node $exportSync --check 2>&1 | Out-Null
+            Check ($LASTEXITCODE -eq 0) "consumer --check passes again after repairing the $($case.Name)" "exit $LASTEXITCODE"
+            Set-Content -LiteralPath $exportClaudeMd -Value $pristine -NoNewline -Encoding utf8
+        }
     } finally {
         if (Test-Path -LiteralPath $exportTemp) { Remove-Item -LiteralPath $exportTemp -Recurse -Force }
     }
