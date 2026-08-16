@@ -778,7 +778,7 @@ const invokedDirectly =
   Boolean(process.argv[1]) &&
   canonicalPath(process.argv[1]) === canonicalPath(fileURLToPath(import.meta.url));
 
-main();
+if (invokedDirectly) main();
 
 function main() {
 try {

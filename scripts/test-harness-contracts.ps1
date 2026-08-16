@@ -959,12 +959,18 @@ try {
     #      thing the check exists to prove.
     # =====================================================================
     $syncTest = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-sync-shape-{0}.mjs" -f [guid]::NewGuid().ToString('N'))
-    # [System.Uri] percent-encodes spaces/non-ASCII and emits the right number of slashes on all
-    # three OSes — hand-built 'file:///' + path breaks on `C:\Users\João Silva\repo` and produces
-    # `file:////home/...` on POSIX, failing the fixture for a reason that is not the contract.
-    $syncModuleUri = ([System.Uri](Join-Path $root 'scripts/sync-harness.mjs')).AbsoluteUri
+    # The path is handed to Node as an ARGUMENT and converted with Node's own pathToFileURL —
+    # never interpolated into an import specifier. Hand-built 'file:///' + path breaks on
+    # `C:\Users\João Silva\repo` (no percent-encoding) and yields `file:////home/...` on POSIX;
+    # and [System.Uri] is no fix either — on Linux a leading-slash path builds a RELATIVE Uri whose
+    # .AbsoluteUri throws, so the specifier silently interpolates as empty. Node's API is the only
+    # one that is correct on all three OSes, and it is the one that owns the conversion anyway.
+    $syncModulePath = (Join-Path $root 'scripts/sync-harness.mjs')
     @"
-import { scanContractRegions, extractContract, upsertContract } from '$syncModuleUri';
+import { pathToFileURL } from 'node:url';
+const { scanContractRegions, extractContract, upsertContract } = await import(
+  pathToFileURL(process.argv[2]).href
+);
 // Importing must NOT run the CLI: if the direct-invocation guard regressed, generate() would have
 // executed here, with no arguments, and set process.exitCode before this line. Asserting on the
 // guard's COMMENT would keep passing with the guard deleted.
@@ -1017,7 +1023,7 @@ if (failures.length) { console.error('SHAPE FAILURES: ' + failures.join(' | '));
 console.log('contract-shape behavior OK');
 "@ | Set-Content -LiteralPath $syncTest -Encoding utf8
     try {
-        Run-Native { node $syncTest } 'sync-harness: contract-shape behavior (orphan #17, duplicate #21, healthy paths)'
+        Run-Native { node $syncTest $syncModulePath } 'sync-harness: contract-shape behavior (orphan #17, duplicate #21, healthy paths)'
     } finally {
         Remove-Item -LiteralPath $syncTest -Force -ErrorAction SilentlyContinue
     }
