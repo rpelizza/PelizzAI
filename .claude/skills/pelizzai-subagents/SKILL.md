@@ -85,8 +85,8 @@ The handoff dir is gitignored in the consumer and temp in source mode (see task-
 ## Verification and integration
 
 A subagent's result is **not** truth until checked. For implementation, run it through the two
-`pelizzai-review` lenses under the recorded profile (`split` by default; `combined` only when the
-user ratified the downgrade at the setup gate). In `split`, the blindness is asymmetric: the
+`pelizzai-review` lenses in **two dispatches** — there is no profile to consult and no
+single-dispatch variant. The blindness is asymmetric: the
 **blind spec lens** receives only diff + spec/plan + the area's domain skills and does
 **NOT receive the report** of the subagent (it judges the code against the contract, without the
 narrative); the **quality/evidence lens** receives the report and verifies the claims with fresh

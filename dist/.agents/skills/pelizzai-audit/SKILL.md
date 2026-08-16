@@ -343,8 +343,8 @@ Before declaring the bootstrap done:
 [ ] the diff contains only approved artifacts;
 ```
 
-Review the whole diff in the `combined` profile (or `split` if hooks/settings/security raise the
-risk), commit the approved artifacts with exact paths, and only then run
+Review the whole diff through the two `pelizzai-review` lenses, in two dispatches like any other
+review, commit the approved artifacts with exact paths, and only then run
 `pelizzai-final-verification` against that HEAD. After recording `validated-head`,
 close the transaction via `pelizzai-finish`. Do not leave the bootstrap uncommitted or expect
 pelizzai-finish to consolidate it.

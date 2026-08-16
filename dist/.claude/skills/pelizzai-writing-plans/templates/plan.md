@@ -88,7 +88,8 @@ _If self-contained, write `none`._
 - Command(s): `[complete canonical commands]`
 - Expected evidence: [exit code, delta, visual state, or exact output]
 - Rollback: [when applicable; otherwise, `not applicable`]
-- Review profile: [split (default) | combined (only with a ratified downgrade)] — [justification by risk/surface]
+- Review depth: [what each of the two lenses should dig into, by risk/surface] — the two lenses in
+  two dispatches are invariable; only their depth is a plan decision
 
 - [ ] **Step 1: Establish the baseline/oracle** → verify: [exact result]
 
@@ -125,7 +126,7 @@ Adapt the order without losing the proof:
 - An executor with zero context on the repository completes each task without asking a single question.
 - Paths, interfaces, content, commands, and outputs are concrete.
 - Every step has `→ verify:`.
-- Each task records cross-cutting skills, implementation/validation strategy, and review profile.
+- Each task records cross-cutting skills, implementation/validation strategy, and review depth.
 - UI never omits `pelizzai-frontend`; Playwright/browser is a tool, not an overlay.
 - No artificial RED for refactoring, CSS, docs, config, IaC, or migration.
 - No TBD/TODO, "handle edge cases", "same as Task N", or undefined references.

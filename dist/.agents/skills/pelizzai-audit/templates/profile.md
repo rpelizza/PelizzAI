@@ -28,13 +28,12 @@ when there are mirrors, synced and verified; never assume `.claude/skills` in ev
 > At bootstrap they are all born `<unset>`: write the value **literally between `<>`**. Any value
 > between `<>` (the menu below, `<unset>`) reads as NOT ratified; the SessionStart hook recap
 > fires on ANY raw value outside `<...>` and `unset` — including `branch`, `inline`, or
-> `squash-final`. The hook reads only `isolation-default`, `execution-mode-default`, and
-> `commit-strategy-default`; `review-policy-default` stays out of the recap.
+> `squash-final`. The hook reads exactly these three fields. There is no review policy: the two
+> review lenses in two dispatches are invariable, so there is nothing for a project to pre-select.
 
 - isolation-default: <branch|worktree|unset>
 - execution-mode-default: <inline|subagents|team|unset>
 - commit-strategy-default: <granular|squash-final|unset>
-- review-policy-default: <combined|split|unset>
 - Ratified on: <YYYY-MM-DD> | Overrides since then: <n>
 <!-- destination is not persistable: push/PR/publish require per-task confirmation -->
 

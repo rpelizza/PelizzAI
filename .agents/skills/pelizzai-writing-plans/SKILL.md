@@ -151,16 +151,12 @@ Fill in **Implementation and validation strategy**:
 Mixed tasks combine strategies. Do not fabricate RED for CSS, Markdown, or configuration just to
 make the plan uniform.
 
-Also record the **Review profile**. The default is `split`, even for bounded:
-
-- `split` (default): the normal case; mandatory for medium/high risk, sensitive surface, public
-  contract, data, migration, or multiple parts;
-- `combined`: an exception for bounded, low risk, and cohesive scope, with no security/data/
-  migration/public contract — and only after the user ratifies the downgrade at step 4 of the
-  setup gate.
-
-Both cover spec and quality; what changes is the number of dispatches, not the approval bar. Only
-`split` makes the spec lens truly blind, so the plan never recommends `combined` on its own.
+**The review is not a plan decision.** Every task and the final range go through the two lenses of
+`pelizzai-review` in two dispatches — blind spec first, then quality/evidence — in any lane,
+bounded included. The plan records no review profile because there is none to record: risk sets
+the **depth** of each lens, never the number of dispatches or the blindness. What the plan does owe
+the reviewer is the material each lens judges against — the requirement, the domain skills, and the
+evidence strategy per task.
 
 ## Document
 
@@ -175,7 +171,6 @@ files/interfaces
 domain skills + overlays
 dependencies/constraints
 implementation and validation strategy
-review profile
 sufficient steps and commands
 observable completion criterion and rollback when applicable
 ```
@@ -255,7 +250,8 @@ and keep it local unless an external destination is requested.
 - Skipping stress and plan approval to start implementing.
 - Duplicating in the plan all the code execution should write.
 - Omitting a detectable frontend/security overlay.
-- Universal TDD — or recording `combined` as the profile without the user having ratified the downgrade.
+- Universal TDD — or writing a review profile/downgrade into the plan: the two lenses in two
+  dispatches are invariable, and the plan has no say over them.
 - Team/worktree out of harness preference, without concrete gain.
 - Using Context7 to decide requirements or acceptance criteria.
 - A giant plan covering subsystems that should be separate tasks/projects.

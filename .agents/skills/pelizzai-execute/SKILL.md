@@ -79,21 +79,22 @@ profile — push/PR/publication are decided per task in `pelizzai-finish`.
    Options: granular · squash-final.
    Recommended: granular — preserves checkpoints; squash-final only if you ask for it.
    Question: which strategy do you choose?
-
-4. Review (only after 3)
-   Options: split · combined.
-   Recommended: split — it is the default, even for a bounded task: only with two dispatches is
-   the spec lens truly blind. Downgrading to combined requires a bounded/low-risk task AND
-   your choice here.
-   Question: confirm split, or do you prefer combined?
 ```
 
 Rules: the mode keeps **the three options always visible** — **team is never omitted**. There is
 no universal ranking. **Squash-final only on explicit user request**. The plan's content (the
 WHAT) was already approved at the previous edge; this gate ratifies the HOW without hiding
 several decisions behind a single "ok". Silence and recommendation do not count as an answer. Do
-not write code, move a worktree, squash, or record final decisions until steps 0–4 are complete.
+not write code, move a worktree, squash, or record final decisions until steps 0–3 are complete.
 Branch base and name were already ratified before the spec/plan by `pelizzai-starting-branch`.
+
+**The review is deliberately NOT a gate item.** It is not asked because it has no alternative to
+offer: every task **and** the final candidate go through the two lenses of `pelizzai-review` in
+**two dispatches**, and the blindness of the spec lens is not negotiable — there is no profile to
+pick and no downgrade to ratify. A gate item whose only valid answer is the recommendation is not
+ratification, it is ritual; and ritual teaches the user to answer gates on autopilot, which
+corrodes exactly the attention items 0–3 need. This omission does not widen the harness's
+autonomy: it removes a question that never had two answers.
 
 Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce route analyses or open
 gates: apply the briefing and escalate to the coordinator whatever requires a decision.
@@ -107,7 +108,7 @@ does not change the profile; changing the policy requires separate confirmation 
 In source mode, use the native execution record as the task's memory, never as inherited
 authorization.
 
-**Applying the isolation — invoke `pelizzai-starting-branch` (POST-ratification).** Only after the four answers:
+**Applying the isolation — invoke `pelizzai-starting-branch` (POST-ratification).** Only after the three answers:
 branch checkpoints the persistent setup when it exists and keeps the current branch; worktree
 captures `checkpoint-sha` after the optional checkpoint, frees the branch in the main working
 tree, adds the worktree with the **existing branch**, and records the new path before Task 1.
@@ -242,7 +243,7 @@ flowchart TD
     DOM --> PRE[Pre-flight: sweep plan for contradictions]
     PRE --> CY[Adaptive cycle per task\nref: task-cycle.md]
     CY --> T[Implement with per-artifact strategy\n+ domain + overlays]
-    T --> RV[Proportional review\ncombined or split]
+    T --> RV[Two-lens review in two dispatches\nblind spec, then quality/evidence]
     RV --> Q{Approved by both?}
     Q -- No --> FX[Fix and re-review\ncircuit breaker: 3 cycles/stage]
     FX --> RV
@@ -278,13 +279,12 @@ clean, proceed.
 
 ## Per-task cycle
 
-The detailed protocol — self-sufficient briefing, per-artifact strategy, proportional review
-with two lenses, circuit breaker, and commit as a gate — lives in
+The detailed protocol — self-sufficient briefing, per-artifact strategy, the two-lens review,
+circuit breaker, and commit as a gate — lives in
 **[references/task-cycle.md](references/task-cycle.md)**. Summary:
 
 ```text
-1. Briefing: PASTE the full text + domain skills + overlays + the evidence strategy and review
-   profile (`split` by default; `combined` only if ratified)
+1. Briefing: PASTE the full text + domain skills + overlays + the evidence strategy
    (the member never reads the whole plan file; use scripts/task-brief.* only when a compatible
    persistent Markdown plan exists. A native plan uses a pasted/constructed brief — see §1,
    including
@@ -298,10 +298,10 @@ with two lenses, circuit breaker, and commit as a gate — lives in
    choose requirements, UX, architecture, data, security, or acceptance. The coordinator does not
    decide for them or by itself either: it consolidates the gaps and takes them to the human via
    `pelizzai-interview` in gap mode before the front continues.
-3. Review with two lenses: (a) conformance to the spec; (b) quality + FRESH evidence.
-   `split` — the default, even for a bounded task — uses sequential stages and is where the
-   blindness actually exists; `combined` applies both in one dispatch/report and is only valid
-   for a bounded/low-risk task whose profile the user ratified at step 4 of the gate.
+3. Review with two lenses in TWO dispatches, always — including a bounded task: (a) conformance
+   to the spec, BLIND (no implementer report), which approves before (b) quality + FRESH evidence
+   is dispatched. Two dispatches are where the blindness actually exists; a single pass would
+   turn it into mere reading order.
 4. Failed? Fix (re-dispatching to the implementer — do not fix by hand, it pollutes the context)
    and RE-REVIEW under the same lens. Circuit breaker: 3 cycles per lens per task; the same
    issue twice escalates on the 2nd; a structural rejection escalates immediately; on overflow →
@@ -324,7 +324,7 @@ and commit are serialized by the coordinator in every case.
 
 ## Subagents mode
 
-Use `pelizzai-subagents`. One **fresh subagent per task**, dispatched by the coordinator, with isolated context. The coordinator routes, applies the review profile, and consolidates. Continuous execution between tasks; no per-task pause.
+Use `pelizzai-subagents`. One **fresh subagent per task**, dispatched by the coordinator, with isolated context. The coordinator routes, dispatches the two review lenses, and consolidates. Continuous execution between tasks; no per-task pause.
 
 ## Inline mode
 
@@ -540,14 +540,14 @@ After this step, `git status --porcelain` must be empty and `validated-head` rem
 
 ```text
 1. Capture candidate-head = `git rev-parse HEAD`.
-2. FINAL REVIEW via pelizzai-review on the exact range `base-sha..candidate-head`. Use an
-   independent reviewer, at the session's model — never a smaller one — and the
-   highest effort the platform allows (see task-cycle §8).
-   Narrow exception: a single `bounded` task, `read-only`/`write-local` effect, low risk,
-   ratified `combined` profile, zero findings, and no later mutation may reuse the task's review
-   if `reviewed-tree == candidate-head^{tree}`. Missing any item — `write-shared` effect,
-   medium/high risk, sensitive surface, or `split` profile (the default) — requires a normal
-   review (see `pelizzai-review` → "Final branch review"). Critical/Important block.
+2. FINAL REVIEW via pelizzai-review on the exact range `base-sha..candidate-head`, in the SAME
+   two dispatches as a task: the blind spec lens over the whole range (diff + spec/plan +
+   domain skills, no delivery narrative) approves first, then the quality/evidence lens. Use
+   independent reviewers, at the session's model — never a smaller one — and the
+   highest effort the platform allows (see task-cycle §8). There is NO reuse of a task's review as the final
+   review, and no bounded/low-risk exception: the range is a different object from any single
+   task, and the last filter before the seal is the one place the blindness is worth the most
+   (see `pelizzai-review` → "Final branch review"). Critical/Important block.
 3. Run, by the coordinator itself, all applicable checks of the profile (test/lint/build/render/
    dry-run/visual etc.), from scratch, with output and exit code. Do not invent a suite for a
    static artifact.
