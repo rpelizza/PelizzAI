@@ -1,6 +1,6 @@
 # Code reviewer prompt template
 
-Use this template when dispatching a reviewer subagent (or inline). The reviewer receives **fabricated context** — never the session history.
+Use this template when dispatching the quality/evidence reviewer — always its own dispatch, per task and on the delivery's final range. The reviewer receives **fabricated context** — never the session history.
 
 ````text
 You are a Senior Code Reviewer with command of software architecture, design

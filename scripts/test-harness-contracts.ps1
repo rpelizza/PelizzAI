@@ -537,6 +537,76 @@ try {
     Check-NotMatch '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'recorded profile' 'plan template: task advancement is not gated on a recorded profile'
     Check-NotMatch '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'commits, and review one question' 'plan template: forwarding no longer sends the review to the gate'
     Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'review is \*\*not\*\* among them' 'plan template: forwarding states the review is not a gate question'
+    # The reference/ TEMPLATES were the blind spot of #25: the doctrine sections were rewritten and
+    # the prompt templates kept the old vocabulary (code-reviewer.md said "or inline"). Lock them too.
+    Check-NotMatch '.claude/skills/pelizzai-review/references/code-reviewer.md' 'or inline|combined' 'code-reviewer template: no inline/combined path survives'
+    Check-NotMatch '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'combined|recommended default' 'spec-reviewer template: no profile vocabulary survives'
+
+    # =====================================================================
+    # Issue #26 (2026-08-16) — the harness assumed an independent reviewer
+    # was always dispatchable. It is not: platforms without a subagent tool,
+    # session instructions forbidding it, quota ceilings, headless runs.
+    # #25 made this concrete by removing `combined`, the last sanctioned path
+    # where the coordinator reviewed by itself. Two halves:
+    # (1) the `inline` MODE is not "without subagents" — it removes the
+    #     delegation of the IMPLEMENTATION and never the review's two
+    #     dispatches. The name invites the opposite reading, so the gate now
+    #     says it out loud instead of assuming it is known;
+    # (2) when the capability genuinely does not exist, there is a DECLARED
+    #     degradation path — authorize / accept a declared non-blind review /
+    #     defer — detected at the edge, never mid-task. Self-dispatch as the
+    #     blind lens stays forbidden: what is lost is the blindness, and it
+    #     has to be visible, which is what review-integrity carries.
+    # =====================================================================
+
+    # -- The gate says the mode does not govern the review (root of the confusion) --
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'the mode decides who IMPLEMENTS' 'gate step 2: the mode decides who implements, not who reviews'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'TWO INDEPENDENT\s+DISPATCHES' 'gate step 2: names the two independent dispatches of the review'
+    # Literal punctuation, not wildcards: the contract is the exact token (`inline`, "blind"), and a
+    # `.` here would let XinlineX satisfy the assertion. Backtick and quote are literal inside '...'.
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' '`inline` means "no delegation\s+to implement", never "no subagents at all"' 'gate step 2: defines inline against the wrong reading'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Check this for the REVIEWER specifically' 'gate step 2: the capability is checked for the reviewer, not inferred from the mode'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'cannot dispatch an independent reviewer, say so\s+HERE, in the conversation''s language' 'gate step 2: the collision is exposed at the gate, in the conversation language'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Inline is not "without subagents"' 'inline mode section: inline is not "without subagents"'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'delegating \*\*the implementation\*\*' 'mode table: the inline criterion is about delegating the implementation'
+
+    # -- The declared degradation path exists, with the three options and the floor --
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' '## When there is no independent reviewer' 'review has the no-independent-reviewer section'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Detect and declare at the EDGE, not mid-task' 'review: the capability is detected at the edge'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'authorize the independent reviewer[\s\S]{0,600}accept a DECLARED non-blind review[\s\S]{0,400}defer the integration' 'review: the degradation offers the three named options'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'does NOT dispatch itself as "the blind spec lens"' 'review: self-dispatch as the blind lens stays forbidden under degradation'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Silence is not an option' 'review: undeclared degradation is named as the defect'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'IN THE CONVERSATION''S LANGUAGE' 'review: the degradation message follows the conversation language'
+    # The evidence bar does not move under degradation: pasted output is never proof, and the
+    # coordinator that implemented must RE-RUN the checks (weaker than independent — that is the point).
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'proof still requires a FRESH RUN' 'review: degraded evidence still requires a fresh run'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Output pasted by whoever\s+implemented is NEVER evidence' 'review: the implementer output is never evidence, degraded included'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'review-integrity: degraded <YYYY-MM-DD>' 'review: the record instruction carries the date'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Discovering only at review time' 'review: anti-pattern of discovering the missing capability late'
+
+    # -- The exception is RATIFIABLE, never self-granted: an escape hatch from an absolute rule that
+    # the agent could take on its own would not be a degradation path, it would be the loophole. --
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'ONLY exception in the whole harness[\s\S]{0,80}not yours to take' 'review: the degradation is the only exception AND is not the agents to take'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'requires the user''s EXPLICIT choice' 'review: option (b) requires the explicit choice of the user'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'the recommendation is not an answer, silence is not an\s+answer' 'review: recommendation and silence do not ratify the degradation'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Without an explicit choice the route is\s+\*\*\(c\)\*\*' 'review: with no answer, the route is defer, never the non-blind review'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'With nobody to ask, \(b\) does not exist' 'review: headless/cron/CI cannot grant itself the exception'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'never grants itself the exception on the grounds that no one was\s+around to deny it' 'review: absence of a human is not authorization'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'does NOT advance to item 3 until the user has chosen' 'gate step 2: the gate blocks until the degradation is ratified'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'a non-blind review is never self-granted' 'gate step 2: the non-blind review is never self-granted'
+
+    # -- The marker travels: template, record, resumption, and the seal --
+    # The marker's SHAPE is the contract, not the token: without date and reason it degrades into an
+    # unauditable flag — you would know something was degraded, never when or why.
+    Check-Match '.claude/skills/pelizzai-execute/templates/state.md' 'review-integrity: <blind \| degraded YYYY-MM-DD — reason>' 'state.md: the marker documents date AND reason, not just the token'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'review-integrity: degraded <YYYY-MM-DD> — <reason>' 'execution-plans: the record instruction demands date and reason'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Read it back on resumption' 'execution-plans: the degradation marker is read back on resumption'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Absent the field, assume `blind`, never the reverse' 'execution-plans: the absent marker never means degraded'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'says so at the seal' 'review: a delivery with degraded tasks discloses it at the seal'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'List them at the seal, by name' 'review: the degraded tasks are named at the seal, not summarized'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'do not\s+become blind retroactively' 'review: a degraded task is not laundered by the final review'
+    Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'capability is LOST mid-run' 'subagents: losing the capability mid-run routes to the degradation path'
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'does not silently collapse into the coordinator' 'team: losing the capability mid-run does not collapse into the coordinator'
 
     # -- D7: thread of the proactive domain skills gate — three capture points + audit names who invokes it --
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'stack domain skills \(proposed at the design edge\)' 'router (D7.1): kickoff lists the stack domain skills in Artifacts'
