@@ -8,8 +8,8 @@ description: Executes an approved plan task by task, choosing proportional proof
 ## Goal
 
 Execute an approved plan with **per-task discipline**: each task gets the test/validation
-strategy suited to its artifact, passes the spec + quality lenses under the proportional review
-profile, and only then is
+strategy suited to its artifact, passes the blind spec and quality/evidence lenses in their two
+dispatches, and only then is
 consolidated. At the end, overlays that may write run before the content is sealed by
 review, suite, and checklist. The skill keeps resumable state and prevents integrating content
 different from what was validated.

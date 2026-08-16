@@ -107,7 +107,7 @@ non-obvious call; otherwise, name the interface, the invariant, and one short ex
 Run: `[exact command]`
 Expected: `[observable result]`
 
-- [ ] **Step 4: Ready for review → consolidate** — do not commit mid-task; the commit is the coordinator's gate after the spec ✅ + quality ✅ lenses in the recorded profile. → verify: `git status` contains only this task's scope
+- [ ] **Step 4: Ready for review → consolidate** — do not commit mid-task; the commit is the coordinator's gate after the blind spec ✅ + quality/evidence ✅ lenses, in their two dispatches. → verify: `git status` contains only this task's scope
 ````
 
 Adapt the order without losing the proof:
@@ -137,4 +137,5 @@ Adapt the order without losing the proof:
 
 Plan materialized, stress-tested, and approved → **forward to the sequential post-plan setup gate**
 of `pelizzai-execute`. The plan carries recommendations; the user decides isolation,
-branch, mode, commits, and review one question at a time before Task 1.
+branch, mode, and commits one question at a time before Task 1. The review is **not** among them —
+the two lenses in two dispatches are fixed, so there is no question to ask.

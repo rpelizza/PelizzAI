@@ -190,10 +190,6 @@ Never ignore an escalation nor re-dispatch without changing anything.
 - Only after spec ✅ and quality ✅ (with fixes applied) does the COORDINATOR consolidate.
 - The coordinator stages the task's exact paths and, in the consumer, the state; inspects
   `git diff --cached` and never uses `git add -A`.
-- To allow safe reuse of the review in a single-task bounded delivery, require that no
-  unstaged/untracked content of the task remains, capture `reviewed-tree = git write-tree` before
-  the commit, and compare it afterward with `git rev-parse HEAD^{tree}`. Divergence invalidates
-  the reuse.
 - Granular: one DEFINITIVE commit per task. In the consumer, the cursor touch goes into the SAME
   commit; in source mode, the native execution record advances with no file. History is kept.
 - Squash-final: one WORK commit per task (`wip(<slug>): <task>`) — never accumulate the entire

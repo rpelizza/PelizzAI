@@ -529,6 +529,15 @@ try {
     Check-Match 'CLAUDE.md' 'review is NOT among them' 'CLAUDE.md: the review is not a ratified structural decision'
     Check-Match 'README.md' 'The review is\s+not asked' 'README: the gate does not ask about the review'
 
+    # -- Negative checks for the legacy vocabulary: a leftover sentence re-teaches the removed
+    # contract even when the doctrine sections are correct, and a generated plan carrying one of
+    # these would reopen the very question this change removed.
+    Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'proportional review\s+profile' 'execution-plans: the Goal no longer names a review profile'
+    Check-NotMatch '.claude/skills/pelizzai-execute/references/task-cycle.md' 'reuse of the review|reviewed-tree' 'task-cycle: the reviewed-tree bookkeeping that served the reuse exception is gone'
+    Check-NotMatch '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'recorded profile' 'plan template: task advancement is not gated on a recorded profile'
+    Check-NotMatch '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'commits, and review one question' 'plan template: forwarding no longer sends the review to the gate'
+    Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'review is \*\*not\*\* among them' 'plan template: forwarding states the review is not a gate question'
+
     # -- D7: thread of the proactive domain skills gate — three capture points + audit names who invokes it --
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'stack domain skills \(proposed at the design edge\)' 'router (D7.1): kickoff lists the stack domain skills in Artifacts'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'proactive[\s\S]{0,4}domain skills gate' 'router points to the proactive gate at the design→plan edge'
