@@ -186,9 +186,11 @@ not just the overlays. Recompute overlays from the real diff: UI includes
 include `pelizzai-documentation`. Persisting names in `overlays:` does not replace pasting
 their gates into the briefing.
 
-**The Active rules travel in the package too.** Before Task 1, read the **Active rules** of
-`pelizzai/data/learnings.md` (the short section only — the Incident log is consulted on demand,
-not loaded here) and paste them into the briefing of EVERY task, exactly like the domain skills.
+**The Active rules travel in the package too — CONSUMER ONLY.** Before Task 1, in a consumer,
+read the **Active rules** of `pelizzai/data/learnings.md` (the short section only — the Incident
+log is consulted on demand, not loaded here) and paste them into the briefing of EVERY task,
+exactly like the domain skills. **In source mode there is no consumer runtime to read**: use the
+source repo's own rules/skills and do not create `pelizzai/` to satisfy this step.
 Reading them yourself is not enough: in subagents/team the implementer is another agent with an
 isolated context, and a rule the coordinator read but did not paste never reaches the code. These
 are the rules this project already paid to learn — most of them are about **how you prove

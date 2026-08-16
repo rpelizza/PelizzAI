@@ -147,8 +147,10 @@ consumes.
 - Promoting a learning on its first occurrence — or leaving a second occurrence unpromoted
   because nobody claimed the edit.
 - A Baseline row appended for a surface that already had one.
-- learnings.md past either budget with nothing retired — or the Incident log eating the Active
-  rules' space (they have SEPARATE ceilings; a full log is never a reason to retire a rule).
+- learnings.md **at or past** either budget with nothing retired or archived — the ceilings are
+  hard, so touching 40/160 already engages the valve; waiting to exceed them means the next
+  promotion has nowhere to land. Each section reacts on its OWN ceiling (a full log is never a
+  reason to retire a rule; a full rules section is never a reason to archive the log).
 - Declaring a reader of the Active rules that does not actually read them. A false declaration is
   worse than an absent one: whoever audits the harness assumes a coverage that is not there.
 - Writing a `scope:` in prose instead of paths/globs — or building a mechanism that loads only

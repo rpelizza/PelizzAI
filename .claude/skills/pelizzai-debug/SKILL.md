@@ -126,7 +126,8 @@ recommendation. If the conversation reveals a structural or design problem, esca
 Before any mutation in the repository — test, instrumentation, or fix — use
 `pelizzai-starting-branch`. In a consumer, load the applicable skills from
 `pelizzai/domain-skills.md`; in source mode, use the source repo's own rules/skills.
-**Re-read the Active rules here, against the PROOF you are about to write.** Most learnings are
+**In a consumer, re-read the Active rules here, against the PROOF you are about to write** (source
+mode: the source repo's own rules/skills; never create `pelizzai/` for this). Most learnings are
 about how you know something works, not about the fix itself — a test that passes on the defect's
 own scenario before the fix exists is the classic shape, and it is the one this second reading
 catches. Reading them at Step 1 oriented the diagnosis; reading them now protects the evidence. Revert

@@ -350,8 +350,11 @@ is propose-and-confirm and coordinator action; a team member only flags the gap 
   defect, check `pelizzai/data/learnings.md`: the incident entry should already be there (written
   at root-cause confirmation, inside the fix's commit) — missing, flag it; and when the same root
   cause appears 2–3 times, offer ONCE the promotion via `pelizzai-evolve` (ratified by the user,
-  never automatic). Check the budgets **per section, never summed**: Active rules past 40 lines
-  or Incident log past 160 — plus `verification-standard.md` past 150. A full log is NOT a reason
+  never automatic). Check the budgets **per section, never summed**, and **at or past** the
+  ceiling — they are hard, so reaching 40/160 already needs the valve: Active rules at or past 40
+  lines (flag it), Incident log at or past 160 (route the oldest entries to
+  `pelizzai/data/history/learnings-<YYYY>.md`) — plus `verification-standard.md` at or past 150.
+  A full log is NOT a reason
   to retire a rule: the ceilings are separate precisely so the history cannot evict the
   prevention, and the log's valve is moving the oldest entries to
   `pelizzai/data/history/learnings-<YYYY>.md`. A start-of-task read over budget is a file nobody
