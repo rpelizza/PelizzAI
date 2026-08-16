@@ -1707,15 +1707,21 @@ try {
     # -- Every track reads the Active rules; the declaration matches reality --
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Active rules travel in the package too' 'execute reads the Active rules and propagates them'
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Reading them yourself is not enough' 'execute: reading without pasting does not reach the member'
-    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Active rules.* of `pelizzai/data/learnings\.md`, pasted' 'task briefing carries the Active rules'
+    # The briefing must carry the rules AND exclude the log: pasting the whole file into every task
+    # would blow the member's context with history and quietly undo the reason the budgets are split.
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Active rules\*\* of `pelizzai/data/learnings\.md`, pasted \(the short section; never the\s+Incident log\)' 'task briefing carries the Active rules and NEVER the incident log'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'paste them into the briefing of EVERY task' 'execute: the rules are pasted into every task briefing, not read once'
     # ORDER is the contract, not the mere presence of the sentence: the rules have to be read at step
     # 1.5, BEFORE step 2 changes code. One anchored regex locks step, content, and position at once —
     # a loose search would still pass with the read moved after the change, or demoted to a footnote.
     Check-Match '.claude/skills/pelizzai-quick-fix/SKILL.md' '1\.5\. Local rules[\s\S]{0,400}Active rules\*\* of\s+`pelizzai/data/learnings\.md`[\s\S]{0,200}the Incident log is not read here[\s\S]{0,1200}2\. Change' 'quick-fix: step 1.5 reads the Active rules (no incident log) BEFORE step 2 changes code'
     Check-Match '.claude/skills/pelizzai-quick-fix/SKILL.md' '"It is small" is not a reason to skip them' 'quick-fix: being small is not a waiver'
-    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'read the Active rules of `pelizzai/data/learnings\.md`' 'debug reads the Active rules on entering the investigation'
+    # Both debug reads are locked BY POSITION, not by phrase: a read that drifts out of Step 1 (after
+    # the hypotheses) or out of Step 4 (after the proof is written) is the same as no read at all.
+    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' '## Step 1 — classify[\s\S]{0,200}read the Active rules of `pelizzai/data/learnings\.md`[\s\S]{0,600}Read it BEFORE forming hypotheses[\s\S]{0,400}\| Class \|' 'debug: Step 1 reads the rules BEFORE the hypotheses and before the class table'
+    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'the Incident log is consulted on demand, not now' 'debug: Step 1 loads the rules WITHOUT the incident log'
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'what WRITES most of that\s+file' 'debug: the write-read loop is closed where it was open'
-    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'Re-read the Active rules here, against the PROOF' 'debug re-reads the rules against the proof it is about to write'
+    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' '## Step 4 — implement and prove[\s\S]{0,900}re-read the Active rules here, against the PROOF you are about to write' 'debug: the re-read lives in Step 4, against the proof about to be written'
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'OUTPUT of the investigation, not its input' 'debug: the file set is the investigation output (why not to filter/postpone)'
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'pelizzai-quick-fix` before the change' 'evolve: the readers table lists the tweak track'
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'Declaring a reader of the Active rules that does not actually read them' 'evolve: a false reader declaration is a red flag'
