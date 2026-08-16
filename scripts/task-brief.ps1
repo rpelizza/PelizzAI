@@ -94,6 +94,9 @@ if (Test-Path -LiteralPath $outDir) {
   if ($existing.Attributes -band [IO.FileAttributes]::ReparsePoint) {
     Fail "handoff dir is a reparse point (symlink/junction): $outDir"
   }
+  # A plain FILE where the directory belongs is not a divert, but it is not writable either — and
+  # failing here names the real problem instead of surfacing a confusing error further down.
+  if (-not $existing.PSIsContainer) { Fail "handoff dir is not a directory: $outDir" }
 } else {
   New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 }
@@ -103,6 +106,9 @@ if (Test-Path -LiteralPath $outPath) {
   if ($existingOut.Attributes -band [IO.FileAttributes]::ReparsePoint) {
     Fail "handoff file is a reparse point (symlink/junction): $outPath"
   }
+  # A DIRECTORY at the destination would make Move-Item drop the temp INSIDE it, and the script
+  # would still print $outPath — a path that holds no brief. Silent wrong answer, so: refuse.
+  if ($existingOut.PSIsContainer) { Fail "handoff file is a directory: $outPath" }
 }
 
 $now = Get-Date -Format 'yyyy-MM-dd HH:mm'
@@ -126,12 +132,28 @@ $reportPath = Join-Path $outDir "task-$TaskNumber-report.md"
 $content.Add("Report: write the result to ``$reportPath`` (mirroring this brief) and reply in chat in at most 15 lines.")
 
 # Atomic install, mirroring task-brief.sh's `mv -f`: write to a private temporary in the same
-# directory, then MOVE it into place. Set-Content writes straight to the destination, so a reader
-# that opens the brief mid-write gets a truncated task — and a truncated brief is worse than a
-# missing one, because the member implements what it can see and reports DONE.
-$tmpOut = "$outPath.tmp.$PID"
+# directory, then MOVE it into place. Writing straight to the destination lets a reader that opens
+# the brief mid-write get a truncated task — worse than a missing one, because the member
+# implements what it can see and reports DONE.
+#
+# The temporary is created EXCLUSIVELY, and that is the security half of this block. The checks
+# above are a point-in-time snapshot: between them and the write, a predictable temp name
+# ("$outPath.tmp.<pid>") could be pre-created as a symlink by anyone sharing the temp dir, and a
+# plain write would follow it — handing over the task's full text. `CreateNew` fails outright if
+# the path exists (a planted link included) and `FileShare.None` keeps it exclusive while open, so
+# the window between validating and writing stops being exploitable instead of merely being short.
+$tmpOut = Join-Path $outDir (".task-$TaskNumber-brief-{0}.tmp" -f [IO.Path]::GetRandomFileName())
 try {
-  Set-Content -LiteralPath $tmpOut -Value ($content -join "`n") -Encoding utf8
+  $stream = [IO.File]::Open($tmpOut, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
+  try {
+    # LF and no BOM, matching what task-brief.sh writes — the two variants must produce the same file.
+    $writer = [IO.StreamWriter]::new($stream, [Text.UTF8Encoding]::new($false))
+    $writer.Write((($content -join "`n") + "`n"))
+    $writer.Flush()
+    $writer.Dispose()
+  } finally {
+    $stream.Dispose()
+  }
   Move-Item -LiteralPath $tmpOut -Destination $outPath -Force
 } finally {
   if (Test-Path -LiteralPath $tmpOut) { Remove-Item -LiteralPath $tmpOut -Force -ErrorAction SilentlyContinue }
