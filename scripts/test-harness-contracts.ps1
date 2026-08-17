@@ -2096,13 +2096,17 @@ function Get-Md34ContractSlots([string]$RelativePath) {
 }
 
 function Get-Md34Section([string]$RelativePath, [string]$StartPattern, [string]$EndPattern) {
+    # FAILS CLOSED on BOTH anchors. Returning the rest of the file when the end anchor is gone
+    # would silently WIDEN the section, and every caller only tests for emptiness — so a widened
+    # section could pick up text from a later section and approve wrongly. Every call site here
+    # bounds a real heading, so an unmatched end anchor means the doctrine moved: say so.
     $text = Text $RelativePath
     $start = [regex]::Match($text, $StartPattern, 'Multiline')
     if (-not $start.Success) { return '' }
     $rest = $text.Substring($start.Index)
     $end = [regex]::Match($rest.Substring(1), $EndPattern, 'Multiline')
-    if ($end.Success) { return $rest.Substring(0, $end.Index + 1) }
-    return $rest
+    if (-not $end.Success) { return '' }
+    return $rest.Substring(0, $end.Index + 1)
 }
 
 function Get-Md34ReviewWindows([string]$Section) {
@@ -2253,6 +2257,9 @@ try {
         $md34Section = Get-Md34Section $md34Flow.File $md34Flow.Start $md34Flow.End
         # A doctrine that MOVED does not silently turn this into a no-op.
         Check ($md34Section -ne '') "the closing section of $($md34Flow.Skill) is located BY POSITION"
+        # Fail-closed on the END anchor too: without this, a vanished end heading would silently
+        # widen the section into the next one, and every check here only tests for emptiness.
+        Check ((Get-Md34Section $md34Flow.File $md34Flow.Start '^## §§ no such heading §§') -eq '') "an unmatched end anchor yields NO section for $($md34Flow.Skill), never the rest of the file"
         $md34Windows = Get-Md34ReviewWindows $md34Section
         $md34Form = Get-Md34ReviewForm $md34Section $md34Windows
         $md34Affirmative = Get-Md34AffirmativeBlindLens $md34Windows
@@ -2316,6 +2323,13 @@ try {
     $md34Step7 = Get-Md34Section '.claude/skills/pelizzai-audit/SKILL.md' '^### 7\. Validate and close' '^## Partial state'
     Check ($md34Step7 -match '3 fix.{0,3}re-review cycles') 'the bootstrap declares its own numeric loop bound'
     Check ($md34Step7 -match 'phase: blocked') 'the bootstrap loop bound escalates through phase: blocked'
+    # Same duty for the OTHER contract-less dispatcher. Debugging already bounded the attempts at
+    # the CAUSE ("three failed definitive fixes"); that is a different counter from the rounds with
+    # the reviewer, and citing it as the review bound left the loop with no limit at all.
+    $md34DebugStep = Get-Md34Section '.claude/skills/pelizzai-debug/SKILL.md' '^## Step 4 — implement and prove' '^## Proportional closeout'
+    Check ($md34DebugStep -match '3 fix.{0,3}re-review cycles') 'debugging declares its own numeric loop bound over the working tree'
+    Check ($md34DebugStep -match 'phase: blocked') 'the debugging loop bound escalates through phase: blocked'
+    Check ($md34DebugStep -match 'does not share the three-definitive-fixes budget') 'the review-loop counter is kept separate from the definitive-fix counter'
     Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'declares its own bound at its closing\s+step' 'task-cycle §5 points flows outside the cycle at their own bound'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'fix→re-review loop is still \*\*bounded\*\*' 'the standalone review keeps a bound after dropping the per-task machinery'
 

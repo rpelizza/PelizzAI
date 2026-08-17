@@ -386,8 +386,8 @@ change acquires one (a new surface, a ratified acceptance), it stops being stand
 through the router and the full two-lens review applies.
 
 The fix→re-review loop is still **bounded** — dropping the per-task machinery does not drop the
-limit. The dispatching skill declares its own at its closing step (`pelizzai-debug`, for a bug's
-definitive fixes; `pelizzai-audit` step 7, for the bootstrap diff), in the same shape as
+limit. The dispatching skill declares its own at its closing step (`pelizzai-debug` step 4, over the
+bug's working tree; `pelizzai-audit` step 7, over the bootstrap diff), in the same shape as
 `pelizzai-execute` → `references/task-cycle.md` §5: count the cycles, escalate on the limit, record
 `phase: blocked`, and leave the working tree INTACT.
 

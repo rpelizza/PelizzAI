@@ -188,8 +188,8 @@ Never ignore an escalation nor re-dispatch without changing anything.
 ```
 
 This breaker governs PLAN TASKS. A flow outside the task cycle declares its own bound at its closing
-step (`pelizzai-audit` step 7, for the bootstrap diff; `pelizzai-debug`, for a bug's definitive
-fixes) — same shape: count the cycles, escalate on the limit, record `phase: blocked`, leave the
+step (`pelizzai-audit` step 7, over the bootstrap diff; `pelizzai-debug` step 4, over the bug's
+working tree) — same shape: count the cycles, escalate on the limit, record `phase: blocked`, leave the
 working tree INTACT. Dropping the per-task machinery never drops the limit.
 
 ## 6. Commit as a gate
