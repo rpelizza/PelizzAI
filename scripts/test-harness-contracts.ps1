@@ -2150,6 +2150,14 @@ function Get-Md34AffirmativeBlindLens([string]$Windows) {
     foreach ($mention in [regex]::Matches($Windows, '(?i)\b(blind(\s+spec)?|spec)\s+lens\b|\bspec-reviewer\b')) {
         $from = [Math]::Max(0, $mention.Index - 80)
         $lead = $Windows.Substring($from, $mention.Index - $from)
+        # Only the clause that GOVERNS this occurrence counts. Without the cut, a negation from an
+        # EARLIER clause licenses a later dispatch in the same sentence:
+        #   "No contract for the blind spec lens, but dispatch the blind spec lens"
+        # — the second occurrence would inherit the first clause's "No" and pass.
+        # PUNCTUATION only: a Markdown line wrap is not a clause boundary. Cutting at "`n" would
+        # split "…so there is **no contract / for the blind spec lens…" and lose the negation.
+        $cut = $lead.LastIndexOfAny([char[]]@('.', ';', ':', ',', '(', ')', '!', '?', [char]0x2014))
+        if ($cut -ge 0) { $lead = $lead.Substring($cut + 1) }
         if ($lead -notmatch '(?i)\b(no|not|never|without|absent|missing|nothing|lacks?)\b') {
             $offenders += ('…' + $lead.Substring([Math]::Max(0, $lead.Length - 48)) + '[' + $mention.Value + ']')
         }
@@ -2175,7 +2183,16 @@ function New-Md34State([string]$Directory, [string]$Template, [hashtable]$Fields
 
 function Get-Md34Contract([string]$StatePath) {
     $found = @()
-    foreach ($line in (Get-Content -LiteralPath $StatePath -Encoding utf8)) {
+    $lines = @(Get-Content -LiteralPath $StatePath -Encoding utf8)
+    # RATIFICATION, not merely a path. A `plan:` pointing at a draft nobody approved is not what
+    # the doctrine calls a contract ("a ratified contract … written BEFORE the diff"), and the
+    # blind lens would be judging against something the user never accepted. The harness's own
+    # marker for that is `kickoff: ratified`: the router writes it ONLY after checking the plan
+    # header's ratifications, and pelizzai-final-verification refuses to seal without it. So a
+    # contract requires BOTH — a path AND the marker. Reading the referenced artifact would be
+    # stronger still; the marker is the signal the harness itself already treats as authoritative.
+    if (-not @($lines | Where-Object { $_ -match '^-\s*kickoff:\s*rati(fied|ficado)\b' }).Count) { return @() }
+    foreach ($line in $lines) {
         if ($line -match '^- (spec|plan):\s*(.*)$') {
             $value = ($Matches[2] -replace '\s+#.*$', '').Trim()
             # A template placeholder, an unfilled cursor or an explicit absence is NOT a contract.
@@ -2221,9 +2238,12 @@ try {
             File  = '.claude/skills/pelizzai-audit/SKILL.md'
             Start = '^### 7\. Validate and close'
             End   = '^## Partial state'
-            # The bootstrap leaves spec/plan exactly as the template writes them: it DISCOVERS the
-            # project, it does not implement a requirement.
-            State = @{ slug = 'bootstrap-harness'; track = 'bootstrap'; phase = 'exec' }
+            # A real bootstrap RATIFIES its kickoff at step 1 and still leaves spec/plan exactly as
+            # the template writes them: it DISCOVERS the project, it does not implement a
+            # requirement. The marker is set on purpose — otherwise "no contract" could be coming
+            # from the missing kickoff instead of from the missing spec/plan, which would isolate
+            # the wrong variable.
+            State = @{ slug = 'bootstrap-harness'; track = 'bootstrap'; phase = 'exec'; kickoff = 'ratified 2026-08-17' }
         },
         [pscustomobject]@{
             Skill = 'pelizzai-execute'
@@ -2232,21 +2252,21 @@ try {
             End   = '^### 4\. Seal and hand off'
             # POSITIVE CONTROL: a planned delivery HAS a contract. Without this row the predicate
             # could be a constant $false and every prohibition below would pass vacuously.
-            State = @{ slug = 'feature-x'; track = 'feature'; phase = 'exec'; spec = 'pelizzai/specs/2026-08-17-feature-x.md'; plan = 'pelizzai/plans/2026-08-17-feature-x.md' }
+            State = @{ slug = 'feature-x'; track = 'feature'; phase = 'exec'; kickoff = 'ratified 2026-08-17'; spec = 'pelizzai/specs/2026-08-17-feature-x.md'; plan = 'pelizzai/plans/2026-08-17-feature-x.md' }
         },
         [pscustomobject]@{
             Skill = 'pelizzai-debug'
             File  = '.claude/skills/pelizzai-debug/SKILL.md'
             Start = '^## Step 4 — implement and prove'
             End   = '^## Proportional closeout'
-            State = @{ slug = 'bug-x'; track = 'bug'; phase = 'exec'; spec = 'not-applicable'; plan = 'not-applicable' }
+            State = @{ slug = 'bug-x'; track = 'bug'; phase = 'exec'; kickoff = 'ratified 2026-08-17'; spec = 'not-applicable'; plan = 'not-applicable' }
         },
         [pscustomobject]@{
             Skill = 'pelizzai-quick-fix'
             File  = '.claude/skills/pelizzai-quick-fix/SKILL.md'
             Start = '^## Process'
             End   = '^## Red flags'
-            State = @{ slug = 'tweak-x'; track = 'tweak'; phase = 'exec'; spec = 'not-applicable'; plan = 'not-applicable' }
+            State = @{ slug = 'tweak-x'; track = 'tweak'; phase = 'exec'; kickoff = 'ratified 2026-08-17'; spec = 'not-applicable'; plan = 'not-applicable' }
         }
     )
 
@@ -2283,6 +2303,16 @@ try {
         }
     }
     Check ((Get-Md34Contract (Join-Path $md34Temp 'pelizzai-execute/pelizzai/data/state.md')).Count -eq 2) 'the contract predicate DOES fire on a planned delivery (positive control)'
+
+    # -- (c.1) Regressions for the two predicates themselves, driven by literal inputs --
+    # A path is not a contract: spec/plan pointing at drafts nobody ratified must not summon the
+    # blind lens. Without this, `plan: draft.md` would pass as an approved requirement.
+    $md34Unratified = New-Md34State (Join-Path $md34Temp 'unratified') $md34StateTemplate @{ slug = 'draft-x'; track = 'feature'; phase = 'exec'; spec = 'pelizzai/specs/draft.md'; plan = 'pelizzai/plans/draft.md' }
+    Check ((Get-Md34Contract $md34Unratified).Count -eq 0) 'filled spec/plan paths WITHOUT a ratified kickoff are not a contract (a draft nobody approved is not one)'
+    # A negation in an earlier clause does not license a later dispatch in the same sentence.
+    Check ((Get-Md34AffirmativeBlindLens 'No contract for the blind spec lens, but dispatch the blind spec lens.').Count -gt 0) 'a negation in an earlier clause does not authorize a later blind-lens dispatch'
+    Check ((Get-Md34AffirmativeBlindLens 'so there is no contract for the blind spec lens to judge against').Count -eq 0) 'a genuinely negated mention is not an offender (the predicate is not just "names the lens")'
+    Check ((Get-Md34AffirmativeBlindLens 'Then dispatch the blind spec lens in its own dispatch.').Count -gt 0) 'a plain affirmative dispatch is an offender'
 
     # -- (d) The central registry must AGREE with each skill's own text (the gap #25 slipped through) --
     $md34Registry = Get-Md34Section '.claude/skills/pelizzai-review/SKILL.md' '^### Who dispatches which lenses' '^### Standalone change review'
