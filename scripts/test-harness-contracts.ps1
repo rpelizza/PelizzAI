@@ -2154,10 +2154,16 @@ function Get-Md34AffirmativeBlindLens([string]$Windows) {
         # EARLIER clause licenses a later dispatch in the same sentence:
         #   "No contract for the blind spec lens, but dispatch the blind spec lens"
         # — the second occurrence would inherit the first clause's "No" and pass.
-        # PUNCTUATION only: a Markdown line wrap is not a clause boundary. Cutting at "`n" would
-        # split "…so there is **no contract / for the blind spec lens…" and lose the negation.
-        $cut = $lead.LastIndexOfAny([char[]]@('.', ';', ':', ',', '(', ')', '!', '?', [char]0x2014))
-        if ($cut -ge 0) { $lead = $lead.Substring($cut + 1) }
+        # The boundary is punctuation OR an adversative conjunction: "No contract for the blind
+        # spec lens but dispatch the blind spec lens" carries no comma, so punctuation alone left
+        # the second occurrence inheriting the first clause's "No".
+        # NOT the line wrap, though — a Markdown break is not a clause boundary, and cutting at
+        # "`n" would split "…so there is **no contract / for the blind spec lens…" and lose a
+        # legitimate negation.
+        # `yet` is deliberately absent from the list: "not yet" is common enough that it would cut
+        # a real negation in half. The bias here is to fail LOUD — a false offender is a visible
+        # FAIL somebody fixes; a false pass hides the defect this whole predicate exists to catch.
+        $lead = [regex]::Replace($lead, '(?is)^.*(?:[.;:,()!?—]|\b(?:but|however|although|whereas|nevertheless|nonetheless)\b)\s*', '')
         if ($lead -notmatch '(?i)\b(no|not|never|without|absent|missing|nothing|lacks?)\b') {
             $offenders += ('…' + $lead.Substring([Math]::Max(0, $lead.Length - 48)) + '[' + $mention.Value + ']')
         }
@@ -2311,6 +2317,10 @@ try {
     Check ((Get-Md34Contract $md34Unratified).Count -eq 0) 'filled spec/plan paths WITHOUT a ratified kickoff are not a contract (a draft nobody approved is not one)'
     # A negation in an earlier clause does not license a later dispatch in the same sentence.
     Check ((Get-Md34AffirmativeBlindLens 'No contract for the blind spec lens, but dispatch the blind spec lens.').Count -gt 0) 'a negation in an earlier clause does not authorize a later blind-lens dispatch'
+    # Same sentence WITHOUT the comma: the clause boundary has to be the conjunction itself,
+    # otherwise the punctuation-only cut leaves the second occurrence inheriting the first "No".
+    Check ((Get-Md34AffirmativeBlindLens 'No contract for the blind spec lens but dispatch the blind spec lens.').Count -gt 0) 'an adversative conjunction without punctuation still ends the negated clause'
+    Check ((Get-Md34AffirmativeBlindLens 'no contract for the blind spec lens; however, dispatch the blind spec lens').Count -gt 0) 'a conjunctive adverb does not carry the negation into the next clause'
     Check ((Get-Md34AffirmativeBlindLens 'so there is no contract for the blind spec lens to judge against').Count -eq 0) 'a genuinely negated mention is not an offender (the predicate is not just "names the lens")'
     Check ((Get-Md34AffirmativeBlindLens 'Then dispatch the blind spec lens in its own dispatch.').Count -gt 0) 'a plain affirmative dispatch is an offender'
 
