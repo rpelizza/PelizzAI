@@ -187,6 +187,11 @@ Never ignore an escalation nor re-dispatch without changing anything.
   re-dispatch reusing the WIP — do not restart from scratch.
 ```
 
+This breaker governs PLAN TASKS. A flow outside the task cycle declares its own bound at its closing
+step (`pelizzai-audit` step 7, over the bootstrap diff; `pelizzai-debug` step 4, over the bug's
+working tree) — same shape: count the cycles, escalate on the limit, record `phase: blocked`, leave the
+working tree INTACT. Dropping the per-task machinery never drops the limit.
+
 ## 6. Commit as a gate
 
 ```text

@@ -181,7 +181,14 @@ Then:
 ```text
 1. Re-run the original oracle — now green.
 2. Run the relevant validation and confirm no regressions.
-3. Review the working tree with `pelizzai-review`; apply findings and re-run the affected proofs.
+3. Review the working tree with `pelizzai-review` → Standalone change review (quality/evidence
+   lens: a reported symptom is not a ratified contract for the blind lens); apply findings and
+   re-run the affected proofs. Loop bound: 3 fix→re-review cycles over the working tree — its OWN
+   counter, which does not share the three-definitive-fixes budget above (that one counts attempts
+   at the CAUSE; this one counts rounds with the reviewer, and a review round is not a failed
+   fix). On blowing it, stop dispatching, record `phase: blocked`, leave the working tree INTACT,
+   and escalate with an actionable message, in the shape of `pelizzai-execute` →
+   `references/task-cycle.md` §5.
 4. Consolidate the content into a definitive commit. If an explicitly authorized squash-final
    strategy produced WIPs, consolidate it now, before the seal; pelizzai-finish does not rewrite history.
 5. Run `pelizzai-final-verification` against the consolidated HEAD, record

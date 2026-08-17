@@ -64,6 +64,18 @@ order, and a reviewer who has already read the implementer's report cannot unkno
 narrative. A blindness that depends on the reviewer forgetting what they just read is not
 blindness.
 
+**The rule behind the invariable.** The blind lens exists wherever a **ratified contract** exists —
+a plan, a task spec, an approved requirement, written BEFORE the diff. "Two lenses in two
+dispatches" is what that rule yields in every flow that EXECUTES a contract, which is every flow
+that has one. A flow that PRODUCES its own artifact with no prior requirement — a reported symptom,
+the harness bootstrap itself — has nothing for the blind lens to judge against: it dispatches the
+quality/evidence lens with its `Verification` block, in its own dispatch, under
+**[Standalone change review](#standalone-change-review)** below. That is not a profile and not a
+downgrade: nobody picks it, risk does not move it, and the moment a contract exists the second
+dispatch is mandatory again. Fabricating a contract so the blind lens has something to read —
+writing the spec after the fact, or handing the lens the coordinator's own checklist — is the
+anti-pattern, not the compliance.
+
 There used to be a `combined` profile — one dispatch, one report — offered as a ratified exception
 for bounded, low-risk tasks. It is **gone**, and it does not come back by request: the case it
 served ("small enough that two dispatches are not worth it") is already covered by the `tweak`
@@ -137,7 +149,9 @@ infer** pass/fail by reading the diff. A relevant check that could not run is **
 
 Use an **independent reviewer** — always, and one per lens: the blind spec lens must be another
 agent, and the coordinator never embodies it. The coordinator never applies the two rubrics inline
-either; there is no inline mode left. The spec lens uses
+either; there is no inline mode left. Where no contract exists, only the quality/evidence lens goes
+out — still to another agent, still in its own dispatch (see
+**[Standalone change review](#standalone-change-review)**). The spec lens uses
 **[references/spec-reviewer.md](references/spec-reviewer.md)**; the quality/evidence lens — per
 task and on the final range — uses **[references/code-reviewer.md](references/code-reviewer.md)**.
 Never merge the two rubrics into one briefing. Fill in with:
@@ -186,8 +200,11 @@ does not pretend this never happens, and it does not leave the choice to improvi
 **Detect and declare at the EDGE, not mid-task.** The place is step 2 of the setup gate
 (`pelizzai-execute`), when the mode is being ratified — the capability is already knowable there,
 and the code has not been written yet. Discovering it at review time means discovering it after the
-work, when the cheapest options are already gone. In the `tweak`/`bug` tracks, the place is the
-compact confirm.
+work, when the cheapest options are already gone. In the `tweak`/`bug` tracks, the place is the head
+skill's compact confirm (`pelizzai-quick-fix`/`pelizzai-debug`). **In the bootstrap, the place is
+the reviewer-capability line of `pelizzai-audit` step 1**, before the first artifact. Every flow
+that dispatches a review carries an edge of its own — a flow without one is a flow that discovers
+the collision too late (see **[Who dispatches which lenses](#who-dispatches-which-lenses)**).
 
 ```text
 Name the collision in one line, IN THE CONVERSATION'S LANGUAGE — what the harness requires (two
@@ -203,6 +220,16 @@ why they conflict. Then offer:
 (c) defer the integration until there is a reviewer — the work is consolidated and stays
     unsealed; `validated-head` is not written.
 ```
+
+**One lens is not inline.** A flow with no ratified contract dispatches ONE lens — the
+quality/evidence one — and that lens still goes to an INDEPENDENT reviewer, in its own dispatch. So
+the absent blind lens does not, by itself, resolve an environment that has no reviewer: the same
+three options apply, unchanged, to the single lens. Read (b) there as "the quality/evidence lens is
+applied by the coordinator, KNOWING it is not independent, with the fresh run required below", and
+(c) as "the diff stays on its task branch, uncommitted and unsealed, until a reviewer exists". Under
+(b), record `review-integrity: degraded <YYYY-MM-DD> — <reason>` exactly as in a two-lens flow: what
+`degraded` marks is a lens the flow REQUIRED that did not run independently, and a single-lens flow
+requires that one.
 
 **(b) is the ONLY exception in the whole harness to the two dispatches and the blindness — and it
 is not yours to take.** It requires the user's EXPLICIT choice, in this turn, under the same rule
@@ -324,19 +351,45 @@ Any fix — from a finding, overlay, test, checklist, or visual verification —
 invalidate `validated-head`, consolidate the fix, re-run the affected overlays, and **reopen the
 final review** over the new HEAD. "It was reviewed before the fix" does not count as approval.
 
-**Who triggers the final review:** `pelizzai-execute` (plan closeout). A bug fix
-(`pelizzai-debug`) uses the **standalone change review** below while still in the working tree;
-then debugging consolidates the content, runs Verification against the HEAD, and only then calls
-pelizzai-finish. The tweak track (`pelizzai-quick-fix`) waives formal review as long as it stays trivial.
+### Who dispatches which lenses
 
-**Standalone change review** (a bug outside a plan, or a tweak reclassified before the commit): use
+The FORM of a review comes from the flow's contract, never from its risk. Every head skill that
+dispatches one, and what it dispatches:
+
+```text
+- pelizzai-execute   — per task AND on the final range: TWO lenses, TWO dispatches. It executes a
+                       ratified plan/spec, so the blind lens has a contract to judge against.
+- pelizzai-debug     — standalone change review on the working tree (quality/evidence lens only);
+                       then it consolidates the content, runs Verification against the HEAD, and
+                       only then calls pelizzai-finish.
+- pelizzai-audit     — the bootstrap diff: standalone change review (quality/evidence lens only),
+                       because the bootstrap produces its own artifacts with no plan, no task spec,
+                       and no approved requirement (pelizzai-audit → step 7).
+- pelizzai-quick-fix — the tweak track waives formal review, for as long as it stays trivial.
+```
+
+A new head skill that dispatches a review belongs on this list, with its form derived from the rule
+above. A flow missing from here is a flow nobody measured against the contract criterion — which is
+exactly how the blind lens came to be demanded of a bootstrap that had nothing to show it.
+
+### Standalone change review
+
+A bug outside a plan, a tweak reclassified before the commit, or the harness bootstrap's own diff —
+any change that produces its own artifact with no ratified contract. Use
 `review-package --working-tree` (staged + unstaged + untracked) and apply **Stage 2**
-(quality) with the `Verification` block, **without** the per-task / final-review /
-circuit-breaker machinery. This is **not** a one-dispatch profile in disguise: the blind spec lens
+(quality) with the `Verification` block, **without** the per-task / final-review machinery. This is
+**not** a one-dispatch profile in disguise: the blind spec lens
 is missing because there is no contract for it to judge against — no plan, no task spec, no
-approved requirement, only a reported symptom. Where a contract exists, both lenses go out. If the
+approved requirement, only a reported symptom or a set of artifacts the coordinator itself
+produced. Where a contract exists, both lenses go out. If the
 change acquires one (a new surface, a ratified acceptance), it stops being standalone: reclassify
 through the router and the full two-lens review applies.
+
+The fix→re-review loop is still **bounded** — dropping the per-task machinery does not drop the
+limit. The dispatching skill declares its own at its closing step (`pelizzai-debug` step 4, over the
+bug's working tree; `pelizzai-audit` step 7, over the bootstrap diff), in the same shape as
+`pelizzai-execute` → `references/task-cycle.md` §5: count the cycles, escalate on the limit, record
+`phase: blocked`, and leave the working tree INTACT.
 
 A valid quick-fix does not enter this procedure. If the diff raises the risk, reclassify through the
 router and apply the new route's review before the commit.
@@ -404,6 +457,13 @@ On a GitHub PR, reply in the inline comment THREAD (not as a top-level PR commen
 - Collapsing the two lenses into a single dispatch to save a round — that is not a proportional
   review, it is a review without blindness. There is no `combined` profile to fall back on, and a
   user asking for one does not create it: what it would buy is already served by the `tweak` lane.
+  This is a different thing from a flow that never had a contract for the blind lens to judge (see
+  "Standalone change review"): there the second dispatch has nothing to read, and inventing a
+  contract to feed it is the defect.
+- Writing a spec/plan for a flow that has none just so the blind lens can be dispatched "by the
+  book" — a contract fabricated after the diff measures the diff against itself.
+- Demanding the blind lens of a flow that produces its own artifact (the bootstrap, a reported
+  symptom), or dropping it where a ratified plan/spec exists.
 - Running the final review with the quality lens only, or reusing a task's review as the final one.
 - Discovering only at review time that this environment cannot dispatch a reviewer — the capability
   is checked when the mode is ratified, not after the code is written.
@@ -460,6 +520,7 @@ Prefer:
 
 Review early and often: depth is proportional to risk, the existence of the review is not.
 Spec first, quality/evidence second — ALWAYS in two dispatches, per task and on the final range. There is no single-dispatch profile. Critical/Important before moving on; Minor for the end.
+The blind lens exists where a ratified contract exists. Where none does — a reported symptom, the harness bootstrap — the quality lens goes alone, to an independent reviewer, and inventing a contract to feed the blind one is the defect.
 The spec lens is blind (no report, no delivery narrative) and receives diff + spec/plan + the area's domain skills; the quality/evidence lens receives and verifies the report. The coordinator crosses the lenses and is never the blind lens.
 Never pass the session history to the reviewer. For security, use pelizzai-oswap.
 ```
