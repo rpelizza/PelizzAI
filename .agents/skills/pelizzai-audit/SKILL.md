@@ -130,7 +130,8 @@ flowchart TD
     Scan --> Gate[Proactive domain skills gate:\nrecommends; the user ratifies]
     Mode -- Yes, authorized --> Iso[pelizzai-starting-branch:\nisolate before the first write]
     Gate -- ratified --> Iso
-    Iso --> Inv[Inventory: structure, stacks,\nMCPs, git/host, skills, conventions]
+    Iso --> Kick[Compact confirm: setup\n+ reviewer capability\n→ kickoff: ratified]
+    Kick --> Inv[Inventory: structure, stacks,\nMCPs, git/host, skills, conventions]
     Inv --> New{New or existing project?}
     New -- New --> Bra[pelizzai-interview + pelizzai-idea-generation:\ndiscovery, spec, stress, approval]
     Bra --> Wri
@@ -138,7 +139,9 @@ flowchart TD
     Rep --> Wri[pelizzai-create-skill:\ncreates the maximum of useful domain skills\nwith context7 + Anthropic rules]
     Wri --> Doc[Harness artifacts: domain-skills.md\ncatalog + ledger + profile.md]
     Doc --> Rec[Recommendations: git init, remote,\nstack MCPs, context7, opt-in hooks]
-    Rec --> End([Harness ready to act])
+    Rec --> Rev[Standalone change review:\nquality lens + Verification\nno blind lens — no contract]
+    Rev --> Seal[Commit exact paths →\npelizzai-final-verification →\nvalidated-head → pelizzai-finish]
+    Seal --> End([Harness ready to act])
 ```
 
 ## Bootstrap-write
@@ -150,6 +153,38 @@ If Git exists, invoke `pelizzai-starting-branch` and create a task branch such a
 declines, explain that there will be no history/rollback and proceed only with authorization.
 
 The bootstrap is its own transaction. Its artifacts must be committed/integrated or stay on the same task branch before a feature worktree depends on them.
+
+**Ratify the bootstrap before the first artifact.** Base and branch name were just ratified by
+`pelizzai-starting-branch`. What is still unratified is the setup, and it has no other gate: the
+bootstrap has no plan, so it never reaches the post-plan setup gate of `pelizzai-execute`, and it is
+neither `tweak` nor `bug`, so no light-track confirm covers it. Present ONE compact line — in the
+conversation's language — and wait:
+
+```text
+Bootstrap on <branch> — isolation: branch · execution-mode: inline · commits: granular.
+Closing review (stated, not offered): quality lens only, no blind lens — the bootstrap has no
+contract for it to judge. Reviewer available here: <yes, independent | NO — none dispatchable>.
+Ok, or name what to change?
+```
+
+The review's FORM is not one of the items to adjust — it follows from the contract, and there is no
+second answer to offer (`pelizzai-execute` → "The review is deliberately NOT a gate item"). What can
+genuinely be answered is the **capability**, and only when it is missing: that has three answers,
+and they are the user's.
+
+**Check the reviewer specifically.** Being able to parallelize the repo-scan does not prove a
+reviewer is dispatchable. If this environment cannot dispatch one, say so HERE and open the
+degradation choice (`pelizzai-review` → "When there is no independent reviewer") — not at step 7,
+with every artifact already written. The bootstrap does not advance to the first write until the
+user has chosen (a), (b), or (c): the recommendation is not an answer, and silence is not an answer.
+
+**Record after the "ok"** (or after the named overrides), in the consumer `pelizzai/data/state.md`
+that `pelizzai-starting-branch` just wrote: `track: bootstrap`, `kickoff: ratified <YYYY-MM-DD>`,
+`isolation`, `execution-mode`, and `commit-strategy` — plus a `review-integrity: degraded` entry
+(date and reason) if the user took option (b). **In the bootstrap, this skill is the sole owner of the
+kickoff marker.** Without it the writegate blocks (Rule B) the very domain skills the user just
+ratified, and `pelizzai-final-verification` refuses to seal at step 7 — the bootstrap would write
+`state.md` and then be locked out by its own harness.
 
 ### 2. Detect skill roots
 
@@ -343,8 +378,20 @@ Before declaring the bootstrap done:
 [ ] the diff contains only approved artifacts;
 ```
 
-Review the whole diff through the two `pelizzai-review` lenses, in two dispatches like any other
-review, commit the approved artifacts with exact paths, and only then run
+Review the whole diff with `pelizzai-review` → **Standalone change review**: the bootstrap produces
+its own artifacts with no plan, no task spec, and no approved requirement, so there is **no contract
+for the blind spec lens to judge against** — the checklist above IS the conformance check, and it
+belongs to the coordinator, not to a reviewer. The quality/evidence lens still goes out, to an
+independent reviewer, in its own dispatch, with its `Verification` block. If this environment has
+none, the choice was already made at step 1; do not discover it here.
+
+**Loop bound:** 3 fix→re-review cycles over the whole diff. The bootstrap is ONE transaction, not a
+sequence of tasks, and there is no second counter because there is no second lens — a loop over
+artifacts the audit itself regenerates would otherwise have no limit at all. On blowing it, stop
+dispatching, record `phase: blocked`, leave the working tree INTACT, and escalate with an actionable
+message, in the shape of `pelizzai-execute` → `references/task-cycle.md` §5.
+
+Then commit the approved artifacts with exact paths, and only then run
 `pelizzai-final-verification` against that HEAD. After recording `validated-head`,
 close the transaction via `pelizzai-finish`. Do not leave the bootstrap uncommitted or expect
 pelizzai-finish to consolidate it.
@@ -399,8 +446,12 @@ In a workspace with multiple repositories, do not pretend one scalar state cover
 - Writing a skill only to .claude when the active platform uses .agents (or vice versa).
 - Declaring a directory gitignored without proving it in the consumer project.
 - Leaving the bootstrap loose on main or invisible to the next worktree.
+- Writing the first artifact without the compact confirm of step 1 — leaving `kickoff: ratified`
+  unwritten locks the bootstrap out of its own domain-skill writes (writegate, Rule B).
+- Demanding the blind spec lens over the bootstrap diff, or writing a spec after the fact so it has
+  something to read: the bootstrap discovers the project, it does not implement a requirement.
 ```
 
 ## Integration
 
-Uses `pelizzai-starting-branch` and `pelizzai-finish` only in `bootstrap-write`; `pelizzai-create-skill` writes the ratified domain skills — the target is the maximum of useful skills, grounded in `context7`; `pelizzai-team`/`pelizzai-subagents` parallelize the repo-scan when the fronts are independent; `pelizzai-idea-generation` enters only on the new/uncertain-project branch.
+Uses `pelizzai-starting-branch` and `pelizzai-finish` only in `bootstrap-write`; `pelizzai-review` closes the bootstrap diff through the **Standalone change review** (quality lens only — the bootstrap has no contract for the blind lens, and that skill owns the rule) and `pelizzai-final-verification` seals `validated-head` before the handoff; `pelizzai-create-skill` writes the ratified domain skills — the target is the maximum of useful skills, grounded in `context7`; `pelizzai-team`/`pelizzai-subagents` parallelize the repo-scan when the fronts are independent; `pelizzai-idea-generation` enters only on the new/uncertain-project branch.

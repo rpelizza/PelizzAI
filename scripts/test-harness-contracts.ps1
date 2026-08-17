@@ -157,7 +157,9 @@ try {
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Source mode[\s\S]*not.*state|source mode[\s\S]*not.*state' 'finish creates no runtime in source mode'
     Check-Match '.claude/skills/pelizzai-quick-fix/SKILL.md' 'Commit[\s\S]*pelizzai-final-verification[\s\S]*pelizzai-finish' 'quick-fix commits before the seal'
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'Review[\s\S]*Consolidate[\s\S]*pelizzai-final-verification[\s\S]*pelizzai-finish' 'debugging reviews, commits, and seals in order'
-    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'commit[\s\S]*pelizzai-final-verification[\s\S]*pelizzai-finish' 'bootstrap commits before the seal'
+    # Scoped to step 7's window: the loose version matched the word "committed" 200 lines earlier
+    # and never actually anchored the closing ORDER it claims to (same defect class as the ex-528).
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' '### 7\. Validate and close[\s\S]{0,3000}commit the approved artifacts[\s\S]{0,400}pelizzai-final-verification[\s\S]{0,300}pelizzai-finish' 'bootstrap commits before the seal (order anchored inside step 7)'
     Check-Match '.cursor/rules/pelizzai.mdc' 'pelizzai-core/SKILL.md' 'Cursor points to core'
     Check-Match '.cursor/rules/pelizzai.mdc' 'pelizzai-router/SKILL.md' 'Cursor points to router'
     Check-Match '.github/workflows/check-harness.yml' '-Check -SourceMode' 'CI validates source mode'
@@ -514,7 +516,9 @@ try {
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'pelizzai/domain-skills\.md' 'review names the domain skills catalog (not just "the catalog")'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' '.\{DOMAIN_SKILLS\}. slot\s+empty' 'review: anti-pattern of dispatching a briefing with an empty domain skills slot'
 
-    # -- The invariable propagated: task-cycle, plan, team, subagents, audit, and the contract files --
+    # -- The invariable propagated: task-cycle, plan, team, subagents, and the contract files --
+    # `pelizzai-audit` is NOT on this list, and its absence is the point: the bootstrap has no
+    # contract for the blind lens to judge (issue #34). Its form is asserted in the #34 block below.
     Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '## 3\. Two-lens review, always in two dispatches' 'task-cycle: the section title states the invariable'
     Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'no profile to pick and no downgrade to ratify' 'task-cycle: no profile and no downgrade'
     Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Cutting a dispatch is not proportionality' 'task-cycle: cutting a dispatch is not proportionality'
@@ -525,7 +529,10 @@ try {
     Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'two lenses always go out in \*\*two dispatches\*\*' 'team: two dispatches in any lane'
     Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'no profile to consult and no\s+single-dispatch variant' 'subagents: no profile and no single-dispatch variant'
     Check-NotMatch '.claude/skills/pelizzai-audit/templates/profile.md' 'review-policy-default' 'profile.md: no review policy left to pre-select'
-    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'two .pelizzai-review. lenses, in two dispatches' 'audit: the bootstrap diff gets both lenses'
+    # The assertion that stood here demanded the DEFECT of issue #34 ("the bootstrap diff gets both
+    # lenses") and passed green precisely because the defect was present. Replaced by its opposite;
+    # the rule itself is EVALUATED in the issue #34 block at the end of this file.
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' '### 7\. Validate and close[\s\S]{0,1200}Standalone change review' 'audit: the bootstrap diff goes to the standalone change review'
     Check-Match 'CLAUDE.md' 'review is NOT among them' 'CLAUDE.md: the review is not a ratified structural decision'
     Check-Match 'README.md' 'The review is\s+not asked' 'README: the gate does not ask about the review'
 
@@ -2042,6 +2049,278 @@ try {
     Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'structurally different[\s\S]{0,60}wallpaper' 'frontend: mockup variants must differ structurally'
 } catch {
     Check $false 'contract anchor + evolve cycle' $_.Exception.Message
+}
+
+# =====================================================================
+# Issue #34 (2026-08-17) — the bootstrap has NO contract for the blind lens.
+#
+# PR #25 removed the `combined` profile and propagated "two lenses, two
+# dispatches" into step 7 of pelizzai-audit with the words "like any other
+# review". The bootstrap is not like any other review: it PRODUCES its own
+# artifacts with no plan, no task spec and no approved requirement, so the
+# blind spec lens — whose entire question is "did they build what was ASKED?"
+# — has nothing to judge against. The guard that used to sit at line ~528
+# passed GREEN precisely BECAUSE the defect was present: it proved the
+# sentence had been typed, never that the rule held.
+#
+# Here the rule is EVALUATED, not quoted. None of the inputs below is a
+# constant typed by whoever wrote the fix:
+#   - the contract SLOT comes from the reviewers' own `**Placeholders:**`
+#     footers;
+#   - the fields a bootstrap's state carries come from starting-branch §8;
+#   - each flow's state is MATERIALIZED from the real template, and the
+#     contract predicate reads that file;
+#   - the FORM of each review is extracted BY POSITION from the flow's own
+#     closing section — an unclassifiable form FAILS, it never skips;
+#   - the central registry (`### Who dispatches which lenses`) must agree,
+#     flow by flow, with what each skill's own text says. That registry did
+#     not exist when #25 propagated the wrong sentence — which is exactly
+#     why nothing collided with it.
+# The one declared human constant is the mapping {FULL_TASK_TEXT} <- the
+# state's spec/plan, which pelizzai-review states verbatim ("the blind spec
+# lens receives diff + spec/plan + domain skills").
+#
+# What this does NOT catch, said plainly: the model's obedience to the
+# corrected prose. This evaluates a MODEL of the decision rule; if the model
+# and what the agent infers ever diverge, the suite stays green.
+#
+# Deliberately NOT done: no new file; no `review-form:` field in the state
+# (the suite would then be checking a field it asked for itself); and no
+# blanket Check-NotMatch of "spec lens" over the whole audit file (that would
+# forbid the audit from NAMING the anti-pattern).
+# =====================================================================
+
+function Get-Md34ContractSlots([string]$RelativePath) {
+    $footer = [regex]::Match((Text $RelativePath), '(?m)^\*\*Placeholders:\*\*.*$').Value
+    return @([regex]::Matches($footer, '\{([A-Z_]+)\}') | ForEach-Object { $_.Groups[1].Value })
+}
+
+function Get-Md34Section([string]$RelativePath, [string]$StartPattern, [string]$EndPattern) {
+    $text = Text $RelativePath
+    $start = [regex]::Match($text, $StartPattern, 'Multiline')
+    if (-not $start.Success) { return '' }
+    $rest = $text.Substring($start.Index)
+    $end = [regex]::Match($rest.Substring(1), $EndPattern, 'Multiline')
+    if ($end.Success) { return $rest.Substring(0, $end.Index + 1) }
+    return $rest
+}
+
+function Get-Md34ReviewForm([string]$Section) {
+    # The tweak track waives the formal review outright — check that FIRST, because its section
+    # legitimately names pelizzai-review when describing PROMOTION out of the lane.
+    if ($Section -match 'skips formal review|waives formal review') { return 'waived' }
+    # Classify only the neighbourhood of each pelizzai-review mention, never the whole section:
+    # the surrounding prose is about commits, seals and verification.
+    $windows = ''
+    foreach ($hit in [regex]::Matches($Section, 'pelizzai-review')) {
+        $from = [Math]::Max(0, $hit.Index - 240)
+        $length = [Math]::Min($Section.Length - $from, ($hit.Index - $from) + $hit.Length + 240)
+        $windows += $Section.Substring($from, $length) + "`n"
+    }
+    if ($windows -eq '') { return 'unclassified' }
+    if (($windows -match 'two\s+(independent\s+)?dispatches') -or
+        ($windows -match 'two\s+`?pelizzai-review`?\s+lenses') -or
+        ($windows -match 'both lenses')) { return 'two-lens' }
+    if ($windows -match 'Standalone change review') { return 'standalone' }
+    return 'delegated'
+}
+
+function New-Md34State([string]$Directory, [string]$Template, [hashtable]$Fields) {
+    $lines = $Template -split '\r?\n'
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        foreach ($field in $Fields.Keys) {
+            if ($lines[$i] -match ('^- {0}:' -f [regex]::Escape($field))) {
+                $lines[$i] = '- {0}: {1}' -f $field, $Fields[$field]
+            }
+        }
+    }
+    $dataDir = Join-Path $Directory 'pelizzai/data'
+    New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+    $statePath = Join-Path $dataDir 'state.md'
+    Set-Content -LiteralPath $statePath -Value ($lines -join "`n") -Encoding utf8
+    return $statePath
+}
+
+function Get-Md34Contract([string]$StatePath) {
+    $found = @()
+    foreach ($line in (Get-Content -LiteralPath $StatePath -Encoding utf8)) {
+        if ($line -match '^- (spec|plan):\s*(.*)$') {
+            $value = ($Matches[2] -replace '\s+#.*$', '').Trim()
+            # A template placeholder, an unfilled cursor or an explicit absence is NOT a contract.
+            # This is what makes the check indifferent to whether a bootstrap leaves `<pending>`
+            # or writes `not-applicable`: neither is a requirement ratified before the diff.
+            if ($value -and $value -notmatch '^<' -and
+                $value -notmatch '^(pending|none|not-applicable|explicitly waived)') {
+                $found += $Matches[1]
+            }
+        }
+    }
+    return @($found)
+}
+
+$md34Temp = $null
+try {
+    $md34Temp = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-md34-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $md34Temp | Out-Null
+
+    # -- (a) The blind lens needs a CONTRACT — derived from the reviewer templates themselves --
+    $md34SpecSlots = Get-Md34ContractSlots '.claude/skills/pelizzai-review/references/spec-reviewer.md'
+    $md34QualitySlots = Get-Md34ContractSlots '.claude/skills/pelizzai-review/references/code-reviewer.md'
+    Check ($md34SpecSlots.Count -ge 2) 'spec-reviewer: the Placeholders footer parses (slot derivation is live)'
+    Check ($md34QualitySlots.Count -ge 4) 'code-reviewer: the Placeholders footer parses (slot derivation is live)'
+    Check ($md34SpecSlots -contains 'FULL_TASK_TEXT') 'the blind lens requires the contract slot {FULL_TASK_TEXT}'
+    Check ($md34SpecSlots -notcontains 'IMPLEMENTER_REPORT') 'the blind lens does not take the implementer report'
+    Check ($md34QualitySlots -contains 'IMPLEMENTER_REPORT') 'the quality lens is the one that receives the report'
+    Check ($md34QualitySlots -notcontains 'FULL_TASK_TEXT') 'the quality lens does not depend on the {FULL_TASK_TEXT} contract slot'
+    Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' '## What was asked[\s\S]{0,120}\{FULL_TASK_TEXT\}' 'the blind lens fills {FULL_TASK_TEXT} with what was ASKED — a requirement ratified before the diff'
+
+    # -- (b) A bootstrap reaches its review with no contract — derived from starting-branch §8 --
+    $md34Setup = [regex]::Match((Text '.claude/skills/pelizzai-starting-branch/SKILL.md'), '(?m)^## 8\. State and report[\s\S]*?```text\r?\n([\s\S]*?)```')
+    Check ($md34Setup.Success) 'the setup state field list parses out of starting-branch §8'
+    $md34SetupFields = @([regex]::Matches($md34Setup.Groups[1].Value, '(?m)^([a-z-]+):') | ForEach-Object { $_.Groups[1].Value })
+    Check ($md34SetupFields.Count -ge 5) 'the setup state field list is non-degenerate'
+    Check (($md34SetupFields -notcontains 'spec') -and ($md34SetupFields -notcontains 'plan')) 'the isolation setup writes neither spec nor plan — a bootstrap has no contract at the source'
+
+    # -- (c) THE RULE, evaluated: each flow's state fixture vs the form of its closing review --
+    $md34StateTemplate = Text '.claude/skills/pelizzai-execute/templates/state.md'
+    $md34Flows = @(
+        [pscustomobject]@{
+            Skill = 'pelizzai-audit'
+            File  = '.claude/skills/pelizzai-audit/SKILL.md'
+            Start = '^### 7\. Validate and close'
+            End   = '^## Partial state'
+            # The bootstrap leaves spec/plan exactly as the template writes them: it DISCOVERS the
+            # project, it does not implement a requirement.
+            State = @{ slug = 'bootstrap-harness'; track = 'bootstrap'; phase = 'exec' }
+        },
+        [pscustomobject]@{
+            Skill = 'pelizzai-execute'
+            File  = '.claude/skills/pelizzai-execute/SKILL.md'
+            Start = '^### 3\. Validate the frozen candidate'
+            End   = '^### 4\. Seal and hand off'
+            # POSITIVE CONTROL: a planned delivery HAS a contract. Without this row the predicate
+            # could be a constant $false and every prohibition below would pass vacuously.
+            State = @{ slug = 'feature-x'; track = 'feature'; phase = 'exec'; spec = 'pelizzai/specs/2026-08-17-feature-x.md'; plan = 'pelizzai/plans/2026-08-17-feature-x.md' }
+        },
+        [pscustomobject]@{
+            Skill = 'pelizzai-debug'
+            File  = '.claude/skills/pelizzai-debug/SKILL.md'
+            Start = '^## Step 4 — implement and prove'
+            End   = '^## Proportional closeout'
+            State = @{ slug = 'bug-x'; track = 'bug'; phase = 'exec'; spec = 'not-applicable'; plan = 'not-applicable' }
+        },
+        [pscustomobject]@{
+            Skill = 'pelizzai-quick-fix'
+            File  = '.claude/skills/pelizzai-quick-fix/SKILL.md'
+            Start = '^## Process'
+            End   = '^## Red flags'
+            State = @{ slug = 'tweak-x'; track = 'tweak'; phase = 'exec'; spec = 'not-applicable'; plan = 'not-applicable' }
+        }
+    )
+
+    $md34Forms = @{}
+    foreach ($md34Flow in $md34Flows) {
+        $md34StatePath = New-Md34State (Join-Path $md34Temp $md34Flow.Skill) $md34StateTemplate $md34Flow.State
+        $md34Contract = Get-Md34Contract $md34StatePath
+        $md34Section = Get-Md34Section $md34Flow.File $md34Flow.Start $md34Flow.End
+        # A doctrine that MOVED does not silently turn this into a no-op.
+        Check ($md34Section -ne '') "the closing section of $($md34Flow.Skill) is located BY POSITION"
+        $md34Form = Get-Md34ReviewForm $md34Section
+        $md34Forms[$md34Flow.Skill] = $md34Form
+        # A paraphrase outside the closed lexicon does not go green: it FAILS by name.
+        Check ($md34Form -ne 'unclassified') "the review form of $($md34Flow.Skill) is classifiable (form=$md34Form)"
+        if ($md34Contract.Count -gt 0) {
+            Check ($md34Form -eq 'two-lens') "$($md34Flow.Skill) HAS a ratified contract ($($md34Contract -join '+')), so the blind lens is mandatory (form=$md34Form)"
+        } else {
+            # THE ASSERTION OF ISSUE #34, stated as a prohibition rather than a description.
+            Check ($md34Form -ne 'two-lens') "$($md34Flow.Skill) has NO contract in its state, so it must not demand the blind lens (form=$md34Form)"
+        }
+    }
+    Check ((Get-Md34Contract (Join-Path $md34Temp 'pelizzai-execute/pelizzai/data/state.md')).Count -eq 2) 'the contract predicate DOES fire on a planned delivery (positive control)'
+
+    # -- (d) The central registry must AGREE with each skill's own text (the gap #25 slipped through) --
+    $md34Registry = Get-Md34Section '.claude/skills/pelizzai-review/SKILL.md' '^### Who dispatches which lenses' '^### Standalone change review'
+    Check ($md34Registry -ne '') 'pelizzai-review carries the "Who dispatches which lenses" registry'
+    $md34Declared = @{}
+    foreach ($md34Entry in [regex]::Matches($md34Registry, '(?m)^- (pelizzai-[a-z-]+)\s+—([\s\S]*?)(?=(?:\r?\n- pelizzai-)|(?:\r?\n```))')) {
+        $md34Body = $md34Entry.Groups[2].Value
+        $md34Declared[$md34Entry.Groups[1].Value] =
+            if ($md34Body -match 'TWO lenses, TWO dispatches') { 'two-lens' }
+            elseif ($md34Body -match 'standalone change review') { 'standalone' }
+            elseif ($md34Body -match 'waives formal review') { 'waived' }
+            else { 'unclassified' }
+    }
+    Check (-not (Compare-Object @($md34Declared.Keys | Sort-Object) @($md34Flows.Skill | Sort-Object))) 'the registry and the measured population name the same head skills'
+    foreach ($md34Skill in @($md34Forms.Keys)) {
+        if ($md34Declared.ContainsKey($md34Skill)) {
+            Check ($md34Declared[$md34Skill] -eq $md34Forms[$md34Skill]) "the registry agrees with $md34Skill's own closing section (registry=$($md34Declared[$md34Skill]), text=$($md34Forms[$md34Skill]))"
+        }
+    }
+
+    # -- (e) The argument the correction rests on is now under assertion (it never was) --
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' '### Standalone change review[\s\S]{0,1200}no contract for it to judge against' 'the standalone section carries the canonical argument (no contract to judge against)'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Where a contract exists, both lenses go out' 'the standalone section states the converse: with a contract, both lenses go out'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'The rule behind the invariable' 'review names the GENERAL criterion, so the next flow of this shape does not inherit the defect'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Fabricating a contract so the blind lens has\s+something to read' 'review forbids the tempting wrong fix: inventing a contract to feed the blind lens'
+    Check-NotMatch '.claude/skills/pelizzai-audit/SKILL.md' 'two dispatches|both lenses|like any other\s+review' 'audit: the two-dispatch demand does not come back to the bootstrap (tombstone)'
+
+    # -- (f) Degradation reachable from EVERY flow that dispatches (secondary defect #1) --
+    $md34Edge = Get-Md34Section '.claude/skills/pelizzai-review/SKILL.md' '^## When there is no independent reviewer' '^## Review-pipeline anti-corruption'
+    Check ($md34Edge -ne '') 'the no-independent-reviewer section is located by position'
+    foreach ($md34Flow in $md34Flows) {
+        Check ($md34Edge -match [regex]::Escape($md34Flow.Skill)) "the degradation edge names $($md34Flow.Skill) as a detection anchor"
+    }
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'One lens is not inline' 'a single-lens flow still dispatches to an INDEPENDENT reviewer'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' '### 1\. Isolate before writing[\s\S]{0,3000}independent reviewer' 'the bootstrap checks reviewer capability at its own edge, before the first artifact'
+
+    # -- (g) The loop is bounded outside the task cycle (secondary defect #2) --
+    $md34Step7 = Get-Md34Section '.claude/skills/pelizzai-audit/SKILL.md' '^### 7\. Validate and close' '^## Partial state'
+    Check ($md34Step7 -match '3 fix.{0,3}re-review cycles') 'the bootstrap declares its own numeric loop bound'
+    Check ($md34Step7 -match 'phase: blocked') 'the bootstrap loop bound escalates through phase: blocked'
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'declares its own bound at its closing\s+step' 'task-cycle §5 points flows outside the cycle at their own bound'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'fix→re-review loop is still \*\*bounded\*\*' 'the standalone review keeps a bound after dropping the per-task machinery'
+
+    # -- (h) EXECUTABLE leg: the harness's own hook judging a bootstrap fixture --
+    # Not prose — the writegate binary decides. The path is the one a bootstrap actually writes
+    # (a domain skill under the active skill root), which is PRODUCT under Rule B. So a bootstrap
+    # that never records `kickoff: ratified` is locked out of its own step 3 by its own harness,
+    # and step 1 of the audit is the only owner of that marker in this flow.
+    $md34Mjs = Join-Path $root '.claude/hooks/pelizzai-writegate.mjs'
+    $md34Ps1 = Join-Path $root '.claude/hooks/pelizzai-writegate.ps1'
+    $md34Consumer = Join-Path $md34Temp 'consumer'
+    New-Item -ItemType Directory -Path $md34Consumer -Force | Out-Null
+    git -C $md34Consumer init -q
+    git -C $md34Consumer symbolic-ref HEAD refs/heads/main
+    git -C $md34Consumer config user.email 'contract@pelizzai.local'
+    git -C $md34Consumer config user.name 'PelizzAI Contract'
+    Set-Content -LiteralPath (Join-Path $md34Consumer 'seed.txt') -Value 'base' -Encoding utf8
+    git -C $md34Consumer add seed.txt
+    git -C $md34Consumer commit -q -m 'base'
+    git -C $md34Consumer checkout -q -b chore/bootstrap-harness
+    # No source sentinel here on purpose: this fixture is a CONSUMER, where Rule B applies.
+    # The state is exactly what pelizzai-starting-branch §5 leaves behind: written, kickoff pending.
+    $null = New-Md34State $md34Consumer $md34StateTemplate @{ slug = 'bootstrap-harness'; track = 'bootstrap'; branch = 'chore/bootstrap-harness'; isolation = 'branch' }
+    Check ((Test-Path -LiteralPath $md34Mjs) -and (Test-Path -LiteralPath $md34Ps1) -and (Test-Path -LiteralPath (Join-Path $md34Consumer '.git'))) 'issue #34: the writegate fixture was built (both legs + git)'
+    foreach ($md34Hook in @($md34Mjs, $md34Ps1)) {
+        $md34Leg = Split-Path -Leaf $md34Hook
+        Check ((Invoke-Writegate $md34Hook @{ file_path = '.claude/skills/dominio-x/SKILL.md' } $md34Consumer) -eq 2) "a bootstrap without a ratified kickoff cannot write its own domain skills ($md34Leg)"
+        Check ((Invoke-Writegate $md34Hook @{ file_path = 'pelizzai/data/state.md' } $md34Consumer) -eq 0) "control: the metadata carve-out still allows the cursor write ($md34Leg)"
+    }
+    # What step 1 of the audit now records — and, in a bootstrap, only it.
+    $null = New-Md34State $md34Consumer $md34StateTemplate @{ slug = 'bootstrap-harness'; track = 'bootstrap'; branch = 'chore/bootstrap-harness'; isolation = 'branch'; kickoff = 'ratified 2026-08-17' }
+    foreach ($md34Hook in @($md34Mjs, $md34Ps1)) {
+        $md34Leg = Split-Path -Leaf $md34Hook
+        Check ((Invoke-Writegate $md34Hook @{ file_path = '.claude/skills/dominio-x/SKILL.md' } $md34Consumer) -eq 0) "a bootstrap that ratifies its kickoff may write its domain skills ($md34Leg)"
+    }
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'sole owner of the\s+kickoff marker' 'audit step 1 owns the kickoff marker in the bootstrap'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'pelizzai-audit`.s own compact confirm in a bootstrap' 'router routes a bootstrap kickoff to pelizzai-audit'
+    Check-Match '.claude/skills/pelizzai-execute/templates/state.md' 'track: <[^>]*bootstrap' 'state.md: the bootstrap has a track of its own in the cursor it creates'
+} catch {
+    Check $false 'issue #34: bootstrap review decision matrix' $_.Exception.Message
+} finally {
+    if ($md34Temp -and (Test-Path -LiteralPath $md34Temp) -and ((Split-Path -Leaf $md34Temp) -like 'pelizzai-md34-*')) {
+        try { Remove-Item -LiteralPath $md34Temp -Recurse -Force -ErrorAction Stop } catch { }
+    }
 }
 
 Write-Host "`nResult: $passes PASS; $($failures.Count) FAIL."

@@ -181,7 +181,9 @@ Then:
 ```text
 1. Re-run the original oracle — now green.
 2. Run the relevant validation and confirm no regressions.
-3. Review the working tree with `pelizzai-review`; apply findings and re-run the affected proofs.
+3. Review the working tree with `pelizzai-review` → Standalone change review (quality/evidence
+   lens: a reported symptom is not a ratified contract for the blind lens); apply findings and
+   re-run the affected proofs. Bound: three failed definitive fixes escalate to the human.
 4. Consolidate the content into a definitive commit. If an explicitly authorized squash-final
    strategy produced WIPs, consolidate it now, before the seal; pelizzai-finish does not rewrite history.
 5. Run `pelizzai-final-verification` against the consolidated HEAD, record

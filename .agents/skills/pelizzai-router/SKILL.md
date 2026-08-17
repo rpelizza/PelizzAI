@@ -254,7 +254,7 @@ record them in the consumer state or the native execution record.
 Compute the setup defaults as a **recommendation**, not a decision applied silently. Read `pelizzai/profile.md` first (section `## Ratified execution defaults`, when it exists): a filled value is the recommendation to display; `<unset>` falls back to the proportional default below.
 
 ```text
-bounded/tweak/common bug:
+bounded/tweak/common bug/bootstrap:
   isolation: branch
   execution-mode: inline
   commit-strategy: granular
@@ -275,6 +275,14 @@ The router does not apply these defaults — it computes the recommendation and 
   base, name, isolation, mode, and commits visible and named; one "ok" ratifies everything, a named
   override adjusts only that item — before the first write. The router does not duplicate the
   question; the one-decision-per-turn menu belongs to the post-plan gate.
+- **Bootstrap** (write-local, no plan, and neither `tweak` nor `bug`): hand the recommendation to
+  `pelizzai-audit`, which issues its OWN compact one-line confirm at its step 1 — after
+  `pelizzai-starting-branch` ratified base and name, before the first artifact. That line is also
+  where the **reviewer capability** is checked (`pelizzai-review` → "When there is no independent
+  reviewer"). This partition is not decorative: without a branch of its own the bootstrap falls
+  between the other two — no post-plan gate, because there is no plan; no light-track confirm,
+  because it is not a light track — and reaches its first write with nothing ratified and no
+  `kickoff: ratified` recorded.
 
 `worktree` and `squash-final` are never applied without the user's choice. Use subagents/team for real independence, hypothesis diversity, or measurable gain; do not treat them as hierarchically better than inline.
 
@@ -326,8 +334,9 @@ and their ratifications live in the **plan header**, dated; the setup gate only 
 `kickoff: ratified` after checking them there or after recording the user's explicit waiver.
 
 When ratifying the kickoff gate, record the route's `lane`/`audience`/overlays, but leave
-`kickoff: pending`: the `kickoff: ratified <YYYY-MM-DD>` marker belongs to the post-plan setup gate
-or to the tweak/bug head skill's confirm, before the first product write. Resumption honors
+`kickoff: pending`: the `kickoff: ratified <YYYY-MM-DD>` marker belongs to the post-plan setup gate,
+to the tweak/bug head skill's confirm, or to `pelizzai-audit`'s own compact confirm in a bootstrap —
+always before the first product write. Resumption honors
 decisions already ratified; a new task never inherits `lane`/`kickoff`/`audience`.
 
 A new task never inherits decisions from the previous one. Closeout belongs to `pelizzai-finish`.
@@ -344,6 +353,8 @@ A new task never inherits decisions from the previous one. Closeout belongs to `
 - Treating frontend/security as a late offer.
 - Applying isolation, execution mode, or commit strategy without user ratification.
 - Scattering the route or the setup across several micro-questions instead of one grouped block.
+- Sending a bootstrap to the post-plan setup gate (it has no plan) or treating it as a light track —
+  it carries its own compact confirm, in `pelizzai-audit` step 1.
 - Scattering the tweak/bug compact confirm across separate questions, or promoting a tweak to
   bounded/plan just because the acceptance is clear (a spec/plan to change a button is the
   historical failure).
@@ -369,7 +380,8 @@ the block's depth can be a single line, but the affirmative answer is mandatory.
 **Before the kickoff:** in a consumer project without a catalog, the bootstrap proposal (§Source
 mode and bootstrap) comes first and applies even in `read-only`. It is not the kickoff — it is a
 one-line question about initializing the harness; a "no" returns the request to its original route
-without creating anything.
+without creating anything. The bootstrap's own kickoff comes later and elsewhere: the compact
+confirm of `pelizzai-audit` step 1, after the isolation and before the first artifact.
 
 **For every mutating task:** stop and wait for ratification. Ask a single question about the route;
 show details as context, not as several simultaneous questions:
@@ -401,7 +413,7 @@ at kickoff that they are coming and decides there.
 Accepting starts the sequential interview. Skipping discovery requires an explicit request and
 records which decisions were left unvalidated; the LLM does not fill those decisions on its own.
 
-**Setup stays out of this block:** isolation, mode (with `team` always visible), and commit are ratified at the post-plan setup gate of `pelizzai-execute` (tracks with a plan) or in the head skill's one-line confirm (tweak/bug). The router recommends silently and does not repeat the question.
+**Setup stays out of this block:** isolation, mode (with `team` always visible), and commit are ratified at the post-plan setup gate of `pelizzai-execute` (tracks with a plan), in the head skill's one-line confirm (tweak/bug), or in `pelizzai-audit`'s compact confirm (bootstrap). The router recommends silently and does not repeat the question.
 
 Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce route analyses or open the kickoff gate: apply the briefing and escalate to the coordinator whatever requires a decision.
 

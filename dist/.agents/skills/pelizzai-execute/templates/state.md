@@ -9,7 +9,7 @@
 ## Active task
 
 - slug: <none>
-- track: <feature | bug | tweak | refactor | infra | review>
+- track: <feature | bug | tweak | refactor | infra | review | bootstrap>
 - lane: <bounded | standard | exploratory>   # depth classified by the router, ratified at kickoff (high risk lands in `exploratory`; severity lives in `risk:`)
 - phase: <brainstorm | plan | exec | review | delivered | done | abandoned | blocked>   # pelizzai-finish does NOT declare `done`: it seals `delivered` (content + destination executed); `done` is observed later against git; `abandoned` = archived without merge
 - branch: <branch-name>
@@ -23,7 +23,7 @@
 - worktree-path: <none | path of the worktree, when isolation: worktree>
 - execution-mode: <pending | team | subagents | inline>   # <pending> until ratification; the three options always visible (team never omitted)
 - commit-strategy: <pending | granular | squash-final>   # <pending> until ratification; squash-final only on the user's explicit request
-- review-integrity: <blind | degraded YYYY-MM-DD — reason>   # `blind` = the norm (two lenses, two dispatches). `degraded` ONLY when the environment had no independent reviewer and the user accepted a declared non-blind review; it travels to the final report and to the next session (pelizzai-review → "When there is no independent reviewer")
+- review-integrity: <blind | degraded YYYY-MM-DD — reason>   # `blind` = every lens the flow REQUIRES ran independently (two where a ratified contract exists; the quality lens alone where none does — bootstrap, standalone). `degraded` ONLY when the environment had no independent reviewer and the user accepted a declared non-blind review; it travels to the final report and to the next session (pelizzai-review → "When there is no independent reviewer")
 - effect: <read-only | write-local | external>
 - risk: <low | medium | high>
 - overlays: <none | comma-separated names>   # required cross-cutting skills, e.g. pelizzai-frontend, pelizzai-oswap
