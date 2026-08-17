@@ -2105,10 +2105,7 @@ function Get-Md34Section([string]$RelativePath, [string]$StartPattern, [string]$
     return $rest
 }
 
-function Get-Md34ReviewForm([string]$Section) {
-    # The tweak track waives the formal review outright — check that FIRST, because its section
-    # legitimately names pelizzai-review when describing PROMOTION out of the lane.
-    if ($Section -match 'skips formal review|waives formal review') { return 'waived' }
+function Get-Md34ReviewWindows([string]$Section) {
     # Classify only the neighbourhood of each pelizzai-review mention, never the whole section:
     # the surrounding prose is about commits, seals and verification.
     $windows = ''
@@ -2117,12 +2114,43 @@ function Get-Md34ReviewForm([string]$Section) {
         $length = [Math]::Min($Section.Length - $from, ($hit.Index - $from) + $hit.Length + 240)
         $windows += $Section.Substring($from, $length) + "`n"
     }
-    if ($windows -eq '') { return 'unclassified' }
-    if (($windows -match 'two\s+(independent\s+)?dispatches') -or
-        ($windows -match 'two\s+`?pelizzai-review`?\s+lenses') -or
-        ($windows -match 'both lenses')) { return 'two-lens' }
-    if ($windows -match 'Standalone change review') { return 'standalone' }
+    return $windows
+}
+
+function Get-Md34ReviewForm([string]$Section, [string]$Windows) {
+    # The tweak track waives the formal review outright — check that FIRST, because its section
+    # legitimately names pelizzai-review when describing PROMOTION out of the lane.
+    if ($Section -match 'skips formal review|waives formal review') { return 'waived' }
+    if ($Windows -eq '') { return 'unclassified' }
+    if (($Windows -match 'two\s+(independent\s+)?dispatches') -or
+        ($Windows -match 'two\s+`?pelizzai-review`?\s+lenses') -or
+        ($Windows -match 'both lenses')) { return 'two-lens' }
+    if ($Windows -match 'Standalone change review') { return 'standalone' }
     return 'delegated'
+}
+
+function Get-Md34AffirmativeBlindLens([string]$Windows) {
+    # Every mention of the blind/spec lens that is NOT inside a negative construction.
+    #
+    # This exists because the form classifier above is a CLOSED LEXICON, and a closed lexicon only
+    # recognizes the wording of the defect it was written against. A step that names the standalone
+    # review AND, in the next clause, orders the blind lens dispatched would classify as
+    # `standalone` and pass — that hole was found by review, by rewriting step 7 exactly that way
+    # and watching the suite stay green. So the burden is INVERTED here: instead of enumerating the
+    # verbs a future defect might use ("dispatch", "send", "hand", "brief"…), any AFFIRMATIVE
+    # mention of the blind lens fails, whatever the phrasing. A no-contract flow may speak of that
+    # lens ONLY to say it is absent — which is what the corrected prose does ("no contract for the
+    # blind spec lens to judge against"; "a reported symptom is not a ratified contract for the
+    # blind lens").
+    $offenders = @()
+    foreach ($mention in [regex]::Matches($Windows, '(?i)\b(blind(\s+spec)?|spec)\s+lens\b|\bspec-reviewer\b')) {
+        $from = [Math]::Max(0, $mention.Index - 80)
+        $lead = $Windows.Substring($from, $mention.Index - $from)
+        if ($lead -notmatch '(?i)\b(no|not|never|without|absent|missing|nothing|lacks?)\b') {
+            $offenders += ('…' + $lead.Substring([Math]::Max(0, $lead.Length - 48)) + '[' + $mention.Value + ']')
+        }
+    }
+    return @($offenders)
 }
 
 function New-Md34State([string]$Directory, [string]$Template, [hashtable]$Fields) {
@@ -2225,15 +2253,26 @@ try {
         $md34Section = Get-Md34Section $md34Flow.File $md34Flow.Start $md34Flow.End
         # A doctrine that MOVED does not silently turn this into a no-op.
         Check ($md34Section -ne '') "the closing section of $($md34Flow.Skill) is located BY POSITION"
-        $md34Form = Get-Md34ReviewForm $md34Section
+        $md34Windows = Get-Md34ReviewWindows $md34Section
+        $md34Form = Get-Md34ReviewForm $md34Section $md34Windows
+        $md34Affirmative = Get-Md34AffirmativeBlindLens $md34Windows
         $md34Forms[$md34Flow.Skill] = $md34Form
         # A paraphrase outside the closed lexicon does not go green: it FAILS by name.
         Check ($md34Form -ne 'unclassified') "the review form of $($md34Flow.Skill) is classifiable (form=$md34Form)"
         if ($md34Contract.Count -gt 0) {
             Check ($md34Form -eq 'two-lens') "$($md34Flow.Skill) HAS a ratified contract ($($md34Contract -join '+')), so the blind lens is mandatory (form=$md34Form)"
+            # Positive control for the predicate below: where the blind lens IS mandatory, the
+            # closing section must really speak of it affirmatively. Without this, an
+            # always-empty predicate would let every prohibition below pass vacuously.
+            Check ($md34Affirmative.Count -gt 0) "$($md34Flow.Skill) HAS a contract, so its closing section really sends the blind lens out"
         } else {
-            # THE ASSERTION OF ISSUE #34, stated as a prohibition rather than a description.
+            # THE ASSERTION OF ISSUE #34, in two independent forms.
+            # (i) lexical: none of the known two-dispatch phrasings.
             Check ($md34Form -ne 'two-lens') "$($md34Flow.Skill) has NO contract in its state, so it must not demand the blind lens (form=$md34Form)"
+            # (ii) phrasing-independent: the section may mention the blind lens ONLY to say it is
+            # absent. This closes the hole (i) leaves open — naming the standalone review and, in
+            # the next clause, ordering the blind lens out satisfies (i) and still reintroduces #34.
+            Check ($md34Affirmative.Count -eq 0) "$($md34Flow.Skill) has NO contract, so its closing section must not send the blind lens out ($($md34Affirmative -join ' | '))"
         }
     }
     Check ((Get-Md34Contract (Join-Path $md34Temp 'pelizzai-execute/pelizzai/data/state.md')).Count -eq 2) 'the contract predicate DOES fire on a planned delivery (positive control)'
