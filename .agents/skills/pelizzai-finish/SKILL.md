@@ -360,12 +360,12 @@ is propose-and-confirm and coordinator action; a team member only flags the gap 
   the worth-it gate's second condition — the local fix did not prevent the next one — so flag
   THAT to `pelizzai-evolve` in place of the promotion. **Count over the whole corpus** —
   `learnings.md` plus every existing `pelizzai/data/history/learnings-<YYYY>.md`; the valve
-  leaves a pointer naming each one, and a missing pointer is no excuse — enumerate
-  `history/learnings-*`. Counting the active file alone means archiving lowers the number that
-  decides the promotion, which turns a budget measure into a silent veto on prevention. Check
-  the budgets on `learnings.md` itself, **per section, never summed**, and **at or past** the
-  ceiling — they are hard, so reaching 40/160 already needs the valve: Active rules at or past
-  40 lines (flag it), Incident log at or past 160 (route the oldest entries to
+  leaves a pointer naming each one, and a missing pointer is no excuse — enumerate every
+  `history/learnings-<YYYY>.md`. Counting the active file alone means archiving lowers the
+  number that decides the promotion, which turns a budget measure into a silent veto on
+  prevention. Check the budgets on `learnings.md` itself, **per section, never summed**, and
+  **at or past** the ceiling — they are hard, so reaching 40/160 already needs the valve: Active
+  rules at or past 40 lines (flag it), Incident log at or past 160 (route the oldest entries to
   `pelizzai/data/history/learnings-<YYYY>.md`, leaving the pointer that keeps them findable) —
   plus `verification-standard.md` at or past 150. A full log is NOT a reason to retire a rule:
   the ceilings are separate precisely so the history cannot evict the prevention, and the log's

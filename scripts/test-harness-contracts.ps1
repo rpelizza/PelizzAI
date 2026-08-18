@@ -2060,7 +2060,11 @@ try {
     # Cardinality is what keeps the pointer budget-neutral: one per ARCHIVE FILE, not per entry.
     # Drift to one-per-entry would make the log grow with archiving and stop the valve being a valve.
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'one\s+pointer\s+per\s+archive' 'evolve: one pointer per archive file, not per entry'
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'a\s+missing\s+pointer\s+is\s+no\s+excuse[\s\S]{0,120}enumerate\s+`history/learnings-\*`' 'finish: enumerate the learnings archives even with no pointer'
+    # The enumeration pattern must stay RESTRICTED to the year archives: a `learnings-*` glob also
+    # matches a stray learnings-notes.md and would inflate the very count this fix protects.
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'a\s+missing\s+pointer\s+is\s+no\s+excuse[\s\S]{0,120}enumerate\s+every\s+`history/learnings-<YYYY>\.md`' 'finish: enumerate the learnings archives even with no pointer'
+    Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' 'history/learnings-\*' 'finish: no permissive learnings-* glob'
+    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'enumerated,\s+pointer\s+or\s+no\s+pointer' 'debug: the archives are enumerated, pointer or not'
     # The corpus is read whole, but it is not written whole: an archived entry is evidence, and a
     # promotion that only flipped statuses there would leave no standing rule — so the count would
     # keep finding the same cause forever. The Active rule IS the record that it already happened.
