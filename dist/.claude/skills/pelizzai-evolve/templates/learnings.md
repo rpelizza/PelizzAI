@@ -10,8 +10,12 @@
 > **Budget: 40 lines hard.**
 >
 > **Incident log** — evidence, consulted ON DEMAND (promotion, recurrence check, doubt about a
-> rule's origin). Never loaded at task start. **Budget: 160 lines hard**; at the ceiling with
-> nothing retirable, the OLDEST entries move to `pelizzai/data/history/learnings-<YYYY>.md`.
+> rule's origin); never loaded at task start. Those three read this file **and** every existing
+> `pelizzai/data/history/learnings-<YYYY>.md`: archiving protects the budget, never the count
+> that earns a promotion. **Budget: 160 lines hard**; at the ceiling with nothing retirable, the
+> OLDEST entries move to `pelizzai/data/history/learnings-<YYYY>.md`, leaving in this file, in
+> their place, the pointer
+> `<!-- archived to pelizzai/data/history/learnings-<YYYY>.md — consult on a recurrence check -->`.
 >
 > Incidents are written when a defect's root cause is CONFIRMED (usually by `pelizzai-debug`,
 > inside the fix's own commit); `pelizzai-finish` counts recurrences at closeout;
@@ -41,7 +45,11 @@
      skill or a linter — retired entries leave the file).
      BUDGET: 160 lines hard. At the ceiling with nothing retirable, move the OLDEST entries to
      pelizzai/data/history/learnings-<YYYY>.md: the evidence is kept, it just stops competing
-     for the space that is read at task start. -->
+     for the space that is read at task start. The move is only complete when it leaves a
+     pointer in this file, below, in place of the entries that left — one line per archive file,
+     in the exact form the header above gives. A second move into a file already pointed to
+     reuses that line. Whoever counts a recurrence reads this file AND every existing archive:
+     a shorter log must never mean a smaller count. -->
 
 - <YYYY-MM-DD> <slug> — status: candidate
   - trigger: <the observable event>
