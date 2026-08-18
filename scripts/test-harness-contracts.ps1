@@ -2067,6 +2067,13 @@ try {
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'archives\s+are\s+append-only' 'evolve: promotion never rewrites an archived entry'
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'flip\s+reaches\s+only\s+the\s+entries\s+still\s+in\s+`learnings\.md`' 'evolve: the flip is scoped to the active file, not the archives'
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'Flipping\s+an\s+archived\s+entry' 'evolve: rewriting an archived entry is a red flag'
+    # Pin the red flag's SECOND half too: pinning a bullet's opening words leaves its body free to
+    # be replaced by its own negation with the suite green (proven by mutation during review).
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'landing\s+a\s+promotion\s+that\s+never\s+reaches\s+Active\s+rules' 'evolve: a promotion that never lands in Active rules is a red flag'
+    # PRESERVATION pin, not a discriminating one: this clause predates issue #38 and matches the
+    # old content too. finish now redirects to it by name, which makes it load-bearing across
+    # skills — without the pin it could vanish while finish keeps confidently naming it.
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'a\s+local\s+fix\s+demonstrably\s+does\s+not\s+prevent\s+the\s+next\s+one' 'evolve: the gate keeps the second condition finish redirects to'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'already\s+carries\s+a\s+rule\s+for\s+that\s+root\s+cause' 'finish: a root cause with a standing rule is not re-offered'
     # Suppressing the offer is not the whole answer: a recurrence WITH the rule already in force is
     # the worth-it gate's second condition, so it must be routed, not swallowed.
