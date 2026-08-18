@@ -29,7 +29,7 @@ in the native execution record.
 | --- | --- | --- | --- |
 | `pelizzai/data/verification-standard.md` | what *correct* means here | `pelizzai-final-verification` before judging a delivery · `pelizzai-review` when briefing reviewers · `pelizzai-writing-plans` when drafting validation | `pelizzai-audit` at bootstrap · here, in its own ratified change — **never during a correction** |
 | `pelizzai/data/learnings.md` (**Active rules**) | what execution already learned | `pelizzai-writing-plans` before approaches · `pelizzai-execute` before Task 1 **and pasted into every task briefing** · `pelizzai-quick-fix` before the change · `pelizzai-debug` on entering the investigation and again when choosing the proof | incident entries at root-cause confirmation (usually `pelizzai-debug`, in the fix's own commit) · `pelizzai-finish` counts recurrences at closeout · here, on promotion and retirement |
-| `pelizzai/data/learnings.md` (**Incident log**) | the evidence that earned each rule | on demand: promotion, recurrence check, and when a rule's origin is in doubt — **not** loaded at task start | same as above |
+| `pelizzai/data/learnings.md` (**Incident log**) | the evidence that earned each rule | on demand — **not** loaded at task start: promotion, recurrence check, and when a rule's origin is in doubt; those three read `learnings.md` **and** every existing `pelizzai/data/history/learnings-<YYYY>.md`, never the active file alone | same as above |
 
 `verification-standard.md` missing in a consumer → propose creating it from
 [templates/verification-standard.md](templates/verification-standard.md); `learnings.md`
@@ -82,12 +82,17 @@ coverage while doing it.
 **Promotion:** a learning becomes a standing rule only after it **recurred 2–3 times**. The
 first occurrence is an incident (`candidate`); the repeat is the evidence. `pelizzai-finish`
 counts — writing a closeout for a task that fixed a confirmed defect, it checks whether that
-root cause is already in the log, and a match routes here. The promotion itself happens here and
-is **ratified by the user** via `pelizzai-interview`: flip the entries to `promoted`, write
-the one-line imperative into **Active rules** with its scope, and propose an edit to the
-project's `CLAUDE.md` only when the rule must hold before any skill loads — in the **project's
-own section, never inside the `pelizzai:contract` block** (the anchored block belongs to the
-harness and is overwritten by the next sync).
+root cause is already in the log, and a match routes here. **That count runs over the whole
+corpus**: `learnings.md` plus every existing `pelizzai/data/history/learnings-<YYYY>.md`.
+Counting the active file alone makes archiving lower the number that decides promotion — the
+prevention mechanism weakened by the very act of preserving its evidence. The count is also the
+reason the valve leaves a pointer behind (below): a corpus nobody can find is a corpus nobody
+reads. The promotion itself happens here and is **ratified by the user** via
+`pelizzai-interview`: flip the entries to `promoted`, write the one-line imperative into
+**Active rules** with its scope, and propose an edit to the project's `CLAUDE.md` only when the
+rule must hold before any skill loads — in the **project's own section,
+never inside the `pelizzai:contract` block** (the anchored block belongs to the harness and is
+overwritten by the next sync).
 
 **Two budgets, deliberately separate.** **Active rules: 40 lines hard. Incident log: 160 lines
 hard.** They are NOT one pool of 200. Under a shared budget the log wins by construction — it
@@ -99,8 +104,16 @@ Retire before adding, **within each section**: an entry whose failure mode can n
 (code gone, dependency dropped, rule absorbed by a domain skill or a linter) goes `retired` and
 out. A log at its ceiling with nothing retirable moves its OLDEST entries to
 `pelizzai/data/history/learnings-<YYYY>.md` — the evidence is kept, it just stops competing for
-the space that is read at task start. Active rules at their ceiling is a different signal: 40
-lines of standing rules means the project needs a domain skill or a linter, not a longer file.
+the space that is read at task start. **Archiving is a budget measure and nothing else: the
+moved entries stay in the corpus of the recurrence check.** So the move is only complete when it
+leaves a **pointer in `learnings.md`**, in place of the entries that left — one line naming the
+archive it wrote to and saying to consult it on a recurrence check — one pointer per archive
+file, so a move into a file already pointed to needs no second line. The pointer replaces
+entries, so it costs the section nothing it was not already spending. Without the pointer,
+whoever counts sees a shorter log and no reason to suspect there is more, which is exactly how
+archiving turns into a silent reduction of the count. Active rules at their ceiling is a
+different signal: 40 lines of standing rules means the project needs a domain skill or a linter,
+not a longer file.
 
 ## The two channels
 
@@ -122,7 +135,8 @@ opinion — present it as one.
 ## The worth-it gate
 
 Escalate from a local fix to a structural change only when **both** hold: the defect
-**recurred** (it is in the log at least twice), and a local fix demonstrably does not prevent
+**recurred** (at least twice in the corpus — `learnings.md` plus every existing
+`pelizzai/data/history/learnings-<YYYY>.md`), and a local fix demonstrably does not prevent
 the next one. Otherwise fix locally, log, move on. Every change is **reversible**, its revert
 line written before it lands; nothing structural, shared, or irreversible lands without explicit
 user approval — including the standard, `CLAUDE.md`, shared config, and anything another project
@@ -151,6 +165,9 @@ consumes.
   hard, so touching 40/160 already engages the valve; waiting to exceed them means the next
   promotion has nowhere to land. Each section reacts on its OWN ceiling (a full log is never a
   reason to retire a rule; a full rules section is never a reason to archive the log).
+- Counting a recurrence over `learnings.md` alone while `pelizzai/data/history/` holds archived
+  entries — or archiving without leaving the pointer, which produces the same blind count by
+  omission. Archiving protects the budget, never the count that earns a promotion.
 - Declaring a reader of the Active rules that does not actually read them. A false declaration is
   worse than an absent one: whoever audits the harness assumes a coverage that is not there.
 - Writing a `scope:` in prose instead of paths/globs — or building a mechanism that loads only
