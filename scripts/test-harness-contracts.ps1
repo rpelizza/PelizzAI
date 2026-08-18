@@ -1978,7 +1978,9 @@ try {
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'They are NOT one pool of 200' 'evolve: the budgets are not a shared pool'
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'the log wins by construction' 'evolve names why a shared budget evicts the rules'
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'history/learnings-<YYYY>\.md' 'evolve: the log valve is archiving, not retiring a rule'
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'per section, never summed' 'finish checks the two learnings budgets separately'
+    # Whitespace-tolerant on purpose: a literal space does not match a newline, so a plain reflow
+    # of this paragraph used to break the check in silence — invisible to whoever edits the prose.
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'per\s+section,\s+never\s+summed' 'finish checks the two learnings budgets separately'
     Check-NotMatch '.claude/skills/pelizzai-evolve/templates/learnings.md' '~200 lines hard' 'learnings template: the single shared budget is gone'
 
     # -- Every track reads the Active rules; the declaration matches reality --
@@ -2012,7 +2014,7 @@ try {
     # lets the file legitimately sit at the ceiling with the next promotion having nowhere to land.
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' '\*\*at or past\*\* either budget' 'evolve: the red flag fires AT the ceiling, not only past it'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '\*\*at or past\*\* the\s+ceiling' 'finish: the budget check fires AT the ceiling'
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Incident log at or past 160 \(route the oldest entries' 'finish: at the log ceiling the action is archiving, not retiring a rule'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Incident\s+log\s+at\s+or\s+past\s+160\s+\(route\s+the\s+oldest\s+entries' 'finish: at the log ceiling the action is archiving, not retiring a rule'
 
     # -- Source mode has no consumer runtime: reading learnings there must never create pelizzai/ --
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'CONSUMER ONLY' 'execute: reading the Active rules is qualified as consumer-only'
@@ -2031,6 +2033,40 @@ try {
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'incident entry \(status candidate\)' 'debugging writes the incident at root-cause confirmation'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'verification-standard\.md' 'review pastes the standard criteria into the briefing'
     Check (Test-Path (Join-Path $root 'dist/.claude/skills/pelizzai-evolve/templates/learnings.md')) 'dist ships the evolve templates'
+
+    # -- Issue #38 (2026-08-18) — archiving evidence must not shrink the recurrence count --
+    # The log valve moves the OLDEST entries to pelizzai/data/history/learnings-<YYYY>.md, but every
+    # instruction that COUNTS a recurrence named a single file. So the budget measure quietly
+    # lowered the number that decides promotion: the prevention mechanism weakened by the very act
+    # of preserving its evidence. Three skills decide or flag that count and each one is pinned
+    # here — evolve (the doctrine and the worth-it gate), finish (the closeout count), debug (the
+    # flag written with the incident) — plus the template a consumer actually reads.
+    # Every phrase here lives in reflowable prose, so the patterns bridge whitespace: a literal
+    # space would turn an innocent rewrap into a silent loss of coverage. Inside the template's
+    # blockquote the continuation carries a `>`, hence [\s>]+ there. Bounded gaps are sized with
+    # real slack — a bound pinned to today's byte count fails on a reword that changes no doctrine.
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'on\s+demand[\s\S]{0,240}every\s+existing\s+`pelizzai/data/history/learnings-<YYYY>\.md`,\s+never\s+the\s+active\s+file\s+alone' 'evolve: the on-demand reads cover the corpus, not the active file alone'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'count\s+runs\s+over\s+the\s+whole\s+corpus' 'evolve: promotion counts over log + archives'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'at\s+least\s+twice\s+in\s+the\s+corpus' 'evolve: the worth-it gate counts over the corpus too'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'Counting\s+a\s+recurrence\s+over\s+`learnings\.md`\s+alone' 'evolve: counting only the active file is a red flag'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Count\s+over\s+the\s+whole\s+corpus' 'finish: the closeout count covers the archives'
+    Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'already\s+in\s+the\s+corpus[\s\S]{0,160}history/learnings-<YYYY>' 'debug: the recurrence flag covers the archives'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'Those[\s>]+three[\s>]+read[\s>]+this[\s>]+file[\s>]+\*\*and\*\*[\s>]+every[\s>]+existing[\s>]+`pelizzai/data/history/learnings-<YYYY>\.md`' 'learnings template: the on-demand reads name the corpus'
+    # The pointer is what makes the archive findable to whoever counts. Both halves are asserted:
+    # the valve must leave it, and counting must not depend on finding one (an archive written
+    # before this rule, or by hand, still counts — enumerate history/).
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'pointer\s+in\s+`learnings\.md`' 'evolve: archiving is only complete with the pointer'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'archiving\s+without\s+leaving\s+the\s+pointer' 'evolve: a pointerless archive is a red flag'
+    # Cardinality is what keeps the pointer budget-neutral: one per ARCHIVE FILE, not per entry.
+    # Drift to one-per-entry would make the log grow with archiving and stop the valve being a valve.
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'one\s+pointer\s+per\s+archive' 'evolve: one pointer per archive file, not per entry'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'a\s+missing\s+pointer\s+is\s+no\s+excuse[\s\S]{0,120}enumerate\s+`history/`' 'finish: enumerate history/ even with no pointer'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' '<!--[\s>]+archived[\s>]+to[\s>]+pelizzai/data/history/learnings-<YYYY>\.md[\s>]+—[\s>]+consult[\s>]+on[\s>]+a[\s>]+recurrence[\s>]+check[\s>]+-->' 'learnings template: the pointer has an exact form'
+    # Control: the fix must NOT inflate what is read at task start — that ceiling is the whole point
+    # of the two budgets. Only the Active rules load there; the archives stay on demand.
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' '\*\*not\*\*\s+loaded\s+at\s+task\s+start' 'evolve: the incident log (and its archives) stay off the task-start load'
+    Check-NotMatch '.claude/skills/pelizzai-execute/references/task-cycle.md' 'history/learnings-' 'task briefing still carries the Active rules only, no archives'
+    Check-NotMatch '.claude/skills/pelizzai-quick-fix/SKILL.md' 'history/learnings-' 'quick-fix start-of-task read does not reach the archives'
 
     # -- Frontend fusion (2026-08-06): the best of the Noetron design node merged in --
     Check (Test-Path (Join-Path $root '.claude/skills/pelizzai-frontend/references/craft-floor.md')) 'frontend ships the measurable craft floor'
