@@ -171,6 +171,9 @@ consumes.
 - Counting a recurrence over `learnings.md` alone while `pelizzai/data/history/` holds archived
   entries — or archiving without leaving the pointer, which produces the same blind count by
   omission. Archiving protects the budget, never the count that earns a promotion.
+- Flipping an archived entry to `promoted`, or landing a promotion that never reaches Active
+  rules: the archives are append-only, and the standing rule is the ONLY record that a cause was
+  already promoted. Without it the corpus keeps counting the same cause forever.
 - Declaring a reader of the Active rules that does not actually read them. A false declaration is
   worse than an absent one: whoever audits the harness assumes a coverage that is not there.
 - Writing a `scope:` in prose instead of paths/globs — or building a mechanism that loads only

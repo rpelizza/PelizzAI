@@ -2065,8 +2065,15 @@ try {
     # promotion that only flipped statuses there would leave no standing rule — so the count would
     # keep finding the same cause forever. The Active rule IS the record that it already happened.
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'archives\s+are\s+append-only' 'evolve: promotion never rewrites an archived entry'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'flip\s+reaches\s+only\s+the\s+entries\s+still\s+in\s+`learnings\.md`' 'evolve: the flip is scoped to the active file, not the archives'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'Flipping\s+an\s+archived\s+entry' 'evolve: rewriting an archived entry is a red flag'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'already\s+carries\s+a\s+rule\s+for\s+that\s+root\s+cause' 'finish: a root cause with a standing rule is not re-offered'
+    # Suppressing the offer is not the whole answer: a recurrence WITH the rule already in force is
+    # the worth-it gate's second condition, so it must be routed, not swallowed.
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'flag\s+THAT\s+to\s+`pelizzai-evolve`' 'finish: a recurrence despite a standing rule is routed, not silenced'
     Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'Whoever\s+counts\s+a\s+recurrence\s+reads\s+this\s+file\s+AND\s+every\s+existing\s+archive' 'learnings template: the incident-log comment keeps the corpus rule'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'append-only\s+evidence' 'learnings template: archived entries are append-only'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'one\s+line\s+per\s+archive\s+file' 'learnings template: one pointer line per archive file'
     # Counting spans the corpus; the BUDGET does not. Without this sentence the corpus language
     # could be read as a corpus-wide ceiling, which would make the valve unable to ever relieve it.
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'budgets\s+on\s+`learnings\.md`\s+itself' 'finish: the budgets are measured on the active file, not on the corpus'
