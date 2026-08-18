@@ -351,18 +351,23 @@ is propose-and-confirm and coordinator action; a team member only flags the gap 
   (advisory) — the whole template is ~50. The intact-block migration to `data/history/` at the
   `delivered` seal already slims the state; condensing what remains is propose-and-confirm.
 - **Learnings recurrence and budgets (`pelizzai-evolve`):** when this task fixed a confirmed
-  defect, check `pelizzai/data/learnings.md`: the incident entry should already be there (written
-  at root-cause confirmation, inside the fix's commit) — missing, flag it; and when the same root
-  cause appears 2–3 times, offer ONCE the promotion via `pelizzai-evolve` (ratified by the user,
-  never automatic). Check the budgets **per section, never summed**, and **at or past** the
-  ceiling — they are hard, so reaching 40/160 already needs the valve: Active rules at or past 40
-  lines (flag it), Incident log at or past 160 (route the oldest entries to
-  `pelizzai/data/history/learnings-<YYYY>.md`) — plus `verification-standard.md` at or past 150.
-  A full log is NOT a reason
-  to retire a rule: the ceilings are separate precisely so the history cannot evict the
-  prevention, and the log's valve is moving the oldest entries to
-  `pelizzai/data/history/learnings-<YYYY>.md`. A start-of-task read over budget is a file nobody
-  reads, and the valve (retire / archive / replace baseline rows) belongs to `pelizzai-evolve`.
+  defect, check `pelizzai/data/learnings.md`: the incident entry should already be there
+  (written at root-cause confirmation, inside the fix's commit) — missing, flag it; and when the
+  same root cause appears 2–3 times, offer ONCE the promotion via `pelizzai-evolve` (ratified by
+  the user, never automatic). **Count over the whole corpus** — `learnings.md` plus every
+  existing `pelizzai/data/history/learnings-<YYYY>.md`; the valve leaves a pointer naming each
+  one, and a missing pointer is no excuse — enumerate `history/`. Counting the active file alone
+  means archiving lowers the number that decides the promotion, which turns a budget measure
+  into a silent veto on prevention. Check the budgets on `learnings.md` itself,
+  **per section, never summed**, and **at or past** the ceiling — they are hard, so reaching
+  40/160 already needs the valve: Active rules at or past 40 lines (flag it),
+  Incident log at or past 160 (route the oldest entries to
+  `pelizzai/data/history/learnings-<YYYY>.md`, leaving the pointer that keeps them findable) —
+  plus `verification-standard.md` at or past 150. A full log is NOT a reason to retire a rule:
+  the ceilings are separate precisely so the history cannot evict the prevention, and the log's
+  valve is moving the oldest entries to `pelizzai/data/history/learnings-<YYYY>.md`, leaving its
+  pointer. A start-of-task read over budget is a file nobody reads, and the valve (retire /
+  archive / replace baseline rows) belongs to `pelizzai-evolve`.
 
 Source mode, or no hook and no ledger: silent no-op.
 

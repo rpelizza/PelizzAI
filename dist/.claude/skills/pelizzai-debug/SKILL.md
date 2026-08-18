@@ -213,7 +213,8 @@ Always:
 [ ] Consumer only: incident entry (status candidate) appended to pelizzai/data/learnings.md in
     the fix's own commit — trigger, root cause, smallest durable fix (file:line), rule learned
     or `n/a — one-off`, scope, revert. Format and promotion belong to pelizzai-evolve; a cause
-    already in the log is a RECURRENCE — flag it for promotion at closeout.
+    already in the corpus — learnings.md plus every existing history/learnings-<YYYY>.md, which
+    the valve's pointers name — is a RECURRENCE; flag it for promotion at closeout.
 ```
 
 For a recurring, distributed, or security failure, or an incident, also record: confirmed cause, contributing factors, containment, prevention/detection, and "what would have prevented this?". For an obviously wrong import, do not invent a post-mortem.
