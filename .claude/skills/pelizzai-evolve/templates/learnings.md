@@ -49,7 +49,9 @@
      pointer in this file, below, in place of the entries that left — one line per archive file,
      in the exact form the header above gives. A second move into a file already pointed to
      reuses that line. Whoever counts a recurrence reads this file AND every existing archive:
-     a shorter log must never mean a smaller count. -->
+     a shorter log must never mean a smaller count. Archived entries are append-only evidence:
+     a promotion flips only what is still HERE and writes the rule into Active rules, which is
+     what records that the promotion already happened. -->
 
 - <YYYY-MM-DD> <slug> — status: candidate
   - trigger: <the observable event>

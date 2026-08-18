@@ -89,10 +89,13 @@ prevention mechanism weakened by the very act of preserving its evidence. The co
 reason the valve leaves a pointer behind (below): a corpus nobody can find is a corpus nobody
 reads. The promotion itself happens here and is **ratified by the user** via
 `pelizzai-interview`: flip the entries to `promoted`, write the one-line imperative into
-**Active rules** with its scope, and propose an edit to the project's `CLAUDE.md` only when the
-rule must hold before any skill loads — in the **project's own section,
-never inside the `pelizzai:contract` block** (the anchored block belongs to the harness and is
-overwritten by the next sync).
+**Active rules** with its scope. **The archives are append-only**: the flip reaches only the
+entries still in `learnings.md` — an archived entry is evidence, not state to rewrite. What
+records that a root cause was already promoted is the standing rule in **Active rules**, so a
+promotion that never lands there leaves the corpus counting the same cause forever. Propose an
+edit to the project's `CLAUDE.md` only when the rule must hold before any skill loads — in the
+**project's own section, never inside the `pelizzai:contract` block** (the anchored block
+belongs to the harness and is overwritten by the next sync).
 
 **Two budgets, deliberately separate.** **Active rules: 40 lines hard. Incident log: 160 lines
 hard.** They are NOT one pool of 200. Under a shared budget the log wins by construction — it

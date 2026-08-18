@@ -2060,7 +2060,13 @@ try {
     # Cardinality is what keeps the pointer budget-neutral: one per ARCHIVE FILE, not per entry.
     # Drift to one-per-entry would make the log grow with archiving and stop the valve being a valve.
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'one\s+pointer\s+per\s+archive' 'evolve: one pointer per archive file, not per entry'
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'a\s+missing\s+pointer\s+is\s+no\s+excuse[\s\S]{0,120}enumerate\s+`history/`' 'finish: enumerate history/ even with no pointer'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'a\s+missing\s+pointer\s+is\s+no\s+excuse[\s\S]{0,120}enumerate\s+`history/learnings-\*`' 'finish: enumerate the learnings archives even with no pointer'
+    # The corpus is read whole, but it is not written whole: an archived entry is evidence, and a
+    # promotion that only flipped statuses there would leave no standing rule — so the count would
+    # keep finding the same cause forever. The Active rule IS the record that it already happened.
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'archives\s+are\s+append-only' 'evolve: promotion never rewrites an archived entry'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'already\s+carries\s+a\s+rule\s+for\s+that\s+root\s+cause' 'finish: a root cause with a standing rule is not re-offered'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'Whoever\s+counts\s+a\s+recurrence\s+reads\s+this\s+file\s+AND\s+every\s+existing\s+archive' 'learnings template: the incident-log comment keeps the corpus rule'
     # Counting spans the corpus; the BUDGET does not. Without this sentence the corpus language
     # could be read as a corpus-wide ceiling, which would make the valve unable to ever relieve it.
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'budgets\s+on\s+`learnings\.md`\s+itself' 'finish: the budgets are measured on the active file, not on the corpus'
