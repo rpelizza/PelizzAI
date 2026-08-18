@@ -109,8 +109,9 @@ out. A log at its ceiling with nothing retirable moves its OLDEST entries to
 `pelizzai/data/history/learnings-<YYYY>.md` — the evidence is kept, it just stops competing for
 the space that is read at task start. **Archiving is a budget measure and nothing else: the
 moved entries stay in the corpus of the recurrence check.** So the move is only complete when it
-leaves a **pointer in `learnings.md`**, in place of the entries that left — one line naming the
-archive it wrote to and saying to consult it on a recurrence check — one pointer per archive
+leaves a **pointer in `learnings.md`**, in place of the entries that left: one line, an HTML
+comment in the exact form [templates/learnings.md](templates/learnings.md) gives, naming the
+archive it wrote to and saying to consult it on a recurrence check. One pointer per archive
 file, so a move into a file already pointed to needs no second line. The pointer replaces
 entries, so it costs the section nothing it was not already spending. Without the pointer,
 whoever counts sees a shorter log and no reason to suspect there is more, which is exactly how

@@ -2059,6 +2059,10 @@ try {
     # the valve must leave it, and counting must not depend on finding one (an archive written
     # before this rule, or by hand, still counts — enumerate history/).
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'pointer\s+in\s+`learnings\.md`' 'evolve: archiving is only complete with the pointer'
+    # The skill states the pointer's FORM by citing the template, which pelizzai-audit designates as
+    # the format authority. Naming it here and pinning the citation keeps the chain explicit without
+    # copying the literal into two files, which is how two sources of truth start to drift.
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'pointer\s+in\s+`learnings\.md`[\s\S]{0,160}an\s+HTML\s+comment\s+in\s+the\s+exact\s+form\s+\[templates/learnings\.md\]' 'evolve: the pointer is the HTML comment the template defines'
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'archiving\s+without\s+leaving\s+the\s+pointer' 'evolve: a pointerless archive is a red flag'
     # Cardinality is what keeps the pointer budget-neutral: one per ARCHIVE FILE, not per entry.
     # Drift to one-per-entry would make the log grow with archiving and stop the valve being a valve.
