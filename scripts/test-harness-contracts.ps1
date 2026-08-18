@@ -2061,6 +2061,9 @@ try {
     # Drift to one-per-entry would make the log grow with archiving and stop the valve being a valve.
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'one\s+pointer\s+per\s+archive' 'evolve: one pointer per archive file, not per entry'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'a\s+missing\s+pointer\s+is\s+no\s+excuse[\s\S]{0,120}enumerate\s+`history/`' 'finish: enumerate history/ even with no pointer'
+    # Counting spans the corpus; the BUDGET does not. Without this sentence the corpus language
+    # could be read as a corpus-wide ceiling, which would make the valve unable to ever relieve it.
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'budgets\s+on\s+`learnings\.md`\s+itself' 'finish: the budgets are measured on the active file, not on the corpus'
     Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' '<!--[\s>]+archived[\s>]+to[\s>]+pelizzai/data/history/learnings-<YYYY>\.md[\s>]+—[\s>]+consult[\s>]+on[\s>]+a[\s>]+recurrence[\s>]+check[\s>]+-->' 'learnings template: the pointer has an exact form'
     # Control: the fix must NOT inflate what is read at task start — that ceiling is the whole point
     # of the two budgets. Only the Active rules load there; the archives stay on demand.
