@@ -2014,7 +2014,10 @@ try {
     # lets the file legitimately sit at the ceiling with the next promotion having nowhere to land.
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' '\*\*at or past\*\* either budget' 'evolve: the red flag fires AT the ceiling, not only past it'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '\*\*at or past\*\* the\s+ceiling' 'finish: the budget check fires AT the ceiling'
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Incident\s+log\s+at\s+or\s+past\s+160\s+\(route\s+the\s+oldest\s+entries' 'finish: at the log ceiling the action is archiving, not retiring a rule'
+    # §5 is read-only: at the ceiling finish FLAGS, and the valve that moves entries lives in
+    # pelizzai-evolve. The pattern pins both halves — the action is archiving (not retiring a
+    # rule), and the agent of the move is the other skill.
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Incident\s+log\s+at\s+or\s+past\s+160[\s\S]{0,100}valve\s+in\s+`pelizzai-evolve`\s+routes\s+the\s+oldest\s+entries' 'finish: at the log ceiling the action is archiving, not retiring a rule'
 
     # -- Source mode has no consumer runtime: reading learnings there must never create pelizzai/ --
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'CONSUMER ONLY' 'execute: reading the Active rules is qualified as consumer-only'

@@ -365,13 +365,14 @@ is propose-and-confirm and coordinator action; a team member only flags the gap 
   number that decides the promotion, which turns a budget measure into a silent veto on
   prevention. Check the budgets on `learnings.md` itself, **per section, never summed**, and
   **at or past** the ceiling — they are hard, so reaching 40/160 already needs the valve: Active
-  rules at or past 40 lines (flag it), Incident log at or past 160 (route the oldest entries to
-  `pelizzai/data/history/learnings-<YYYY>.md`, leaving the pointer that keeps them findable) —
-  plus `verification-standard.md` at or past 150. A full log is NOT a reason to retire a rule:
-  the ceilings are separate precisely so the history cannot evict the prevention, and the log's
-  valve is moving the oldest entries to `pelizzai/data/history/learnings-<YYYY>.md`, leaving its
-  pointer. A start-of-task read over budget is a file nobody reads, and the valve (retire /
-  archive / replace baseline rows) belongs to `pelizzai-evolve`.
+  rules at or past 40 lines (flag it), Incident log at or past 160 (flag it: the valve in
+  `pelizzai-evolve` routes the oldest entries to `pelizzai/data/history/learnings-<YYYY>.md`,
+  leaving the pointer that keeps them findable) — plus `verification-standard.md` at or past
+  150. A full log is NOT a reason to retire a rule: the ceilings are separate precisely so the
+  history cannot evict the prevention, and the log's valve is moving the oldest entries to
+  `pelizzai/data/history/learnings-<YYYY>.md`, leaving its pointer. A start-of-task read over
+  budget is a file nobody reads, and the valve (retire / archive / replace baseline rows)
+  belongs to `pelizzai-evolve`.
 
 Source mode, or no hook and no ledger: silent no-op.
 
