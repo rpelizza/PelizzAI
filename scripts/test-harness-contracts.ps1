@@ -396,6 +396,8 @@ try {
     Check-Match 'README.md' 'git rm --cached pelizzai/data/state\.md' 'README carries the legacy-consumer migration command'
     Check-Match 'README.md' 'local per dev — ignored' 'README tree marks state.md as the local per-dev cursor'
     Check-NotMatch 'README.md' 'state\.md \+ history/' 'README: the old closure shape (state + history) is gone'
+    Check-Match '.cursor/rules/pelizzai.mdc' 'never committed[\s\S]{0,20}issue #43' 'cursor adapter teaches the local per-dev cursor (issue #43)'
+    Check-NotMatch '.cursor/rules/pelizzai.mdc' 'metadata-only commit of `state\.md`' 'cursor adapter: the old closure doctrine is gone (issue #43)'
 
     # =====================================================================
     # Pre-2026-07-11 restoration (2026-07-21) — F4: the state is a CURSOR again.
