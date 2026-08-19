@@ -408,17 +408,28 @@ try {
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' '\*\*Who writes the cursor' 'execution-plans hosts cursor authorship (prose moved out of the template)'
     Check-Match '.claude/skills/pelizzai-handoff/SKILL.md' 'artifact that has a path is referenced, never pasted' 'handoff: reference-instead-of-paste rule (basis of deduplication)'
 
-    # -- Setup pays no metadata commit: the cursor rides in the first content commit --
+    # -- Setup pays no metadata commit: the cursor is local per dev and never committed (issue #43) --
     Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'create a metadata-only commit' 'starting-branch: setup writes the state and moves on, no metadata commit'
     Check-NotMatch '.claude/skills/pelizzai-starting-branch/SKILL.md' 'make\s+a setup metadata commit' 'starting-branch does NOT reintroduce the setup commit'
-    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'there is no metadata-only commit to start the task' 'task-cycle: Task 1 carries the setup state in the content commit'
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'there is no metadata-only commit to start the task' 'task-cycle: Task 1 never waits on a setup commit'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'local per dev[\s\S]{0,120}never staged' 'execute: the cursor is local per dev and never staged (issue #43)'
+    Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'cursor-only commits' 'execute: cursor-only commits are gone (the cursor cannot be committed — issue #43)'
+    Check-Match '.claude/skills/pelizzai-execute/templates/state.md' 'LOCAL per dev' 'state.md template declares the cursor local per dev (issue #43)'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'fresh worktree starts WITHOUT the cursor' 'starting-branch: a new worktree does not carry the ignored cursor (issue #43)'
+    Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'cursor-only recovery needs no commit' 'recovery: cursor-only recovery has no commit (issue #43)'
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'NEVER staged[\s\S]{0,220}no cursor in any commit' 'task-cycle §7: the cursor is never staged, in any mode (issue #43)'
+    Check-NotMatch '.claude/skills/pelizzai-execute/references/task-cycle.md' 'include it in the stage|carries the cursor' 'task-cycle: the old stage-the-cursor doctrine is gone (issue #43)'
+    Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'cursor included' 'execute: the flow diagram no longer puts the cursor inside the commit (issue #43)'
 
     # -- The cursor deflates at CLOSEOUT (the delivered seal), not at the next opening --
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Migration at the .delivered' 'execution-plans: the history/ migration happens at the delivered seal'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Migrate the intact block and deflate the cursor' 'finish-task runs the migration when sealing delivered'
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- pelizzai/data/state\.md pelizzai/data/history/' 'finish-task stages state + history in the same closure'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- pelizzai/data/history/' 'finish-task stages ONLY the migrated history file in the closure (issue #43)'
+    Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- pelizzai/data/state\.md' 'finish-task never stages the local per-dev cursor (issue #43)'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' ":\(exclude\)pelizzai/data/history/" 'finish-task: product guard excludes history/ metadata'
-    Check-Match '.claude/skills/pelizzai-final-verification/SKILL.md' 'only harness metadata' 'verification: closure contains state + history, not just state'
+    Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' ":\(exclude\)pelizzai/data/state\.md" 'finish-task: no state exclude left — the ignored cursor never reaches a diff (issue #43)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'git ls-files -- pelizzai/data/state\.md' 'finish-task: legacy guard detects a consumer that predates the #43 migration'
+    Check-Match '.claude/skills/pelizzai-final-verification/SKILL.md' 'only harness metadata' 'verification: closure contains the history file only (issue #43)'
     Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'already migrated to .pelizzai/data/history/' 'recovery: on resumption only stamps the outcome (the block already migrated)'
 
     # -- A plan executable by someone with zero context (BASE requirement restored) --
@@ -742,7 +753,7 @@ try {
     Check-Match '.claude/skills/pelizzai-handoff/SKILL.md' 're-anchors before acting' 'handoff tells the next session to re-anchor before acting'
 
     # -- F8: the metadata-only closure is not a privilege of granular mode --
-    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'metadata-only closure of pelizzai-finish in the\s+consumer[\s\S]{0,60}both commit strategies' 'execution-plans: the closure applies under both commit strategies'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'metadata-only closure of pelizzai-finish\s+in the\s+consumer[\s\S]{0,80}both commit strategies' 'execution-plans: the closure applies under both commit strategies'
     Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'cursor closure commit of pelizzai-finish' 'execution-plans does not describe the closure as granular-only'
 
     # -- F8: writegate described by what the hook DOES (Rule A + Rule B), without inventing a gate --
@@ -1572,7 +1583,7 @@ try {
     Check-Match '.claude/skills/pelizzai-preferences/SKILL.md' 'never one worktree per agent' 'preferences: the floor repeats the one-worktree-per-agent ban'
 
     # The closure is TWO metadata files: state.md + the block migrated to history/.
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'the two closure metadata files' 'finish-task: pre-destination guard requires state + history, not just state'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'the one closure metadata file' 'finish-task: pre-destination guard requires exactly the migrated history file (issue #43)'
 
     # A plan gap goes to the interview; guessing stopped being expected behavior.
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'whatever the plan lacks[\s\S]{0,140}pelizzai-interview' 'writing-plans: a plan gap goes to interview-me, never to guessing'

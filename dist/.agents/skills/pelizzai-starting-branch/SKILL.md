@@ -193,11 +193,10 @@ For a direct flow without planning, apply the isolation choice right away:
 - Worktree: `git worktree add -b <branch> <path-outside-the-repo> <base-ref>` and record the path.
 
 In a consumer, **write** the `state.md` with your file tools and move on — writing is enough. **Do
-not create a metadata-only commit** (`chore: start task <slug>`): the cursor travels in the task's
-first content commit, alongside the exact paths it describes. It is harness metadata, not delivery
-content — if it shows up in Task 1's review package, it is known noise, never a reason for an
-extra commit. In source mode, there is no state and no setup commit; branch/worktree + execution
-record suffice.
+not create a metadata-only commit** (`chore: start task <slug>`): the cursor is the local per-dev
+file `pelizzai/.gitignore` covers (issue #43) — it never travels in any commit and never shows up
+in a review package. In source mode, there is no state and no setup commit; branch/worktree +
+execution record suffice.
 
 ## 6. Apply the chosen isolation after the plan
 
@@ -237,9 +236,10 @@ git worktree add <path-outside-the-repo> <type>/<slug>
 6. Inside it, confirm the branch, `HEAD == checkpoint-sha`, and the presence of the persistent
    artifacts, when they exist.
 7. In a consumer, record `isolation: worktree` and `worktree-path` in the `state.md` inside the
-   worktree — no metadata commit; that touch goes into the first content commit. Before Task 1,
-   require that nothing besides it is dirty. In source mode, update only the native execution
-   record; do not create state.
+   worktree — no commit: the cursor is local per dev and git ignores it (issue #43). Note that a
+   fresh worktree starts WITHOUT the cursor (ignored files do not travel with git); recreate it
+   there from the current values. Before Task 1, require a clean working tree. In source mode,
+   update only the native execution record; do not create state.
 
 The path stays outside the repository tree. If the environment blocks the creation, report it and
 ask for confirmation to stay on branch; do not degrade silently.

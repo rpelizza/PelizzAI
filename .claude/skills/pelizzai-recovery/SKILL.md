@@ -119,7 +119,8 @@ Update only proven fields. Before the commit:
 
 - be on a safe, non-protected branch; if needed, use `pelizzai-starting-branch` without losing the
   rescue ref;
-- consumer: stage only `pelizzai/data/state.md` when the recovery is cursor-only;
+- consumer: a cursor-only recovery needs no commit — `pelizzai/data/state.md` is the local
+  per-dev cursor, ignored by git (issue #43); write it and move on;
 - source mode: update only the native execution record; do not create state or a cursor commit;
 - if legitimate WIP will also be consolidated, return it to the normal lifecycle for
   review/proof/commit; do not mix unreviewed content into a “recovery commit”.

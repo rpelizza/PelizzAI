@@ -1,6 +1,6 @@
 ---
 name: pelizzai-finish
-description: Use after overlays, consolidation, and final validation have sealed the content at validated-head. Before the destination, checks as a safety net whether security, UI, or documentation went uncovered and offers — without blocking — to return the delivery to the cycle. In a consumer, closes the task in phase delivered with a metadata-only commit of state.md + the data/history/ file from the migration (done is observed later, not here); in the source repo, validates the seal without creating runtime/closure. Keeps local by default or publishes/opens a PR with authorization. Never alters content or history after the seal.
+description: Use after overlays, consolidation, and final validation have sealed the content at validated-head. Before the destination, checks as a safety net whether security, UI, or documentation went uncovered and offers — without blocking — to return the delivery to the cycle. In a consumer, closes the task in phase delivered with a metadata-only commit of the data/history/ file from the migration — state.md is the local per-dev cursor, ignored by git (issue #43), updated but never committed (done is observed later, not here); in the source repo, validates the seal without creating runtime/closure. Keeps local by default or publishes/opens a PR with authorization. Never alters content or history after the seal.
 ---
 
 # PelizzAI Finish
@@ -17,7 +17,7 @@ observed, not declared — the observation happens at the next opening/resumptio
 skill:
 
 ```text
-consumer: validated-head → closure `delivered` (state.md + history/ from the migration) → delivery-head
+consumer: validated-head → closure `delivered` (history/ file from the migration; the local state.md is updated, never committed) → delivery-head
 source:   validated-head ──────────────────────────────────→ delivery-head
                                      (done observed later, outside this skill)
 ```
@@ -42,14 +42,15 @@ The state/closure sections below apply only to consumer projects.
 
 ```text
 - One task/state represents a single Git repository.
-- On entry, HEAD == validated-head.
-- The only dirt allowed is pelizzai/data/state.md with the seal not yet committed.
+- On entry, HEAD == validated-head and the working tree is clean: pelizzai/data/state.md is the
+  local per-dev cursor, ignored by git (issue #43), so its pending seal update never shows in
+  porcelain.
 - After the seal, no squash/rebase/reset, overlay, formatter, codegen, snapshot-writing test,
   doc generator, or fix runs.
 - A coverage gap (security, UI, documentation) becomes an explicit offer in §1.5, never silence;
   accepting it returns the task to the validation cycle — it never becomes a post-seal patch.
-- In consumer mode, the single new commit touches only harness metadata: pelizzai/data/state.md
-  and the pelizzai/data/history/<YYYY-MM-DD>-<slug>.md the seal's migration just generated
+- In consumer mode, the single new commit touches only harness metadata: the
+  pelizzai/data/history/<YYYY-MM-DD>-<slug>.md the seal's migration just generated
   (source mode creates NO closure commit — §Source mode and §2b).
 - Keeping local is the default recommendation, but it still requires an answer at the gate.
   Push/PR, worktree removal, and discard require an explicit per-task decision: they are never
@@ -77,7 +78,12 @@ Stop and go back to the validating flow when any item fails:
 - branch empty/protected (`main`, `master`, `develop`, `dev`, or the `base-ref` name) or different from the state;
 - `validated-head` missing, abbreviated, invalid, or different from `git rev-parse HEAD`;
 - staged change;
-- modified/untracked file other than `pelizzai/data/state.md`;
+- any modified/untracked file (the local per-dev cursor is ignored by git and never appears here);
+- `git ls-files -- pelizzai/data/state.md` lists the cursor — a consumer that predates the #43
+  migration: stop and run it first (untrack the cursor with `git rm --cached`, update
+  `pelizzai/.gitignore`, add `pelizzai/.gitattributes` — contract in `pelizzai-audit`). The
+  migration commit is content: after it, return to the validating flow and seal a fresh
+  `validated-head` — never resume this seal on top of it;
 - evidence of review/checklist/verification predating the last fix;
 - an overlay recorded in `overlays:` that never ran — the plan promised and did not deliver; go
   back and run it there. A touched surface nobody ever recorded does **not** stop here: it falls
@@ -177,7 +183,8 @@ commit, `delivery-head == validated-head` is required before delivery, and the d
 status lives in the native execution record.
 
 `delivered` = content sealed + destination executed; it is recorded BEFORE leaving the task branch
-(it rides along in the PR). In the `pelizzai/data/state.md` already modified by the seal:
+(the migrated history/ file rides along in the PR; the cursor itself is local per dev and never
+travels). In the `pelizzai/data/state.md` already modified by the seal:
 
 1. **Migrate the intact block and deflate the cursor** along the boundary defined in
    `pelizzai-execute` → §State and resumption: copy the task fields + the
@@ -199,23 +206,26 @@ status lives in the native execution record.
    (option 4) → `archived locally, no merge expected` (it is not a delivery onto a base: §3d
    decides archive or discard; the observation becomes `done` when the archive is accepted, or
    `abandoned` if discarded). Also set `delivery-status:` to the destination INTENT from 2a —
-   `pending push`, `pending pr`, `local`, or `archive`. In a consumer it is sealed in this same
-   closure commit and never edited again by this skill (a second cursor commit is a red flag) —
-   the rule binds the consumer cursor; source mode records the destination status in the native
+   `pending push`, `pending pr`, `local`, or `archive`. In a consumer it is written once in the
+   local cursor at the seal and never edited again by this skill (the cursor is local per dev and
+   never committed — issue #43); source mode records the destination status in the native
    execution record as §3 describes: what actually
    happened at §3 is reported in the conversation and OBSERVED on resumption against the remote,
    with the sealed intent narrowing the reconciliation — remote branch missing = failed before
    the push; branch at `delivery-head` without a PR = pushed, PR pending.
 3. Check that the `## History` index line (step 1) is dated as `delivered`, without promising
    merge/`done` yet — that stamp comes from the later observation.
-4. Update the date.
+4. Update the date. Order note: the history file is the only durable snapshot of the task
+   (issue #43) — perform the step 1 copy with the sealed fields of steps 2–3 already written, or
+   re-copy them into the history file before staging; a history file without
+   `phase/confirm/delivery-status` recorded is an incomplete seal.
 
-Stage **only** the harness metadata — the cursor and the history file it just generated (the
-step 1 migration creates a versioned file; it travels in this same closure, never in an extra
-commit):
+Stage **only** the harness metadata — the history file the step 1 migration just generated (a
+versioned file; it travels in this same closure, never in an extra commit). The cursor is
+**written, never staged**: it is the local per-dev file the ignore protects (issue #43):
 
 ```bash
-git add -- pelizzai/data/state.md pelizzai/data/history/<YYYY-MM-DD>-<slug>.md
+git add -- pelizzai/data/history/<YYYY-MM-DD>-<slug>.md
 git diff --cached --name-only
 git commit -m "chore: seal task as delivered"
 ```
@@ -223,11 +233,11 @@ git commit -m "chore: seal task as delivered"
 Before executing the destination, prove the three guards:
 
 ```bash
-# must list exactly these two metadata files, nothing more
+# must list exactly this one metadata file, nothing more
 git diff --name-only <validated-head>..HEAD
 
 # no product difference outside the harness metadata
-git diff --quiet <validated-head>..HEAD -- . ':(exclude)pelizzai/data/state.md' ':(exclude)pelizzai/data/history/*'
+git diff --quiet <validated-head>..HEAD -- . ':(exclude)pelizzai/data/history/*'
 
 # must be empty
 git status --porcelain --untracked-files=all
@@ -251,8 +261,8 @@ git status --porcelain --untracked-files=all
 ```
 
 In a consumer, also repeat `git diff --name-only <validated-head>..<delivery-head>` and require
-only the two closure metadata files: `pelizzai/data/state.md` and the
-`pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` generated by the seal's migration — nothing more.
+only the one closure metadata file: the `pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` generated
+by the seal's migration — nothing more.
 In source mode, require `delivery-head == validated-head`.
 Diverged? Stop; do not publish.
 
@@ -386,7 +396,7 @@ Source mode, or no hook and no ledger: silent no-op.
 - Declaring `phase: done` here (pelizzai-finish closes in `delivered`; `done` is observed later).
 - Squash/reset/rebase/amend after validated-head.
 - `git add -A` in the closure commit.
-- A second cursor commit to record the destination.
+- Staging or committing the local per-dev cursor — at the closure or anywhere else (issue #43).
 - Pushing HEAD without comparing it to delivery-head, or pushing directly onto the base.
 - Force-push, branch -D, worktree --force, automatic stash/reset.
 - Treating multiple repositories as a single task.
