@@ -384,6 +384,21 @@ try {
     Check-NotMatch '.claude/skills/pelizzai-audit/SKILL.md' '^data/history/\s*$' 'audit: history/ is NOT ignored in the template (durable versioned record)'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'history/\s+versioned' 'audit: history/ marked versioned in the Canonical layout (durable, outside the ignore)'
 
+    # -- Issue #43 (2026-08-19): multi-dev — the cursor is local per dev; learnings merge by union --
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' '^data/state\.md\s*$' 'audit: state.md IS in the mandatory ignore (local per-dev cursor — issue #43)'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'pelizzai/\.gitattributes' 'audit: the bootstrap ships pelizzai/.gitattributes'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' '^data/learnings\.md merge=union\s*$' 'audit: learnings.md merges by union (append-shaped shared memory)'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' '^data/history/learnings-\*\.md merge=union\s*$' 'audit: learnings archives merge by union too'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'state\.md\s+ignored[^\n]*per-dev' 'audit: Canonical layout marks state.md as the local per-dev cursor'
+    Check-NotMatch '.claude/skills/pelizzai-audit/SKILL.md' '`data/state\.md`[^\n]*are \*\*versioned\*\*' 'audit: the old doctrine (state.md versioned) is gone'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'git rm --cached\s+pelizzai/data/state\.md' 'audit: partial state proposes the #43 migration for a legacy consumer'
+    Check-Match 'README.md' 'Multiple developers on the same consumer' 'README documents the multi-dev contract (issue #43)'
+    Check-Match 'README.md' 'git rm --cached pelizzai/data/state\.md' 'README carries the legacy-consumer migration command'
+    Check-Match 'README.md' 'local per dev — ignored' 'README tree marks state.md as the local per-dev cursor'
+    Check-NotMatch 'README.md' 'state\.md \+ history/' 'README: the old closure shape (state + history) is gone'
+    Check-Match '.cursor/rules/pelizzai.mdc' 'never committed[\s\S]{0,20}issue #43' 'cursor adapter teaches the local per-dev cursor (issue #43)'
+    Check-NotMatch '.cursor/rules/pelizzai.mdc' 'metadata-only commit of `state\.md`' 'cursor adapter: the old closure doctrine is gone (issue #43)'
+
     # =====================================================================
     # Pre-2026-07-11 restoration (2026-07-21) — F4: the state is a CURSOR again.
     # The regression this section locks out: the data template was drifting into
@@ -400,18 +415,122 @@ try {
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' '\*\*Who writes the cursor' 'execution-plans hosts cursor authorship (prose moved out of the template)'
     Check-Match '.claude/skills/pelizzai-handoff/SKILL.md' 'artifact that has a path is referenced, never pasted' 'handoff: reference-instead-of-paste rule (basis of deduplication)'
 
-    # -- Setup pays no metadata commit: the cursor rides in the first content commit --
+    # -- Setup pays no metadata commit: the cursor is local per dev and never committed (issue #43) --
     Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'create a metadata-only commit' 'starting-branch: setup writes the state and moves on, no metadata commit'
     Check-NotMatch '.claude/skills/pelizzai-starting-branch/SKILL.md' 'make\s+a setup metadata commit' 'starting-branch does NOT reintroduce the setup commit'
-    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'there is no metadata-only commit to start the task' 'task-cycle: Task 1 carries the setup state in the content commit'
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'there is no metadata-only commit to start the task' 'task-cycle: Task 1 never waits on a setup commit'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'local per dev[\s\S]{0,120}never staged' 'execute: the cursor is local per dev and never staged (issue #43)'
+    Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'cursor-only commits' 'execute: cursor-only commits are gone (the cursor cannot be committed — issue #43)'
+    Check-Match '.claude/skills/pelizzai-execute/templates/state.md' 'LOCAL per dev' 'state.md template declares the cursor local per dev (issue #43)'
+    Check-Match '.claude/skills/pelizzai-starting-branch/SKILL.md' 'fresh worktree starts WITHOUT the cursor' 'starting-branch: a new worktree does not carry the ignored cursor (issue #43)'
+    Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'cursor-only recovery needs no commit' 'recovery: cursor-only recovery has no commit (issue #43)'
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'NEVER staged[\s\S]{0,220}no cursor in any commit' 'task-cycle §7: the cursor is never staged, in any mode (issue #43)'
+    Check-NotMatch '.claude/skills/pelizzai-execute/references/task-cycle.md' 'include it in the stage|carries the cursor' 'task-cycle: the old stage-the-cursor doctrine is gone (issue #43)'
+    Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'cursor included' 'execute: the flow diagram no longer puts the cursor inside the commit (issue #43)'
 
     # -- The cursor deflates at CLOSEOUT (the delivered seal), not at the next opening --
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Migration at the .delivered' 'execution-plans: the history/ migration happens at the delivered seal'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Migrate the intact block and deflate the cursor' 'finish-task runs the migration when sealing delivered'
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- pelizzai/data/state\.md pelizzai/data/history/' 'finish-task stages state + history in the same closure'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- <history-file>' 'finish-task stages ONLY the resolved history file in the closure (issue #43)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'The resolved path is\s+\*\*`<history-file>`\*\*' 'finish-task: step 1 defines the <history-file> identifier (collision-safe name)'
+    Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- pelizzai/data/history/<YYYY-MM-DD>-<slug>\.md' 'finish-task: the stage never reconstructs the unsuffixed filename'
+    Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- pelizzai/data/state\.md' 'finish-task never stages the local per-dev cursor (issue #43)'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' ":\(exclude\)pelizzai/data/history/" 'finish-task: product guard excludes history/ metadata'
-    Check-Match '.claude/skills/pelizzai-final-verification/SKILL.md' 'only harness metadata' 'verification: closure contains state + history, not just state'
+    Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' ":\(exclude\)pelizzai/data/state\.md" 'finish-task: no state exclude left — the ignored cursor never reaches a diff (issue #43)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'git ls-files -- pelizzai/data/state\.md' 'finish-task: legacy guard detects a consumer that predates the #43 migration'
+    Check-Match '.claude/skills/pelizzai-final-verification/SKILL.md' 'only harness metadata' 'verification: closure contains the history file only (issue #43)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'unique by construction, across branches' 'finish-task: the history name is unique by construction across branches (issue #43)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '<YYYY-MM-DD>-<slug>-<sha7>\.md[\s\S]{0,120}validated-head' 'finish-task: <sha7> comes from validated-head (globally unique per task)'
+    Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' 'suffix the filename' 'finish-task: the local-existence suffix rule is gone (it cannot see unmerged branches)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'sealed-by: <git user\.name>' 'finish-task: the history file names its author from git config (issue #43)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Seal the cursor fields first[\s\S]{0,40}single write order' 'finish-task: sealed fields are written BEFORE the migration copy (single write order)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'single faithful copy[\s\S]{0,40}never copy-then-patch' 'finish-task: the migration is one copy, never copy-then-patch'
+    Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' 're-copy them into the history file' 'finish-task: the ambiguous re-copy escape hatch is gone'
+    Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'first 7 characters of the sealed task[\s\S]{0,4}`validated-head`, never the current HEAD' 'recovery: <sha7> origin is the sealed validated-head, never HEAD'
+    Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'read the resolved path from the `## History` index line' 'recovery: the history path is read from the index, never recomputed'
+    Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'git check-ignore pelizzai/data/state\.md' 'recovery: cursor-only write proves the cursor is local before writing (issue #43)'
+    Check-NotMatch '.claude/skills/pelizzai-starting-branch/SKILL.md' 'spec/ADR and, in a consumer, `state\.md`' 'starting-branch: the worktree checkpoint no longer lists the cursor (issue #43)'
     Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'already migrated to .pelizzai/data/history/' 'recovery: on resumption only stamps the outcome (the block already migrated)'
+
+    # -- Issue #43 behavioral fixture: a real repo proves the closure shape — the ignored cursor
+    #    is invisible to porcelain, un-addable without -f, and the stage holds EXACTLY the
+    #    migrated history file (textual assertions alone cannot prove behavior). --
+    $cl43 = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-closure43-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $cl43 | Out-Null
+    try {
+        git -C $cl43 init -q
+        git -C $cl43 config user.email 'contract@pelizzai.local'
+        git -C $cl43 config user.name 'PelizzAI Contract'
+        New-Item -ItemType Directory -Path (Join-Path $cl43 'pelizzai/data/history') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $cl43 'pelizzai/.gitignore') -Value "data/state.md`ndata/.cadence-state.json`ndata/handoffs/`ndata/mockups/`ndata/reports/`n" -Encoding utf8
+        Set-Content -LiteralPath (Join-Path $cl43 'pelizzai/.gitattributes') -Value "data/learnings.md merge=union`ndata/history/learnings-*.md merge=union`n" -Encoding utf8
+        Set-Content -LiteralPath (Join-Path $cl43 'product.txt') -Value 'validated content' -Encoding utf8
+        git -C $cl43 add pelizzai/.gitignore pelizzai/.gitattributes product.txt
+        git -C $cl43 commit -q -m 'validated-head'
+        Set-Content -LiteralPath (Join-Path $cl43 'pelizzai/data/state.md') -Value "- slug: t43`n- phase: delivered`n" -Encoding utf8
+        $porcelain = @(git -C $cl43 status --porcelain --untracked-files=all)
+        Check ($porcelain.Count -eq 0) 'closure fixture: the ignored cursor is invisible to porcelain (issue #43)' ($porcelain -join ',')
+        git -C $cl43 add -- pelizzai/data/state.md 2>$null
+        Check ($LASTEXITCODE -ne 0) 'closure fixture: git add of the ignored cursor fails without -f (issue #43)'
+        Set-Content -LiteralPath (Join-Path $cl43 'pelizzai/data/history/2026-08-19-t43.md') -Value 'intact block' -Encoding utf8
+        git -C $cl43 add -- pelizzai/data/history/2026-08-19-t43.md
+        $staged = @(git -C $cl43 diff --cached --name-only)
+        Check (($staged.Count -eq 1) -and ($staged[0] -eq 'pelizzai/data/history/2026-08-19-t43.md')) 'closure fixture: the stage holds EXACTLY the migrated history file (issue #43)' ($staged -join ',')
+        git -C $cl43 commit -q -m 'chore: seal task as delivered'
+        $closure = @(git -C $cl43 diff --name-only HEAD~1..HEAD)
+        Check (($closure.Count -eq 1) -and ($closure[0] -eq 'pelizzai/data/history/2026-08-19-t43.md')) 'closure fixture: validated-head..closure-head contains only the history file (issue #43)' ($closure -join ',')
+    } finally {
+        Remove-Item -Recurse -Force $cl43 -ErrorAction SilentlyContinue
+    }
+
+    # -- Issue #43: two parallel closures with the SAME date+slug must integrate without
+    #    conflict — the <sha7> component keeps the names disjoint by construction, which no
+    #    local existence check could guarantee against an unmerged branch. --
+    $mg43 = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-merge43-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $mg43 | Out-Null
+    try {
+        git -C $mg43 init -q
+        git -C $mg43 symbolic-ref HEAD refs/heads/main
+        git -C $mg43 config user.email 'contract@pelizzai.local'
+        git -C $mg43 config user.name 'PelizzAI Contract'
+        New-Item -ItemType Directory -Path (Join-Path $mg43 'pelizzai/data/history') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $mg43 'pelizzai/.gitignore') -Value "data/state.md`n" -Encoding utf8
+        git -C $mg43 add pelizzai/.gitignore
+        git -C $mg43 commit -q -m 'base'
+        # Branch A: a real content commit IS the validated-head; its sha7 names the history file.
+        git -C $mg43 checkout -q -b task-a
+        Set-Content -LiteralPath (Join-Path $mg43 'product-a.txt') -Value 'validated A' -Encoding utf8
+        git -C $mg43 add -- product-a.txt
+        git -C $mg43 commit -q -m 'validated task-a'
+        $shaA = (git -C $mg43 rev-parse HEAD).Trim().Substring(0, 7)
+        Set-Content -LiteralPath (Join-Path $mg43 "pelizzai/data/history/2026-08-19-fix-login-$shaA.md") -Value "block A`nsealed-by: Dev A <a@pelizzai.local>`n" -Encoding utf8
+        git -C $mg43 add -- "pelizzai/data/history/2026-08-19-fix-login-$shaA.md"
+        git -C $mg43 commit -q -m 'chore: seal task as delivered'
+        git -C $mg43 checkout -q main
+        # Branch B: same date+slug, its own validated-head → its own sha7.
+        git -C $mg43 checkout -q -b task-b
+        Set-Content -LiteralPath (Join-Path $mg43 'product-b.txt') -Value 'validated B' -Encoding utf8
+        git -C $mg43 add -- product-b.txt
+        git -C $mg43 commit -q -m 'validated task-b'
+        $shaB = (git -C $mg43 rev-parse HEAD).Trim().Substring(0, 7)
+        # checking out main pruned the now-empty history/ dir along with task-a's file
+        New-Item -ItemType Directory -Path (Join-Path $mg43 'pelizzai/data/history') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $mg43 "pelizzai/data/history/2026-08-19-fix-login-$shaB.md") -Value "block B`nsealed-by: Dev B <b@pelizzai.local>`n" -Encoding utf8
+        git -C $mg43 add -- "pelizzai/data/history/2026-08-19-fix-login-$shaB.md"
+        git -C $mg43 commit -q -m 'chore: seal task as delivered'
+        Check ($shaA -ne $shaB) 'merge fixture: distinct validated-heads yield distinct history names (issue #43)' "shaA=$shaA shaB=$shaB"
+        git -C $mg43 checkout -q main
+        git -C $mg43 merge -q --no-ff task-a -m 'merge task-a' 2>$null
+        $mergeA = $LASTEXITCODE
+        git -C $mg43 merge -q --no-ff task-b -m 'merge task-b' 2>$null
+        $mergeB = $LASTEXITCODE
+        Check (($mergeA -eq 0) -and ($mergeB -eq 0)) 'merge fixture: two same-date+slug closures integrate without conflict (issue #43)' "mergeA=$mergeA mergeB=$mergeB"
+        $both = @(git -C $mg43 ls-files -- 'pelizzai/data/history/*') | Sort-Object
+        $expected = @("pelizzai/data/history/2026-08-19-fix-login-$shaA.md", "pelizzai/data/history/2026-08-19-fix-login-$shaB.md") | Sort-Object
+        Check (($both.Count -eq 2) -and ($both[0] -eq $expected[0]) -and ($both[1] -eq $expected[1])) 'merge fixture: both sha7-named history files survive the integration (issue #43)' ($both -join ',')
+    } finally {
+        Remove-Item -Recurse -Force $mg43 -ErrorAction SilentlyContinue
+    }
 
     # -- A plan executable by someone with zero context (BASE requirement restored) --
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'zero context\*\*[\s\S]{0,80}a single question' 'writing-plans: goal is the plan a zero-context executor runs without asking'
@@ -734,7 +853,7 @@ try {
     Check-Match '.claude/skills/pelizzai-handoff/SKILL.md' 're-anchors before acting' 'handoff tells the next session to re-anchor before acting'
 
     # -- F8: the metadata-only closure is not a privilege of granular mode --
-    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'metadata-only closure of pelizzai-finish in the\s+consumer[\s\S]{0,60}both commit strategies' 'execution-plans: the closure applies under both commit strategies'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'metadata-only closure of pelizzai-finish\s+in the\s+consumer[\s\S]{0,80}both commit strategies' 'execution-plans: the closure applies under both commit strategies'
     Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'cursor closure commit of pelizzai-finish' 'execution-plans does not describe the closure as granular-only'
 
     # -- F8: writegate described by what the hook DOES (Rule A + Rule B), without inventing a gate --
@@ -1563,8 +1682,8 @@ try {
     Check-Match '.claude/skills/pelizzai-preferences/SKILL.md' 'disjoint paths' 'preferences: the floor does not deny parallel writes on disjoint paths'
     Check-Match '.claude/skills/pelizzai-preferences/SKILL.md' 'never one worktree per agent' 'preferences: the floor repeats the one-worktree-per-agent ban'
 
-    # The closure is TWO metadata files: state.md + the block migrated to history/.
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'the two closure metadata files' 'finish-task: pre-destination guard requires state + history, not just state'
+    # The closure is ONE metadata file: the block migrated to history/ (the cursor is local per dev — issue #43).
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'the one closure metadata file' 'finish-task: pre-destination guard requires exactly the migrated history file (issue #43)'
 
     # A plan gap goes to the interview; guessing stopped being expected behavior.
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'whatever the plan lacks[\s\S]{0,140}pelizzai-interview' 'writing-plans: a plan gap goes to interview-me, never to guessing'

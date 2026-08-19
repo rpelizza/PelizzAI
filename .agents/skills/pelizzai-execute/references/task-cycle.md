@@ -180,7 +180,8 @@ Never ignore an escalation nor re-dispatch without changing anything.
   execution record. In the consumer, log the blockage in `## Progress` → `pending` (task, stage,
   number of failed cycles, the distinct rejection reasons
   IN ORDER, the fixes attempted, and the pattern: independent issues / same recurring issue /
-  structural conflict); commit ONLY the cursor in the consumer (source mode creates no cursor commit); escalate to the
+  structural conflict); the cursor write is local — no commit in either mode (the per-dev cursor
+  is ignored by git, issue #43); escalate to the
   human with an ACTIONABLE message (what was done + each reason + fixes + pattern + options:
   clarify the spec via pelizzai-writing-plans / split the task / revise the plan);
   leave the working tree INTACT (never git reset --hard). If the human says to continue,
@@ -197,28 +198,31 @@ working tree INTACT. Dropping the per-task machinery never drops the limit.
 ```text
 - The member does NOT commit. The work stays in the working tree until BOTH lenses pass.
 - Only after spec ✅ and quality ✅ (with fixes applied) does the COORDINATOR consolidate.
-- The coordinator stages the task's exact paths and, in the consumer, the state; inspects
-  `git diff --cached` and never uses `git add -A`.
-- Granular: one DEFINITIVE commit per task. In the consumer, the cursor touch goes into the SAME
-  commit; in source mode, the native execution record advances with no file. History is kept.
+- The coordinator stages the task's exact paths; inspects `git diff --cached` and never uses
+  `git add -A`. In the consumer the cursor is updated alongside, never staged (local per-dev
+  file, ignored by git — issue #43).
+- Granular: one DEFINITIVE commit per task. In the consumer, the cursor advances with the task
+  but stays out of the commit; in source mode, the native execution record advances with no
+  file. History is kept.
 - Squash-final: one WORK commit per task (`wip(<slug>): <task>`) — never accumulate the entire
   working tree without a commit until the end (a crash would lose everything). After the tasks and
   overlays, `pelizzai-execute` consolidates the WIPs into a single commit **before** the
-  final review and `validated-head`. `pelizzai-finish` does not rewrite history. In the
-  consumer the cursor goes into the WIP; in source mode there is no cursor commit.
+  final review and `validated-head`. `pelizzai-finish` does not rewrite history. The cursor stays
+  out of the WIPs too — it is local per dev in the consumer, and source mode has no cursor file.
 ```
 
 ## 7. Advancing the cursor
 
-In the consumer, before the task's commit update `pelizzai/data/state.md` (in `## Progress`, append
-**one line** `T<n> ✅ <sha|date> — <note ≤1 line>` — a long report goes to
-`pelizzai/data/reports/` with only the link —, adjust `next` and `pending`, keep `phase: exec`) and
-include it in the stage along with the task's exact paths. The definitive commit (granular) or wip
-(squash-final) carries the cursor — including Task 1, which carries the state written at setup:
-**there is no metadata-only commit to start the task**. On concluding the plan and sealing the
-content, `pelizzai-finish` seals `phase: delivered` in the single metadata-only closure
-commit, migrating the task's intact block to `data/history/` — the cursor returns to template size
-and `done` is observed afterward.
+In the consumer, alongside the task's commit update `pelizzai/data/state.md` (in `## Progress`,
+append **one line** `T<n> ✅ <sha|date> — <note ≤1 line>` — a long report goes to
+`pelizzai/data/reports/` with only the link —, adjust `next` and `pending`, keep `phase: exec`).
+The cursor is the local per-dev file `pelizzai/.gitignore` covers (issue #43): it is NEVER staged
+— not in the definitive commit (granular), not in a wip (squash-final), not at setup:
+**there is no metadata-only commit to start the task**, and there is no cursor in any commit
+after it either. On concluding the plan and sealing the content, `pelizzai-finish` seals
+`phase: delivered` in the single metadata-only closure commit — which carries only the
+`data/history/` file the intact-block migration generates — and the cursor returns to template
+size; `done` is observed afterward.
 
 In source mode, advance the native execution record after the commit and do not create
 state/closure.

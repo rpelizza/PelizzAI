@@ -50,7 +50,9 @@ subagents, and interviews are situational as well. The testing strategy depends 
   are recommended and ratified one question at a time; never a silent default.
   `squash-final` only on explicit request, and `destination` is confirmed per task.
 - Content is only ready when review, overlays, and Verification validate the same commit and
-  record its SHA in `validated-head`. Finish may add only the metadata-only commit of `state.md`.
+  record its SHA in `validated-head`. Finish may add only the metadata-only commit of the
+  migrated `data/history/` file — `state.md` is the local per-dev cursor and is never committed
+  (issue #43).
 - Push, PR, deploy, message, discard, and other external actions require the corresponding gate.
 - Code in English; reply to the user in the language of the conversation.
 - For external libraries, frameworks, and APIs, ground yourself in available official documentation.

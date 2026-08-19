@@ -273,7 +273,7 @@ flowchart TD
     RV --> Q{Approved by both?}
     Q -- No --> FX[Fix and re-review\ncircuit breaker: 3 cycles/stage]
     FX --> RV
-    Q -- Yes --> CM[Coordinator advances the cursor AND consolidates\na single commit, cursor included]
+    Q -- Yes --> CM[Coordinator advances the local cursor AND consolidates\na single commit of the task's exact paths]
     CM --> MORE{More tasks?}
     MORE -- Yes --> CY
     MORE -- No --> OV[Overlays that may write\nsecurity + frontend + docs]
@@ -333,7 +333,8 @@ circuit breaker, and commit as a gate — lives in
    issue twice escalates on the 2nd; a structural rejection escalates immediately; on overflow →
    record phase: blocked and escalate to the human with an actionable message.
 5. Both lenses approved? The COORDINATOR consolidates: stage the task's EXACT paths and, in the
-   consumer, update/stage state in the same commit; in source mode advance the execution record
+   consumer, update the state alongside the commit (the cursor is local per dev, ignored by git —
+   issue #43 — and is never staged); in source mode advance the execution record
    without a file. Inspect `git diff --cached` and commit (granular: definitive; squash-final:
    wip). Never use `git add -A`.
 ```
@@ -407,14 +408,17 @@ Common invariants:
 
 **Consumer:** the cursor lives in `pelizzai/data/state.md` (template in
 [templates/state.md](templates/state.md)) — the template carries the fields; the doctrine is this
-section. Advance it in the same commit as the task; the only cursor-only commits are
-`phase: blocked` and the final closure. After compaction, trust the state + `git log` (never
+section. The cursor is **local per dev** — `pelizzai/.gitignore` covers it (issue #43) — so it is
+never staged or committed: advance it alongside each task's commit, write `phase: blocked` locally
+when escalating, and the closure commit of `pelizzai-finish` carries only the migrated `history/`
+file. After compaction, trust the state + `git log` (never
 post-compaction memory, which re-dispatches an already completed task) and rebuild from the
 state, the `plan:` file, and Git.
 
 **Who writes the cursor.** The file is created by the first among `pelizzai-router` /
 `pelizzai-starting-branch` / this skill that needs to write — writing is enough, **there is no
-commit just to initialize it**: it travels in the task's first content commit. Then:
+commit at all for it**: the cursor is local per dev and never travels in any commit (issue #43).
+Then:
 `pelizzai-router` (initial route decisions), `pelizzai-starting-branch` (branch/base-ref/base-sha/
 isolation/worktree-path), this skill (`kickoff: ratified`, cursor/progress, and the
 `delivered`→`done` reconciliation), and `pelizzai-finish` (`delivered` seal + `confirm:`).
@@ -439,14 +443,15 @@ block to `history/` (lossless), any condensation of content is propose-confirm.
 **Migration at the `delivered` seal (the cursor slims down at closeout, not at the next opening).**
 The executor is `pelizzai-finish`; the boundary is defined here. When writing
 `phase: delivered`, the task's **intact block** migrates to
-`pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` (VERSIONED) and the state returns to template
+`pelizzai/data/history/<YYYY-MM-DD>-<slug>-<sha7>.md` (VERSIONED; `<sha7>` from
+`validated-head` — naming authority: `pelizzai-finish` §2b) and the state returns to template
 size, with ONE index line under `## History`. Intact block (**migration boundary**, identical
 for `done` and `abandoned`) = all fields of this task's `## Active task` + its
 `T<n>`/`next`/`pending` lines from `## Progress`, with the `data/reports/` links copied verbatim.
 Order of operations (lossless → verifiable):
 
 ```text
-1. Copy the intact block to data/history/<YYYY-MM-DD>-<slug>.md — a faithful copy, nothing rewritten.
+1. Copy the intact block to data/history/<YYYY-MM-DD>-<slug>-<sha7>.md — a faithful copy, nothing rewritten.
 2. Return `## Active task` to the template placeholders, PRESERVING the fields that the
    destination and the later observation still read: slug, phase: delivered, branch, base-ref,
    base-sha, validated-head, commit-strategy, worktree-path, confirm, delivery-status, and
@@ -472,7 +477,10 @@ re-ratifies it before any product is written.
 
 **Reconciliation of the previous delivery (`delivered` → `done`).** When opening the next task
 (here) or resuming (`pelizzai-recovery`/session-start), if the state carries `phase: delivered`,
-observe the delivery BEFORE overwriting the cursor. The block is already in `history/`; the
+observe the delivery BEFORE overwriting the cursor. The cursor is local per dev (issue #43): on a
+machine without it (another developer, a fresh clone), there is no `delivered` to trip over —
+deliveries sealed elsewhere are readable in the versioned `data/history/` files, and their `done`
+stamp is appended there by whoever observes the integration. The block is already in `history/`; the
 reconciliation only stamps the outcome:
 
 ```text
@@ -646,9 +654,9 @@ config, or doc may change after the seal.
 - Stopping for a material gap and returning an open-ended question ("what do you prefer?")
   instead of naming the gap with 2–3 options and the recommended one per `pelizzai-interview`.
 - Making the subagent read the whole plan file (paste the task's text).
-- An orphan commit just to move the cursor DURING execution (legitimate exceptions: the circuit
-  breaker's phase: blocked record and the metadata-only closure of pelizzai-finish in the
-  consumer — which happens under both commit strategies).
+- Any commit that stages the cursor (issue #43): it is local per dev and lives outside git — a
+  `phase: blocked` record is a plain local write, and the metadata-only closure of pelizzai-finish
+  in the consumer stages only the migrated history file, under both commit strategies.
 - Trusting state.md without validating it against git on resumption.
 - Concurrent writing under `isolation: branch`, or on paths that overlap inside the worktree,
   making `--working-tree` impossible to scope.

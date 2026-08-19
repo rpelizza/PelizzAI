@@ -53,10 +53,10 @@ function main() {
       const state = readFileSync(statePath, 'utf8');
       const slug = (state.match(/^\s*-\s*slug:\s*(.+?)\s*$/m) || [])[1];
       const phase = (state.match(/^\s*-\s*phase:\s*(\S+)/m) || [])[1];
-      // state.md is a VERSIONED file: whatever it carries lands in the agent's context on every
-      // session start. Values are matched against the shape the template documents and the whole
-      // line is DISCARDED on mismatch — untrusted text, not "a different policy" (second-order
-      // prompt injection via a merged commit).
+      // state.md is a local per-dev file (issue #43), but whatever it carries lands in the
+      // agent's context on every session start. Values are matched against the shape the
+      // template documents and the whole line is DISCARDED on mismatch — untrusted text, not
+      // "a different policy" (prompt injection via a tampered local cursor).
       const SLUG_SHAPE = /^[a-z0-9][a-z0-9._-]{0,63}$/;
       const PHASES = ['brainstorm', 'plan', 'exec', 'review', 'delivered', 'done', 'abandoned', 'blocked'];
       const active =

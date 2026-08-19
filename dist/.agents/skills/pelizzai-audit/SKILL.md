@@ -252,20 +252,37 @@ The persistent bootstrap leaves:
   what "correct" means here, filled from the REAL commands/criteria confirmed with the user, and
   the execution memory, born empty — never pre-filled with guesses;
 - `pelizzai/profile.md` — real commands, package manager, **Stack baseline** (the drift anchor for the version/adoption axes), and skill roots; also record the **Ratified execution defaults** section with every field at `<unset>` — the bootstrap does not guess policy; the user ratifies it at the post-plan gate;
-- `pelizzai/.gitignore` — scoped protection of the ephemerals.
+- `pelizzai/.gitignore` — scoped protection of the ephemerals and of the per-dev cursor;
+- `pelizzai/.gitattributes` — union merge for the append-shaped shared memory.
 
 Mandatory content of `pelizzai/.gitignore`:
 
 ```gitignore
+data/state.md
 data/.cadence-state.json
 data/handoffs/
 data/mockups/
 data/reports/
 ```
 
-`data/state.md`, `data/review-domain-skills.md`, and `data/history/` are **versioned** — a durable
-record; they never go into the ignore (a broad `data/*` with exceptions would silence `history/`
-and break the durability of the sealed-task record). Verify with `git check-ignore` using
+Mandatory content of `pelizzai/.gitattributes`:
+
+```gitattributes
+data/learnings.md merge=union
+data/history/learnings-*.md merge=union
+```
+
+`data/review-domain-skills.md`, `data/learnings.md`, and `data/history/` are **versioned** — a
+durable record; they never go into the ignore (a broad `data/*` with exceptions would silence
+`history/` and break the durability of the sealed-task record). `data/state.md` is the one
+deliberate exception: the cursor is **local per dev** (issue #43) — with it versioned, every
+developer's closure commit edits the same singleton file and concurrent MRs conflict by
+construction; the durable record of each task is the `data/history/<YYYY-MM-DD>-<slug>-<sha7>.md` file
+(unique by construction, across branches too — `<sha7>` comes from the task's `validated-head`,
+per the seal migration in `pelizzai-finish` — conflict-free) that the seal migration creates. `merge=union` on
+`learnings.md` keeps concurrent appends from conflicting; its residual risk is an occasional
+duplicated line and arbitrary ordering of concurrently appended lines — visible and benign for
+append-shaped content — never a silent conflict. Verify with `git check-ignore` using
 temporary proof files; remove the proofs afterward.
 
 Create on demand, not at bootstrap: `context.md`, `adr/`, `out-of-scope/`, `specs/`, `plans/`, and the ephemeral directories.
@@ -399,6 +416,10 @@ pelizzai-finish to consolidate it.
 ## Partial state
 
 - catalog exists, ledger missing → propose/repair only the ledger in write mode;
+- `git ls-files -- pelizzai/data/state.md` lists the cursor (consumer bootstrapped before
+  issue #43) → propose the one-time migration in write mode: `git rm --cached
+  pelizzai/data/state.md`, update `pelizzai/.gitignore`, add `pelizzai/.gitattributes` per the
+  mandatory contents above; read-only just reports it;
 - `verification-standard.md`/`learnings.md` missing (consumer bootstrapped before the evolve
   cycle) → propose creating only them from `pelizzai-evolve/templates/` in write mode;
 - an entry file (`CLAUDE.md`/`AGENTS.md`/`GEMINI.md`) missing or without the
@@ -413,13 +434,14 @@ pelizzai-finish to consolidate it.
 ```text
 pelizzai/
 ├── .gitignore
+├── .gitattributes
 ├── domain-skills.md
 ├── profile.md
 ├── context.md | context/           on demand
 ├── adr/ | out-of-scope/            on demand
 ├── specs/ | plans/                 on demand
 └── data/
-    ├── state.md                    versioned
+    ├── state.md                    ignored (local per-dev cursor — issue #43)
     ├── review-domain-skills.md     versioned
     ├── verification-standard.md    versioned (what "correct" means — pelizzai-evolve)
     ├── learnings.md                versioned (execution memory — pelizzai-evolve)

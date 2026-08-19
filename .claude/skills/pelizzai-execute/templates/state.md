@@ -1,8 +1,10 @@
 # Task state — PelizzAI
 
-> Cursor of the active task. Lives in `pelizzai/data/state.md` (repository or workspace root).
-> Doctrine — who writes each field, the Delivery lifecycle (`delivered` → `done`), reconciliation,
-> and history hygiene — lives in `pelizzai-execute` → SKILL.md §State and resumption.
+> Cursor of the active task. Lives in `pelizzai/data/state.md` (repository or workspace root),
+> LOCAL per dev — `pelizzai/.gitignore` covers it (issue #43); it is never committed. The durable
+> record is `data/history/` (VERSIONED). Doctrine — who writes each field, the Delivery lifecycle
+> (`delivered` → `done`), reconciliation, and history hygiene — lives in `pelizzai-execute` →
+> SKILL.md §State and resumption.
 > Reference, don't duplicate: the fields live here, the process lives there.
 > No active task = `slug: <none>`. `phase: blocked` = stuck, awaiting a human decision.
 
@@ -17,7 +19,7 @@
 - base-sha: <full SHA resolved from base-ref before the first change>
 - validated-head: <none | full SHA of the last content commit approved in the final validation>
 - confirm: <none | observable condition to establish `done` — e.g. "base-ref contains validated-head (PR/branch integrated)" | "local delivery accepted by the user">
-- delivery-status: <none | pending push | pending pr | local | archive>   # destination INTENT sealed in the pelizzai-finish closure; what actually happened is OBSERVED against the remote on resumption (never a second cursor commit)
+- delivery-status: <none | pending push | pending pr | local | archive>   # destination INTENT sealed in the pelizzai-finish closure; what actually happened is OBSERVED against the remote on resumption (the cursor is local — never committed)
 - kickoff: <pending | ratified YYYY-MM-DD>   # consolidated gate (plan content + isolation/mode/commits) ratified by the user
 - isolation: <pending | branch | worktree>   # <pending> until ratification; never written as a silent default
 - worktree-path: <none | path of the worktree, when isolation: worktree>
@@ -45,10 +47,10 @@
 ## History
 
 <!-- Durable index of deliveries. On the `delivered` seal, the task's intact block migrates to
-     pelizzai/data/history/<YYYY-MM-DD>-<slug>.md (VERSIONED), the cursor returns to the size of
+     pelizzai/data/history/<YYYY-MM-DD>-<slug>-<sha7>.md (VERSIONED), the cursor returns to the size of
      this template, and ONE line stays here — stamped with `done`/`abandoned` when observed. -->
 
 - <YYYY-MM-DD> — state initialized (pelizzai-router / pelizzai-starting-branch / pelizzai-execute)
-- <YYYY-MM-DD> <slug> — delivered [→ done | abandoned <YYYY-MM-DD>] — <outcome in ≤10 words> → data/history/<YYYY-MM-DD>-<slug>.md
+- <YYYY-MM-DD> <slug> — delivered [→ done | abandoned <YYYY-MM-DD>] — <outcome in ≤10 words> → data/history/<YYYY-MM-DD>-<slug>-<sha7>.md
 
 _Last updated: <YYYY-MM-DD>_

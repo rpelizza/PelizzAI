@@ -39,10 +39,10 @@ try {
       $mPhase = [regex]::Match($state, '(?m)^\s*-\s*phase:\s*(\S+)')
       $slug = if ($mSlug.Success) { $mSlug.Groups[1].Value } else { $null }
       $phase = if ($mPhase.Success) { $mPhase.Groups[1].Value } else { $null }
-      # state.md is a VERSIONED file: whatever it carries lands in the agent's context on every
-      # session start. Values are matched against the shape the template documents and the whole
-      # line is DISCARDED on mismatch - untrusted text, not "a different policy" (second-order
-      # prompt injection via a merged commit). Parity with the .mjs fix.
+      # state.md is a local per-dev file (issue #43), but whatever it carries lands in the
+      # agent's context on every session start. Values are matched against the shape the
+      # template documents and the whole line is DISCARDED on mismatch - untrusted text, not
+      # "a different policy" (prompt injection via a tampered local cursor). Parity with .mjs.
       $phases = @('brainstorm', 'plan', 'exec', 'review', 'delivered', 'done', 'abandoned', 'blocked')
       if ($slug -and $slug -cmatch '^[a-z0-9][a-z0-9._-]{0,63}$' -and $phase -and ($phases -ccontains $phase) -and $phase -ne 'done') {
         $lines += "There is an ACTIVE task in pelizzai/data/state.md (slug: $slug, phase: $phase) - resume via pelizzai-router, validating the cursor against git before proceeding."
