@@ -384,6 +384,14 @@ try {
     Check-NotMatch '.claude/skills/pelizzai-audit/SKILL.md' '^data/history/\s*$' 'audit: history/ is NOT ignored in the template (durable versioned record)'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'history/\s+versioned' 'audit: history/ marked versioned in the Canonical layout (durable, outside the ignore)'
 
+    # -- Issue #43 (2026-08-19): multi-dev — the cursor is local per dev; learnings merge by union --
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' '^data/state\.md\s*$' 'audit: state.md IS in the mandatory ignore (local per-dev cursor — issue #43)'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'pelizzai/\.gitattributes' 'audit: the bootstrap ships pelizzai/.gitattributes'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' '^data/learnings\.md merge=union\s*$' 'audit: learnings.md merges by union (append-shaped shared memory)'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' '^data/history/learnings-\*\.md merge=union\s*$' 'audit: learnings archives merge by union too'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'state\.md\s+ignored[^\n]*per-dev' 'audit: Canonical layout marks state.md as the local per-dev cursor'
+    Check-NotMatch '.claude/skills/pelizzai-audit/SKILL.md' '`data/state\.md`[^\n]*are \*\*versioned\*\*' 'audit: the old doctrine (state.md versioned) is gone'
+
     # =====================================================================
     # Pre-2026-07-11 restoration (2026-07-21) — F4: the state is a CURSOR again.
     # The regression this section locks out: the data template was drifting into
