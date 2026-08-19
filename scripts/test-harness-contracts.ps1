@@ -1587,7 +1587,7 @@ try {
     Check-Match '.claude/skills/pelizzai-preferences/SKILL.md' 'disjoint paths' 'preferences: the floor does not deny parallel writes on disjoint paths'
     Check-Match '.claude/skills/pelizzai-preferences/SKILL.md' 'never one worktree per agent' 'preferences: the floor repeats the one-worktree-per-agent ban'
 
-    # The closure is TWO metadata files: state.md + the block migrated to history/.
+    # The closure is ONE metadata file: the block migrated to history/ (the cursor is local per dev — issue #43).
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'the one closure metadata file' 'finish-task: pre-destination guard requires exactly the migrated history file (issue #43)'
 
     # A plan gap goes to the interview; guessing stopped being expected behavior.
