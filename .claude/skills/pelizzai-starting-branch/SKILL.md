@@ -208,14 +208,16 @@ here.
 
 Confirm that `git branch --show-current` is the recorded branch and, in a consumer, record
 `isolation: branch` plus the gate decisions. Before Task 1, checkpoint the intentional
-planning/state artifacts with exact paths and require a clean working tree. In source mode,
+planning artifacts with exact paths and require a clean working tree (the cursor is local per
+dev and never checkpointed — issue #43). In source mode,
 checkpoint only a persistent plan the user explicitly asked for; a native plan generates no file.
 Do not recreate the branch or recompute the base.
 
 ### Move the existing branch to a worktree
 
 1. On the task branch, checkpoint **only when there are** intentional persistent planning
-   artifacts (`plan`, spec/ADR and, in a consumer, `state.md`). Use exact paths; never
+   artifacts (`plan`, spec/ADR — never `state.md`: the cursor is local per dev, ignored by git,
+   and is recreated in the worktree instead — issue #43). Use exact paths; never
    `git add -A`. A native plan in source mode creates no empty commit.
 2. If there are artifacts, inspect `git diff --cached` and create the commit. If the user does not
    authorize that checkpoint, keep `isolation: branch`; uncommitted changes do not cross

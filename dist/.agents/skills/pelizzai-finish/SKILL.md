@@ -189,7 +189,10 @@ travels). In the `pelizzai/data/state.md` already modified by the seal:
 1. **Migrate the intact block and deflate the cursor** along the boundary defined in
    `pelizzai-execute` → §State and resumption: copy the task fields + the
    `T<n>`/`next`/`pending` lines faithfully into `pelizzai/data/history/<YYYY-MM-DD>-<slug>.md`
-   (VERSIONED), return `## Active task` and `## Progress` to the template placeholders, and leave
+   (VERSIONED). The name must be **unique at seal time**: if that exact path already exists —
+   locally or on the base (a parallel task claimed the same date+slug) — suffix the filename
+   (`-2`, `-3`, …) until it is free, and use the actual filename everywhere below. Then return
+   `## Active task` and `## Progress` to the template placeholders, and leave
    in `## History` **one** index line
    (`- <date> <slug> — delivered — <result ≤10 words> → data/history/<file>`). The cursor shrinks
    back to template size HERE, at closeout — it does not stay bloated through the whole

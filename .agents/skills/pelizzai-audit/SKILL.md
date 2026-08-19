@@ -278,7 +278,8 @@ durable record; they never go into the ignore (a broad `data/*` with exceptions 
 deliberate exception: the cursor is **local per dev** (issue #43) — with it versioned, every
 developer's closure commit edits the same singleton file and concurrent MRs conflict by
 construction; the durable record of each task is the `data/history/<YYYY-MM-DD>-<slug>.md` file
-(unique name per task, conflict-free) that the seal migration creates. `merge=union` on
+(unique name per task — on a rare date+slug collision the seal migration in `pelizzai-finish`
+suffixes the filename — conflict-free) that the seal migration creates. `merge=union` on
 `learnings.md` keeps concurrent appends from conflicting; its residual risk is an occasional
 duplicated line and arbitrary ordering of concurrently appended lines — visible and benign for
 append-shaped content — never a silent conflict. Verify with `git check-ignore` using

@@ -437,7 +437,40 @@ try {
     Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' ":\(exclude\)pelizzai/data/state\.md" 'finish-task: no state exclude left — the ignored cursor never reaches a diff (issue #43)'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'git ls-files -- pelizzai/data/state\.md' 'finish-task: legacy guard detects a consumer that predates the #43 migration'
     Check-Match '.claude/skills/pelizzai-final-verification/SKILL.md' 'only harness metadata' 'verification: closure contains the history file only (issue #43)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'unique at seal time[\s\S]{0,160}suffix the filename' 'finish-task: the history name gets a suffix on a date+slug collision (issue #43)'
+    Check-NotMatch '.claude/skills/pelizzai-starting-branch/SKILL.md' 'spec/ADR and, in a consumer, `state\.md`' 'starting-branch: the worktree checkpoint no longer lists the cursor (issue #43)'
     Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'already migrated to .pelizzai/data/history/' 'recovery: on resumption only stamps the outcome (the block already migrated)'
+
+    # -- Issue #43 behavioral fixture: a real repo proves the closure shape — the ignored cursor
+    #    is invisible to porcelain, un-addable without -f, and the stage holds EXACTLY the
+    #    migrated history file (textual assertions alone cannot prove behavior). --
+    $cl43 = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-closure43-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $cl43 | Out-Null
+    try {
+        git -C $cl43 init -q
+        git -C $cl43 config user.email 'contract@pelizzai.local'
+        git -C $cl43 config user.name 'PelizzAI Contract'
+        New-Item -ItemType Directory -Path (Join-Path $cl43 'pelizzai/data/history') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $cl43 'pelizzai/.gitignore') -Value "data/state.md`ndata/.cadence-state.json`ndata/handoffs/`ndata/mockups/`ndata/reports/`n" -Encoding utf8
+        Set-Content -LiteralPath (Join-Path $cl43 'pelizzai/.gitattributes') -Value "data/learnings.md merge=union`ndata/history/learnings-*.md merge=union`n" -Encoding utf8
+        Set-Content -LiteralPath (Join-Path $cl43 'product.txt') -Value 'validated content' -Encoding utf8
+        git -C $cl43 add pelizzai/.gitignore pelizzai/.gitattributes product.txt
+        git -C $cl43 commit -q -m 'validated-head'
+        Set-Content -LiteralPath (Join-Path $cl43 'pelizzai/data/state.md') -Value "- slug: t43`n- phase: delivered`n" -Encoding utf8
+        $porcelain = @(git -C $cl43 status --porcelain --untracked-files=all)
+        Check ($porcelain.Count -eq 0) 'closure fixture: the ignored cursor is invisible to porcelain (issue #43)' ($porcelain -join ',')
+        git -C $cl43 add -- pelizzai/data/state.md 2>$null
+        Check ($LASTEXITCODE -ne 0) 'closure fixture: git add of the ignored cursor fails without -f (issue #43)'
+        Set-Content -LiteralPath (Join-Path $cl43 'pelizzai/data/history/2026-08-19-t43.md') -Value 'intact block' -Encoding utf8
+        git -C $cl43 add -- pelizzai/data/history/2026-08-19-t43.md
+        $staged = @(git -C $cl43 diff --cached --name-only)
+        Check (($staged.Count -eq 1) -and ($staged[0] -eq 'pelizzai/data/history/2026-08-19-t43.md')) 'closure fixture: the stage holds EXACTLY the migrated history file (issue #43)' ($staged -join ',')
+        git -C $cl43 commit -q -m 'chore: seal task as delivered'
+        $closure = @(git -C $cl43 diff --name-only HEAD~1..HEAD)
+        Check (($closure.Count -eq 1) -and ($closure[0] -eq 'pelizzai/data/history/2026-08-19-t43.md')) 'closure fixture: validated-head..closure-head contains only the history file (issue #43)' ($closure -join ',')
+    } finally {
+        Remove-Item -Recurse -Force $cl43 -ErrorAction SilentlyContinue
+    }
 
     # -- A plan executable by someone with zero context (BASE requirement restored) --
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'zero context\*\*[\s\S]{0,80}a single question' 'writing-plans: goal is the plan a zero-context executor runs without asking'
