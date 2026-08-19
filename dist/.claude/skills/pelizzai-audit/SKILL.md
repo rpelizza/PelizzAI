@@ -415,6 +415,10 @@ pelizzai-finish to consolidate it.
 ## Partial state
 
 - catalog exists, ledger missing → propose/repair only the ledger in write mode;
+- `git ls-files -- pelizzai/data/state.md` lists the cursor (consumer bootstrapped before
+  issue #43) → propose the one-time migration in write mode: `git rm --cached
+  pelizzai/data/state.md`, update `pelizzai/.gitignore`, add `pelizzai/.gitattributes` per the
+  mandatory contents above; read-only just reports it;
 - `verification-standard.md`/`learnings.md` missing (consumer bootstrapped before the evolve
   cycle) → propose creating only them from `pelizzai-evolve/templates/` in write mode;
 - an entry file (`CLAUDE.md`/`AGENTS.md`/`GEMINI.md`) missing or without the

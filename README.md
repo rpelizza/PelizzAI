@@ -337,7 +337,7 @@ flowchart LR
     T --> R["review"]
     R --> V["Verification"]
     V --> S["validated-head<br/>SHA of the approved content"]
-    S --> M["one metadata-only commit<br/>state.md + history/ → delivered"]
+    S --> M["one metadata-only commit<br/>history/ file → delivered<br/>(the cursor is local, never committed)"]
     M --> X["destination confirmed"]
     X --> DN["done observed later,<br/>against Git"]
 ```
@@ -349,7 +349,9 @@ validated content commit.
 `pelizzai-finish` requires `HEAD == validated-head` — **what you receive is exactly what was
 reviewed**. It then creates a single metadata-only commit to seal the task in `phase: delivered`
 and record `confirm:`, the observable condition that will become `done`. In that seal, the task's
-intact block migrates to `pelizzai/data/history/` and the cursor returns to template size.
+intact block migrates to `pelizzai/data/history/` — the only file the closure commit carries —
+and the cursor returns to template size. The cursor itself (`state.md`) is **local per dev** and
+never enters a commit (issue #43).
 
 `done` is never declared at closeout: it is **observed** at the opening of the next task or on
 resumption, by checking `confirm:` against Git. If the observation fails — a PR closed without a
@@ -371,19 +373,46 @@ holds versioned knowledge; `data/` holds state and ephemera.
 ```text
 pelizzai/
 ├── .gitignore
+├── .gitattributes                merge=union for the append-shaped shared memory
 ├── domain-skills.md              domain catalog; marks the bootstrap as complete
 ├── profile.md                    test/build/lint commands, stack baseline, ratified defaults
 ├── context.md | context/         domain glossary, on demand
 ├── adr/ | specs/ | plans/        on demand
 └── data/
-    ├── state.md                  cursor of the active task                     (versioned)
+    ├── state.md                  cursor of the active task            (local per dev — ignored)
     ├── review-domain-skills.md   maintenance ledger for the domain skills      (versioned)
+    ├── verification-standard.md  what "correct" means here (pelizzai-evolve)   (versioned)
+    ├── learnings.md              execution memory (pelizzai-evolve)  (versioned, merge=union)
     ├── history/                  intact block migrated at the delivered seal   (versioned)
     ├── .cadence-state.json       local counter for the cadence hook            (ignored)
     ├── handoffs/                 task briefs and review packages               (ignored)
     ├── mockups/                  visual companion screens                      (ignored)
     └── reports/                  long QA, review, and architecture reports     (ignored)
 ```
+
+### Multiple developers on the same consumer (issue #43)
+
+The cursor is **per developer**: `state.md` is ignored by git, so each dev carries their own
+active task and no merge ever conflicts on it. What the team shares travels in files that merge
+cleanly — `data/history/` (one file per task with a unique name, plus the `learnings-*.md`
+archives) is the durable record of every delivery, and `learnings.md` merges by **union**
+(concurrent appends never conflict; the worst case is a duplicated line or arbitrary ordering,
+visible and benign). A delivery sealed on another machine is readable
+in its `data/history/` file, and its `done` stamp is appended there by whoever observes the
+integration.
+
+A consumer bootstrapped **before** this contract still tracks `state.md`. Migrate it once, in a
+normal task branch:
+
+```bash
+git rm --cached pelizzai/data/state.md
+```
+
+Then update `pelizzai/.gitignore` and add `pelizzai/.gitattributes` per the mandatory contents in
+`pelizzai-audit` (re-exporting the harness brings the updated skills; the runtime files are
+per-project and this one-time migration is yours), and commit. `pelizzai-finish` refuses to seal
+a delivery while the cursor is still tracked, so an unmigrated consumer fails loudly, not
+silently.
 
 `state.md` is a **cursor, not a stamp file**: the discovery, spec, domain skills, and plan
 approvals live in the plan header, with dates — not in the cursor. Main fields:

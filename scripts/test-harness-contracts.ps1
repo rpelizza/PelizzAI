@@ -391,6 +391,11 @@ try {
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' '^data/history/learnings-\*\.md merge=union\s*$' 'audit: learnings archives merge by union too'
     Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'state\.md\s+ignored[^\n]*per-dev' 'audit: Canonical layout marks state.md as the local per-dev cursor'
     Check-NotMatch '.claude/skills/pelizzai-audit/SKILL.md' '`data/state\.md`[^\n]*are \*\*versioned\*\*' 'audit: the old doctrine (state.md versioned) is gone'
+    Check-Match '.claude/skills/pelizzai-audit/SKILL.md' 'git rm --cached\s+pelizzai/data/state\.md' 'audit: partial state proposes the #43 migration for a legacy consumer'
+    Check-Match 'README.md' 'Multiple developers on the same consumer' 'README documents the multi-dev contract (issue #43)'
+    Check-Match 'README.md' 'git rm --cached pelizzai/data/state\.md' 'README carries the legacy-consumer migration command'
+    Check-Match 'README.md' 'local per dev — ignored' 'README tree marks state.md as the local per-dev cursor'
+    Check-NotMatch 'README.md' 'state\.md \+ history/' 'README: the old closure shape (state + history) is gone'
 
     # =====================================================================
     # Pre-2026-07-11 restoration (2026-07-21) — F4: the state is a CURSOR again.
