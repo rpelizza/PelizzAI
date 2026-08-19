@@ -186,7 +186,25 @@ status lives in the native execution record.
 (the migrated history/ file rides along in the PR; the cursor itself is local per dev and never
 travels). In the `pelizzai/data/state.md` already modified by the seal:
 
-1. **Migrate the intact block and deflate the cursor** along the boundary defined in
+1. **Seal the cursor fields first — single write order.** In the local cursor, set
+   `phase: delivered`, record `confirm:` with the observable condition that becomes `done`,
+   derived from the destination chosen in 2a: publish/PR → `base-ref contains validated-head
+   (PR/branch integrated)`; keep local → `local delivery accepted by the user`; discard/archival
+   (option 4) → `archived locally, no merge expected` (it is not a delivery onto a base: §3d
+   decides archive or discard; the observation becomes `done` when the archive is accepted, or
+   `abandoned` if discarded). Also set `delivery-status:` to the destination INTENT from 2a —
+   `pending push`, `pending pr`, `local`, or `archive` — and update the date. In a consumer it is
+   written once in the
+   local cursor at the seal and never edited again by this skill (the cursor is local per dev and
+   never committed — issue #43); source mode records the destination status in the native
+   execution record as §3 describes: what actually
+   happened at §3 is reported in the conversation and OBSERVED on resumption against the remote,
+   with the sealed intent narrowing the reconciliation — remote branch missing = failed before
+   the push; branch at `delivery-head` without a PR = pushed, PR pending. Every sealed field
+   exists in the cursor BEFORE the copy in step 2: the history file is the only durable snapshot
+   of the task (issue #43), the migration is a single faithful copy — never copy-then-patch — and
+   a history file without `phase/confirm/delivery-status` recorded is an incomplete seal.
+2. **Migrate the intact block and deflate the cursor** along the boundary defined in
    `pelizzai-execute` → §State and resumption: copy the task fields + the
    `T<n>`/`next`/`pending` lines faithfully into
    `pelizzai/data/history/<YYYY-MM-DD>-<slug>-<sha7>.md` (VERSIONED), where `<sha7>` is the first
@@ -209,27 +227,10 @@ travels). In the `pelizzai/data/state.md` already modified by the seal:
    about a task that just shipped, and block any product write until the next task's gate. The
    reset of `kickoff` belongs to the NEXT task's opening (`pelizzai-execute` → §State and
    resumption), not to this seal.
-2. Set `phase: delivered` and record `confirm:` with the observable condition that becomes `done`,
-   derived from the destination chosen in 2a: publish/PR → `base-ref contains validated-head
-   (PR/branch integrated)`; keep local → `local delivery accepted by the user`; discard/archival
-   (option 4) → `archived locally, no merge expected` (it is not a delivery onto a base: §3d
-   decides archive or discard; the observation becomes `done` when the archive is accepted, or
-   `abandoned` if discarded). Also set `delivery-status:` to the destination INTENT from 2a —
-   `pending push`, `pending pr`, `local`, or `archive`. In a consumer it is written once in the
-   local cursor at the seal and never edited again by this skill (the cursor is local per dev and
-   never committed — issue #43); source mode records the destination status in the native
-   execution record as §3 describes: what actually
-   happened at §3 is reported in the conversation and OBSERVED on resumption against the remote,
-   with the sealed intent narrowing the reconciliation — remote branch missing = failed before
-   the push; branch at `delivery-head` without a PR = pushed, PR pending.
-3. Check that the `## History` index line (step 1) is dated as `delivered`, without promising
+3. Check that the `## History` index line (step 2) is dated as `delivered`, without promising
    merge/`done` yet — that stamp comes from the later observation.
-4. Update the date. Order note: the history file is the only durable snapshot of the task
-   (issue #43) — perform the step 1 copy with the sealed fields of steps 2–3 already written, or
-   re-copy them into the history file before staging; a history file without
-   `phase/confirm/delivery-status` recorded is an incomplete seal.
 
-Stage **only** the harness metadata — the history file the step 1 migration just generated (a
+Stage **only** the harness metadata — the history file the step 2 migration just generated (a
 versioned file; it travels in this same closure, never in an extra commit). The cursor is
 **written, never staged**: it is the local per-dev file the ignore protects (issue #43):
 
@@ -271,7 +272,7 @@ git status --porcelain --untracked-files=all
 
 In a consumer, also repeat `git diff --name-only <validated-head>..<delivery-head>` and require
 only the one closure metadata file: the `<history-file>` resolved by the seal's migration
-(§2b step 1) — nothing more.
+(§2b step 2) — nothing more.
 In source mode, require `delivery-head == validated-head`.
 Diverged? Stop; do not publish.
 

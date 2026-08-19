@@ -443,6 +443,12 @@ try {
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '<YYYY-MM-DD>-<slug>-<sha7>\.md[\s\S]{0,120}validated-head' 'finish-task: <sha7> comes from validated-head (globally unique per task)'
     Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' 'suffix the filename' 'finish-task: the local-existence suffix rule is gone (it cannot see unmerged branches)'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'sealed-by: <git user\.name>' 'finish-task: the history file names its author from git config (issue #43)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Seal the cursor fields first[\s\S]{0,40}single write order' 'finish-task: sealed fields are written BEFORE the migration copy (single write order)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'single faithful copy[\s\S]{0,40}never copy-then-patch' 'finish-task: the migration is one copy, never copy-then-patch'
+    Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' 're-copy them into the history file' 'finish-task: the ambiguous re-copy escape hatch is gone'
+    Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'first 7 characters of the sealed task[\s\S]{0,4}`validated-head`, never the current HEAD' 'recovery: <sha7> origin is the sealed validated-head, never HEAD'
+    Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'read the resolved path from the `## History` index line' 'recovery: the history path is read from the index, never recomputed'
+    Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'git check-ignore pelizzai/data/state\.md' 'recovery: cursor-only write proves the cursor is local before writing (issue #43)'
     Check-NotMatch '.claude/skills/pelizzai-starting-branch/SKILL.md' 'spec/ADR and, in a consumer, `state\.md`' 'starting-branch: the worktree checkpoint no longer lists the cursor (issue #43)'
     Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'already migrated to .pelizzai/data/history/' 'recovery: on resumption only stamps the outcome (the block already migrated)'
 
@@ -491,25 +497,37 @@ try {
         Set-Content -LiteralPath (Join-Path $mg43 'pelizzai/.gitignore') -Value "data/state.md`n" -Encoding utf8
         git -C $mg43 add pelizzai/.gitignore
         git -C $mg43 commit -q -m 'base'
+        # Branch A: a real content commit IS the validated-head; its sha7 names the history file.
         git -C $mg43 checkout -q -b task-a
-        Set-Content -LiteralPath (Join-Path $mg43 'pelizzai/data/history/2026-08-19-fix-login-aaaaaaa.md') -Value "block A`nsealed-by: Dev A <a@pelizzai.local>`n" -Encoding utf8
-        git -C $mg43 add -- pelizzai/data/history/2026-08-19-fix-login-aaaaaaa.md
+        Set-Content -LiteralPath (Join-Path $mg43 'product-a.txt') -Value 'validated A' -Encoding utf8
+        git -C $mg43 add -- product-a.txt
+        git -C $mg43 commit -q -m 'validated task-a'
+        $shaA = (git -C $mg43 rev-parse HEAD).Trim().Substring(0, 7)
+        Set-Content -LiteralPath (Join-Path $mg43 "pelizzai/data/history/2026-08-19-fix-login-$shaA.md") -Value "block A`nsealed-by: Dev A <a@pelizzai.local>`n" -Encoding utf8
+        git -C $mg43 add -- "pelizzai/data/history/2026-08-19-fix-login-$shaA.md"
         git -C $mg43 commit -q -m 'chore: seal task as delivered'
         git -C $mg43 checkout -q main
+        # Branch B: same date+slug, its own validated-head → its own sha7.
         git -C $mg43 checkout -q -b task-b
+        Set-Content -LiteralPath (Join-Path $mg43 'product-b.txt') -Value 'validated B' -Encoding utf8
+        git -C $mg43 add -- product-b.txt
+        git -C $mg43 commit -q -m 'validated task-b'
+        $shaB = (git -C $mg43 rev-parse HEAD).Trim().Substring(0, 7)
         # checking out main pruned the now-empty history/ dir along with task-a's file
         New-Item -ItemType Directory -Path (Join-Path $mg43 'pelizzai/data/history') -Force | Out-Null
-        Set-Content -LiteralPath (Join-Path $mg43 'pelizzai/data/history/2026-08-19-fix-login-bbbbbbb.md') -Value "block B`nsealed-by: Dev B <b@pelizzai.local>`n" -Encoding utf8
-        git -C $mg43 add -- pelizzai/data/history/2026-08-19-fix-login-bbbbbbb.md
+        Set-Content -LiteralPath (Join-Path $mg43 "pelizzai/data/history/2026-08-19-fix-login-$shaB.md") -Value "block B`nsealed-by: Dev B <b@pelizzai.local>`n" -Encoding utf8
+        git -C $mg43 add -- "pelizzai/data/history/2026-08-19-fix-login-$shaB.md"
         git -C $mg43 commit -q -m 'chore: seal task as delivered'
+        Check ($shaA -ne $shaB) 'merge fixture: distinct validated-heads yield distinct history names (issue #43)' "shaA=$shaA shaB=$shaB"
         git -C $mg43 checkout -q main
         git -C $mg43 merge -q --no-ff task-a -m 'merge task-a' 2>$null
         $mergeA = $LASTEXITCODE
         git -C $mg43 merge -q --no-ff task-b -m 'merge task-b' 2>$null
         $mergeB = $LASTEXITCODE
         Check (($mergeA -eq 0) -and ($mergeB -eq 0)) 'merge fixture: two same-date+slug closures integrate without conflict (issue #43)' "mergeA=$mergeA mergeB=$mergeB"
-        $both = @(git -C $mg43 ls-files -- 'pelizzai/data/history/*')
-        Check ($both.Count -eq 2) 'merge fixture: both history files survive the integration (issue #43)' ($both -join ',')
+        $both = @(git -C $mg43 ls-files -- 'pelizzai/data/history/*') | Sort-Object
+        $expected = @("pelizzai/data/history/2026-08-19-fix-login-$shaA.md", "pelizzai/data/history/2026-08-19-fix-login-$shaB.md") | Sort-Object
+        Check (($both.Count -eq 2) -and ($both[0] -eq $expected[0]) -and ($both[1] -eq $expected[1])) 'merge fixture: both sha7-named history files survive the integration (issue #43)' ($both -join ',')
     } finally {
         Remove-Item -Recurse -Force $mg43 -ErrorAction SilentlyContinue
     }

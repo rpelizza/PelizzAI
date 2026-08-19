@@ -47,7 +47,9 @@ PR = push confirmed, PR pending) — the field is the INTENT and is never overwr
 observed outcome — and check `confirm:` against git (read-only): does `base-ref` contain
 `validated-head`? PR merged? branch integrated? (local delivery: does the user accept?). Observed → stamp the `## History` index
 line with `done <YYYY-MM-DD>` + 1-line evidence and record `phase: done` — the full block
-already migrated to `pelizzai/data/history/<YYYY-MM-DD>-<slug>-<sha7>.md` at the `delivered` seal, so
+already migrated to `pelizzai/data/history/<YYYY-MM-DD>-<slug>-<sha7>.md` at the `delivered` seal
+(`<sha7>` = first 7 characters of the sealed task's `validated-head`, never the current HEAD;
+read the resolved path from the `## History` index line — do not recompute it), so
 there is no block to move here. On a protected branch this authorization covers ONLY the cursor
 reconciliation just described (the index stamp and `phase`) — it is not a general license to
 write arbitrary `pelizzai/` metadata there; the commit waits for
@@ -120,7 +122,11 @@ Update only proven fields. Before the commit:
 - be on a safe, non-protected branch; if needed, use `pelizzai-starting-branch` without losing the
   rescue ref;
 - consumer: a cursor-only recovery needs no commit — `pelizzai/data/state.md` is the local
-  per-dev cursor, ignored by git (issue #43); write it and move on;
+  per-dev cursor, ignored by git (issue #43). Before writing it, confirm the §1 diagnosis put you
+  in the recorded worktree/branch, and prove the cursor is really local:
+  `git check-ignore pelizzai/data/state.md` succeeds and `git ls-files -- pelizzai/data/state.md`
+  is empty. A tracked or unignored cursor is a pre-#43 consumer — stop and propose the one-time
+  migration (`pelizzai-audit` §Partial state) before reconciling. Then write it and move on;
 - source mode: update only the native execution record; do not create state or a cursor commit;
 - if legitimate WIP will also be consolidated, return it to the normal lifecycle for
   review/proof/commit; do not mix unreviewed content into a “recovery commit”.
