@@ -188,12 +188,16 @@ travels). In the `pelizzai/data/state.md` already modified by the seal:
 
 1. **Migrate the intact block and deflate the cursor** along the boundary defined in
    `pelizzai-execute` → §State and resumption: copy the task fields + the
-   `T<n>`/`next`/`pending` lines faithfully into `pelizzai/data/history/<YYYY-MM-DD>-<slug>.md`
-   (VERSIONED). The name must be **unique at seal time**: if that exact path already exists —
-   locally or on the base (a parallel task claimed the same date+slug) — suffix the filename
-   (`-2`, `-3`, …) until it is free. The resolved path is **`<history-file>`** from here on: the
-   index line, the `git add`, and every later guard use it verbatim — never reconstruct the
-   unsuffixed name. Then return
+   `T<n>`/`next`/`pending` lines faithfully into
+   `pelizzai/data/history/<YYYY-MM-DD>-<slug>-<sha7>.md` (VERSIONED), where `<sha7>` is the first
+   7 characters of `validated-head`. The name is **unique by construction, across branches too**:
+   parallel tasks sealed on different branches carry different heads, so no local existence check
+   — which cannot see another branch's unmerged closure — is ever needed. Add to the migrated
+   block the line `sealed-by: <git user.name> <user.email>` (from `git config`): the file is the
+   durable record in a multi-dev consumer, and it names its author. The resolved path is
+   **`<history-file>`** from here on: the
+   index line, the `git add`, and every later guard use it verbatim — never reconstruct a
+   different name. Then return
    `## Active task` and `## Progress` to the template placeholders, and leave
    in `## History` **one** index line
    (`- <date> <slug> — delivered — <result ≤10 words> → <history-file>`). The cursor shrinks

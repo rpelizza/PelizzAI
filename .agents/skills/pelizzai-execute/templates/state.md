@@ -47,10 +47,10 @@
 ## History
 
 <!-- Durable index of deliveries. On the `delivered` seal, the task's intact block migrates to
-     pelizzai/data/history/<YYYY-MM-DD>-<slug>.md (VERSIONED), the cursor returns to the size of
+     pelizzai/data/history/<YYYY-MM-DD>-<slug>-<sha7>.md (VERSIONED), the cursor returns to the size of
      this template, and ONE line stays here — stamped with `done`/`abandoned` when observed. -->
 
 - <YYYY-MM-DD> — state initialized (pelizzai-router / pelizzai-starting-branch / pelizzai-execute)
-- <YYYY-MM-DD> <slug> — delivered [→ done | abandoned <YYYY-MM-DD>] — <outcome in ≤10 words> → data/history/<YYYY-MM-DD>-<slug>.md
+- <YYYY-MM-DD> <slug> — delivered [→ done | abandoned <YYYY-MM-DD>] — <outcome in ≤10 words> → data/history/<YYYY-MM-DD>-<slug>-<sha7>.md
 
 _Last updated: <YYYY-MM-DD>_

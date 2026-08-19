@@ -47,7 +47,7 @@ PR = push confirmed, PR pending) — the field is the INTENT and is never overwr
 observed outcome — and check `confirm:` against git (read-only): does `base-ref` contain
 `validated-head`? PR merged? branch integrated? (local delivery: does the user accept?). Observed → stamp the `## History` index
 line with `done <YYYY-MM-DD>` + 1-line evidence and record `phase: done` — the full block
-already migrated to `pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` at the `delivered` seal, so
+already migrated to `pelizzai/data/history/<YYYY-MM-DD>-<slug>-<sha7>.md` at the `delivered` seal, so
 there is no block to move here. On a protected branch this authorization covers ONLY the cursor
 reconciliation just described (the index stamp and `phase`) — it is not a general license to
 write arbitrary `pelizzai/` metadata there; the commit waits for

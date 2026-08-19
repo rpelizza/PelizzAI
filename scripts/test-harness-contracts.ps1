@@ -432,14 +432,17 @@ try {
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Migration at the .delivered' 'execution-plans: the history/ migration happens at the delivered seal'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Migrate the intact block and deflate the cursor' 'finish-task runs the migration when sealing delivered'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- <history-file>' 'finish-task stages ONLY the resolved history file in the closure (issue #43)'
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'The resolved path is \*\*`<history-file>`\*\*' 'finish-task: step 1 defines the <history-file> identifier (collision-safe name)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'The resolved path is\s+\*\*`<history-file>`\*\*' 'finish-task: step 1 defines the <history-file> identifier (collision-safe name)'
     Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- pelizzai/data/history/<YYYY-MM-DD>-<slug>\.md' 'finish-task: the stage never reconstructs the unsuffixed filename'
     Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- pelizzai/data/state\.md' 'finish-task never stages the local per-dev cursor (issue #43)'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' ":\(exclude\)pelizzai/data/history/" 'finish-task: product guard excludes history/ metadata'
     Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' ":\(exclude\)pelizzai/data/state\.md" 'finish-task: no state exclude left — the ignored cursor never reaches a diff (issue #43)'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'git ls-files -- pelizzai/data/state\.md' 'finish-task: legacy guard detects a consumer that predates the #43 migration'
     Check-Match '.claude/skills/pelizzai-final-verification/SKILL.md' 'only harness metadata' 'verification: closure contains the history file only (issue #43)'
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'unique at seal time[\s\S]{0,160}suffix the filename' 'finish-task: the history name gets a suffix on a date+slug collision (issue #43)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'unique by construction, across branches' 'finish-task: the history name is unique by construction across branches (issue #43)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '<YYYY-MM-DD>-<slug>-<sha7>\.md[\s\S]{0,120}validated-head' 'finish-task: <sha7> comes from validated-head (globally unique per task)'
+    Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' 'suffix the filename' 'finish-task: the local-existence suffix rule is gone (it cannot see unmerged branches)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'sealed-by: <git user\.name>' 'finish-task: the history file names its author from git config (issue #43)'
     Check-NotMatch '.claude/skills/pelizzai-starting-branch/SKILL.md' 'spec/ADR and, in a consumer, `state\.md`' 'starting-branch: the worktree checkpoint no longer lists the cursor (issue #43)'
     Check-Match '.claude/skills/pelizzai-recovery/SKILL.md' 'already migrated to .pelizzai/data/history/' 'recovery: on resumption only stamps the outcome (the block already migrated)'
 
@@ -472,6 +475,43 @@ try {
         Check (($closure.Count -eq 1) -and ($closure[0] -eq 'pelizzai/data/history/2026-08-19-t43.md')) 'closure fixture: validated-head..closure-head contains only the history file (issue #43)' ($closure -join ',')
     } finally {
         Remove-Item -Recurse -Force $cl43 -ErrorAction SilentlyContinue
+    }
+
+    # -- Issue #43: two parallel closures with the SAME date+slug must integrate without
+    #    conflict — the <sha7> component keeps the names disjoint by construction, which no
+    #    local existence check could guarantee against an unmerged branch. --
+    $mg43 = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-merge43-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $mg43 | Out-Null
+    try {
+        git -C $mg43 init -q
+        git -C $mg43 symbolic-ref HEAD refs/heads/main
+        git -C $mg43 config user.email 'contract@pelizzai.local'
+        git -C $mg43 config user.name 'PelizzAI Contract'
+        New-Item -ItemType Directory -Path (Join-Path $mg43 'pelizzai/data/history') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $mg43 'pelizzai/.gitignore') -Value "data/state.md`n" -Encoding utf8
+        git -C $mg43 add pelizzai/.gitignore
+        git -C $mg43 commit -q -m 'base'
+        git -C $mg43 checkout -q -b task-a
+        Set-Content -LiteralPath (Join-Path $mg43 'pelizzai/data/history/2026-08-19-fix-login-aaaaaaa.md') -Value "block A`nsealed-by: Dev A <a@pelizzai.local>`n" -Encoding utf8
+        git -C $mg43 add -- pelizzai/data/history/2026-08-19-fix-login-aaaaaaa.md
+        git -C $mg43 commit -q -m 'chore: seal task as delivered'
+        git -C $mg43 checkout -q main
+        git -C $mg43 checkout -q -b task-b
+        # checking out main pruned the now-empty history/ dir along with task-a's file
+        New-Item -ItemType Directory -Path (Join-Path $mg43 'pelizzai/data/history') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $mg43 'pelizzai/data/history/2026-08-19-fix-login-bbbbbbb.md') -Value "block B`nsealed-by: Dev B <b@pelizzai.local>`n" -Encoding utf8
+        git -C $mg43 add -- pelizzai/data/history/2026-08-19-fix-login-bbbbbbb.md
+        git -C $mg43 commit -q -m 'chore: seal task as delivered'
+        git -C $mg43 checkout -q main
+        git -C $mg43 merge -q --no-ff task-a -m 'merge task-a' 2>$null
+        $mergeA = $LASTEXITCODE
+        git -C $mg43 merge -q --no-ff task-b -m 'merge task-b' 2>$null
+        $mergeB = $LASTEXITCODE
+        Check (($mergeA -eq 0) -and ($mergeB -eq 0)) 'merge fixture: two same-date+slug closures integrate without conflict (issue #43)' "mergeA=$mergeA mergeB=$mergeB"
+        $both = @(git -C $mg43 ls-files -- 'pelizzai/data/history/*')
+        Check ($both.Count -eq 2) 'merge fixture: both history files survive the integration (issue #43)' ($both -join ',')
+    } finally {
+        Remove-Item -Recurse -Force $mg43 -ErrorAction SilentlyContinue
     }
 
     # -- A plan executable by someone with zero context (BASE requirement restored) --

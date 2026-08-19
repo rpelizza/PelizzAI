@@ -443,14 +443,15 @@ block to `history/` (lossless), any condensation of content is propose-confirm.
 **Migration at the `delivered` seal (the cursor slims down at closeout, not at the next opening).**
 The executor is `pelizzai-finish`; the boundary is defined here. When writing
 `phase: delivered`, the task's **intact block** migrates to
-`pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` (VERSIONED) and the state returns to template
+`pelizzai/data/history/<YYYY-MM-DD>-<slug>-<sha7>.md` (VERSIONED; `<sha7>` from
+`validated-head` — naming authority: `pelizzai-finish` §2b) and the state returns to template
 size, with ONE index line under `## History`. Intact block (**migration boundary**, identical
 for `done` and `abandoned`) = all fields of this task's `## Active task` + its
 `T<n>`/`next`/`pending` lines from `## Progress`, with the `data/reports/` links copied verbatim.
 Order of operations (lossless → verifiable):
 
 ```text
-1. Copy the intact block to data/history/<YYYY-MM-DD>-<slug>.md — a faithful copy, nothing rewritten.
+1. Copy the intact block to data/history/<YYYY-MM-DD>-<slug>-<sha7>.md — a faithful copy, nothing rewritten.
 2. Return `## Active task` to the template placeholders, PRESERVING the fields that the
    destination and the later observation still read: slug, phase: delivered, branch, base-ref,
    base-sha, validated-head, commit-strategy, worktree-path, confirm, delivery-status, and
