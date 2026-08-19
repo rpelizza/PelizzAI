@@ -431,7 +431,9 @@ try {
     # -- The cursor deflates at CLOSEOUT (the delivered seal), not at the next opening --
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Migration at the .delivered' 'execution-plans: the history/ migration happens at the delivered seal'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Migrate the intact block and deflate the cursor' 'finish-task runs the migration when sealing delivered'
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- pelizzai/data/history/' 'finish-task stages ONLY the migrated history file in the closure (issue #43)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- <history-file>' 'finish-task stages ONLY the resolved history file in the closure (issue #43)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'The resolved path is \*\*`<history-file>`\*\*' 'finish-task: step 1 defines the <history-file> identifier (collision-safe name)'
+    Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- pelizzai/data/history/<YYYY-MM-DD>-<slug>\.md' 'finish-task: the stage never reconstructs the unsuffixed filename'
     Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- pelizzai/data/state\.md' 'finish-task never stages the local per-dev cursor (issue #43)'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' ":\(exclude\)pelizzai/data/history/" 'finish-task: product guard excludes history/ metadata'
     Check-NotMatch '.claude/skills/pelizzai-finish/SKILL.md' ":\(exclude\)pelizzai/data/state\.md" 'finish-task: no state exclude left — the ignored cursor never reaches a diff (issue #43)'

@@ -50,7 +50,7 @@ The state/closure sections below apply only to consumer projects.
 - A coverage gap (security, UI, documentation) becomes an explicit offer in §1.5, never silence;
   accepting it returns the task to the validation cycle — it never becomes a post-seal patch.
 - In consumer mode, the single new commit touches only harness metadata: the
-  pelizzai/data/history/<YYYY-MM-DD>-<slug>.md the seal's migration just generated
+  pelizzai/data/history/ file the seal's migration just resolved as `<history-file>` — §2b step 1
   (source mode creates NO closure commit — §Source mode and §2b).
 - Keeping local is the default recommendation, but it still requires an answer at the gate.
   Push/PR, worktree removal, and discard require an explicit per-task decision: they are never
@@ -191,10 +191,12 @@ travels). In the `pelizzai/data/state.md` already modified by the seal:
    `T<n>`/`next`/`pending` lines faithfully into `pelizzai/data/history/<YYYY-MM-DD>-<slug>.md`
    (VERSIONED). The name must be **unique at seal time**: if that exact path already exists —
    locally or on the base (a parallel task claimed the same date+slug) — suffix the filename
-   (`-2`, `-3`, …) until it is free, and use the actual filename everywhere below. Then return
+   (`-2`, `-3`, …) until it is free. The resolved path is **`<history-file>`** from here on: the
+   index line, the `git add`, and every later guard use it verbatim — never reconstruct the
+   unsuffixed name. Then return
    `## Active task` and `## Progress` to the template placeholders, and leave
    in `## History` **one** index line
-   (`- <date> <slug> — delivered — <result ≤10 words> → data/history/<file>`). The cursor shrinks
+   (`- <date> <slug> — delivered — <result ≤10 words> → <history-file>`). The cursor shrinks
    back to template size HERE, at closeout — it does not stay bloated through the whole
    `delivered` window. Preserve `slug`, `phase`, `branch`, `base-ref`, `base-sha`,
    `validated-head`, `commit-strategy`, `worktree-path`, `confirm:`, `delivery-status:`, and
@@ -228,7 +230,7 @@ versioned file; it travels in this same closure, never in an extra commit). The 
 **written, never staged**: it is the local per-dev file the ignore protects (issue #43):
 
 ```bash
-git add -- pelizzai/data/history/<YYYY-MM-DD>-<slug>.md
+git add -- <history-file>
 git diff --cached --name-only
 git commit -m "chore: seal task as delivered"
 ```
@@ -264,8 +266,8 @@ git status --porcelain --untracked-files=all
 ```
 
 In a consumer, also repeat `git diff --name-only <validated-head>..<delivery-head>` and require
-only the one closure metadata file: the `pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` generated
-by the seal's migration — nothing more.
+only the one closure metadata file: the `<history-file>` resolved by the seal's migration
+(§2b step 1) — nothing more.
 In source mode, require `delivery-head == validated-head`.
 Diverged? Stop; do not publish.
 
