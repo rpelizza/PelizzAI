@@ -169,12 +169,14 @@ Never ignore an escalation nor re-dispatch without changing anything.
 ## 5. Review-loop circuit breaker
 
 ```text
-- Limit: 3 fix→re-review cycles PER TASK — one budget shared by both lenses, whichever one
-  rejects. Separate per-lens counters doubled the worst case to 6 rounds per task without buying
+- Limit: 3 fix→re-review cycles PER TASK — one budget shared by both verdicts, whichever one
+  fails. Separate per-lens counters doubled the worst case to 6 rounds per task without buying
   anything the shared budget lacks: a task that burned 3 rounds is escalation material regardless
-  of which lens spent them.
-- A fix round is one fix dispatch plus one SCOPED re-review: the re-review verdicts the previous
-  findings (ADDRESSED / NOT_ADDRESSED) and flags only NEW breakage inside the fix's diff window —
+  of which verdict spent them.
+- A fix round is one fix dispatch plus one SCOPED re-review — one dispatch that keeps BOTH task
+  verdicts current: it verdicts the previous findings (ADDRESSED / NOT_ADDRESSED), flags only NEW
+  breakage inside the fix's diff window, and restates both verdicts at the end (a verdict that was
+  ✅ stays ✅ unless the fix's window broke it) —
   it does not re-run the full rubric over the whole task. One widening, only when it applies: if
   the fix changed a PUBLIC, wire, or persisted contract, the window includes that contract's
   directly affected consumers — an unchanged caller can regress without a line of it in the diff.
@@ -190,7 +192,7 @@ Never ignore an escalation nor re-dispatch without changing anything.
 - The same issue rejected 2x → escalate on the 2nd.
 - Structural rejection ("the approach is fundamentally wrong") → escalate immediately.
 - Reset (do not give up too early): zero the budget when starting a new task — a loop in Task N
-  does not affect N+1. Passing one lens does not refund rounds already spent.
+  does not affect N+1. Passing one verdict does not refund rounds already spent.
 - Does NOT count as a cycle (avoids false positives): BLOCKED (it is already an escalation, never
   a tally); DONE_WITH_CONCERNS whose caveats are observations and the review passes; an
   implementer who CONTESTS the rejection ("the reviewer says X is missing, but it is on line Y")
@@ -216,7 +218,7 @@ working tree INTACT. Dropping the per-task machinery never drops the limit.
 ## 6. Commit as a gate
 
 ```text
-- The member does NOT commit. The work stays in the working tree until BOTH lenses pass.
+- The member does NOT commit. The work stays in the working tree until BOTH verdicts pass.
 - Only after spec ✅ and quality ✅ (with fixes applied) does the COORDINATOR consolidate.
 - The coordinator stages the task's exact paths; inspects `git diff --cached` and never uses
   `git add -A`. In the consumer the cursor is updated alongside, never staged (local per-dev
@@ -276,7 +278,7 @@ coordinator records concerns, does not feign certainty.
 ## 9. Phase timing (lightweight instrumentation)
 
 Stamp wall-clock timings as the cycle advances, so slowness is measurable instead of anecdotal:
-per task, note the elapsed time of the implementation, of each review lens, and of the fix rounds,
+per task, note the elapsed time of the implementation, of the review, and of the fix rounds,
 appended to the SAME progress line the cursor already writes (`## Progress` in the consumer state;
 the native execution record in source mode) — e.g.
 `T3 ✅ <sha> — <note> [timing: impl 14m · spec 6m · quality 9m · fix-rounds 1 (7m)]`. It is a

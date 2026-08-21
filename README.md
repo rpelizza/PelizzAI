@@ -260,8 +260,9 @@ Branch, inline execution, and granular commits are the **recommended** defaults;
 and subagents come in when genuinely independent fronts justify the cost. None of it is applied in
 silence — after the plan is approved, isolation, mode (with `team` always visible), and commits are
 decided **one question at a time**. `squash-final` happens only on explicit request. The review is
-not asked: every task goes to one independent reviewer of `pelizzai-review` returning both
-verdicts, the final range goes through the two lenses (blind spec + quality) in two dispatches,
+not asked: every plan task goes to one independent reviewer of `pelizzai-review` returning both
+verdicts, the final range goes through the two lenses (blind spec + quality) in two dispatches —
+a flow with no ratified contract (a standalone bug, the bootstrap) gets the quality lens alone —
 and there is no profile to pick.
 
 Ratified structural decisions can become **project policy** in `pelizzai/profile.md` and
@@ -329,7 +330,7 @@ final review uses the `base-sha..HEAD` range, with **the model you chose — nev
 and the highest effort your platform allows**: the harness elevates the reasoning of any model,
 the math of which model to use is yours, and process depth is proportional to risk — never lowered
 to compensate for a smaller model. Per-task dispatches run at your session's effort, with a budget
-of **3 fix→re-review rounds per task shared by both lenses**, scoped re-reviews, and effort
+of **3 fix→re-review rounds per task shared by both verdicts**, scoped re-reviews, and effort
 escalation only **after** a rejection — the platform's maximum is the final filter's tool, not
 every dispatch's default. Each task also stamps a compact phase-timing line in the execution
 record, so where the time goes is measured, not guessed.

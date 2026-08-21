@@ -2616,21 +2616,21 @@ try {
 # the final filter. These assertions pin the proportional contract so a future
 # review round does not silently reintroduce either.
 
-# -- (a) One budget per task, shared by both lenses; per-lens counters are gone --
-Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '3 fix.{0,3}re-review cycles PER TASK[\s\S]{0,120}shared by both\s+lenses' 'task-cycle §5: the fix budget is per task and shared by both lenses'
+# -- (a) One budget per task, shared by both verdicts; per-lens counters are gone --
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '3 fix.{0,3}re-review cycles PER TASK[\s\S]{0,120}shared by both\s+verdicts' 'task-cycle §5: the fix budget is per task and shared by both verdicts'
 Check-NotMatch '.claude/skills/pelizzai-execute/references/task-cycle.md' 'PER LENS, PER TASK|separate counters' 'task-cycle §5: the per-lens counters do not come back'
-Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Passing one lens does not refund rounds already spent' 'task-cycle §5: a lens pass does not refund the shared budget'
-Check-Match '.claude/skills/pelizzai-execute/SKILL.md' '3 cycles per task, one budget shared\s+by both lenses' 'execute mirrors the shared per-task budget'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Passing one verdict does not refund rounds already spent' 'task-cycle §5: a verdict pass does not refund the shared budget'
+Check-Match '.claude/skills/pelizzai-execute/SKILL.md' '3 cycles per task, one budget shared\s+by both verdicts' 'execute mirrors the shared per-task budget'
 Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'per lens per task' 'execute: the per-lens phrasing is gone'
 Check-Match '.claude/skills/pelizzai-review/SKILL.md' '3 cycles per task, one budget shared by both' 'review points at the shared per-task budget'
 
 # -- (b) A fix round re-reviews the fix window, not the whole task --
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'one fix dispatch plus one SCOPED re-review' 'task-cycle §5: the re-review is scoped to the fix'
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'ADDRESSED / NOT_ADDRESSED' 'task-cycle §5: the scoped re-review verdicts the previous findings'
-Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'flags only NEW breakage inside the fix''s diff window' 'task-cycle §5: the scoped re-review also hunts breakage the fix introduced'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'flags only NEW\s+breakage inside the fix''s diff window' 'task-cycle §5: the scoped re-review also hunts breakage the fix introduced'
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'PREFER resuming it with the findings verbatim' 'task-cycle §5: resume the original implementer before a cold re-dispatch'
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'PUBLIC, wire, or persisted contract[\s\S]{0,120}directly affected consumers' 'task-cycle §5: a contract-touching fix widens the window to its direct consumers'
-Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'widened to the directly affected consumers' 'execute mirrors the contract-widened re-review window'
+Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'widened to the directly\s+affected consumers' 'execute mirrors the contract-widened re-review window'
 
 # -- (c) Effort: the session is the floor; the maximum is the final filter's tool --
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'session''s effort is the floor, not the ceiling everywhere' 'task-cycle §8: session effort is the floor, not a universal ceiling'

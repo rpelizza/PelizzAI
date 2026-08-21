@@ -426,7 +426,7 @@ Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route ana
 ```
 
 This feeds the `pelizzai-execute` circuit breaker (3 cycles per task, one budget shared by both
-lenses; scoped re-review, effort escalation after a rejection, and resets in
+verdicts; scoped re-review keeping both verdicts current, effort escalation after a rejection, and resets in
 `pelizzai-execute` → `references/task-cycle.md` §5).
 **Protected-branch handback:** if acting on the feedback means writing code and there is no
 isolation in the consumer state or native execution record, go through `pelizzai-starting-branch`

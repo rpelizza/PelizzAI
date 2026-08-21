@@ -331,10 +331,11 @@ circuit breaker, and commit as a gate — lives in
    then (b) quality + FRESH evidence verifying the report. The truly blind spec lens belongs to
    the final range, in its own dispatch (task-cycle §3).
 4. Failed? Fix (resume the original implementer when the platform allows — its context is intact;
-   do not fix by hand, it pollutes the context) and RE-REVIEW under the same lens, SCOPED to the
-   fix's diff — widened to the directly affected consumers when the fix changed a public, wire,
+   do not fix by hand, it pollutes the context) and RE-REVIEW SCOPED to the
+   fix's diff, in one dispatch that keeps both verdicts current — widened to the directly
+   affected consumers when the fix changed a public, wire,
    or persisted contract (task-cycle §5). Circuit breaker: 3 cycles per task, one budget shared
-   by both lenses; a rejection
+   by both verdicts; a rejection
    raises the next round's effort (escalation by failure — task-cycle §5); the same
    issue twice escalates on the 2nd; a structural rejection escalates immediately; on overflow →
    record phase: blocked and escalate to the human with an actionable message.

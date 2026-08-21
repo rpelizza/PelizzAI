@@ -29,7 +29,8 @@ when there are mirrors, synced and verified; never assume `.claude/skills` in ev
 > between `<>` (the menu below, `<unset>`) reads as NOT ratified; the SessionStart hook recap
 > fires on ANY raw value outside `<...>` and `unset` — including `branch`, `inline`, or
 > `squash-final`. The hook reads exactly these three fields. There is no review policy: the
-> review's form (one reviewer with both verdicts per task; two dispatches on the final range) is
+> review's form (one reviewer with both verdicts per task; two dispatches on the final range; the
+> quality lens alone where no ratified contract exists) is
 > invariable, so there is nothing for a project to pre-select.
 
 - isolation-default: <branch|worktree|unset>
