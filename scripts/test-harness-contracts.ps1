@@ -2676,8 +2676,9 @@ Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'the pe
 Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'A report missing either verdict is incomplete' 'task-reviewer: a single-verdict report is incomplete'
 Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'never the session history' 'task-reviewer: fabricated context, no session history'
 Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '\{DOMAIN_SKILLS\}' 'task-reviewer: carries the domain-skills slot'
-Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '\{FULL_TASK_TEXT\}' 'task-reviewer: carries the task-contract slot'
-Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'code is in the working tree[\s\S]{0,120}git diff' 'task-reviewer: points the reviewer at the working-tree diff'
+Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '## What was asked \(the contract\)\s+\{FULL_TASK_TEXT\}' 'task-reviewer: the task-contract slot sits in its operational section'
+Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '## VERDICT 1[^\r\n]*\r?\n[\s\S]{0,600}git diff' 'task-reviewer: the spec-verdict block itself points at the working-tree diff'
+Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '\{FULL_TASK_TEXT\}[\s\S]+## VERDICT 1[\s\S]+\{IMPLEMENTER_REPORT\}[\s\S]+## VERDICT 2' 'task-reviewer: contract before verdict 1, report only after it, quality verdict last'
 
 # -- (b) The doctrine points per-task dispatches at the new template --
 Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'references/task-reviewer\.md' 'review: the per-task dispatch uses task-reviewer.md'
