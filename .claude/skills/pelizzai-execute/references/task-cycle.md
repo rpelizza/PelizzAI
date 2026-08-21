@@ -171,7 +171,10 @@ Never ignore an escalation nor re-dispatch without changing anything.
   of which lens spent them.
 - A fix round is one fix dispatch plus one SCOPED re-review: the re-review verdicts the previous
   findings (ADDRESSED / NOT_ADDRESSED) and flags only NEW breakage inside the fix's diff window —
-  it does not re-run the full rubric over the whole task.
+  it does not re-run the full rubric over the whole task. One widening, only when it applies: if
+  the fix changed a PUBLIC, wire, or persisted contract, the window includes that contract's
+  directly affected consumers — an unchanged caller can regress without a line of it in the diff.
+  Still new-breakage-only; never a full re-review by the back door.
 - Fixes go back to the implementer. When the platform can RESUME the original implementer
   (teammate still alive, resumable subagent), prefer resuming it with the findings verbatim — its
   context is intact and cheaper than a cold re-dispatch; a fresh implementer is for when the
