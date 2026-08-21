@@ -165,12 +165,25 @@ Never ignore an escalation nor re-dispatch without changing anything.
 ## 5. Review-loop circuit breaker
 
 ```text
-- Limit: 3 fix→re-review cycles PER LENS, PER TASK. The lenses have separate counters because
-  they are separate dispatches: a spec rejection never consumes the quality budget, and vice versa.
+- Limit: 3 fix→re-review cycles PER TASK — one budget shared by both lenses, whichever one
+  rejects. Separate per-lens counters doubled the worst case to 6 rounds per task without buying
+  anything the shared budget lacks: a task that burned 3 rounds is escalation material regardless
+  of which lens spent them.
+- A fix round is one fix dispatch plus one SCOPED re-review: the re-review verdicts the previous
+  findings (ADDRESSED / NOT_ADDRESSED) and flags only NEW breakage inside the fix's diff window —
+  it does not re-run the full rubric over the whole task.
+- Fixes go back to the implementer. When the platform can RESUME the original implementer
+  (teammate still alive, resumable subagent), prefer resuming it with the findings verbatim — its
+  context is intact and cheaper than a cold re-dispatch; a fresh implementer is for when the
+  original is gone or the rejection is structural.
+- Escalation by failure, not by default: after a rejection, raise the reasoning effort of the NEXT
+  fix and re-review dispatches, up to the platform's highest (§8) — a rejected round is what buys
+  more capability; a first pass is not. A LARGER MODEL remains a ratifiable recommendation, never
+  an automatic swap (§8).
 - The same issue rejected 2x → escalate on the 2nd.
 - Structural rejection ("the approach is fundamentally wrong") → escalate immediately.
-- Resets (do not give up too early): zero the spec counter on spec ✅, the quality counter on
-  quality ✅, and BOTH when starting a new task — a loop in Task N does not affect N+1.
+- Reset (do not give up too early): zero the budget when starting a new task — a loop in Task N
+  does not affect N+1. Passing one lens does not refund rounds already spent.
 - Does NOT count as a cycle (avoids false positives): BLOCKED (it is already an escalation, never
   a tally); DONE_WITH_CONCERNS whose caveats are observations and the review passes; an
   implementer who CONTESTS the rejection ("the reviewer says X is missing, but it is on line Y")
@@ -232,10 +245,13 @@ state/closure.
 Harness policy: **the model is whatever the user chose on their platform** — by plan, cost, or
 preference — and it holds for every role: members, reviewers, and the coordinator use the
 session's model, with no upgrade required. What the harness never does is **downgrade on its
-own**: no role runs on a smaller model than the session's to save money, and the effort/reasoning
-stays at the highest level the user's platform offers. Specify the model and the effort explicitly
-when dispatching members and reviewers, so they do not inherit a default smaller than the
-session's.
+own**: no role runs on a smaller model than the session's to save money, and no dispatch runs
+below the session's effort. **The session's effort is the floor, not the ceiling everywhere:** the
+platform's HIGHEST effort is reserved for the last filter — the final branch review and the
+delivery's final validation — and enters earlier only as escalation after a review rejection (§5).
+Per-task dispatches run at the session's effort; forcing the maximum on every routine dispatch
+buys latency, not rigor. Specify the model and the effort explicitly when dispatching members and
+reviewers, so they do not inherit a default smaller than the session's.
 
 The harness elevates the reasoning of **any** model via `pelizzai-reasoning`: the right technique,
 a verifiable protocol, and fresh evidence do not depend on the model's capability. Proportionality
@@ -249,3 +265,16 @@ bill is the user's, never an automatic swap. The BLOCKED steps are still give mo
 change the approach/split the task → escalate to the human; "switching models" only enters as a
 ratifiable recommendation on that last step. Fix context, tooling, or decomposition first. The
 coordinator records concerns, does not feign certainty.
+
+## 9. Phase timing (lightweight instrumentation)
+
+Stamp wall-clock timings as the cycle advances, so slowness is measurable instead of anecdotal:
+per task, note the elapsed time of the implementation, of each review lens, and of the fix rounds,
+appended to the SAME progress line the cursor already writes (`## Progress` in the consumer state;
+the native execution record in source mode) — e.g.
+`T3 ✅ <sha> — <note> [timing: impl 14m · spec 6m · quality 9m · fix-rounds 1 (7m)]`. It is a
+suffix of the existing line, not a second one — the one-line-per-task Progress hygiene still
+holds. No new file and no commit of its
+own: the timing travels with the record that already exists, under the same rules (the consumer
+cursor is local per dev and never staged). The final report aggregates the totals per phase — that
+aggregate is what proves, or refutes, where the delivery's time went.
