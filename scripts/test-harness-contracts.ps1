@@ -2721,7 +2721,7 @@ $expectedHotPathPaths = @(
     '.claude/skills/pelizzai-execute/references/task-cycle.md'
 )
 $configuredHotPathPaths = @($hotPathBudgets | ForEach-Object { $_.Path })
-Check ((@($configuredHotPathPaths | Sort-Object -Unique).Count -eq $expectedHotPathPaths.Count) -and (-not (Compare-Object -ReferenceObject ($expectedHotPathPaths | Sort-Object) -DifferenceObject ($configuredHotPathPaths | Sort-Object)))) 'hot-path budget table covers exactly the six expected files, no duplicates' "configured: $($configuredHotPathPaths -join ', ')"
+Check ((@($configuredHotPathPaths | Sort-Object -CaseSensitive -Unique).Count -eq $expectedHotPathPaths.Count) -and (-not (Compare-Object -CaseSensitive -ReferenceObject ($expectedHotPathPaths | Sort-Object -CaseSensitive) -DifferenceObject ($configuredHotPathPaths | Sort-Object -CaseSensitive)))) 'hot-path budget table covers exactly the six expected files, no duplicates' "configured: $($configuredHotPathPaths -join ', ')"
 foreach ($hp in $hotPathBudgets) {
     $hpLines = (Get-Content -LiteralPath (Join-Path $root $hp.Path)).Count
     Check ($hpLines -le $hp.Budget) "hot-path budget: $($hp.Path) stays at or under $($hp.Budget) lines" "currently $hpLines lines — prune zero-sum or move on-demand material to references/ (issue #51)"
