@@ -2645,7 +2645,8 @@ Check-Match '.claude/skills/pelizzai-audit/assets/contract.md' 'reserve the plat
 
 # -- (d) Phase timing exists, travels in the existing record, and creates nothing --
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '## 9\. Phase timing' 'task-cycle has the phase-timing section'
-Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '\[timing: impl 14m' 'phase timing shows the compact suffix shape'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '\[timing: impl 14m[\s\S]{0,40}spec 6m[\s\S]{0,40}quality 9m[\s\S]{0,40}fix-rounds 1' 'phase timing example covers implementation, both lenses, and the fix rounds'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'final report aggregates the totals per phase' 'phase timing: the final report aggregates the per-phase totals'
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'suffix of the existing line, not a second one' 'phase timing preserves the one-line-per-task Progress hygiene'
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'No new file and no commit of its\s+own' 'phase timing creates no artifact of its own'
 } catch {
