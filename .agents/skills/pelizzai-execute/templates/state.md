@@ -25,7 +25,7 @@
 - worktree-path: <none | path of the worktree, when isolation: worktree>
 - execution-mode: <pending | team | subagents | inline>   # <pending> until ratification; the three options always visible (team never omitted)
 - commit-strategy: <pending | granular | squash-final>   # <pending> until ratification; squash-final only on the user's explicit request
-- review-integrity: <blind | degraded YYYY-MM-DD — reason>   # `blind` = every lens the flow REQUIRES ran independently (two where a ratified contract exists; the quality lens alone where none does — bootstrap, standalone). `degraded` ONLY when the environment had no independent reviewer and the user accepted a declared non-blind review; it travels to the final report and to the next session (pelizzai-review → "When there is no independent reviewer")
+- review-integrity: <blind | degraded YYYY-MM-DD — reason>   # `blind` = every review the flow REQUIRES ran independently (one reviewer with both verdicts per task and the final range's blind lens where a ratified contract exists; the quality lens alone where none does — bootstrap, standalone). `degraded` ONLY when the environment had no independent reviewer and the user accepted a declared non-independent review; it travels to the final report and to the next session (pelizzai-review → "When there is no independent reviewer")
 - effect: <read-only | write-local | external>
 - risk: <low | medium | high>
 - overlays: <none | comma-separated names>   # required cross-cutting skills, e.g. pelizzai-frontend, pelizzai-oswap

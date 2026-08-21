@@ -151,11 +151,13 @@ Fill in **Implementation and validation strategy**:
 Mixed tasks combine strategies. Do not fabricate RED for CSS, Markdown, or configuration just to
 make the plan uniform.
 
-**The review is not a plan decision.** Every task and the final range go through the two lenses of
-`pelizzai-review` in two dispatches — blind spec first, then quality/evidence — in any lane,
-bounded included. The plan records no review profile because there is none to record: risk sets
-the **depth** of each lens, never the number of dispatches or the blindness. What the plan does owe
-the reviewer is the material each lens judges against — the requirement, the domain skills, and the
+**The review is not a plan decision.** Every task goes to ONE independent reviewer of
+`pelizzai-review` returning both verdicts — spec first, then quality/evidence — in any lane,
+bounded included; the final range goes through the two lenses in two dispatches, with the blind
+spec lens judging the range against the whole plan. The plan records no review profile because
+there is none to record: risk sets
+the **depth** of each rubric, never the review's form. What the plan does owe
+the reviewer is the material each rubric judges against — the requirement, the domain skills, and the
 evidence strategy per task.
 
 ## Document
@@ -250,8 +252,9 @@ and keep it local unless an external destination is requested.
 - Skipping stress and plan approval to start implementing.
 - Duplicating in the plan all the code execution should write.
 - Omitting a detectable frontend/security overlay.
-- Universal TDD — or writing a review profile/downgrade into the plan: the two lenses in two
-  dispatches are invariable, and the plan has no say over them.
+- Universal TDD — or writing a review profile/downgrade into the plan: the review's form (one
+  reviewer with both verdicts per task; two dispatches on the final range) is invariable, and the
+  plan has no say over it.
 - Team/worktree out of harness preference, without concrete gain.
 - Using Context7 to decide requirements or acceptance criteria.
 - A giant plan covering subsystems that should be separate tasks/projects.

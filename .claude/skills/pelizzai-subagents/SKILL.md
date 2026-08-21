@@ -84,12 +84,13 @@ The handoff dir is gitignored in the consumer and temp in source mode (see task-
 
 ## Verification and integration
 
-A subagent's result is **not** truth until checked. For implementation, run it through the two
-`pelizzai-review` lenses in **two dispatches** — there is no profile to consult and no
-single-dispatch variant. The blindness is asymmetric: the
-**blind spec lens** receives only diff + spec/plan + the area's domain skills and does
-**NOT receive the report** of the subagent (it judges the code against the contract, without the
-narrative); the **quality/evidence lens** receives the report and verifies the claims with fresh
+A subagent's result is **not** truth until checked. For implementation, run it through
+`pelizzai-review`: ONE independent reviewer per task applying the two rubrics — there is no
+profile to consult. The **spec rubric** is formed against the contract (diff + spec/plan + the
+area's domain skills) BEFORE the report section of the briefing; the **quality/evidence rubric**
+receives the report of the subagent and verifies the claims with fresh
+evidence. On the delivery's final range the review splits into two dispatches, with a truly
+**blind spec lens** (range + full plan, no narrative); the coordinator crosses verdicts with fresh
 proof. The coordinator (the main session) cross-checks the lenses and is **never** the blind lens.
 Choosing this mode proves only that an IMPLEMENTER was dispatchable at the gate — it does not prove
 a REVIEWER is dispatchable now: a quota, a partial restriction, or a restricted resumption can block
@@ -121,7 +122,7 @@ continue.
 - Sending a writing role to a read-only agentType (Explore/Plan do not edit).
 - A vague briefing, or assuming the subagent has the conversation history.
 - Treating the subagent's report as truth without checking (git diff / fresh evidence).
-- Handing the subagent's report to the blind spec lens, or the coordinator dispatching itself as that lens.
+- Handing the delivery narrative to the final range's blind spec lens, or the coordinator dispatching itself as any reviewer of its own delivery.
 - Assembling the specialist subagent without the complete domain-skill package for its area.
 - The subagent filling by default or "reasonable inference" a decision that is not in the briefing/plan/spec, instead of naming the gap and returning NEEDS_CONTEXT.
 - The coordinator resolving the material gap alone (or re-dispatching over it) instead of taking it to the human via `pelizzai-interview` — consolidating is not deciding.

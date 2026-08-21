@@ -71,8 +71,9 @@ Each task's briefing includes:
   dominant technique from `pelizzai-reasoning` (decomposition, RCA, comparison, verification —
   see the skill's matrix); omit it for a mechanical task with a clear contract — do not impose a
   technique without a trigger.
-- The risk rationale that sets the DEPTH of each review lens (the two lenses and their two
-  dispatches are invariable — there is nothing to record about them).
+- The risk rationale that sets the DEPTH of each review rubric (the review's form is invariable —
+  one reviewer with both verdicts per task, two dispatches on the final range — so there is
+  nothing to record about it).
 - The expected return format and status (see below), including the mandatory field
   `Deviations from plan:` (or `none`).
 - Operational deviation test (canonical phrase, in the briefing TEXT):
@@ -106,37 +107,40 @@ TDD is the primary strategy when the skill's suitability gate passes; being able
 test is not enough. For deletions and purely mechanical changes, use the regression suite +
 proportional static checks. The member tests/validates, self-reviews, and **does not commit**.
 
-## 3. Two-lens review, always in two dispatches
+## 3. Task review: one independent reviewer, both verdicts
 
-Every task passes through the **spec** and **quality** lenses, in this order, with **asymmetric
-blindness**: the spec lens judges the code blind against the contract; the quality lens is the
-**evidence** lens and receives the author's report in order to verify it. They always use **two
-independent dispatches**, in any lane, including bounded — the spec stage approves before quality
-is dispatched. There is no profile to pick and no downgrade to ratify: a single pass would collapse
-the blindness into mere reading order, since a reviewer who has already read the report cannot
-unknow the author's narrative.
+Every task passes through the **spec** and **quality/evidence** rubrics, in this order, applied by
+**ONE independent reviewer in ONE dispatch** — in any lane, including bounded. There is no profile
+to pick and no downgrade to ratify. The reviewer's independence comes from **fabricated context**:
+it receives the task contract, the diff, the domain skills, and the author's report — never the
+session history. The briefing (`pelizzai-review` → `references/task-reviewer.md`) places the spec
+rubric BEFORE the report and instructs the reviewer to form the spec verdict reading code against
+contract first. The truly BLIND spec lens belongs to the FINAL range, in its own dispatch — that
+is where a requirement that fell between tasks becomes visible (issue #49 holds the cost analysis
+that moved it there).
 
-Proportionality: what varies with risk is the **depth** of each lens — how much gets investigated
-and how many checks get run — never the existence of the review, the number of dispatches, or the
-blindness. Cutting a dispatch is not proportionality, it is removing the only mechanism that makes
-the spec lens independent.
+Proportionality: what varies with risk is the **depth** of each rubric — how much gets
+investigated and how many checks get run — never the existence of the review or who reviews
+(always an independent reviewer, never the coordinator grading its own delivery).
 
 ```text
 (0) Material: generate `review-package --working-tree`; the same package covers staged, unstaged,
     and untracked. Do not use a range before the task is committed.
-(a) Spec lens (BLIND): receives ONLY the diff + the task's spec/plan + the area's domain skills.
-    The spec-lens reviewer does NOT receive the implementer's report — they judge the code against the contract, without the author's narrative.
-    It is ADVERSARIAL by instruction: it compares the real implementation vs the requirements LINE BY LINE,
-    hunting for omissions, extras (scope beyond what was asked), and misunderstandings.
-(b) Quality / evidence lens: receives the author's report and VERIFIES the claims — tests run?
-    FRESH proof? deviations declared? — on top of readability, design, reuse, and security.
-    It does not blindly trust the report: the reviewer actually ran the checks applicable to the
-    artifact and pasted output + exit code. An inferred "tests pass" does NOT count as approved; a
-    check that did not run = UNVERIFIED, never ✅.
+(1) ONE dispatch, TWO verdicts, in order:
+    (a) Spec rubric — formed BEFORE the report section: the reviewer compares the real
+        implementation vs the requirements LINE BY LINE, hunting for omissions, extras (scope
+        beyond what was asked), and misunderstandings, with the area's domain skills as part of
+        the contract.
+    (b) Quality / evidence rubric — receives the author's report and VERIFIES the claims — tests
+        run? FRESH proof? deviations declared? — on top of readability, design, reuse, and
+        security. It does not blindly trust the report: the reviewer actually ran the checks
+        applicable to the artifact and pasted output + exit code. An inferred "tests pass" does
+        NOT count as approved; a check that did not run = UNVERIFIED, never ✅.
 ```
 
-Approval requires **both** verdicts: spec ✅ **and** quality ✅, in this order and in separate
-stages — quality is not dispatched while spec is open. Conflict between the lenses → the coordinator decides with their OWN evidence or
+Approval requires **both** verdicts: spec ✅ **and** quality ✅ — a report missing either verdict
+is incomplete, never approved. Conflict between the verdicts (or with the coordinator's own
+knowledge) → the coordinator decides with their OWN evidence or
 escalates; the author's narrative never arbitrates. "⚠️ not verifiable" items require the
 coordinator's assessment against the plan before marking them complete.
 
@@ -259,8 +263,8 @@ reviewers, so they do not inherit a default smaller than the session's.
 The harness elevates the reasoning of **any** model via `pelizzai-reasoning`: the right technique,
 a verifiable protocol, and fresh evidence do not depend on the model's capability. Proportionality
 still applies to the depth of the process (interview, brainstorming, TDD, the depth of each review
-lens, overlays) — and it is **never lowered to compensate for a smaller model**. In architecture, in the
-two review lenses, in the final review, and in the delivery's final validation, a smaller model
+rubric, overlays) — and it is **never lowered to compensate for a smaller model**. In architecture, in the
+task review, in the final review, and in the delivery's final validation, a smaller model
 demands an intact process, not a shallower one.
 
 If the platform allows more capability in a critical role, **recommend and ratify**: the model

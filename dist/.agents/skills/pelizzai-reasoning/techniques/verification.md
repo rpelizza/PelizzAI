@@ -386,8 +386,8 @@ distinct agents or lenses, not from the same head in the same turn:
 ```text
 - pelizzai-team / pelizzai-subagents: several members reach the same result by different
   paths (distinct methods, hypotheses, or sources);
-- independent reviewers and blind lenses (e.g., the blind spec lens of pelizzai-review, which
-  judges the code without the author's narrative);
+- independent reviewers and blind lenses (e.g., the final range's blind spec lens of
+  pelizzai-review, which judges the delivery without the author's narrative);
 - recalculation by an independent method or tool against the same data.
 ```
 
