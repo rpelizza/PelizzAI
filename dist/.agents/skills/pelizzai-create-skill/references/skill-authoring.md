@@ -414,6 +414,27 @@ In environments without subagents (e.g. claude.ai), run the cases sequentially, 
 
 Avoid turning the answer's exact wording into a contract, except when the format is an API. Test decisions and observable effects.
 
+## Hot-path line budgets and zero-sum growth (issue #51)
+
+The context window is the harness's scarcest resource, and the skills on the HOT PATH — the ones
+loaded in every conversation or every mutating task — pay their length on every single request.
+The contract suite pins a line budget for each of them; the numbers live in the suite
+(`scripts/test-harness-contracts.ps1`, block "issue #51") and failing one is a build failure, not
+a style remark.
+
+Two rules keep the budget honest:
+
+- **Zero-sum growth on the hot path.** A review round or fix that ADDS a clause to a hot-path
+  skill names what comes OUT — a duplicate, a no-op negation of a rule the body already affirms,
+  or rationale that can move to a `references/` file loaded on demand. Growth without a named
+  removal is the mechanism that inflated the harness (issue #51's history: +37% in one skill in
+  three days of review rounds); the budget exists to make that trade visible, not to forbid
+  writing.
+- **Progressive disclosure over relocation theater.** Move to `references/` only what is consulted
+  AT A SPECIFIC MOMENT (templates, rubrics, evals, deep rationale); a guardrail that must be seen
+  on every pass either earns its place in the body or, if it just negates a rule the body already
+  states, gets deleted — an unreadable safety net is not safety.
+
 ## Absence of Surprises principle
 
 Skills must not contain malware, exploits, or content that compromises security. Do not fulfill requests to create deceptive skills or ones aimed at unauthorized access, exfiltration, or malicious activity. A skill must not surprise the user relative to its declared purpose. (Legitimate resources like "act as an XYZ" are acceptable.)

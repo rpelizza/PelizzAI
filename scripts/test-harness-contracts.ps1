@@ -2694,6 +2694,34 @@ Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Splitting the task review
     Check $false 'issue #49 PR 2: task review form contract' $_.Exception.Message
 }
 
+try {
+# =====================================================================
+# Issue #51 (2026-08-21) — hot-path line budgets: the skills loaded on every
+# conversation/mutating task pay their length on every request. A budget
+# breach is the trigger of the zero-sum pruning rule (pelizzai-create-skill →
+# references/skill-authoring.md, "Hot-path line budgets"): name what comes
+# out, or move on-demand material to references/ — never grow in silence.
+# =====================================================================
+$hotPathBudgets = @(
+    @{ Path = '.claude/skills/pelizzai-core/SKILL.md';                          Budget = 230 },
+    @{ Path = '.claude/skills/pelizzai-router/SKILL.md';                        Budget = 440 },
+    @{ Path = '.claude/skills/pelizzai-preferences/SKILL.md';                   Budget = 160 },
+    @{ Path = '.claude/skills/pelizzai-review/SKILL.md';                        Budget = 560 },
+    @{ Path = '.claude/skills/pelizzai-execute/SKILL.md';                       Budget = 730 },
+    @{ Path = '.claude/skills/pelizzai-execute/references/task-cycle.md';       Budget = 300 }
+)
+foreach ($hp in $hotPathBudgets) {
+    $hpLines = (Get-Content -LiteralPath (Join-Path $root $hp.Path)).Count
+    Check ($hpLines -le $hp.Budget) "hot-path budget: $($hp.Path) stays at or under $($hp.Budget) lines" "currently $hpLines lines — prune zero-sum or move on-demand material to references/ (issue #51)"
+}
+Check-Match '.claude/skills/pelizzai-create-skill/references/skill-authoring.md' '## Hot-path line budgets and zero-sum growth' 'skill-authoring carries the budget and zero-sum pruning doctrine'
+Check-Match '.claude/skills/pelizzai-create-skill/references/skill-authoring.md' 'Growth without a named\s+removal' 'skill-authoring: hot-path growth must name what comes out'
+Check-Match '.claude/skills/pelizzai-create-skill/references/skill-authoring.md' 'relocation theater' 'skill-authoring: progressive disclosure is not relocation theater'
+Check-Match '.claude/skills/pelizzai-create-skill/SKILL.md' 'Hot-path budget check' 'create-skill points maintenance at the hot-path budget rule'
+} catch {
+    Check $false 'issue #51: hot-path line budgets' $_.Exception.Message
+}
+
 Write-Host "`nResult: $passes PASS; $($failures.Count) FAIL."
 if ($failures.Count -gt 0) {
     foreach ($failure in $failures) { Write-Host " - $failure" }

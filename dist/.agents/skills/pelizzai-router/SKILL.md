@@ -343,30 +343,20 @@ A new task never inherits decisions from the previous one. Closeout belongs to `
 
 ## Red flags
 
+Most guardrails live where their rule lives — each section above names its own failure mode
+(bootstrap proposal, first write, lanes, greenfield, material gap, discovery cadence). What stays
+here is what has no single home, plus the historical failures:
+
 ```text
-- A mutating bootstrap to answer a read-only request without proposing and getting the user's "yes".
-- Finding a missing catalog and proceeding in silence, without proposing the bootstrap.
-- Writing state/spec/plan before isolation.
-- Forcing full brainstorming on a bounded feature.
-- Classifying a greenfield product/project as bounded because the stack was specified.
-- Using lines/files as the only measure of complexity.
-- Treating frontend/security as a late offer.
 - Applying isolation, execution mode, or commit strategy without user ratification.
-- Scattering the route or the setup across several micro-questions instead of one grouped block.
-- Sending a bootstrap to the post-plan setup gate (it has no plan) or treating it as a light track —
-  it carries its own compact confirm, in `pelizzai-audit` step 1.
+- Silently assuming a decision that changes scope/UX/architecture without presenting it in the Proposal analysis or at the kickoff gate.
 - Scattering the tweak/bug compact confirm across separate questions, or promoting a tweak to
   bounded/plan just because the acceptance is clear (a spec/plan to change a button is the
   historical failure).
-- Silently assuming a decision that changes scope/UX/architecture without presenting it in the Proposal analysis or at the kickoff gate.
-- Using Context7, convention, or a "safe default" as the user's vote.
-- Filling with a default/convention/inference a material gap that appeared AFTER kickoff, instead
-  of stopping the work and taking it to `pelizzai-interview`.
-- Asking several discovery questions in the same turn when the previous answer changes the next.
+- Treating frontend/security as a late offer.
 - Parallelizing writes in a shared working tree as if a worktree isolated the agents.
 - Inheriting `lane`/base/branch/strategy from a PREVIOUS task's state as accidental carryover — the
   project policy explicitly ratified in `profile.md` is the only exception.
-- Triggering several head skills at the same time.
 ```
 
 ## Kickoff gate (route as a recommendation)
@@ -420,9 +410,8 @@ Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce route
 ## Regression evaluation
 
 When changing routing, Context7, discovery, spec, plan, or authority rules, validate the matrix
-[adaptive-user-control.md](evals/adaptive-user-control.md). It combines the historical failure with
-greenfield on another platform, an existing feature, a skill upgrade/refresh, debugging, and a
-local tweak to prevent both autonomy and overfitting to one prompt or stack.
+[adaptive-user-control.md](evals/adaptive-user-control.md) — it exists to prevent both autonomy
+and overfitting to one prompt or stack.
 
 ## Final instruction
 

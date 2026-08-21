@@ -39,13 +39,13 @@ This coexists with the platform's native hierarchy: a skill does not redefine sy
 
 ## Skill announcements (global rule)
 
-When triggering a **head skill or a material overlay**, **announce** in one line, **in the conversation's language**, what you are going to do, **always using the exact brand spelling: "PelizzAI"** (capital P, A, and I — never "Pelizzai", "pelizzAI", or "PELIZZAI" in prose). An internal gate of a flow already announced is not an independent trigger and adds no announcement (see below). Pattern:
+When triggering a **head skill or a material overlay**, **announce** in one line, **in the conversation's language**, what you are going to do, **always using the exact brand spelling: "PelizzAI"** (capital P, A, and I — never "Pelizzai", "pelizzAI", or "PELIZZAI" in prose). An internal gate of a flow already announced is not an independent trigger and adds no announcement. Pattern:
 
 > State that you are using the PelizzAI \<Name\> skill to \<goal\>. The brand and the skill's name stay verbatim; the rest of the sentence follows the conversation's language — never copy this English wording literally.
 
 Skill identifiers (`pelizzai-core`, `pelizzai-router`, …), file paths, and the target project's `pelizzai/` directory stay lowercase — the rule applies to the brand in running text.
 
-The rule is exhaustive on purpose: head skill and material overlays are announced; internal gates (Verification, an auxiliary technique, re-review) run without a new announcement when they are already part of the communicated flow — they are steps of an announced skill, not triggers of their own. Announcing is mandatory; turning the announcement into a preamble bigger than the task is not.
+Announcing is mandatory; turning the announcement into a preamble bigger than the task is not.
 
 ## Activation rule
 
@@ -184,25 +184,6 @@ Overlays do not replace the head skill:
 ## Harness flow map
 
 The entry point is always this skill (`pelizzai-core`); after understanding the goal, `pelizzai-router` orchestrates. On the first interaction with a consumer project (or when the user types **"bootstrap"**), `pelizzai-audit` maps the project and creates the domain skills before any task. A **purely conceptual** question does not trigger the bootstrap — `pelizzai-audit` only enters when the answer requires touching or understanding the project. In the source repo (sentinel `scripts/pelizzai-source-repo.txt`) there is no consumer catalog: the bootstrap branch does not apply.
-
-```mermaid
-flowchart TD
-    U(["User message"]) --> P["pelizzai-core: require skill before responding"]
-    P --> G["Understand the goal and classify the effect"]
-    G --> CONC{"Purely conceptual<br/>question?"}
-    CONC -- "Yes" --> ANSC["Answer directly<br/>without bootstrap"]
-    CONC -- "No" --> RT["pelizzai-router: effect, intent, risk,<br/>uncertainty, and surfaces"]
-    RT --> BOOT{"Harness initialized?<br/>pelizzai/domain-skills.md exists?"}
-    BOOT -- "No / 1st interaction / 'bootstrap'" --> AUD["pelizzai-audit: maps project/workspace,<br/>MCPs, git/host, creates domain skills + docs"]
-    AUD --> CLS
-    BOOT -- "Yes" --> CLS{"Classify the intent and the lane"}
-    CLS --> KICK["Kickoff gate: route as a recommendation to ratify"]
-    KICK --> HEAD["One head skill + mandatory overlays"]
-    HEAD --> GAP{"Material gap<br/>in any phase?"}
-    GAP -- "Yes" --> IV["pelizzai-interview:<br/>one question at a time, with a recommendation"]
-    IV --> HEAD
-    GAP -- "No" --> GO["Mechanical step within<br/>what was already ratified"]
-```
 
 The detail of each track (lanes, gates, and chaining) lives in `pelizzai-router`.
 

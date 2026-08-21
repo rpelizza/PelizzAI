@@ -196,6 +196,11 @@ the requested scope, without reopening the authorization they just gave.
 
 ---
 
+**Hot-path budget check (source repo).** When maintaining a HOT-PATH skill (core, router,
+preferences, review, execute, task-cycle), respect the line budgets the contract suite pins and
+the zero-sum rule: an added clause names what comes out (see `references/skill-authoring.md` →
+"Hot-path line budgets and zero-sum growth").
+
 ## Cadence and triggers (hybrid)
 
 Self-maintenance combines **portable logic in the skill** (core) with a **reinforcement hook** in Claude Code. Detailed mechanics in **[references/domain-skill-maintenance.md](references/domain-skill-maintenance.md)**.
