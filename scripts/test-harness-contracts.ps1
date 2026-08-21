@@ -2650,7 +2650,8 @@ Check-Match 'README.md' 'effort\s+escalation only \*\*after\*\* a rejection' 'RE
 
 # -- (d) Phase timing exists, travels in the existing record, and creates nothing --
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '## 9\. Phase timing' 'task-cycle has the phase-timing section'
-Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '\[timing: impl 14m[^\r\n]{0,40}spec 6m[^\r\n]{0,40}quality 9m[^\r\n]{0,40}fix-rounds 1 \(7m\)\]' 'phase timing example covers implementation, both lenses, and the fix rounds on ONE line'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '\[timing: impl 14m[^\r\n]{0,40}review 9m[^\r\n]{0,40}fix-rounds 1 \(7m\)\]' 'phase timing example covers implementation, the single review dispatch, and the fix rounds on ONE line'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'the review is one\s+dispatch, so it is one duration' 'phase timing: the task review logs ONE duration, matching its one dispatch'
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'final report aggregates the totals per phase' 'phase timing: the final report aggregates the per-phase totals'
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'suffix of the existing line, not a second one' 'phase timing preserves the one-line-per-task Progress hygiene'
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'No new file and no commit of its\s+own' 'phase timing creates no artifact of its own'
@@ -2674,6 +2675,7 @@ Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '\{IMPL
 Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'the per-task reviewer is not blind; the blind lens lives at the final range' 'task-reviewer: honest about not being blind'
 Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'A report missing either verdict is incomplete' 'task-reviewer: a single-verdict report is incomplete'
 Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'never the session history' 'task-reviewer: fabricated context, no session history'
+Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '\{DOMAIN_SKILLS\}' 'task-reviewer: carries the domain-skills slot'
 
 # -- (b) The doctrine points per-task dispatches at the new template --
 Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'references/task-reviewer\.md' 'review: the per-task dispatch uses task-reviewer.md'

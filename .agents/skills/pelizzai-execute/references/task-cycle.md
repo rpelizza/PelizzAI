@@ -281,7 +281,9 @@ Stamp wall-clock timings as the cycle advances, so slowness is measurable instea
 per task, note the elapsed time of the implementation, of the review, and of the fix rounds,
 appended to the SAME progress line the cursor already writes (`## Progress` in the consumer state;
 the native execution record in source mode) — e.g.
-`T3 ✅ <sha> — <note> [timing: impl 14m · spec 6m · quality 9m · fix-rounds 1 (7m)]`. It is a
+`T3 ✅ <sha> — <note> [timing: impl 14m · review 9m · fix-rounds 1 (7m)]` — the review is one
+dispatch, so it is one duration (the final range, with its two dispatches, may log
+`final-review spec 6m · quality 9m`). It is a
 suffix of the existing line, not a second one — the one-line-per-task Progress hygiene still
 holds. No new file and no commit of its
 own: the timing travels with the record that already exists, under the same rules (the consumer
