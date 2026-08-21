@@ -349,7 +349,10 @@ here is what has no single home, plus the historical failures:
 
 ```text
 - Applying isolation, execution mode, or commit strategy without user ratification.
-- Silently assuming a decision that changes scope/UX/architecture without presenting it in the Proposal analysis or at the kickoff gate.
+- Silently assuming a decision that changes scope/UX/architecture/data/accepted risk/acceptance
+  criteria — presenting it in the Proposal analysis or at the kickoff gate is necessary, not
+  sufficient: the decision is applied only after explicit ratification, and a material gap goes to
+  `pelizzai-interview`, never to a default.
 - Scattering the tweak/bug compact confirm across separate questions, or promoting a tweak to
   bounded/plan just because the acceptance is clear (a spec/plan to change a button is the
   historical failure).

@@ -2710,14 +2710,27 @@ $hotPathBudgets = @(
     @{ Path = '.claude/skills/pelizzai-execute/SKILL.md';                       Budget = 730 },
     @{ Path = '.claude/skills/pelizzai-execute/references/task-cycle.md';       Budget = 300 }
 )
+# The set itself is part of the contract: dropping a file from the table (or duplicating one to
+# shadow another) must fail, not silently shrink the coverage.
+$expectedHotPathPaths = @(
+    '.claude/skills/pelizzai-core/SKILL.md'
+    '.claude/skills/pelizzai-router/SKILL.md'
+    '.claude/skills/pelizzai-preferences/SKILL.md'
+    '.claude/skills/pelizzai-review/SKILL.md'
+    '.claude/skills/pelizzai-execute/SKILL.md'
+    '.claude/skills/pelizzai-execute/references/task-cycle.md'
+)
+$configuredHotPathPaths = @($hotPathBudgets | ForEach-Object { $_.Path })
+Check ((@($configuredHotPathPaths | Sort-Object -Unique).Count -eq $expectedHotPathPaths.Count) -and (-not (Compare-Object -ReferenceObject ($expectedHotPathPaths | Sort-Object) -DifferenceObject ($configuredHotPathPaths | Sort-Object)))) 'hot-path budget table covers exactly the six expected files, no duplicates' "configured: $($configuredHotPathPaths -join ', ')"
 foreach ($hp in $hotPathBudgets) {
     $hpLines = (Get-Content -LiteralPath (Join-Path $root $hp.Path)).Count
     Check ($hpLines -le $hp.Budget) "hot-path budget: $($hp.Path) stays at or under $($hp.Budget) lines" "currently $hpLines lines — prune zero-sum or move on-demand material to references/ (issue #51)"
 }
 Check-Match '.claude/skills/pelizzai-create-skill/references/skill-authoring.md' '## Hot-path line budgets and zero-sum growth' 'skill-authoring carries the budget and zero-sum pruning doctrine'
-Check-Match '.claude/skills/pelizzai-create-skill/references/skill-authoring.md' 'Growth without a named\s+removal' 'skill-authoring: hot-path growth must name what comes out'
-Check-Match '.claude/skills/pelizzai-create-skill/references/skill-authoring.md' 'relocation theater' 'skill-authoring: progressive disclosure is not relocation theater'
-Check-Match '.claude/skills/pelizzai-create-skill/SKILL.md' 'Hot-path budget check' 'create-skill points maintenance at the hot-path budget rule'
+Check-Match '.claude/skills/pelizzai-create-skill/references/skill-authoring.md' 'Zero-sum growth on the hot path\.\*\*[\s\S]{0,600}Growth without a named\s+removal' 'skill-authoring: the zero-sum clause itself demands naming what comes out'
+Check-Match '.claude/skills/pelizzai-create-skill/references/skill-authoring.md' 'Progressive disclosure over relocation theater' 'skill-authoring: the disclosure clause rejects relocation theater by name'
+Check-Match '.claude/skills/pelizzai-create-skill/SKILL.md' 'Hot-path budget check[\s\S]{0,500}references/skill-authoring\.md[^\r\n]{0,40}\r?\n[^\r\n]{0,80}Hot-path line budgets and zero-sum growth' 'create-skill maintenance points at the exact budget-rule section'
+Check-Match '.claude/skills/pelizzai-create-skill/SKILL.md' 'pelizzai-source-repo\.txt' 'create-skill conditions the budget check on the source-repo sentinel'
 } catch {
     Check $false 'issue #51: hot-path line budgets' $_.Exception.Message
 }

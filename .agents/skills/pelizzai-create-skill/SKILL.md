@@ -196,10 +196,12 @@ the requested scope, without reopening the authorization they just gave.
 
 ---
 
-**Hot-path budget check (source repo).** When maintaining a HOT-PATH skill (core, router,
-preferences, review, execute, task-cycle), respect the line budgets the contract suite pins and
+**Hot-path budget check (source repo only — `scripts/pelizzai-source-repo.txt` present).** When
+maintaining a HOT-PATH file (the SKILL.md of core, router, preferences, review, or execute, and
+`pelizzai-execute/references/task-cycle.md`), respect the line budgets the contract suite pins and
 the zero-sum rule: an added clause names what comes out (see `references/skill-authoring.md` →
-"Hot-path line budgets and zero-sum growth").
+"Hot-path line budgets and zero-sum growth"). Exported consumers have no sentinel and no suite —
+the rule does not apply there.
 
 ## Cadence and triggers (hybrid)
 
