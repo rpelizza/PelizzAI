@@ -196,6 +196,13 @@ the requested scope, without reopening the authorization they just gave.
 
 ---
 
+**Hot-path budget check (source repo only — `scripts/pelizzai-source-repo.txt` present).** When
+maintaining a HOT-PATH file (the SKILL.md of core, router, preferences, review, or execute, and
+`pelizzai-execute/references/task-cycle.md`), respect the line budgets the contract suite pins and
+the zero-sum rule: an added clause names what comes out (see `references/skill-authoring.md` →
+"Hot-path line budgets and zero-sum growth"). Exported consumers have no sentinel and no suite —
+the rule does not apply there.
+
 ## Cadence and triggers (hybrid)
 
 Self-maintenance combines **portable logic in the skill** (core) with a **reinforcement hook** in Claude Code. Detailed mechanics in **[references/domain-skill-maintenance.md](references/domain-skill-maintenance.md)**.
