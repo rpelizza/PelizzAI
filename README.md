@@ -325,7 +325,11 @@ evidence. The per-task review uses the entire working tree — staged, unstaged,
 final review uses the `base-sha..HEAD` range, with **the model you chose — never a smaller one —
 and the highest effort your platform allows**: the harness elevates the reasoning of any model,
 the math of which model to use is yours, and process depth is proportional to risk — never lowered
-to compensate for a smaller model.
+to compensate for a smaller model. Per-task dispatches run at your session's effort, with a budget
+of **3 fix→re-review rounds per task shared by both lenses**, scoped re-reviews, and effort
+escalation only **after** a rejection — the platform's maximum is the final filter's tool, not
+every dispatch's default. Each task also stamps a compact phase-timing line in the execution
+record, so where the time goes is measured, not guessed.
 
 ---
 

@@ -420,8 +420,9 @@ Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route ana
 - Reviewer wrong → push back with technical reasoning (show code/tests that prove it).
 ```
 
-This feeds the `pelizzai-execute` circuit breaker (3 cycles per lens, per task;
-detail and resets in `pelizzai-execute` → `references/task-cycle.md` §5).
+This feeds the `pelizzai-execute` circuit breaker (3 cycles per task, one budget shared by both
+lenses; scoped re-review, effort escalation after a rejection, and resets in
+`pelizzai-execute` → `references/task-cycle.md` §5).
 **Protected-branch handback:** if acting on the feedback means writing code and there is no
 isolation in the consumer state or native execution record, go through `pelizzai-starting-branch`
 first — so the fixes do not land on a protected branch.

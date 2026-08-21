@@ -2605,6 +2605,58 @@ try {
     }
 }
 
+try {
+# =====================================================================
+# Issue #49/#50 (2026-08-21) — proportional review cost: shared fix budget,
+# scoped re-review, escalation by failure, session effort as the floor
+# =====================================================================
+# The per-lens counters doubled the worst case to 6 rounds per task, and the
+# universal maximum-effort mandate priced every routine dispatch as if it were
+# the final filter. These assertions pin the proportional contract so a future
+# review round does not silently reintroduce either.
+
+# -- (a) One budget per task, shared by both lenses; per-lens counters are gone --
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '3 fix.{0,3}re-review cycles PER TASK[\s\S]{0,120}shared by both\s+lenses' 'task-cycle §5: the fix budget is per task and shared by both lenses'
+Check-NotMatch '.claude/skills/pelizzai-execute/references/task-cycle.md' 'PER LENS, PER TASK|separate counters' 'task-cycle §5: the per-lens counters do not come back'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Passing one lens does not refund rounds already spent' 'task-cycle §5: a lens pass does not refund the shared budget'
+Check-Match '.claude/skills/pelizzai-execute/SKILL.md' '3 cycles per task, one budget shared\s+by both lenses' 'execute mirrors the shared per-task budget'
+Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'per lens per task' 'execute: the per-lens phrasing is gone'
+Check-Match '.claude/skills/pelizzai-review/SKILL.md' '3 cycles per task, one budget shared by both' 'review points at the shared per-task budget'
+
+# -- (b) A fix round re-reviews the fix window, not the whole task --
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'one fix dispatch plus one SCOPED re-review' 'task-cycle §5: the re-review is scoped to the fix'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'ADDRESSED / NOT_ADDRESSED' 'task-cycle §5: the scoped re-review verdicts the previous findings'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'flags only NEW breakage inside the fix''s diff window' 'task-cycle §5: the scoped re-review also hunts breakage the fix introduced'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'PREFER resuming it with the findings verbatim' 'task-cycle §5: resume the original implementer before a cold re-dispatch'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'PUBLIC, wire, or persisted contract[\s\S]{0,120}directly affected consumers' 'task-cycle §5: a contract-touching fix widens the window to its direct consumers'
+Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'widened to the directly affected consumers' 'execute mirrors the contract-widened re-review window'
+
+# -- (c) Effort: the session is the floor; the maximum is the final filter's tool --
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'session''s effort is the floor, not the ceiling everywhere' 'task-cycle §8: session effort is the floor, not a universal ceiling'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '## 8\. Model selection per role[\s\S]{0,1200}Per-task dispatches run at the session''s effort' 'task-cycle §8: routine per-task dispatches run at exactly the session effort'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'HIGHEST effort is reserved for the last filter' 'task-cycle §8: the platform maximum is reserved for the final filter'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'escalation after a review rejection' 'task-cycle §8: earlier maximum effort requires a rejection first'
+Check-NotMatch '.claude/skills/pelizzai-execute/references/task-cycle.md' 'stays at the highest level the user''s platform offers' 'task-cycle §8: the universal maximum-effort mandate is gone'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'raise the reasoning effort of the NEXT\s+fix and re-review dispatches' 'task-cycle §5: escalation by failure raises the next round, not the first pass'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'a rejected round is what buys\s+more capability; a first pass is not' 'task-cycle §5: a first pass never earns the escalation — only a rejection does'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'LARGER MODEL remains a ratifiable recommendation' 'task-cycle §5: a larger model still requires ratification'
+# The final filter KEEPS the maximum — the proportionality must not erode the last line of defense.
+Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'highest effort the platform allows' 'review: the final branch review keeps the platform maximum'
+Check-Match 'CLAUDE.md' 'reserve the platform''s highest effort for the final review' 'CLAUDE.md carries the proportional effort doctrine'
+Check-Match '.claude/skills/pelizzai-audit/assets/contract.md' 'reserve the platform''s highest effort for the final review' 'the consumer contract asset carries the same doctrine'
+Check-Match 'README.md' 'Per-task dispatches run at your session''s effort' 'README: the public contract states session effort for routine dispatches'
+Check-Match 'README.md' 'effort\s+escalation only \*\*after\*\* a rejection' 'README: the public contract conditions escalation on a rejection'
+
+# -- (d) Phase timing exists, travels in the existing record, and creates nothing --
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '## 9\. Phase timing' 'task-cycle has the phase-timing section'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '\[timing: impl 14m[^\r\n]{0,40}spec 6m[^\r\n]{0,40}quality 9m[^\r\n]{0,40}fix-rounds 1 \(7m\)\]' 'phase timing example covers implementation, both lenses, and the fix rounds on ONE line'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'final report aggregates the totals per phase' 'phase timing: the final report aggregates the per-phase totals'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'suffix of the existing line, not a second one' 'phase timing preserves the one-line-per-task Progress hygiene'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'No new file and no commit of its\s+own' 'phase timing creates no artifact of its own'
+} catch {
+    Check $false 'issues #49/#50: proportional review contract' $_.Exception.Message
+}
+
 Write-Host "`nResult: $passes PASS; $($failures.Count) FAIL."
 if ($failures.Count -gt 0) {
     foreach ($failure in $failures) { Write-Host " - $failure" }

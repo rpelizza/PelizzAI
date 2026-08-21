@@ -271,7 +271,7 @@ flowchart TD
     CY --> T[Implement with per-artifact strategy\n+ domain + overlays]
     T --> RV[Two-lens review in two dispatches\nblind spec, then quality/evidence]
     RV --> Q{Approved by both?}
-    Q -- No --> FX[Fix and re-review\ncircuit breaker: 3 cycles/stage]
+    Q -- No --> FX[Fix and scoped re-review\ncircuit breaker: 3 cycles/task]
     FX --> RV
     Q -- Yes --> CM[Coordinator advances the local cursor AND consolidates\na single commit of the task's exact paths]
     CM --> MORE{More tasks?}
@@ -328,8 +328,12 @@ circuit breaker, and commit as a gate — lives in
    to the spec, BLIND (no implementer report), which approves before (b) quality + FRESH evidence
    is dispatched. Two dispatches are where the blindness actually exists; a single pass would
    turn it into mere reading order.
-4. Failed? Fix (re-dispatching to the implementer — do not fix by hand, it pollutes the context)
-   and RE-REVIEW under the same lens. Circuit breaker: 3 cycles per lens per task; the same
+4. Failed? Fix (resume the original implementer when the platform allows — its context is intact;
+   do not fix by hand, it pollutes the context) and RE-REVIEW under the same lens, SCOPED to the
+   fix's diff — widened to the directly affected consumers when the fix changed a public, wire,
+   or persisted contract (task-cycle §5). Circuit breaker: 3 cycles per task, one budget shared
+   by both lenses; a rejection
+   raises the next round's effort (escalation by failure — task-cycle §5); the same
    issue twice escalates on the 2nd; a structural rejection escalates immediately; on overflow →
    record phase: blocked and escalate to the human with an actionable message.
 5. Both lenses approved? The COORDINATOR consolidates: stage the task's EXACT paths and, in the
