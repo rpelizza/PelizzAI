@@ -418,7 +418,7 @@ or restructured · **three or more** components with rendered output changed · 
 design tokens or a shared layout primitive · any delivery born from the sortition. The third
 clause is blast radius rather than diff size: one token edit can repaint the whole product.
 
-At the trigger, the per-task review of `pelizzai-review` (blind spec lens) receives, besides the
+At the trigger, the per-task reviewer of `pelizzai-review` receives, besides the
 diff and the plan: the **direction contract anchor**, the screenshots/preview, and the
 **[Craft Floor](references/craft-floor.md)**. It returns a **fidelity matrix** — per contract
 block: `followed / drifted`, with evidence; the typography and color/material lines are
@@ -443,7 +443,7 @@ Playwright, the browser MCP, and screenshots are **tools** for carrying out this
 - `pelizzai-execute`: to execute UI tasks inside approved plans.
 - `pelizzai-tdd`: for component, form, route, and regression behavior.
 - `pelizzai-review`: to review adherence to the spec and quality — on substantial frontend
-  deliveries the blind lens also returns the fidelity matrix against the direction contract.
+  deliveries the reviewer also returns the fidelity matrix against the direction contract.
 - `pelizzai-final-verification`: for fresh evidence before declaring it done.
 - `pelizzai-interview`: a contested direction-contract block is a product decision — it goes
   there, one question at a time.

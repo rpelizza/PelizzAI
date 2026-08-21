@@ -8,8 +8,8 @@ description: Executes an approved plan task by task, choosing proportional proof
 ## Goal
 
 Execute an approved plan with **per-task discipline**: each task gets the test/validation
-strategy suited to its artifact, passes the blind spec and quality/evidence lenses in their two
-dispatches, and only then is
+strategy suited to its artifact, passes one independent reviewer's spec and quality/evidence
+verdicts, and only then is
 consolidated. At the end, overlays that may write run before the content is sealed by
 review, suite, and checklist. The skill keeps resumable state and prevents integrating content
 different from what was validated.
@@ -74,15 +74,16 @@ profile — push/PR/publication are decided per task in `pelizzai-finish`.
    Options always visible: inline · subagents · team.
    Recommended: <mode> — <why>.
    Note (say it, do not assume it is known): the mode decides who IMPLEMENTS. It does NOT change
-   the review. In every mode — inline included — the two lenses go out as TWO INDEPENDENT
-   DISPATCHES, because the coordinator can never be the blind lens. `inline` means "no delegation
+   the review. In every mode — inline included — each task's review goes to ONE INDEPENDENT
+   reviewer (both verdicts), and the final range to two, because the coordinator never grades its
+   own delivery. `inline` means "no delegation
    to implement", never "no subagents at all".
    Check this for the REVIEWER specifically — being able to dispatch an implementer does not prove
    a reviewer is dispatchable. If this environment cannot dispatch an independent reviewer, say so
    HERE, in the conversation's language, and open the degradation choice (`pelizzai-review` →
    "When there is no independent reviewer") — not later, with the code already written. The gate
    does NOT advance to item 3 until the user has chosen (a), (b), or (c): as with every other
-   item, recommendation and silence are not answers, and a non-blind review is never self-granted.
+   item, recommendation and silence are not answers, and a non-independent review is never self-granted.
    Question: which mode do you choose?
 
 3. Commits (only after 2)
@@ -99,8 +100,9 @@ not write code, move a worktree, squash, or record final decisions until steps 0
 Branch base and name were already ratified before the spec/plan by `pelizzai-starting-branch`.
 
 **The review is deliberately NOT a gate item.** It is not asked because it has no alternative to
-offer: every task **and** the final candidate go through the two lenses of `pelizzai-review` in
-**two dispatches**, and the blindness of the spec lens is not negotiable — there is no profile to
+offer: every task goes to ONE independent reviewer with both verdicts, the final candidate goes
+through the two lenses of `pelizzai-review` in **two dispatches**, and the blindness of the final
+spec lens is not negotiable — there is no profile to
 pick and no downgrade to ratify. A gate item whose only valid answer is the recommendation is not
 ratification, it is ritual; and ritual teaches the user to answer gates on autopilot, which
 corrodes exactly the attention items 0–3 need. This omission does not widen the harness's
@@ -230,7 +232,7 @@ There is no universal ranking; use the least coordination that preserves quality
 | -------------------- | ------------------ | ---------------------------------------------------------------------------- |
 | **team**             | `pelizzai-team`    | Fronts with dependencies that require coordination and exchange during execution |
 | **subagents**        | `pelizzai-subagents` | Independent tasks that only need to **report**; one fresh subagent per task, isolated context, per-task review |
-| **inline**           | —                  | Small/sequential plan where delegating **the implementation** would cost more than executing it. It does not waive the review's two dispatches — no mode does |
+| **inline**           | —                  | Small/sequential plan where delegating **the implementation** would cost more than executing it. It does not waive the independent reviewer — no mode does |
 
 ```text
 Isolation and parallelism (as the user ratified at the gate). The shared working tree does NOT
@@ -269,7 +271,7 @@ flowchart TD
     DOM --> PRE[Pre-flight: sweep plan for contradictions]
     PRE --> CY[Adaptive cycle per task\nref: task-cycle.md]
     CY --> T[Implement with per-artifact strategy\n+ domain + overlays]
-    T --> RV[Two-lens review in two dispatches\nblind spec, then quality/evidence]
+    T --> RV[Task review: one independent reviewer\nspec verdict, then quality/evidence]
     RV --> Q{Approved by both?}
     Q -- No --> FX[Fix and scoped re-review\ncircuit breaker: 3 cycles/task]
     FX --> RV
@@ -324,15 +326,16 @@ circuit breaker, and commit as a gate — lives in
    choose requirements, UX, architecture, data, security, or acceptance. The coordinator does not
    decide for them or by itself either: it consolidates the gaps and takes them to the human via
    `pelizzai-interview` in gap mode before the front continues.
-3. Review with two lenses in TWO dispatches, always — including a bounded task: (a) conformance
-   to the spec, BLIND (no implementer report), which approves before (b) quality + FRESH evidence
-   is dispatched. Two dispatches are where the blindness actually exists; a single pass would
-   turn it into mere reading order.
+3. Review by ONE independent reviewer, always — including a bounded task: both verdicts in one
+   dispatch, (a) conformance to the spec formed against the contract BEFORE the report section,
+   then (b) quality + FRESH evidence verifying the report. The truly blind spec lens belongs to
+   the final range, in its own dispatch (task-cycle §3).
 4. Failed? Fix (resume the original implementer when the platform allows — its context is intact;
-   do not fix by hand, it pollutes the context) and RE-REVIEW under the same lens, SCOPED to the
-   fix's diff — widened to the directly affected consumers when the fix changed a public, wire,
+   do not fix by hand, it pollutes the context) and RE-REVIEW SCOPED to the
+   fix's diff, in one dispatch that keeps both verdicts current — widened to the directly
+   affected consumers when the fix changed a public, wire,
    or persisted contract (task-cycle §5). Circuit breaker: 3 cycles per task, one budget shared
-   by both lenses; a rejection
+   by both verdicts; a rejection
    raises the next round's effort (escalation by failure — task-cycle §5); the same
    issue twice escalates on the 2nd; a structural rejection escalates immediately; on overflow →
    record phase: blocked and escalate to the human with an actionable message.
@@ -363,8 +366,8 @@ For a small, sequential plan, the coordinator executes in its own session follow
 cycle. Inline is an adequate choice, not an inferior fallback.
 
 **Inline is not "without subagents".** It removes the delegation of the IMPLEMENTATION; the review
-keeps its two independent dispatches, exactly as in the other two modes — the coordinator wrote the
-code here, so it is precisely the agent that CANNOT judge it blind. A session that cannot dispatch a reviewer
+still goes to an independent reviewer, exactly as in the other two modes — the coordinator wrote the
+code here, so it is precisely the agent that CANNOT judge it. A session that cannot dispatch a reviewer
 is not "inline mode": it is an environment without an independent reviewer, and that goes through
 `pelizzai-review` → "When there is no independent reviewer", declared at the gate.
 
@@ -595,8 +598,8 @@ After this step, `git status --porcelain` must be empty and `validated-head` rem
 
 ```text
 1. Capture candidate-head = `git rev-parse HEAD`.
-2. FINAL REVIEW via pelizzai-review on the exact range `base-sha..candidate-head`, in the SAME
-   two dispatches as a task: the blind spec lens over the whole range (diff + spec/plan +
+2. FINAL REVIEW via pelizzai-review on the exact range `base-sha..candidate-head`, in TWO
+   dispatches — the one place the review splits: the blind spec lens over the whole range (diff + spec/plan +
    domain skills, no delivery narrative) approves first, then the quality/evidence lens. Use
    independent reviewers, at the session's model — never a smaller one — and the
    highest effort the platform allows (see task-cycle §8). There is NO reuse of a task's review as the final

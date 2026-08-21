@@ -1,6 +1,6 @@
 ---
 name: pelizzai-review
-description: Code review skill of the PelizzAI harness. Use after EVERY task during plan execution, when a relevant feature is complete, before integrating a delivery, or when the user asks for a review of a working tree, branch, or PR. Applies the (blind) spec lens and the quality/evidence lens — always in two dispatches, per task and on the final range — and teaches how to receive feedback with technical rigor. For security/OWASP, compose `pelizzai-oswap`.
+description: Code review skill of the PelizzAI harness. Use after EVERY task during plan execution, when a relevant feature is complete, before integrating a delivery, or when the user asks for a review of a working tree, branch, or PR. Applies the spec and quality/evidence rubrics — ONE independent reviewer per task returning both verdicts, and two dispatches (blind spec + quality) on the final range — and teaches how to receive feedback with technical rigor. For security/OWASP, compose `pelizzai-oswap`.
 ---
 
 # PelizzAI Review
@@ -27,8 +27,9 @@ Catch problems before they propagate. The reviewer receives **fabricated context
 ```text
 Mandatory:
 - After EVERY task during plan execution (pelizzai-execute) — no exception for "it's simple".
-  Risk changes the DEPTH of each lens, never whether the review happens nor its form: the two
-  lenses go out in two dispatches in every task, in every lane.
+  Risk changes the DEPTH of each rubric, never whether the review happens nor its form: every
+  task gets ONE independent reviewer returning both verdicts, in every lane; the final range
+  gets the two lenses in two dispatches.
 - When a relevant feature is complete.
 - On the final candidate of a planned delivery, before `validated-head` — and before integrating into the base.
 - When the user asks for a review.
@@ -41,84 +42,83 @@ Optional, but valuable:
 
 ---
 
-## The two lenses (always two dispatches)
+## The two rubrics — one reviewer per task, two dispatches on the final range
 
-During plan execution, each task passes through **two lenses with asymmetric blindness** — the
-**spec** lens and the **quality/evidence** lens, in that order. The implementer has **not
-committed** — the code is in the working tree. The asymmetry is deliberate:
+During plan execution, each task passes through the **spec** rubric and the **quality/evidence**
+rubric, in that order. The implementer has **not committed** — the code is in the working tree.
 
-- **Spec lens (blind):** receives ONLY the diff, the task's spec/plan, and the area's domain skills.
-  **The spec lens reviewer does NOT receive the implementer's report — it judges the code against the contract, without the author's narrative.**
-  Without the writer's story, it measures the real implementation against the request, line by line,
-  without being anchored by the author's optimistic claims.
-- **Quality/evidence lens:** receives the author's report and **verifies the claims** — did the tests
+- **Spec rubric:** measures the real implementation against the task's contract, line by line —
+  missing, extra, misunderstood — from the diff, the task's spec/plan, and the area's domain skills.
+- **Quality/evidence rubric:** receives the author's report and **verifies the claims** — did the tests
   actually run? Is the proof fresh (command + output + exit code)? Were deviations from the plan
   declared? It actually runs the applicable checks to confirm or refute what the report asserts,
   besides assessing code quality.
 
-**The two lenses always go out in two independent dispatches** — per task and on the final range,
-in every lane, including a bounded task. This is not a profile, a default, or a recommendation:
-there is nothing here for a plan to pick or a user to ratify. **Two dispatches are the only place
-where the blindness actually exists**; collapsed into a single pass it degrades into mere reading
-order, and a reviewer who has already read the implementer's report cannot unknow the author's
-narrative. A blindness that depends on the reviewer forgetting what they just read is not
-blindness.
+**Per task, both rubrics go to ONE independent reviewer, in one dispatch, returning BOTH
+verdicts** — in every lane, including a bounded task. There is nothing here for a plan to pick or
+a user to ratify. The reviewer's independence comes from **fabricated context**: it receives the
+task contract, the diff, the domain skills, and the author's report — never the session history,
+never the coordinator's reasoning. The briefing places the spec rubric BEFORE the report and
+instructs the reviewer to form the spec verdict by reading code against contract first — an
+anchoring mitigation, stated as what it is, not sold as blindness.
 
-**The rule behind the invariable.** The blind lens exists wherever a **ratified contract** exists —
-a plan, a task spec, an approved requirement, written BEFORE the diff. "Two lenses in two
-dispatches" is what that rule yields in every flow that EXECUTES a contract, which is every flow
-that has one. A flow that PRODUCES its own artifact with no prior requirement — a reported symptom,
-the harness bootstrap itself — has nothing for the blind lens to judge against: it dispatches the
+**The truly BLIND spec lens lives at the final range, in its own dispatch.** That is where
+blindness pays what it costs: a requirement that fell between two tasks passes every per-task
+review and is only visible against the whole plan, judged without the delivery narrative. Per
+task, a second sequential dispatch bought latency, not rigor — the per-task defect classes
+(missing, extra, misunderstood) are caught by the same rubric with the contract in hand, and the
+report the reviewer sees is precisely the thing its evidence rubric exists to verify.
+
+**The rule behind the form.** The spec rubric exists wherever a **ratified contract** exists — a
+plan, a task spec, an approved requirement, written BEFORE the diff. Per task it rides in the
+single reviewer's first verdict; on the final range it becomes a blind, independent dispatch. A
+flow that PRODUCES its own artifact with no prior requirement — a reported symptom, the harness
+bootstrap itself — has nothing for the spec rubric to judge against: it dispatches the
 quality/evidence lens with its `Verification` block, in its own dispatch, under
-**[Standalone change review](#standalone-change-review)** below. That is not a profile and not a
-downgrade: nobody picks it, risk does not move it, and the moment a contract exists the second
-dispatch is mandatory again. Fabricating a contract so the blind lens has something to read —
-writing the spec after the fact, or handing the lens the coordinator's own checklist — is the
-anti-pattern, not the compliance.
+**[Standalone change review](#standalone-change-review)** below. Fabricating a contract so the
+spec rubric has something to read — writing the spec after the fact, or handing the reviewer the
+coordinator's own checklist — is the anti-pattern, not the compliance.
 
-There used to be a `combined` profile — one dispatch, one report — offered as a ratified exception
-for bounded, low-risk tasks. It is **gone**, and it does not come back by request: the case it
-served ("small enough that two dispatches are not worth it") is already covered by the `tweak`
-lane, which waives formal review outright. What is left between the two is not a saving, it is a
-review that only looks like one.
+Two tombstones, kept honest. The `combined` **profile** (issue #24) died because a ratifiable
+choice with one real answer was ritual; it stays dead — the per-task form is invariable, not a
+menu. The per-task **two-dispatch split** (PR #25) died to issue #49: it serialized every task
+behind two reviewer round-trips while every reference harness caps review at two dispatches in a
+single pass, and the blindness it protected per task was mere briefing order — the real one was
+always the final range's. Neither comes back by request.
 
-**Proportionality without loosening the blindness:** what proportionality regulates is the
-**depth** of each lens — how much gets investigated, how many checks get run — never whether the
-review happens, how many dispatches it uses, or whether it is blind. Cutting the second dispatch
-is not a proportional review; it is the removal of the one mechanism that makes the spec lens
-independent.
+**Proportionality without loosening the form:** what proportionality regulates is the **depth** of
+each rubric — how much gets investigated, how many checks get run — never whether the review
+happens, who reviews (always an independent reviewer), or the final range's two dispatches.
 
-**Consolidation and conflict belong to the coordinator:** it crosses the verdicts of the two lenses
-and, when they diverge, decides with its own evidence (running the disputed check itself) or
-escalates to the user. The coordinator is **never** the blind lens — it has already seen the author's
-report and reasoning, so it cannot judge blind; the blind spec lens is always an independent reviewer.
+**Consolidation and conflict belong to the coordinator:** it reads the two verdicts and, when they
+diverge from each other or from its own knowledge, decides with its own evidence (running the
+disputed check itself) or escalates to the user. The coordinator **never reviews its own
+delivery** — it has already seen the author's report and reasoning; per task the reviewer is an
+independent agent, and on the final range the blind spec lens is always an independent reviewer.
 
-### Stage 1 — Spec lens (compliance, blind)
+### The task review — one dispatch, two verdicts
 
-Verify that the implementer built **exactly** what was asked — nothing more, nothing less.
-This lens is **blind**, without exception: you do not receive the implementer's report — you judge
-the diff against the contract, without the author's narrative. **Actually read the code**, do not
-accept claims.
+Use the **[references/task-reviewer.md](references/task-reviewer.md)** template. The reviewer
+verifies, in this order, and returns BOTH verdicts — a report missing either one is incomplete:
 
 ```text
+Spec verdict (form it BEFORE reading the report section):
 - Missing: did they implement everything that was asked? Skipped or forgot any requirement?
   Claimed something works but never implemented it?
 - Extra/unnecessary: built what was not asked? Over-engineering? "Nice to haves" outside the spec?
 - Misunderstandings: interpreted differently from what was intended? Solved the wrong problem? Right, but the wrong way?
 - Line-level traceability: does every changed line trace directly to a requirement of the request?
   A line with no trace is scope creep — a first-class finding, not a remark.
+
+Quality/evidence verdict:
+- The full quality rubric plus the Verification block: run the applicable checks, verify every
+  claim in the implementer's report, and flag undeclared plan deviations.
 ```
 
-Use the **[references/spec-reviewer.md](references/spec-reviewer.md)** template (without running tests — Verification belongs to Stage 2). Outcome: **✅ Matches the spec** (everything checks out after code inspection), **❌ Issues** (list what is missing/extra, with `file:line`), or **⚠️ Not verifiable** → requires the coordinator's assessment against the plan before concluding (see `pelizzai-execute` → `references/task-cycle.md` §3-§4).
-
-### Stage 2 — Quality/evidence lens
-
-Only dispatch this lens after spec passes — never in parallel with it, and never in the same
-dispatch. **This is the lens that receives the implementer's report** and
-verifies the claims — did the tests actually run? Is the proof fresh (command + output + exit
-code)? Were deviations from the plan declared in the `Plan deviations:` field? A claim you could not
-confirm by running the check is **UNVERIFIED**, never ✅. Use the full rubric in
-**[references/code-reviewer.md](references/code-reviewer.md)**. Assess: separation of concerns, error handling, type safety, DRY without premature abstraction, edge cases, architecture, security, tests (they verify real behavior, not mocks), production readiness. Additionally:
+Spec outcome: **✅ Matches the spec**, **❌ Issues** (with `file:line`), or **⚠️ Not verifiable** →
+requires the coordinator's assessment against the plan before concluding (see `pelizzai-execute` →
+`references/task-cycle.md` §3-§4). A claim the reviewer could not confirm by running the check is
+**UNVERIFIED**, never ✅. Assess: separation of concerns, error handling, type safety, DRY without premature abstraction, edge cases, architecture, security, tests (they verify real behavior, not mocks), production readiness. Additionally:
 
 ```text
 - Does each file have ONE clear responsibility and a well-defined interface?
@@ -147,35 +147,38 @@ infer** pass/fail by reading the diff. A relevant check that could not run is **
 
 ## How to dispatch the reviewer
 
-Use an **independent reviewer** — always, and one per lens: the blind spec lens must be another
-agent, and the coordinator never embodies it. The coordinator never applies the two rubrics inline
-either; there is no inline mode left. Where no contract exists, only the quality/evidence lens goes
-out — still to another agent, still in its own dispatch (see
-**[Standalone change review](#standalone-change-review)**). The spec lens uses
-**[references/spec-reviewer.md](references/spec-reviewer.md)**; the quality/evidence lens — per
-task and on the final range — uses **[references/code-reviewer.md](references/code-reviewer.md)**.
-Never merge the two rubrics into one briefing. Fill in with:
+Use an **independent reviewer** — always: the coordinator never applies the rubrics inline; there
+is no inline mode. Per task, ONE reviewer runs both rubrics via
+**[references/task-reviewer.md](references/task-reviewer.md)**. On the final range, TWO
+dispatches: the blind spec lens uses
+**[references/spec-reviewer.md](references/spec-reviewer.md)** and the quality/evidence lens uses
+**[references/code-reviewer.md](references/code-reviewer.md)** — never merged into one briefing
+there. Where no contract exists, only the quality/evidence lens goes out — still to another agent,
+still in its own dispatch (see **[Standalone change review](#standalone-change-review)**).
+Fill in with:
 
 ```text
 - Description: what was built.
 - Requirements/Plan: what it should do (task text or plan path in pelizzai/plans/).
-- Implementer's report: the author's claims (tests run, proof, plan deviations). It goes
-  ONLY to the quality/evidence lens, which verifies it.
-  NEVER to the blind spec lens — it judges the code against the contract, without the narrative.
+- Implementer's report: the author's claims (tests run, proof, plan deviations). In the task
+  review it fills the report section AFTER the spec rubric — the reviewer verifies it under the
+  evidence rubric. On the final range it goes ONLY to the quality/evidence lens:
+  NEVER to the blind spec lens — that lens judges the range against the plan, without the narrative.
 - Diff to review:
-  - Per task (spec AND quality/evidence, one dispatch each) → generate `review-package --working-tree`. The package contains,
+  - Per task (one dispatch, both rubrics) → generate `review-package --working-tree`. The package contains,
     separately, `git diff --cached`, `git diff`, and the content of the untracked files. Do not use a range:
     the task has not been committed yet, and an empty range would hide all the work.
   - Final review → generate `review-package <base-sha> <HEAD_SHA>` and use the committed range.
     `base-sha` comes from the consumer `state.md` or the native execution record; do not rediscover the base.
 - DOMAIN SKILLS for the area (pasted) — from the `pelizzai/domain-skills.md` catalog in a consumer, or
-  from the source repo's rules/skills in source mode. They fill the `{DOMAIN_SKILLS}` slot **of both
-  templates**: the blind spec lens receives diff + spec/plan + domain skills; the quality/evidence lens
-  receives the same skills plus the report. In a consumer, also paste the acceptance criteria of
+  from the source repo's rules/skills in source mode. They fill the `{DOMAIN_SKILLS}` slot of
+  **every** template: the task reviewer and, on the final range, the blind spec lens (diff +
+  spec/plan + domain skills) and the quality/evidence lens (the same skills plus the report). In a
+  consumer, also paste the acceptance criteria of
   `pelizzai/data/verification-standard.md` when it exists — the reviewer judges against what
   "correct" means HERE, not against taste (see `pelizzai-evolve`).
-  A domain skill promised but not pasted is a blind lens
-  without a contract — paste the operational points, not just the names. With no coverage for the
+  A domain skill promised but not pasted is a reviewer
+  without the project's contract — paste the operational points, not just the names. With no coverage for the
   area, write "none" and ask the reviewer to flag the gap.
 - Cross-cutting skills/overlays recorded in the state/execution record (pasted) — frontend, security,
   documentation, or any other applicable constraint is also part of the review contract.
@@ -207,16 +210,17 @@ that dispatches a review carries an edge of its own — a flow without one is a 
 the collision too late (see **[Who dispatches which lenses](#who-dispatches-which-lenses)**).
 
 ```text
-Name the collision in one line, IN THE CONVERSATION'S LANGUAGE — what the harness requires (two
-lenses, two dispatches, the blind one by an independent agent), what this environment allows, and
+Name the collision in one line, IN THE CONVERSATION'S LANGUAGE — what the harness requires (an
+independent reviewer per task; on the final range, two dispatches with the blind one by an
+independent agent), what this environment allows, and
 why they conflict. Then offer:
 
 (a) authorize the independent reviewer for the reviews of this task/delivery — the way out that
     costs nothing in rigor. Ask for it explicitly; the user may simply not know the harness
     needs it (see the mode note at the gate);
-(b) accept a DECLARED non-blind review — the quality/evidence lens runs normally, with real
-    Verification, and the spec lens is applied by the coordinator KNOWING it is not blind.
-    Record it (below) and state it in the final report;
+(b) accept a DECLARED non-independent review — the coordinator applies the rubrics itself, with
+    real Verification (fresh runs), KNOWING it is not independent — and, on the final range, that
+    its spec pass is not blind. Record it (below) and state it in the final report;
 (c) defer the integration until there is a reviewer — the work is consolidated and stays
     unsealed; `validated-head` is not written.
 ```
@@ -231,8 +235,8 @@ applied by the coordinator, KNOWING it is not independent, with the fresh run re
 `degraded` marks is a lens the flow REQUIRED that did not run independently, and a single-lens flow
 requires that one.
 
-**(b) is the ONLY exception in the whole harness to the two dispatches and the blindness — and it
-is not yours to take.** It requires the user's EXPLICIT choice, in this turn, under the same rule
+**(b) is the ONLY exception in the whole harness to the independent reviewer — and to the final
+range's blindness — and it is not yours to take.** It requires the user's EXPLICIT choice, in this turn, under the same rule
 as every other decision at the edges: the recommendation is not an answer, silence is not an
 answer, and "the environment forced it" is not an answer. Without an explicit choice the route is
 **(c)** — the work waits. An agent that reads this section and applies (b) on its own has not
@@ -254,9 +258,9 @@ around to deny it.
   implemented is NEVER evidence, and that rule does not relax here (`pelizzai-team` → evidence
   gate). When the coordinator both implemented and reviews, it RE-RUNS the checks itself: that is
   weaker than an independent run, and being weaker is part of what `degraded` records.
-- Silence is not an option. A non-blind review presented as a completed two-lens review is
-  exactly the defect the whole asymmetry exists to prevent — and it is worse than the missing
-  capability, because it is invisible.
+- Silence is not an option. A coordinator's self-review presented as a completed independent
+  review is exactly the defect this whole section exists to prevent — and it is worse than the
+  missing capability, because it is invisible.
 ```
 
 **Record.** With option (b), write `review-integrity: degraded <YYYY-MM-DD>` in the consumer
@@ -357,8 +361,9 @@ The FORM of a review comes from the flow's contract, never from its risk. Every 
 dispatches one, and what it dispatches:
 
 ```text
-- pelizzai-execute   — per task AND on the final range: TWO lenses, TWO dispatches. It executes a
-                       ratified plan/spec, so the blind lens has a contract to judge against.
+- pelizzai-execute   — per task: ONE independent reviewer, both rubrics, both verdicts. On the
+                       final range: TWO lenses, TWO dispatches — it executes a ratified plan/spec,
+                       so the blind lens has the whole plan to judge the range against.
 - pelizzai-debug     — standalone change review on the working tree (quality/evidence lens only);
                        then it consolidates the content, runs Verification against the HEAD, and
                        only then calls pelizzai-finish.
@@ -376,14 +381,14 @@ exactly how the blind lens came to be demanded of a bootstrap that had nothing t
 
 A bug outside a plan, a tweak reclassified before the commit, or the harness bootstrap's own diff —
 any change that produces its own artifact with no ratified contract. Use
-`review-package --working-tree` (staged + unstaged + untracked) and apply **Stage 2**
-(quality) with the `Verification` block, **without** the per-task / final-review machinery. This is
-**not** a one-dispatch profile in disguise: the blind spec lens
+`review-package --working-tree` (staged + unstaged + untracked) and apply the **quality/evidence
+rubric** (`references/code-reviewer.md`) with the `Verification` block, **without** the per-task / final-review machinery. This is
+**not** the task review minus paperwork: the spec rubric
 is missing because there is no contract for it to judge against — no plan, no task spec, no
 approved requirement, only a reported symptom or a set of artifacts the coordinator itself
-produced. Where a contract exists, both lenses go out. If the
+produced. Where a contract exists, both rubrics apply. If the
 change acquires one (a new surface, a ratified acceptance), it stops being standalone: reclassify
-through the router and the full two-lens review applies.
+through the router and the full review form applies.
 
 The fix→re-review loop is still **bounded** — dropping the per-task machinery does not drop the
 limit. The dispatching skill declares its own at its closing step (`pelizzai-debug` step 4, over the
@@ -421,7 +426,7 @@ Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route ana
 ```
 
 This feeds the `pelizzai-execute` circuit breaker (3 cycles per task, one budget shared by both
-lenses; scoped re-review, effort escalation after a rejection, and resets in
+verdicts; scoped re-review keeping both verdicts current, effort escalation after a rejection, and resets in
 `pelizzai-execute` → `references/task-cycle.md` §5).
 **Protected-branch handback:** if acting on the feedback means writing code and there is no
 isolation in the consumer state or native execution record, go through `pelizzai-starting-branch`
@@ -455,15 +460,15 @@ On a GitHub PR, reply in the inline comment THREAD (not as a top-level PR commen
 ```text
 - Skipping the review because "it's simple" — depth is proportional; the existence of the review is not.
 - Skipping a review required by the lane, or shrinking it because the risk looks low.
-- Collapsing the two lenses into a single dispatch to save a round — that is not a proportional
-  review, it is a review without blindness. There is no `combined` profile to fall back on, and a
-  user asking for one does not create it: what it would buy is already served by the `tweak` lane.
-  This is a different thing from a flow that never had a contract for the blind lens to judge (see
-  "Standalone change review"): there the second dispatch has nothing to read, and inventing a
-  contract to feed it is the defect.
-- Writing a spec/plan for a flow that has none just so the blind lens can be dispatched "by the
+- Collapsing the FINAL range review into a single dispatch, or skipping its blind spec lens —
+  the final range is the one place the blindness uniquely pays, and it is not negotiable there.
+- A task reviewer returning only one verdict — spec and quality/evidence are BOTH required, and a
+  report missing either one is incomplete, not approved.
+- Splitting the task review back into two sequential dispatches "for extra rigor" — that is the
+  latency the form removed (issue #49), and the added rigor was briefing order, not blindness.
+- Writing a spec/plan for a flow that has none just so the spec rubric can be applied "by the
   book" — a contract fabricated after the diff measures the diff against itself.
-- Demanding the blind lens of a flow that produces its own artifact (the bootstrap, a reported
+- Demanding the spec rubric of a flow that produces its own artifact (the bootstrap, a reported
   symptom), or dropping it where a ratified plan/spec exists.
 - Running the final review with the quality lens only, or reusing a task's review as the final one.
 - Discovering only at review time that this environment cannot dispatch a reviewer — the capability
@@ -472,7 +477,7 @@ On a GitHub PR, reply in the inline comment THREAD (not as a top-level PR commen
   and report a completed two-lens review. Degradation is legitimate; UNDECLARED degradation is the
   defect — and `review-integrity: degraded` is what makes it visible past this session.
 - Promising domain skills to the reviewer and dispatching the briefing with the `{DOMAIN_SKILLS}` slot
-  empty — the blind lens is left without the project contract it should judge against.
+  empty — the reviewer is left without the project contract it should judge against.
 - Downgrading model or effort below the session's in a review (per-task or final) to save cost —
   capacity is the user's choice, and the harness never reduces it silently.
 - Ignoring a Critical, or moving on with an Important open.
@@ -481,9 +486,9 @@ On a GitHub PR, reply in the inline comment THREAD (not as a top-level PR commen
 - Reporting as ✅ a check that did not run (evidence inferred from the diff).
 - Passing the session history to the reviewer (it receives only fabricated context).
 - Performative agreement when receiving feedback ("you're absolutely right", thanking).
-- Dispatching quality/evidence before spec passes, or dispatching both at once.
-- Handing the implementer's report (or the delivery narrative, in the final review) to the blind spec
-  lens — it judges the code against the contract, without the author's narrative; the lens that
+- In the final review, dispatching quality/evidence before the blind spec lens passes, or both at once.
+- Handing the delivery narrative, the task reports, or the coordinator's summary to the final
+  blind spec lens — it judges the range against the plan, without the narrative; the lens that
   receives and verifies the report is quality/evidence.
 - The coordinator dispatching itself as the blind spec lens: it has already seen the author's report
   and reasoning, so it cannot judge blind — the blind lens is always an independent reviewer.
@@ -499,7 +504,7 @@ On a GitHub PR, reply in the inline comment THREAD (not as a top-level PR commen
 
 **Combines with:**
 
-- `pelizzai-execute` — per-task review and final review, both in two dispatches; see `task-cycle.md`.
+- `pelizzai-execute` — per-task review (one reviewer, both verdicts) and final review (two dispatches); see `task-cycle.md`.
 - `pelizzai-tdd` — the tests the review checks are born from the TDD cycle.
 - `pelizzai-starting-branch` — handback when acting on feedback turns into writing code.
 - `pelizzai-reasoning` — *Critique and Refine* (acting on the feedback) and *Verification* (fresh evidence).
@@ -520,8 +525,10 @@ Prefer:
 - technical rigor over performative agreement when receiving feedback.
 
 Review early and often: depth is proportional to risk, the existence of the review is not.
-Spec first, quality/evidence second — ALWAYS in two dispatches, per task and on the final range. There is no single-dispatch profile. Critical/Important before moving on; Minor for the end.
-The blind lens exists where a ratified contract exists. Where none does — a reported symptom, the harness bootstrap — the quality lens goes alone, to an independent reviewer, and inventing a contract to feed the blind one is the defect.
-The spec lens is blind (no report, no delivery narrative) and receives diff + spec/plan + the area's domain skills; the quality/evidence lens receives and verifies the report. The coordinator crosses the lenses and is never the blind lens.
+Per task: ONE independent reviewer, spec verdict first, quality/evidence verdict second — both
+required. On the final range: two dispatches — the BLIND spec lens (range + full plan, no
+narrative) approves before quality/evidence. Critical/Important before moving on; Minor for the end.
+The spec rubric exists where a ratified contract exists. Where none does — a reported symptom, the harness bootstrap — the quality lens goes alone, to an independent reviewer, and inventing a contract to feed the spec rubric is the defect.
+The coordinator crosses the verdicts and never reviews its own delivery; the final blind lens is always an independent reviewer.
 Never pass the session history to the reviewer. For security, use pelizzai-oswap.
 ```

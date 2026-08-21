@@ -156,10 +156,10 @@ flowchart TD
     GAP -- "YES" --> IV["STOPS and calls the interview:<br/>one question at a time, 2-3 options<br/>with the recommended one marked"]
     IV --> REG["your answer is recorded<br/>in the plan, with a date"]
     REG --> IMPL
-    GAP -- "no" --> REV["review through two lenses"]
-    REV --> L1["SPEC lens — BLIND<br/>sees only the diff, the spec, and<br/>the area's domain skills"]
-    REV --> L2["QUALITY lens<br/>sees the implementer's report<br/>and AUDITS the claims"]
-    L1 --> OK{"do both approve?"}
+    GAP -- "no" --> REV["review by ONE independent reviewer"]
+    REV --> L1["SPEC verdict — formed first,<br/>code vs contract, before<br/>the report section"]
+    REV --> L2["QUALITY verdict<br/>reads the implementer's report<br/>and AUDITS the claims"]
+    L1 --> OK{"do both verdicts approve?"}
     L2 --> OK
     OK -- "no" --> IMPL
     OK -- "yes" --> NEXT["next task"]
@@ -167,9 +167,11 @@ flowchart TD
 
 Two things deserve highlighting here:
 
-**The blind lens.** The spec reviewer never reads the implementer's report — only the diff and the
-spec. That way it does not inherit the framing of whoever wrote the code. The report is read by the
-other lens, whose duty is precisely to **audit the claims**, not trust them.
+**The independent reviewer.** Each task's reviewer receives fabricated context — the task
+contract, the diff, the domain skills, and the report — never the coordinator's session history,
+and it forms the spec verdict against the contract before reading the report. The truly **blind**
+spec lens runs at the delivery's final range, in its own dispatch: that is the one place a
+requirement that fell between two tasks becomes visible, judged without the delivery narrative.
 
 **The interview is not just for planning.** If the gap appears on task 7 of 9, the work stops
 right there. The executor does not choose — it names the gap and hands it back. In team mode, the
@@ -258,8 +260,10 @@ Branch, inline execution, and granular commits are the **recommended** defaults;
 and subagents come in when genuinely independent fronts justify the cost. None of it is applied in
 silence — after the plan is approved, isolation, mode (with `team` always visible), and commits are
 decided **one question at a time**. `squash-final` happens only on explicit request. The review is
-not asked: every task and the final range go through the two lenses of `pelizzai-review` in two
-dispatches, and there is no profile to pick.
+not asked: every plan task goes to one independent reviewer of `pelizzai-review` returning both
+verdicts, the final range goes through the two lenses (blind spec + quality) in two dispatches —
+a flow with no ratified contract (a standalone bug, the bootstrap) gets the quality lens alone —
+and there is no profile to pick.
 
 Ratified structural decisions can become **project policy** in `pelizzai/profile.md` and
 pre-select future recommendations. They do not auto-confirm a new task, barring your explicit
@@ -326,7 +330,7 @@ final review uses the `base-sha..HEAD` range, with **the model you chose — nev
 and the highest effort your platform allows**: the harness elevates the reasoning of any model,
 the math of which model to use is yours, and process depth is proportional to risk — never lowered
 to compensate for a smaller model. Per-task dispatches run at your session's effort, with a budget
-of **3 fix→re-review rounds per task shared by both lenses**, scoped re-reviews, and effort
+of **3 fix→re-review rounds per task shared by both verdicts**, scoped re-reviews, and effort
 escalation only **after** a rejection — the platform's maximum is the final filter's tool, not
 every dispatch's default. Each task also stamps a compact phase-timing line in the execution
 record, so where the time goes is measured, not guessed.

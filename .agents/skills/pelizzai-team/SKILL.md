@@ -146,10 +146,10 @@ flowchart TD
 ## The coordinator's role
 
 The coordinator is the **team lead** (Teammates Mode) or the **main session** (Subagents Mode). It
-**orchestrates**: decomposes, delegates, crosses the lenses, and consolidates. It **never** implements a front
-on its own, nor dispatches itself as the review's **blind spec lens** — it has already seen the
-members' report and reasoning, so it cannot judge blind; the blind lens is always an independent
-reviewer. In both modes, the rule is the same and non-negotiable:
+**orchestrates**: decomposes, delegates, crosses the verdicts, and consolidates. It **never** implements a front
+on its own, nor reviews its own delivery — it has already seen the
+members' report and reasoning; the task reviewer and the final range's blind spec lens are always
+independent reviewers. In both modes, the rule is the same and non-negotiable:
 
 <HARD-GATE>
 Do not delegate a subtask to a member until you can answer, for **each** member:
@@ -418,7 +418,7 @@ Member results are **not** truth until they are cross-checked.
 - **Cross-check:** confront deliverables that overlap; conflicting findings trigger a refutation round (Subagents Mode) or a debate via `SendMessage` (Teammates Mode).
 - **Adversarial verification:** prefer that **another** member (or a dedicated verifier) try to take down a conclusion, rather than the author confirming it.
 - **Cross-check via independent runs (Verification):** when several members reach the same result through independent paths, the convergence increases confidence — but it does not replace a real test/source.
-- **Per-task review (two lenses with asymmetric blindness):** every implementation deliverable goes through `pelizzai-review` — the **blind spec lens** (receives only diff + spec/plan + the area's domain skills, NEVER the author's report: it judges the code against the contract, without the narrative) and the **quality/evidence lens** (receives the report and verifies the claims with fresh proof). The coordinator dispatches independent reviewers — it is **never the blind lens** —, crosses the two verdicts and, on conflict, decides with its own evidence or escalates. The two lenses always go out in **two dispatches**, in any lane, including bounded — only that way does the spec lens not know the author's narrative; there is no single-pass variant to fall back on. What is proportional is each lens's **depth**, not the review's existence, the number of dispatches, nor the blindness. Being able to dispatch MEMBERS does not prove a REVIEWER is dispatchable — check it separately at the gate; and if the capability is lost mid-run (quota, ceiling, restricted resumption), the review does not silently collapse into the coordinator: go through `pelizzai-review` → "When there is no independent reviewer".
+- **Per-task review (one independent reviewer, both verdicts):** every implementation deliverable goes through `pelizzai-review` — ONE independent reviewer per task applies the **spec rubric** (code vs contract, formed before the report section of the briefing) and the **quality/evidence rubric** (verifies the report's claims with fresh proof) and returns BOTH verdicts. On the delivery's final range the review splits into **two dispatches**, and there the spec lens is truly **blind** (range + full plan, no delivery narrative). The coordinator dispatches independent reviewers — it never reviews its own delivery —, crosses the verdicts and, on conflict, decides with its own evidence or escalates. What is proportional is each rubric's **depth**, not the review's existence nor the reviewer's independence. Being able to dispatch MEMBERS does not prove a REVIEWER is dispatchable — check it separately at the gate; and if the capability is lost mid-run (quota, ceiling, restricted resumption), the review does not silently collapse into the coordinator: go through `pelizzai-review` → "When there is no independent reviewer".
 - **Evidence gate:** before accepting an **implementation** deliverable, apply `pelizzai-final-verification` — check the **git diff** and run the test commands yourself, or accept output + exit code from **whoever ran the check** (the quality/evidence lens, an independent reviewer — never the author); the member's report, including output the member pasted itself, is never evidence.
 - **Synthesis:** cross the deliverables with `Evidence Synthesis` and produce **one** delivery, making clear what is consensus, what was resolved divergence, and what remains open.
 - **Deadlock:** if the confrontation does **not** converge, the coordinator does **not** force an artificial consensus: it decides by the task's dominant criterion (invoking `Decision Making`) and, when the choice belongs to the user or the impact is high, **escalates via `pelizzai-interview`** — naming the gap, with the positions turned into 2–3 real options, the recommended one, and each one's trade-off.
@@ -448,8 +448,8 @@ Apply the **effort budget** from `pelizzai-reasoning`: verification depth is pro
 - Delegating a writing role to a read-only agentType (Explore/Plan do not edit).
 - "Continuing the conversation" with a subagent across rounds (each round is a new spawn, no memory).
 - The coordinator starting to implement instead of delegating, waiting, and synthesizing.
-- The coordinator dispatching itself as the blind spec lens (it has already seen the report) — the blind lens is always an independent reviewer.
-- Handing the implementer's report to the blind spec lens, or assembling a member without the complete package of domain skills for its area.
+- The coordinator dispatching itself as any reviewer of its own delivery — per task the reviewer is independent, and the final range's blind lens is always an independent reviewer.
+- Handing the delivery narrative to the final range's blind spec lens, or assembling a member without the complete package of domain skills for its area.
 - A member filling in, by default, convention, or "reasonable inference", a product decision that is not in the briefing/plan/spec, instead of naming the gap and returning `NEEDS_CONTEXT`.
 - The coordinator deciding the material gap (on its own or for the member) instead of taking it to the human via `pelizzai-interview` — consolidating the gaps is not deciding them.
 - Accepting findings without adversarial verification.
@@ -469,7 +469,7 @@ Apply the **effort budget** from `pelizzai-reasoning`: verification depth is pro
 - Enable Agent Teams in the user's `settings.json` without confirmation.
 - Treat a member's result as truth before cross-checking/refuting it.
 - Decide, in the user's place, a material gap the members named (consolidating is not deciding).
-- Act as the blind spec lens yourself (the coordinator), or hand the author's report to it.
+- Act as a reviewer of your own delivery (the coordinator), or hand the delivery narrative to the final range's blind spec lens.
 - Conclude silently with a failed or open front.
 - Shut the team down before validating the completion criteria.
 - Let the lead conclude "it's done" with tasks still open — check the roster.

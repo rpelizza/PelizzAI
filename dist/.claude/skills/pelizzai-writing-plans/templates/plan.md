@@ -88,8 +88,8 @@ _If self-contained, write `none`._
 - Command(s): `[complete canonical commands]`
 - Expected evidence: [exit code, delta, visual state, or exact output]
 - Rollback: [when applicable; otherwise, `not applicable`]
-- Review depth: [what each of the two lenses should dig into, by risk/surface] — the two lenses in
-  two dispatches are invariable; only their depth is a plan decision
+- Review depth: [what each of the two rubrics should dig into, by risk/surface] — the review's
+  form is invariable; only its depth is a plan decision
 
 - [ ] **Step 1: Establish the baseline/oracle** → verify: [exact result]
 
@@ -107,7 +107,7 @@ non-obvious call; otherwise, name the interface, the invariant, and one short ex
 Run: `[exact command]`
 Expected: `[observable result]`
 
-- [ ] **Step 4: Ready for review → consolidate** — do not commit mid-task; the commit is the coordinator's gate after the blind spec ✅ + quality/evidence ✅ lenses, in their two dispatches. → verify: `git status` contains only this task's scope
+- [ ] **Step 4: Ready for review → consolidate** — do not commit mid-task; the commit is the coordinator's gate after the reviewer's spec ✅ + quality/evidence ✅ verdicts. → verify: `git status` contains only this task's scope
 ````
 
 Adapt the order without losing the proof:
@@ -138,4 +138,5 @@ Adapt the order without losing the proof:
 Plan materialized, stress-tested, and approved → **forward to the sequential post-plan setup gate**
 of `pelizzai-execute`. The plan carries recommendations; the user decides isolation,
 branch, mode, and commits one question at a time before Task 1. The review is **not** among them —
-the two lenses in two dispatches are fixed, so there is no question to ask.
+its form (one reviewer with both verdicts per task; two dispatches on the final range) is fixed,
+so there is no question to ask.

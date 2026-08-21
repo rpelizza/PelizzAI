@@ -140,8 +140,9 @@ try {
     Check-Match '.claude/skills/pelizzai-debug/SKILL.md' 'Do not invent a hypothesis count|never.*fixed number' 'debugging does not fix a hypothesis count'
     Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Test/validation strategy|Primary strategy' 'task-cycle picks proof by artifact'
     Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'Cross-cutting harness skills' 'plan propagates overlays'
-    # The plan no longer records a review profile (issue #24): the two lenses in two dispatches are
-    # invariable, so the only thing left for the plan to decide is each lens's DEPTH.
+    # The plan no longer records a review profile (issue #24): the review's form is invariable
+    # (one reviewer with both verdicts per task; two dispatches on the final range — issue #49),
+    # so the only thing left for the plan to decide is each rubric's DEPTH.
     Check-Match '.claude/skills/pelizzai-writing-plans/SKILL.md' 'The review is not a plan decision' 'writing-plans: the review is not a plan decision'
     Check-NotMatch '.claude/skills/pelizzai-writing-plans/SKILL.md' 'pelizzai-interview[^\n]*(MANDATORY|mandatory)' 'bounded plan does not force an interview'
     Check-Match '.claude/skills/pelizzai-frontend/SKILL.md' 'mandatory overlay' 'frontend is a mandatory overlay for UI'
@@ -557,19 +558,19 @@ try {
     Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'is not approved[\s\S]{0,40}present it before implementing' 'task-cycle pins the operational deviation test in the briefing'
 
     # -- D6: two-lens review with asymmetric blindness + separate coordinator + specialists by area --
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'spec lens reviewer does NOT receive the implementer''s report[\s\S]{0,60}judges the code against the contract' 'review: the spec lens is blind (literal D6 anchor)'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'asymmetric blindness' 'review names the asymmetric blindness of the two lenses'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'never[\s\S]{0,4}the blind lens' 'review: the coordinator is never the blind lens'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'lens that receives the implementer''s report' 'review: the evidence lens receives and verifies the implementer report'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Two dispatches are the only place[\s\S]{0,30}blindness actually exists' 'review: the asymmetric blindness lives in the two dispatches'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'It does NOT receive the delivery narrative' 'review: the final blind lens judges the range without the narrative (D6 anchor, final range)'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'anchoring mitigation, stated as what it is' 'review: the briefing order is named an anchoring mitigation, never sold as blindness'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'never reviews its own\s+delivery' 'review: the coordinator never reviews its own delivery'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'receives the author''s report and \*\*verifies the claims\*\*' 'review: the evidence rubric receives and verifies the implementer report'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'truly BLIND spec lens lives at the final range, in its own dispatch' 'review: the true blindness lives at the final range, in its own dispatch'
     Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'spec lens reviewer does NOT receive the implementer''s report' 'spec-reviewer is the blind lens (does not receive the report)'
     Check-NotMatch '.claude/skills/pelizzai-review/references/spec-reviewer.md' '\{IMPLEMENTER_REPORT\}' 'spec-reviewer (blind lens) no longer injects the report placeholder'
     Check-Match '.claude/skills/pelizzai-review/references/code-reviewer.md' '\{IMPLEMENTER_REPORT\}' 'code-reviewer (evidence lens) receives the report placeholder'
     Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'SPECIALISTS by area' 'team: implementation roles are specialists by area'
     Check-Match '.claude/skills/pelizzai-team/SKILL.md' '\*\*COMPLETE\*\* package of domain skills' 'team: pastes the COMPLETE domain-skill package for the role area'
     Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'never[\s\S]{0,4}implements a front' 'team: the coordinator orchestrates, never implements a front'
-    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'blind spec lens' 'team: per-task review uses the blind spec lens'
-    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'coordinator dispatching itself as the blind spec lens' 'team: anti-pattern — coordinator never dispatches itself as the blind lens'
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'blind spec lens' 'team: the final-range blind spec lens is named'
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'coordinator dispatching itself as any reviewer of its own delivery' 'team: anti-pattern — coordinator never reviews its own delivery'
     Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'assemble a SPECIALIST' 'subagents: builds the subagent as an area specialist'
     Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' '\*\*COMPLETE\*\* domain-skill package' 'subagents: COMPLETE domain-skill package for the area'
     Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'blind spec lens' 'subagents: review uses the blind spec lens; the coordinator is never it'
@@ -597,13 +598,13 @@ try {
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Skipping the review because .it''s simple' 'review: BASE anti-pattern (skipping because "it is simple") preserved'
 
     # -- Two dispatches are invariable: no profile, no default, nothing to ratify --
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'two lenses always go out in two independent dispatches' 'review: the two lenses always use two dispatches'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'not a profile, a default, or a recommendation' 'review: two dispatches are not a default anyone can override'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'There used to be a .combined. profile[\s\S]{0,400}It is \*\*gone\*\*' 'review: combined is named as REMOVED (tombstone against reintroduction)'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'does not come back by request' 'review: a user asking for combined does not recreate it'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Cutting the second dispatch[\s\S]{0,120}not a proportional review' 'review: cutting a dispatch is not proportionality'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Collapsing the two lenses into a single dispatch' 'review: anti-pattern of collapsing the two lenses'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'This lens is \*\*blind\*\*, without exception' 'review: the spec lens is blind with no exception'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'both rubrics go to ONE independent reviewer, in one dispatch, returning BOTH\s+verdicts' 'review: per task, one dispatch returns both verdicts'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'nothing here for a plan to pick or\s+a user to ratify' 'review: the per-task form is not a default anyone can override'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Two tombstones, kept honest[\s\S]{0,220}stays dead' 'review: combined is named as REMOVED (tombstone against reintroduction)'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Neither comes back by request' 'review: neither dead form comes back by request'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'per-task \*\*two-dispatch split\*\* \(PR #25\) died to issue #49' 'review: the per-task two-dispatch split has a tombstone of its own'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Collapsing the FINAL range review into a single dispatch' 'review: anti-pattern of collapsing the final range review'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'the one place the blindness uniquely pays' 'review: the final blindness is not negotiable'
     Check-NotMatch '.claude/skills/pelizzai-review/SKILL.md' 'ratified .combined.|recommended default' 'review: no ratified-combined path and no profile default survive'
 
     # -- The gate lost item 4, and records WHY (so it is not re-added as a silent default) --
@@ -622,8 +623,8 @@ try {
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'no reuse exception and no low-risk waiver' 'review: the reuse exception was REMOVED, not narrowed'
     Check-NotMatch '.claude/skills/pelizzai-review/SKILL.md' 'Reuse exception \(narrow|may treat the task.s review as the final review' 'review: no reuse exception survives'
     Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'own dispatch\*\*, with no exception' 'spec-reviewer: always its own dispatch'
-    Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'final review, the same rule covers the delivery narrative' 'spec-reviewer: the final blind lens gets no delivery narrative'
-    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'in the SAME[\s\S]{0,60}two dispatches as a task' 'execution-plans: the final review mirrors the task review'
+    Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'same rule covers the delivery narrative' 'spec-reviewer: the final blind lens gets no delivery narrative'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'in TWO\s+dispatches [^\r\n]{0,10}the one place the review splits' 'execution-plans: the final review is the one place the review splits in two'
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'NO reuse of a task.s review as the final' 'execution-plans: no reuse of a task review as the final review'
     Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'Narrow exception' 'execution-plans: the reuse exception is gone'
 
@@ -631,22 +632,22 @@ try {
     Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' '\{DOMAIN_SKILLS\}' 'spec-reviewer (blind lens) receives the domain skills slot'
     Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'Blindness is \*\*not\*\* lack of project context' 'spec-reviewer: blindness means not seeing the narrative, not losing the contract'
     Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'Domain skills: does the change respect the rules' 'spec-reviewer: domain skills enter the blind lens checklist'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' '.\{DOMAIN_SKILLS\}. slot \*\*of both\s+templates\*\*' 'review: the briefing pastes the domain skills into BOTH templates'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' '.\{DOMAIN_SKILLS\}. slot of\s+\*\*every\*\* template' 'review: the briefing pastes the domain skills into EVERY template'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'pelizzai/domain-skills\.md' 'review names the domain skills catalog (not just "the catalog")'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' '.\{DOMAIN_SKILLS\}. slot\s+empty' 'review: anti-pattern of dispatching a briefing with an empty domain skills slot'
 
     # -- The invariable propagated: task-cycle, plan, team, subagents, and the contract files --
     # `pelizzai-audit` is NOT on this list, and its absence is the point: the bootstrap has no
     # contract for the blind lens to judge (issue #34). Its form is asserted in the #34 block below.
-    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '## 3\. Two-lens review, always in two dispatches' 'task-cycle: the section title states the invariable'
-    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'no profile to pick and no downgrade to ratify' 'task-cycle: no profile and no downgrade'
-    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Cutting a dispatch is not proportionality' 'task-cycle: cutting a dispatch is not proportionality'
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '## 3\. Task review: one independent reviewer, both verdicts' 'task-cycle: the section title states the invariable form'
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'no profile\s+to pick and no downgrade to ratify' 'task-cycle: no profile and no downgrade'
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'never the existence of the review or who reviews\s+\(always an independent reviewer' 'task-cycle: proportionality never removes the independent reviewer'
     Check-NotMatch '.claude/skills/pelizzai-execute/references/task-cycle.md' 'combined' 'task-cycle: no combined profile survives'
     Check-NotMatch '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'Review profile' 'plan template: no Review profile field'
     Check-Match '.claude/skills/pelizzai-writing-plans/templates/plan.md' 'Review depth' 'plan template: records review DEPTH instead of a profile'
     Check-NotMatch '.claude/skills/pelizzai-writing-plans/SKILL.md' 'universal split review' 'writing-plans does not treat universal split as a red flag'
-    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'two lenses always go out in \*\*two dispatches\*\*' 'team: two dispatches in any lane'
-    Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'no profile to consult and no\s+single-dispatch variant' 'subagents: no profile and no single-dispatch variant'
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'ONE independent reviewer per task applies' 'team: one reviewer per task returns both verdicts'
+    Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'ONE independent reviewer per task applying the two rubrics' 'subagents: one reviewer per task applies both rubrics'
     Check-NotMatch '.claude/skills/pelizzai-audit/templates/profile.md' 'review-policy-default' 'profile.md: no review policy left to pre-select'
     # The assertion that stood here demanded the DEFECT of issue #34 ("the bootstrap diff gets both
     # lenses") and passed green precisely because the defect was present. Replaced by its opposite;
@@ -687,7 +688,7 @@ try {
 
     # -- The gate says the mode does not govern the review (root of the confusion) --
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'the mode decides who IMPLEMENTS' 'gate step 2: the mode decides who implements, not who reviews'
-    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'TWO INDEPENDENT\s+DISPATCHES' 'gate step 2: names the two independent dispatches of the review'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'ONE INDEPENDENT\s+reviewer \(both verdicts\)' 'gate step 2: names the independent reviewer of the task review'
     # Literal punctuation, not wildcards: the contract is the exact token (`inline`, "blind"), and a
     # `.` here would let XinlineX satisfy the assertion. Backtick and quote are literal inside '...'.
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' '`inline` means "no delegation\s+to implement", never "no subagents at all"' 'gate step 2: defines inline against the wrong reading'
@@ -699,7 +700,7 @@ try {
     # -- The declared degradation path exists, with the three options and the floor --
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' '## When there is no independent reviewer' 'review has the no-independent-reviewer section'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Detect and declare at the EDGE, not mid-task' 'review: the capability is detected at the edge'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'authorize the independent reviewer[\s\S]{0,600}accept a DECLARED non-blind review[\s\S]{0,400}defer the integration' 'review: the degradation offers the three named options'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'authorize the independent reviewer[\s\S]{0,600}accept a DECLARED non-independent review[\s\S]{0,400}defer the integration' 'review: the degradation offers the three named options'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'does NOT dispatch itself as "the blind spec lens"' 'review: self-dispatch as the blind lens stays forbidden under degradation'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Silence is not an option' 'review: undeclared degradation is named as the defect'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'IN THE CONVERSATION''S LANGUAGE' 'review: the degradation message follows the conversation language'
@@ -719,7 +720,7 @@ try {
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'With nobody to ask, \(b\) does not exist' 'review: headless/cron/CI cannot grant itself the exception'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'never grants itself the exception on the grounds that no one was\s+around to deny it' 'review: absence of a human is not authorization'
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'does NOT advance to item 3 until the user has chosen' 'gate step 2: the gate blocks until the degradation is ratified'
-    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'a non-blind review is never self-granted' 'gate step 2: the non-blind review is never self-granted'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'a non-independent review is never self-granted' 'gate step 2: the non-independent review is never self-granted'
 
     # -- The marker travels: template, record, resumption, and the seal --
     # The marker's SHAPE is the contract, not the token: without date and reason it degrades into an
@@ -2534,9 +2535,9 @@ try {
 
     # -- (e) The argument the correction rests on is now under assertion (it never was) --
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' '### Standalone change review[\s\S]{0,1200}no contract for it to judge against' 'the standalone section carries the canonical argument (no contract to judge against)'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Where a contract exists, both lenses go out' 'the standalone section states the converse: with a contract, both lenses go out'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'The rule behind the invariable' 'review names the GENERAL criterion, so the next flow of this shape does not inherit the defect'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Fabricating a contract so the blind lens has\s+something to read' 'review forbids the tempting wrong fix: inventing a contract to feed the blind lens'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Where a contract exists, both rubrics apply' 'the standalone section states the converse: with a contract, both rubrics apply'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'The rule behind the form' 'review names the GENERAL criterion, so the next flow of this shape does not inherit the defect'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Fabricating a contract so the\s+spec rubric has something to read' 'review forbids the tempting wrong fix: inventing a contract to feed the spec rubric'
     Check-NotMatch '.claude/skills/pelizzai-audit/SKILL.md' 'two dispatches|both lenses|like any other\s+review' 'audit: the two-dispatch demand does not come back to the bootstrap (tombstone)'
 
     # -- (f) Degradation reachable from EVERY flow that dispatches (secondary defect #1) --
@@ -2615,21 +2616,21 @@ try {
 # the final filter. These assertions pin the proportional contract so a future
 # review round does not silently reintroduce either.
 
-# -- (a) One budget per task, shared by both lenses; per-lens counters are gone --
-Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '3 fix.{0,3}re-review cycles PER TASK[\s\S]{0,120}shared by both\s+lenses' 'task-cycle §5: the fix budget is per task and shared by both lenses'
+# -- (a) One budget per task, shared by both verdicts; per-lens counters are gone --
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '3 fix.{0,3}re-review cycles PER TASK[\s\S]{0,120}shared by both\s+verdicts' 'task-cycle §5: the fix budget is per task and shared by both verdicts'
 Check-NotMatch '.claude/skills/pelizzai-execute/references/task-cycle.md' 'PER LENS, PER TASK|separate counters' 'task-cycle §5: the per-lens counters do not come back'
-Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Passing one lens does not refund rounds already spent' 'task-cycle §5: a lens pass does not refund the shared budget'
-Check-Match '.claude/skills/pelizzai-execute/SKILL.md' '3 cycles per task, one budget shared\s+by both lenses' 'execute mirrors the shared per-task budget'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Passing one verdict does not refund rounds already spent' 'task-cycle §5: a verdict pass does not refund the shared budget'
+Check-Match '.claude/skills/pelizzai-execute/SKILL.md' '3 cycles per task, one budget shared\s+by both verdicts' 'execute mirrors the shared per-task budget'
 Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'per lens per task' 'execute: the per-lens phrasing is gone'
 Check-Match '.claude/skills/pelizzai-review/SKILL.md' '3 cycles per task, one budget shared by both' 'review points at the shared per-task budget'
 
 # -- (b) A fix round re-reviews the fix window, not the whole task --
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'one fix dispatch plus one SCOPED re-review' 'task-cycle §5: the re-review is scoped to the fix'
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'ADDRESSED / NOT_ADDRESSED' 'task-cycle §5: the scoped re-review verdicts the previous findings'
-Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'flags only NEW breakage inside the fix''s diff window' 'task-cycle §5: the scoped re-review also hunts breakage the fix introduced'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'flags only NEW\s+breakage inside the fix''s diff window' 'task-cycle §5: the scoped re-review also hunts breakage the fix introduced'
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'PREFER resuming it with the findings verbatim' 'task-cycle §5: resume the original implementer before a cold re-dispatch'
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'PUBLIC, wire, or persisted contract[\s\S]{0,120}directly affected consumers' 'task-cycle §5: a contract-touching fix widens the window to its direct consumers'
-Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'widened to the directly affected consumers' 'execute mirrors the contract-widened re-review window'
+Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'widened to the directly\s+affected consumers' 'execute mirrors the contract-widened re-review window'
 
 # -- (c) Effort: the session is the floor; the maximum is the final filter's tool --
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'session''s effort is the floor, not the ceiling everywhere' 'task-cycle §8: session effort is the floor, not a universal ceiling'
@@ -2649,12 +2650,48 @@ Check-Match 'README.md' 'effort\s+escalation only \*\*after\*\* a rejection' 'RE
 
 # -- (d) Phase timing exists, travels in the existing record, and creates nothing --
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '## 9\. Phase timing' 'task-cycle has the phase-timing section'
-Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '\[timing: impl 14m[^\r\n]{0,40}spec 6m[^\r\n]{0,40}quality 9m[^\r\n]{0,40}fix-rounds 1 \(7m\)\]' 'phase timing example covers implementation, both lenses, and the fix rounds on ONE line'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '\[timing: impl 14m[^\r\n]{0,40}review 9m[^\r\n]{0,40}fix-rounds 1 \(7m\)\]' 'phase timing example covers implementation, the single review dispatch, and the fix rounds on ONE line'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'the review is one\s+dispatch, so it is one duration' 'phase timing: the task review logs ONE duration, matching its one dispatch'
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'final report aggregates the totals per phase' 'phase timing: the final report aggregates the per-phase totals'
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'suffix of the existing line, not a second one' 'phase timing preserves the one-line-per-task Progress hygiene'
 Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'No new file and no commit of its\s+own' 'phase timing creates no artifact of its own'
 } catch {
     Check $false 'issues #49/#50: proportional review contract' $_.Exception.Message
+}
+
+try {
+# =====================================================================
+# Issue #49 PR 2 (2026-08-21) — task review form: one independent reviewer,
+# both verdicts; the blind spec lens moves to the final range
+# =====================================================================
+# The per-task two-dispatch split serialized every task behind two reviewer
+# round-trips; the blindness it protected per task was briefing order. These
+# assertions pin the new form and the places the old one must not regrow.
+
+# -- (a) The task-reviewer template exists and carries the contract --
+Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'one\s+dispatch, BOTH verdicts' 'task-reviewer: one dispatch, both verdicts'
+Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'VERDICT 1 — Spec compliance \(form it BEFORE reading the report below\)' 'task-reviewer: the spec verdict is formed before the report section'
+Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '\{IMPLEMENTER_REPORT\}' 'task-reviewer: the report is a placeholder of this template'
+Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'the per-task reviewer is not blind; the blind lens lives at the final range' 'task-reviewer: honest about not being blind'
+Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'A report missing either verdict is incomplete' 'task-reviewer: a single-verdict report is incomplete'
+Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'never the session history' 'task-reviewer: fabricated context, no session history'
+Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '\{DOMAIN_SKILLS\}' 'task-reviewer: carries the domain-skills slot'
+Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '## What was asked \(the contract\)\s+\{FULL_TASK_TEXT\}' 'task-reviewer: the task-contract slot sits in its operational section'
+Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '## VERDICT 1[^\r\n]*\r?\n[\s\S]{0,600}git diff' 'task-reviewer: the spec-verdict block itself points at the working-tree diff'
+Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '\{FULL_TASK_TEXT\}[\s\S]+## VERDICT 1[\s\S]+\{IMPLEMENTER_REPORT\}[\s\S]+## VERDICT 2' 'task-reviewer: contract before verdict 1, report only after it, quality verdict last'
+
+# -- (b) The doctrine points per-task dispatches at the new template --
+Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'references/task-reviewer\.md' 'review: the per-task dispatch uses task-reviewer.md'
+Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'references/task-reviewer\.md' 'task-cycle: the briefing names task-reviewer.md'
+Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'final range' 'spec-reviewer: rescoped to the final range'
+Check-Match '.claude/skills/pelizzai-review/references/code-reviewer.md' 'task-reviewer\.md' 'code-reviewer: names the per-task composition'
+
+# -- (c) The final range KEEPS its two dispatches and its blindness --
+Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'final review uses the SAME two lenses' 'review: the final review still runs both lenses'
+Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Blind spec lens over the RANGE' 'review: the final blind lens survives the reform'
+Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Splitting the task review back into two sequential dispatches' 'review: anti-pattern against regrowing the per-task split'
+} catch {
+    Check $false 'issue #49 PR 2: task review form contract' $_.Exception.Message
 }
 
 Write-Host "`nResult: $passes PASS; $($failures.Count) FAIL."

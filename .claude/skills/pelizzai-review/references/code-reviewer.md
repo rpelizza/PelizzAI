@@ -1,6 +1,6 @@
 # Code reviewer prompt template
 
-Use this template when dispatching the quality/evidence reviewer — always its own dispatch, per task and on the delivery's final range. The reviewer receives **fabricated context** — never the session history.
+Use this template when dispatching the quality/evidence reviewer in its **own dispatch**: the second dispatch of the delivery's final range, and the single lens of a standalone change review (the per-task review uses `task-reviewer.md`, which composes this rubric with the spec rubric in one dispatch). The reviewer receives **fabricated context** — never the session history.
 
 ````text
 You are a Senior Code Reviewer with command of software architecture, design
@@ -27,10 +27,10 @@ domain skills pasted here PREVAIL.
 
 {IMPLEMENTER_REPORT}   # paste the author's report; this lens (quality/evidence) RECEIVES and VERIFIES it
 
-This is the lens that receives the report (the spec lens is blind and never sees it). Do NOT trust
+This is the rubric that receives the report (the final range's blind spec lens never sees it). Do NOT trust
 it: every claim — "the tests pass", "I covered edge case X", "no deviation from the plan" — is a
 hypothesis to REFUTE with fresh evidence. Run the check yourself and compare with what the author
-asserted. Check especially the `Plan deviations:` field: a real deviation not declared there is a finding.
+asserted. Check especially the `Deviations from plan:` field: a real deviation not declared there is a finding.
 
 ## Scope to review (the caller picks one)
 
