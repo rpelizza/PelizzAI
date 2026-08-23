@@ -458,7 +458,7 @@ Better:
 ```
 
 When the material question is factual, validate it through context, code, or documentation. When it
-is a human decision, use [pelizzai-interview](../../pelizzai-interview/SKILL.md), one question
+is a human decision, use [pelizzai-interview-me](../../pelizzai-interview-me/SKILL.md), one question
 at a time, with a recommendation; documentation does not decide for the user.
 
 ## Assumptions in debugging

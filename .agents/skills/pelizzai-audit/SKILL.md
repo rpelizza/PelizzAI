@@ -92,7 +92,7 @@ user to type `bootstrap`:
   The plan does not start until the user chooses to create, trim, defer, or record zero skills.
 - **plan→execution (existing project):** before fixing the build lane, if a mutating task's stack is not covered by the catalog (absent, OR present but not covering that stack), propose all the domain skills that would close that gap and prevent agent error.
 
-**Who invokes this gate (it is not just the audit's own self-service):** `pelizzai-idea-generation`
+**Who invokes this gate (it is not just the audit's own self-service):** `pelizzai-brainstorming`
 triggers it at the design→plan edge, as a numbered step of closing the design edge;
 `pelizzai-writing-plans` triggers it as a safety net before Task 1, when the plan's stack has no
 coverage in the catalog (or the catalog is absent). At those two points, the `pelizzai-router`
@@ -130,18 +130,15 @@ flowchart TD
     Scan --> Gate[Proactive domain skills gate:\nrecommends; the user ratifies]
     Mode -- Yes, authorized --> Iso[pelizzai-starting-branch:\nisolate before the first write]
     Gate -- ratified --> Iso
-    Iso --> Kick[Compact confirm: setup\n+ reviewer capability\n→ kickoff: ratified]
-    Kick --> Inv[Inventory: structure, stacks,\nMCPs, git/host, skills, conventions]
+    Iso --> Inv[Inventory: structure, stacks,\nMCPs, git/host, skills, conventions]
     Inv --> New{New or existing project?}
-    New -- New --> Bra[pelizzai-interview + pelizzai-idea-generation:\ndiscovery, spec, stress, approval]
+    New -- New --> Bra[pelizzai-interview-me + pelizzai-brainstorming:\ndiscovery, spec, stress, approval]
     Bra --> Wri
     New -- Existing / Workspace --> Rep[Full repo-scan:\npatterns, stacks, frameworks, conventions]
-    Rep --> Wri[pelizzai-create-skill:\ncreates the maximum of useful domain skills\nwith context7 + Anthropic rules]
+    Rep --> Wri[pelizzai-writing-skills:\ncreates the maximum of useful domain skills\nwith context7 + Anthropic rules]
     Wri --> Doc[Harness artifacts: domain-skills.md\ncatalog + ledger + profile.md]
     Doc --> Rec[Recommendations: git init, remote,\nstack MCPs, context7, opt-in hooks]
-    Rec --> Rev[Standalone change review:\nquality lens + Verification\nno blind lens — no contract]
-    Rev --> Seal[Commit exact paths →\npelizzai-final-verification →\nvalidated-head → pelizzai-finish]
-    Seal --> End([Harness ready to act])
+    Rec --> End([Harness ready to act])
 ```
 
 ## Bootstrap-write
@@ -153,38 +150,6 @@ If Git exists, invoke `pelizzai-starting-branch` and create a task branch such a
 declines, explain that there will be no history/rollback and proceed only with authorization.
 
 The bootstrap is its own transaction. Its artifacts must be committed/integrated or stay on the same task branch before a feature worktree depends on them.
-
-**Ratify the bootstrap before the first artifact.** Base and branch name were just ratified by
-`pelizzai-starting-branch`. What is still unratified is the setup, and it has no other gate: the
-bootstrap has no plan, so it never reaches the post-plan setup gate of `pelizzai-execute`, and it is
-neither `tweak` nor `bug`, so no light-track confirm covers it. Present ONE compact line — in the
-conversation's language — and wait:
-
-```text
-Bootstrap on <branch> — isolation: branch · execution-mode: inline · commits: granular.
-Closing review (stated, not offered): quality lens only, no blind lens — the bootstrap has no
-contract for it to judge. Reviewer available here: <yes, independent | NO — none dispatchable>.
-Ok, or name what to change?
-```
-
-The review's FORM is not one of the items to adjust — it follows from the contract, and there is no
-second answer to offer (`pelizzai-execute` → "The review is deliberately NOT a gate item"). What can
-genuinely be answered is the **capability**, and only when it is missing: that has three answers,
-and they are the user's.
-
-**Check the reviewer specifically.** Being able to parallelize the repo-scan does not prove a
-reviewer is dispatchable. If this environment cannot dispatch one, say so HERE and open the
-degradation choice (`pelizzai-review` → "When there is no independent reviewer") — not at step 7,
-with every artifact already written. The bootstrap does not advance to the first write until the
-user has chosen (a), (b), or (c): the recommendation is not an answer, and silence is not an answer.
-
-**Record after the "ok"** (or after the named overrides), in the consumer `pelizzai/data/state.md`
-that `pelizzai-starting-branch` just wrote: `track: bootstrap`, `kickoff: ratified <YYYY-MM-DD>`,
-`isolation`, `execution-mode`, and `commit-strategy` — plus a `review-integrity: degraded` entry
-(date and reason) if the user took option (b). **In the bootstrap, this skill is the sole owner of the
-kickoff marker.** Without it the writegate blocks (Rule B) the very domain skills the user just
-ratified, and `pelizzai-final-verification` refuses to seal at step 7 — the bootstrap would write
-`state.md` and then be locked out by its own harness.
 
 ### 2. Detect skill roots
 
@@ -198,26 +163,14 @@ skill-roots:
 canonical-skill-root: <active root>
 ```
 
-`pelizzai-create-skill` writes domain skills to the active root; if both are installed, it keeps byte-for-byte copies and verifies parity.
-
-### 2.5. Anchor the entrypoints
-
-Run `node scripts/sync-harness.mjs` once. It anchors the harness contract — the
-`<!-- pelizzai:contract -->` block derived from the shipped asset
-(`.claude/skills/pelizzai-audit/assets/contract.md`) — into `CLAUDE.md`, `AGENTS.md`, and
-`GEMINI.md`: **absent → created; present → the block is appended, the project's own content
-untouched; block tampered or outdated → resynced in place**. `dist/` ships no entry files on
-purpose — this step (or any later sync) is what creates them, so a copy-install works on a
-virgin project AND on a project that already has its own entry files, without clobbering either.
-The same command is the repair path whenever a session notices the block missing (the
-session-start hook nudges exactly that).
+`pelizzai-writing-skills` writes domain skills to the active root; if both are installed, it keeps byte-for-byte copies and verifies parity.
 
 ### 3. Propose the maximum of useful domain skills
 
 In an existing project or workspace, first do the **full repo-scan** — patterns, stacks,
 frameworks, languages, conventions, and extension points. From the observed patterns comes the
 proposal: the **maximum of useful domain skills** for the agent to work correctly in this project.
-Broad coverage is the target; the filter is "useful", not "few". `pelizzai-create-skill` writes
+Broad coverage is the target; the filter is "useful", not "few". `pelizzai-writing-skills` writes
 each candidate grounded in the `context7` MCP (real documentation of the libs/frameworks at the
 version pinned in the manifest) and in Anthropic's skill-creation rules.
 
@@ -247,42 +200,21 @@ The persistent bootstrap leaves:
 
 - `pelizzai/domain-skills.md` — the catalog, including `_none for now_` when applicable;
 - `pelizzai/data/review-domain-skills.md` — the ledger seeded with the current date/HEAD;
-- `pelizzai/data/verification-standard.md` and `pelizzai/data/learnings.md` — the
-  self-optimization pair, seeded from `pelizzai-evolve/templates/` (their format authority):
-  what "correct" means here, filled from the REAL commands/criteria confirmed with the user, and
-  the execution memory, born empty — never pre-filled with guesses;
 - `pelizzai/profile.md` — real commands, package manager, **Stack baseline** (the drift anchor for the version/adoption axes), and skill roots; also record the **Ratified execution defaults** section with every field at `<unset>` — the bootstrap does not guess policy; the user ratifies it at the post-plan gate;
-- `pelizzai/.gitignore` — scoped protection of the ephemerals and of the per-dev cursor;
-- `pelizzai/.gitattributes` — union merge for the append-shaped shared memory.
+- `pelizzai/.gitignore` — scoped protection of the ephemerals.
 
 Mandatory content of `pelizzai/.gitignore`:
 
 ```gitignore
-data/state.md
 data/.cadence-state.json
 data/handoffs/
 data/mockups/
 data/reports/
 ```
 
-Mandatory content of `pelizzai/.gitattributes`:
-
-```gitattributes
-data/learnings.md merge=union
-data/history/learnings-*.md merge=union
-```
-
-`data/review-domain-skills.md`, `data/learnings.md`, and `data/history/` are **versioned** — a
-durable record; they never go into the ignore (a broad `data/*` with exceptions would silence
-`history/` and break the durability of the sealed-task record). `data/state.md` is the one
-deliberate exception: the cursor is **local per dev** (issue #43) — with it versioned, every
-developer's closure commit edits the same singleton file and concurrent MRs conflict by
-construction; the durable record of each task is the `data/history/<YYYY-MM-DD>-<slug>-<sha7>.md` file
-(unique by construction, across branches too — `<sha7>` comes from the task's `validated-head`,
-per the seal migration in `pelizzai-finish` — conflict-free) that the seal migration creates. `merge=union` on
-`learnings.md` keeps concurrent appends from conflicting; its residual risk is an occasional
-duplicated line and arbitrary ordering of concurrently appended lines — visible and benign for
-append-shaped content — never a silent conflict. Verify with `git check-ignore` using
+`data/state.md`, `data/review-domain-skills.md`, and `data/history/` are **versioned** — a durable
+record; they never go into the ignore (a broad `data/*` with exceptions would silence `history/`
+and break the durability of the sealed-task record). Verify with `git check-ignore` using
 temporary proof files; remove the proofs afterward.
 
 Create on demand, not at bootstrap: `context.md`, `adr/`, `out-of-scope/`, `specs/`, `plans/`, and the ephemeral directories.
@@ -291,8 +223,8 @@ Create on demand, not at bootstrap: `context.md`, `adr/`, `out-of-scope/`, `spec
 
 ### 5. New project
 
-With no code/patterns, use the greenfield cycle: `pelizzai-interview` one question at a time →
-full `pelizzai-idea-generation` → stress → approved spec. Then apply the **Proactive domain skills
+With no code/patterns, use the greenfield cycle: `pelizzai-interview-me` one question at a time →
+full `pelizzai-brainstorming` → stress → approved spec. Then apply the **Proactive domain skills
 gate** before the plan, create only the ratified ones, and record them in the catalog/ledger. If
 the original request includes building the product, continue to `pelizzai-writing-plans`; if it
 asked only for bootstrap/design, stop at the approved scope.
@@ -305,7 +237,7 @@ the **opt-in Claude Code hooks** — **one by one, with confirmation; never impo
 the effect of each. Do not reopen the offer once the check passes:
 
 - **Cadence hook** (`pelizzai-cadence.mjs`/`.ps1`, `UserPromptSubmit`): non-blocking reminder to
-  review the domain skills (see `pelizzai-create-skill` →
+  review the domain skills (see `pelizzai-writing-skills` →
   `references/domain-skill-maintenance.md`); a no-op without a ledger.
 - **Git guard hook** (`pelizzai-guardrails.mjs`/`.ps1`, `PreToolUse` matcher `Bash`): blocks,
   before they run, `push --force` (except `--force-with-lease`), `reset --hard`, `clean -f`,
@@ -385,8 +317,6 @@ that changes the environment waits for confirmation:
 Before declaring the bootstrap done:
 
 ```text
-[ ] entrypoints anchored: CLAUDE.md, AGENTS.md, and GEMINI.md carry the pelizzai:contract block
-    (node scripts/sync-harness.mjs --check passes);
 [ ] the catalog exists and matches the real skills;
 [ ] ledger/profile have no placeholders (`<unset>` fields in *Ratified execution defaults* are valid state — policy not yet ratified —, not a placeholder to fill);
 [ ] commands came from real manifests/scripts;
@@ -395,36 +325,15 @@ Before declaring the bootstrap done:
 [ ] the diff contains only approved artifacts;
 ```
 
-Review the whole diff with `pelizzai-review` → **Standalone change review**: the bootstrap produces
-its own artifacts with no plan, no task spec, and no approved requirement, so there is **no contract
-for the blind spec lens to judge against** — the checklist above IS the conformance check, and it
-belongs to the coordinator, not to a reviewer. The quality/evidence lens still goes out, to an
-independent reviewer, in its own dispatch, with its `Verification` block. If this environment has
-none, the choice was already made at step 1; do not discover it here.
-
-**Loop bound:** 3 fix→re-review cycles over the whole diff. The bootstrap is ONE transaction, not a
-sequence of tasks, and there is no second counter because there is no second lens — a loop over
-artifacts the audit itself regenerates would otherwise have no limit at all. On blowing it, stop
-dispatching, record `phase: blocked`, leave the working tree INTACT, and escalate with an actionable
-message, in the shape of `pelizzai-execute` → `references/task-cycle.md` §5.
-
-Then commit the approved artifacts with exact paths, and only then run
-`pelizzai-final-verification` against that HEAD. After recording `validated-head`,
-close the transaction via `pelizzai-finish`. Do not leave the bootstrap uncommitted or expect
-pelizzai-finish to consolidate it.
+Review the whole diff in the `combined` profile (or `split` if hooks/settings/security raise the
+risk), commit the approved artifacts with exact paths, and only then run
+`pelizzai-verification-before-completion` against that HEAD. After recording `validated-head`,
+close the transaction via `pelizzai-finish-task`. Do not leave the bootstrap uncommitted or expect
+finish-task to consolidate it.
 
 ## Partial state
 
 - catalog exists, ledger missing → propose/repair only the ledger in write mode;
-- `git ls-files -- pelizzai/data/state.md` lists the cursor (consumer bootstrapped before
-  issue #43) → propose the one-time migration in write mode: `git rm --cached
-  pelizzai/data/state.md`, update `pelizzai/.gitignore`, add `pelizzai/.gitattributes` per the
-  mandatory contents above; read-only just reports it;
-- `verification-standard.md`/`learnings.md` missing (consumer bootstrapped before the evolve
-  cycle) → propose creating only them from `pelizzai-evolve/templates/` in write mode;
-- an entry file (`CLAUDE.md`/`AGENTS.md`/`GEMINI.md`) missing or without the
-  `pelizzai:contract` block → run `node scripts/sync-harness.mjs` (creates/repairs only the
-  block; project content outside the markers is preserved);
 - a skill exists outside the catalog → catalog it after confirming origin/content;
 - outdated profile → update only the affected fields;
 - read-only → just report the inconsistency.
@@ -434,17 +343,14 @@ pelizzai-finish to consolidate it.
 ```text
 pelizzai/
 ├── .gitignore
-├── .gitattributes
 ├── domain-skills.md
 ├── profile.md
 ├── context.md | context/           on demand
 ├── adr/ | out-of-scope/            on demand
 ├── specs/ | plans/                 on demand
 └── data/
-    ├── state.md                    ignored (local per-dev cursor — issue #43)
+    ├── state.md                    versioned
     ├── review-domain-skills.md     versioned
-    ├── verification-standard.md    versioned (what "correct" means — pelizzai-evolve)
-    ├── learnings.md                versioned (execution memory — pelizzai-evolve)
     ├── history/                    versioned (each task's intact block, migrated at the seal)
     ├── .cadence-state.json         ignored
     ├── handoffs/                   ignored
@@ -468,12 +374,8 @@ In a workspace with multiple repositories, do not pretend one scalar state cover
 - Writing a skill only to .claude when the active platform uses .agents (or vice versa).
 - Declaring a directory gitignored without proving it in the consumer project.
 - Leaving the bootstrap loose on main or invisible to the next worktree.
-- Writing the first artifact without the compact confirm of step 1 — leaving `kickoff: ratified`
-  unwritten locks the bootstrap out of its own domain-skill writes (writegate, Rule B).
-- Demanding the blind spec lens over the bootstrap diff, or writing a spec after the fact so it has
-  something to read: the bootstrap discovers the project, it does not implement a requirement.
 ```
 
 ## Integration
 
-Uses `pelizzai-starting-branch` and `pelizzai-finish` only in `bootstrap-write`; `pelizzai-review` closes the bootstrap diff through the **Standalone change review** (quality lens only — the bootstrap has no contract for the blind lens, and that skill owns the rule) and `pelizzai-final-verification` seals `validated-head` before the handoff; `pelizzai-create-skill` writes the ratified domain skills — the target is the maximum of useful skills, grounded in `context7`; `pelizzai-team`/`pelizzai-subagents` parallelize the repo-scan when the fronts are independent; `pelizzai-idea-generation` enters only on the new/uncertain-project branch.
+Uses `pelizzai-starting-branch` and `pelizzai-finish-task` only in `bootstrap-write`; `pelizzai-writing-skills` writes the ratified domain skills — the target is the maximum of useful skills, grounded in `context7`; `pelizzai-team`/`pelizzai-subagents` parallelize the repo-scan when the fronts are independent; `pelizzai-brainstorming` enters only on the new/uncertain-project branch.

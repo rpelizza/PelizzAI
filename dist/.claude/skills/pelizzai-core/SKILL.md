@@ -39,13 +39,13 @@ This coexists with the platform's native hierarchy: a skill does not redefine sy
 
 ## Skill announcements (global rule)
 
-When triggering a **head skill or a material overlay**, **announce** in one line, **in the conversation's language**, what you are going to do, **always using the exact brand spelling: "PelizzAI"** (capital P, A, and I — never "Pelizzai", "pelizzAI", or "PELIZZAI" in prose). An internal gate of a flow already announced is not an independent trigger and adds no announcement. Pattern:
+When triggering a **head skill or a material overlay**, **announce** in one line, **in the conversation's language**, what you are going to do, **always using the exact brand spelling: "PelizzAI"** (capital P, A, and I — never "Pelizzai", "pelizzAI", or "PELIZZAI" in prose). An internal gate of a flow already announced is not an independent trigger and adds no announcement (see below). Pattern:
 
 > State that you are using the PelizzAI \<Name\> skill to \<goal\>. The brand and the skill's name stay verbatim; the rest of the sentence follows the conversation's language — never copy this English wording literally.
 
 Skill identifiers (`pelizzai-core`, `pelizzai-router`, …), file paths, and the target project's `pelizzai/` directory stay lowercase — the rule applies to the brand in running text.
 
-Announcing is mandatory; turning the announcement into a preamble bigger than the task is not.
+The rule is exhaustive on purpose: head skill and material overlays are announced; internal gates (Verification, an auxiliary technique, re-review) run without a new announcement when they are already part of the communicated flow — they are steps of an announced skill, not triggers of their own. Announcing is mandatory; turning the announcement into a preamble bigger than the task is not.
 
 ## Activation rule
 
@@ -95,8 +95,7 @@ Ambiguity: is something missing that would materially change the outcome?
 Use context, code, and documentation before asking, to eliminate factual doubts. Do not use that
 evidence to decide product intent. Ask when the answer changes requirements, scope, UX,
 architecture, data, security, cost, authority, acceptance, or solution — the instrument for that
-question is `pelizzai-interview`. Ask **one question at a time**, in the conversation's language,
-in dependency order; offer 2–3
+question is `pelizzai-interview-me`. Ask **one question at a time**, in dependency order; offer 2–3
 real options when that helps and mark the best recommendation with a short reason. Do not adopt a
 product assumption to "unblock" the work. A reversible choice may only be applied mechanically when
 it is already contained in a ratified spec/plan or was explicitly delegated by the user. The
@@ -122,7 +121,7 @@ The executor decides alone only:
 - mechanical, local, reversible steps already covered by a ratified decision.
 ```
 
-A gap that falls in the user's block is **closed with `pelizzai-interview`** — in design, in the
+A gap that falls in the user's block is **closed with `pelizzai-interview-me`** — in design, in the
 plan, and also mid-execution, when the work reveals a decision that the spec or plan does not cover.
 Filling it with a default, convention, Context7, or "reasonable inference" is a violation, even when
 the choice looks obvious and reversible.
@@ -153,7 +152,7 @@ core
 → Verification seals the result
 → Finish integrates it without altering it
 
-at any point, material gap → pelizzai-interview (one question at a time) → resume the phase
+at any point, material gap → pelizzai-interview-me (one question at a time) → resume the phase
 ```
 
 ### Head skills
@@ -161,13 +160,13 @@ at any point, material gap → pelizzai-interview (one question at a time) → r
 | Intent | Head skill |
 | --- | --- |
 | Authorized bootstrap/remap | `pelizzai-audit` |
-| Greenfield product/project, or feature/refactor/infra with a design decision | `pelizzai-idea-generation` |
-| Plan/design already clear | `pelizzai-writing-plans` or `pelizzai-execute` |
-| Bug/unexpected behavior | `pelizzai-debug` |
+| Greenfield product/project, or feature/refactor/infra with a design decision | `pelizzai-brainstorming` |
+| Plan/design already clear | `pelizzai-writing-plans` or `pelizzai-execution-plans` |
+| Bug/unexpected behavior | `pelizzai-debugging` |
 | Local tweak without a new rule/contract | `pelizzai-quick-fix` |
 | Review of a diff/branch/PR | `pelizzai-review` |
-| Codebase-wide architectural review | `pelizzai-architecture-refinement` |
-| Git conflict | `pelizzai-merge-conflict-resolution` |
+| Codebase-wide architectural review | `pelizzai-improving-architecture` |
+| Git conflict | `pelizzai-resolving-merge-conflicts` |
 | State × Git divergence | `pelizzai-recovery` |
 
 ### Overlays
@@ -177,13 +176,32 @@ Overlays do not replace the head skill:
 - UI/UX/CSS/component/screen → `pelizzai-frontend`;
 - auth/input/SQL/upload/secret/dependency/sensitive surface → `pelizzai-oswap` at review;
 - project patterns → domain skills from the catalog (when in doubt whether a domain skill applies to the task, include it: the cost of including is lower than the cost of ignoring a project rule);
-- new human documentation → `pelizzai-documentation` when it is part of the scope.
+- new human documentation → `pelizzai-documenting-features` when it is part of the scope.
 
 `pelizzai-preferences` is not an optional overlay: it is the behavior floor described above and follows every non-trivial task. `pelizzai-reasoning` selects proportional heuristics; it does not add ceremony by itself.
 
 ## Harness flow map
 
 The entry point is always this skill (`pelizzai-core`); after understanding the goal, `pelizzai-router` orchestrates. On the first interaction with a consumer project (or when the user types **"bootstrap"**), `pelizzai-audit` maps the project and creates the domain skills before any task. A **purely conceptual** question does not trigger the bootstrap — `pelizzai-audit` only enters when the answer requires touching or understanding the project. In the source repo (sentinel `scripts/pelizzai-source-repo.txt`) there is no consumer catalog: the bootstrap branch does not apply.
+
+```mermaid
+flowchart TD
+    U(["User message"]) --> P["pelizzai-core: require skill before responding"]
+    P --> G["Understand the goal and classify the effect"]
+    G --> CONC{"Purely conceptual<br/>question?"}
+    CONC -- "Yes" --> ANSC["Answer directly<br/>without bootstrap"]
+    CONC -- "No" --> RT["pelizzai-router: effect, intent, risk,<br/>uncertainty, and surfaces"]
+    RT --> BOOT{"Harness initialized?<br/>pelizzai/domain-skills.md exists?"}
+    BOOT -- "No / 1st interaction / 'bootstrap'" --> AUD["pelizzai-audit: maps project/workspace,<br/>MCPs, git/host, creates domain skills + docs"]
+    AUD --> CLS
+    BOOT -- "Yes" --> CLS{"Classify the intent and the lane"}
+    CLS --> KICK["Kickoff gate: route as a recommendation to ratify"]
+    KICK --> HEAD["One head skill + mandatory overlays"]
+    HEAD --> GAP{"Material gap<br/>in any phase?"}
+    GAP -- "Yes" --> IV["pelizzai-interview-me:<br/>one question at a time, with a recommendation"]
+    IV --> HEAD
+    GAP -- "No" --> GO["Mechanical step within<br/>what was already ratified"]
+```
 
 The detail of each track (lanes, gates, and chaining) lives in `pelizzai-router`.
 
@@ -211,7 +229,7 @@ Use the platform's native mechanism. Without native loading, read `.agents/skill
 - A mutating bootstrap to answer a read-only analysis.
 - Asking before consulting evidence already available.
 - Plugging a user-owned gap with Context7, convention, a default, or "reasonable inference"
-  instead of stopping at pelizzai-interview.
+  instead of stopping at pelizzai-interview-me.
 - Treating the specified stack as sufficient requirements/acceptance for a greenfield project.
 - Confusing a heuristic (OODA/TDD/team) with a universal invariant.
 - Starting to write before the router and the first-write gate.

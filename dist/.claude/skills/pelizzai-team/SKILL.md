@@ -21,7 +21,7 @@ The coordination and delegation protocol is **the same in both modes**; only the
 <TEAM-MEMBER-STOP>
 If you were assigned as a **member** of a team (a teammate or a subagent executing a subtask), **do not invoke this skill** to create a sub-team. There are no nested teams. Execute your subtask, invoke `pelizzai-reasoning` to reason about it, **apply the domain skills pasted into your briefing** (they prevail over generic patterns) and the global layer `pelizzai-preferences`, and return the deliverable in the format agreed in your briefing. **Do not commit** — consolidation (commit) belongs to the coordinator, after the reviews; leave the work in the working tree.
 
-A member **produces artifacts** (spec, report, diff) as a **deliverable for the coordinator** — it does not run, on its own, flows that require user approval (`pelizzai-idea-generation`, `pelizzai-writing-plans`). Those flows belong to the coordinator / the main session.
+A member **produces artifacts** (spec, report, diff) as a **deliverable for the coordinator** — it does not run, on its own, flows that require user approval (`pelizzai-brainstorming`, `pelizzai-writing-plans`). Those flows belong to the coordinator / the main session.
 
 Under a closed briefing (TEAM-MEMBER-STOP/SUBAGENT-STOP), do not produce route analyses or open gates: apply the briefing, **flag in your return** (`DONE_WITH_CONCERNS`/`NEEDS_CONTEXT`) if no domain skill covered your task's stack, and escalate to the coordinator whatever requires a decision.
 
@@ -66,7 +66,7 @@ Teams multiply token cost and add coordination cost. Use the **smallest** team t
 
 In the right-hand column, prefer a **single session** (sequential/trivial task) or a **single subagent** via `pelizzai-subagents` (isolated work that only needs to report back).
 
-**Bridge to the bug track (`pelizzai-debug`):** a bug fix always runs **inline** — never parallelize the fix. What a team can take on is the **investigation** (Phases 1–3), with competing hypotheses in **read-only** roles, and only when ≥3 fixes have already failed or the hypotheses are independent of each other; the team investigates and reports, and Phase 4 (failing test + fix) returns to the main session.
+**Bridge to the bug track (`pelizzai-debugging`):** a bug fix always runs **inline** — never parallelize the fix. What a team can take on is the **investigation** (Phases 1–3), with competing hypotheses in **read-only** roles, and only when ≥3 fixes have already failed or the hypotheses are independent of each other; the team investigates and reports, and Phase 4 (failing test + fix) returns to the main session.
 
 ---
 
@@ -146,10 +146,10 @@ flowchart TD
 ## The coordinator's role
 
 The coordinator is the **team lead** (Teammates Mode) or the **main session** (Subagents Mode). It
-**orchestrates**: decomposes, delegates, crosses the verdicts, and consolidates. It **never** implements a front
-on its own, nor reviews its own delivery — it has already seen the
-members' report and reasoning; the task reviewer and the final range's blind spec lens are always
-independent reviewers. In both modes, the rule is the same and non-negotiable:
+**orchestrates**: decomposes, delegates, crosses the lenses, and consolidates. It **never** implements a front
+on its own, nor dispatches itself as the review's **blind spec lens** — it has already seen the
+members' report and reasoning, so it cannot judge blind; the blind lens is always an independent
+reviewer. In both modes, the rule is the same and non-negotiable:
 
 <HARD-GATE>
 Do not delegate a subtask to a member until you can answer, for **each** member:
@@ -192,11 +192,11 @@ In both cases, review, stage, commit, and cursor remain serialized by the coordi
 - Verify the results adversarially (cross-check, refutation).
 - Synthesize everything into a single delivery, resolving divergences.
 - Receive the **material gaps** the members name and take them to the human via
-  `pelizzai-interview` (gap mode) **before the front continues** — one question at a time, with
+  `pelizzai-interview-me` (gap mode) **before the front continues** — one question at a time, with
   2–3 options and the recommended one. The coordinator groups and orders the gaps by dependency, but
   **consolidating is not deciding**: it chooses neither on its own nor for the member. The ratified
   decision goes back into the plan and the briefing before re-dispatch.
-- Collect the domain-skill gaps flagged by the members and consolidate them into a **single** proposal at closeout (feeding the adoption-driven axis of `pelizzai-finish`); never create a skill mid-task. That is a different lane: a domain-skill gap does **not** stop the front; a material gap does.
+- Collect the domain-skill gaps flagged by the members and consolidate them into a **single** proposal at closeout (feeding the adoption-driven axis of `pelizzai-finish-task`); never create a skill mid-task. That is a different lane: a domain-skill gap does **not** stop the front; a material gap does.
 - Decide on completion and shut down the members.
 
 ### How many members
@@ -309,7 +309,7 @@ Briefing for [member name] — role: [role named by AREA, e.g., backend-implemen
   the spec, STOP, NAME the gap (what is missing + what it changes + 2–3 options with the
   recommended one), return `NEEDS_CONTEXT`, and declare it also under `Deviations from plan:`.
   You do not fill it in by default and you do not talk to the user — the coordinator is who takes
-  the decision to the human, via `pelizzai-interview` (gap mode)
+  the decision to the human, via `pelizzai-interview-me` (gap mode)
 - Restrictions/prohibitions: [do not touch X; do not run Y; do not publish; read-only]
 ```
 
@@ -418,10 +418,10 @@ Member results are **not** truth until they are cross-checked.
 - **Cross-check:** confront deliverables that overlap; conflicting findings trigger a refutation round (Subagents Mode) or a debate via `SendMessage` (Teammates Mode).
 - **Adversarial verification:** prefer that **another** member (or a dedicated verifier) try to take down a conclusion, rather than the author confirming it.
 - **Cross-check via independent runs (Verification):** when several members reach the same result through independent paths, the convergence increases confidence — but it does not replace a real test/source.
-- **Per-task review (one independent reviewer, both verdicts):** every implementation deliverable goes through `pelizzai-review` — ONE independent reviewer per task applies the **spec rubric** (code vs contract, formed before the report section of the briefing) and the **quality/evidence rubric** (verifies the report's claims with fresh proof) and returns BOTH verdicts. On the delivery's final range the review splits into **two dispatches**, and there the spec lens is truly **blind** (range + full plan, no delivery narrative). The coordinator dispatches independent reviewers — it never reviews its own delivery —, crosses the verdicts and, on conflict, decides with its own evidence or escalates. What is proportional is each rubric's **depth**, not the review's existence nor the reviewer's independence. Being able to dispatch MEMBERS does not prove a REVIEWER is dispatchable — check it separately at the gate; and if the capability is lost mid-run (quota, ceiling, restricted resumption), the review does not silently collapse into the coordinator: go through `pelizzai-review` → "When there is no independent reviewer".
-- **Evidence gate:** before accepting an **implementation** deliverable, apply `pelizzai-final-verification` — check the **git diff** and run the test commands yourself, or accept output + exit code from **whoever ran the check** (the quality/evidence lens, an independent reviewer — never the author); the member's report, including output the member pasted itself, is never evidence.
+- **Per-task review (two lenses with asymmetric blindness):** every implementation deliverable goes through `pelizzai-review` — the **blind spec lens** (receives only diff + spec/plan + the area's domain skills, NEVER the author's report: it judges the code against the contract, without the narrative) and the **quality/evidence lens** (receives the report and verifies the claims with fresh proof). The coordinator dispatches independent reviewers — it is **never the blind lens** —, crosses the two verdicts and, on conflict, decides with its own evidence or escalates. The blind/dual profile (`split`) is the default in any lane, including bounded — only with two dispatches does the spec lens not know the author's narrative; `combined` in a single pass is an exception the user ratifies at step 4 of the setup gate. What is proportional is each lens's **depth**, not the review's existence nor the blindness.
+- **Evidence gate:** before accepting an **implementation** deliverable, apply `pelizzai-verification-before-completion` — check the **git diff** and run the test commands yourself, or accept output + exit code from **whoever ran the check** (the quality/evidence lens, an independent reviewer — never the author); the member's report, including output the member pasted itself, is never evidence.
 - **Synthesis:** cross the deliverables with `Evidence Synthesis` and produce **one** delivery, making clear what is consensus, what was resolved divergence, and what remains open.
-- **Deadlock:** if the confrontation does **not** converge, the coordinator does **not** force an artificial consensus: it decides by the task's dominant criterion (invoking `Decision Making`) and, when the choice belongs to the user or the impact is high, **escalates via `pelizzai-interview`** — naming the gap, with the positions turned into 2–3 real options, the recommended one, and each one's trade-off.
+- **Deadlock:** if the confrontation does **not** converge, the coordinator does **not** force an artificial consensus: it decides by the task's dominant criterion (invoking `Decision Making`) and, when the choice belongs to the user or the impact is high, **escalates via `pelizzai-interview-me`** — naming the gap, with the positions turned into 2–3 real options, the recommended one, and each one's trade-off.
 
 Apply the **effort budget** from `pelizzai-reasoning`: verification depth is proportional to the change's risk.
 
@@ -448,10 +448,10 @@ Apply the **effort budget** from `pelizzai-reasoning`: verification depth is pro
 - Delegating a writing role to a read-only agentType (Explore/Plan do not edit).
 - "Continuing the conversation" with a subagent across rounds (each round is a new spawn, no memory).
 - The coordinator starting to implement instead of delegating, waiting, and synthesizing.
-- The coordinator dispatching itself as any reviewer of its own delivery — per task the reviewer is independent, and the final range's blind lens is always an independent reviewer.
-- Handing the delivery narrative to the final range's blind spec lens, or assembling a member without the complete package of domain skills for its area.
+- The coordinator dispatching itself as the blind spec lens (it has already seen the report) — the blind lens is always an independent reviewer.
+- Handing the implementer's report to the blind spec lens, or assembling a member without the complete package of domain skills for its area.
 - A member filling in, by default, convention, or "reasonable inference", a product decision that is not in the briefing/plan/spec, instead of naming the gap and returning `NEEDS_CONTEXT`.
-- The coordinator deciding the material gap (on its own or for the member) instead of taking it to the human via `pelizzai-interview` — consolidating the gaps is not deciding them.
+- The coordinator deciding the material gap (on its own or for the member) instead of taking it to the human via `pelizzai-interview-me` — consolidating the gaps is not deciding them.
 - Accepting findings without adversarial verification.
 - In Subagents Mode, expecting the members to coordinate on their own (they do not talk to each other).
 - Using split-panes on Windows / Windows Terminal / the VS Code terminal / Ghostty.
@@ -469,7 +469,7 @@ Apply the **effort budget** from `pelizzai-reasoning`: verification depth is pro
 - Enable Agent Teams in the user's `settings.json` without confirmation.
 - Treat a member's result as truth before cross-checking/refuting it.
 - Decide, in the user's place, a material gap the members named (consolidating is not deciding).
-- Act as a reviewer of your own delivery (the coordinator), or hand the delivery narrative to the final range's blind spec lens.
+- Act as the blind spec lens yourself (the coordinator), or hand the author's report to it.
 - Conclude silently with a failed or open front.
 - Shut the team down before validating the completion criteria.
 - Let the lead conclude "it's done" with tasks still open — check the roster.
@@ -499,10 +499,10 @@ Apply the **effort budget** from `pelizzai-reasoning`: verification depth is pro
 - `pelizzai-reasoning` — the coordinator's reasoning (decomposition, plan, synthesis, verification) and each member's; it is also where the `Verification` technique for closeout lives.
 - `pelizzai-preferences` — the global layer instructed in each member's briefing (domain skills prevail).
 - `pelizzai-subagents` — lightweight delegation to **one** isolated subagent (no team).
-- `pelizzai-router` / `pelizzai-execute` — where the `team` mode arrives from (setup gate); pelizzai-execute defines the per-task cycle each front follows.
-- `pelizzai-interview` — destination of the material gaps named by the members: the coordinator consolidates them and takes them to the human before the front continues.
-- `pelizzai-final-verification` — the evidence gate before accepting an implementation deliverable.
-- `pelizzai-idea-generation` / `pelizzai-writing-plans` — where the team's task usually comes from.
+- `pelizzai-router` / `pelizzai-execution-plans` — where the `team` mode arrives from (setup gate); execution-plans defines the per-task cycle each front follows.
+- `pelizzai-interview-me` — destination of the material gaps named by the members: the coordinator consolidates them and takes them to the human before the front continues.
+- `pelizzai-verification-before-completion` — the evidence gate before accepting an implementation deliverable.
+- `pelizzai-brainstorming` / `pelizzai-writing-plans` — where the team's task usually comes from.
 
 ---
 
@@ -524,7 +524,7 @@ Prefer:
 
 Do not delegate without answering the five HARD-GATE items.
 Do not let a member fill in a product decision — they name the gap and return NEEDS_CONTEXT.
-Do not decide the material gap in the user's place: consolidate and take it to pelizzai-interview.
+Do not decide the material gap in the user's place: consolidate and take it to pelizzai-interview-me.
 Do not send a writing role to a read-only agentType.
 Do not treat subagent rounds as a continuous conversation — each round is a new spawn.
 Do not enable Agent Teams without user confirmation.

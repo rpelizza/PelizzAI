@@ -5,9 +5,9 @@
 > the *Ratified execution defaults* section, which is NOT detected: it is born `<unset>` and only
 > the user fills it in when ratifying the policy at the post-plan gate.
 > Lives at `pelizzai/profile.md`. Consumed by: `pelizzai-tdd` (test command),
-> `pelizzai-execute` (post-plan gate + final validation), `pelizzai-finish`
+> `pelizzai-execution-plans` (post-plan gate + final validation), `pelizzai-finish-task`
 > (verification and destination), `pelizzai-router` (execution-defaults recommendation),
-> `pelizzai-debug` (feedback loop), and `pelizzai-create-skill` (Stack baseline
+> `pelizzai-debugging` (feedback loop), and `pelizzai-writing-skills` (Stack baseline
 > → version/adoption-driven axes). Update it when scripts/manifests change; in a
 > workspace, repeat the sections per project.
 
@@ -28,14 +28,13 @@ when there are mirrors, synced and verified; never assume `.claude/skills` in ev
 > At bootstrap they are all born `<unset>`: write the value **literally between `<>`**. Any value
 > between `<>` (the menu below, `<unset>`) reads as NOT ratified; the SessionStart hook recap
 > fires on ANY raw value outside `<...>` and `unset` — including `branch`, `inline`, or
-> `squash-final`. The hook reads exactly these three fields. There is no review policy: the
-> review's form (one reviewer with both verdicts per task; two dispatches on the final range; the
-> quality lens alone where no ratified contract exists) is
-> invariable, so there is nothing for a project to pre-select.
+> `squash-final`. The hook reads only `isolation-default`, `execution-mode-default`, and
+> `commit-strategy-default`; `review-policy-default` stays out of the recap.
 
 - isolation-default: <branch|worktree|unset>
 - execution-mode-default: <inline|subagents|team|unset>
 - commit-strategy-default: <granular|squash-final|unset>
+- review-policy-default: <combined|split|unset>
 - Ratified on: <YYYY-MM-DD> | Overrides since then: <n>
 <!-- destination is not persistable: push/PR/publish require per-task confirmation -->
 
@@ -66,7 +65,7 @@ _Snapshot date: YYYY-MM-DD (bootstrap or last refresh)._
 | `<framework>`     | `<x.y.z>`          |
 | `<key-lib>`       | `<x.y.z>`          |
 
-_Anchor of the version-driven and adoption-driven axes of `pelizzai-create-skill`:
+_Anchor of the version-driven and adoption-driven axes of `pelizzai-writing-skills`:
 version-driven = the version of an item in this baseline changed in the manifests (version drift);
 adoption-driven = there is a new top-level entry in the manifests, absent from this baseline AND
 from the `pelizzai/domain-skills.md` catalog → proposal to CREATE a skill for the new stack._

@@ -9,7 +9,7 @@ Copy to `pelizzai/plans/YYYY-MM-DD-<topic>.md` and replace every bracketed text 
 ```markdown
 # [Name] — Implementation plan
 
-> **For the executor:** MANDATORY SUB-SKILL — use `pelizzai-execute`.
+> **For the executor:** MANDATORY SUB-SKILL — use `pelizzai-execution-plans`.
 
 **Goal:** [one-sentence result]
 
@@ -47,14 +47,14 @@ List the residual assumptions and material gaps **new to the plan** (unhandled c
 
 ## Technical decisions in this plan
 
-**Numbered** list of this plan's material technical decisions — each on one line: **what** was decided, **where it was ratified**, the **rejected alternative**, and the **why**. Every material decision must be ratified before the plan closes: one that emerged while assembling the plan goes to the user as a question with 2–3 options and a recommendation (via `pelizzai-interview`), not as a fait accompli. If the plan is purely mechanical and makes no material technical decision, write exactly `no material technical decision — purely mechanical plan`. Never leave the section empty or omit it.
+**Numbered** list of this plan's material technical decisions — each on one line: **what** was decided, **where it was ratified**, the **rejected alternative**, and the **why**. Every material decision must be ratified before the plan closes: one that emerged while assembling the plan goes to the user as a question with 2–3 options and a recommendation (via `pelizzai-interview-me`), not as a fait accompli. If the plan is purely mechanical and makes no material technical decision, write exactly `no material technical decision — purely mechanical plan`. Never leave the section empty or omit it.
 
 ```text
 1. [decision] — ratified: [spec | design | plan interview | execution interview] — rejected: [alternative] — why: [one-line reason]
 2. [decision] — ratified: [spec | design | plan interview | execution interview] — rejected: [alternative] — why: [one-line reason]
 ```
 
-The post-plan setup gate presents this list: the already-ratified ones (spec/design/interview) as a one-line recap, and any decision with no ratification origin becomes a question with 2–3 options and a recommendation right there — never a block rubber-stamp. During execution the operational deviation test applies — if the decision is not written in the plan or the spec, it is not approved — present it before implementing. A material gap that surfaces later, mid-execution, is plugged by `pelizzai-interview` and comes back here as a new line with origin `execution interview` — the list stays alive during execution; it does not freeze at the gate.
+The post-plan setup gate presents this list: the already-ratified ones (spec/design/interview) as a one-line recap, and any decision with no ratification origin becomes a question with 2–3 options and a recommendation right there — never a block rubber-stamp. During execution the operational deviation test applies — if the decision is not written in the plan or the spec, it is not approved — present it before implementing. A material gap that surfaces later, mid-execution, is plugged by `pelizzai-interview-me` and comes back here as a new line with origin `execution interview` — the list stays alive during execution; it does not freeze at the gate.
 
 ## Structure of each task
 
@@ -88,8 +88,7 @@ _If self-contained, write `none`._
 - Command(s): `[complete canonical commands]`
 - Expected evidence: [exit code, delta, visual state, or exact output]
 - Rollback: [when applicable; otherwise, `not applicable`]
-- Review depth: [what each of the two rubrics should dig into, by risk/surface] — the review's
-  form is invariable; only its depth is a plan decision
+- Review profile: [split (default) | combined (only with a ratified downgrade)] — [justification by risk/surface]
 
 - [ ] **Step 1: Establish the baseline/oracle** → verify: [exact result]
 
@@ -107,7 +106,7 @@ non-obvious call; otherwise, name the interface, the invariant, and one short ex
 Run: `[exact command]`
 Expected: `[observable result]`
 
-- [ ] **Step 4: Ready for review → consolidate** — do not commit mid-task; the commit is the coordinator's gate after the reviewer's spec ✅ + quality/evidence ✅ verdicts. → verify: `git status` contains only this task's scope
+- [ ] **Step 4: Ready for review → consolidate** — do not commit mid-task; the commit is the coordinator's gate after the spec ✅ + quality ✅ lenses in the recorded profile. → verify: `git status` contains only this task's scope
 ````
 
 Adapt the order without losing the proof:
@@ -126,7 +125,7 @@ Adapt the order without losing the proof:
 - An executor with zero context on the repository completes each task without asking a single question.
 - Paths, interfaces, content, commands, and outputs are concrete.
 - Every step has `→ verify:`.
-- Each task records cross-cutting skills, implementation/validation strategy, and review depth.
+- Each task records cross-cutting skills, implementation/validation strategy, and review profile.
 - UI never omits `pelizzai-frontend`; Playwright/browser is a tool, not an overlay.
 - No artificial RED for refactoring, CSS, docs, config, IaC, or migration.
 - No TBD/TODO, "handle edge cases", "same as Task N", or undefined references.
@@ -136,7 +135,5 @@ Adapt the order without losing the proof:
 ## Forwarding to execution
 
 Plan materialized, stress-tested, and approved → **forward to the sequential post-plan setup gate**
-of `pelizzai-execute`. The plan carries recommendations; the user decides isolation,
-branch, mode, and commits one question at a time before Task 1. The review is **not** among them —
-its form (one reviewer with both verdicts per task; two dispatches on the final range) is fixed,
-so there is no question to ask.
+of `pelizzai-execution-plans`. The plan carries recommendations; the user decides isolation,
+branch, mode, commits, and review one question at a time before Task 1.

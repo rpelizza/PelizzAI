@@ -99,7 +99,7 @@ or **Unknown** (do not invent it).
 **1. Assess.** Understand the goal, scope, available context, project rules, and risks before
 acting. Do not ask reflexively on a **factual** doubt: context, code, documentation, files, and safe
 observation settle facts. A **material** decision gap (requirement, scope, UX, architecture, data,
-security, acceptance) is not settled by research: it goes to `pelizzai-interview` even when the
+security, acceptance) is not settled by research: it goes to `pelizzai-interview-me` even when the
 documentation suggests a path — evidence improves the recommendation, it never replaces
 ratification.
 

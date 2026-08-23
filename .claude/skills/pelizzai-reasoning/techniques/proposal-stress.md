@@ -55,7 +55,7 @@ Given a request:
    architecture, security, data, or acceptance. A reversible product decision still belongs to the
    user; only a mechanical detail covered by a ratified contract may become an operational assumption.
 4. **Emit the compact analysis** and point out **which material gaps justify PROPOSING discovery**
-   (compact brainstorming or a focused `pelizzai-interview`).
+   (compact brainstorming or a focused `pelizzai-interview-me`).
 
 ## Analysis format (≤ 6 bullets, proportional)
 
@@ -97,7 +97,7 @@ discovery gate: apply the briefing and escalate to the coordinator the scope dec
 | [Assumption Tracking](assumption-tracking.md)  | The assumption machine (identify, classify, validate) this routine applies |
 | [Constraint Satisfaction](constraint-satisfaction.md) | Separates the mandatory from the desirable among the gaps found      |
 | [Decision Making](decision-making.md)          | Compares the materially different alternatives when the gate opens        |
-| [pelizzai-interview](../../pelizzai-interview/SKILL.md) | Sister skill that resolves the material gaps once discovery is accepted |
+| [pelizzai-interview-me](../../pelizzai-interview-me/SKILL.md) | Sister skill that resolves the material gaps once discovery is accepted |
 
 ## Anti-patterns
 

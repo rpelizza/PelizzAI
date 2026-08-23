@@ -7,7 +7,6 @@ import {
   mkdirSync,
   readFileSync,
   readdirSync,
-  realpathSync,
   renameSync,
   rmSync,
   statSync,
@@ -27,12 +26,6 @@ const geminiMd = join(root, 'GEMINI.md');
 const coreManifest = join(root, 'scripts', 'pelizzai-core-skills.txt');
 const sourceSentinel = join(root, 'scripts', 'pelizzai-source-repo.txt');
 const distDir = join(root, 'dist');
-// The consumer contract SEED: generated from CLAUDE.md in the source repo and shipped inside
-// the core skills (so it travels in .agents/, dist/, and every export automatically). Every
-// consumer sync reads it to create/append/resync the three entry files — which is why dist/
-// does not ship CLAUDE.md/AGENTS.md/GEMINI.md at all: the first sync (or bootstrap) anchors
-// them in place, preserving whatever the project already has.
-const contractAsset = join(srcSkills, 'pelizzai-audit', 'assets', 'contract.md');
 
 const REF_IGNORE = new Set([
   'pelizzai-cadence',
@@ -42,157 +35,6 @@ const REF_IGNORE = new Set([
   'pelizzai-writegate',
   'pelizzai-source-repo',
 ]);
-
-// ── Contract anchor ─────────────────────────────────────────────────────────
-// In a CONSUMER, the harness owns a marker-delimited BLOCK inside CLAUDE.md, AGENTS.md, and
-// GEMINI.md — never the whole file. The project keeps its own content around the block; the
-// export and the consumer sync create, append, skip, or resync ONLY the block. Byte equality
-// of the block against what the source generates is what lets any session detect drift with a
-// plain diff. The SOURCE repo keeps whole-file generation: there the files are the authority.
-const CONTRACT_OPEN = '<!-- pelizzai:contract -->';
-const CONTRACT_CLOSE = '<!-- /pelizzai:contract -->';
-
-// Every contract region in `text`, in order, each `{ start, end, orphan }`.
-//
-// A region is WELL-FORMED when its OPEN is closed by a CLOSE with no second OPEN in between. An
-// OPEN that never closes — or that is followed by another OPEN before its CLOSE — is ORPHAN, and
-// it delimits NOTHING: `end` covers the marker line alone, because every byte after it belongs to
-// the PROJECT until proven otherwise.
-//
-// Scanning for pairs instead of `indexOf(OPEN)` + `indexOf(CLOSE)` is what keeps two failures from
-// destroying content. With a lone `indexOf` pair, an orphan OPEN left above a real block makes
-// `start` point at the orphan and `end` at the real CLOSE — and the "resync" then replaces
-// everything in between, project content included, with no note (issue #17). The same shortcut
-// stops at the FIRST block and calls a file with two blocks `unchanged`, shipping two managed
-// contracts to the agent behind a green check (issue #21).
-function scanContractRegions(text) {
-  const regions = [];
-  let cursor = 0;
-  while (cursor < text.length) {
-    const start = text.indexOf(CONTRACT_OPEN, cursor);
-    if (start < 0) break;
-    const after = start + CONTRACT_OPEN.length;
-    const close = text.indexOf(CONTRACT_CLOSE, after);
-    const nextOpen = text.indexOf(CONTRACT_OPEN, after);
-    if (close < 0 || (nextOpen >= 0 && nextOpen < close)) {
-      regions.push({ start, end: after, orphan: true });
-      cursor = after;
-      continue;
-    }
-    regions.push({ start, end: close + CONTRACT_CLOSE.length, orphan: false });
-    cursor = close + CONTRACT_CLOSE.length;
-  }
-  // A CLOSE that no pair consumed is orphan too — the mirror of the case above. Scanning only for
-  // OPEN would leave harness syntax loose in project content AND let `--check` approve it; worse,
-  // a later OPEN inserted above it would pair with THAT close and swallow everything in between,
-  // which is issue #17 arriving from the other side.
-  for (let at = text.indexOf(CONTRACT_CLOSE); at >= 0; at = text.indexOf(CONTRACT_CLOSE, at + 1)) {
-    const paired = regions.some((region) => !region.orphan && at >= region.start && at < region.end);
-    if (!paired) regions.push({ start: at, end: at + CONTRACT_CLOSE.length, orphan: true });
-  }
-  return regions.sort((a, b) => a.start - b.start);
-}
-
-// The single well-formed block of `text`, or null when there is none — or when the file carries a
-// malformed shape (an orphan marker, or more than one block). Returning null on a malformed shape
-// is deliberate: the caller's job is to FAIL or REPAIR, never to pick one of several contracts.
-function extractContract(text) {
-  const regions = scanContractRegions(text);
-  if (regions.length !== 1 || regions[0].orphan) return null;
-  return text.slice(regions[0].start, regions[0].end);
-}
-
-// Four-case upsert of the contract block into a consumer file:
-//   file absent            → created (freshHeader + block);
-//   markers present, equal → unchanged;
-//   markers present, drift → resynced (ONLY the block is replaced, in place);
-//   no markers             → appended at the end — unless `legacyStart` matches a file the
-//     PRE-anchor export generated wholesale: that content is harness-owned, so the generated
-//     body (from `legacyStart` to `legacyEnd`) is replaced in place, preserving whatever the
-//     project keeps BEFORE it and — when the body's known terminal line is found — whatever it
-//     appended AFTER it. When the terminal line is not found, the replacement runs to the end
-//     of the file and the migration says so out loud (never a silent loss).
-function upsertContract(existing, block, { freshHeader = '', legacyStart = null, legacyEnd = null } = {}) {
-  if (existing === null) return { action: 'created', content: `${freshHeader}${block}\n` };
-
-  // Repair the malformed shapes BEFORE deciding anything, and touch no byte outside the markers:
-  // an orphan OPEN is deleted (it delimits nothing) and every block past the first is deleted (the
-  // harness owns exactly one). What sits BETWEEN them is project content and survives verbatim —
-  // which is the whole difference from the old behavior, where it was swallowed by the "resync".
-  const notes = [];
-  const initial = scanContractRegions(existing);
-  const orphans = initial.filter((region) => region.orphan);
-  const extras = initial.filter((region) => !region.orphan).slice(1);
-  if (orphans.length || extras.length) {
-    let repaired = '';
-    let cursor = 0;
-    for (const region of [...orphans, ...extras].sort((a, b) => a.start - b.start)) {
-      repaired += existing.slice(cursor, region.start);
-      cursor = region.end;
-    }
-    existing = repaired + existing.slice(cursor);
-    if (orphans.length) {
-      notes.push(
-        `${orphans.length} orphan contract marker(s) removed — project content around them preserved`,
-      );
-    }
-    if (extras.length) notes.push(`${extras.length} duplicate contract block(s) removed`);
-  }
-  const note = notes.length ? notes.join('; ') : null;
-
-  const blocks = scanContractRegions(existing).filter((region) => !region.orphan);
-  if (blocks.length === 1) {
-    const { start, end } = blocks[0];
-    const current = existing.slice(start, end);
-    if (current === block && !note) return { action: 'unchanged', content: existing };
-    return {
-      action: note ? 'repaired' : 'resynced',
-      content: existing.slice(0, start) + block + existing.slice(end),
-      note,
-    };
-  }
-  if (legacyStart) {
-    const legacyAt = existing.indexOf(legacyStart);
-    if (legacyAt >= 0) {
-      let rawTail = '';
-      let terminalFound = false;
-      if (legacyEnd) {
-        const relative = existing.slice(legacyAt).match(legacyEnd);
-        if (relative) {
-          terminalFound = true;
-          // VERBATIM slice: the tail is project content and keeps its exact whitespace —
-          // trimming would normalize indentation/blank lines the project may care about.
-          rawTail = existing.slice(legacyAt + relative.index + relative[0].length);
-        }
-      }
-      const hasTail = rawTail.trim().length > 0;
-      const tailPart = hasTail ? `${rawTail.startsWith('\n') ? '' : '\n'}${rawTail}${rawTail.endsWith('\n') ? '' : '\n'}` : '\n';
-      const migrationNote = terminalFound
-        ? hasTail
-          ? 'project content found after the legacy body was preserved below the block'
-          : null
-        : 'legacy body replaced to end of file (terminal line not found — review the diff)';
-      return {
-        action: 'migrated',
-        content: `${existing.slice(0, legacyAt)}${block}${tailPart}`,
-        // A repair note must never be swallowed by the branch that runs after it.
-        note: [note, migrationNote].filter(Boolean).join('; ') || null,
-      };
-    }
-  }
-  const sep = existing.endsWith('\n\n') ? '' : existing.endsWith('\n') ? '\n' : '\n\n';
-  return { action: 'appended', content: `${existing}${sep}${block}\n`, note };
-}
-
-function writeContract(path, result, label) {
-  if (result.action !== 'unchanged') writeTextAtomic(path, result.content);
-  console.log(`${label}: contract block ${result.action}${result.note ? ` (${result.note})` : ''}.`);
-}
-
-// Terminal lines of the bodies the PRE-anchor sync generated wholesale — everything after them
-// in a legacy file is project-owned and survives the migration.
-const LEGACY_CLAUDE_END = /Signs in the opposite direction are a trigger to revise the skills — not to abandon them\./;
-const LEGACY_AGENTS_END = /Available skills \(\d+\): [^\n]*/;
 
 function fail(message) {
   console.error(`FAIL: ${message}`);
@@ -207,8 +49,6 @@ function parseArgs(argv) {
     exportConsumer: null,
     installHooks: false,
     buildDist: false,
-    skipEntrypoints: false,
-    internalStaging: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -239,21 +79,6 @@ function parseArgs(argv) {
       case '--build-dist':
       case '-builddist':
         options.buildDist = true;
-        break;
-      case '--skip-entrypoints':
-      case '-skipentrypoints':
-        // Generation only: mirror WITHOUT anchoring the three entry files. It is REFUSED with
-        // --check below — the entrypoints are the very thing the check exists to prove, and an
-        // OK obtained by skipping them is a green gate that verified nothing (issue #19).
-        options.skipEntrypoints = true;
-        break;
-      case '--internal-staging':
-      case '-internalstaging':
-        // INTERNAL to the dist build, and the only way to skip the entrypoints in a --check: dist
-        // ships without them on purpose, so validating the staged tree must not demand them. Not
-        // a user flag — a person proving a consumer's integrity has no reason to reach for it.
-        options.skipEntrypoints = true;
-        options.internalStaging = true;
         break;
       case '--help':
       case '-h':
@@ -309,19 +134,13 @@ function listSkillNames(skillsRoot = srcSkills) {
 }
 
 function buildAgentsMd() {
+  const skills = listSkillNames();
   const header = `<!-- GENERATED by scripts/sync-harness.mjs from CLAUDE.md — do NOT edit by hand. -->
 <!-- To change the guidelines, edit CLAUDE.md and run your platform's sync-harness. -->
 
 `;
   const body = readText(claudeMd).trimEnd();
-  return `${header}${body}${harnessSection().trimEnd()}\n`;
-}
-
-// The AGENTS.md/GEMINI.md tail shared by the source-repo whole file and the consumer block:
-// how to enter the harness plus the current skill roster (the CONSUMER's roster when run there).
-function harnessSection() {
-  const skills = listSkillNames();
-  return `
+  const harness = `
 
 ---
 
@@ -341,31 +160,7 @@ This project uses the **PelizzAI** skills harness. Skills live in \`.agents/skil
 
 Available skills (${skills.length}): ${skills.join(', ')}.
 `;
-}
-
-// Consumer CLAUDE.md contract: the consumer bridge plus everything from '## Behavioral
-// guidelines' down in the SOURCE CLAUDE.md, wrapped in the anchor markers.
-function buildConsumerClaudeContract(sourceClaude) {
-  const marker = '## Behavioral guidelines';
-  const markerIndex = sourceClaude.indexOf(marker);
-  if (markerIndex < 0) throw new Error(`CLAUDE.md is missing the '${marker}' section.`);
-  const bridge = `## PelizzAI harness (mandatory entry point)
-
-This repository consumes PelizzAI. For project requests, enter through \`pelizzai-core\` → \`pelizzai-router\`. The router picks a head skill, reasoning techniques, and overlays; Context7/official documentation grounds the technical reading; every material decision goes back to the user.
-
-This is a consumer: there is no \`scripts/pelizzai-source-repo.txt\`. The manifest separates core from domain skills; harness updates never overwrite the project's own skills, and this block is the only part of this file the harness manages — project content outside the markers is preserved.
-
-`;
-  return `${CONTRACT_OPEN}\n${bridge}${sourceClaude.slice(markerIndex).trimEnd()}\n${CONTRACT_CLOSE}`;
-}
-
-// Consumer AGENTS.md/GEMINI.md contract: the SAME contract core carried by CLAUDE.md's block,
-// plus the skills-harness section, wrapped in the anchor markers.
-function buildAgentsContractBlock(claudeContract) {
-  const core = claudeContract.replace(CONTRACT_OPEN, '').replace(CONTRACT_CLOSE, '').trim();
-  const note =
-    '<!-- PelizzAI harness block — managed by scripts/sync-harness.mjs; edit outside the markers only. -->';
-  return `${CONTRACT_OPEN}\n${note}\n\n${core}${harnessSection().trimEnd()}\n${CONTRACT_CLOSE}`;
+  return `${header}${body}${harness.trimEnd()}\n`;
 }
 
 function walkFiles(base) {
@@ -411,7 +206,7 @@ function readCoreManifest(path = coreManifest) {
 function testRefs() {
   const skillNames = new Set(listSkillNames());
   const markdown = walkFiles(srcSkills).filter((path) => path.endsWith('.md'));
-  if (existsSync(claudeMd)) markdown.push(claudeMd); // a fresh consumer may not have it yet
+  markdown.push(claudeMd);
   const refs = new Set();
   for (const path of markdown) {
     for (const match of readText(path).matchAll(/pelizzai-[a-z][a-z0-9-]*/g)) refs.add(match[0]);
@@ -435,7 +230,7 @@ function runNode(script, args, cwd) {
   if (result.status !== 0) throw new Error(`${script} failed with exit ${result.status}.`);
 }
 
-function copyConsumerPayload(target, { anchorEntrypoints = true } = {}) {
+function copyConsumerPayload(target) {
   const resolved = resolve(target);
   if (resolved === root) {
     throw new Error('The target cannot be the source repo itself.');
@@ -495,14 +290,24 @@ function copyConsumerPayload(target, { anchorEntrypoints = true } = {}) {
   mkdirSync(targetCursorRules, { recursive: true });
   cpSync(cursorAdapter, join(targetCursorRules, 'pelizzai.mdc'));
 
-  // The target's own sync anchors the three entry files from the contract asset just copied
-  // with the skills (create when absent, append when present, resync drift, migrate legacy) —
-  // the same self-repair any later consumer sync performs. The dist build skips the anchoring:
-  // dist ships no entry files, and the consumer's first sync creates them in place.
-  const entryArgs = anchorEntrypoints ? [] : ['--internal-staging'];
+  const marker = '## Behavioral guidelines';
+  const sourceClaude = readText(claudeMd);
+  const markerIndex = sourceClaude.indexOf(marker);
+  if (markerIndex < 0) throw new Error(`CLAUDE.md is missing the '${marker}' section.`);
+  const bridge = `# CLAUDE.md
+
+## PelizzAI harness (mandatory entry point)
+
+This repository consumes PelizzAI. For project requests, enter through \`pelizzai-core\` → \`pelizzai-router\`. The router picks a head skill, reasoning techniques, and overlays; Context7/official documentation grounds the technical reading; every material decision goes back to the user.
+
+This is a consumer: there is no \`scripts/pelizzai-source-repo.txt\`. The manifest separates core from domain skills; harness updates never overwrite the project's own skills.
+
+`;
+  writeTextAtomic(join(target, 'CLAUDE.md'), `${bridge}${sourceClaude.slice(markerIndex)}`);
+
   const targetSync = join(targetScripts, 'sync-harness.mjs');
-  runNode(targetSync, [...entryArgs], target);
-  runNode(targetSync, ['--check', ...entryArgs], target);
+  runNode(targetSync, [], target);
+  runNode(targetSync, ['--check'], target);
   return core;
 }
 
@@ -523,9 +328,8 @@ function exportConsumer(destination, installHooks) {
   }
 
   console.log(
-    `Consumer export complete: ${target} (${core.length} core skills; Cursor adapter; domain skills, ` +
-      `pelizzai/, and project content in CLAUDE.md/AGENTS.md/GEMINI.md preserved — the harness manages ` +
-      `only its anchored contract block; hooks ${installHooks ? 'registered' : 'copied, registration pending user decision'}).`,
+    `Consumer export complete: ${target} (${core.length} core skills; Cursor adapter; domain and ` +
+      `pelizzai/ preserved; hooks ${installHooks ? 'registered' : 'copied, registration pending user decision'}).`,
   );
 }
 
@@ -535,91 +339,29 @@ function buildDist({ quiet = false } = {}) {
   }
   rmSync(distDir, { recursive: true, force: true });
   mkdirSync(distDir, { recursive: true });
-  const core = copyConsumerPayload(distDir, { anchorEntrypoints: false });
+  const core = copyConsumerPayload(distDir);
   if (!quiet) {
     console.log(
-      `dist/ regenerated (${core.length} core skills; no sentinel, no entry files — the first ` +
-        `sync/bootstrap anchors CLAUDE.md/AGENTS.md/GEMINI.md in place): copy its contents to your project root.`,
+      `dist/ regenerated (${core.length} core skills; no sentinel): copy its contents to your project root.`,
     );
   }
 }
 
-function check(sourceMode, skipEntrypoints = false) {
+function check(sourceMode) {
   let problems = 0;
   const difference = treeDiffCount(srcSkills, dstSkills);
   if (difference) {
     console.error(`FAIL: .agents/skills out of sync (${difference} file(s)).`);
     problems += 1;
   }
-  const sentinelPresent = existsSync(sourceSentinel);
-  const claudeText = existsSync(claudeMd) ? readText(claudeMd) : '';
-  if (sentinelPresent) {
-    // Source repo: the shipped asset must match what CLAUDE.md derives, and the root entry
-    // files stay wholly generated (there they ARE the authority — no markers).
-    const expectedAsset = `${buildConsumerClaudeContract(claudeText)}\n`;
-    if (!existsSync(contractAsset) || readText(contractAsset) !== expectedAsset) {
-      console.error('FAIL: contract asset out of sync with CLAUDE.md (run the sync).');
-      problems += 1;
-    }
-    const expected = buildAgentsMd();
-    if (!existsSync(agentsMd) || readText(agentsMd) !== expected) {
-      console.error('FAIL: AGENTS.md out of sync with CLAUDE.md.');
-      problems += 1;
-    }
-    if (!existsSync(geminiMd) || readText(geminiMd) !== expected) {
-      console.error('FAIL: GEMINI.md out of sync with CLAUDE.md.');
-      problems += 1;
-    }
-  } else if (!skipEntrypoints && existsSync(contractAsset)) {
-    // Anchored consumer: each of the THREE entry files must carry the block the asset derives
-    // — the project owns everything around it. A missing file or a tampered block is repaired
-    // by the sync itself, so the failure message says exactly that.
-    const block = readText(contractAsset).trimEnd();
-    const expectedAgents = buildAgentsContractBlock(block);
-    for (const [path, label, expectedBlock] of [
-      [claudeMd, 'CLAUDE.md', block],
-      [agentsMd, 'AGENTS.md', expectedAgents],
-      [geminiMd, 'GEMINI.md', expectedAgents],
-    ]) {
-      // SHAPE first, content second. A file with an orphan marker or two blocks is a distinct
-      // failure from a stale block: `extractContract` returns null for it precisely so the check
-      // cannot mistake "one of several contracts" for "the contract" (issues #17/#21).
-      const text = existsSync(path) ? readText(path) : null;
-      const regions = text === null ? [] : scanContractRegions(text);
-      const orphans = regions.filter((region) => region.orphan).length;
-      const wellFormed = regions.length - orphans;
-      if (orphans || wellFormed > 1) {
-        console.error(
-          `FAIL: ${label} has a malformed contract shape (${orphans} orphan marker(s), ${wellFormed} block(s)) — ` +
-            'run node scripts/sync-harness.mjs to repair it; project content around the markers is preserved.',
-        );
-        problems += 1;
-        continue;
-      }
-      const actualBlock = text === null ? null : extractContract(text);
-      if (actualBlock !== expectedBlock) {
-        console.error(
-          `FAIL: ${label} contract block missing or out of sync — run node scripts/sync-harness.mjs to anchor/repair it.`,
-        );
-        problems += 1;
-      }
-    }
-  } else if (!skipEntrypoints) {
-    // Legacy consumer without the shipped asset: whole-file equality, as before.
-    if (!existsSync(claudeMd)) {
-      console.error('FAIL: CLAUDE.md missing and no contract asset available (reinstall the core skills).');
-      problems += 1;
-    } else {
-      const expected = buildAgentsMd();
-      if (!existsSync(agentsMd) || readText(agentsMd) !== expected) {
-        console.error('FAIL: AGENTS.md out of sync with CLAUDE.md.');
-        problems += 1;
-      }
-      if (!existsSync(geminiMd) || readText(geminiMd) !== expected) {
-        console.error('FAIL: GEMINI.md out of sync with CLAUDE.md.');
-        problems += 1;
-      }
-    }
+  const expected = buildAgentsMd();
+  if (!existsSync(agentsMd) || readText(agentsMd) !== expected) {
+    console.error('FAIL: AGENTS.md out of sync with CLAUDE.md.');
+    problems += 1;
+  }
+  if (!existsSync(geminiMd) || readText(geminiMd) !== expected) {
+    console.error('FAIL: GEMINI.md out of sync with CLAUDE.md.');
+    problems += 1;
   }
   const broken = testRefs();
   if (broken.length) {
@@ -663,16 +405,6 @@ function check(sourceMode, skipEntrypoints = false) {
     if (existsSync(join(distDir, 'scripts', 'test-harness-contracts.ps1'))) {
       distProblems.push('contract suite present');
     }
-    // dist ships NO entry files: the consumer's first sync/bootstrap anchors them in place
-    // (create when absent, append/resync when present) from the contract asset it does ship.
-    for (const name of ['CLAUDE.md', 'AGENTS.md', 'GEMINI.md']) {
-      if (existsSync(join(distDir, name))) {
-        distProblems.push(`${name} present (entry files are anchored at install, not shipped)`);
-      }
-    }
-    if (!existsSync(join(distDir, '.claude', 'skills', 'pelizzai-audit', 'assets', 'contract.md'))) {
-      distProblems.push('contract asset missing');
-    }
     const distSkillsDiff = treeDiffCount(srcSkills, join(distDir, '.claude', 'skills'));
     if (distSkillsDiff) distProblems.push(`skills out of sync (${distSkillsDiff} file(s))`);
     if (distProblems.length) {
@@ -688,60 +420,11 @@ function check(sourceMode, skipEntrypoints = false) {
   return 0;
 }
 
-function generate(updateManifest, skipEntrypoints = false) {
-  const sourceMode = existsSync(sourceSentinel);
-  if (sourceMode) {
-    // The consumer contract asset is GENERATED from CLAUDE.md and ships with the core skills:
-    // it is the seed every consumer sync uses to create/repair the three entry files. Written
-    // BEFORE the mirror copy so it travels in .agents/, dist/, and every export.
-    mkdirSync(dirname(contractAsset), { recursive: true });
-    writeTextAtomic(contractAsset, `${buildConsumerClaudeContract(readText(claudeMd))}\n`);
-  }
+function generate(updateManifest) {
   copyExact(srcSkills, dstSkills);
-  // Consumer: anchor the THREE entry files from the shipped asset — absent → create; present
-  // without markers → append (files the pre-anchor sync generated wholesale are migrated in
-  // place); identical → skip; drifted/tampered → resync ONLY the block. This is what keeps the
-  // PelizzAI instructions always present in the entry files, whatever happens to them between
-  // syncs. Source repo: whole-file generation (there the files ARE the authority). Dist build
-  // (--skip-entrypoints): no entry files at all — the consumer's first sync anchors them.
-  if (!sourceMode && !skipEntrypoints && existsSync(contractAsset)) {
-    const block = readText(contractAsset).trimEnd();
-    const existingClaude = existsSync(claudeMd) ? readText(claudeMd) : null;
-    writeContract(
-      claudeMd,
-      upsertContract(existingClaude, block, {
-        freshHeader: '# CLAUDE.md\n\n',
-        legacyStart: '## PelizzAI harness (mandatory entry point)',
-        legacyEnd: LEGACY_CLAUDE_END,
-      }),
-      'CLAUDE.md',
-    );
-    const agentsBlock = buildAgentsContractBlock(block);
-    for (const [path, label] of [
-      [agentsMd, 'AGENTS.md'],
-      [geminiMd, 'GEMINI.md'],
-    ]) {
-      const existing = existsSync(path) ? readText(path) : null;
-      writeContract(
-        path,
-        upsertContract(existing, agentsBlock, {
-          legacyStart: '<!-- GENERATED by scripts/sync-harness.mjs',
-          legacyEnd: LEGACY_AGENTS_END,
-        }),
-        label,
-      );
-    }
-  } else if (!skipEntrypoints) {
-    if (!existsSync(claudeMd)) {
-      throw new Error(
-        'CLAUDE.md missing and no contract asset available — reinstall the core skills ' +
-          '(.claude/skills/pelizzai-audit/assets/contract.md) and rerun the sync.',
-      );
-    }
-    const agents = buildAgentsMd();
-    writeTextAtomic(agentsMd, agents);
-    writeTextAtomic(geminiMd, agents);
-  }
+  const agents = buildAgentsMd();
+  writeTextAtomic(agentsMd, agents);
+  writeTextAtomic(geminiMd, agents);
   if (updateManifest) {
     if (!existsSync(sourceSentinel)) throw new Error('--update-manifest only runs in the source repo.');
     writeTextAtomic(coreManifest, buildCoreManifest());
@@ -763,32 +446,6 @@ function generate(updateManifest, skipEntrypoints = false) {
   return 0;
 }
 
-// The contract-shape helpers are PURE and exported so the contract suite can exercise the real
-// code on the real failure shapes (orphan marker, duplicate block) instead of grepping this file
-// for prose. A regression here silently destroys a consumer's own content, which is exactly the
-// class of bug a text assertion cannot catch.
-export { scanContractRegions, extractContract, upsertContract };
-
-// Only the direct invocation runs the CLI; importing the module must have no side effects.
-//
-// Both sides go through realpath because Node resolves symlinks for `import.meta.url` by default:
-// invoked through a symlinked path, a plain `resolve()` comparison would differ, `main()` would
-// never run, and the command would exit 0 having synced NOTHING — the same silent green this PR
-// exists to remove. `resolve()` stays as the fallback for a path that cannot be realpath'd.
-const canonicalPath = (candidate) => {
-  try {
-    return realpathSync(candidate);
-  } catch {
-    return resolve(candidate);
-  }
-};
-const invokedDirectly =
-  Boolean(process.argv[1]) &&
-  canonicalPath(process.argv[1]) === canonicalPath(fileURLToPath(import.meta.url));
-
-if (invokedDirectly) main();
-
-function main() {
 try {
   const options = parseArgs(process.argv.slice(2));
   if (options.exportConsumer) {
@@ -796,22 +453,10 @@ try {
   } else if (options.buildDist) {
     buildDist();
   } else if (options.check) {
-    // The check is the PROOF that a consumer's entrypoints are anchored — pelizzai-audit closes
-    // the bootstrap on it and the SessionStart hook points at it. Letting it skip them turns the
-    // proof into a green that verified nothing, and the failure is silent: whoever runs the
-    // command sees success. Refuse instead (issue #19); --internal-staging is the dist build's
-    // narrow exception, where there are deliberately no entrypoints to verify.
-    if (options.skipEntrypoints && !options.internalStaging) {
-      throw new Error(
-        '--check cannot be combined with --skip-entrypoints: the entrypoints are what the check exists to verify. ' +
-          'Run the check without the flag, or use --skip-entrypoints on a generation run.',
-      );
-    }
-    process.exitCode = check(options.sourceMode, options.skipEntrypoints);
+    process.exitCode = check(options.sourceMode);
   } else {
-    process.exitCode = generate(options.updateManifest, options.skipEntrypoints);
+    process.exitCode = generate(options.updateManifest);
   }
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));
-}
 }

@@ -4,7 +4,7 @@
 # Equivalent to pelizzai-cadence.mjs, for fleets without Node. Requires PowerShell 7+ (pwsh)
 # - 5.1 corrupts accented UTF-8 output.
 #
-# Cadence (calibrated for active teams - see pelizzai-create-skill ->
+# Cadence (calibrated for active teams - see pelizzai-writing-skills ->
 # references/domain-skill-maintenance.md):
 #  - Sampling: checks every 10 interactions (not on every message).
 #  - Review due: >= 10 commits OR > 10 days since last-review (the DAYS axis is the sprint
@@ -81,7 +81,7 @@ try {
   if ($reviewDue) { $parts += "$commits commit(s) and $daysReview day(s) since the last domain-skill review" }
   if ($scanDue) { $parts += "$daysScan day(s) since the last full repo-scan" }
 
-  $ctx = 'PelizzAI (cadence): ' + ($parts -join '; ') + '. Consider invoking the pelizzai-create-skill skill (maintenance mode) to review/update the domain skills. Suggest it to the user once; do not block the work.'
+  $ctx = 'PelizzAI (cadence): ' + ($parts -join '; ') + '. Consider invoking the pelizzai-writing-skills skill (maintenance mode) to review/update the domain skills. Suggest it to the user once; do not block the work.'
   $out = [pscustomobject]@{
     hookSpecificOutput = [pscustomobject]@{
       hookEventName     = 'UserPromptSubmit'

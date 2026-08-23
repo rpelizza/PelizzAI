@@ -10,9 +10,8 @@
 # Prints the written path. The reviewer reads the FILE - the diff is never pasted into
 # the coordinator's context.
 #
-# Blocks use a DYNAMIC fence: one backtick more than the longest backtick run found in the
-# content, never below 4. A fixed fence breaks the moment the content itself carries a run of
-# the same length (markdown files in this very repo use 4-backtick fences).
+# Blocks use a 4-backtick fence: diffs of .md files contain ``` and would break
+# a 3-backtick fence.
 #
 # IMPORTANT - range is exclusive to the final review. BASE is the `base-sha` persisted in
 # the state when the branch was created. Per-task review uses --working-tree. NEVER use
@@ -73,25 +72,12 @@ while (Test-Path -LiteralPath $outPath) {
 }
 $now = Get-Date -Format 'yyyy-MM-dd HH:mm'
 
-# One backtick more than the longest run in the content, never below 4.
-function Get-Fence($Body) {
-  $max = 3
-  foreach ($l in @($Body)) {
-    if ($null -eq $l) { continue }
-    foreach ($m in [regex]::Matches([string]$l, '`+')) {
-      if ($m.Length -gt $max) { $max = $m.Length }
-    }
-  }
-  return ('`' * ($max + 1))
-}
-
 function Add-Block([System.Collections.Generic.List[string]]$List, [string]$Title, [string]$Fence, $Body) {
-  $tick = Get-Fence $Body
   $List.Add("## $Title")
   $List.Add('')
-  $List.Add($tick + $Fence)
+  $List.Add('````' + $Fence)
   foreach ($l in @($Body)) { if ($null -ne $l) { $List.Add([string]$l) } }
-  $List.Add($tick)
+  $List.Add('````')
   $List.Add('')
 }
 
@@ -141,11 +127,9 @@ if ($workingTree) {
       $text = $null
       try { $text = Get-Content -LiteralPath $f -Raw -ErrorAction Stop } catch {}
       if ($null -ne $text -and $text -notmatch "`0") {
-        $fileLines = $text -split "`r?`n"
-        $tick = Get-Fence $fileLines
-        $content.Add($tick + 'text')
-        foreach ($l in $fileLines) { $content.Add($l) }
-        $content.Add($tick)
+        $content.Add('````text')
+        foreach ($l in ($text -split "`r?`n")) { $content.Add($l) }
+        $content.Add('````')
       } else {
         $content.Add('_binary or unreadable - content omitted._')
       }

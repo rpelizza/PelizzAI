@@ -40,19 +40,12 @@ If it is a directory false alarm, fix the context and return to the router witho
 
 **Delivery in `delivered` on resumption.** If state shows `phase: delivered`, the task was sealed and
 its destination executed, leaving only the observation of `done` — this is **not** WIP divergence.
-Apply the same reconciliation as `pelizzai-execute` (§Reconciling the previous delivery):
-read the sealed intent in `delivery-status:` to narrow what to observe (`pending push` with no
-remote branch = failed before the push; `pending pr` with the branch at `validated-head` and no
-PR = push confirmed, PR pending) — the field is the INTENT and is never overwritten with the
-observed outcome — and check `confirm:` against git (read-only): does `base-ref` contain
-`validated-head`? PR merged? branch integrated? (local delivery: does the user accept?). Observed → stamp the `## History` index
+Apply the same reconciliation as `pelizzai-execution-plans` (§Reconciling the previous delivery):
+check `confirm:` against git (read-only) — does `base-ref` contain `validated-head`? PR merged?
+branch integrated? (local delivery: does the user accept?). Observed → stamp the `## History` index
 line with `done <YYYY-MM-DD>` + 1-line evidence and record `phase: done` — the full block
-already migrated to `pelizzai/data/history/<YYYY-MM-DD>-<slug>-<sha7>.md` at the `delivered` seal
-(`<sha7>` = first 7 characters of the sealed task's `validated-head`, never the current HEAD;
-read the resolved path from the `## History` index line — do not recompute it), so
-there is no block to move here. On a protected branch this authorization covers ONLY the cursor
-reconciliation just described (the index stamp and `phase`) — it is not a general license to
-write arbitrary `pelizzai/` metadata there; the commit waits for
+already migrated to `pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` at the `delivered` seal, so
+there is no block to move here; writing metadata in `pelizzai/` is valid on any branch, but the commit waits for
 the new task branch (never on a protected one). Failed (PR closed without merge) → do not record
 `done`; report and propose resuming the branch or archiving as `abandoned`. No working file is moved
 in this observation. Source mode: the same observation applies to the native execution record,
@@ -121,12 +114,7 @@ Update only proven fields. Before the commit:
 
 - be on a safe, non-protected branch; if needed, use `pelizzai-starting-branch` without losing the
   rescue ref;
-- consumer: a cursor-only recovery needs no commit — `pelizzai/data/state.md` is the local
-  per-dev cursor, ignored by git (issue #43). Before writing it, confirm the §1 diagnosis put you
-  in the recorded worktree/branch, and prove the cursor is really local:
-  `git check-ignore pelizzai/data/state.md` succeeds and `git ls-files -- pelizzai/data/state.md`
-  is empty. A tracked or unignored cursor is a pre-#43 consumer — stop and propose the one-time
-  migration (`pelizzai-audit` §Partial state) before reconciling. Then write it and move on;
+- consumer: stage only `pelizzai/data/state.md` when the recovery is cursor-only;
 - source mode: update only the native execution record; do not create state or a cursor commit;
 - if legitimate WIP will also be consolidated, return it to the normal lifecycle for
   review/proof/commit; do not mix unreviewed content into a “recovery commit”.
@@ -148,7 +136,7 @@ limitations/pending decision
 ```
 
 If the task was sealed and any content changed, invalidate `validated-head` and go back to review +
-Verification. Recovery never calls pelizzai-finish with a stale seal.
+Verification. Recovery never calls finish-task with a stale seal.
 
 ## Red flags
 
@@ -163,6 +151,6 @@ Verification. Recovery never calls pelizzai-finish with a stale seal.
 
 ## Integration
 
-Called by router/starting-branch/pelizzai-execute when the record and Git diverge. Uses
-`pelizzai-starting-branch` for safe rescue and returns the work to the lifecycle; pelizzai-finish only
+Called by router/starting-branch/execution-plans when the record and Git diverge. Uses
+`pelizzai-starting-branch` for safe rescue and returns the work to the lifecycle; finish-task only
 enters after new content is consolidated and sealed.

@@ -922,4 +922,4 @@ Penalize recklessness and ritual paralysis alike.
 - Evals index: [README.md](README.md)
 - Skill regression scenarios: [regression.md](regression.md)
 - Technique catalog: [pelizzai-reasoning](../SKILL.md)
-- Sibling elicitation skill: [pelizzai-interview](../../pelizzai-interview/SKILL.md)
+- Sibling elicitation skill: [pelizzai-interview-me](../../pelizzai-interview-me/SKILL.md)

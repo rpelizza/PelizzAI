@@ -1,11 +1,8 @@
-# Spec lens reviewer prompt template — blind (final range)
+# Spec lens reviewer prompt template — blind (Stage 1)
 
-Use when dispatching the BLIND SPEC reviewer of the delivery's **final range** — the first of the
-final review's two dispatches (the per-task review uses `task-reviewer.md`, one dispatch with both
-verdicts). It is a **pure** compliance verdict — **do NOT run tests or fill Verification** (that
-belongs to the quality/evidence dispatch). The reviewer receives fabricated context, never the session history.
+Use when dispatching the SPEC reviewer (first stage, per task). It is a **pure** compliance verdict — **do NOT run tests or fill Verification** (that belongs to Stage 2). The reviewer receives fabricated context, never the session history.
 
-This lens is **blind** by design and always runs in its **own dispatch**, with no exception and no profile that merges it into another: **The spec lens reviewer does NOT receive the implementer's report — it judges the code against the contract, without the author's narrative.** Do not paste the report into this briefing. The same rule covers the delivery narrative, the task reports, and the coordinator's summary: `{FULL_TASK_TEXT}` is the **full spec/plan** and the diff is the committed range, and nothing that explains the delivery comes along.
+This lens is **blind** by design. In the `split` profile — the **recommended default**, where it runs in its own dispatch — the anchor holds: **The spec lens reviewer does NOT receive the implementer's report — it judges the code against the contract, without the author's narrative.** Do not paste the report into this briefing. (In `combined`, an exception the user ratifies at the gate, a single reviewer merges this rubric and the quality/evidence one into a single briefing, and the report enters through the quality/evidence rubric — never through here.)
 
 Blindness is **not** lack of project context: this lens receives the diff, the task's spec/plan, **and the area's domain skills**. What it does not receive is the author's narrative.
 

@@ -97,7 +97,7 @@ acceptance remains, ask the user one decision at a time and recommend the best o
 
 For a new feature/refactor request with mutating effect and material uncertainty, produce the **Proposal Analysis** with [Proposal Stress (Assumption Tracking applied)](techniques/proposal-stress.md) before routing — assumptions, material gaps, risks, and alternatives — as a result presented by `pelizzai-router`, not as a question. Read-only work and trivial tweaks do not trigger it; high risk alone raises proof and gates, not uncertainty.
 
-Use `pelizzai-interview` in every greenfield and whenever there is a material human decision.
+Use `pelizzai-interview-me` in every greenfield and whenever there is a material human decision.
 Evidence resolves facts; it does not resolve the user's preference, policy, or intent.
 
 ---
@@ -150,7 +150,7 @@ Read the corresponding technique before applying it.
 | Root Cause Analysis      | Investigate uncertain causes, recurrence, flakiness, incidents, and cross-system failures | [root-cause-analysis.md](techniques/root-cause-analysis.md)        |
 | Critique and Refine      | Improve an artifact after feedback, a failure, an inconsistency, or an unmet requirement | [critique-and-refine.md](techniques/critique-and-refine.md)           |
 
-> The `pelizzai-interview` skill is a **sister skill**, not one of the catalog's techniques: invoke it to resolve material ambiguity by interview, per the Initial triage and the matrix.
+> The `pelizzai-interview-me` skill is a **sister skill**, not one of the catalog's techniques: invoke it to resolve material ambiguity by interview, per the Initial triage and the matrix.
 
 > **Proposal Stress** is the [Assumption Tracking](techniques/assumption-tracking.md) routine applied to a new request, documented in [proposal-stress.md](techniques/proposal-stress.md): it produces the **Proposal Analysis** that `pelizzai-router` presents before routing. It is not an extra catalog technique — it is the same assumption machine with a scope-premortem lens.
 
@@ -171,8 +171,8 @@ Read the corresponding technique before applying it.
 | Incident with active damage                                  | Constraint Satisfaction  | Decision Making, ReAct, Verification; RCA after containment   |
 | Choosing between libraries or architectures                  | Decision Making          | Constraint Satisfaction, Evidence Synthesis                   |
 | Research across several sources                              | Evidence Synthesis       | Verification, Assumption Tracking                             |
-| New feature/refactor request with material uncertainty, before routing | Assumption Tracking + Proposal Stress | Constraint Satisfaction, pelizzai-interview |
-| Ambiguous or incomplete requirements                         | Assumption Tracking      | Constraint Satisfaction, pelizzai-interview                |
+| New feature/refactor request with material uncertainty, before routing | Assumption Tracking + Proposal Stress | Constraint Satisfaction, pelizzai-interview-me |
+| Ambiguous or incomplete requirements                         | Assumption Tracking      | Constraint Satisfaction, pelizzai-interview-me                |
 | Plan depending on an unconfirmed assumption                  | Assumption Tracking      | Plan and Execute, Verification                                |
 | Multiple interdependent alternatives with material impact    | Decision Making (search with pruning/backtracking) | Constraint Satisfaction, Evidence Synthesis    |
 | Critical calculation, diagnosis, or extraction               | Verification             | Evidence Synthesis; multi-agent cross-check when there are independent reviewers |
@@ -211,7 +211,7 @@ Assumption Tracking + Constraint Satisfaction during discovery
 ```
 
 Use Constraint Satisfaction when there are hard requirements, compatibility, security, or
-prohibitions. OODA only governs `pelizzai-loop`/`pelizzai-execute` when there are multiple
+prohibitions. OODA only governs `pelizzai-loop`/`pelizzai-execution-plans` when there are multiple
 iterations and reality (git, tests, review, environment) can change the next decision. A linear
 task or a single-slice plan does not earn OODA just for using tools.
 

@@ -48,7 +48,7 @@ reviews:
         - User authority: the harness RECOMMENDS and the user RATIFIES. Flag any text that
           authorizes the agent to decide scope, UX, architecture, data, accepted risk, or
           acceptance criteria on its own. A material gap found during development must lead
-          to `pelizzai-interview`, never to a default.
+          to `pelizzai-interview-me`, never to a default.
         - This repository is PUBLIC and clonable into any project: it must contain no local
           path, no private project name, and no personal convention of the author.
 

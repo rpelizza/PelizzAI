@@ -588,7 +588,7 @@ Temporarily accept its absence, define a compatible default value, update the cl
 
 ## Security and privacy constraints
 
-Always treat the items below as hard constraints. The user's ratification settles what the terms mean for this task — what counts as necessary, who is authorized, which confirmation is proper, what risk is accepted — and it is settled through `pelizzai-interview`. It does not switch a constraint off: a request to bypass one is escalated and recorded, never executed silently, and the relevant security overlay plus Verification still run. The agent never authorizes a deviation on its own judgment that it looks legitimate or safe:
+Always treat the items below as hard constraints. The user's ratification settles what the terms mean for this task — what counts as necessary, who is authorized, which confirmation is proper, what risk is accepted — and it is settled through `pelizzai-interview-me`. It does not switch a constraint off: a request to bypass one is escalated and recorded, never executed silently, and the relevant security overlay plus Verification still run. The agent never authorizes a deviation on its own judgment that it looks legitimate or safe:
 
 ```text
 - Do not expose secrets.
