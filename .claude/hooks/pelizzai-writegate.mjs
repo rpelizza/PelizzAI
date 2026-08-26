@@ -37,8 +37,11 @@
  *
  * Block: exit 2 + reason and safe path on stderr (the agent reads it and corrects the route).
  * Errors in the hook ITSELF and cases it cannot decide safely: exit 0 (fail-open —
- * a bug or false positive here never locks the user out). When it cannot read the kickoff in a
- * consumer without state.md, it allows the write and warns at most once per window (no spam).
+ * a bug or false positive here never locks the user out). A missing state.md is NOT such a case
+ * when the repo carries the harness (pelizzai/ or the pelizzai-core skill): there the gate never
+ * ran and the write BLOCKS — ratifying the gate writes the marker and creates the file, so no
+ * legitimate flow is locked out. Only a repo with no harness footprint at all fails open, with
+ * at most one warning per window (no spam).
  *
  * Install (opt-in, recommended by pelizzai-onboard at bootstrap, merged without overwriting
  * existing hooks/permissions), in the consumer project's .claude/settings.json — BOTH
@@ -368,11 +371,32 @@ function main() {
 
   const statePath = join(gitRoot, 'pelizzai', 'data', 'state.md');
   if (!existsSync(statePath)) {
-    // Consumer without state.md: cannot read the kickoff safely → fail-open + warn once.
+    // HARNESS EVIDENCE (2026-08-26 hardening): a missing state.md used to fail-open for every
+    // consumer, which made Rule B unenforceable in the exact window it exists for — a consumer
+    // that carries the harness but whose kickoff gate never ran (the trigger tests caught an
+    // agent editing product right through this gap). The head skills write the marker BEFORE
+    // the first product write and writing pelizzai/data/state.md is always allowed, so blocking
+    // here locks out no legitimate flow: ratifying the gate creates the file. The fail-open +
+    // warn survives ONLY where it is honest — a repo with no trace of the harness at all
+    // (e.g. the hook registered off-label in global settings).
+    const harnessPresent =
+      existsSync(join(gitRoot, 'pelizzai')) ||
+      existsSync(join(gitRoot, '.claude', 'skills', 'pelizzai-core')) ||
+      existsSync(join(gitRoot, '.agents', 'skills', 'pelizzai-core'));
+    if (harnessPresent) {
+      return block(
+        'this consumer carries the harness but pelizzai/data/state.md does not exist — the kickoff ' +
+          'gate never ran. Run the kickoff/post-plan gate WITH the user — isolation, execution mode, ' +
+          'and commit strategy —, record "kickoff: ratified" in pelizzai/data/state.md (writes under ' +
+          'pelizzai/ are always allowed and create the file), and then write the product.'
+      );
+    }
+    // No trace of the harness in this repo: cannot decide safely → fail-open + warn once.
     warnOnce(
       gitRoot,
-      'no pelizzai/data/state.md to check the kickoff; allowing the write. If this project ' +
-        'uses the harness, run the kickoff gate and record "kickoff: ratified" before writing product.'
+      'no pelizzai/data/state.md and no harness footprint to check the kickoff; allowing the write. ' +
+        'If this project uses the harness, run the kickoff gate and record "kickoff: ratified" ' +
+        'before writing product.'
     );
     return 0;
   }

@@ -36,7 +36,10 @@
 #
 # Block: exit 2 + reason and safe path on stderr. Errors in the hook ITSELF and cases it
 # cannot decide safely: exit 0 (fail-open - a bug or false positive never locks the user
-# out). No state.md in a consumer: allows and warns at most once per window.
+# out). A missing state.md is NOT such a case when the repo carries the harness (pelizzai/
+# or the pelizzai-core skill): there the gate never ran and the write BLOCKS - ratifying
+# the gate writes the marker and creates the file. Only a repo with no harness footprint
+# at all fails open, warning at most once per window.
 #
 # Install (opt-in, recommended by pelizzai-onboard at bootstrap, merged without overwriting
 # existing hooks/permissions), in .claude/settings.json - BOTH matchers are required:
@@ -340,8 +343,20 @@ try {
 
   $statePath = Join-Path $gitRoot 'pelizzai/data/state.md'
   if (-not (Test-Path -LiteralPath $statePath)) {
-    # Consumer without state.md: cannot read the kickoff safely -> fail-open + warn once.
-    Invoke-WarnOnce $gitRoot 'no pelizzai/data/state.md to check the kickoff; allowing the write. If this project uses the harness, run the kickoff gate and record "kickoff: ratified" before writing product.'
+    # HARNESS EVIDENCE (2026-08-26 hardening): a missing state.md used to fail-open for every
+    # consumer, making Rule B unenforceable in the exact window it exists for - a consumer that
+    # carries the harness but whose kickoff gate never ran. The head skills write the marker
+    # BEFORE the first product write and writing pelizzai/data/state.md is always allowed, so
+    # blocking here locks out no legitimate flow: ratifying the gate creates the file. The
+    # fail-open + warn survives ONLY where it is honest - a repo with no trace of the harness.
+    $harnessPresent = (Test-Path -LiteralPath (Join-Path $gitRoot 'pelizzai')) -or
+      (Test-Path -LiteralPath (Join-Path $gitRoot '.claude/skills/pelizzai-core')) -or
+      (Test-Path -LiteralPath (Join-Path $gitRoot '.agents/skills/pelizzai-core'))
+    if ($harnessPresent) {
+      Invoke-Block 'this consumer carries the harness but pelizzai/data/state.md does not exist - the kickoff gate never ran. Run the kickoff/post-plan gate WITH the user - isolation, execution mode, and commit strategy -, record "kickoff: ratified" in pelizzai/data/state.md (writes under pelizzai/ are always allowed and create the file), and then write the product.'
+    }
+    # No trace of the harness in this repo: cannot decide safely -> fail-open + warn once.
+    Invoke-WarnOnce $gitRoot 'no pelizzai/data/state.md and no harness footprint to check the kickoff; allowing the write. If this project uses the harness, run the kickoff gate and record "kickoff: ratified" before writing product.'
     exit 0
   }
   $state = ''

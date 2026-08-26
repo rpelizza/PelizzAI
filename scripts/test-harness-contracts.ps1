@@ -705,6 +705,10 @@ try {
             Check-Match $wgRel 'DELIBERATE SCOPE' "writegate documents why it locks only the kickoff ($leaf)"
             # D2: documented metadata carve-out + security note (parity across both legs).
             Check-Match $wgRel 'METADATA CARVE-OUT' "writegate documents the harness metadata carve-out ($leaf)"
+            # 2026-08-26 hardening: a missing state.md in a repo that carries the harness BLOCKS
+            # (the gate never ran); the fail-open + warn survives only with no harness footprint.
+            # The trigger tests caught an agent editing product right through the old fail-open.
+            Check-Match $wgRel 'HARNESS EVIDENCE' "writegate documents the missing-state.md hardening ($leaf)"
             Check-Match $wgRel 'FILE writes ONLY' "writegate: security note — the carve-out is file writes only, not commits ($leaf)"
             Check-Match $wgRel 'LIMIT \(symlink\)' "writegate: security note documents the carve-out's symlink limitation ($leaf)"
         }
@@ -756,6 +760,26 @@ try {
             }
 
             git -C $wgTemp checkout -q -b feat/x  # task branch (not protected)
+
+            # -- Rule B, missing-state.md matrix (2026-08-26 hardening) --
+            # No harness footprint at all: still fail-open (an off-label install — e.g. the hook
+            # registered in global settings — must never lock an unrelated repo out).
+            foreach ($wg in @($wgMjs, $wgPs1)) {
+                $leaf = Split-Path -Leaf $wg
+                Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 0) "writegate: no state.md and no harness footprint fails open ($leaf)"
+            }
+            # A harness footprint (here: the pelizzai/ dir) with NO state.md means the kickoff gate
+            # never ran — the product write BLOCKS instead of warning. This is the gap the trigger
+            # tests exposed: an agent skipped the compact confirm and edited product right through
+            # the old fail-open, because the fixture consumer had the harness but no state.md yet.
+            New-Item -ItemType Directory -Path (Join-Path $wgTemp 'pelizzai') -Force | Out-Null
+            foreach ($wg in @($wgMjs, $wgPs1)) {
+                $leaf = Split-Path -Leaf $wg
+                Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 2) "writegate blocks product when the harness is present and state.md is missing ($leaf)"
+                # Ratifying the gate is the way out: writing state.md itself stays allowed.
+                Check ((Invoke-Writegate $wg @{ file_path = 'pelizzai/data/state.md' } $wgTemp) -eq 0) "writegate: recording the kickoff stays allowed with state.md missing ($leaf)"
+            }
+
             New-Item -ItemType Directory -Path (Join-Path $wgTemp 'pelizzai/data') -Force | Out-Null
             Set-Content -LiteralPath (Join-Path $wgTemp 'pelizzai/data/state.md') -Value "- kickoff: <pending>`n" -Encoding utf8
             foreach ($wg in @($wgMjs, $wgPs1)) {
