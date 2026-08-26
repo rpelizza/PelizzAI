@@ -91,6 +91,12 @@ stop. Hand over manual instructions to reconcile the protected branch; do not au
 
 ## 1.5. Coverage safety net (an offer — it does not block)
 
+**Recurrence check (consumer).** Before sealing, compare what this delivery fixed against the
+Incident log of `pelizzai/data/learnings.md` and the archived `pelizzai/data/history/learnings-*.md`.
+A defect that already has an entry is a **recurrence**, and a recurrence is the trigger for
+`pelizzai-evolve`: the existing rule did not prevent it, so either it is not being read, its scope
+is wrong, or it was never promoted. Count it and say so; do not open the cycle here.
+
 Overlays are the router's and the plan's responsibility and run **during execution**, before the
 final review and `validated-head`; this section does not pull them here. It is the **last net**: it
 catches the surface that escaped classification back then. Run it once, with the §1 gate green and

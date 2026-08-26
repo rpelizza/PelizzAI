@@ -116,6 +116,12 @@ handed back as an open question without options. Agreeing with the recommendatio
 
 ## Applicable skills
 
+**In a consumer, read the Active rules of `pelizzai/data/learnings.md` BEFORE choosing approaches**
+(the short section only; the Incident log is consulted on demand). A rule read after the approach is
+picked can only be an audit; read before, it removes an approach from the table. Most of them are
+about how this project proves something works, which is what a plan gets wrong by omission. Source
+mode: use the repo's own rules; never create `pelizzai/` for this.
+
 - In the header: the catalog's domain skills that apply to the whole plan, or `none`.
 - In each task: that slice's domain skills and the **Cross-cutting harness skills** it requires,
   or `none`. This per-task block is what reaches the executor in the briefing — the overlay does

@@ -118,7 +118,13 @@ recommendation. If the conversation reveals a structural or design problem, esca
 
 Before any mutation in the repository — test, instrumentation, or fix — use
 `pelizzai-isolate`. In a consumer, load the applicable skills from
-`pelizzai/domain-skills.md`; in source mode, use the source repo's own rules/skills. Revert
+`pelizzai/domain-skills.md`; in source mode, use the source repo's own rules/skills.
+
+**In a consumer, first read the Active rules of `pelizzai/data/learnings.md`** (the short section
+only; the Incident log is consulted on demand). This skill is what WRITES most of that file, and
+reading it here closes the loop: without this step the harness records a lesson and walks past it
+on the next bug. Read it BEFORE forming hypotheses — a rule postponed until you "know what you are
+touching" arrives after it could have redirected you. If the section is empty, say so and move on. Revert
 throwaway experiments that do not belong to the fix. Authorized operational containment that does
 not write to the repo does not wait for a branch.
 

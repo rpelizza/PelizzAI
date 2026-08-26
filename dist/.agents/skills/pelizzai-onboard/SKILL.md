@@ -201,7 +201,8 @@ The persistent bootstrap leaves:
 - `pelizzai/domain-skills.md` — the catalog, including `_none for now_` when applicable;
 - `pelizzai/data/review-domain-skills.md` — the ledger seeded with the current date/HEAD;
 - `pelizzai/profile.md` — real commands, package manager, **Stack baseline** (the drift anchor for the version/adoption axes), and skill roots; also record the **Ratified execution defaults** section with every field at `<unset>` — the bootstrap does not guess policy; the user ratifies it at the post-plan gate;
-- `pelizzai/.gitignore` — scoped protection of the ephemerals.
+- `pelizzai/.gitignore` and `pelizzai/.gitattributes` — scoped protection of the ephemerals; union merge for the append-shaped files;
+- `pelizzai/data/learnings.md` and `pelizzai/data/verification-standard.md` — seeded from the `pelizzai-evolve` templates.
 
 Mandatory content of `pelizzai/.gitignore`:
 
@@ -210,12 +211,27 @@ data/.cadence-state.json
 data/handoffs/
 data/mockups/
 data/reports/
+data/state.md
 ```
 
-`data/state.md`, `data/review-domain-skills.md`, and `data/history/` are **versioned** — a durable
-record; they never go into the ignore (a broad `data/*` with exceptions would silence `history/`
-and break the durability of the sealed-task record). Verify with `git check-ignore` using
-temporary proof files; remove the proofs afterward.
+Mandatory `pelizzai/.gitattributes`:
+```gitattributes
+data/learnings.md merge=union
+data/history/learnings-*.md merge=union
+```
+
+`data/review-domain-skills.md`, `data/learnings.md`, `data/verification-standard.md`, and
+`data/history/` are **versioned** — a durable record; never in the ignore (a broad `data/*` with
+exceptions would silence `history/`).
+
+`data/state.md` is the one deliberate exception: **the cursor is local per dev** — versioned, every
+dev's closure commit would fight over the same singleton. The durable per-task record is
+`data/history/<YYYY-MM-DD>-<slug>.md`, conflict-free by unique name.
+
+`merge=union` keeps concurrent appends to `learnings.md` from conflicting; the residual risk — a
+duplicated line between parallel appends — is visible and benign for append-shaped content. Union
+merge on a file that is NOT append-shaped interleaves edits silently; declare, never assume.
+Verify the ignore with `git check-ignore` using temporary proof files; remove the proofs afterward.
 
 Create on demand, not at bootstrap: `context.md`, `adr/`, `out-of-scope/`, `specs/`, `plans/`, and the ephemeral directories.
 
@@ -344,13 +360,14 @@ finish-task to consolidate it.
 ```text
 pelizzai/
 ├── .gitignore
+├── .gitattributes
 ├── domain-skills.md
 ├── profile.md
 ├── context.md | context/           on demand
 ├── adr/ | out-of-scope/            on demand
 ├── specs/ | plans/                 on demand
 └── data/
-    ├── state.md                    versioned
+    ├── state.md                    ignored (local per-dev cursor)
     ├── review-domain-skills.md     versioned
     ├── history/                    versioned (each task's intact block, migrated at the seal)
     ├── .cadence-state.json         ignored

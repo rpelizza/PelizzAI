@@ -29,6 +29,14 @@ NO CLAIM OF COMPLETION WITHOUT FRESH VERIFICATION EVIDENCE.
 If you do not have the output of a proof **from this round of changes**, you **cannot** claim it
 passes.
 
+**In a consumer, judge against `pelizzai/data/verification-standard.md`** — what "correct" means in
+this project, its procedure, and the baseline per surface. It is **read-only during any correction**:
+if an output fails, fix the output. Editing a criterion, the procedure, or a baseline row so a
+failing output passes is the guardrail violation under a friendlier name, and it is the failure this
+file exists to make visible. The standard changes only in a deliberate change of its own, ratified
+through `pelizzai-interview` via `pelizzai-evolve`. Missing file, or source mode: say so, and judge
+by the plan's acceptance criteria.
+
 ## The gate
 
 ```text
@@ -71,9 +79,15 @@ A conversation-only change does not invalidate proof. A product change does.
 | docs/prompt/policy | lint/render/links/schema/grep or a consumption scenario | fabricating a unit test |
 | plan requirements | traceability requirement → task/diff/proof | “the tests pass” |
 
-Combine rows for mixed tasks. Run the full suite when risk, profile, or a cross-cutting change
-justifies it; use a focal test for local iteration. Do not run unrelated checks just to inflate
-output volume.
+Combine rows for mixed tasks. Do not run unrelated checks just to inflate output volume.
+
+**Scope during a task, whole suite at the end.** A task proves the files it touched; the full
+suite runs once, before the final review, and it is not optional — it is the only run positioned to
+catch an interaction no single task could see. Two exceptions, both narrow: a task whose subject is
+itself cross-cutting (a shared type, a global config, a migration) has no meaningful touched-files
+scope and runs the suite; and a red inherited from an already-failing module is named in the
+briefing, or it gets reported as this task's failure. See `pelizzai-execute` →
+`references/task-cycle.md` §2, which owns this rule.
 
 ## Common failures
 

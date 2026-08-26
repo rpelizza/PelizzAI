@@ -60,6 +60,9 @@ ambiguous branch or ambiguous dirt is never adopted on a hunch.
 
 ## 2. Detect a multi-project workspace
 
+Detects a multi-project workspace and confirms the affected set with the user: in a workspace the
+harness never picks the projects on its own.
+
 A task still belongs to **one** Git repository (§1) — that does not change. What the harness needs
 to know before creating anything is whether that repository lives inside a **workspace**: the
 workspace decides where `pelizzai/` lives and which projects the request actually touches. Check
