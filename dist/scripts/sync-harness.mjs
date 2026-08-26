@@ -150,7 +150,7 @@ This project uses the **PelizzAI** skills harness. Skills live in \`.agents/skil
 
 **Entry:** start with \`pelizzai-core\` and \`pelizzai-router\`. The router classifies effect, risk, uncertainty, and surfaces; it picks a head skill and overlays. Read-only operations initialize no state. Before the first write, confirm isolation and branch. In the source repo, use the native plan/execution record; in a consumer, state/specs/plans follow the lifecycle.
 
-**Branch protection:** never commit to \`main\`/\`master\`/\`develop\`/\`dev\` or on a detached HEAD. Isolate via \`pelizzai-starting-branch\`.
+**Branch protection:** never commit to \`main\`/\`master\`/\`develop\`/\`dev\` or on a detached HEAD. Isolate via \`pelizzai-isolate\`.
 
 **User authority:** the harness classifies, reasons, researches with Context7/official documentation, and recommends; the user decides requirements, scope, UX, architecture, data, accepted risk, and acceptance criteria. Ask one question at a time, with the best option recommended. Greenfield goes through discovery, spec, and plan — stress-tested and ratified.
 

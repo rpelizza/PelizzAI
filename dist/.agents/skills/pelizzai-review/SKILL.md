@@ -1,6 +1,6 @@
 ---
 name: pelizzai-review
-description: Code review skill of the PelizzAI harness. Use after EVERY task during plan execution, when a relevant feature is complete, before integrating a delivery, or when the user asks for a review of a working tree, branch, or PR. Applies the (blind) spec lens and the quality/evidence lens — by default in two dispatches (`split`) — and teaches how to receive feedback with technical rigor. For security/OWASP, compose `pelizzai-oswap`.
+description: Code review skill of the PelizzAI harness. Use after EVERY task during plan execution, when a relevant feature is complete, before integrating a delivery, or when the user asks for a review of a working tree, branch, or PR. Applies the (blind) spec lens and the quality/evidence lens — by default in two dispatches (`split`) — and teaches how to receive feedback with technical rigor. For security/OWASP, compose `pelizzai-security`.
 ---
 
 # PelizzAI Review
@@ -26,7 +26,7 @@ Catch problems before they propagate. The reviewer receives **fabricated context
 
 ```text
 Mandatory:
-- After EVERY task during plan execution (pelizzai-execution-plans) — no exception for "it's simple".
+- After EVERY task during plan execution (pelizzai-execute) — no exception for "it's simple".
   The recorded profile (`split` by default, `combined` only by ratification) changes the FORM of the
   review, never whether it happens.
 - When a relevant feature is complete.
@@ -60,7 +60,7 @@ The plan picks the profile, which decides whether the lenses use one or two disp
 recommended default is `split`** — only with two dispatches does the blindness actually exist; in a
 single dispatch it becomes mere reading order, and a reviewer who has already read the report cannot
 unknow the author's narrative. `combined` is the **exception**, and the user ratifies it explicitly
-at step 4 of the setup gate (`pelizzai-execution-plans`).
+at step 4 of the setup gate (`pelizzai-execute`).
 
 | Profile | Predicate | Form |
 | --- | --- | --- |
@@ -97,7 +97,7 @@ the request before reading any claim. In both: **actually read the code**, do no
   A line with no trace is scope creep — a first-class finding, not a remark.
 ```
 
-Use the **[references/spec-reviewer.md](references/spec-reviewer.md)** template (without running tests — Verification belongs to Stage 2). Outcome: **✅ Matches the spec** (everything checks out after code inspection), **❌ Issues** (list what is missing/extra, with `file:line`), or **⚠️ Not verifiable** → requires the coordinator's assessment against the plan before concluding (see `pelizzai-execution-plans` → `references/task-cycle.md` §3-§4).
+Use the **[references/spec-reviewer.md](references/spec-reviewer.md)** template (without running tests — Verification belongs to Stage 2). Outcome: **✅ Matches the spec** (everything checks out after code inspection), **❌ Issues** (list what is missing/extra, with `file:line`), or **⚠️ Not verifiable** → requires the coordinator's assessment against the plan before concluding (see `pelizzai-execute` → `references/task-cycle.md` §3-§4).
 
 ### Stage 2 — Quality/evidence lens
 
@@ -119,7 +119,7 @@ confirm by running the check is **UNVERIFIED**, never ✅. Use the full rubric i
   patterns, the domain skills and the project's rules PREVAIL.
 ```
 
-If the reviewer flags a **sensitive surface** (auth, user input, query/SQL, secrets, upload, new dependencies), trigger `pelizzai-oswap` (OWASP) before concluding — do not leave security as a mere checklist item.
+If the reviewer flags a **sensitive surface** (auth, user input, query/SQL, secrets, upload, new dependencies), trigger `pelizzai-security` (OWASP) before concluding — do not leave security as a mere checklist item.
 
 ---
 
@@ -128,7 +128,7 @@ If the reviewer flags a **sensitive surface** (auth, user input, query/SQL, secr
 The quality reviewer selects and **actually runs** the checks that can prove the artifact
 (test, lint, build, parser, render, dry-run, or scenario), pasting command, output, and exit code
 into a `### Verification` block. Do not impose test/lint/build when there is no executable diff or
-causal relation; codebase-wide architectural review uses `pelizzai-improving-architecture`. **Do not
+causal relation; codebase-wide architectural review uses `pelizzai-architecture`. **Do not
 infer** pass/fail by reading the diff. A relevant check that could not run is **UNVERIFIED — never ✅**.
 
 ---
@@ -219,9 +219,9 @@ task. Use an independent reviewer, with the **session's model** — the one the 
 a lesser one — and the **highest effort the platform allows**: the final review is the last filter
 before the seal, not a place to economize on your own initiative nor to tune the process to
 compensate for a lesser model. It is step 1 of the coordinator's
-**final delivery validation** (`pelizzai-execution-plans` → "Final delivery
+**final delivery validation** (`pelizzai-execute` → "Final delivery
 validation") and happens **after** the overlays that may write (security, frontend, and documentation)
-and before the full suite, checklist, and `pelizzai-verification-before-completion`. Open
+and before the full suite, checklist, and `pelizzai-verify`. Open
 Critical/Important findings block completion.
 
 Reuse exception (narrow, and never the default path): a plan of **a single bounded task**,
@@ -238,8 +238,8 @@ Any fix — from a finding, overlay, test, checklist, or visual verification —
 invalidate `validated-head`, consolidate the fix, re-run the affected overlays, and **reopen the
 final review** over the new HEAD. "It was reviewed before the fix" does not count as approval.
 
-**Who triggers the final review:** `pelizzai-execution-plans` (plan closeout). A bug fix
-(`pelizzai-debugging`) uses the **standalone change review** below while still in the working tree;
+**Who triggers the final review:** `pelizzai-execute` (plan closeout). A bug fix
+(`pelizzai-diagnose`) uses the **standalone change review** below while still in the working tree;
 then debugging consolidates the content, runs Verification against the HEAD, and only then calls
 finish-task. The tweak track (`pelizzai-quick-fix`) waives formal review as long as it stays trivial.
 
@@ -277,10 +277,10 @@ Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route ana
 - Reviewer wrong → push back with technical reasoning (show code/tests that prove it).
 ```
 
-This feeds the `pelizzai-execution-plans` circuit breaker (3 cycles per lens, per task;
-detail and resets in `pelizzai-execution-plans` → `references/task-cycle.md` §5).
+This feeds the `pelizzai-execute` circuit breaker (3 cycles per lens, per task;
+detail and resets in `pelizzai-execute` → `references/task-cycle.md` §5).
 **Protected-branch handback:** if acting on the feedback means writing code and there is no
-isolation in the consumer state or native execution record, go through `pelizzai-starting-branch`
+isolation in the consumer state or native execution record, go through `pelizzai-isolate`
 first — so the fixes do not land on a protected branch.
 
 ---
@@ -340,12 +340,12 @@ On a GitHub PR, reply in the inline comment THREAD (not as a top-level PR commen
 
 **Combines with:**
 
-- `pelizzai-execution-plans` — per-task review (combined/split) and final review; see `task-cycle.md`.
+- `pelizzai-execute` — per-task review (combined/split) and final review; see `task-cycle.md`.
 - `pelizzai-tdd` — the tests the review checks are born from the TDD cycle.
-- `pelizzai-starting-branch` — handback when acting on feedback turns into writing code.
+- `pelizzai-isolate` — handback when acting on feedback turns into writing code.
 - `pelizzai-reasoning` — *Critique and Refine* (acting on the feedback) and *Verification* (fresh evidence).
-- `pelizzai-oswap` — the review's security (OWASP) dimension.
-- `pelizzai-verification-before-completion` / `pelizzai-finish-task` — completion after the final review.
+- `pelizzai-security` — the review's security (OWASP) dimension.
+- `pelizzai-verify` / `pelizzai-finish` — completion after the final review.
 
 ---
 
@@ -363,5 +363,5 @@ Prefer:
 Review early and often: depth is proportional to risk, the existence of the review is not.
 Spec first, quality/evidence second — in TWO dispatches by default (`split`); a single dispatch (`combined`) only with the user's explicit ratification. Critical/Important before moving on; Minor for the end.
 In split, the spec lens is blind (no report) and receives diff + spec/plan + the area's domain skills; the quality/evidence lens receives and verifies the report. The coordinator crosses the lenses and is never the blind lens.
-Never pass the session history to the reviewer. For security, use pelizzai-oswap.
+Never pass the session history to the reviewer. For security, use pelizzai-security.
 ```

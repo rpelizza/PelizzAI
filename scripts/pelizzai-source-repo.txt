@@ -5,7 +5,7 @@
 #   - the harness does NOT create the consumer `pelizzai/` runtime (state/specs/plans/profile);
 #   - the pelizzai-writegate hook SKIPS Rule B (kickoff via consumer state);
 #   - the pelizzai-session-start hook does NOT suggest consumer bootstrap;
-#   - pelizzai-audit treats the project as a source (scan without bootstrap).
+#   - pelizzai-onboard treats the project as a source (scan without bootstrap).
 #
 # NEVER copy this file into a consumer project: it would disable the consumer
 # lifecycle and the writegate enforcement there. The correct distribution is:

@@ -90,15 +90,15 @@ Record in the plan/briefing the terms and invariants the implementation/review m
 
 ## Integration
 
-`pelizzai-brainstorming` uses this overlay only when the model changes; `pelizzai-writing-plans`
-propagates the invariants; `pelizzai-codebase-design` translates the boundaries into modules; useful
+`pelizzai-discovery` uses this overlay only when the model changes; `pelizzai-plan`
+propagates the invariants; `pelizzai-module-design` translates the boundaries into modules; useful
 reasoning is Constraint Satisfaction + Assumption Tracking.
 
 ADR recording points (all filtered by the triple criterion, all the coordinator's action):
-`pelizzai-brainstorming` when saving the spec of a ratified design (auto + one-line announcement);
-`pelizzai-execution-plans` when consolidating a durable architectural decision — already ratified at
+`pelizzai-discovery` when saving the spec of a ratified design (auto + one-line announcement);
+`pelizzai-execute` when consolidating a durable architectural decision — already ratified at
 the design gate (auto, pre-seal) or emergent (presents it to the user before writing);
-`pelizzai-debugging` on a durable root cause (emergent → presents); `pelizzai-improving-architecture`
+`pelizzai-diagnose` on a durable root cause (emergent → presents); `pelizzai-architecture`
 only **offers**, being read-only.
 
 ## Red flags

@@ -1,6 +1,6 @@
 ---
 name: pelizzai-tdd
-description: "Test-driven development (TDD) — the harness's PER-TASK test-first discipline. Use to build features or fix bugs test-first (red → green → refactor, vertical slices, integration tests); trigger it when implementing each code task of a plan (via `pelizzai-execution-plans`) and whenever a `pelizzai-team`/`pelizzai-subagents` member writes code. The suitability gate decides the legitimate exceptions: preserving refactors, visual CSS, documentation, configuration, IaC, migrations, and generated code use characterization, native validation, dry-run, visual QA, or static checks."
+description: "Test-driven development (TDD) — the harness's PER-TASK test-first discipline. Use to build features or fix bugs test-first (red → green → refactor, vertical slices, integration tests); trigger it when implementing each code task of a plan (via `pelizzai-execute`) and whenever a `pelizzai-team`/`pelizzai-subagents` member writes code. The suitability gate decides the legitimate exceptions: preserving refactors, visual CSS, documentation, configuration, IaC, migrations, and generated code use characterization, native validation, dry-run, visual QA, or static checks."
 ---
 
 # PelizzAI TDD
@@ -31,11 +31,11 @@ Otherwise, use the strategy selected by `pelizzai-reasoning` and recorded in the
 | Refactor with no behavioral change | green characterization coverage/suite first; refactor on green; same suite after |
 | Configuration or IaC | the tool's validator/plan/dry-run plus compatibility/rollback checks |
 | Migration | schema validation, dry-run/disposable environment, forward/rollback as supported |
-| Purely visual UI | `pelizzai-frontend` + browser/screenshot across relevant viewports and states |
+| Purely visual UI | `pelizzai-interface` + browser/screenshot across relevant viewports and states |
 | Documentation/copy | lint, links, examples, build/render, or proportional static inspection |
 | Generated/vendor code | validate the source/generator and deterministic regeneration; do not test the artifact as authored code |
 
-Combinations are normal: a form uses TDD for submission/errors **and** `pelizzai-frontend` for appearance, accessibility, and responsiveness.
+Combinations are normal: a form uses TDD for submission/errors **and** `pelizzai-interface` for appearance, accessibility, and responsiveness.
 
 Do not self-classify a behavioral change as "cosmetic" or "config" to escape the cycle: the
 exception holds by the artifact's real effect, not by haste.
@@ -90,19 +90,19 @@ Before the first test:
 ```
 
 **Agree the seams before the tests: no test is written on an unconfirmed seam.** In a feature
-flow, the seams already come from the approved spec (`pelizzai-brainstorming`, validation strategy,
+flow, the seams already come from the approved spec (`pelizzai-discovery`, validation strategy,
 and real seams) — confirm them; outside it, agree them here, with the vocabulary of
-`pelizzai-codebase-design`.
+`pelizzai-module-design`.
 
 While agreeing the seam, identify opportunities for deep modules (simple interface, robust
-implementation) using the vocabulary of `pelizzai-codebase-design` and `pelizzai-reasoning`'s
+implementation) using the vocabulary of `pelizzai-module-design` and `pelizzai-reasoning`'s
 *Structured Decomposition* to map behaviors and testability; in new design, this already comes from
-`pelizzai-brainstorming`.
+`pelizzai-discovery`.
 
-If the needed seam does not exist, that is an architectural signal. Do not contort the test: record the gap and use `pelizzai-improving-architecture` when it requires a design change.
+If the needed seam does not exist, that is an architectural signal. Do not contort the test: record the gap and use `pelizzai-architecture` when it requires a design change.
 
 Any material gap — an interface to change, expected behavior, a seam, an acceptance criterion —
-halts the work and goes to `pelizzai-interview-me`, one question at a time. Do not fill it by
+halts the work and goes to `pelizzai-interview`, one question at a time. Do not fill it by
 convention, default, or reasonable inference; also do not reopen an already-approved decision.
 
 ---
@@ -130,7 +130,7 @@ Waived from this gate — with no self-declared "obviousness":
 
 ```text
 - a ratified spec/plan that already approved this task's behaviors and seams (do not reopen);
-- light path: a single regression test (`pelizzai-debugging`) or a minimal tweak test
+- light path: a single regression test (`pelizzai-diagnose`) or a minimal tweak test
   (`pelizzai-quick-fix`), where the target behavior is already fixed by the root cause or by the
   tweak's criterion;
 - closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP): apply the briefing, do not open gates, and escalate to the
@@ -205,7 +205,7 @@ flowchart LR
 [ ] No speculative functionality got in.
 ```
 
-For a regression bug, `pelizzai-verification-before-completion` requires the reinforced proof: green with the fix, failing when only the fix is removed/reverted, green after restoring it.
+For a regression bug, `pelizzai-verify` requires the reinforced proof: green with the fix, failing when only the fix is removed/reverted, green after restoring it.
 
 ## When a test fails unexpectedly
 
@@ -218,34 +218,34 @@ Do not invoke RCA by reflex:
 - active damage → reversible containment first.
 ```
 
-Follow the triage in `pelizzai-debugging`.
+Follow the triage in `pelizzai-diagnose`.
 
 ## Harness integration
 
 **When TDD comes in:**
 
 - Directly, when the user develops test-first or fixes a bug — first write the regression test that reproduces the bug.
-- As a **per-task discipline** when executing a plan: `pelizzai-execution-plans` drives task by task (team, subagents, or inline) and applies the recorded strategy — TDD by default for the code task, without forcing it where the effect is not behavioral.
+- As a **per-task discipline** when executing a plan: `pelizzai-execute` drives task by task (team, subagents, or inline) and applies the recorded strategy — TDD by default for the code task, without forcing it where the effect is not behavioral.
 - By **`pelizzai-team` / `pelizzai-subagents` members**: every member who writes code implements their workstream via TDD.
-- `pelizzai-writing-plans` records the proof strategy per task: TDD is the code task's default and the suitability gate names the exception when the effect is not behavioral.
-- `pelizzai-debugging` uses red→green regression when there is automatable behavior.
-- `pelizzai-frontend` remains mandatory for UI even when component tests pass.
-- `pelizzai-verification-before-completion` validates the complete result before any claim.
+- `pelizzai-plan` records the proof strategy per task: TDD is the code task's default and the suitability gate names the exception when the effect is not behavioral.
+- `pelizzai-diagnose` uses red→green regression when there is automatable behavior.
+- `pelizzai-interface` remains mandatory for UI even when component tests pass.
+- `pelizzai-verify` validates the complete result before any claim.
 
 **Reasoning — `pelizzai-reasoning`:**
 
 - Planning: list the behaviors with *Structured Decomposition* (behaviors, not implementation steps).
-- Unexpected red test or bug: `pelizzai-debugging` triage before touching the code.
+- Unexpected red test or bug: `pelizzai-diagnose` triage before touching the code.
 - Green state: *Verification* confirms the behavior actually exists — "it passed" is not enough.
 
 **Loop until delivery — `pelizzai-loop` (OODA):**
 
 - The RED→GREEN cycle is a loop: repeat test→code per behavior until the *Definition of Done* (critical behaviors tested and green, refactored on green).
-- At the task/plan level, the harness keeps the **OODA** loop (observe the fresh evidence → orient against the plan → decide → act) until the task is delivered successfully. On material doubt, **stop** and use `pelizzai-interview-me`.
+- At the task/plan level, the harness keeps the **OODA** loop (observe the fresh evidence → orient against the plan → decide → act) until the task is delivered successfully. On material doubt, **stop** and use `pelizzai-interview`.
 
 **Approval and completion:**
 
-- Confirm interface, behaviors, and seams with `pelizzai-interview-me`, or in the approved `pelizzai-brainstorming` design, before writing tests.
-- Before declaring done, go through `pelizzai-verification-before-completion` and `pelizzai-review` (exception: the **tweak** track waives the formal review for trivial scope — see `pelizzai-quick-fix`; verification always applies).
+- Confirm interface, behaviors, and seams with `pelizzai-interview`, or in the approved `pelizzai-discovery` design, before writing tests.
+- Before declaring done, go through `pelizzai-verify` and `pelizzai-review` (exception: the **tweak** track waives the formal review for trivial scope — see `pelizzai-quick-fix`; verification always applies).
 
 > TDD is the default discipline for behavior — not a universal quality proof for an artifact with no automatable behavior.

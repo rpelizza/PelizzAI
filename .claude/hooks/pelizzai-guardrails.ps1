@@ -29,7 +29,7 @@
 # Errors in the hook ITSELF: exit 0 (fail-open - the hook is a safety net, not the
 # primary gate; a bug here never locks the user out).
 #
-# Installation (opt-in, recommended by pelizzai-audit), in .claude/settings.json:
+# Installation (opt-in, recommended by pelizzai-onboard), in .claude/settings.json:
 #   { "hooks": { "PreToolUse": [ { "matcher": "Bash", "hooks": [
 #       { "type": "command",
 #         "command": "pwsh -NoProfile -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-guardrails.ps1\"" } ] } ] } }
@@ -66,7 +66,7 @@ try {
     @{ Name = 'git reset --hard'
        Test = { param($s) ($s -match '\bgit\b.*\breset\b') -and ($s -cmatch '(^|\s)--hard\b') }
        Why  = 'discards commits and working-tree changes with no way back.'
-       Safe = 'create a return point first (named stash or WIP commit) and follow the pelizzai-recovery skill procedure.' },
+       Safe = 'create a return point first (named stash or WIP commit) and follow the pelizzai-resume skill procedure.' },
     @{ Name = 'git clean -f'
        Test = { param($s) ($s -match '\bgit\b.*\bclean\b') -and (($s -cmatch '(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)') -or ($s -cmatch '(^|\s)--force\b')) }
        Why  = 'deletes untracked files irreversibly (there is no stash or reflog for them).'
@@ -78,7 +78,7 @@ try {
        # -M is NOT included: renaming a branch is the canonical git init step (git branch -M main).
        Test = { param($s) ($s -match '\bgit\b.*\bbranch\b') -and (($s -cmatch '(^|\s)-[a-zA-Z]*D[a-zA-Z]*(\s|$)') -or (($s -cmatch '(^|\s)--delete(\s|$)') -and (($s -cmatch '(^|\s)--force(\s|$)') -or ($s -cmatch '(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)')))) }
        Why  = 'forces the removal of a branch that is NOT merged - its commits may be lost.'
-       Safe = 'use -d (it only deletes an already-merged branch) or confirm the discard with the user (pelizzai-finish-task requires the literal text "discard").' },
+       Safe = 'use -d (it only deletes an already-merged branch) or confirm the discard with the user (pelizzai-finish requires the literal text "discard").' },
     @{ Name = 'git checkout . / checkout [<ref>] -- .'
        # Covers "checkout .", "checkout -- .", "checkout <ref> -- ." and the "./" form (all discard the working tree).
        # checkout -- <file> is NOT included: discarding a named file is a routine operation.

@@ -69,7 +69,7 @@
       ],
       "metadata": true,
       "head": [
-        ".claude/skills/pelizzai-debugging/SKILL.md"
+        ".claude/skills/pelizzai-diagnose/SKILL.md"
       ],
       "ceilingBytes": 92439,
       "targetBytes": 55000
@@ -85,7 +85,7 @@
       ],
       "metadata": true,
       "head": [
-        ".claude/skills/pelizzai-brainstorming/SKILL.md"
+        ".claude/skills/pelizzai-discovery/SKILL.md"
       ],
       "ceilingBytes": 91920,
       "targetBytes": 60000
@@ -101,7 +101,7 @@
       ],
       "metadata": true,
       "head": [
-        ".claude/skills/pelizzai-writing-plans/SKILL.md"
+        ".claude/skills/pelizzai-plan/SKILL.md"
       ],
       "ceilingBytes": 93944,
       "targetBytes": 60000
@@ -117,8 +117,8 @@
       ],
       "metadata": true,
       "head": [
-        ".claude/skills/pelizzai-execution-plans/SKILL.md",
-        ".claude/skills/pelizzai-execution-plans/references/task-cycle.md"
+        ".claude/skills/pelizzai-execute/SKILL.md",
+        ".claude/skills/pelizzai-execute/references/task-cycle.md"
       ],
       "ceilingBytes": 135895,
       "targetBytes": 85000
@@ -174,7 +174,7 @@
   },
   "_driftCheck": "Every reference a head skill links to is either declared in the route that loads it, or listed under `onDemand` as consulted only inside a named branch. A link that appears in neither is drift: the doctrine grew a mandatory read that nobody budgeted.",
   "onDemand": [
-    ".claude/skills/pelizzai-debugging/references/feedback-loops.md",
+    ".claude/skills/pelizzai-diagnose/references/feedback-loops.md",
     ".claude/skills/pelizzai-review/references/code-reviewer.md",
     ".claude/skills/pelizzai-review/references/spec-reviewer.md"
   ]

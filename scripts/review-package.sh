@@ -31,7 +31,7 @@ handoff_dir() {
   else
     identity=$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)
     key=$(printf '%s' "$identity" | cksum | awk '{print $1}')
-    printf '%s\n' "${TMPDIR:-/tmp}/pelizzai-handoffs-$key"
+    printf '%s\n' "${TMPDIR:-/tmp}/pelizzai-continuitys-$key"
   fi
 }
 

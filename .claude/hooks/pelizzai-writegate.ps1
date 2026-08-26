@@ -38,7 +38,7 @@
 # cannot decide safely: exit 0 (fail-open - a bug or false positive never locks the user
 # out). No state.md in a consumer: allows and warns at most once per window.
 #
-# Install (opt-in, recommended by pelizzai-audit at bootstrap, merged without overwriting
+# Install (opt-in, recommended by pelizzai-onboard at bootstrap, merged without overwriting
 # existing hooks/permissions), in .claude/settings.json - BOTH matchers are required:
 #   { "hooks": { "PreToolUse": [
 #       { "matcher": "Write|Edit|MultiEdit|NotebookEdit", "hooks": [
@@ -243,7 +243,7 @@ function Get-ShellTargets([string]$command) {
 # Blocks: reason + safe path on stderr and exit 2.
 function Invoke-Block([string]$reason) {
   [Console]::Error.WriteLine("PelizzAI writegate: write blocked - $reason")
-  [Console]::Error.WriteLine('(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, isolate via pelizzai-starting-branch, ratify the gate, or disable the hook in .claude/settings.json.)')
+  [Console]::Error.WriteLine('(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, isolate via pelizzai-isolate, ratify the gate, or disable the hook in .claude/settings.json.)')
   exit 2
 }
 
@@ -325,7 +325,7 @@ try {
   }
   if ($isProtected -and $products.Count -gt 0) {
     $b = if ($branch) { $branch } else { 'detached HEAD' }
-    Invoke-Block "protected/detached branch ($b). Isolate via pelizzai-starting-branch before writing product - isolation before the first write is an invariant (metadata writes in pelizzai/ are allowed even here)."
+    Invoke-Block "protected/detached branch ($b). Isolate via pelizzai-isolate before writing product - isolation before the first write is an invariant (metadata writes in pelizzai/ are allowed even here)."
   }
 
   # Source mode (PelizzAI source repo): the marker lives in the execution record -> Rule B skipped.

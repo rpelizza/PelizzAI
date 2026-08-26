@@ -52,7 +52,7 @@ try {
     # Dedicated sentinel: only the source repo has it (consumers have manifest/sync and are NOT the source).
     $srcMode = Test-Path -LiteralPath (Join-Path $cwd 'scripts/pelizzai-source-repo.txt')
     if ((-not $srcMode) -and (-not (Test-Path -LiteralPath (Join-Path $cwd 'pelizzai/domain-skills.md')))) {
-      $lines += 'Project has no domain-skill catalog (pelizzai/domain-skills.md missing). If you are going to work on the code, consider pelizzai-audit in scan-only -> propose bootstrap-write. Nothing is created without your confirmation.'
+      $lines += 'Project has no domain-skill catalog (pelizzai/domain-skills.md missing). If you are going to work on the code, consider pelizzai-onboard in scan-only -> propose bootstrap-write. Nothing is created without your confirmation.'
     }
   } catch {}
 

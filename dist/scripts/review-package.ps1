@@ -45,7 +45,7 @@ function Get-HandoffDir {
   $sha = [Security.Cryptography.SHA256]::Create()
   try { $digest = $sha.ComputeHash($bytes) } finally { $sha.Dispose() }
   $hash = (-join ($digest | ForEach-Object { $_.ToString('x2') })).Substring(0, 12)
-  return (Join-Path ([IO.Path]::GetTempPath()) "pelizzai-handoffs/$hash")
+  return (Join-Path ([IO.Path]::GetTempPath()) "pelizzai-continuitys/$hash")
 }
 
 git rev-parse --is-inside-work-tree *> $null

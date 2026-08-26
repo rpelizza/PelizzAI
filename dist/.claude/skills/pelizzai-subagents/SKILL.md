@@ -78,7 +78,7 @@ The handoff dir is gitignored in the consumer and temp in source mode (see task-
   (what is missing + what it changes + 2–3 options with the recommended one), return
   `NEEDS_CONTEXT`, and also declare it under `Deviations from plan:`. Do not fill it by default or
   by "reasonable inference" — the coordinator is who takes the decision to the human, via
-  `pelizzai-interview-me` (gap mode).
+  `pelizzai-interview` (gap mode).
 - Constraints: what not to touch; read-only, when applicable.
 ```
 
@@ -91,18 +91,18 @@ user ratified the downgrade at the setup gate). In `split`, the blindness is asy
 **NOT receive the report** of the subagent (it judges the code against the contract, without the
 narrative); the **quality/evidence lens** receives the report and verifies the claims with fresh
 proof. The coordinator (the main session) cross-checks the lenses and is **never** the blind lens.
-Then apply `pelizzai-verification-before-completion` before consolidating. For research,
+Then apply `pelizzai-verify` before consolidating. For research,
 cross-check conflicting findings and distrust an unverified report.
 
 If the subagent flagged a domain-skill gap for the task's stack, the coordinator accumulates
 those gaps and consolidates them into a single proposal at closeout (the adoption-driven axis of
-`pelizzai-finish-task`) — never creating a skill mid-task. This path does **not** halt execution.
+`pelizzai-finish`) — never creating a skill mid-task. This path does **not** halt execution.
 
 **A material gap is the other path, and that one halts the workstream.** If the subagent NAMED a
 requirement, scope, UX, architecture, data, security, cost, or acceptance decision that was not in
 the briefing, the plan, or the spec, it does not get resolved in the next dispatch: the coordinator
 does **not decide** for itself or for the subagent. It consolidates the open gaps — grouping and
-ordering by dependency, never choosing — and takes them to the human via `pelizzai-interview-me`
+ordering by dependency, never choosing — and takes them to the human via `pelizzai-interview`
 in gap mode (one question at a time, 2–3 options with the recommended one) before re-dispatching.
 The ratified decision goes back into the plan and the briefing; only then does the workstream
 continue.
@@ -119,7 +119,7 @@ continue.
 - Handing the subagent's report to the blind spec lens, or the coordinator dispatching itself as that lens.
 - Assembling the specialist subagent without the complete domain-skill package for its area.
 - The subagent filling by default or "reasonable inference" a decision that is not in the briefing/plan/spec, instead of naming the gap and returning NEEDS_CONTEXT.
-- The coordinator resolving the material gap alone (or re-dispatching over it) instead of taking it to the human via `pelizzai-interview-me` — consolidating is not deciding.
+- The coordinator resolving the material gap alone (or re-dispatching over it) instead of taking it to the human via `pelizzai-interview` — consolidating is not deciding.
 - Using subagents for a TEAM of roles that need to dialogue — that is `pelizzai-team`.
 ```
 
@@ -131,7 +131,7 @@ continue.
 
 - `pelizzai-team` — the full team (multiple roles, task list, dialogue); subagents is delegation to ONE agent.
 - `pelizzai-reasoning` / `pelizzai-preferences` — reasoning layer and global floor instructed in the briefing (domain skills prevail).
-- `pelizzai-execution-plans` — `subagents` mode: one subagent per task, dispatched by the coordinator.
-- `pelizzai-interview-me` — destination of the material gap the subagent names: the coordinator takes it to the human before re-dispatching.
-- `pelizzai-review` / `pelizzai-verification-before-completion` — check the result before consolidating.
-- `pelizzai-audit` — catalog of domain skills pasted into the briefing.
+- `pelizzai-execute` — `subagents` mode: one subagent per task, dispatched by the coordinator.
+- `pelizzai-interview` — destination of the material gap the subagent names: the coordinator takes it to the human before re-dispatching.
+- `pelizzai-review` / `pelizzai-verify` — check the result before consolidating.
+- `pelizzai-onboard` — catalog of domain skills pasted into the briefing.

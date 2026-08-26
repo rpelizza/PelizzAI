@@ -176,14 +176,14 @@ Routing:
 
 Next action:
 - Inspect the contract, the existing patterns, and the pagination before changing code.
-- Register `pelizzai-frontend` as a mandatory overlay.
-- Use TDD for the behavior and visual QA via `pelizzai-frontend` for the UI.
+- Register `pelizzai-interface` as a mandatory overlay.
+- Use TDD for the behavior and visual QA via `pelizzai-interface` for the UI.
 ```
 
 #### Failure
 
 - Implementing the filter only on the frontend without checking the API.
-- Treating Playwright/browser as a substitute for the `pelizzai-frontend` skill.
+- Treating Playwright/browser as a substitute for the `pelizzai-interface` skill.
 - Building a tree of alternatives without need.
 - Concluding without build, tests, or proportional validation.
 

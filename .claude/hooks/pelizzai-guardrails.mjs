@@ -33,7 +33,7 @@
  * (fail-open — the hook is a safety net, not the primary gate; a bug here never
  * locks the user out).
  *
- * Installation (opt-in, recommended by pelizzai-audit at bootstrap), in the consumer
+ * Installation (opt-in, recommended by pelizzai-onboard at bootstrap), in the consumer
  * project's .claude/settings.json:
  *   { "hooks": { "PreToolUse": [ { "matcher": "Bash", "hooks": [
  *       { "type": "command",
@@ -69,7 +69,7 @@ const RULES = [
     name: 'git reset --hard',
     test: (s) => /\bgit\b.*\breset\b/i.test(s) && /(^|\s)--hard\b/.test(s),
     why: 'discards commits and working-tree changes with no way back.',
-    safe: 'create a return point first (named stash or WIP commit) and follow the pelizzai-recovery skill procedure.',
+    safe: 'create a return point first (named stash or WIP commit) and follow the pelizzai-resume skill procedure.',
   },
   {
     name: 'git clean -f',
@@ -91,7 +91,7 @@ const RULES = [
         (/(^|\s)--delete(\s|$)/.test(s) &&
           (/(^|\s)--force(\s|$)/.test(s) || /(^|\s)-[a-zA-Z]*f[a-zA-Z]*(\s|$)/.test(s)))),
     why: 'forces the removal of a branch that is NOT merged — its commits may be lost.',
-    safe: 'use -d (it only deletes an already-merged branch) or confirm the discard with the user (pelizzai-finish-task requires the literal text "discard").',
+    safe: 'use -d (it only deletes an already-merged branch) or confirm the discard with the user (pelizzai-finish requires the literal text "discard").',
   },
   {
     name: 'git checkout . / checkout [<ref>] -- .',

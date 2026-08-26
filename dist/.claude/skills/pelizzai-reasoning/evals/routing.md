@@ -31,7 +31,7 @@ The goal is not to evaluate the full quality of the final answer, the code, or t
 | Root Cause Analysis      | [root-cause-analysis.md](../techniques/root-cause-analysis.md)           |
 | Critique and Refine      | [critique-and-refine.md](../techniques/critique-and-refine.md)           |
 
-> Note: [pelizzai-interview-me](../../pelizzai-interview-me/SKILL.md) is a **sibling** skill (an interview to clarify goal/premises), not one of the catalog's reasoning techniques. When cited in a routing, it is the "ask for clarification" action, not a countable auxiliary technique.
+> Note: [pelizzai-interview](../../pelizzai-interview/SKILL.md) is a **sibling** skill (an interview to clarify goal/premises), not one of the catalog's reasoning techniques. When cited in a routing, it is the "ask for clarification" action, not a countable auxiliary technique.
 
 > Note: **Proposal Stress (applied Assumption Tracking)** is the application of [Assumption Tracking](../techniques/assumption-tracking.md) to a new request — it produces the Proposal Analysis that `pelizzai-router` presents before routing. It is not a separate technique in this suite: new-request scenarios with material uncertainty (e.g., R-05) expect Assumption Tracking as primary and the exposure of the material gaps as output, not a reflexive question.
 
@@ -217,8 +217,8 @@ Acceptable auxiliary techniques:
 
 Next action:
 - Inspect the contract and the existing patterns before changing code.
-- Register `pelizzai-frontend` as a mandatory overlay of the UI task.
-- Use TDD for the filter/pagination behavior and visual verification via `pelizzai-frontend`
+- Register `pelizzai-interface` as a mandatory overlay of the UI task.
+- Use TDD for the filter/pagination behavior and visual verification via `pelizzai-interface`
   for states, responsiveness, and interaction; Playwright/browser is a tool, not a substitute.
 ```
 
@@ -257,7 +257,7 @@ Acceptable auxiliary techniques:
 - Structured Decomposition.
 ```
 
-Clarification action: invoke [pelizzai-interview-me](../../pelizzai-interview-me/SKILL.md) (a sibling skill, not an auxiliary technique) if the context does not resolve material ambiguities.
+Clarification action: invoke [pelizzai-interview](../../pelizzai-interview/SKILL.md) (a sibling skill, not an auxiliary technique) if the context does not resolve material ambiguities.
 
 ```text
 Next action:

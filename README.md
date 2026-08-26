@@ -92,7 +92,7 @@ consumer's `CLAUDE.md`, and validates the mirrors — **without touching** your 
 The hooks are Claude Code-specific and **opt-in**. You have two paths:
 
 - enable them along with the installation, adding `--install-hooks` (or `-InstallHooks`);
-- leave it to the first task that writes something: `pelizzai-audit` checks, recommends, and asks
+- leave it to the first task that writes something: `pelizzai-onboard` checks, recommends, and asks
   once, one hook at a time.
 
 ```bash
@@ -206,10 +206,10 @@ review, and Verification.
 
 | Observed signal | Mandatory overlay |
 | --- | --- |
-| screen, component, CSS, layout, UX, or accessibility | `pelizzai-frontend` |
-| auth, external input, SQL, upload, secret, CORS, SSRF, or a sensitive dependency | `pelizzai-oswap` before the final validation |
+| screen, component, CSS, layout, UX, or accessibility | `pelizzai-interface` |
+| auth, external input, SQL, upload, secret, CORS, SSRF, or a sensitive dependency | `pelizzai-security` before the final validation |
 | project-specific convention | domain skill cataloged in `pelizzai/domain-skills.md` |
-| human documentation in scope | `pelizzai-documenting-features` |
+| human documentation in scope | `pelizzai-docs` |
 
 The frontend overlay applies the existing design system and specification before any generic
 preference. It demands real states, responsiveness, accessibility, and visual QA, and explicitly
@@ -239,7 +239,7 @@ flowchart TD
     CP --> WT["worktree of the same branch"]
 ```
 
-For Git-mutating tasks, `pelizzai-starting-branch` creates or validates the branch **before** any
+For Git-mutating tasks, `pelizzai-isolate` creates or validates the branch **before** any
 state, spec, plan, ADR, code, configuration, test, scaffold, or prototype. Spec and plan are never
 born on a protected branch.
 
@@ -269,7 +269,7 @@ language, and database define neither users, rules, states, UX, data, nor accept
 
 ### Debugging
 
-`pelizzai-debugging` starts with **triage**, not a fixed ritual. The failure class picks the
+`pelizzai-diagnose` starts with **triage**, not a fixed ritual. The failure class picks the
 method:
 
 | Failure class | Method | Hypotheses |
@@ -288,7 +288,7 @@ gap, not stubbornness.
 
 - `pelizzai-quick-fix` — a local, reversible change with no new rule, contract, or surface.
 - `pelizzai-review` — read-only review of a diff, working tree, branch, or PR.
-- `pelizzai-improving-architecture` — codebase-wide review by friction and evidence, with no
+- `pelizzai-architecture` — codebase-wide review by friction and evidence, with no
   writes.
 - If a tweak reveals new design, contract, or risk, the router reclassifies before continuing.
 
@@ -330,10 +330,10 @@ flowchart LR
 ```
 
 The final validation happens after squash, overlays, tests, and fixes. When everything passes,
-`pelizzai-verification-before-completion` records the `validated-head`: the exact SHA of the last
+`pelizzai-verify` records the `validated-head`: the exact SHA of the last
 validated content commit.
 
-`pelizzai-finish-task` requires `HEAD == validated-head` — **what you receive is exactly what was
+`pelizzai-finish` requires `HEAD == validated-head` — **what you receive is exactly what was
 reviewed**. It then creates a single metadata-only commit to seal the task in `phase: delivered`
 and record `confirm:`, the observable condition that will become `done`. In that seal, the task's
 intact block migrates to `pelizzai/data/history/` and the cursor returns to template size.
@@ -389,7 +389,7 @@ approvals live in the plan header, with dates — not in the cursor. Main fields
 
 Below the cursor sit only `## Progress` (one line per task; a long report goes to `data/reports/`
 and the link stays) and `## History` (durable index). On resumption, all of it is checked against
-Git; dangerous divergence goes to `pelizzai-recovery`.
+Git; dangerous divergence goes to `pelizzai-resume`.
 
 ---
 
@@ -480,16 +480,16 @@ copies it to the consumer project along with the rest of the harness.
 
 | Group | Skills | Responsibility |
 | --- | --- | --- |
-| Entry and orchestration | `pelizzai-core`, `pelizzai-router`, `pelizzai-audit`, `pelizzai-preferences` | mandatory entry, route classification and kickoff gate, bootstrap, global behavior floor |
-| Reasoning and conversation | `pelizzai-reasoning`, `pelizzai-interview-me`, `pelizzai-writing-clearly-and-concisely` | proportional reasoning techniques (including OODA), the interview that resolves every material gap, clear writing |
-| Design, plan, and execution | `pelizzai-brainstorming`, `pelizzai-writing-plans`, `pelizzai-execution-plans` | ratified design with spec, executable and stress-tested plan, setup gate and task-by-task execution |
-| Per-task execution | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop`, `pelizzai-handoff` | proof strategy per artifact, delegation and teams, macro loop and forking into a new session |
-| Dedicated tracks | `pelizzai-debugging`, `pelizzai-quick-fix` | bug with triage and root cause; local tweak without losing isolation, proof, and closeout |
-| Design and exploration | `pelizzai-codebase-design`, `pelizzai-domain-modeling`, `pelizzai-prototype`, `pelizzai-improving-architecture` | deep modules and seams, vocabulary and ADRs, disposable prototype, read-only architectural review |
-| Isolation and integration | `pelizzai-starting-branch`, `pelizzai-finish-task`, `pelizzai-resolving-merge-conflicts`, `pelizzai-recovery`, `pelizzai-documenting-features` | branch before the first write, `delivered` seal, conflicts, recovery, and human docs |
-| Quality and security | `pelizzai-review`, `pelizzai-oswap`, `pelizzai-verification-before-completion` | per-task and final review, OWASP on the sensitive surface, fresh evidence before completion |
-| Frontend | `pelizzai-frontend` | product, design, implementation, and visual QA overlay — from design onward |
-| Skill authoring | `pelizzai-writing-skills` | authoring and maintenance of the domain skills |
+| Entry and orchestration | `pelizzai-core`, `pelizzai-router`, `pelizzai-onboard`, `pelizzai-preferences` | mandatory entry, route classification and kickoff gate, bootstrap, global behavior floor |
+| Reasoning and conversation | `pelizzai-reasoning`, `pelizzai-interview`, `pelizzai-prose` | proportional reasoning techniques (including OODA), the interview that resolves every material gap, clear writing |
+| Design, plan, and execution | `pelizzai-discovery`, `pelizzai-plan`, `pelizzai-execute` | ratified design with spec, executable and stress-tested plan, setup gate and task-by-task execution |
+| Per-task execution | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop`, `pelizzai-continuity` | proof strategy per artifact, delegation and teams, macro loop and forking into a new session |
+| Dedicated tracks | `pelizzai-diagnose`, `pelizzai-quick-fix` | bug with triage and root cause; local tweak without losing isolation, proof, and closeout |
+| Design and exploration | `pelizzai-module-design`, `pelizzai-domain-modeling`, `pelizzai-experiment`, `pelizzai-architecture` | deep modules and seams, vocabulary and ADRs, disposable prototype, read-only architectural review |
+| Isolation and integration | `pelizzai-isolate`, `pelizzai-finish`, `pelizzai-merge-recovery`, `pelizzai-resume`, `pelizzai-docs` | branch before the first write, `delivered` seal, conflicts, recovery, and human docs |
+| Quality and security | `pelizzai-review`, `pelizzai-security`, `pelizzai-verify` | per-task and final review, OWASP on the sensitive surface, fresh evidence before completion |
+| Frontend | `pelizzai-interface` | product, design, implementation, and visual QA overlay — from design onward |
+| Skill authoring | `pelizzai-skill-lab` | authoring and maintenance of the domain skills |
 
 ---
 

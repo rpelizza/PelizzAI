@@ -21,7 +21,7 @@
  *   (main/master/develop/dev, plus origin/HEAD's default) or on a detached HEAD → BLOCKS.
  *   CARVE-OUT: metadata writes in pelizzai/** are allowed even here (the system updating itself;
  *   it is file writes only — the commit still follows the task-branch flow). Way out (product):
- *   isolate via pelizzai-starting-branch.
+ *   isolate via pelizzai-isolate.
  *
  * RULE B (consumer only: pelizzai/ exists and this is NOT the source repo) — no code before the gate:
  *   writing a PRODUCT path (outside pelizzai/) while pelizzai/data/state.md does NOT
@@ -40,7 +40,7 @@
  * a bug or false positive here never locks the user out). When it cannot read the kickoff in a
  * consumer without state.md, it allows the write and warns at most once per window (no spam).
  *
- * Install (opt-in, recommended by pelizzai-audit at bootstrap, merged without overwriting
+ * Install (opt-in, recommended by pelizzai-onboard at bootstrap, merged without overwriting
  * existing hooks/permissions), in the consumer project's .claude/settings.json — BOTH
  * matchers are required to also cover writes via shell:
  *   { "hooks": { "PreToolUse": [
@@ -264,7 +264,7 @@ function block(reason) {
   process.stderr.write(
     `PelizzAI writegate: write blocked — ${reason}\n` +
       `(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, ` +
-      `isolate via pelizzai-starting-branch, ratify the gate, or disable the hook in .claude/settings.json.)\n`
+      `isolate via pelizzai-isolate, ratify the gate, or disable the hook in .claude/settings.json.)\n`
   );
   return 2;
 }
@@ -353,7 +353,7 @@ function main() {
   }
   if (isProtected && products.length > 0) {
     return block(
-      `protected/detached branch (${branch || 'detached HEAD'}). Isolate via pelizzai-starting-branch ` +
+      `protected/detached branch (${branch || 'detached HEAD'}). Isolate via pelizzai-isolate ` +
         `before writing product — isolation before the first write is an invariant ` +
         `(metadata writes in pelizzai/ are allowed even here).`
     );

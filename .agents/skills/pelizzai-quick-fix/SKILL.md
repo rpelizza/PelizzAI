@@ -1,6 +1,6 @@
 ---
 name: pelizzai-quick-fix
-description: "Head skill for a local, cohesive, clear, low-risk tweak — text, label, color, button, or field on an existing screen, a constant, a mechanical rename/refactor, an obvious configuration. Typical signals: ~1 file and under ~50 lines (scale signals, not hard limits). Public surface = a NEW route, command, endpoint, API, or config — a tweak creates none of them and changes no business rule. Something broken uses `pelizzai-debugging`; a new surface/contract or a design decision reclassifies through the router's lane."
+description: "Head skill for a local, cohesive, clear, low-risk tweak — text, label, color, button, or field on an existing screen, a constant, a mechanical rename/refactor, an obvious configuration. Typical signals: ~1 file and under ~50 lines (scale signals, not hard limits). Public surface = a NEW route, command, endpoint, API, or config — a tweak creates none of them and changes no business rule. Something broken uses `pelizzai-diagnose`; a new surface/contract or a design decision reclassifies through the router's lane."
 ---
 
 # PelizzAI Quick Fix
@@ -40,7 +40,7 @@ a button is not. Something **broken** uses debugging.
 
 `pelizzai-router` computes the recommendations for this tweak; this head skill is the sole emitter
 of the setup. A tweak uses the **compact one-line confirm** — not the post-plan gate's question
-menu. `pelizzai-starting-branch` discovers the base and proposes the name WITHOUT a stop of its
+menu. `pelizzai-isolate` discovers the base and proposes the name WITHOUT a stop of its
 own (a base with no unambiguous candidate still stops there); the head skill presents everything
 in one line, with the decisions visible and named, and waits:
 
@@ -53,7 +53,7 @@ belongs to the post-plan gate of the tracks with a plan. Under a closed briefing
 open no gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 ```text
-1. Branch — pelizzai-starting-branch discovers the base and proposes `<type>/<slug>`; ratification
+1. Branch — pelizzai-isolate discovers the base and proposes `<type>/<slug>`; ratification
    happens in the compact confirm above and only after it is the branch created (never on a
    protected branch).
 1.5. Local rules — in a consumer, check `pelizzai/domain-skills.md`; in source mode, use the repo's
@@ -69,7 +69,7 @@ open no gates: apply the briefing and escalate to the coordinator whatever requi
    - Testable behavior (constant, condition, return value): pelizzai-tdd — smallest failing test first, then the change.
    - Behavior-preserving refactor (rename/extract/inline): do NOT fabricate a RED — ensure characterization/a green suite first, refactor in a small step, and run the same proof after.
    - Config/IaC/migration: use validate/plan/dry-run and check compatibility/rollback; unit tests only for separable logic.
-   - UI/CSS/visual state: mandatorily apply pelizzai-frontend and use the proportional visual
+   - UI/CSS/visual state: mandatorily apply pelizzai-interface and use the proportional visual
      proof defined there; TDD enters only if there is behavior.
    - Documentation, label, or copy: lint/links/build-render or proportional static inspection; nothing to unit-test.
    Do not self-classify a behavior change as "cosmetic"/"config" to skip the test.
@@ -78,8 +78,8 @@ open no gates: apply the briefing and escalate to the coordinator whatever requi
 3.5. Commit the **content** with exact paths and a definitive message
    `<type>(<scope>): <description>`. A quick-fix already produces a single commit; do not create
    WIP nor leave a squash for finish-task.
-4. Seal and close — run `pelizzai-verification-before-completion` against that HEAD, record
-   `validated-head` only after success, and invoke `pelizzai-finish-task`: a consumer adds
+4. Seal and close — run `pelizzai-verify` against that HEAD, record
+   `validated-head` only after success, and invoke `pelizzai-finish`: a consumer adds
    only the metadata closure (state + the task's history file);
    source mode closes the execution record without a closure file/commit.
 ```
@@ -107,9 +107,9 @@ Never: treat as quick-fix something that creates a new surface or changes a busi
 
 **Routed by:** `pelizzai-router` (track `tweak`).
 
-**Uses:** `pelizzai-starting-branch`, local rules/skills, `pelizzai-reasoning` (strategy
-selection), `pelizzai-tdd` only for behavior, `pelizzai-frontend` as the mandatory overlay
-for UI, `pelizzai-verification-before-completion`, and `pelizzai-finish-task`.
+**Uses:** `pelizzai-isolate`, local rules/skills, `pelizzai-reasoning` (strategy
+selection), `pelizzai-tdd` only for behavior, `pelizzai-interface` as the mandatory overlay
+for UI, `pelizzai-verify`, and `pelizzai-finish`.
 
-**Escalates to:** `pelizzai-writing-plans` for bounded, `pelizzai-brainstorming` when there is a
-design decision or uncertainty, or `pelizzai-debugging` when it is a bug.
+**Escalates to:** `pelizzai-plan` for bounded, `pelizzai-discovery` when there is a
+design decision or uncertainty, or `pelizzai-diagnose` when it is a bug.

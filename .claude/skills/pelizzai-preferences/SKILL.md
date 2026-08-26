@@ -11,7 +11,7 @@ This skill defines the harness's **behavioral floor**: the defaults that hold fo
 
 A floor is not ceremony. The layer is always active; each rule applies where it is relevant to the task, the stack, and the risk. A trivial task, one that can be answered directly, with no risk and no project context, simply has nothing to apply.
 
-Do not repeat here the process of skills that already have an owner: frontend (`pelizzai-frontend`), debugging (`pelizzai-debugging`), review (`pelizzai-review`), diff security (`pelizzai-oswap`).
+Do not repeat here the process of skills that already have an owner: frontend (`pelizzai-interface`), debugging (`pelizzai-diagnose`), review (`pelizzai-review`), diff security (`pelizzai-security`).
 
 ## 1. Priority and applicability
 
@@ -30,7 +30,7 @@ Do not repeat here the process of skills that already have an owner: frontend (`
 - Use clear, direct, objective language. Explain a technical term when it matters to understanding.
 - Code, identifiers, technical file names, and internal messages follow the project's convention; absent one, use English.
 - Keep the tone compatible with the context: professional for documentation and production, more didactic for explanation and learning.
-- Apply `pelizzai-writing-clearly-and-concisely` to relevant textual artifacts, not to every response.
+- Apply `pelizzai-prose` to relevant textual artifacts, not to every response.
 
 ## 3. Reasoning, investigation, and transparency
 
@@ -38,7 +38,7 @@ Do not repeat here the process of skills that already have an owner: frontend (`
 - Do not assume behavior, architecture, or integration without confirming through existing code, official documentation, the project's specification, or concrete evidence.
 - Consult the available context — code, documentation, evidence — before asking.
 - Before proposing a relevant implementation, identify the goal, constraints, expected impact, and success criteria.
-- Use the `pelizzai-interview-me` skill when there is material ambiguity that the conversation, the code, and the available documentation do not resolve.
+- Use the `pelizzai-interview` skill when there is material ambiguity that the conversation, the code, and the available documentation do not resolve.
 - Investigate the root cause before applying a fix. Do not stop at the first plausible solution when there is risk of regression, side effects, or a structural problem.
 - For a library, API, version, or external behavior that may be outdated, prioritize current official documentation: the `context7` MCP (`resolve-library-id` → `query-docs`) when available, the official web absent it — never memory. For internal conventions, use the repo itself.
 
@@ -60,7 +60,7 @@ Do not repeat here the process of skills that already have an owner: frontend (`
 
 - Write readable, cohesive, testable code aligned with the language's and the project's conventions.
 - **Docstrings are allowed and welcome.** Document modules, classes, functions, and public APIs with docstrings in the language's idiomatic format (JSDoc/TSDoc, Python docstrings, C# XML docs, godoc, rustdoc, PHPDoc, etc.): purpose, parameters, return value, and errors/exceptions when relevant. Use English, unless a contrary convention is already established in the project (same rule as section 2).
-- Inline comments are for the **why** the code does not express (constraints, trade-offs, workarounds with context) — not for narrating what the line does. Do not write placeholder comments ("TODO: improve later") or redundant comments. For the text, apply `pelizzai-writing-clearly-and-concisely`.
+- Inline comments are for the **why** the code does not express (constraints, trade-offs, workarounds with context) — not for narrating what the line does. Do not write placeholder comments ("TODO: improve later") or redundant comments. For the text, apply `pelizzai-prose`.
 - Do not hardcode business values, URLs, credentials, external IDs, or environment configuration when they can vary across environments or over time. A stable, local constant is allowed when it improves clarity and does not represent external configuration.
 - Never expose a secret, token, password, API key, or personal data in code, logs, documentation, or responses. Use environment variables, secret providers, or the project's approved configuration mechanism.
 - Do not change `.env`, `.env.local`, `.env.development`, `.env.production`, or equivalents by default. Change them only when the user explicitly requests it, the change is necessary, and no secret is exposed; prefer updating `.env.example` with keys only, without sensitive values.
@@ -70,7 +70,7 @@ Do not repeat here the process of skills that already have an owner: frontend (`
 ## 6. Concurrency, asynchrony, and resilience
 
 - Use parallelism or concurrency only when the operations are independent, there is real gain, and the risks of ordering, resource consumption, and partial failure are under control.
-- A shared working tree/worktree does not isolate agents from each other; concurrent writes require disjoint paths or serialization — never one worktree per agent. The canonical regime (`isolation: branch` / `isolation: worktree`) is that of `pelizzai-execution-plans` and `pelizzai-team`.
+- A shared working tree/worktree does not isolate agents from each other; concurrent writes require disjoint paths or serialization — never one worktree per agent. The canonical regime (`isolation: branch` / `isolation: worktree`) is that of `pelizzai-execute` and `pelizzai-team`.
 - Avoid needless blocking operations, especially in servers, APIs, and interfaces. For heavy or decouplable work, use a queue, an async job, or background processing when the architecture supports it.
 - Timers only when they are part of the behavior (debounce, retry with backoff, controlled polling, expiration, rate limiting); never as a substitute for correct synchronization, state confirmation, or event handling.
 - Do not create silent fallbacks that hide failure, weaken security, or change results without observability. Fallbacks and graceful degradation are allowed when explicit, safe, documented, and monitorable.
@@ -86,7 +86,7 @@ Do not repeat here the process of skills that already have an owner: frontend (`
 behavior/bug → relevant test plus regression when feasible
 refactor     → characterization/green before and after
 config/IaC   → validate, dry-run/plan, idempotency/rollback
-frontend     → applicable tests + browser/screenshot via pelizzai-frontend
+frontend     → applicable tests + browser/screenshot via pelizzai-interface
 document     → lint/render/link check or artifact inspection
 high risk    → additional checks, contingency, and independent review
 ```
@@ -103,7 +103,7 @@ high risk    → additional checks, contingency, and independent review
 
 ## 9. Backend-specific rules
 
-- Validate input, types, contracts, authorization, error handling, and side effects. The diff's security review belongs to the `pelizzai-oswap` overlay; here lives the writing default, which holds even when the overlay is not triggered.
+- Validate input, types, contracts, authorization, error handling, and side effects. The diff's security review belongs to the `pelizzai-security` overlay; here lives the writing default, which holds even when the overlay is not triggered.
 - Define limits, timeouts, failure handling, and observability for external integrations when the context requires it.
 - Guarantee idempotency in critical operations subject to retry, duplication, or reprocessing.
 - Update tests for changed routes, services, or business rules when a test infrastructure is available.
