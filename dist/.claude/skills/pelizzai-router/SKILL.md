@@ -188,6 +188,7 @@ Never create a worktree from the clean base after writing spec/plan in another w
 | Something broken/error/failure/unexpected behavior; "it doesn't work", "it broke", "there's a bug", "stop guessing" | `bug` → `pelizzai-diagnose` |
 | Local change without a new rule/contract/surface (text, label, color, button/field on an existing screen; ~1 file/<~50 lines as a signal) | `tweak` → `pelizzai-quick-fix` |
 | Local refactor preserving behavior | `tweak` → `pelizzai-quick-fix` |
+| Feasibility question — "can we", "is it possible", "would X work here", where a throwaway probe answers cheaper than debating | `spike` → `pelizzai-experiment` |
 | Review of a diff, working tree, branch, or PR | `review` → `pelizzai-review` |
 | Codebase-wide review of architecture, debt, or seams | `review` → `pelizzai-architecture` |
 | Git conflict in progress | `pelizzai-merge-recovery` |
@@ -224,12 +225,10 @@ ratified understanding
 → execution
 ```
 
-Context7/official documentation is read-only technical reconnaissance, not a late step. After
-identifying the stack and the real version in manifests/lockfiles — or the candidate stack in
-greenfield — consult it before kickoff whenever that improves classification, reveals constraints,
-avoids a factual question, or sharpens the recommendation. Keep using it through design, planning,
-implementation, debugging, upgrades, and skill authoring/maintenance. Never use it to invent a
-persona, business rule, permission, state, priority, retention, or acceptance criterion.
+Context7/official documentation is read-only technical reconnaissance, not a late step: consult it
+before kickoff whenever that improves classification or avoids a factual question. Never use it to
+invent a persona, business rule, permission, state, priority, retention, or acceptance criterion.
+The full contract lives in `CLAUDE.md` (§Context7).
 
 A small, additive endpoint with a clear contract can be `standard` with stronger review/overlays;
 risk raises proof and gates, it does not create artificial uncertainty. A large, mechanical change
@@ -282,17 +281,11 @@ The router does not apply these defaults — it computes the recommendation and 
 
 Ratifying the route does not end the user's authority. After kickoff — in spec, plan,
 implementation, debugging, review, or closeout — **every material gap stops the work and goes back
-to the user through `pelizzai-interview`**, one question at a time, with a recommendation. A
-material gap includes: an ambiguous requirement; a scope, UX, architecture, data, or security
-decision that the spec/plan does not cover; an undefined interface contract.
-
+to the user through `pelizzai-interview`**, one question at a time, with a recommendation.
 Filling the gap with a default, ecosystem convention, Context7, or "reasonable inference" is a
-violation — including when the choice looks obvious and reversible. Context7 and official
-documentation eliminate **factual** doubt; they never ratify a decision that belongs to the user.
-
-Autonomy between gates still holds for the **mechanical, verifiable** step within already-ratified
-boundaries (approved spec and plan, ratified setup). If the answer changes product, scope, UX,
-architecture, data, security, cost, or acceptance, it is not mechanical: stop and ask.
+violation — including when the choice looks obvious and reversible (the full authority contract is
+`CLAUDE.md` §The LLM never decides alone). Autonomy between gates still holds for the
+**mechanical, verifiable** step within already-ratified boundaries.
 
 ## Sync & delta
 

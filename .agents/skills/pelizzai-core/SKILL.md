@@ -126,14 +126,9 @@ plan, and also mid-execution, when the work reveals a decision that the spec or 
 Filling it with a default, convention, Context7, or "reasonable inference" is a violation, even when
 the choice looks obvious and reversible.
 
-Context7 is the preferred technical source whenever a library, framework, API, service, tool,
-version, or external capability influences the task. Inspect manifests, lockfiles, configuration,
-and code first to discover the real version; consult Context7 early enough to eliminate factual
-doubts and improve the route, the options, and the questions. In greenfield, it can inform the
-initial technical analysis before kickoff; in an existing project, it must be combined with the
-behavior observed in the repo. If unavailable, use current official documentation and state the
-limitation. Technical evidence grounds the recommendation; it never ratifies a decision on the
-user's behalf.
+Context7 is the preferred technical source; the full contract lives in `CLAUDE.md` (§Context7).
+The one-line version: consult it early to remove **factual** doubt about libraries, versions, and
+APIs — it never ratifies a decision that belongs to the user.
 
 ## Global preferences layer
 
@@ -164,6 +159,7 @@ at any point, material gap → pelizzai-interview (one question at a time) → r
 | Plan/design already clear | `pelizzai-plan` or `pelizzai-execute` |
 | Bug/unexpected behavior | `pelizzai-diagnose` |
 | Local tweak without a new rule/contract | `pelizzai-quick-fix` |
+| Feasibility question answered by a throwaway experiment | `pelizzai-experiment` |
 | Review of a diff/branch/PR | `pelizzai-review` |
 | Codebase-wide architectural review | `pelizzai-architecture` |
 | Git conflict | `pelizzai-merge-recovery` |
@@ -211,9 +207,12 @@ The context window is a task resource — manage it deliberately:
 
 - **Safe zone: ~120k tokens.** Beyond that, quality degrades; plan the boundaries before getting there.
 - Use continuous context for design → plan; execution gets a fresh briefing per task.
-- Handoff forks; compact continues the same work — and never compact mid-mutation or before recording verifiable state.
+- At a **phase boundary** (a phase ends: the design is ratified, the plan is approved, the QA is
+  done), decide deliberately between continue, clear, handoff, subagent, and compact —
+  `pelizzai-continuity` owns that decision tree (`references/phase-boundaries.md`). Never compact
+  mid-mutation or before recording verifiable state.
 - After compaction, validate the consumer state or native execution record against Git; do not trust memory.
-- Load only the references/techniques needed for the current phase.
+- Load only the references needed for the current phase.
 
 ## How to load skills
 

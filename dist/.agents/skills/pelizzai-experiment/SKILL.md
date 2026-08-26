@@ -35,6 +35,23 @@ at the skill's internal gate:
 Recommend and wait: "may I spend `<timebox>` on a throwaway spike to answer `<question>`?
 destination: `<delete|absorb|turn into a task>`". Without a "yes", do not write the experiment.
 
+## Spike route (head skill)
+
+When the router lands here directly — the request IS the feasibility question ("can we", "is it
+possible", "would X work here") — this skill owns the whole route, and the kickoff collapses to the
+cheapest **legitimate** form: an experiment writes code, so the affirmative stays mandatory, but it
+is ONE compact line, never a spec or a plan:
+
+```text
+Spike: <question> — probe: <what will be built>, timebox: <cap>,
+isolation: <branch>, destination: delete (default) | absorb | turn into a task. Proceed? (yes/adjust)
+```
+
+After the "yes": `pelizzai-isolate` → build the minimum probe → run it → read the output →
+answer. The route's deliverable is the **answer with its evidence**, not the code. Close out below
+applies in full — including the possibility that the honest answer is "no spike needed: the code
+already shows X" (reading first is part of the probe).
+
 Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce route analyses or open gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 A prototype writes: go through `pelizzai-isolate` first. Use an ignored temporary path or a

@@ -14,6 +14,10 @@ inventing state that Git can prove.
 
 ## Handoff or compaction?
 
+At a real phase boundary (a phase just ended and the next is about to start), read
+[references/phase-boundaries.md](references/phase-boundaries.md) and walk its five moves in order —
+continue, clear, handoff, subagent, compact; the first honest yes wins. The quick form:
+
 ```text
 same mission + same direction → native compaction/continuation
 new session, new workstream, or change of direction → handoff

@@ -242,6 +242,13 @@ sequential gate; the plan informs and the gate ratifies before Task 1. If the us
 plan only**, do not execute code: validate the artifact, consolidate/seal the planning delivery,
 and keep it local unless an external destination is requested.
 
+**Session boundary.** The approved plan is a phase boundary — and the plan is written to run with
+zero repo context, so execution rarely needs this session's reasoning verbatim. At the closing
+gate, alongside the setup recommendations, offer the choice: **continue executing here, or start a
+fresh session (or handoff) seeded with the plan's path** — recommend the fresh session when the
+planning conversation is long, and continuing when the remaining room clearly fits the execution.
+The decision tree is `pelizzai-continuity` → `references/phase-boundaries.md`.
+
 ## Red flags
 
 ```text

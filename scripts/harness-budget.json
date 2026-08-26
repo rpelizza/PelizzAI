@@ -26,7 +26,7 @@
       ],
       "metadata": true,
       "head": [],
-      "ceilingBytes": 29993,
+      "ceilingBytes": 29855,
       "targetBytes": 20000
     },
     {
@@ -39,8 +39,24 @@
       ],
       "metadata": true,
       "head": [],
-      "ceilingBytes": 54807,
+      "ceilingBytes": 54222,
       "targetBytes": 24000
+    },
+    {
+      "id": "spike",
+      "label": "feasibility question answered by a throwaway experiment",
+      "fragments": [
+        "entrypoint",
+        "core",
+        "router",
+        "floor"
+      ],
+      "metadata": true,
+      "head": [
+        ".claude/skills/pelizzai-experiment/SKILL.md"
+      ],
+      "ceilingBytes": 72715,
+      "targetBytes": 40000
     },
     {
       "id": "tweak",
@@ -55,7 +71,7 @@
       "head": [
         ".claude/skills/pelizzai-quick-fix/SKILL.md"
       ],
-      "ceilingBytes": 75041,
+      "ceilingBytes": 74456,
       "targetBytes": 45000
     },
     {
@@ -71,7 +87,7 @@
       "head": [
         ".claude/skills/pelizzai-diagnose/SKILL.md"
       ],
-      "ceilingBytes": 81950,
+      "ceilingBytes": 81365,
       "targetBytes": 55000
     },
     {
@@ -87,7 +103,7 @@
       "head": [
         ".claude/skills/pelizzai-discovery/SKILL.md"
       ],
-      "ceilingBytes": 81760,
+      "ceilingBytes": 81175,
       "targetBytes": 60000
     },
     {
@@ -103,7 +119,7 @@
       "head": [
         ".claude/skills/pelizzai-plan/SKILL.md"
       ],
-      "ceilingBytes": 83686,
+      "ceilingBytes": 83673,
       "targetBytes": 60000
     },
     {
@@ -120,7 +136,7 @@
         ".claude/skills/pelizzai-execute/SKILL.md",
         ".claude/skills/pelizzai-execute/references/task-cycle.md"
       ],
-      "ceilingBytes": 125318,
+      "ceilingBytes": 124733,
       "targetBytes": 85000
     },
     {
@@ -136,7 +152,7 @@
       "head": [
         ".claude/skills/pelizzai-review/SKILL.md"
       ],
-      "ceilingBytes": 90643,
+      "ceilingBytes": 90058,
       "targetBytes": 60000
     }
   ],
@@ -176,6 +192,9 @@
   "onDemand": [
     ".claude/skills/pelizzai-diagnose/references/feedback-loops.md",
     ".claude/skills/pelizzai-review/references/code-reviewer.md",
-    ".claude/skills/pelizzai-review/references/spec-reviewer.md"
+    ".claude/skills/pelizzai-review/references/spec-reviewer.md",
+    ".claude/skills/pelizzai-continuity/references/phase-boundaries.md",
+    ".claude/skills/pelizzai-router/references/proposal-stress.md",
+    ".claude/skills/pelizzai-loop/references/ooda.md"
   ]
 }
