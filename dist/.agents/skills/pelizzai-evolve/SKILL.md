@@ -130,7 +130,7 @@ not a longer file.
 treat the gain as a hypothesis: state it in one line, validate the alternative against the
 **complete** standard, **measure it against the baseline** with the numbers named, and propose.
 Adoption is the user's. An opportunity that cannot be measured against the baseline is an
-opinion — present it as one.
+opinion — present it as one. Hypothesis, numbers, and proposal reach the user in the conversation's language.
 
 ## The worth-it gate
 

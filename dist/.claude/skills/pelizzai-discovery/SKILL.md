@@ -111,8 +111,10 @@ Question: which option do you choose?
 
 The turn stops after the question. Silence, a recommendation, and Context7 do not count as an
 answer. After the choice, record the decision, recompute the gaps, and ask only the next question.
-Skipping the entire discovery requires an explicit request; in that case, do not invent answers:
-record the untaken decisions as limitations and confirm an implementable spec still exists.
+Skipping the entire discovery requires an explicit request AND is only available in
+`standard`/`exploratory` — greenfield never has this exit (the HARD-GATE's rule). Record the
+waiver (`spec: explicitly waived <YYYY-MM-DD>`) and do not invent answers: record the untaken
+decisions as limitations and confirm an implementable spec still exists.
 
 Do not reopen what the router's kickoff gate has already ratified: group only the material gaps still open. In `bounded` with no material gap, the gate does not appear.
 
@@ -170,7 +172,8 @@ without reopening the approved design absent new evidence.
 
 Present the whole design at proportional size and ask **one approval question** at the edge.
 In greenfield/`standard`/`exploratory`, the spec is the artifact presented before any plan or
-implementation. The user approves, requests an adjustment, or explicitly waives; the waiver is recorded.
+implementation. The user approves, requests an adjustment, or — in `standard`/`exploratory` only,
+never greenfield — explicitly waives; the waiver is recorded (`spec: explicitly waived <date>`).
 
 The user does not need to approve every paragraph, every seam, and then the same content again in the spec.
 

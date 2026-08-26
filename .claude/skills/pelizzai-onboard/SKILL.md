@@ -127,7 +127,9 @@ Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route ana
 flowchart TD
     Start([First contact OR bootstrap]) --> Mode{Does the request mutate files?}
     Mode -- No --> Scan[scan-only: context inventory\nteam/subagents only when worth it]
-    Scan --> Gate[Proactive domain skills gate:\nrecommends; the user ratifies]
+    Scan --> SRC{Source repo,\nby sentinel?}
+    SRC -- Yes --> Done([report only: no consumer\ncatalog, gate does not run])
+    SRC -- No --> Gate[Proactive domain skills gate:\nrecommends; the user ratifies]
     Mode -- Yes, authorized --> Iso[pelizzai-isolate:\nisolate before the first write]
     Gate -- ratified --> Iso
     Iso --> Inv[Inventory: structure, stacks,\nMCPs, git/host, skills, conventions]
@@ -215,6 +217,7 @@ data/state.md
 ```
 
 Mandatory `pelizzai/.gitattributes`:
+
 ```gitattributes
 data/learnings.md merge=union
 data/history/learnings-*.md merge=union
@@ -363,17 +366,14 @@ pelizzai/
 ├── .gitattributes
 ├── domain-skills.md
 ├── profile.md
-├── context.md | context/           on demand
-├── adr/ | out-of-scope/            on demand
-├── specs/ | plans/                 on demand
+├── context.md | context/ · adr/ | out-of-scope/ · specs/ | plans/   on demand
 └── data/
     ├── state.md                    ignored (local per-dev cursor)
     ├── review-domain-skills.md     versioned
+    ├── learnings.md                versioned (merge=union)
+    ├── verification-standard.md    versioned
     ├── history/                    versioned (each task's intact block, migrated at the seal)
-    ├── .cadence-state.json         ignored
-    ├── handoffs/                   ignored
-    ├── mockups/                    ignored
-    └── reports/                    ignored
+    └── .cadence-state.json · handoffs/ · mockups/ · reports/   ignored
 ```
 
 In a workspace with multiple repositories, do not pretend one scalar state covers them all: bootstrap per repo or explicitly declare which root owns the artifacts.

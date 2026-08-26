@@ -1344,7 +1344,8 @@ try {
     Check-Match 'README.md' 'PelizzAI source repo[\s\S]{0,260}does not create\s*\r?\na metadata-only commit' 'README: closeout carries the source mode caveat'
 
     # CLAUDE.md: model/effort are never downgraded below the session ones — stated without zeugma.
-    Check-Match 'CLAUDE.md' 'implementation subagents may run a mid tier when the user ratifies it' 'CLAUDE.md: the executor tier is a user-ratified choice'
+    # Re-anchored 2026-08-26: "mid tier" became the compound adjective "mid-tier model" (CR full review).
+    Check-Match 'CLAUDE.md' 'implementation subagents may run a mid-tier model when the user ratifies it' 'CLAUDE.md: the executor tier is a user-ratified choice'
 } catch {
     Check $false 'PR #4 review fixes' $_.Exception.Message
 }

@@ -488,7 +488,7 @@ copies it to the consumer project along with the rest of the harness.
 | Design and exploration | `pelizzai-module-design`, `pelizzai-domain-modeling`, `pelizzai-experiment`, `pelizzai-architecture` | deep modules and seams, vocabulary and ADRs, disposable prototype, read-only architectural review |
 | Isolation and integration | `pelizzai-isolate`, `pelizzai-finish`, `pelizzai-merge-recovery`, `pelizzai-resume`, `pelizzai-docs` | branch before the first write, `delivered` seal, conflicts, recovery, and human docs |
 | Quality and security | `pelizzai-review`, `pelizzai-security`, `pelizzai-verify` | per-task and final review, stack-aware security lenses, fresh evidence before completion |
-| Memory and evolution | `pelizzai-evolve`, `pelizzai-skill-lab`, `pelizzai-interface` | the project's learned rules and verification standard with pinned readers; skill authoring and maintenance; the UI overlay with direction contract and closed-verdict review |
+| Memory and evolution | `pelizzai-evolve`, `pelizzai-skill-lab` | the project's learned rules and verification standard with pinned readers; skill authoring and maintenance |
 | Frontend | `pelizzai-interface` | product, design, implementation, and visual QA overlay — from design onward |
 | Skill authoring | `pelizzai-skill-lab` | authoring and maintenance of the domain skills |
 

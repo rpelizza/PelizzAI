@@ -125,7 +125,9 @@ BRAINSTORM_REMOTE_TRANSPORT=tls-tunnel scripts/start-server.sh \
 
 Use `--url-host` to control which hostname is printed in the returned URL JSON (advertised as
 `https://` in this mode). It must be the tunnel address the USER's browser reaches. `localhost`
-only works when the browser runs on the same machine as the server.
+only works when the browser runs on the same machine as the server. When the tunnel exposes a
+different PUBLIC port (typically `443`) and forwards to the server's listen port, set
+`BRAINSTORM_URL_PORT` to the public port so the advertised URL is the one the browser can reach.
 
 ## The Loop
 

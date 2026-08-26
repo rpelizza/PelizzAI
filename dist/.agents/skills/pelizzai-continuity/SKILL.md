@@ -17,7 +17,7 @@ inventing state that Git can prove.
 At a real phase boundary (a phase just ended and the next is about to start), read
 [references/phase-boundaries.md](references/phase-boundaries.md) and walk its five moves in order —
 continue, clear, handoff, subagent, compact; the first honest yes is the RECOMMENDATION, presented
-with its one-line why for the user to ratify before it is applied — a boundary move can change
+with its one-line why for the user to ratify before it is applied — recommendation, why, and question in the conversation's language — a boundary move can change
 route, scope, or execution mode, and those are never chosen in silence. A material gap at the
 boundary stops and goes to `pelizzai-interview`. The quick form:
 

@@ -135,5 +135,6 @@ Adapt the order without losing the proof:
 ## Forwarding to execution
 
 Plan materialized, stress-tested, and approved → **forward to the sequential post-plan setup gate**
-of `pelizzai-execute`. The plan carries recommendations; the user decides isolation,
-branch, mode, commits, and review one question at a time before Task 1.
+of `pelizzai-execute`. The plan carries recommendations; the user decides isolation (keep the
+branch or convert to worktree), mode, commits, and the executor tier one question at a time before
+Task 1 — branch base and name were already ratified by `pelizzai-isolate` before the spec/plan.

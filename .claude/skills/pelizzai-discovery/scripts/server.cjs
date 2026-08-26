@@ -85,6 +85,9 @@ function decodeFrame(buffer) {
 // ========== Configuration ==========
 
 const PORT = process.env.BRAINSTORM_PORT || 49152 + Math.floor(Math.random() * 16383);
+// The PUBLIC port may differ from the listen port: an HTTPS tunnel typically exposes 443 and
+// forwards to PORT — advertising the internal port would hand the browser a dead URL.
+const URL_PORT = process.env.BRAINSTORM_URL_PORT || PORT;
 const HOST = process.env.BRAINSTORM_HOST || '127.0.0.1';
 const URL_HOST = process.env.BRAINSTORM_URL_HOST || (HOST === '127.0.0.1' ? 'localhost' : HOST);
 const LOOPBACK = HOST === '127.0.0.1' || HOST === '::1' || HOST === 'localhost';
@@ -469,7 +472,7 @@ function startServer() {
 	}
 
 	server.listen(PORT, HOST, () => {
-		const url = SCHEME + '://' + URL_HOST + ':' + PORT + '/?key=' + SESSION_KEY;
+		const url = SCHEME + '://' + URL_HOST + ':' + URL_PORT + '/?key=' + SESSION_KEY;
 		const info = JSON.stringify({
 			type: 'server-started',
 			port: Number(PORT),

@@ -99,10 +99,13 @@ asking; and do not block on it: only the questions downstream of that fact wait,
 question proceeds. Asking the user something the repo can answer wastes their turn and erodes the
 interview's authority.
 
-**Record each answer where it lives, immediately.** A ratified answer is written into the spec/plan
-section it affects (or the plan's `## Technical decisions`) right after the turn — replacing the
-ambiguous statement it invalidates, never accumulating beside it — so an interrupted interview
-loses nothing and the artifact never carries two contradictory sentences.
+**Record each answer where it lives, immediately — once writing is authorized.** A ratified answer
+is written into the spec/plan section it affects (or the plan's `## Technical decisions`) right
+after the turn — replacing the ambiguous statement it invalidates, never accumulating beside it —
+so an interrupted interview loses nothing and the artifact never carries two contradictory
+sentences. The first-write gate still rules: with isolation and the task/planning branch not yet
+confirmed (an explicit interview, a read-only entry), the ratified answers ride the handoff and
+land in the artifact at the first AUTHORIZED write, never on the current branch by convenience.
 
 ## How to ask
 

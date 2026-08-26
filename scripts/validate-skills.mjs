@@ -240,6 +240,18 @@ const checks = [
   })),
 ];
 
+// The same silent-green trap as the max limits: a non-numeric `allowed` (say, "invalid") makes
+// `count > allowed` false forever and the ratchet stops ratcheting. Validate the EFFECTIVE
+// values, after the ?? 0 defaults above — the budget being unusable is exit 2.
+for (const check of checks) {
+  if (!Number.isInteger(check.allowed) || check.allowed < 0) {
+    console.error(
+      `validate-skills: the "allowed" value for ${check.id} is not a non-negative integer — the ratchet would silently stop applying.`
+    );
+    process.exit(2);
+  }
+}
+
 const risen = checks.filter((check) => check.count > check.allowed);
 const fell = checks.filter((check) => check.count < check.allowed);
 const ok = risen.length === 0;

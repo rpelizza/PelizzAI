@@ -39,7 +39,7 @@ Version-driven and rework-driven only **update** what already exists. Adoption-d
    auth, payments, queue/sensitive infra). A trivial utility does not become a skill — the filter
    here is real leverage, not scarcity.
 3. At the task's CLOSEOUT (read-only nudge from `pelizzai-finish`), present ONE grouped
-   proposal — never a per-task gate: "The task adopted <lib@lockfile version>, with no domain
+   proposal — never a per-task gate (the quoted shape below is REFERENCE content: emit it in the conversation's language, identifiers verbatim): "The task adopted <lib@lockfile version>, with no domain
    skill covering it. Create one now, grounded in context7 or current official documentation?
    [create · defer · don't create]". Recommended: "create" for high-leverage libs; "defer" for a
    utility.
@@ -110,7 +110,7 @@ count=$(git rev-list --count --since="$last_review 00:00" HEAD 2>/dev/null || ec
   the nudge when there is a real burst of work. The cadence is deliberately short: field
   feedback showed that long thresholds let domain skills age without warning — better to
   remind early (advisory, once, with snooze) than too late.
-- Threshold crossed → propose ONCE:
+- Threshold crossed → propose ONCE (reference shape; emitted in the conversation's language):
   "We have accumulated <count> commits / <days> days since the last domain-skill review.
    May I run maintenance (pelizzai-skill-lab) now? Proceed now or leave it for later?"
 - Below the threshold → say nothing and finish.

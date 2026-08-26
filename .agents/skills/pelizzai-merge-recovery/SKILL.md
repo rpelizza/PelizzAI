@@ -16,8 +16,11 @@ description: "Use when a git merge or rebase conflict is in progress. Preserves 
 2. Find the primary source of each conflict. Understand DEEPLY why each change was made and what the
    original intent was — read the commit messages, the PRs, the originating issues/tickets.
 
-3. Resolve each hunk. Preserve BOTH intents when possible. Where they are incompatible, choose the one
-   that matches the declared goal of the merge and note the trade-off. Do NOT invent new behavior.
+3. Resolve each hunk. Preserve BOTH intents when possible. Where they are incompatible, a side may
+   be picked ONLY when the ratified goal of the merge determines it unambiguously — then record the
+   trade-off. When the goal does not decide it, do not pick: that choice changes behavior, scope,
+   or risk, so STOP and escalate with both options and a recommendation (the harness recommends,
+   the user ratifies). Do NOT invent new behavior.
    Always try to resolve. If the original intent CANNOT be safely preserved (fundamentally
    incompatible sides, insufficient context), do NOT invent and do NOT force it: STOP and escalate
    to the user with the options — including aborting (`--abort`) and starting over with more context.

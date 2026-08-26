@@ -14,12 +14,13 @@ place, and the writer's real voice survives the edit.**
 
 **Edit (default).** The text is yours to improve: make the minimum effective edit using the
 principles below and the pattern catalog, and say what changed in one short block. A rough draft
-with a real voice still sounds like the same person afterward.
+with a real voice still sounds like the same person afterward. The change summary speaks the conversation's language (the edited text keeps its own).
 
 **Detect.** Asked whether a text reads as AI, or to audit without rewriting: name each pattern
 from [references/patterns.md](references/patterns.md) that appears, quote the offending line, and
 give the fix in a few words. Do not rewrite, do not score, and never claim to know whether an AI
 wrote it — detectors guess; a named pattern with a quoted line is evidence the reader can check.
+The report itself speaks the conversation's language; pattern names and quotes stay verbatim.
 
 ## Editing principles
 

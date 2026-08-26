@@ -316,7 +316,11 @@ function copyConsumerPayload(target) {
 
   // A skill renamed or retired upstream must not survive in the consumer: the platform keeps
   // loading the stale copy next to the new one (the 44-skill consumer of 23/08 was exactly this).
-  // Only pelizzai-* names outside the manifest are touched — domain skills are never candidates.
+  // Only pelizzai-* names outside the manifest are touched — domain skills are never candidates,
+  // BY CONTRACT: pelizzai-skill-lab reserves the `pelizzai-` prefix for harness skills ("NEVER
+  // use the pelizzai- prefix") and flags any domain skill carrying it as a red flag. A local
+  // directory with this prefix is therefore either a retired core skill or a contract violation;
+  // each removal is named on stdout so nothing disappears silently.
   for (const skillsRoot of [targetSkills, join(target, '.agents', 'skills')]) {
     if (!existsSync(skillsRoot)) continue;
     const orphans = listSkillNames(skillsRoot).filter(

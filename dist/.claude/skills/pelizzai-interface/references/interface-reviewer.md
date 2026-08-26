@@ -55,5 +55,8 @@ reports the verdict **verbatim** and has no authority to soften it. No praise, n
 
 A second dispatch SCORES each material fix — `resolved | partial | not resolved` — over
 recaptures **of the same paths**; it is not a fresh hunt. The parent's narration is not evidence;
-`partial`/`not resolved` never recompute to `ship`. Budget: two rounds; stop the moment a round
-resolves nothing. Evidence reported by the user beats every own capture and reopens a full review.
+`partial`/`not resolved` never recompute to `ship`. After the scores, the round ends in ONE closed
+verdict, reported verbatim: every material fix `resolved` → `ship`; anything `partial`/`not
+resolved` → `fix` (or `rebuild`/`recapture` when the section scores demand it) — the coordinator
+advances or reopens on that verdict alone. Budget: two rounds; stop the moment a round resolves
+nothing. Evidence reported by the user beats every own capture and reopens a full review.

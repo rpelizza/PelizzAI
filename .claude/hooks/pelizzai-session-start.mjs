@@ -77,7 +77,7 @@ function main() {
     if (!sourceMode && !existsSync(join(cwd, 'pelizzai', 'domain-skills.md'))) {
       lines.push(
         'Project has no domain-skill catalog (pelizzai/domain-skills.md missing). If you are ' +
-          'going to work on the code, consider pelizzai-onboard in scan-only → propose bootstrap-write. ' +
+          'going to work on the code, consider pelizzai-onboard in scan-only -> propose bootstrap-write. ' +
           'Nothing is created without your confirmation.'
       );
     }

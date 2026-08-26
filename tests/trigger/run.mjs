@@ -154,6 +154,7 @@ function makeScratch(id) {
 function parseTranscript(raw) {
   const skills = [];
   const tools = [];
+  const shellCommands = [];
   let assistantTurns = 0;
   for (const line of raw.split('\n')) {
     if (!line.trim().startsWith('{')) continue;
@@ -174,10 +175,35 @@ function parseTranscript(raw) {
         skills.push({ name: String(id).split(':').pop(), at: tools.length + skills.length });
       } else {
         tools.push({ name, at: tools.length + skills.length });
+        if ((name === 'Bash' || name === 'PowerShell') && typeof block.input?.command === 'string') {
+          shellCommands.push({ command: block.input.command, at: tools.length + skills.length - 1 });
+        }
       }
     }
   }
-  return { skills, tools, assistantTurns };
+  return { skills, tools, shellCommands, assistantTurns };
+}
+
+/**
+ * `forbidTools: [Edit, Write]` proves nothing while Bash stays open: `printf x > file` or a git
+ * mutation changes the project without either tool. This names the shell-write signatures we can
+ * detect honestly. BEST-EFFORT by design — a `>` inside a quoted string can false-positive and an
+ * exotic writer can slip through — but every signature listed here is one the old suite scored as
+ * a clean pass. Returns the matched signature, or null for a read-only command.
+ */
+function shellWriteSignature(command) {
+  const patterns = [
+    [/(^|\s)\d*>{1,2}\s*(?![&\s])/, 'output redirect'],
+    [/\b(tee|mv|cp|rm|mkdir|touch|chmod|ln)\b/, 'file-mutating utility'],
+    [/\bsed\s+(-[a-zA-Z]*\s+)*-i/, 'sed -i'],
+    [/\bgit\s+(add|commit|checkout\s+-b|switch\s+-c|push|merge|rebase|reset|restore|stash|mv|rm)\b/, 'git mutation'],
+    [/\b(Set-Content|Add-Content|Out-File|New-Item)\b/i, 'PowerShell writer'],
+    [/\b(npm|pnpm|yarn)\s+(install|add|remove|update)\b/, 'package mutation'],
+  ];
+  for (const [re, label] of patterns) {
+    if (re.test(command)) return label;
+  }
+  return null;
 }
 
 const results = [];
@@ -217,7 +243,7 @@ for (const testCase of cases) {
 
   const raw = `${run.stdout ?? ''}\n${run.stderr ?? ''}`;
   writeFileSync(join(scratch.dir, 'transcript.jsonl'), raw);
-  const { skills, tools, assistantTurns } = parseTranscript(raw);
+  const { skills, tools, shellCommands, assistantTurns } = parseTranscript(raw);
   const firstSkillAt = skills.length > 0 ? skills[0].at : Infinity;
   const notes = [];
 
@@ -242,6 +268,14 @@ for (const testCase of cases) {
   }
   for (const forbidden of testCase.forbidTools ?? []) {
     if (tools.some((t) => t.name === forbidden)) notes.push(`${forbidden} was used at all, and must not be`);
+  }
+  if (testCase.forbidShellWrites) {
+    for (const c of shellCommands) {
+      const signature = shellWriteSignature(c.command);
+      if (signature) {
+        notes.push(`shell mutation (${signature}): ${c.command.replace(/\s+/g, ' ').slice(0, 100)}`);
+      }
+    }
   }
   if (skills.length === 0 && (testCase.skills ?? []).length > 0) {
     notes.push('no Skill invocation found in the transcript');
