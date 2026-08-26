@@ -1,0 +1,3 @@
+what's the difference between a worktree and a branch in git, and when would you reach for one over the other?
+
+not about this repo specifically, I'm just trying to get the mental model straight.

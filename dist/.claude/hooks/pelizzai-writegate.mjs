@@ -21,7 +21,7 @@
  *   (main/master/develop/dev, plus origin/HEAD's default) or on a detached HEAD → BLOCKS.
  *   CARVE-OUT: metadata writes in pelizzai/** are allowed even here (the system updating itself;
  *   it is file writes only — the commit still follows the task-branch flow). Way out (product):
- *   isolate via pelizzai-starting-branch.
+ *   isolate via pelizzai-isolate.
  *
  * RULE B (consumer only: pelizzai/ exists and this is NOT the source repo) — no code before the gate:
  *   writing a PRODUCT path (outside pelizzai/) while pelizzai/data/state.md does NOT
@@ -37,10 +37,13 @@
  *
  * Block: exit 2 + reason and safe path on stderr (the agent reads it and corrects the route).
  * Errors in the hook ITSELF and cases it cannot decide safely: exit 0 (fail-open —
- * a bug or false positive here never locks the user out). When it cannot read the kickoff in a
- * consumer without state.md, it allows the write and warns at most once per window (no spam).
+ * a bug or false positive here never locks the user out). A missing state.md is NOT such a case
+ * when the repo carries the harness (pelizzai/ or the pelizzai-core skill): there the gate never
+ * ran and the write BLOCKS — ratifying the gate writes the marker and creates the file, so no
+ * legitimate flow is locked out. Only a repo with no harness footprint at all fails open, with
+ * at most one warning per window (no spam).
  *
- * Install (opt-in, recommended by pelizzai-audit at bootstrap, merged without overwriting
+ * Install (opt-in, recommended by pelizzai-onboard at bootstrap, merged without overwriting
  * existing hooks/permissions), in the consumer project's .claude/settings.json — BOTH
  * matchers are required to also cover writes via shell:
  *   { "hooks": { "PreToolUse": [
@@ -60,8 +63,8 @@
  * On fleets without Node, use the PowerShell variant pelizzai-writegate.ps1 (identical behavior).
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join, resolve, isAbsolute } from 'node:path';
+import { readFileSync, writeFileSync, existsSync, realpathSync, statSync, lstatSync, readlinkSync } from 'node:fs';
+import { join, parse, isAbsolute, dirname, basename } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 
@@ -109,6 +112,59 @@ function norm(p) {
 
 // Windows and macOS compare paths case-insensitively; Linux is case-sensitive.
 const CI = process.platform === 'win32' || process.platform === 'darwin';
+
+// macOS pitfall the CI caught: the temp tree lives behind a symlink (/var -> /private/var), so
+// `git rev-parse --show-toplevel` reports the PHYSICAL root while the payload's cwd — and every
+// relative target joined to it — stays LOGICAL. All in-root writes then looked outside the root
+// and the hook failed OPEN on exactly the platform the suite first ran on. Canonicalize to the
+// physical path; a target that does not exist yet resolves through its parent; anything that
+// cannot be resolved keeps its raw spelling (fail-open, as everywhere else in this file).
+function realpathOr(p, depth = 0) {
+  if (!p) return p; // '' must stay '' — resolving it would invent a root out of the cwd
+  try {
+    return realpathSync(p);
+  } catch {
+    /* target missing — but the component itself may still be a DANGLING link */
+  }
+  // A dangling link fails both realpath and exists, yet a write THROUGH it lands on the target —
+  // pelizzai/dangling -> ../new-file would otherwise classify as metadata while the OS creates
+  // product. lstat sees the link itself; its target resolves against the physical parent.
+  try {
+    if (depth < 8 && lstatSync(p).isSymbolicLink()) {
+      const target = readlinkSync(p);
+      const base = realpathOr(dirname(p), depth + 1);
+      return isAbsolute(target) ? physicalResolve('', target, depth + 1) : physicalResolve(base, target, depth + 1);
+    }
+  } catch {
+    /* not a link either — fall through to the parent resolution */
+  }
+  try {
+    return join(realpathSync(dirname(p)), basename(p));
+  } catch {
+    return p;
+  }
+}
+
+// `..` must be applied AFTER the link resolution, never before: a lexical normalize collapses
+// `pelizzai/link/../src` to `pelizzai/src` (metadata, allowed) while the OS resolves `link`
+// first and lands the write on real product OUTSIDE pelizzai/ — a clean bypass of Rules A and
+// B through the carve-out. So each component is resolved against the PHYSICAL path built so
+// far, and `..` climbs the resolved parent. `baseDir` must already be physical.
+function physicalResolve(baseDir, target, depth = 0) {
+  const abs = isAbsolute(target);
+  const root = abs ? parse(target).root : '';
+  let cur = abs ? realpathOr(root, depth) : baseDir;
+  const rest = abs ? target.slice(root.length) : target;
+  for (const seg of rest.split(/[\\/]+/)) {
+    if (!seg || seg === '.') continue;
+    if (seg === '..') {
+      cur = dirname(cur);
+      continue;
+    }
+    cur = realpathOr(join(cur, seg), depth); // resolves a link component; a not-yet-existing one appends
+  }
+  return cur;
+}
 
 // child is the root itself or is INSIDE it.
 function eqOrInside(child, root) {
@@ -262,9 +318,9 @@ function extractShellTargets(command) {
 
 function block(reason) {
   process.stderr.write(
-    `PelizzAI writegate: write blocked — ${reason}\n` +
+    `PelizzAI writegate: write redirected - ${reason}\n` +
       `(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, ` +
-      `isolate via pelizzai-starting-branch, ratify the gate, or disable the hook in .claude/settings.json.)\n`
+      `isolate via pelizzai-isolate, ratify the gate, or disable the hook in .claude/settings.json.)\n`
   );
   return 2;
 }
@@ -311,13 +367,13 @@ function main() {
   if (typeof ti.command === 'string' && ti.command) targets.push(...extractShellTargets(ti.command));
   if (targets.length === 0) return 0; // nothing to guard (e.g. read-only Bash)
 
-  const gitRoot = git(cwd, ['rev-parse', '--show-toplevel']);
+  const gitRoot = realpathOr(git(cwd, ['rev-parse', '--show-toplevel']));
   if (!gitRoot) return 0; // outside a git repo (scratchpad/external) or git missing → allow
+  cwd = realpathOr(cwd); // physical cwd, so relative targets land on the same spelling as gitRoot
 
   // Only targets INSIDE the root matter; scratchpad/temp outside the root never blocks.
   const inRoot = targets
-    .map((t) => (isAbsolute(t) ? t : join(cwd, t)))
-    .map((t) => resolve(t))
+    .map((t) => physicalResolve(cwd, t))
     .filter((t) => eqOrInside(t, gitRoot));
   if (inRoot.length === 0) return 0;
 
@@ -334,12 +390,12 @@ function main() {
   // product or commit loophole — product (outside pelizzai/) stays blocked by this same Rule A;
   // the metadata is only COMMITTED in the first commit of the new task branch (the flow never
   // requires a commit on a protected branch); and pelizzai-guardrails keeps blocking destructive
-  // git. LIMIT (symlink): the metadata-vs-product classification is by PATH — resolve() normalizes
-  // `..` (which is why `pelizzai/../src` correctly counts as product) but does NOT follow symlinks.
-  // A symlink inside pelizzai/ pointing outside (e.g. `pelizzai/link -> ../src`) could make a real
-  // product write be read as metadata and allowed on a protected branch. The carve-out is NOT
-  // airtight against symlinks; the compensating controls remain: pelizzai-guardrails blocks
-  // destructive git and human review sees the real target.
+  // git. LIMIT (symlink): the classification is by PHYSICAL path — physicalResolve follows
+  // directory links component-by-component and applies `..` on the RESOLVED parent, so both
+  // `pelizzai/../src` and `pelizzai/link/../src` (link -> product) correctly count as product.
+  // Residual limit: a link created BETWEEN this check and the actual write (TOCTOU) is not
+  // seen; the compensating controls remain — pelizzai-guardrails blocks destructive git and
+  // human review sees the real target.
   const branch = git(cwd, ['branch', '--show-current']); // '' = detached HEAD (or no branch)
   let isProtected = branch === '' || PROTECTED.includes(branch);
   if (!isProtected) {
@@ -353,7 +409,7 @@ function main() {
   }
   if (isProtected && products.length > 0) {
     return block(
-      `protected/detached branch (${branch || 'detached HEAD'}). Isolate via pelizzai-starting-branch ` +
+      `protected/detached branch (${branch || 'detached HEAD'}). Isolate via pelizzai-isolate ` +
         `before writing product — isolation before the first write is an invariant ` +
         `(metadata writes in pelizzai/ are allowed even here).`
     );
@@ -368,11 +424,41 @@ function main() {
 
   const statePath = join(gitRoot, 'pelizzai', 'data', 'state.md');
   if (!existsSync(statePath)) {
-    // Consumer without state.md: cannot read the kickoff safely → fail-open + warn once.
+    // HARNESS EVIDENCE (2026-08-26 hardening): a missing state.md used to fail-open for every
+    // consumer, which made Rule B unenforceable in the exact window it exists for — a consumer
+    // that carries the harness but whose kickoff gate never ran (the trigger tests caught an
+    // agent editing product right through this gap). The head skills write the marker BEFORE
+    // the first product write and writing pelizzai/data/state.md is always allowed, so blocking
+    // here locks out no legitimate flow: ratifying the gate creates the file. The fail-open +
+    // warn survives ONLY where it is honest — a repo with no trace of the harness at all
+    // (e.g. the hook registered off-label in global settings).
+    // DIRECTORIES only: a repo that happens to carry a regular FILE named `pelizzai` is not a
+    // harness footprint, and reading it as one would hard-block an unrelated project.
+    const isDir = (p) => {
+      try {
+        return statSync(p).isDirectory();
+      } catch {
+        return false;
+      }
+    };
+    const harnessPresent =
+      isDir(join(gitRoot, 'pelizzai')) ||
+      isDir(join(gitRoot, '.claude', 'skills', 'pelizzai-core')) ||
+      isDir(join(gitRoot, '.agents', 'skills', 'pelizzai-core'));
+    if (harnessPresent) {
+      return block(
+        'this consumer carries the harness but pelizzai/data/state.md does not exist — the kickoff ' +
+          'gate never ran. Run the kickoff/post-plan gate WITH the user — isolation, execution mode, ' +
+          'and commit strategy —, record "kickoff: ratified" in pelizzai/data/state.md (writes under ' +
+          'pelizzai/ are always allowed and create the file), and then write the product.'
+      );
+    }
+    // No trace of the harness in this repo: cannot decide safely → fail-open + warn once.
     warnOnce(
       gitRoot,
-      'no pelizzai/data/state.md to check the kickoff; allowing the write. If this project ' +
-        'uses the harness, run the kickoff gate and record "kickoff: ratified" before writing product.'
+      'no pelizzai/data/state.md and no harness footprint to check the kickoff; allowing the write. ' +
+        'If this project uses the harness, run the kickoff gate and record "kickoff: ratified" ' +
+        'before writing product.'
     );
     return 0;
   }

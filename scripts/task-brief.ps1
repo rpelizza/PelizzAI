@@ -13,7 +13,7 @@
 #
 # Why a file, not pasting: everything that enters by pasting stays resident in the
 # coordinator's context forever (gain measured at the source: ~2x faster,
-# ~50% fewer tokens). See pelizzai-execution-plans -> references/task-cycle.md, section 1.
+# ~50% fewer tokens). See pelizzai-execute -> references/task-cycle.md, section 1.
 #
 # Requires PowerShell 7+. POSIX variant: scripts/task-brief.sh.
 
@@ -44,7 +44,7 @@ function Get-HandoffDir {
   $sha = [Security.Cryptography.SHA256]::Create()
   try { $digest = $sha.ComputeHash($bytes) } finally { $sha.Dispose() }
   $hash = (-join ($digest | ForEach-Object { $_.ToString('x2') })).Substring(0, 12)
-  return (Join-Path ([IO.Path]::GetTempPath()) "pelizzai-handoffs/$hash")
+  return (Join-Path ([IO.Path]::GetTempPath()) "pelizzai-continuitys/$hash")
 }
 
 if (-not $PlanPath -or -not $TaskNumber) { Fail 'usage: task-brief.ps1 <plan-path> <N>' }

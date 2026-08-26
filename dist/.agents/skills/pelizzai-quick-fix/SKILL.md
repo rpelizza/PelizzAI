@@ -1,6 +1,6 @@
 ---
 name: pelizzai-quick-fix
-description: Head skill for a local, cohesive, clear, low-risk tweak — text, label, color, button, or field on an existing screen, a constant, a mechanical rename/refactor, an obvious configuration. Typical signals: ~1 file and under ~50 lines (scale signals, not hard limits). Public surface = a NEW route, command, endpoint, API, or config — a tweak creates none of them and changes no business rule. Something broken uses `pelizzai-debugging`; a new surface/contract or a design decision reclassifies through the router's lane.
+description: "The cheapest mutating route. Use for a local low-risk tweak — text, label, color, a field on an existing screen, a constant, an obvious config. No spec, no plan."
 ---
 
 # PelizzAI Quick Fix
@@ -32,7 +32,7 @@ It is a `quick-fix` when the change:
 Lines and files help detect growth, but they never decide alone. Clear acceptance is an ENTRY
 criterion of the quick-fix, never a reason for promotion. Promote only when something new appears:
 a NEW public surface/contract with clear acceptance → `bounded` lane and a compact plan; a real
-design decision or uncertainty → `standard`/`exploratory` and proportional brainstorming. In doubt
+design decision or uncertainty → `standard`/`exploratory` and proportional discovery. In doubt
 between tweak and bounded, recommend `tweak` at kickoff — promoting later is cheap; a plan to swap
 a button is not. Something **broken** uses debugging.
 
@@ -40,24 +40,32 @@ a button is not. Something **broken** uses debugging.
 
 `pelizzai-router` computes the recommendations for this tweak; this head skill is the sole emitter
 of the setup. A tweak uses the **compact one-line confirm** — not the post-plan gate's question
-menu. `pelizzai-starting-branch` discovers the base and proposes the name WITHOUT a stop of its
+menu. `pelizzai-isolate` discovers the base and proposes the name WITHOUT a stop of its
 own (a base with no unambiguous candidate still stops there); the head skill presents everything
 in one line, with the decisions visible and named, and waits:
 
 `Kickoff: quick-fix on branch <type>/<slug> @ <base-ref> (<short-sha>) — isolation: branch · mode: inline · commits: granular. Ok? (overrides: worktree · subagents/team · squash-final · different name/base)`
 
+The line is emitted in the conversation's language — the template above fixes the STRUCTURE and
+the technical identifiers (branch, refs, decision names stay verbatim), not the prose around them.
+
 One "ok" ratifies base, name, and the three decisions at once — all are named in the line, nothing
-was silent; a named override adjusts only that item and keeps the rest. Only then is the branch
+was silent; a named override adjusts only that item and keeps the rest. **Silence is not an ok:
+without the affirmative answer, HOLD THE TURN — no branch, no edit.** "The user already told me to
+skip the process" is the rationalization this line exists against: what they waived was spec and
+plan, which the tweak never had; the one-line confirm is the part that cannot be waived by
+implication. A run with nobody to answer stops here by design. Only then is the branch
 created. Do not scatter this line across separate questions: the one-decision-per-turn menu
 belongs to the post-plan gate of the tracks with a plan. Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP),
 open no gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 ```text
-1. Branch — pelizzai-starting-branch discovers the base and proposes `<type>/<slug>`; ratification
+1. Branch — pelizzai-isolate discovers the base and proposes `<type>/<slug>`; ratification
    happens in the compact confirm above and only after it is the branch created (never on a
    protected branch).
-1.5. Local rules — in a consumer, check `pelizzai/domain-skills.md`; in source mode, use the repo's
-   own rules/skills. Follow only those applicable to the area.
+1.5. Local rules — in a consumer, check `pelizzai/domain-skills.md` AND the **Active rules** of
+   `pelizzai/data/learnings.md` (the short section only; the Incident log is not read here); in
+   source mode, use the repo's own rules/skills. Follow only those applicable to the area.
 1.6. Record the ratification (after the compact confirm's "ok") — write the marker `kickoff: ratified <YYYY-MM-DD>`
    (with `isolation`/`execution-mode`/`commit-strategy` ratified) in the consumer state
    `pelizzai/data/state.md` or, in source mode, in the native execution record with the same keyword,
@@ -69,7 +77,7 @@ open no gates: apply the briefing and escalate to the coordinator whatever requi
    - Testable behavior (constant, condition, return value): pelizzai-tdd — smallest failing test first, then the change.
    - Behavior-preserving refactor (rename/extract/inline): do NOT fabricate a RED — ensure characterization/a green suite first, refactor in a small step, and run the same proof after.
    - Config/IaC/migration: use validate/plan/dry-run and check compatibility/rollback; unit tests only for separable logic.
-   - UI/CSS/visual state: mandatorily apply pelizzai-frontend and use the proportional visual
+   - UI/CSS/visual state: mandatorily apply pelizzai-interface and use the proportional visual
      proof defined there; TDD enters only if there is behavior.
    - Documentation, label, or copy: lint/links/build-render or proportional static inspection; nothing to unit-test.
    Do not self-classify a behavior change as "cosmetic"/"config" to skip the test.
@@ -77,9 +85,9 @@ open no gates: apply the briefing and escalate to the coordinator whatever requi
    project's relevant suite. Fix before consolidating.
 3.5. Commit the **content** with exact paths and a definitive message
    `<type>(<scope>): <description>`. A quick-fix already produces a single commit; do not create
-   WIP nor leave a squash for finish-task.
-4. Seal and close — run `pelizzai-verification-before-completion` against that HEAD, record
-   `validated-head` only after success, and invoke `pelizzai-finish-task`: a consumer adds
+   WIP nor leave a squash for `pelizzai-finish`.
+4. Seal and close — run `pelizzai-verify` against that HEAD, record
+   `validated-head` only after success, and invoke `pelizzai-finish`: a consumer adds
    only the metadata closure (state + the task's history file);
    source mode closes the execution record without a closure file/commit.
 ```
@@ -107,9 +115,8 @@ Never: treat as quick-fix something that creates a new surface or changes a busi
 
 **Routed by:** `pelizzai-router` (track `tweak`).
 
-**Uses:** `pelizzai-starting-branch`, local rules/skills, `pelizzai-reasoning` (strategy
-selection), `pelizzai-tdd` only for behavior, `pelizzai-frontend` as the mandatory overlay
-for UI, `pelizzai-verification-before-completion`, and `pelizzai-finish-task`.
+**Uses:** `pelizzai-isolate`, local rules/skills, `pelizzai-tdd` only for behavior, `pelizzai-interface` as the mandatory overlay
+for UI, `pelizzai-verify`, and `pelizzai-finish`.
 
-**Escalates to:** `pelizzai-writing-plans` for bounded, `pelizzai-brainstorming` when there is a
-design decision or uncertainty, or `pelizzai-debugging` when it is a bug.
+**Escalates to:** `pelizzai-plan` for bounded, `pelizzai-discovery` when there is a
+design decision or uncertainty, or `pelizzai-diagnose` when it is a bug.

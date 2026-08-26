@@ -36,9 +36,12 @@
 #
 # Block: exit 2 + reason and safe path on stderr. Errors in the hook ITSELF and cases it
 # cannot decide safely: exit 0 (fail-open - a bug or false positive never locks the user
-# out). No state.md in a consumer: allows and warns at most once per window.
+# out). A missing state.md is NOT such a case when the repo carries the harness (pelizzai/
+# or the pelizzai-core skill): there the gate never ran and the write BLOCKS - ratifying
+# the gate writes the marker and creates the file. Only a repo with no harness footprint
+# at all fails open, warning at most once per window.
 #
-# Install (opt-in, recommended by pelizzai-audit at bootstrap, merged without overwriting
+# Install (opt-in, recommended by pelizzai-onboard at bootstrap, merged without overwriting
 # existing hooks/permissions), in .claude/settings.json - BOTH matchers are required:
 #   { "hooks": { "PreToolUse": [
 #       { "matcher": "Write|Edit|MultiEdit|NotebookEdit", "hooks": [
@@ -242,8 +245,8 @@ function Get-ShellTargets([string]$command) {
 
 # Blocks: reason + safe path on stderr and exit 2.
 function Invoke-Block([string]$reason) {
-  [Console]::Error.WriteLine("PelizzAI writegate: write blocked - $reason")
-  [Console]::Error.WriteLine('(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, isolate via pelizzai-starting-branch, ratify the gate, or disable the hook in .claude/settings.json.)')
+  [Console]::Error.WriteLine("PelizzAI writegate: write redirected - $reason")
+  [Console]::Error.WriteLine('(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, isolate via pelizzai-isolate, ratify the gate, or disable the hook in .claude/settings.json.)')
   exit 2
 }
 
@@ -283,12 +286,91 @@ try {
 
   $gitRoot = Invoke-Git $cwd @('rev-parse', '--show-toplevel')
   if (-not $gitRoot) { exit 0 } # outside a git repo (scratchpad/external) or git missing -> allow
+  # macOS pitfall the CI caught: the temp tree lives behind a symlink (/var -> /private/var), so
+  # git reports the PHYSICAL root while the payload's cwd - and every relative target joined to
+  # it - stays LOGICAL. All in-root writes then looked outside the root and the hook failed OPEN.
+  # Canonicalize via `pwd -P` on POSIX (Windows has no such split and stays untouched); anything
+  # that cannot be resolved keeps its raw spelling (fail-open, as everywhere else in this file).
+  # Physical resolution with `..` applied AFTER the link resolution, never before: a lexical
+  # normalize collapses `pelizzai/link/../src` to `pelizzai/src` (metadata, allowed) while the OS
+  # resolves `link` first and lands the write on real product OUTSIDE pelizzai/ - a clean bypass
+  # of Rules A and B through the carve-out. Each component resolves against the PHYSICAL prefix
+  # built so far ($IsWindows is absent on Windows PowerShell 5.1 - the env check covers it);
+  # anything unresolvable keeps its raw spelling - fail-open, as everywhere else in this file.
+  function Get-PhysicalPath([string]$p, [int]$Depth = 0) {
+    if (-not $p) { return $p }
+    try {
+      $isWin = ($env:OS -eq 'Windows_NT' -or $IsWindows)
+      $qualifier = [System.IO.Path]::GetPathRoot($p)
+      if (-not $qualifier) { return $p } # relative input never reaches here; the caller joins cwd first
+      $rest = @($p.Substring($qualifier.Length) -split '[\\/]' | Where-Object { $_ -and $_ -ne '.' })
+      $cur = $qualifier
+      foreach ($seg in $rest) {
+        if ($seg -eq '..') {
+          $parent = Split-Path -Parent $cur
+          if ($parent) { $cur = $parent }
+          continue
+        }
+        $next = Join-Path $cur $seg
+        if (-not (Test-Path -LiteralPath $next)) {
+          # Test-Path FOLLOWS links, so a DANGLING link looks "not on disk" — yet a write through
+          # it lands on the target. See the link itself and resolve its target physically.
+          $linkTarget = $null
+          if ($Depth -lt 8) {
+            if ($isWin) {
+              $li = Get-Item -LiteralPath $next -Force -ErrorAction SilentlyContinue
+              if ($li -and $li.LinkType -and $li.Target) { $linkTarget = [string]($li.Target | Select-Object -First 1) }
+            } else {
+              & sh -c 'test -L "$0"' $next 2>$null
+              if ($LASTEXITCODE -eq 0) {
+                $t = & sh -c 'readlink -- "$0"' $next 2>$null
+                if ($LASTEXITCODE -eq 0 -and $t) { $linkTarget = ([string]($t | Select-Object -Last 1)).Trim() }
+              }
+            }
+          }
+          if ($linkTarget) {
+            if (-not [System.IO.Path]::IsPathRooted($linkTarget)) { $linkTarget = Join-Path $cur $linkTarget }
+            $cur = Get-PhysicalPath $linkTarget ($Depth + 1)
+          } else {
+            $cur = $next # genuinely not on disk yet
+          }
+          continue
+        }
+        if ($isWin) {
+          $item = Get-Item -LiteralPath $next -Force -ErrorAction SilentlyContinue
+          while ($item -and $item.LinkType) {
+            $t = $item.ResolveLinkTarget($true) # .NET 6+; a miss falls to the catch below
+            if (-not $t) { break }
+            $item = $t
+          }
+          $cur = if ($item) { $item.FullName } else { $next }
+        } elseif (Test-Path -LiteralPath $next -PathType Container) {
+          $out = & sh -c 'cd -P -- "$0" && pwd -P' $next 2>$null
+          $cur = if ($LASTEXITCODE -eq 0 -and $out) { ([string]($out | Select-Object -Last 1)).Trim() } else { $next }
+        } else {
+          # POSIX file component: resolve a symlink CHAIN with plain readlink (readlink -f is not
+          # portable to older macOS), physicalizing each hop's parent via cd -P. Without this,
+          # `pelizzai/alias -> src/app.ts` stayed spelled as metadata while the OS writes product
+          # - the file-symlink twin of the ..-after-link bypass. A plain file walks zero hops.
+          # ONE line on purpose: this .ps1 checks out with CRLF, and a multi-line sh script would
+          # carry a \r into every dash token and silently fall back to the logical path.
+          $out = & sh -c 'p="$0"; i=0; while [ -L "$p" ] && [ "$i" -lt 40 ]; do t=$(readlink -- "$p") || break; case "$t" in /*) p="$t";; *) p="$(dirname -- "$p")/$t";; esac; d=$(cd -P -- "$(dirname -- "$p")" 2>/dev/null && pwd -P) || break; p="$d/$(basename -- "$p")"; i=$((i+1)); done; printf "%s\n" "$p"' $next 2>$null
+          $cur = if ($LASTEXITCODE -eq 0 -and $out) { ([string]($out | Select-Object -Last 1)).Trim() } else { $next }
+        }
+      }
+      return $cur
+    } catch { return $p }
+  }
+  $gitRoot = Get-PhysicalPath $gitRoot
+  $cwd = Get-PhysicalPath $cwd # physical cwd, so relative targets land on the same spelling as gitRoot
 
   # Only targets INSIDE the root matter; scratchpad/temp outside the root never blocks.
   $inRoot = [System.Collections.Generic.List[string]]::new()
   foreach ($t in $targets) {
+    # No GetFullPath here: it would collapse `..` lexically BEFORE the link walk - the exact
+    # bypass Get-PhysicalPath exists to close. The walk owns the whole normalization.
     $abs = if ([System.IO.Path]::IsPathRooted($t)) { $t } else { Join-Path $cwd $t }
-    try { $abs = [System.IO.Path]::GetFullPath($abs) } catch { continue }
+    $abs = Get-PhysicalPath $abs
     if (Test-Inside $abs $gitRoot) { [void]$inRoot.Add($abs) }
   }
   if ($inRoot.Count -eq 0) { exit 0 }
@@ -306,12 +388,12 @@ try {
   # product or commit loophole - product (outside pelizzai/) stays blocked by this same Rule A;
   # the metadata is only COMMITTED in the first commit of the new task branch (the flow never
   # requires a commit on a protected branch); and pelizzai-guardrails keeps blocking destructive
-  # git. LIMIT (symlink): the metadata-vs-product classification is by PATH - GetFullPath normalizes
-  # `..` (which is why `pelizzai/../src` correctly counts as product) but does NOT follow symlinks.
-  # A symlink inside pelizzai/ pointing outside (e.g. `pelizzai/link -> ../src`) could make a real
-  # product write be read as metadata and allowed on a protected branch. The carve-out is NOT
-  # airtight against symlinks; the compensating controls remain: pelizzai-guardrails blocks
-  # destructive git and human review sees the real target.
+  # git. LIMIT (symlink): the classification is by PHYSICAL path - Get-PhysicalPath follows
+  # directory links component-by-component and applies `..` on the RESOLVED parent, so both
+  # `pelizzai/../src` and `pelizzai/link/../src` (link -> product) correctly count as product.
+  # Residual limit: a link created BETWEEN this check and the write (TOCTOU) is not seen; the
+  # compensating controls remain - pelizzai-guardrails blocks destructive git and human review
+  # sees the real target.
   $branch = Invoke-Git $cwd @('branch', '--show-current') # '' = detached HEAD (or no branch)
   $isProtected = ($branch -eq '') -or ($PROTECTED -contains $branch)
   if (-not $isProtected) {
@@ -325,7 +407,7 @@ try {
   }
   if ($isProtected -and $products.Count -gt 0) {
     $b = if ($branch) { $branch } else { 'detached HEAD' }
-    Invoke-Block "protected/detached branch ($b). Isolate via pelizzai-starting-branch before writing product - isolation before the first write is an invariant (metadata writes in pelizzai/ are allowed even here)."
+    Invoke-Block "protected/detached branch ($b). Isolate via pelizzai-isolate before writing product - isolation before the first write is an invariant (metadata writes in pelizzai/ are allowed even here)."
   }
 
   # Source mode (PelizzAI source repo): the marker lives in the execution record -> Rule B skipped.
@@ -340,8 +422,22 @@ try {
 
   $statePath = Join-Path $gitRoot 'pelizzai/data/state.md'
   if (-not (Test-Path -LiteralPath $statePath)) {
-    # Consumer without state.md: cannot read the kickoff safely -> fail-open + warn once.
-    Invoke-WarnOnce $gitRoot 'no pelizzai/data/state.md to check the kickoff; allowing the write. If this project uses the harness, run the kickoff gate and record "kickoff: ratified" before writing product.'
+    # HARNESS EVIDENCE (2026-08-26 hardening): a missing state.md used to fail-open for every
+    # consumer, making Rule B unenforceable in the exact window it exists for - a consumer that
+    # carries the harness but whose kickoff gate never ran. The head skills write the marker
+    # BEFORE the first product write and writing pelizzai/data/state.md is always allowed, so
+    # blocking here locks out no legitimate flow: ratifying the gate creates the file. The
+    # fail-open + warn survives ONLY where it is honest - a repo with no trace of the harness.
+    # DIRECTORIES only: a repo carrying a regular FILE named `pelizzai` is not a harness
+    # footprint, and reading it as one would hard-block an unrelated project.
+    $harnessPresent = (Test-Path -LiteralPath (Join-Path $gitRoot 'pelizzai') -PathType Container) -or
+      (Test-Path -LiteralPath (Join-Path $gitRoot '.claude/skills/pelizzai-core') -PathType Container) -or
+      (Test-Path -LiteralPath (Join-Path $gitRoot '.agents/skills/pelizzai-core') -PathType Container)
+    if ($harnessPresent) {
+      Invoke-Block 'this consumer carries the harness but pelizzai/data/state.md does not exist - the kickoff gate never ran. Run the kickoff/post-plan gate WITH the user - isolation, execution mode, and commit strategy -, record "kickoff: ratified" in pelizzai/data/state.md (writes under pelizzai/ are always allowed and create the file), and then write the product.'
+    }
+    # No trace of the harness in this repo: cannot decide safely -> fail-open + warn once.
+    Invoke-WarnOnce $gitRoot 'no pelizzai/data/state.md and no harness footprint to check the kickoff; allowing the write. If this project uses the harness, run the kickoff gate and record "kickoff: ratified" before writing product.'
     exit 0
   }
   $state = ''

@@ -1,0 +1,3 @@
+One of the tests in this project fails maybe one run in five, always a different one. CI has been red on and off for two days and nobody can reproduce it locally.
+
+Figure out what's going on and fix it.

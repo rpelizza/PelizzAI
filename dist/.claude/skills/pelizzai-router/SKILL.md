@@ -1,6 +1,6 @@
 ---
 name: pelizzai-router
-description: Orchestrator for any request that needs to inspect or change a project. Classifies effect, intent, risk, uncertainty, and surfaces; recommends one head skill and overlays; guarantees ratification and isolation before writing. On the first interaction with a consumer project, with the harness not initialized (no `pelizzai/domain-skills.md`), or when the user says "bootstrap", proposes the bootstrap via `pelizzai-audit` before routing. Every greenfield product/project goes through approved discovery, spec, and plan even with the stack specified. Use after `pelizzai-core`; do not use in a purely conceptual conversation without a project.
+description: "Use for any request that inspects or changes a project. Classifies effect, intent, risk, and surfaces; recommends one head skill plus overlays; the kickoff gate ratifies before writes."
 ---
 
 # PelizzAI Router
@@ -11,7 +11,7 @@ If you received a closed subtask, do not route again. Follow the briefing and es
 
 ## Purpose
 
-Produce the smallest route that solves the task safely. The router decides the **lifecycle**; `pelizzai-reasoning` decides the **heuristics** within each phase.
+Produce the smallest route that solves the task safely. The router decides the **lifecycle**; the head skill decides the **heuristics** within each phase.
 
 **Announce**, in the conversation's language: that you are using the PelizzAI Router skill to classify the task's effect, risk, and flow.
 
@@ -63,7 +63,7 @@ user's decision.
 
 ## Proposal analysis (whenever there is a non-trivial mutating effect)
 
-After deriving the envelope and BEFORE choosing the head skill, run a compact stress pass over the request — trigger the **Proposal Stress (Assumption Tracking applied)** routine from `pelizzai-reasoning` ([proposal-stress.md](../pelizzai-reasoning/techniques/proposal-stress.md)). Present in ≤6 bullets:
+After deriving the envelope and BEFORE choosing the head skill, run a compact stress pass over the request — trigger the **Proposal Stress** routine ([references/proposal-stress.md](references/proposal-stress.md)). Present in ≤6 bullets:
 
 - material assumptions that would need ratification to proceed;
 - gaps that change scope/UX/architecture/security/data;
@@ -72,7 +72,7 @@ After deriving the envelope and BEFORE choosing the head skill, run a compact st
 
 The Proposal analysis is diagnosis, not authorization. It feeds the **Discovery** line of the
 kickoff gate; each gap that belongs to the user will be resolved later by
-`pelizzai-interview-me`, one question at a time, with a recommendation.
+`pelizzai-interview`, one question at a time, with a recommendation.
 
 Proportionality does not remove authority. In pure `read-only` and a trivial tweak/bug whose
 contract was stated, the analysis may collapse to zero. In `bounded`, it collapses to one line: "No
@@ -105,10 +105,11 @@ execution decisions, progress, overlays, `validated-head`, `delivery-head`, and 
 
 In a consumer project, **before classifying the request**, check: is the harness initialized?
 If `pelizzai/domain-skills.md` does NOT exist — or it is the first interaction with this project, or
-the user typed `bootstrap` — **propose** the bootstrap via `pelizzai-audit` (maps the project,
+the user typed `bootstrap` — **propose** the bootstrap via `pelizzai-onboard` (maps the project,
 creates the domain skills and docs) as the first thing in the turn and wait for the answer.
 The router does not wait for the user to remember to ask: a missing catalog is signal enough to
-raise the proposal, in one line, with the reason.
+raise the proposal, in one line, with the reason. Both bootstrap routes speak the conversation's
+language in everything they emit — proposal, kickoff, and confirmations included.
 
 Proposing is not executing. The bootstrap only writes after an explicit "yes" — once accepted, the
 effect becomes `write-local` and the first-write gate applies. If the user declines or defers, the
@@ -120,9 +121,9 @@ catalog to create.
 
 | Situation | Route |
 | --- | --- |
-| Catalog missing, first interaction with the project | Invoke `pelizzai-audit` (at minimum `scan-only`) and propose the bootstrap before the kickoff gate; declining does not block the request. |
-| Catalog missing, `effect: read-only` | Map in `scan-only`, propose, and wait. Yes → `pelizzai-audit` in `bootstrap-write`; no/later → continue in `scan-only`, no file is created. |
-| User said `bootstrap`/`reinitialize` | `pelizzai-audit` in `bootstrap-write`. |
+| Catalog missing, first interaction with the project | Invoke `pelizzai-onboard` (at minimum `scan-only`) and propose the bootstrap before the kickoff gate; declining does not block the request. |
+| Catalog missing, `effect: read-only` | Map in `scan-only`, propose, and wait. Yes → `pelizzai-onboard` in `bootstrap-write`; no/later → continue in `scan-only`, no file is created. |
+| User said `bootstrap`/`reinitialize` | `pelizzai-onboard` in `bootstrap-write`. |
 | Mutating task, catalog missing | Do scan-only, present the proposed minimum set of artifacts, and get consent for `bootstrap-write`. |
 | Catalog exists, ledger missing | In an authorized mutating task, repair only the ledger; read-only just reports. |
 
@@ -143,7 +144,7 @@ phase: blocked
 
 phase: delivered
 → sealed delivery awaiting observation. Apply §Reconciliation of the previous delivery
-  (`pelizzai-execution-plans`; resumption: `pelizzai-recovery`) BEFORE treating it as an active
+  (`pelizzai-execute`; resumption: `pelizzai-resume`) BEFORE treating it as an active
   task or a conflict: verify `confirm:` against git and observe `done` — or propose resuming the
   branch or `abandoned`. Only then classify the new request.
 
@@ -162,11 +163,11 @@ Validation:
 - base: confirm `base-ref`/`base-sha` when recorded;
 - plan: the recorded path must exist in the execution environment.
 
-On a divergence that risks work, use `pelizzai-recovery`; never reconcile destructively on a hunch.
+On a divergence that risks work, use `pelizzai-resume`; never reconcile destructively on a hunch.
 
 ## First-write gate
 
-For `write-local`/`external`, invoke `pelizzai-starting-branch` **before** creating or changing:
+For `write-local`/`external`, invoke `pelizzai-isolate` **before** creating or changing:
 
 - `pelizzai/data/state.md`;
 - specs, plans, or ADRs;
@@ -184,26 +185,27 @@ Never create a worktree from the clean base after writing spec/plan in another w
 
 | Request | Track/head |
 | --- | --- |
-| Authorized bootstrap/remap, or accepted bootstrap proposal | `pelizzai-audit` (`bootstrap-write`) |
-| Something broken/error/failure/unexpected behavior; "it doesn't work", "it broke", "there's a bug", "stop guessing" | `bug` → `pelizzai-debugging` |
+| Authorized bootstrap/remap, or accepted bootstrap proposal | `pelizzai-onboard` (`bootstrap-write`) |
+| Something broken/error/failure/unexpected behavior; "it doesn't work", "it broke", "there's a bug", "stop guessing" | `bug` → `pelizzai-diagnose` |
 | Local change without a new rule/contract/surface (text, label, color, button/field on an existing screen; ~1 file/<~50 lines as a signal) | `tweak` → `pelizzai-quick-fix` |
 | Local refactor preserving behavior | `tweak` → `pelizzai-quick-fix` |
+| Feasibility question — "can we", "is it possible", "would X work here", where a throwaway probe answers cheaper than debating | `spike` → `pelizzai-experiment` |
 | Review of a diff, working tree, branch, or PR | `review` → `pelizzai-review` |
-| Codebase-wide review of architecture, debt, or seams | `review` → `pelizzai-improving-architecture` |
-| Git conflict in progress | `pelizzai-resolving-merge-conflicts` |
-| Greenfield product/project, even with the stack specified | `exploratory` → `pelizzai-brainstorming` + `pelizzai-interview-me` → spec → plan |
-| Feature/refactor/infra with design already approved and a plan ready | `pelizzai-execution-plans` |
-| Approved design/spec/Figma, clear acceptance, but no plan | `pelizzai-writing-plans`; brainstorming/interview-me **proposed** when the Proposal analysis flags a material gap |
-| Stress-test an existing design/plan, resolve a flagged material gap, or an interview request | proposed by the Proposal analysis or by the user → `pelizzai-interview-me` |
+| Codebase-wide review of architecture, debt, or seams | `review` → `pelizzai-architecture` |
+| Git conflict in progress | `pelizzai-merge-recovery` |
+| Greenfield product/project, even with the stack specified | `exploratory` → `pelizzai-discovery` + `pelizzai-interview` → spec → plan |
+| Feature/refactor/infra with design already approved and a plan ready | `pelizzai-execute` |
+| Approved design/spec/Figma, clear acceptance, but no plan | `pelizzai-plan`; discovery/interview **proposed** when the Proposal analysis flags a material gap |
+| Stress-test an existing design/plan, resolve a flagged material gap, or an interview request | proposed by the Proposal analysis or by the user → `pelizzai-interview` |
 | Existing feature/refactor/infra with ratified requirements but no plan | use the lanes below |
 
 ### Feature/refactor/infra lanes
 
 | Lane | Predicate | Route |
 | --- | --- | --- |
-| `bounded` | low uncertainty/risk; one cohesive behavior; clear acceptance; no architectural decision | `pelizzai-writing-plans` in compact mode; do not force brainstorming. |
-| `standard` | medium risk and/or a few parts/contracts, with a clear solution and acceptance | `pelizzai-writing-plans`; prepend a compact brainstorming only if a real trade-off remains. |
-| `exploratory` | high uncertainty, or high risk that demands discovery/design mitigation; architecture or sensitive coupled decisions | full `pelizzai-brainstorming` + proportional stress → plan. |
+| `bounded` | low uncertainty/risk; one cohesive behavior; clear acceptance; no architectural decision | `pelizzai-plan` in compact mode; do not force discovery. |
+| `standard` | medium risk and/or a few parts/contracts, with a clear solution and acceptance | `pelizzai-plan`; prepend a compact discovery only if a real trade-off remains. |
+| `exploratory` | high uncertainty, or high risk that demands discovery/design mitigation; architecture or sensitive coupled decisions | full `pelizzai-discovery` + proportional stress → plan. |
 
 ### Greenfield rule
 
@@ -214,22 +216,20 @@ mandatory route, barring the user's explicit waiver of each artifact, is:
 
 ```text
 ratified understanding
-→ discovery with `pelizzai-interview-me`: one question at a time, with a recommendation
-→ design/spec (`pelizzai-brainstorming`)
-→ spec stress-test with `pelizzai-interview-me` + approval
+→ discovery with `pelizzai-interview`: one question at a time, with a recommendation
+→ design/spec (`pelizzai-discovery`)
+→ spec stress-test with `pelizzai-interview` + approval
 → domain skills proposal and ratification
 → implementation plan
-→ plan stress-test with `pelizzai-interview-me` + approval
+→ plan stress-test with `pelizzai-interview` + approval
 → ratified setup
 → execution
 ```
 
-Context7/official documentation is read-only technical reconnaissance, not a late step. After
-identifying the stack and the real version in manifests/lockfiles — or the candidate stack in
-greenfield — consult it before kickoff whenever that improves classification, reveals constraints,
-avoids a factual question, or sharpens the recommendation. Keep using it through design, planning,
-implementation, debugging, upgrades, and skill authoring/maintenance. Never use it to invent a
-persona, business rule, permission, state, priority, retention, or acceptance criterion.
+Context7/official documentation is read-only technical reconnaissance, not a late step: consult it
+before kickoff whenever that improves classification or avoids a factual question. Never use it to
+invent a persona, business rule, permission, state, priority, retention, or acceptance criterion.
+The full contract lives in `CLAUDE.md` (§Context7).
 
 A small, additive endpoint with a clear contract can be `standard` with stronger review/overlays;
 risk raises proof and gates, it does not create artificial uncertainty. A large, mechanical change
@@ -242,10 +242,10 @@ record them in the consumer state or the native execution record.
 
 | Signal | Overlay/conduct |
 | --- | --- |
-| screen, component, CSS, layout, UX, accessibility | `pelizzai-frontend` from design/implementation through visual QA. |
-| auth, external input, SQL, upload, secret, CORS, SSRF, dependency | `pelizzai-oswap` before final validation. |
+| screen, component, CSS, layout, UX, accessibility | `pelizzai-interface` from design/implementation through visual QA. |
+| auth, external input, SQL, upload, secret, CORS, SSRF, dependency | `pelizzai-security` before final validation. |
 | project-specific patterns | consumer: skills from `pelizzai/domain-skills.md`; source mode: the source repo's rules/skills. |
-| human documentation in scope | `pelizzai-documenting-features` before final validation. |
+| human documentation in scope | `pelizzai-docs` before final validation. |
 
 `Playwright`, the browser, and screenshots are tools of the frontend overlay, not substitutes for it.
 
@@ -269,9 +269,14 @@ squash-final:
 
 The router does not apply these defaults — it computes the recommendation and forwards it for ratification:
 
-- **Tracks with a plan** (bounded/standard/exploratory): defer isolation, mode, and commit to the consolidated **post-plan setup gate** of `pelizzai-execution-plans` — that is where the three mode options (inline · subagents · **team**) are always visible and the commit strategy is always shown.
+- **Tracks with a plan** (bounded/standard/exploratory): isolation is NOT deferred — the
+  first-write gate opens a normal task/planning branch via `pelizzai-isolate` before the first
+  persistent artifact. What defers to the consolidated **post-plan setup gate** of
+  `pelizzai-execute` is the rest: worktree conversion, execution mode, and commit strategy —
+  that is where the three mode options (inline · subagents · **team**) are always visible and
+  the commit strategy is always shown.
 - **Write-local without a plan** (tweak/bug): hand the recommendation to the head skill; the head
-  skill itself (`pelizzai-quick-fix`/`pelizzai-debugging`) issues the compact ONE-line confirm —
+  skill itself (`pelizzai-quick-fix`/`pelizzai-diagnose`) issues the compact ONE-line confirm —
   base, name, isolation, mode, and commits visible and named; one "ok" ratifies everything, a named
   override adjusts only that item — before the first write. The router does not duplicate the
   question; the one-decision-per-turn menu belongs to the post-plan gate.
@@ -282,17 +287,11 @@ The router does not apply these defaults — it computes the recommendation and 
 
 Ratifying the route does not end the user's authority. After kickoff — in spec, plan,
 implementation, debugging, review, or closeout — **every material gap stops the work and goes back
-to the user through `pelizzai-interview-me`**, one question at a time, with a recommendation. A
-material gap includes: an ambiguous requirement; a scope, UX, architecture, data, or security
-decision that the spec/plan does not cover; an undefined interface contract.
-
+to the user through `pelizzai-interview`**, one question at a time, with a recommendation.
 Filling the gap with a default, ecosystem convention, Context7, or "reasonable inference" is a
-violation — including when the choice looks obvious and reversible. Context7 and official
-documentation eliminate **factual** doubt; they never ratify a decision that belongs to the user.
-
-Autonomy between gates still holds for the **mechanical, verifiable** step within already-ratified
-boundaries (approved spec and plan, ratified setup). If the answer changes product, scope, UX,
-architecture, data, security, cost, or acceptance, it is not mechanical: stop and ask.
+violation — including when the choice looks obvious and reversible (the full authority contract is
+`CLAUDE.md` §The LLM never decides alone). Autonomy between gates still holds for the
+**mechanical, verifiable** step within already-ratified boundaries.
 
 ## Sync & delta
 
@@ -330,7 +329,7 @@ When ratifying the kickoff gate, record the route's `lane`/`audience`/overlays, 
 or to the tweak/bug head skill's confirm, before the first product write. Resumption honors
 decisions already ratified; a new task never inherits `lane`/`kickoff`/`audience`.
 
-A new task never inherits decisions from the previous one. Closeout belongs to `pelizzai-finish-task`.
+A new task never inherits decisions from the previous one. Closeout belongs to `pelizzai-finish`.
 
 ## Red flags
 
@@ -338,7 +337,7 @@ A new task never inherits decisions from the previous one. Closeout belongs to `
 - A mutating bootstrap to answer a read-only request without proposing and getting the user's "yes".
 - Finding a missing catalog and proceeding in silence, without proposing the bootstrap.
 - Writing state/spec/plan before isolation.
-- Forcing full brainstorming on a bounded feature.
+- Forcing full discovery on a bounded feature.
 - Classifying a greenfield product/project as bounded because the stack was specified.
 - Using lines/files as the only measure of complexity.
 - Treating frontend/security as a late offer.
@@ -350,7 +349,7 @@ A new task never inherits decisions from the previous one. Closeout belongs to `
 - Silently assuming a decision that changes scope/UX/architecture without presenting it in the Proposal analysis or at the kickoff gate.
 - Using Context7, convention, or a "safe default" as the user's vote.
 - Filling with a default/convention/inference a material gap that appeared AFTER kickoff, instead
-  of stopping the work and taking it to `pelizzai-interview-me`.
+  of stopping the work and taking it to `pelizzai-interview`.
 - Asking several discovery questions in the same turn when the previous answer changes the next.
 - Parallelizing writes in a shared working tree as if a worktree isolated the agents.
 - Inheriting `lane`/base/branch/strategy from a PREVIOUS task's state as accidental carryover — the
@@ -379,7 +378,7 @@ show details as context, not as several simultaneous questions:
 - Understanding: <X> as a <feature|tweak|bug|refactor>
 - Lane: <bounded|standard|exploratory> — <one-line justification>
 - Head + overlays: <head skill> + <overlays or "none">
-- Discovery: <"no material gaps" | numbered list of gaps → I recommend <compact|full pelizzai-brainstorming|focused pelizzai-interview-me>>
+- Discovery: <"no material gaps" | numbered list of gaps → I recommend <compact|full pelizzai-discovery|focused pelizzai-interview>>
 - Artifacts: <spec/plan/ADR expected in this lane | "none beyond the native plan">; in greenfield/exploratory with a missing catalog or a new stack, also list "stack domain skills (proposed at the design edge)"
 
 Recommendation: accept this route because <reason>.
@@ -392,16 +391,16 @@ turn**, always with a recommendation; do not turn the route block into a require
 
 In a greenfield/exploratory lane with a missing catalog or a new stack, the Artifacts line
 anticipates the "stack domain skills (proposed at the design edge)": they will be proposed by the
-**proactive domain skills gate** of `pelizzai-audit` at the design→plan edge — the user already sees
+**proactive domain skills gate** of `pelizzai-onboard` at the design→plan edge — the user already sees
 at kickoff that they are coming and decides there.
 
-**Audience:** when the user seems non-technical or the intent admits ≥2 material readings, the block's first line re-presents the understanding (handshake) before routing; record `audience: technical | layperson` (see Execution record). Do not dump jargon; follow `pelizzai-writing-clearly-and-concisely`.
+**Audience:** when the user seems non-technical or the intent admits ≥2 material readings, the block's first line re-presents the understanding (handshake) before routing; record `audience: technical | layperson` (see Execution record). Do not dump jargon; follow `pelizzai-prose`.
 
-**Discovery:** when there is a material gap, recommend `pelizzai-brainstorming`/`pelizzai-interview-me`.
+**Discovery:** when there is a material gap, recommend `pelizzai-discovery`/`pelizzai-interview`.
 Accepting starts the sequential interview. Skipping discovery requires an explicit request and
 records which decisions were left unvalidated; the LLM does not fill those decisions on its own.
 
-**Setup stays out of this block:** isolation, mode (with `team` always visible), and commit are ratified at the post-plan setup gate of `pelizzai-execution-plans` (tracks with a plan) or in the head skill's one-line confirm (tweak/bug). The router recommends silently and does not repeat the question.
+**Setup stays out of this block:** the planning branch is already isolated by `pelizzai-isolate` before the first persistent artifact (the first-write gate). What is ratified later — at the post-plan setup gate of `pelizzai-execute` (tracks with a plan) or in the head skill's one-line confirm (tweak/bug) — is the rest: worktree conversion, mode (with `team` always visible), commits, and the executor tier. The router recommends silently and does not repeat the question.
 
 Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce route analyses or open the kickoff gate: apply the briefing and escalate to the coordinator whatever requires a decision.
 
@@ -417,7 +416,7 @@ local tweak to prevent both autonomy and overfitting to one prompt or stack.
 Classify effect, intent, risk, uncertainty, and surfaces. Present the Proposal analysis and the
 recommended route; on a mutating task, only invoke the head skill after explicit ratification.
 Greenfield always discovers, specifies, stress-tests, and plans before implementing, with
-`pelizzai-interview-me` in discovery and in both stress passes. A material gap that appears later —
+`pelizzai-interview` in discovery and in both stress passes. A material gap that appears later —
 including mid-execution — stops the work and goes back to the user through the same skill. Select
 reasoning/test/review proportionally, without turning process intelligence into authority over the
 product.

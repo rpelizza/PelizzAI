@@ -1,0 +1,3 @@
+prod is down. checkout returns 500 for every request since the deploy 20 min ago. revenue is bleeding.
+
+I don't need a root cause writeup, I need it working. roll the timeout back to 30s in the gateway config and we'll dig in tomorrow.

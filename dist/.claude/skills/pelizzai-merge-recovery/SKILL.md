@@ -1,0 +1,52 @@
+---
+name: pelizzai-merge-recovery
+description: "Use when a git merge or rebase conflict is in progress. Preserves the intent of both sides; never aborts on its own — an unresolvable conflict escalates to the user."
+---
+
+# PelizzAI Merge Recovery
+
+**Announce at start**, in the conversation's language: that you are using the PelizzAI Merge Recovery skill to resolve the conflicts.
+
+## Process
+
+```text
+1. See the current state of the merge/rebase. Check the git history and the conflicted files
+   (git status, git diff, git log of both tips).
+
+2. Find the primary source of each conflict. Understand DEEPLY why each change was made and what the
+   original intent was — read the commit messages, the PRs, the originating issues/tickets.
+
+3. Resolve each hunk. Preserve BOTH intents when possible. Where they are incompatible, a side may
+   be picked ONLY when the ratified goal of the merge determines it unambiguously — then record the
+   trade-off. When the goal does not decide it, do not pick: that choice changes behavior, scope,
+   or risk, so STOP and escalate with both options and a recommendation (the harness recommends,
+   the user ratifies). Do NOT invent new behavior.
+   Always try to resolve. If the original intent CANNOT be safely preserved (fundamentally
+   incompatible sides, insufficient context), do NOT invent and do NOT force it: STOP and escalate
+   to the user with the options — including aborting (`--abort`) and starting over with more context.
+   The abort is the user's decision, never your autonomous exit to escape the conflict.
+
+4. Reapply the change's domain skills and overlays (frontend/security/docs when the resolution
+   touches those surfaces). Run the proof appropriate to the artifact: focal/full test, typecheck,
+   parser, dry-run, render, or visual QA. Do not run irrelevant formatters/checks as ritual.
+
+5. Stage only the resolved paths, check `git diff --cached`, and confirm that
+   `git diff --name-only --diff-filter=U` is empty. Continue the merge/rebase with the command
+   indicated by `git status`; on each new conflict, go back to step 1. Never use `git add -A`.
+
+6. When done, run Verification against the integrated state. If this conflict belongs to an active
+   task, return control to the lifecycle; do not create a parallel closeout.
+```
+
+## Red flags
+
+```text
+Never: run `git merge --abort`/`git rebase --abort` on your own to escape the conflict (aborting is
+       the user's decision, after you escalate with the options); invent behavior that was on
+       neither side; resolve without understanding the original intent; `git add -A`; conclude
+       without proportional proof or without checking for unresolved conflicts.
+```
+
+## Integration
+
+**Combines with:** `pelizzai-isolate` (the base the conflict arises from), `pelizzai-finish` (the integration/PR where the conflict appears), `pelizzai-verify` (running the checks after resolving), evidence synthesis to reconcile conflicting intents.

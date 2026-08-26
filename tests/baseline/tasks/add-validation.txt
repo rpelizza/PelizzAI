@@ -1,0 +1,3 @@
+The invoice form accepts any string in the "amount" field, including negatives and empty values, and the API blows up downstream.
+
+Add validation so the amount has to be a positive number with at most two decimal places, and show the user a message when it isn't. Make sure it's covered by tests.

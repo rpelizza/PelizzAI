@@ -14,7 +14,7 @@ have an area to call, complete, and track the queue.
 
 Expected:
 
-- `write-local`, `feature/greenfield`, lane `exploratory`, head `pelizzai-brainstorming`;
+- `write-local`, `feature/greenfield`, lane `exploratory`, head `pelizzai-discovery`;
 - Context7 may be consulted read-only before kickoff to confirm the stack's current capabilities,
   compatibility, and practices and to improve the questions;
 - the first response presents the analysis and a single route-ratification question;
@@ -94,7 +94,7 @@ exists.
 
 Expected: `tweak`/`pelizzai-quick-fix` — a button on an existing screen calling an existing service
 is NOT a new public surface (surface = a new route, command, endpoint, API, or config). The
-`pelizzai-frontend` overlay is applied with proportional visual proof; no spec/plan generated; at
+`pelizzai-interface` overlay is applied with proportional visual proof; no spec/plan generated; at
 most two stops before writing. It fails if the harness promotes it to `bounded`/`standard` (a
 plan/spec for a button) or opens a discovery interview.
 

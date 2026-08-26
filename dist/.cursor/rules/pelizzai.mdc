@@ -20,7 +20,7 @@ how to reason; the user decides requirements, scope, UX, architecture, data, ris
 - `read-only`: inspect without creating branch, state, profile, catalog, report, or bootstrap.
 - `write-local`: go through the first write gate before any persistent file.
 - `external`: also validate authority, target, reversibility, and confirmation at the action's gate.
-- UI/UX/CSS/component/layout/accessibility: apply `pelizzai-frontend` as a mandatory overlay,
+- UI/UX/CSS/component/layout/accessibility: apply `pelizzai-interface` as a mandatory overlay,
   including design system, anti-AI-slop, and visual QA.
 - Security surfaces, domain skills, and documentation travel with the work through Verification.
 

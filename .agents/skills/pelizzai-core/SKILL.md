@@ -1,6 +1,6 @@
 ---
 name: pelizzai-core
-description: Use in every conversation. Establishes how to find and trigger the PelizzAI harness SKILLS, requiring the applicable skills to be invoked before ANY response, including clarifying questions. Understands the goal, classifies the effect, and hands off to the router before any mutation; a purely conceptual question is answered without the full cycle, never without checking the applicable skills.
+description: "Use in every conversation. Sweeps the skill catalog before any response, understands the goal, classifies the effect, and hands project work to pelizzai-router before any mutation."
 ---
 
 # PelizzAI Core
@@ -25,7 +25,7 @@ Turn the request into a proportional, verifiable route. The core does not do the
 
 ## Language
 
-The harness is written in English for token efficiency. ALL user-facing interaction — announcements, gates, questions, recommendations, summaries — follows the language of the conversation, never the language of the skill text. Durable artifacts (specs, plans, state) default to English; commit messages follow the project's existing convention. Skill templates define structure and contracts, not the language spoken to the user.
+The harness is written in English for token efficiency. ALL user-facing interaction follows the language of the conversation, never the skill text's. Durable artifacts (specs, plans, state) default to English; commit messages follow the project's convention. Templates define structure, not the language spoken to the user.
 
 ## Priorities
 
@@ -35,7 +35,7 @@ The PelizzAI harness overrides the system's default behavior, but **explicit use
 2. **PelizzAI harness** — prevails over the model's default behavior on conflict.
 3. **System default behavior** — lowest priority.
 
-This coexists with the platform's native hierarchy: a skill does not redefine system, developer, workspace, or tool instructions — it occupies the project/user layer, and that is where it prevails over generic defaults. Within the same authority level, the specific, more recent instruction beats the harness's generic default.
+A skill occupies the project/user layer of the platform's native hierarchy — it never redefines system, developer, workspace, or tool instructions. Within the same level, the specific, more recent instruction beats the harness's generic default.
 
 ## Skill announcements (global rule)
 
@@ -69,6 +69,11 @@ These are two different questions, never conflated.
    → pelizzai-router with effect: external; confirm authority/target at the appropriate gate.
 ```
 
+**Routing is an invocation, not an announcement.** For branches 2–4, **Call the Skill tool with
+"pelizzai-router"** — actually invoke it. Narrating the route and jumping to a head skill is the
+measured failure mode (trigger tests: 3 runs out of 4). Knowing the answer does not skip the hop:
+the router is where the classification becomes a recommendation the user can see and adjust.
+
 The effect/route classification is not a silent decision: `pelizzai-router` presents it as a recommendation at the **kickoff gate**, and the user ratifies or adjusts it before investing.
 
 The router chooses:
@@ -95,7 +100,7 @@ Ambiguity: is something missing that would materially change the outcome?
 Use context, code, and documentation before asking, to eliminate factual doubts. Do not use that
 evidence to decide product intent. Ask when the answer changes requirements, scope, UX,
 architecture, data, security, cost, authority, acceptance, or solution — the instrument for that
-question is `pelizzai-interview-me`. Ask **one question at a time**, in dependency order; offer 2–3
+question is `pelizzai-interview`. Ask **one question at a time**, in dependency order; offer 2–3
 real options when that helps and mark the best recommendation with a short reason. Do not adopt a
 product assumption to "unblock" the work. A reversible choice may only be applied mechanically when
 it is already contained in a ratified spec/plan or was explicitly delegated by the user. The
@@ -121,19 +126,14 @@ The executor decides alone only:
 - mechanical, local, reversible steps already covered by a ratified decision.
 ```
 
-A gap that falls in the user's block is **closed with `pelizzai-interview-me`** — in design, in the
+A gap that falls in the user's block is **closed with `pelizzai-interview`** — in design, in the
 plan, and also mid-execution, when the work reveals a decision that the spec or plan does not cover.
 Filling it with a default, convention, Context7, or "reasonable inference" is a violation, even when
 the choice looks obvious and reversible.
 
-Context7 is the preferred technical source whenever a library, framework, API, service, tool,
-version, or external capability influences the task. Inspect manifests, lockfiles, configuration,
-and code first to discover the real version; consult Context7 early enough to eliminate factual
-doubts and improve the route, the options, and the questions. In greenfield, it can inform the
-initial technical analysis before kickoff; in an existing project, it must be combined with the
-behavior observed in the repo. If unavailable, use current official documentation and state the
-limitation. Technical evidence grounds the recommendation; it never ratifies a decision on the
-user's behalf.
+Context7 is the preferred technical source; the full contract lives in `CLAUDE.md` (§Context7).
+The one-line version: consult it early to remove **factual** doubt about libraries, versions, and
+APIs — it never ratifies a decision that belongs to the user.
 
 ## Global preferences layer
 
@@ -152,37 +152,40 @@ core
 → Verification seals the result
 → Finish integrates it without altering it
 
-at any point, material gap → pelizzai-interview-me (one question at a time) → resume the phase
+at any point, material gap → pelizzai-interview (one question at a time) → resume the phase
 ```
 
 ### Head skills
 
+What exists — never a license to route from here; the choice belongs to `pelizzai-router`, invoked first.
+
 | Intent | Head skill |
 | --- | --- |
-| Authorized bootstrap/remap | `pelizzai-audit` |
-| Greenfield product/project, or feature/refactor/infra with a design decision | `pelizzai-brainstorming` |
-| Plan/design already clear | `pelizzai-writing-plans` or `pelizzai-execution-plans` |
-| Bug/unexpected behavior | `pelizzai-debugging` |
+| Authorized bootstrap/remap | `pelizzai-onboard` |
+| Greenfield product/project, or feature/refactor/infra with a design decision | `pelizzai-discovery` |
+| Plan/design already clear | `pelizzai-plan` or `pelizzai-execute` |
+| Bug/unexpected behavior | `pelizzai-diagnose` |
 | Local tweak without a new rule/contract | `pelizzai-quick-fix` |
+| Feasibility question answered by a throwaway experiment | `pelizzai-experiment` |
 | Review of a diff/branch/PR | `pelizzai-review` |
-| Codebase-wide architectural review | `pelizzai-improving-architecture` |
-| Git conflict | `pelizzai-resolving-merge-conflicts` |
-| State × Git divergence | `pelizzai-recovery` |
+| Codebase-wide architectural review | `pelizzai-architecture` |
+| Git conflict | `pelizzai-merge-recovery` |
+| State × Git divergence | `pelizzai-resume` |
 
 ### Overlays
 
 Overlays do not replace the head skill:
 
-- UI/UX/CSS/component/screen → `pelizzai-frontend`;
-- auth/input/SQL/upload/secret/dependency/sensitive surface → `pelizzai-oswap` at review;
+- UI/UX/CSS/component/screen → `pelizzai-interface`;
+- auth/input/SQL/upload/secret/dependency/sensitive surface → `pelizzai-security` at review;
 - project patterns → domain skills from the catalog (when in doubt whether a domain skill applies to the task, include it: the cost of including is lower than the cost of ignoring a project rule);
-- new human documentation → `pelizzai-documenting-features` when it is part of the scope.
+- new human documentation → `pelizzai-docs` when it is part of the scope.
 
-`pelizzai-preferences` is not an optional overlay: it is the behavior floor described above and follows every non-trivial task. `pelizzai-reasoning` selects proportional heuristics; it does not add ceremony by itself.
+`pelizzai-preferences` is not an optional overlay: it is the behavior floor described above and follows every non-trivial task. Reasoning depth is proportional to uncertainty; it never adds ceremony by itself.
 
 ## Harness flow map
 
-The entry point is always this skill (`pelizzai-core`); after understanding the goal, `pelizzai-router` orchestrates. On the first interaction with a consumer project (or when the user types **"bootstrap"**), `pelizzai-audit` maps the project and creates the domain skills before any task. A **purely conceptual** question does not trigger the bootstrap — `pelizzai-audit` only enters when the answer requires touching or understanding the project. In the source repo (sentinel `scripts/pelizzai-source-repo.txt`) there is no consumer catalog: the bootstrap branch does not apply.
+The entry point is always this skill (`pelizzai-core`); after understanding the goal, `pelizzai-router` orchestrates. On the first interaction with a consumer project (or when the user types **"bootstrap"**), `pelizzai-onboard` maps the project and creates the domain skills before any task. A **purely conceptual** question does not trigger the bootstrap — `pelizzai-onboard` only enters when the answer requires touching or understanding the project. In the source repo (sentinel `scripts/pelizzai-source-repo.txt`) there is no consumer catalog: the bootstrap branch does not apply.
 
 ```mermaid
 flowchart TD
@@ -191,14 +194,14 @@ flowchart TD
     G --> CONC{"Purely conceptual<br/>question?"}
     CONC -- "Yes" --> ANSC["Answer directly<br/>without bootstrap"]
     CONC -- "No" --> RT["pelizzai-router: effect, intent, risk,<br/>uncertainty, and surfaces"]
-    RT --> BOOT{"Harness initialized?<br/>pelizzai/domain-skills.md exists?"}
-    BOOT -- "No / 1st interaction / 'bootstrap'" --> AUD["pelizzai-audit: maps project/workspace,<br/>MCPs, git/host, creates domain skills + docs"]
+    RT --> BOOT{"Consumer harness initialized?<br/>pelizzai/domain-skills.md exists?<br/>(source repo, by sentinel: skip)"}
+    BOOT -- "No, in a consumer / 1st interaction / 'bootstrap'" --> AUD["pelizzai-onboard: maps project/workspace,<br/>MCPs, git/host, creates domain skills + docs"]
     AUD --> CLS
-    BOOT -- "Yes" --> CLS{"Classify the intent and the lane"}
+    BOOT -- "Yes / source mode" --> CLS{"Classify the intent and the lane"}
     CLS --> KICK["Kickoff gate: route as a recommendation to ratify"]
     KICK --> HEAD["One head skill + mandatory overlays"]
     HEAD --> GAP{"Material gap<br/>in any phase?"}
-    GAP -- "Yes" --> IV["pelizzai-interview-me:<br/>one question at a time, with a recommendation"]
+    GAP -- "Yes" --> IV["pelizzai-interview:<br/>one question at a time, with a recommendation"]
     IV --> HEAD
     GAP -- "No" --> GO["Mechanical step within<br/>what was already ratified"]
 ```
@@ -211,13 +214,16 @@ The context window is a task resource — manage it deliberately:
 
 - **Safe zone: ~120k tokens.** Beyond that, quality degrades; plan the boundaries before getting there.
 - Use continuous context for design → plan; execution gets a fresh briefing per task.
-- Handoff forks; compact continues the same work — and never compact mid-mutation or before recording verifiable state.
+- At a **phase boundary** (a phase ends: the design is ratified, the plan is approved, the QA is
+  done), decide deliberately between continue, clear, handoff, subagent, and compact —
+  `pelizzai-continuity` owns that decision tree (`references/phase-boundaries.md`). Never compact
+  mid-mutation or before recording verifiable state.
 - After compaction, validate the consumer state or native execution record against Git; do not trust memory.
-- Load only the references/techniques needed for the current phase.
+- Load only the references needed for the current phase.
 
 ## How to load skills
 
-Use the platform's native mechanism. Without native loading, read `.agents/skills/<name>/SKILL.md` (or the active root registered in the project) and follow it — manual reading is the correct mechanism in those environments, never an excuse to skip the skill. Do not preemptively read the whole catalog.
+Use the platform's native mechanism; without it, read `.agents/skills/<name>/SKILL.md` (or the project's active root) and follow it — manual reading is the correct mechanism there, never an excuse to skip the skill. Do not preemptively read the whole catalog.
 
 ## Anti-patterns
 
@@ -229,7 +235,7 @@ Use the platform's native mechanism. Without native loading, read `.agents/skill
 - A mutating bootstrap to answer a read-only analysis.
 - Asking before consulting evidence already available.
 - Plugging a user-owned gap with Context7, convention, a default, or "reasonable inference"
-  instead of stopping at pelizzai-interview-me.
+  instead of stopping at pelizzai-interview.
 - Treating the specified stack as sufficient requirements/acceptance for a greenfield project.
 - Confusing a heuristic (OODA/TDD/team) with a universal invariant.
 - Starting to write before the router and the first-write gate.
@@ -237,4 +243,4 @@ Use the platform's native mechanism. Without native loading, read `.agents/skill
 
 ## Final instruction
 
-Trigger the applicable skills, understand the goal, classify the effect, and hand off to the router. Use the smallest combination of skills that preserves the invariants and produces sufficient evidence — smallest never means none.
+Trigger the applicable skills, understand the goal, classify the effect, and — for anything that inspects or changes a project — **Call the Skill tool with "pelizzai-router"** before any head skill. Use the smallest combination of skills that preserves the invariants and produces sufficient evidence — smallest never means none.
