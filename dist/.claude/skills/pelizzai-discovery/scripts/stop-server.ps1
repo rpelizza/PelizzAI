@@ -24,9 +24,11 @@ if (-not (Test-Path $pidFile)) {
 $serverPid = Get-Content $pidFile
 
 # A stale pidfile after PID reuse would aim the kill at an unrelated process. Only signal a
-# PID whose command line still looks like this server; otherwise just clean the stale file.
+# PID whose command line carries BOTH the server entrypoint and THIS session's unique dir (the
+# launcher passes it as an argv marker). Residual TOCTOU between this check and Stop-Process is
+# accepted: matching another process would require it to spawn with this exact marker.
 $cmdline = (Get-CimInstance Win32_Process -Filter "ProcessId=$serverPid" -ErrorAction SilentlyContinue).CommandLine
-if (-not $cmdline -or $cmdline -notmatch '(^|[\\/\s"])server\.cjs([\s"]|$)') {
+if (-not $cmdline -or $cmdline -notmatch '(^|[\\/\s"])server\.cjs([\s"]|$)' -or -not $cmdline.Contains($SessionDir)) {
     Remove-Item $pidFile -Force -ErrorAction SilentlyContinue
     Write-Output '{"status": "not_running", "note": "stale pidfile removed"}'
     exit 0

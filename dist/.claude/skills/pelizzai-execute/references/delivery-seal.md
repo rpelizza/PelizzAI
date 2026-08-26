@@ -16,7 +16,7 @@ for `done` and `abandoned`) = all fields of this task's `## Active task` + its
 Order of operations (lossless → verifiable):
 
 ```text
-1. Copy the intact block to data/history/<YYYY-MM-DD>-<slug>.md — a faithful copy, nothing rewritten.
+1. Copy the intact block to pelizzai/data/history/<YYYY-MM-DD>-<slug>.md — a faithful copy, nothing rewritten.
 2. Split `## Active task` in two disjoint sets. KEEP the real values of the nine fields the
    destination and the later observation still read — slug, phase: delivered, branch, base-ref,
    base-sha, validated-head, commit-strategy, worktree-path, and confirm — they hold the
@@ -25,7 +25,7 @@ Order of operations (lossless → verifiable):
    any of the nine is destructive: reconciliation loses the delivery.
 3. Remove the migrated T<n>/next/pending lines from `## Progress` (they return to placeholders).
 4. Insert under `## History`: `- <date> <slug> — delivered — <result ≤10 words> →
-   data/history/<file>`.
+   pelizzai/data/history/<file>`.
 ```
 
 The migration is only complete after (1)–(4) and is lossless → automatic; CONDENSING the block's
@@ -42,7 +42,7 @@ reconciliation only stamps the outcome:
   `validated-head`? Was the PR merged/closed? Was the branch integrated? (Local delivery: does
   the user accept it?)
 - Observed → stamp the `## History` index line (`— done <YYYY-MM-DD> — <one-line evidence>`),
-  write `phase: done`, and append the same observation to the corresponding `data/history/`
+  write `phase: done`, and append the same observation to the corresponding `pelizzai/data/history/`
   file. Only then free slug/branch/base-*/validated-head/confirm for the new task.
 - Failed (PR closed without merge, branch discarded) → do NOT stamp `done`. Report it and propose
   resuming the delivery branch or archiving it as `abandoned` — the decision is the user's.

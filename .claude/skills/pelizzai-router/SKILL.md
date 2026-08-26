@@ -400,7 +400,7 @@ at kickoff that they are coming and decides there.
 Accepting starts the sequential interview. Skipping discovery requires an explicit request and
 records which decisions were left unvalidated; the LLM does not fill those decisions on its own.
 
-**Setup stays out of this block:** isolation, mode (with `team` always visible), and commit are ratified at the post-plan setup gate of `pelizzai-execute` (tracks with a plan) or in the head skill's one-line confirm (tweak/bug). The router recommends silently and does not repeat the question.
+**Setup stays out of this block:** the planning branch is already isolated by `pelizzai-isolate` before the first persistent artifact (the first-write gate). What is ratified later — at the post-plan setup gate of `pelizzai-execute` (tracks with a plan) or in the head skill's one-line confirm (tweak/bug) — is the rest: worktree conversion, mode (with `team` always visible), commits, and the executor tier. The router recommends silently and does not repeat the question.
 
 Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce route analyses or open the kickoff gate: apply the briefing and escalate to the coordinator whatever requires a decision.
 

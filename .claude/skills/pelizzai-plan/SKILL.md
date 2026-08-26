@@ -36,7 +36,8 @@ state is mandatory only in the consumer.
 - Source mode follows the source repo's rules without `pelizzai/` runtime; a consumer uses catalog/profile.
 - Library/API facts that may have changed were verified in Context7 for the observed version;
   current official documentation is the fallback when the tool is unavailable.
-- Greenfield/standard/exploratory has an approved spec, or an explicit waiver on record.
+- Greenfield has an APPROVED spec — the waiver does not exist there; standard/exploratory has an
+  approved spec or the user's explicit waiver on record (spec: explicitly waived <date>).
 ```
 
 If the technical question still cannot be stated precisely, go back to `pelizzai-discovery`. If the
@@ -97,7 +98,11 @@ trade-off. Each item states, in one line: **what** was decided, **where it was r
   user's). Only once ratified does it enter the list, with origin `ratified in the plan interview`.
 
 The plan only closes when **every** material decision is ratified — no weighty technical choice
-travels hidden in the middle of an N-task plan to be rubber-stamped along with it.
+travels hidden in the middle of an N-task plan to be rubber-stamped along with it. **This close is
+the single ratification boundary.** The post-plan gate's item 0 is a SAFETY NET against a
+ratification that failed to get recorded, never a second boundary: an unratified decision surfacing
+there means this close failed its own contract — ratify it right there and amend the plan before
+Task 1, so the artifact and the record agree.
 
 **A ratified decision with architectural weight also becomes an ADR** — chosen pattern or library
 with a rejected alternative, a boundary/contract that future work must honor, a durable rejection.

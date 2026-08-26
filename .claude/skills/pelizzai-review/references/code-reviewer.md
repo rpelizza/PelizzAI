@@ -30,7 +30,7 @@ domain skills pasted here PREVAIL.
 This is the lens that receives the report (the spec lens is blind and never sees it). Do NOT trust
 it: every claim — "the tests pass", "I covered edge case X", "no deviation from the plan" — is a
 hypothesis to REFUTE with fresh evidence. Run the check yourself and compare with what the author
-asserted. Check especially the `Plan deviations:` field: a real deviation not declared there is a finding.
+asserted. Check especially the `Deviations from plan:` field: a real deviation not declared there is a finding.
 
 ## Scope to review (the caller picks one)
 

@@ -810,8 +810,29 @@ try {
             } else {
                 Write-Host 'SKIP: this environment cannot create file symlinks; the alias regression runs where it can.'
             }
+            # DANGLING link: Test-Path follows links, so pelizzai/dangling -> ghost.ts (target not
+            # on disk) used to look "nonexistent", classify as metadata, and let the write CREATE
+            # product through it. The walk must resolve the link itself.
+            $wgDangling = Join-Path $wgTemp 'pelizzai/dangling'
+            if ($env:OS -eq 'Windows_NT' -or $IsWindows) {
+                try { $null = New-Item -ItemType SymbolicLink -Path $wgDangling -Target (Join-Path $wgTemp 'ghost.ts') -ErrorAction Stop } catch {}
+            } else {
+                & sh -c 'ln -s "$0" "$1"' (Join-Path $wgTemp 'ghost.ts') $wgDangling 2>$null
+            }
+            $wgDanglingOk = if ($env:OS -eq 'Windows_NT' -or $IsWindows) { [bool](Get-Item -LiteralPath $wgDangling -Force -ErrorAction SilentlyContinue) } else { (& sh -c 'test -L "$0"' $wgDangling 2>$null); $LASTEXITCODE -eq 0 }
+            if ($wgDanglingOk) {
+                foreach ($wg in @($wgMjs, $wgPs1)) {
+                    $leaf = Split-Path -Leaf $wg
+                    Check -Condition ((Invoke-Writegate $wg @{ file_path = 'pelizzai/dangling' } $wgTemp) -eq 2) -Name "writegate: a dangling link under pelizzai/ aiming at product still classifies as product ($leaf)"
+                }
+            } elseif ($onCI -and -not ($env:OS -eq 'Windows_NT' -or $IsWindows)) {
+                Check -Condition $false -Name 'writegate: POSIX CI must be able to create the dangling symlink for the regression'
+            } else {
+                Write-Host 'SKIP: this environment cannot create dangling links; the regression runs where it can.'
+            }
+
             # Remove the reparse points/links ONLY - a recursive delete through a link follows it.
-            foreach ($lnk in @($wgLink, $wgAlias)) {
+            foreach ($lnk in @($wgLink, $wgAlias, $wgDangling)) {
                 if (Test-Path -LiteralPath $lnk) {
                     if ($env:OS -eq 'Windows_NT' -or $IsWindows) { Remove-Item -LiteralPath $lnk -Force -ErrorAction SilentlyContinue }
                     else { & sh -c 'rm -- "$0"' $lnk 2>$null }

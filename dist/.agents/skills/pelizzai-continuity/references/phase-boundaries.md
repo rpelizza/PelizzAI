@@ -2,8 +2,11 @@
 
 A **phase** is a chunk of work that ends when you would say "ok, that part is done": the discovery,
 the spec, the plan, the implementation of a task group, the QA. The **boundary** between two phases
-is the only place where a context decision belongs. Mid-phase there is no decision: continue, or
-split what remains into subagents. Compacting mid-phase loses the thread.
+is the only place where a CONTEXT decision (handoff, clear, compaction, subagent split) belongs.
+Mid-phase there is no context decision: continue, or split what remains into subagents —
+compacting mid-phase loses the thread. This scopes CONTEXT only: a material gap in product,
+scope, UX, architecture, data, security, or acceptance still stops the work mid-phase and goes
+to pelizzai-interview, as pelizzai-core rules.
 
 At every boundary, walk the five moves **top to bottom; the first honest "yes" wins**:
 

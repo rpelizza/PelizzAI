@@ -63,7 +63,7 @@
  * On fleets without Node, use the PowerShell variant pelizzai-writegate.ps1 (identical behavior).
  */
 
-import { readFileSync, writeFileSync, existsSync, realpathSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, realpathSync, statSync, lstatSync, readlinkSync } from 'node:fs';
 import { join, parse, isAbsolute, dirname, basename } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
@@ -119,12 +119,24 @@ const CI = process.platform === 'win32' || process.platform === 'darwin';
 // and the hook failed OPEN on exactly the platform the suite first ran on. Canonicalize to the
 // physical path; a target that does not exist yet resolves through its parent; anything that
 // cannot be resolved keeps its raw spelling (fail-open, as everywhere else in this file).
-function realpathOr(p) {
+function realpathOr(p, depth = 0) {
   if (!p) return p; // '' must stay '' — resolving it would invent a root out of the cwd
   try {
     return realpathSync(p);
   } catch {
-    /* not on disk yet — resolve through the parent */
+    /* target missing — but the component itself may still be a DANGLING link */
+  }
+  // A dangling link fails both realpath and exists, yet a write THROUGH it lands on the target —
+  // pelizzai/dangling -> ../new-file would otherwise classify as metadata while the OS creates
+  // product. lstat sees the link itself; its target resolves against the physical parent.
+  try {
+    if (depth < 8 && lstatSync(p).isSymbolicLink()) {
+      const target = readlinkSync(p);
+      const base = realpathOr(dirname(p), depth + 1);
+      return isAbsolute(target) ? physicalResolve('', target, depth + 1) : physicalResolve(base, target, depth + 1);
+    }
+  } catch {
+    /* not a link either — fall through to the parent resolution */
   }
   try {
     return join(realpathSync(dirname(p)), basename(p));
@@ -138,10 +150,10 @@ function realpathOr(p) {
 // first and lands the write on real product OUTSIDE pelizzai/ — a clean bypass of Rules A and
 // B through the carve-out. So each component is resolved against the PHYSICAL path built so
 // far, and `..` climbs the resolved parent. `baseDir` must already be physical.
-function physicalResolve(baseDir, target) {
+function physicalResolve(baseDir, target, depth = 0) {
   const abs = isAbsolute(target);
   const root = abs ? parse(target).root : '';
-  let cur = abs ? realpathOr(root) : baseDir;
+  let cur = abs ? realpathOr(root, depth) : baseDir;
   const rest = abs ? target.slice(root.length) : target;
   for (const seg of rest.split(/[\\/]+/)) {
     if (!seg || seg === '.') continue;
@@ -149,7 +161,7 @@ function physicalResolve(baseDir, target) {
       cur = dirname(cur);
       continue;
     }
-    cur = realpathOr(join(cur, seg)); // resolves a link component; a not-yet-existing one appends
+    cur = realpathOr(join(cur, seg), depth); // resolves a link component; a not-yet-existing one appends
   }
   return cur;
 }

@@ -93,7 +93,7 @@ out after code inspection), **❌ Issues** (list what is missing/extra, with `fi
 
 Applied after the spec verdict is formed. **This is the rubric that receives the implementer's report** and
 verifies the claims — did the tests actually run? Is the proof fresh (command + output + exit
-code)? Were deviations from the plan declared in the `Plan deviations:` field? A claim you could not
+code)? Were deviations from the plan declared in the `Deviations from plan:` field? A claim you could not
 confirm by running the check is **UNVERIFIED**, never ✅. Use the full rubric in
 **[references/code-reviewer.md](references/code-reviewer.md)**. Assess: separation of concerns, error handling, type safety, DRY without premature abstraction, edge cases, architecture, security, tests (they verify real behavior, not mocks), production readiness. Additionally:
 

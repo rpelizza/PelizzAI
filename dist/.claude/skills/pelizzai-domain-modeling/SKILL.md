@@ -1,6 +1,6 @@
 ---
 name: pelizzai-domain-modeling
-description: "Overlay that makes the domain model explicit when the task changes terminology, relationships, invariants, or bounded contexts — and the place where ADRs are actually written."
+description: "Overlay for a model change: 'new domain term', 'rename this concept', 'new invariant or bounded context', 'write an ADR'. Makes the model explicit; ADRs are written here."
 ---
 
 # PelizzAI Domain Modeling

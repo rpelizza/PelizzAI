@@ -80,14 +80,14 @@ $env:BRAINSTORM_IDLE_TIMEOUT_MINUTES = "$IdleTimeoutMinutes"
 
 # Foreground mode for environments that reap detached processes.
 if ($Foreground -and -not $Background) {
-    $proc = Start-Process node -ArgumentList 'server.cjs' -NoNewWindow -PassThru
+    $proc = Start-Process node -ArgumentList @('server.cjs', $sessionDir) -NoNewWindow -PassThru
     Set-Content -Path $pidFile -Value $proc.Id
     $proc.WaitForExit()
     exit $proc.ExitCode
 }
 
 # Background: detached node process; child inherits the BRAINSTORM_* environment.
-$proc = Start-Process node -ArgumentList 'server.cjs' -WindowStyle Hidden -PassThru `
+$proc = Start-Process node -ArgumentList @('server.cjs', $sessionDir) -WindowStyle Hidden -PassThru `
     -RedirectStandardOutput $logFile -RedirectStandardError $errFile
 Set-Content -Path $pidFile -Value $proc.Id
 

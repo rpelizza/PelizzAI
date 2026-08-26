@@ -42,8 +42,8 @@ function main() {
   }
 
   const lines = [
-    'PelizzAI: before answering ANYTHING, load the pelizzai-core skill and honor the 1% rule — if a skill applies (even to a trivial tweak), invoke it.',
-    'Every task that touches the project goes through pelizzai-core → pelizzai-router: classify effect, risk, uncertainty and surfaces before acting.',
+    'PelizzAI: before answering ANYTHING, load the pelizzai-core skill and honor the 1% rule - if a skill applies (even to a trivial tweak), invoke it.',
+    'Every task that touches the project goes through pelizzai-core -> pelizzai-router: classify effect, risk, uncertainty and surfaces before acting.',
     'Pick a head skill and proportional overlays; read-only initializes no state, and any write goes through the isolation gate first.',
   ];
 
@@ -58,7 +58,7 @@ function main() {
         phase && phase !== 'done' && !phase.startsWith('<');
       if (active) {
         lines.push(
-          `There is an ACTIVE task in pelizzai/data/state.md (slug: ${slug}, phase: ${phase}) — ` +
+          `There is an ACTIVE task in pelizzai/data/state.md (slug: ${slug}, phase: ${phase}) - ` +
             'resume via pelizzai-router, validating the cursor against git before proceeding.'
         );
       }
@@ -106,7 +106,7 @@ function main() {
       if (isRatified(commit)) ratified.push(`commit ${commit}`);
       if (ratified.length) {
         lines.push(
-          `Ratified execution policy for this project (pelizzai/profile.md): ${ratified.join(', ')} — ` +
+          `Ratified execution policy for this project (pelizzai/profile.md): ${ratified.join(', ')} - ` +
             'reapply it as a 1-line recap; do not re-ask what has already been ratified (destination remains per task).'
         );
       }

@@ -1,6 +1,6 @@
 ---
 name: pelizzai-evolve
-description: The project self-optimization cycle over two durable artifacts — what "correct" means here, and what execution already learned. Use when a failure recurs and a standing rule would prevent it.
+description: "Use when a failure recurs, a lesson should become a standing rule, or to promote, retire, or archive learnings. The self-optimization cycle over learnings and the verification standard."
 ---
 
 # PelizzAI Evolve

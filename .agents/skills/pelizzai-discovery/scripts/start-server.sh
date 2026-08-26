@@ -30,17 +30,17 @@ IDLE_TIMEOUT_MINUTES="240"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --project-dir)
-      [[ $# -ge 2 && -n "$2" ]] || { echo '{"error": "--project-dir requires a value"}'; exit 1; }
+      [[ $# -ge 2 && -n "$2" && "$2" != --* ]] || { echo '{"error": "--project-dir requires a value"}'; exit 1; }
       PROJECT_DIR="$2"
       shift 2
       ;;
     --host)
-      [[ $# -ge 2 && -n "$2" ]] || { echo '{"error": "--host requires a value"}'; exit 1; }
+      [[ $# -ge 2 && -n "$2" && "$2" != --* ]] || { echo '{"error": "--host requires a value"}'; exit 1; }
       BIND_HOST="$2"
       shift 2
       ;;
     --url-host)
-      [[ $# -ge 2 && -n "$2" ]] || { echo '{"error": "--url-host requires a value"}'; exit 1; }
+      [[ $# -ge 2 && -n "$2" && "$2" != --* ]] || { echo '{"error": "--url-host requires a value"}'; exit 1; }
       URL_HOST="$2"
       shift 2
       ;;
@@ -131,12 +131,12 @@ fi
 # Foreground mode for environments that reap detached/background processes.
 if [[ "$FOREGROUND" == "true" ]]; then
   echo "$$" > "$PID_FILE"
-  exec env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" BRAINSTORM_OPEN="$OPEN_BROWSER" BRAINSTORM_IDLE_TIMEOUT_MINUTES="$IDLE_TIMEOUT_MINUTES" node server.cjs
+  exec env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" BRAINSTORM_OPEN="$OPEN_BROWSER" BRAINSTORM_IDLE_TIMEOUT_MINUTES="$IDLE_TIMEOUT_MINUTES" node server.cjs "$SESSION_DIR"
 fi
 
 # Start server, capturing output to log file
 # Use nohup to survive shell exit; disown to remove from job table
-nohup env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" BRAINSTORM_OPEN="$OPEN_BROWSER" BRAINSTORM_IDLE_TIMEOUT_MINUTES="$IDLE_TIMEOUT_MINUTES" node server.cjs > "$LOG_FILE" 2>&1 &
+nohup env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" BRAINSTORM_OPEN="$OPEN_BROWSER" BRAINSTORM_IDLE_TIMEOUT_MINUTES="$IDLE_TIMEOUT_MINUTES" node server.cjs "$SESSION_DIR" > "$LOG_FILE" 2>&1 &
 SERVER_PID=$!
 disown "$SERVER_PID" 2>/dev/null
 echo "$SERVER_PID" > "$PID_FILE"

@@ -51,7 +51,7 @@ The full catalog does not apply to everything the harness writes:
 | Level | Applies to | Rules |
 | --- | --- | --- |
 | **1 — human copy** | READMEs, docs, reports, commit/PR messages, UI copy, specs and plans | the whole of [references/patterns.md](references/patterns.md): word lists, named patterns, judgment patterns, em-dash discipline |
-| **2 — LLM instruction** | the harness's own SKILL.md files, subagent briefings, prompt templates | word lists and named patterns only, with the technical vocabulary released (`robust`, `seamless`, `elevate`, `underscore`, `pivotal` have legitimate technical readings) — and the hardening repetition and triadic checklists those files use exist ON PURPOSE; do not strip the mechanisms that make an instruction survive |
+| **2 — LLM instruction** | the harness's own SKILL.md files, subagent briefings, prompt templates | word lists and named patterns only, with the technical vocabulary released (`robust`, `seamless`, `elevate`, `underscore`, `pivotal`, `leverage` have legitimate technical readings — `leverage` is canonical vocabulary in pelizzai-module-design) — and the hardening repetition and triadic checklists those files use exist ON PURPOSE; do not strip the mechanisms that make an instruction survive |
 
 Applying level 1 to a skill file attacks exactly what makes skills work; applying level 2 to a
 README ships slop. Say which level you are applying when it is not obvious.

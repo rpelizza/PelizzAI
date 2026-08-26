@@ -20,8 +20,11 @@ if [[ -f "$PID_FILE" ]]; then
   pid=$(cat "$PID_FILE")
 
   # A stale pidfile after PID reuse would aim the kill at an unrelated process. Only signal a
-  # PID whose command line still looks like this server; otherwise just clean the stale file.
-  if ! ps -p "$pid" -o args= 2>/dev/null | grep -Eq '(^|[/ ])server\.cjs( |$)'; then
+  # PID whose command line carries BOTH the server entrypoint and THIS session's unique dir
+  # (the launcher passes it as an argv marker). Residual TOCTOU between this check and the kill
+  # is accepted: matching another process would require it to spawn with this exact marker.
+  if ! ps -p "$pid" -o args= 2>/dev/null | grep -Eq '(^|[/ ])server\.cjs( |$)' \
+    || ! ps -p "$pid" -o args= 2>/dev/null | grep -qF "$SESSION_DIR"; then
     rm -f "$PID_FILE"
     echo '{"status": "not_running", "note": "stale pidfile removed"}'
     exit 0

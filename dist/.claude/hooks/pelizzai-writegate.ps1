@@ -297,7 +297,7 @@ try {
   # of Rules A and B through the carve-out. Each component resolves against the PHYSICAL prefix
   # built so far ($IsWindows is absent on Windows PowerShell 5.1 - the env check covers it);
   # anything unresolvable keeps its raw spelling - fail-open, as everywhere else in this file.
-  function Get-PhysicalPath([string]$p) {
+  function Get-PhysicalPath([string]$p, [int]$Depth = 0) {
     if (-not $p) { return $p }
     try {
       $isWin = ($env:OS -eq 'Windows_NT' -or $IsWindows)
@@ -312,7 +312,30 @@ try {
           continue
         }
         $next = Join-Path $cur $seg
-        if (-not (Test-Path -LiteralPath $next)) { $cur = $next; continue } # not on disk yet
+        if (-not (Test-Path -LiteralPath $next)) {
+          # Test-Path FOLLOWS links, so a DANGLING link looks "not on disk" — yet a write through
+          # it lands on the target. See the link itself and resolve its target physically.
+          $linkTarget = $null
+          if ($Depth -lt 8) {
+            if ($isWin) {
+              $li = Get-Item -LiteralPath $next -Force -ErrorAction SilentlyContinue
+              if ($li -and $li.LinkType -and $li.Target) { $linkTarget = [string]($li.Target | Select-Object -First 1) }
+            } else {
+              & sh -c 'test -L "$0"' $next 2>$null
+              if ($LASTEXITCODE -eq 0) {
+                $t = & sh -c 'readlink -- "$0"' $next 2>$null
+                if ($LASTEXITCODE -eq 0 -and $t) { $linkTarget = ([string]($t | Select-Object -Last 1)).Trim() }
+              }
+            }
+          }
+          if ($linkTarget) {
+            if (-not [System.IO.Path]::IsPathRooted($linkTarget)) { $linkTarget = Join-Path $cur $linkTarget }
+            $cur = Get-PhysicalPath $linkTarget ($Depth + 1)
+          } else {
+            $cur = $next # genuinely not on disk yet
+          }
+          continue
+        }
         if ($isWin) {
           $item = Get-Item -LiteralPath $next -Force -ErrorAction SilentlyContinue
           while ($item -and $item.LinkType) {

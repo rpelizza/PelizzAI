@@ -1,6 +1,6 @@
 ---
 name: pelizzai-finish
-description: "Use after final validation seals validated-head. Integrates exactly the validated content, runs the coverage safety net, seals delivery, and resolves the destination — local, push, or PR."
+description: "Use after final validation seals validated-head: 'finish the task', 'close this out', 'seal the delivery'. Integrates exactly the validated content and resolves the destination."
 ---
 
 # PelizzAI Finish

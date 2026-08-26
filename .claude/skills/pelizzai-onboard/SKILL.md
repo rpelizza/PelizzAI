@@ -96,8 +96,7 @@ user to type `bootstrap`:
 triggers it at the design→plan edge, as a numbered step of closing the design edge;
 `pelizzai-plan` triggers it as a safety net before Task 1, when the plan's stack has no
 coverage in the catalog (or the catalog is absent). At those two points, the `pelizzai-router`
-kickoff already announces in the Artifacts that the stack's domain skills will come as a proposal
-at the design edge.
+kickoff already announces in the Artifacts that the stack's skills come as a design-edge proposal.
 
 A one-question gate, with a recommendation:
 
@@ -108,9 +107,8 @@ Recommendation: <create all | subset> — <one-line reason>.
 Question: create the recommended ones, adjust the set, or proceed with none for now?
 ```
 
-After the answer about skills, ask separately the opt-in question about arming maintenance
-(Stack baseline + ledger + hook), also with a recommendation. Do not hide two decisions inside a
-single checkbox.
+After the answer about skills, ask separately the opt-in question about arming maintenance (Stack
+baseline + ledger + hook), also with a recommendation — never two decisions in one checkbox.
 
 Zero domain skills is valid only when ratified against the proposal. "First interaction" does not
 trigger writing by itself; greenfield triggers discovery and, after the spec is approved, this
@@ -125,11 +123,11 @@ Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route ana
 
 ```mermaid
 flowchart TD
-    Start([First contact OR bootstrap]) --> Mode{Does the request mutate files?}
+    Start([First contact OR bootstrap]) --> SRC{Source repo,\nby sentinel?}
+    SRC -- Yes --> Done([scan-only report: no consumer\nruntime, no gate, no bootstrap-write])
+    SRC -- No --> Mode{Does the request mutate files?}
     Mode -- No --> Scan[scan-only: context inventory\nteam/subagents only when worth it]
-    Scan --> SRC{Source repo,\nby sentinel?}
-    SRC -- Yes --> Done([report only: no consumer\ncatalog, gate does not run])
-    SRC -- No --> Gate[Proactive domain skills gate:\nrecommends; the user ratifies]
+    Scan --> Gate[Proactive domain skills gate:\nrecommends; the user ratifies]
     Mode -- Yes, authorized --> Iso[pelizzai-isolate:\nisolate before the first write]
     Gate -- ratified --> Iso
     Iso --> Inv[Inventory: structure, stacks,\nMCPs, git/host, skills, conventions]
@@ -149,7 +147,10 @@ flowchart TD
 
 If Git exists, invoke `pelizzai-isolate` and create a task branch such as
 `chore/bootstrap-harness` before any file. If there is no Git, offer `git init`; if the user
-declines, explain that there will be no history/rollback and proceed only with authorization.
+declines, bootstrap-write does NOT proceed — without a repository there is no branch, no
+isolation, and no rollback, and a generic authorization does not replace that precondition (the
+first-write gate rules). Offer scan-only instead: the mapping and the proposal survive; only the
+writes wait for a repository.
 
 The bootstrap is its own transaction. Its artifacts must be committed/integrated or stay on the same task branch before a feature worktree depends on them.
 
@@ -189,8 +190,7 @@ the writing, **never a conjunctive door** that vetoes candidates:
 
 A candidate with few signals goes lower in the order, with a one-line reason — it is not silently
 discarded. What prevents noise is each skill's value, not a quantity cap: a skill per folder, file,
-or generic tool is not coverage. The proposal grows with the project's real patterns, not with the
-directory tree.
+or generic tool is not coverage. The proposal grows with real project patterns, not the tree.
 
 Zero domain skills is a possible outcome WHEN the user ratifies it against the proposal — the decision not to create is the user's, not the classifier's.
 
@@ -231,10 +231,10 @@ exceptions would silence `history/`).
 dev's closure commit would fight over the same singleton. The durable per-task record is
 `data/history/<YYYY-MM-DD>-<slug>.md`, conflict-free by unique name.
 
-`merge=union` keeps concurrent appends to `learnings.md` from conflicting; the residual risk — a
-duplicated line between parallel appends — is visible and benign for append-shaped content. Union
-merge on a file that is NOT append-shaped interleaves edits silently; declare, never assume.
-Verify the ignore with `git check-ignore` using temporary proof files; remove the proofs afterward.
+`merge=union` keeps concurrent appends to `learnings.md` from conflicting; the residual duplicated
+line between parallel appends is visible and benign for append-shaped content — on anything NOT
+append-shaped it interleaves edits silently, so declare, never assume. Verify the ignore with
+`git check-ignore` using temporary proof files; remove the proofs afterward.
 
 Create on demand, not at bootstrap: `context.md`, `adr/`, `out-of-scope/`, `specs/`, `plans/`, and the ephemeral directories.
 

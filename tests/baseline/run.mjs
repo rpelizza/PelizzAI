@@ -39,6 +39,10 @@ const argv = process.argv.slice(2);
 const flags = new Set(argv.filter((a) => a.startsWith('--')));
 const modelIndex = argv.indexOf('--model');
 const model = modelIndex !== -1 ? argv[modelIndex + 1] : null;
+if (modelIndex !== -1 && (!model || model.startsWith('--'))) {
+  console.error('baseline: --model requires a model name');
+  process.exit(2);
+}
 const taskArg = argv.find((a) => !a.startsWith('--') && a !== model);
 
 if (!taskArg) {
