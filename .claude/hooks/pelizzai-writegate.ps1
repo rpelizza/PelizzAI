@@ -329,15 +329,9 @@ try {
           # portable to older macOS), physicalizing each hop's parent via cd -P. Without this,
           # `pelizzai/alias -> src/app.ts` stayed spelled as metadata while the OS writes product
           # - the file-symlink twin of the ..-after-link bypass. A plain file walks zero hops.
-          $out = & sh -c 'p="$0"; i=0
-            while [ -L "$p" ] && [ "$i" -lt 40 ]; do
-              t=$(readlink -- "$p") || break
-              case "$t" in /*) p="$t";; *) p="$(dirname -- "$p")/$t";; esac
-              d=$(cd -P -- "$(dirname -- "$p")" 2>/dev/null && pwd -P) || break
-              p="$d/$(basename -- "$p")"
-              i=$((i+1))
-            done
-            printf "%s\n" "$p"' $next 2>$null
+          # ONE line on purpose: this .ps1 checks out with CRLF, and a multi-line sh script would
+          # carry a \r into every dash token and silently fall back to the logical path.
+          $out = & sh -c 'p="$0"; i=0; while [ -L "$p" ] && [ "$i" -lt 40 ]; do t=$(readlink -- "$p") || break; case "$t" in /*) p="$t";; *) p="$(dirname -- "$p")/$t";; esac; d=$(cd -P -- "$(dirname -- "$p")" 2>/dev/null && pwd -P) || break; p="$d/$(basename -- "$p")"; i=$((i+1)); done; printf "%s\n" "$p"' $next 2>$null
           $cur = if ($LASTEXITCODE -eq 0 -and $out) { ([string]($out | Select-Object -Last 1)).Trim() } else { $next }
         }
       }
