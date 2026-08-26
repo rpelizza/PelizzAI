@@ -80,12 +80,17 @@ profile — push/PR/publication are decided per task in `pelizzai-finish`.
    Recommended: granular — preserves checkpoints; squash-final only if you ask for it.
    Question: which strategy do you choose?
 
-4. Review (only after 3)
-   Options: split · combined.
-   Recommended: split — it is the default, even for a bounded task: only with two dispatches is
-   the spec lens truly blind. Downgrading to combined requires a bounded/low-risk task AND
-   your choice here.
-   Question: confirm split, or do you prefer combined?
+4. Executor tier (only after 3; skip when the mode is inline — the session's model executes)
+   The task review is not a choice: ONE independent dispatch, both verdicts, in every lane
+   (task-cycle §3); the truly blind spec lens runs on the final range.
+   What IS a choice is the implementers' model tier. Spec, plan, orchestration, and review stay
+   on the session's tier — the evidence is that a weaker orchestrator ships planted defects —
+   while implementation subagents may run a mid tier when the tasks are mechanical against a
+   ratified plan.
+   Recommended: <session tier | mid tier> — <one-line why grounded in the tasks' risk and shape>.
+   Question: which tier do the implementers run on?
+   The harness never switches models on its own; the bill is the user's. The round-4 escalation
+   of the fix loop (task-cycle §5) also recommends and waits.
 ```
 
 Rules: the mode keeps **the three options always visible** — **team is never omitted**. There is
@@ -172,6 +177,13 @@ their gates into the briefing.
 
 ```text
 1. Consumer: read `pelizzai/domain-skills.md`; source mode: use the source repo's rules/skills.
+1.5. Consumer: read the **Active rules** of `pelizzai/data/learnings.md` (the short section only —
+   the Incident log is consulted on demand, not loaded here) and PASTE them into the briefing of
+   every task, exactly like the domain skills. Reading them yourself is not enough: in
+   subagents/team the implementer has an isolated context, and a rule the coordinator read but
+   did not paste never reaches the code. Most of them are about HOW YOU PROVE something works,
+   which is what a task under time pressure gets wrong first. Source mode: no consumer runtime —
+   use the repo's own rules and do not create `pelizzai/` for this.
 2. Read `overlays:` in the state/execution record and complement from the observed effect/surface.
 3. Inline: load domain + overlays. Subagents/Team: PASTE their operational points into the briefing.
 4. Propagate the same package to the reviewer; they must judge UI/security/docs requirements too.
@@ -242,9 +254,9 @@ flowchart TD
     DOM --> PRE[Pre-flight: sweep plan for contradictions]
     PRE --> CY[Adaptive cycle per task\nref: task-cycle.md]
     CY --> T[Implement with per-artifact strategy\n+ domain + overlays]
-    T --> RV[Proportional review\ncombined or split]
+    T --> RV[Task review\none dispatch, two verdicts]
     RV --> Q{Approved by both?}
-    Q -- No --> FX[Fix and re-review\ncircuit breaker: 3 cycles/stage]
+    Q -- No --> FX[Fix and re-review\ncircuit breaker: 5 rounds/stage]
     FX --> RV
     Q -- Yes --> CM[Coordinator advances the cursor AND consolidates\na single commit, cursor included]
     CM --> MORE{More tasks?}
@@ -283,8 +295,8 @@ with two lenses, circuit breaker, and commit as a gate — lives in
 **[references/task-cycle.md](references/task-cycle.md)**. Summary:
 
 ```text
-1. Briefing: PASTE the full text + domain skills + overlays + the evidence strategy and review
-   profile (`split` by default; `combined` only if ratified)
+1. Briefing: PASTE the full text + domain skills + overlays + the evidence strategy, with the
+   test command SCOPED to the task's paths
    (the member never reads the whole plan file; use scripts/task-brief.* only when a compatible
    persistent Markdown plan exists. A native plan uses a pasted/constructed brief — see §1,
    including
@@ -298,15 +310,16 @@ with two lenses, circuit breaker, and commit as a gate — lives in
    choose requirements, UX, architecture, data, security, or acceptance. The coordinator does not
    decide for them or by itself either: it consolidates the gaps and takes them to the human via
    `pelizzai-interview` in gap mode before the front continues.
-3. Review with two lenses: (a) conformance to the spec; (b) quality + FRESH evidence.
-   `split` — the default, even for a bounded task — uses sequential stages and is where the
-   blindness actually exists; `combined` applies both in one dispatch/report and is only valid
-   for a bounded/low-risk task whose profile the user ratified at step 4 of the gate.
+3. Task review: ONE independent dispatch with both verdicts — (a) conformance to the spec,
+   formed before reading the report; (b) quality + FRESH evidence, verifying the report
+   (task-cycle §3; template: pelizzai-review → references/task-reviewer.md). The truly blind
+   spec lens runs on the final range only.
 4. Failed? Fix (re-dispatching to the implementer — do not fix by hand, it pollutes the context)
-   and RE-REVIEW under the same lens. Circuit breaker: 3 cycles per lens per task; the same
-   issue twice escalates on the 2nd; a structural rejection escalates immediately; on overflow →
-   record phase: blocked and escalate to the human with an actionable message.
-5. Both lenses approved? The COORDINATOR consolidates: stage the task's EXACT paths and, in the
+   and RE-REVIEW scoped to the fix. Circuit breaker: 5 rounds per task (1-3 same instance, 4 fresh instance with a
+   changed approach and a ratifiable model escalation, 5 last attempt, then the breaker adjudicates); the same
+   issue twice jumps to the round-4 regime on the 2nd; a structural rejection goes straight to
+   the breaker; on overflow → record phase: blocked and escalate with an actionable message.
+5. Both verdicts approved? The COORDINATOR consolidates: stage the task's EXACT paths and, in the
    consumer, update/stage state in the same commit; in source mode advance the execution record
    without a file. Inspect `git diff --cached` and commit (granular: definitive; squash-final:
    wip). Never use `git add -A`.
@@ -404,58 +417,10 @@ compacting once (advisory, same model as the cadence; it never blocks): the whol
 ~50 lines, so that threshold already exposes a bloated cursor. Apart from migrating an intact
 block to `history/` (lossless), any condensation of content is propose-confirm.
 
-**Migration at the `delivered` seal (the cursor slims down at closeout, not at the next opening).**
-The executor is `pelizzai-finish`; the boundary is defined here. When writing
-`phase: delivered`, the task's **intact block** migrates to
-`pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` (VERSIONED) and the state returns to template
-size, with ONE index line under `## History`. Intact block (**migration boundary**, identical
-for `done` and `abandoned`) = all fields of this task's `## Active task` + its
-`T<n>`/`next`/`pending` lines from `## Progress`, with the `data/reports/` links copied verbatim.
-Order of operations (lossless → verifiable):
-
-```text
-1. Copy the intact block to data/history/<YYYY-MM-DD>-<slug>.md — a faithful copy, nothing rewritten.
-2. Return `## Active task` to the template placeholders, PRESERVING the fields that the
-   destination and the later observation still read: slug, phase: delivered, branch, base-ref,
-   base-sha, validated-head, commit-strategy, worktree-path, and confirm.
-3. Remove the migrated T<n>/next/pending lines from `## Progress` (they return to placeholders).
-4. Insert under `## History`: `- <date> <slug> — delivered — <result ≤10 words> →
-   data/history/<file>`.
-```
-
-The migration is only complete after (1)–(4) and is lossless → automatic; CONDENSING the block's
-content (instead of copying it faithfully) is destructive, falls outside the automatic rule →
-propose-confirm only.
-
-**Reconciliation of the previous delivery (`delivered` → `done`).** When opening the next task
-(here) or resuming (`pelizzai-resume`/session-start), if the state carries `phase: delivered`,
-observe the delivery BEFORE overwriting the cursor. The block is already in `history/`; the
-reconciliation only stamps the outcome:
-
-```text
-- Read `confirm:` and verify it against git (read-only): does `base-ref` already contain
-  `validated-head`? Was the PR merged/closed? Was the branch integrated? (Local delivery: does
-  the user accept it?)
-- Observed → stamp the `## History` index line (`— done <YYYY-MM-DD> — <one-line evidence>`),
-  write `phase: done`, and append the same observation to the corresponding `data/history/`
-  file. Only then free slug/branch/base-*/validated-head/confirm for the new task.
-- Failed (PR closed without merge, branch discarded) → do NOT stamp `done`. Report it and propose
-  resuming the delivery branch or archiving it as `abandoned` — the decision is the user's.
-  Archiving as `abandoned` uses the SAME lossless migration: the block already migrated at the
-  seal, and the index line gets `— abandoned <YYYY-MM-DD> — <reason ≤10 words>`.
-```
-
-Metadata writes in `pelizzai/` are allowed on any branch; the commit still requires a task
-branch. That is why the reconciliation **reads** on the current branch (even a protected one) and
-**writes** the reconciled metadata, but it is only **committed in the first commit of the NEW
-task branch** — never a commit on a protected branch. Source mode: the same observation applies
-in the native execution record, without creating `pelizzai/` or `history/` runtime.
-
-In both modes, validate the branch with `git branch --show-current` and the worktree via
-`git worktree list`/a command run inside the recorded path. A material divergence calls
-`pelizzai-resume` in the corresponding mode; it preserves WIP before reconciling.
-
----
+**At the delivery edges** — sealing `delivered`, and opening the next task on top of a delivered
+one — the cursor migrates and the previous delivery is reconciled. That contract lives in
+[references/delivery-seal.md](references/delivery-seal.md) (~800 tokens); it fires at closeout, never
+between two tasks of the same plan.
 
 ## Loop until delivery (adaptive control)
 
@@ -544,9 +509,9 @@ After this step, `git status --porcelain` must be empty and `validated-head` rem
    independent reviewer, at the session's model — never a smaller one — and the
    highest effort the platform allows (see task-cycle §8).
    Narrow exception: a single `bounded` task, `read-only`/`write-local` effect, low risk,
-   ratified `combined` profile, zero findings, and no later mutation may reuse the task's review
+   zero findings, and no later mutation may reuse the task's review
    if `reviewed-tree == candidate-head^{tree}`. Missing any item — `write-shared` effect,
-   medium/high risk, sensitive surface, or `split` profile (the default) — requires a normal
+   medium/high risk, or a sensitive surface — requires a normal
    review (see `pelizzai-review` → "Final branch review"). Critical/Important block.
 3. Run, by the coordinator itself, all applicable checks of the profile (test/lint/build/render/
    dry-run/visual etc.), from scratch, with output and exit code. Do not invent a suite for a
@@ -594,7 +559,10 @@ config, or doc may change after the seal.
 - Accepting an inferred "tests pass", without fresh pasted evidence.
 - Fixing a member's rejected work by hand (re-dispatch — fixing by hand pollutes the context).
 - Skipping the re-review after a fix ("I fixed it" is just one more unverified claim).
-- An endless fix→re-review loop (ignoring the 3-cycle circuit breaker).
+- An endless fix→re-review loop (ignoring the 5-round circuit breaker).
+- Escalating to the human at the cap without dispatching the breaker: after five rounds the
+  likeliest reading is that implementer and reviewer are both right about different things, and
+  that is an adjudication, not a decision the user should have to make.
 - Declaring delivered without applicable overlays + final review (or proven bounded reuse) +
   checks + checklist + seal.
 - Pausing at every task of an already approved plan, or asking permission for every mechanical
@@ -627,6 +595,7 @@ config, or doc may change after the seal.
 - `pelizzai-review` — per-task review (spec + quality) and the final branch review.
 - `pelizzai-loop` — OODA when a real loop exists, Definition of Done, and stopping on doubt.
 - `pelizzai-interview` — the mandatory destination of the material-gap stop during execution.
+
 - `pelizzai-verify` / `pelizzai-finish` — completion with gates.
 - `pelizzai-onboard` — the `pelizzai/` directory pattern and the domain-skill catalog.
 

@@ -34,7 +34,7 @@ when there are mirrors, synced and verified; never assume `.claude/skills` in ev
 - isolation-default: <branch|worktree|unset>
 - execution-mode-default: <inline|subagents|team|unset>
 - commit-strategy-default: <granular|squash-final|unset>
-- review-policy-default: <combined|split|unset>
+- executor-tier-default: <session|mid|unset>
 - Ratified on: <YYYY-MM-DD> | Overrides since then: <n>
 <!-- destination is not persistable: push/PR/publish require per-task confirmation -->
 

@@ -144,7 +144,8 @@ try {
     Check-Match '.claude/skills/pelizzai-plan/templates/plan.md' 'Cross-cutting harness skills' 'plan propagates overlays'
     # The combined→split order was the old default; what matters is the plan RECORDING the profile
     # with both values named (the default itself lives in the F6 block, below).
-    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'Review profile[\s\S]{0,400}split[\s\S]{0,400}combined' 'plan records the review profile with both values'
+    # v3 slice 3: the profile choice is gone — one dispatch, both verdicts; the plan records DEPTH.
+    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'review shape is fixed, not planned[\s\S]{0,200}review DEPTH' 'plan records review depth, never a profile'
     Check-NotMatch '.claude/skills/pelizzai-plan/SKILL.md' 'interview-me[^\n]*(MANDATORY|mandatory)' 'bounded plan does not force an interview'
     Check-Match '.claude/skills/pelizzai-interface/SKILL.md' 'mandatory overlay' 'frontend is a mandatory overlay for UI'
     Check-Match '.claude/skills/pelizzai-interface/SKILL.md' 'existing brand or design system.*is.*the direction' 'frontend honors an existing brand/design system'
@@ -361,8 +362,9 @@ try {
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Reconciliation of the previous delivery' 'execution-plans reconciles the previous delivery (delivered→done)'
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'phase: delivered[\s\S]{0,6}delivery sealed' 'execution-plans defines phase delivered'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'phase: delivered[\s\S]{0,120}Reconciliation of the previous delivery' 'router (D3): delivered triggers reconciliation before treating it as an active task'
-    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'migration boundary' 'execution-plans (D4): defines the verifiable boundary of the intact block'
-    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'uses the SAME lossless migration' 'execution-plans: abandoned uses the same lossless migration to history/'
+    # v3 slice 3: the delivered-seal contract moved verbatim to references/delivery-seal.md.
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'migration boundary' 'execute (D4): defines the verifiable boundary of the intact block'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'uses the SAME lossless migration' 'execute: abandoned uses the same lossless migration to history/'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'phase: delivered' 'finish-task closes the task in delivered'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'seal task as delivered' 'finish-task: closure commit seals as delivered'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Declaring .phase: done. here' 'finish-task: anti-pattern of declaring done inside finish itself'
@@ -379,7 +381,7 @@ try {
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Progress hygiene' 'execution-plans has the Progress hygiene section'
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'one line per task' 'execution-plans: one line per task in progress'
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' '~60 lines' 'execution-plans: compaction nudge at ~60 lines'
-    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'data/history/[\s\S]{0,40}VERSIONED' 'execution-plans: intact-block migration to versioned history/'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'data/history/[\s\S]{0,40}VERSIONED' 'execute: intact-block migration to versioned history/'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '~60 lines' 'finish-task: bulky state nudge (~60 lines)'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'data/history/' 'finish-task cites the history/ migration in the done observation'
     Check-Match '.claude/skills/pelizzai-onboard/SKILL.md' '^data/reports/\s*$' 'audit: reports/ stays ignored (ephemeral)'
@@ -408,7 +410,7 @@ try {
     Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'there is no metadata-only commit to start the task' 'task-cycle: Task 1 carries the setup state in the content commit'
 
     # -- The cursor deflates at CLOSEOUT (the delivered seal), not at the next opening --
-    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Migration at the .delivered' 'execution-plans: the history/ migration happens at the delivered seal'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'Migration at the .delivered' 'execute: the history/ migration happens at the delivered seal'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Migrate the intact block and deflate the cursor' 'finish-task runs the migration when sealing delivered'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'git add -- pelizzai/data/state\.md pelizzai/data/history/' 'finish-task stages state + history in the same closure'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' ":\(exclude\)pelizzai/data/history/" 'finish-task: product guard excludes history/ metadata'
@@ -440,11 +442,13 @@ try {
     Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'is not approved[\s\S]{0,40}present it before implementing' 'task-cycle pins the operational deviation test in the briefing'
 
     # -- D6: two-lens review with asymmetric blindness + separate coordinator + specialists by area --
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'spec lens reviewer does NOT receive the implementer''s report[\s\S]{0,60}judges the code against the contract' 'review: the spec lens is blind (literal D6 anchor)'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'asymmetric blindness' 'review names the asymmetric blindness of the two lenses'
+    # v3 slice 3: the truly blind spec lens moved to the FINAL range; per task the spec verdict
+    # is formed before the report is read, in one dispatch.
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'truly blind spec lens runs on the FINAL range' 'review: the blind spec lens lives on the final range'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'spec verdict[\s\S]{0,80}reading code against[\s\S]{0,20}contract first' 'review: the spec verdict is formed before the report'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'never[\s\S]{0,4}the blind lens' 'review: the coordinator is never the blind lens'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'lens that receives the implementer''s report' 'review: the evidence lens receives and verifies the implementer report'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'asymmetric blindness of the two lenses lives in' 'review: the asymmetric blindness of the two lenses lives in split'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'rubric that receives the implementer''s report' 'review: the evidence rubric receives and verifies the implementer report'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'ONE independent reviewer in ONE dispatch' 'review: the task review is one independent dispatch'
     Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'spec lens reviewer does NOT receive the implementer''s report' 'spec-reviewer is the blind lens (does not receive the report)'
     Check-NotMatch '.claude/skills/pelizzai-review/references/spec-reviewer.md' '\{IMPLEMENTER_REPORT\}' 'spec-reviewer (blind lens) no longer injects the report placeholder'
     Check-Match '.claude/skills/pelizzai-review/references/code-reviewer.md' '\{IMPLEMENTER_REPORT\}' 'code-reviewer (evidence lens) receives the report placeholder'
@@ -477,10 +481,10 @@ try {
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Skipping the review because .it''s simple' 'review: BASE anti-pattern (skipping because "it is simple") restored'
 
     # -- split is the default; combined is a ratified exception (not the other way around) --
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'recommended default[\s\S]{0,20}is .split.' 'review: split is the profile recommended by default'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' '.combined. is[\s\S]{0,20}\*\*exception\*\*' 'review: combined is the exception, not the normal case'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'downgrading to .combined. always requires' 'review: downgrading to combined requires an explicit user choice'
-    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Using .combined. on your own' 'review: anti-pattern of assuming combined without ratification'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'There is no profile to pick' 'review: there is no profile to pick per task'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Proportionality regulates depth, never existence' 'review: proportionality regulates depth, never existence'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'review degraded: single-context' 'review: inline degradation is DECLARED, never silent'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'coordinator never grades its own delivery' 'review: the coordinator never grades its own delivery'
     Check-NotMatch '.claude/skills/pelizzai-review/SKILL.md' 'trivial/bounded task proceeds with .combined.' 'review does not send bounded tasks back to combined by default'
 
     # -- The blind lens receives the domain skills (blindness ≠ lack of project context) --
@@ -498,14 +502,15 @@ try {
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Narrow exception:[\s\S]{0,200}read-only.*write-local' 'execution-plans mirrors the limits of the reuse exception'
 
     # -- The default propagated: gate, plan, task-cycle, team, and subagents teach the SAME thing --
-    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Recommended: split — it is the default' 'gate step 4 recommends split by default'
-    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'Downgrading to combined requires[\s\S]{0,80}your choice' 'gate step 4: combined requires an explicit user choice'
-    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' '\| .split. \(default\)' 'task-cycle: the profile table opens with split (default)'
+    # v3 slice 3: gate step 4 is now the executor tier (ratified 26/08); review shape is fixed.
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' '4. Executor tier' 'gate step 4 ratifies the executor tier'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'never switches models on its own' 'gate step 4: the harness never switches models on its own'
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'ONE independent reviewer in ONE dispatch' 'task-cycle §3: one independent reviewer, one dispatch'
     Check-NotMatch '.claude/skills/pelizzai-execute/references/task-cycle.md' 'trivial/bounded tasks proceed with \*\*combined\*\* review' 'task-cycle does not send bounded tasks back to combined'
-    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'The default is .split., even for bounded' 'writing-plans records split as the review-profile default'
+    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'ONE independent dispatch with both verdicts' 'plan: the per-task review shape is one dispatch, both verdicts'
     Check-NotMatch '.claude/skills/pelizzai-plan/SKILL.md' 'universal split review' 'writing-plans no longer treats universal split as a red flag'
-    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'blind/dual profile \(.split.\) is the default' 'team: split is the per-task review default'
-    Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' '.split. by default' 'subagents: the recorded profile is split by default'
+    Check-Match '.claude/skills/pelizzai-team/SKILL.md' 'one dispatch, both verdicts' 'team: the per-task review is one dispatch, both verdicts'
+    Check-Match '.claude/skills/pelizzai-subagents/SKILL.md' 'ONE independent reviewer, ONE dispatch, both verdicts' 'subagents: the task review is one dispatch, both verdicts'
 
     # -- D7: thread of the proactive domain skills gate — three capture points + audit names who invokes it --
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'stack domain skills \(proposed at the design edge\)' 'router (D7.1): kickoff lists the stack domain skills in Artifacts'
@@ -530,14 +535,16 @@ try {
     Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'downgrading model/effort below what the\s+user chose' 'execution-plans: the anti-pattern is downgrading below what the user chose'
     Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'most capable model available and maximum effort' 'execution-plans does not mandate maximum capability'
     Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Model selection per role' 'task-cycle §8 remains model selection per role'
-    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'the model is whatever the user chose on their platform' 'task-cycle §8: the model belongs to the user'
-    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'no\s+role runs on a smaller model than the session' 'task-cycle §8 forbids downgrading below the session model'
+    # v3 slice 3: tier-by-role ratified 26/08 supersedes "never downgrade" — the coordinator and
+    # every review stay on the session tier; executors run the tier ratified at the gate.
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'tier by role, ratified at the setup gate, never switched silently' 'task-cycle §8: tier by role, ratified, never silent'
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'coordinator never runs below the session''s tier' 'task-cycle §8: the coordinator never runs below the session tier'
     Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'elevates the reasoning of \*\*any\*\* model' 'task-cycle §8: reasoning elevates any model'
-    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'never lowered to compensate for a smaller model' 'task-cycle §8: process stays intact even with a smaller model'
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'never lowered to\s+compensate for a smaller model' 'task-cycle §8: process stays intact even with a smaller model'
     Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'recommend and ratify' 'task-cycle §8: a capability upgrade is a ratifiable recommendation'
     Check-NotMatch '.claude/skills/pelizzai-execute/references/task-cycle.md' 'most capable model available|effort/reasoning at the maximum level' 'task-cycle §8 does not impose maximum capability'
-    Check-Match 'CLAUDE.md' 'the model is not the harness''s decision' 'CLAUDE.md: the model belongs to the user, not the harness'
-    Check-Match 'CLAUDE.md' 'never downgrade the process to compensate for a smaller model' 'CLAUDE.md: process does not compensate for a smaller model'
+    Check-Match 'CLAUDE.md' 'tiered by role and ratified, never switched silently' 'CLAUDE.md: capability is tiered by role and ratified'
+    Check-Match 'CLAUDE.md' 'process is never downgraded to compensate for a smaller model' 'CLAUDE.md: process does not compensate for a smaller model'
     Check-Match 'README.md' 'the model you chose — never a smaller one' 'README: final review respects the chosen model'
 
     # -- F7: debugging regrafts the signals and tactics lost in the pivot (pre-2026-07-11 restoration) --
@@ -1218,7 +1225,7 @@ try {
     Check-Match 'README.md' 'PelizzAI source repo[\s\S]{0,260}does not create\s*\r?\na metadata-only commit' 'README: closeout carries the source mode caveat'
 
     # CLAUDE.md: model/effort are never downgraded below the session ones — stated without zeugma.
-    Check-Match 'CLAUDE.md' 'never downgrade model or effort below the session''s to save cost' 'CLAUDE.md names the anti-pattern of downgrading model/effort below the session'
+    Check-Match 'CLAUDE.md' 'implementation subagents may run a mid tier when the user ratifies it' 'CLAUDE.md: the executor tier is a user-ratified choice'
 } catch {
     Check $false 'PR #4 review fixes' $_.Exception.Message
 }

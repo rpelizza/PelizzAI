@@ -88,7 +88,7 @@ _If self-contained, write `none`._
 - Command(s): `[complete canonical commands]`
 - Expected evidence: [exit code, delta, visual state, or exact output]
 - Rollback: [when applicable; otherwise, `not applicable`]
-- Review profile: [split (default) | combined (only with a ratified downgrade)] — [justification by risk/surface]
+- Review depth: [which checks the task reviewer should actually run] — [justification by risk/surface]
 
 - [ ] **Step 1: Establish the baseline/oracle** → verify: [exact result]
 

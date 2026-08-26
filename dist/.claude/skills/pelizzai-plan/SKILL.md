@@ -147,16 +147,10 @@ Fill in **Implementation and validation strategy**:
 Mixed tasks combine strategies. Do not fabricate RED for CSS, Markdown, or configuration just to
 make the plan uniform.
 
-Also record the **Review profile**. The default is `split`, even for bounded:
-
-- `split` (default): the normal case; mandatory for medium/high risk, sensitive surface, public
-  contract, data, migration, or multiple parts;
-- `combined`: an exception for bounded, low risk, and cohesive scope, with no security/data/
-  migration/public contract — and only after the user ratifies the downgrade at step 4 of the
-  setup gate.
-
-Both cover spec and quality; what changes is the number of dispatches, not the approval bar. Only
-`split` makes the spec lens truly blind, so the plan never recommends `combined` on its own.
+The review shape is fixed, not planned: per task, ONE independent dispatch with both verdicts
+(spec, then quality/evidence); the truly blind spec lens runs on the final range. What the plan
+records per task is the review DEPTH the risk demands — which checks the reviewer should actually
+run — never a profile choice.
 
 ## Document
 
@@ -258,7 +252,7 @@ The decision tree is `pelizzai-continuity` → `references/phase-boundaries.md`.
 - Skipping stress and plan approval to start implementing.
 - Duplicating in the plan all the code execution should write.
 - Omitting a detectable frontend/security overlay.
-- Universal TDD — or recording `combined` as the profile without the user having ratified the downgrade.
+- Universal TDD — or planning a review "profile": the per-task review shape is fixed (one dispatch, both verdicts).
 - Team/worktree out of harness preference, without concrete gain.
 - Using Context7 to decide requirements or acceptance criteria.
 - A giant plan covering subsystems that should be separate tasks/projects.

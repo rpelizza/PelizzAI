@@ -93,6 +93,17 @@ documentation ground options; they never ratify a decision that belongs to the u
 Do not state effort as fact without measuring. When two interpretations materially change scope or
 cost, show the available evidence and the consequence of each.
 
+**Finding facts is the harness's job, never the user's.** When a pending question needs a fact from
+the environment (filesystem, repo, docs), look it up — or dispatch a subagent for it — instead of
+asking; and do not block on it: only the questions downstream of that fact wait, the current
+question proceeds. Asking the user something the repo can answer wastes their turn and erodes the
+interview's authority.
+
+**Record each answer where it lives, immediately.** A ratified answer is written into the spec/plan
+section it affects (or the plan's `## Technical decisions`) right after the turn — replacing the
+ambiguous statement it invalidates, never accumulating beside it — so an interrupted interview
+loses nothing and the artifact never carries two contradictory sentences.
+
 ## How to ask
 
 - Ask **exactly one question per turn**. Order it by the highest-impact decision that conditions

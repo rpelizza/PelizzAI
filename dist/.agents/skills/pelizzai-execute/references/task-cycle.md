@@ -4,6 +4,17 @@ The protocol each task follows during the execution of a plan, valid in all thre
 subagents, inline). The proof and the shape of the review vary by artifact and risk; the scope,
 quality, and evidence gates remain observable.
 
+1. [Autonomy between tasks and the material-gap stop](#0-autonomy-between-tasks-and-the-material-gap-stop)
+2. [Self-sufficient briefing](#1-self-sufficient-briefing-by-file-when-the-scripts-exist-by-pasting-otherwise)
+3. [Choosing the strategy by artifact](#2-choosing-the-strategy-by-artifact) — including test scope
+4. [Task review: one independent reviewer, both verdicts](#3-task-review-one-independent-reviewer-both-verdicts)
+5. [Member status](#4-member-status)
+6. [Review-loop circuit breaker](#5-review-loop-circuit-breaker) — five rounds, then adjudication
+7. [Commit as a gate](#6-commit-as-a-gate)
+8. [Advancing the cursor](#7-advancing-the-cursor)
+9. [Model selection per role](#8-model-selection-per-role) — tier by role, ratified
+10. [Phase timing](#9-phase-timing-lightweight-instrumentation)
+
 ## 0. Autonomy between tasks and the material-gap stop
 
 The coordinator runs the cycle below end to end **without asking leave at every step**: inside a
@@ -58,17 +69,22 @@ Each task's briefing includes:
   the gates each one requires. Propagate them to the implementer **and reviewers**; naming them is
   not enough.
 - The necessary conventions and contracts (paths, interfaces, decisions already made).
+- The **Active rules** of `pelizzai/data/learnings.md`, PASTED (the short section; never the
+  Incident log). They are what this project already paid to learn, and the member has no other way
+  to reach them — a rule the coordinator read but did not paste never reaches the code. Empty
+  section, or source mode: say so explicitly, so nobody assumes coverage that is not there.
 - Global layer: apply `pelizzai-preferences` (language, secrets, .env, production quality) and
-  on conflict, the DOMAIN SKILLS pasted into this briefing and
+  reason deliberately; on conflict, the DOMAIN SKILLS pasted into this briefing and
   the project rules PREVAIL over preferences/reasoning.
-- Test/validation strategy chosen by the matrix in §2. For external APIs, ground it in Context7
+- Test/validation strategy chosen by the matrix in §2, WITH THE COMMAND SCOPED to the paths this
+  task touches, and the explicit line that the full suite is not this task's job. For external APIs, ground it in Context7
   for the observed version; current official documentation is the fallback, never memory.
 - Reasoning: when the task involves uncertainty, a decision, or a diagnosis, the suggested
-  dominant reasoning technique (decomposition, RCA, comparison, verification —
+  dominant technique (decomposition, RCA, comparison, verification —
   see the skill's matrix); omit it for a mechanical task with a clear contract — do not impose a
   technique without a trigger.
-- The review profile recorded in the plan: `split` (default) or ratified `combined`, with the
-  risk rationale.
+- The task review shape: ONE independent dispatch with both verdicts (§3); the truly blind spec
+  lens runs on the final range, not per task.
 - The expected return format and status (see below), including the mandatory field
   `Deviations from plan:` (or `none`).
 - Operational deviation test (canonical phrase, in the briefing TEXT):
@@ -102,44 +118,68 @@ TDD is the primary strategy when the skill's suitability gate passes; being able
 test is not enough. For deletions and purely mechanical changes, use the regression suite +
 proportional static checks. The member tests/validates, self-reviews, and **does not commit**.
 
-## 3. Proportional review with two lenses
+### Scope during a task, whole suite at the end
 
-Every task passes through the **spec** and **quality** lenses, in this order, with **asymmetric
-blindness**: the spec lens judges the code blind against the contract; the quality lens is the
-**evidence** lens and receives the author's report in order to verify it. The profile decides
-whether they use one or two dispatches:
+A task proves the files it touched. Scoping is not proving less — the evidence the row above demands
+is unchanged; what changes is that a member neither pays for nor gets blocked by a red in a module
+it never opened. The briefing must say so, because "run the tests" resolves to the whole suite by
+default in most repositories:
 
-| Profile | When | Execution |
-| --- | --- | --- |
-| `split` (default) | the normal case, including the bounded lane; **mandatory** for medium/high risk, public contract, security, data, migration, multiple parts, or structural rejection | the spec stage approves before quality is dispatched; independent dispatches |
-| `combined` (ratified exception) | bounded lane, low risk, cohesive scope, no security/data/migration/public contract — **and** the user ratified the profile in step 4 of the setup gate | one reviewer and one report, spec first and quality second |
+```text
+Tests to run: <the command scoped to the touched paths>
+Full suite: NOT in this task — the coordinator runs it at the end.
+```
 
-Proportionality: what varies with risk is the **depth** of each lens, not the existence of the
-review nor the blindness. The **separate lenses with blindness** profile is the default in any
-lane — only with two dispatches does the spec lens not know the author's narrative. If the diff
-reveals a surface that changes the risk, promote `combined` to `split` without a new ratification;
-downgrading to `combined` is always the user's explicit choice, never the saving of one round.
+**The full suite runs once, before the final review**, and is neither optional nor delegable: it is
+the only run positioned to catch an interaction the per-task scopes could not see, and nobody
+holding one task's context reads a cross-task regression correctly. Two exceptions, named in the
+briefing when they apply: a task whose subject is itself cross-cutting (shared type, global config,
+migration) has no touched-files scope and runs the suite; and a module already red is declared as
+such, or the member reports someone else's failure as its own.
+
+A red in the final run is not the last member's fault by default — find which task introduced it
+(`git bisect` over the task commits) before dispatching a fix.
+
+## 3. Task review: one independent reviewer, both verdicts
+
+Every task passes through the **spec** and **quality/evidence** rubrics, in this order, applied by
+**ONE independent reviewer in ONE dispatch** — in any lane, including bounded. There is no profile
+to pick and no downgrade to ratify. The reviewer's independence comes from **fabricated context**:
+it receives the task contract, the diff, the domain skills, and the author's report — never the
+session history. The briefing (`pelizzai-review` → `references/task-reviewer.md`) places the spec
+rubric BEFORE the report and instructs the reviewer to form the spec verdict reading code against
+contract first. The truly BLIND spec lens belongs to the FINAL range, in its own dispatch — that
+is where a requirement that fell between tasks becomes visible (issue #49 holds the cost analysis
+that moved it there).
+
+Proportionality: what varies with risk is the **depth** of each rubric — how much gets
+investigated and how many checks get run — never the existence of the review or who reviews
+(always an independent reviewer, never the coordinator grading its own delivery).
 
 ```text
 (0) Material: generate `review-package --working-tree`; the same package covers staged, unstaged,
     and untracked. Do not use a range before the task is committed.
-(a) Spec lens (BLIND): receives ONLY the diff + the task's spec/plan + the area's domain skills.
-    The spec-lens reviewer does NOT receive the implementer's report — they judge the code against the contract, without the author's narrative.
-    It is ADVERSARIAL by instruction: it compares the real implementation vs the requirements LINE BY LINE,
-    hunting for omissions, extras (scope beyond what was asked), and misunderstandings.
-(b) Quality / evidence lens: receives the author's report and VERIFIES the claims — tests run?
-    FRESH proof? deviations declared? — on top of readability, design, reuse, and security.
-    It does not blindly trust the report: the reviewer actually ran the checks applicable to the
-    artifact and pasted output + exit code. An inferred "tests pass" does NOT count as approved; a
-    check that did not run = UNVERIFIED, never ✅.
+(1) ONE dispatch, TWO verdicts, in order:
+    (a) Spec rubric — formed BEFORE the report section: the reviewer compares the real
+        implementation vs the requirements LINE BY LINE, hunting for omissions, extras (scope
+        beyond what was asked), and misunderstandings, with the area's domain skills as part of
+        the contract.
+    (b) Quality / evidence rubric — receives the author's report and VERIFIES the claims — tests
+        run? FRESH proof? deviations declared? — on top of readability, design, reuse, and
+        security. It does not blindly trust the report: the reviewer actually ran the checks
+        applicable to the artifact and pasted output + exit code. An inferred "tests pass" does
+        NOT count as approved; a check that did not run = UNVERIFIED, never ✅.
 ```
 
-Approval requires **both** verdicts: spec ✅ **and** quality ✅, whether in the same report or in
-separate stages. In the `combined` profile the asymmetry is logical: first the blind judgment
-against the contract, only then the reading of the report to verify the evidence — never the
-reverse. Conflict between the lenses → the coordinator decides with their OWN evidence or
-escalates; the author's narrative never arbitrates. "⚠️ not verifiable" items require the
-coordinator's assessment against the plan before marking them complete.
+The reviewer runs a test only when reading raises a specific doubt no existing run answers — and
+then a focused test, never the whole suite (§2 owns the suite's single position in the cycle).
+Warnings or other noise in the reported test output are findings — test output should be pristine.
+
+Approval requires **both** verdicts: spec ✅ **and** quality ✅ — a report missing either verdict
+is incomplete, never approved. Conflict between the verdicts (or with the coordinator's own
+knowledge) → the coordinator decides with their OWN evidence or escalates; the author's narrative
+never arbitrates. "⚠️ not verifiable" items require the coordinator's assessment against the plan
+before marking them complete.
 
 Pipeline anti-corruption (full rules in `pelizzai-review`): do not instruct the reviewer on what NOT to flag nor pre-classify severity; a finding caused by the plan itself goes up to the human; Minors accumulate in a ledger triaged at the final review; the final review's findings are fixed by ONE single fixer.
 
@@ -165,24 +205,62 @@ Never ignore an escalation nor re-dispatch without changing anything.
 
 ## 5. Review-loop circuit breaker
 
+Five rounds in three regimes. The regime matters more than the count: a loop that only counts higher
+never changes what it is doing.
+
 ```text
-- Limit: 3 fix→re-review cycles PER LENS, PER TASK. In the `combined` profile, use a shared
-  counter; promote to `split` if it becomes unclear which lens is failing.
-- The same issue rejected 2x → escalate on the 2nd.
-- Structural rejection ("the approach is fundamentally wrong") → escalate immediately.
-- Resets (do not give up too early): zero the spec counter on spec ✅, the quality counter on
-  quality ✅, and BOTH when starting a new task — a loop in Task N does not affect N+1.
+Rounds 1-3  SAME implementer, same approach. Ordinary correction, nothing escalates.
+Round 4     FRESH implementer, approach MUST change — dispatched WITHOUT the loop's history,
+            which after three rejections is arguing with itself. State what was tried and
+            rejected. Recommend a more capable model here and wait: per §8 the bill is the
+            user's. A "no" costs nothing; round 4 runs either way.
+Round 5     Last attempt, with whatever was ratified.
+At the cap  The BREAKER adjudicates — the human is not the next step.
+```
+
+**The breaker** judges the disagreement instead of continuing it, because after five rounds the
+likeliest reading is that both sides are right about different things. It receives the task, the
+diff, and each rejection in order — **never** the loop's conversation — and returns one of:
+
+```text
+IMPLEMENTER_RIGHT  the rejection does not hold. Accept the work; record the concern as an
+                   observation. A reviewer is a subagent and can be wrong.
+REVIEWER_RIGHT     the defect is real. Name it in ONE sentence the implementer can act on; if
+                   that sentence cannot be written, this is not the verdict.
+BOTH_PARTIAL       they answer different questions. Name both, and which one the task is for.
+UNDERSPECIFIED     neither can be right: the plan/spec does not decide it. Ends the loop and goes
+                   to the human — and reaching it early is a win, not a failure.
+```
+
+A verdict is not an approval to ship: `IMPLEMENTER_RIGHT` returns to normal close-out, everything
+else buys one bounded fix or escalates.
+
+```text
+- Limit: 5 fix→re-review rounds PER TASK — the task review is one dispatch, so the two verdicts
+  share a single counter. The re-review is SCOPED to the fix's diff plus each rejection's
+  subject; it is not a fresh hunt over the whole task.
+- The same issue rejected 2x → do not spend rounds 2 and 3 repeating it: jump to the round-4
+  regime (fresh implementer, changed approach) on the 2nd.
+- Structural rejection ("the approach is fundamentally wrong") → straight to the breaker; rounds
+  do not fix a wrong approach.
+- Resets (do not give up too early): zero the counter on full approval (both verdicts ✅) and
+  when starting a new task — a loop in Task N does not affect N+1.
 - Does NOT count as a cycle (avoids false positives): BLOCKED (it is already an escalation, never
   a tally); DONE_WITH_CONCERNS whose caveats are observations and the review passes; an
   implementer who CONTESTS the rejection ("the reviewer says X is missing, but it is on line Y")
   → treat it as NEEDS_CONTEXT and reconfirm with the reviewer (reviewers are subagents and make
   mistakes).
-- On blowing the limit: stop dispatching; write `phase: blocked` in the consumer state or native
+- On reaching the cap: dispatch the BREAKER first — the human is not the next step, the
+  adjudication is. `IMPLEMENTER_RIGHT` closes the task normally. `REVIEWER_RIGHT` or
+  `BOTH_PARTIAL` buys ONE bounded fix against the named sentence, and that fix does not reopen
+  the counter: if it fails, escalate.
+- On escalating (the breaker returned `UNDERSPECIFIED`, or the bounded fix failed): stop
+  dispatching; write `phase: blocked` in the consumer state or native
   execution record. In the consumer, log the blockage in `## Progress` → `pending` (task, stage,
-  number of failed cycles, the distinct rejection reasons
-  IN ORDER, the fixes attempted, and the pattern: independent issues / same recurring issue /
-  structural conflict); commit ONLY the cursor in the consumer (source mode creates no cursor commit); escalate to the
-  human with an ACTIONABLE message (what was done + each reason + fixes + pattern + options:
+  number of failed rounds, the distinct rejection reasons
+  IN ORDER, the fixes attempted, the pattern — independent issues / same recurring issue /
+  structural conflict — and the breaker's verdict); commit ONLY the cursor in the consumer (source mode creates no cursor commit); escalate to the
+  human with an ACTIONABLE message (what was done + each reason + fixes + pattern + verdict + options:
   clarify the spec via pelizzai-plan / split the task / revise the plan);
   leave the working tree INTACT (never git reset --hard). If the human says to continue,
   re-dispatch reusing the WIP — do not restart from scratch.
@@ -225,23 +303,42 @@ state/closure.
 
 ## 8. Model selection per role
 
-Harness policy: **the model is whatever the user chose on their platform** — by plan, cost, or
-preference — and it holds for every role: members, reviewers, and the coordinator use the
-session's model, with no upgrade required. What the harness never does is **downgrade on its
-own**: no role runs on a smaller model than the session's to save money, and the effort/reasoning
-stays at the highest level the user's platform offers. Specify the model and the effort explicitly
-when dispatching members and reviewers, so they do not inherit a default smaller than the
-session's.
+Harness policy — **tier by role, ratified at the setup gate, never switched silently**:
 
-The harness elevates the reasoning of **any** model: the right technique,
-a verifiable protocol, and fresh evidence do not depend on the model's capability. Proportionality
-still applies to the depth of the process (interview, brainstorming, TDD, review profile,
-overlays) — and it is **never lowered to compensate for a smaller model**. In architecture, in the
-two review lenses, in the final review, and in the delivery's final validation, a smaller model
-demands an intact process, not a shallower one.
+```text
+Session tier (the model the user chose):  spec, plan, ORCHESTRATION (the coordinator),
+                                          every review, the breaker, final validation.
+Ratified executor tier:                   implementation members run the tier the user chose at
+                                          setup-gate step 4 — the session's tier, or a mid tier
+                                          when the tasks are mechanical against a ratified plan.
+```
 
-If the platform allows more capability in a critical role, **recommend and ratify**: the model
-bill is the user's, never an automatic swap. The BLOCKED steps are still give more context →
-change the approach/split the task → escalate to the human; "switching models" only enters as a
-ratifiable recommendation on that last step. Fix context, tooling, or decomposition first. The
-coordinator records concerns, does not feign certainty.
+The asymmetry has evidence behind it: plans and reviews concentrate the judgment, and a weaker
+**orchestrator** — not just a weaker reviewer — is what ships planted defects. That is why the
+coordinator never runs below the session's tier, whatever the executors run. Specify model and
+effort explicitly when dispatching members and reviewers, so nobody inherits a default smaller
+than intended.
+
+The harness elevates the reasoning of **any** model: the right technique, a verifiable protocol,
+and fresh evidence do not depend on the model's capability. Proportionality still applies to the
+depth of the process (interview, brainstorming, TDD, overlays) — and it is **never lowered to
+compensate for a smaller model**: a mid-tier executor demands an intact process, not a shallower
+one, and the session-tier review is exactly the net under it.
+
+Escalating capability is always **recommend and ratify** — the bill is the user's, never an
+automatic swap. The two places it happens: round 4 of the fix loop (§5), and a BLOCKED whose
+context, tooling, and decomposition were already fixed. The coordinator records concerns, does
+not feign certainty.
+
+## 9. Phase timing (lightweight instrumentation)
+
+Stamp wall-clock timings as the cycle advances, so slowness is measurable instead of anecdotal:
+per task, note the elapsed time of the implementation, of the review, and of the fix rounds,
+appended to the SAME progress line the cursor already writes (`## Progress` in the consumer state;
+the native execution record in source mode) — e.g.
+`T3 ✅ <sha> — <note> [timing: impl 14m · review 9m · fix-rounds 1 (7m)]` — the task review is one
+dispatch, so it is one duration (the final range, with its own dispatches, may log
+`final-review spec 6m · quality 9m`). It is a suffix of the existing line, not a second one — the
+one-line-per-task Progress hygiene still holds. No new file and no commit of its own: the timing
+travels with the record that already exists, under the same rules. The final report aggregates the
+totals per phase — that aggregate is what proves, or refutes, where the delivery's time went.
