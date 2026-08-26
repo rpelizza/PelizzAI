@@ -1,0 +1,3 @@
+the copy on the settings page says "Aceitar" and it should say "Salvar". it's one word in one file.
+
+please don't do the whole planning thing for this, just fix it. I've already looked, it's src/pages/Settings.tsx line 84.

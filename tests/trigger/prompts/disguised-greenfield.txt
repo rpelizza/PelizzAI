@@ -1,0 +1,3 @@
+quick one — spin up a small internal tool for the ops team to see which invoices are overdue. nothing fancy.
+
+stack is next.js + postgres, same as everything else here. should be like 2 screens.

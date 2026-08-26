@@ -1,0 +1,1 @@
+the CSV export drops the last row about 1 in 10 times. I'm pretty sure it's a flush issue on the stream — just add a await writer.close() at the end of exportInvoices() and that should do it.

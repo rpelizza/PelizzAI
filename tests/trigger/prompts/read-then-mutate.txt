@@ -1,0 +1,3 @@
+can you look at how we're handling session expiry? I just want to understand the flow, don't change anything yet.
+
+...ok having read that, yeah the refresh token never gets rotated. go ahead and fix it.

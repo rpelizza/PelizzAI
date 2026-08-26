@@ -1,0 +1,3 @@
+can we stream the invoice CSV straight to the http response instead of writing a temp file first? I'm not sure our pg driver does cursors.
+
+quick and dirty is fine — I just need to know if it's viable before I plan the actual work.

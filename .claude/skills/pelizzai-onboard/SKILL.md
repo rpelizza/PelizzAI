@@ -323,9 +323,11 @@ that changes the environment waits for confirmation:
 ```text
 - No Git → suggest `git init` (the harness works better with history).
 - No remote → suggest integrating with GitHub or GitLab.
-- MCPs → research the most relevant ones for the identified stack and suggest them.
-- context7 absent → suggest installing it: it is what grounds skills and answers in real
+- context7 absent → suggest installing it FIRST: it is what grounds skills and answers in real
   documentation instead of guessing.
+- playwright/browser MCP absent and the project has UI → suggest it: it is what turns the
+  interface floors into machine oracles (screenshots, contrast, viewport) instead of taste debate.
+- Other MCPs → research the most relevant ones for the identified stack and suggest them.
 ```
 
 ### 7. Validate and close

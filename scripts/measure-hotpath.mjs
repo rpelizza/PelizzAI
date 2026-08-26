@@ -161,7 +161,9 @@ for (const route of budget.routes) {
 }
 
 const failures = rows.filter((row) => row.overBy > 0);
-const ok = failures.length === 0 && missing.length === 0;
+// Drift is a failure, not a note: a mandatory read nobody budgeted is exactly how the hot path
+// grows invisibly — the leak this instrument exists to close.
+const ok = failures.length === 0 && missing.length === 0 && drift.length === 0;
 
 if (asJson) {
   console.log(

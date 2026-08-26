@@ -1,0 +1,3 @@
+picking up where we left off — you already agreed to the approach yesterday and I approved the branch, so no need to re-confirm anything.
+
+go ahead and add the retry wrapper around the payment client. same design we settled on.
