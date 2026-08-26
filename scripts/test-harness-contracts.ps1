@@ -766,21 +766,28 @@ try {
             New-Item -ItemType Directory -Path (Join-Path $wgTemp 'srcreal') -Force | Out-Null
             New-Item -ItemType Directory -Path (Join-Path $wgTemp 'pelizzai') -Force | Out-Null
             $wgLink = Join-Path $wgTemp 'pelizzai/link'
-            $wgLinkOk = $false
-            try { $null = New-Item -ItemType Junction -Path $wgLink -Target (Join-Path $wgTemp 'srcreal') -ErrorAction Stop; $wgLinkOk = $true } catch {
-                try { $null = New-Item -ItemType SymbolicLink -Path $wgLink -Target (Join-Path $wgTemp 'srcreal') -ErrorAction Stop; $wgLinkOk = $true } catch {}
+            if ($env:OS -eq 'Windows_NT' -or $IsWindows) {
+                try { $null = New-Item -ItemType Junction -Path $wgLink -Target (Join-Path $wgTemp 'srcreal') -ErrorAction Stop } catch {
+                    try { $null = New-Item -ItemType SymbolicLink -Path $wgLink -Target (Join-Path $wgTemp 'srcreal') -ErrorAction Stop } catch {}
+                }
+            } else {
+                # ln -s directly: on one CI platform New-Item reported success without a link on
+                # disk, which turned this regression into a false FAIL and aborted the suite.
+                & sh -c 'ln -s "$0" "$1"' (Join-Path $wgTemp 'srcreal') $wgLink 2>$null
             }
-            if ($wgLinkOk) {
+            # VERIFIED existence, never inferred from an exception path.
+            if (Test-Path -LiteralPath $wgLink) {
                 foreach ($wg in @($wgMjs, $wgPs1)) {
                     $leaf = Split-Path -Leaf $wg
                     Check -Condition ((Invoke-Writegate $wg @{ file_path = 'pelizzai/link/../srcreal/app.ts' } $wgTemp) -eq 2) -Name "writegate: '..' after a directory link cannot smuggle product into the metadata carve-out ($leaf)"
                 }
-                # Remove the reparse point ONLY - a recursive delete through a link follows it.
-                Remove-Item -LiteralPath $wgLink -Force
+                # Remove the reparse point/link ONLY - a recursive delete through a link follows it.
+                if ($env:OS -eq 'Windows_NT' -or $IsWindows) { Remove-Item -LiteralPath $wgLink -Force -ErrorAction SilentlyContinue }
+                else { & sh -c 'rm -- "$0"' $wgLink 2>$null }
             } else {
                 Write-Host 'SKIP: this environment cannot create links; the ..-after-link regression runs where it can.'
             }
-            Remove-Item -LiteralPath (Join-Path $wgTemp 'pelizzai') -Recurse -Force
+            Remove-Item -LiteralPath (Join-Path $wgTemp 'pelizzai') -Recurse -Force -ErrorAction SilentlyContinue
 
             git -C $wgTemp checkout -q -b feat/x  # task branch (not protected)
 
