@@ -141,6 +141,20 @@ const declared = new Set([
   // reference is conditional — was the shape that broke it.
   ...(budget.onDemand ?? []).map((entry) => (typeof entry === 'string' ? entry : entry?.path)),
 ]);
+
+// An onDemand path nobody validates rots silently: rename the reference and the stale entry keeps
+// "declaring" it, the drift check stays green, and the budget accumulates dead rows. Same failure
+// class the Set fix above closed — so the same remedy: a missing or malformed entry fails the build.
+for (const entry of budget.onDemand ?? []) {
+  const p = typeof entry === 'string' ? entry : entry?.path;
+  if (!p) {
+    missing.push(`onDemand entry ${JSON.stringify(entry)} has no path`);
+    continue;
+  }
+  if (!existsSync(join(root, p))) {
+    missing.push(`onDemand declares ${p}, which does not exist`);
+  }
+}
 const drift = [];
 const linkPattern = /\]\(([^)]*(?:references|techniques)\/[^)]+\.md)\)/g;
 

@@ -58,7 +58,7 @@ Format: **Verify** (how to check, preferably measured in a rendered browser) / *
 
 ## Accessibility — hard Refuse lines
 
-Non-negotiable; no direction contract can except them:
+Non-negotiable; no direction contract can override them:
 
 - Contrast floors above.
 - Focus visibility above.

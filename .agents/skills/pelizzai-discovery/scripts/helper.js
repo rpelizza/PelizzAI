@@ -1,5 +1,5 @@
 (function () {
-	const WS_URL = 'ws://' + window.location.host;
+	const WS_URL = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host;
 	let ws = null;
 	let eventQueue = [];
 
@@ -69,6 +69,30 @@
 		}, 0);
 	});
 
+	// Keyboard access: mockups are plain divs, which never receive focus — a keyboard-only user
+	// could not choose at all. Every [data-choice] becomes a focusable button; Enter/Space route
+	// through the same click path, so onclick/toggleSelect and the indicator behave identically.
+	// The page fully reloads on content changes, so load-time wiring covers every screen.
+	function wireKeyboardAccess() {
+		document.querySelectorAll('[data-choice]').forEach((el) => {
+			if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+			if (!el.hasAttribute('role')) el.setAttribute('role', 'button');
+			el.setAttribute('aria-pressed', el.classList.contains('selected') ? 'true' : 'false');
+		});
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', wireKeyboardAccess);
+	} else {
+		wireKeyboardAccess();
+	}
+	document.addEventListener('keydown', (e) => {
+		if (e.key !== 'Enter' && e.key !== ' ') return;
+		const target = e.target.closest && e.target.closest('[data-choice]');
+		if (!target) return;
+		e.preventDefault(); // Space must select, not scroll the page
+		target.click();
+	});
+
 	// Frame UI: selection tracking
 	window.selectedChoice = null;
 
@@ -76,13 +100,17 @@
 		const container = el.closest('.options') || el.closest('.cards');
 		const multi = container && container.dataset.multiselect !== undefined;
 		if (container && !multi) {
-			container.querySelectorAll('.option, .card').forEach((o) => o.classList.remove('selected'));
+			container.querySelectorAll('.option, .card').forEach((o) => {
+				o.classList.remove('selected');
+				o.setAttribute('aria-pressed', 'false');
+			});
 		}
 		if (multi) {
 			el.classList.toggle('selected');
 		} else {
 			el.classList.add('selected');
 		}
+		el.setAttribute('aria-pressed', el.classList.contains('selected') ? 'true' : 'false');
 		window.selectedChoice = el.dataset.choice;
 	};
 

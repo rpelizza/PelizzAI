@@ -286,12 +286,37 @@ try {
 
   $gitRoot = Invoke-Git $cwd @('rev-parse', '--show-toplevel')
   if (-not $gitRoot) { exit 0 } # outside a git repo (scratchpad/external) or git missing -> allow
+  # macOS pitfall the CI caught: the temp tree lives behind a symlink (/var -> /private/var), so
+  # git reports the PHYSICAL root while the payload's cwd - and every relative target joined to
+  # it - stays LOGICAL. All in-root writes then looked outside the root and the hook failed OPEN.
+  # Canonicalize via `pwd -P` on POSIX (Windows has no such split and stays untouched); anything
+  # that cannot be resolved keeps its raw spelling (fail-open, as everywhere else in this file).
+  function Get-PhysicalPath([string]$p) {
+    # $IsWindows is absent on Windows PowerShell 5.1 - the env check keeps the guard true there.
+    if ($env:OS -eq 'Windows_NT' -or $IsWindows -or -not $p) { return $p }
+    try {
+      if (Test-Path -LiteralPath $p) {
+        $out = & sh -c 'if [ -d "$0" ]; then cd "$0" && pwd -P; else cd "$(dirname "$0")" && printf "%s/%s\n" "$(pwd -P)" "$(basename "$0")"; fi' $p 2>$null
+        if ($LASTEXITCODE -eq 0 -and $out) { return ([string]($out | Select-Object -Last 1)).Trim() }
+      } else {
+        $parent = Split-Path -Parent $p
+        if ($parent -and (Test-Path -LiteralPath $parent)) {
+          $out = & sh -c 'cd "$0" && pwd -P' $parent 2>$null
+          if ($LASTEXITCODE -eq 0 -and $out) { return (Join-Path ([string]($out | Select-Object -Last 1)).Trim() (Split-Path -Leaf $p)) }
+        }
+      }
+    } catch {}
+    return $p
+  }
+  $gitRoot = Get-PhysicalPath $gitRoot
+  $cwd = Get-PhysicalPath $cwd # physical cwd, so relative targets land on the same spelling as gitRoot
 
   # Only targets INSIDE the root matter; scratchpad/temp outside the root never blocks.
   $inRoot = [System.Collections.Generic.List[string]]::new()
   foreach ($t in $targets) {
     $abs = if ([System.IO.Path]::IsPathRooted($t)) { $t } else { Join-Path $cwd $t }
     try { $abs = [System.IO.Path]::GetFullPath($abs) } catch { continue }
+    $abs = Get-PhysicalPath $abs
     if (Test-Inside $abs $gitRoot) { [void]$inRoot.Add($abs) }
   }
   if ($inRoot.Count -eq 0) { exit 0 }

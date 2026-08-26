@@ -1182,8 +1182,17 @@ try {
         New-Item -ItemType Directory -Path 'pelizzai' -Force | Out-Null
         Set-Content -LiteralPath 'pelizzai/.gitignore' -Value "data/handoffs/`n" -Encoding utf8
         $consumerOut = @(& pwsh -NoProfile -File (Join-Path $root 'scripts/review-package.ps1') '--working-tree')
-        $expectedConsumer = Join-Path (Get-Location).Path 'pelizzai/data/handoffs'
-        Check ((Split-Path -Parent $consumerOut[-1]) -eq $expectedConsumer) 'consumer helper uses the gitignored handoff'
+        # macOS: Get-Location stays on the LOGICAL spelling (/var/...) while the helper's
+        # git-derived path is PHYSICAL (/private/var/...). Compare both at the physical spelling.
+        function Get-PhysicalDir([string]$p) {
+            if ($env:OS -eq 'Windows_NT' -or $IsWindows -or -not (Test-Path -LiteralPath $p)) { return $p }
+            $o = & sh -c 'cd "$0" && pwd -P' $p 2>$null
+            if ($LASTEXITCODE -eq 0 -and $o) { return ([string]($o | Select-Object -Last 1)).Trim() }
+            return $p
+        }
+        $actualHandoffDir = Get-PhysicalDir (Split-Path -Parent $consumerOut[-1])
+        $expectedConsumer = Get-PhysicalDir (Join-Path (Get-Location).Path 'pelizzai/data/handoffs')
+        Check ($actualHandoffDir -eq $expectedConsumer) 'consumer helper uses the gitignored handoff'
     } finally {
         Pop-Location
     }

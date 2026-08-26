@@ -22,7 +22,7 @@ source:   validated-head ──────────────────�
                                      (done observed later, outside this skill)
 ```
 
-**Announce on start**, in the conversation's language: that you are using the PelizzAI Finish Task skill to integrate the already-validated content.
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Finish skill to integrate the already-validated content. Everything this flow says to the user — questions, proposals, evidence, verdicts, confirmations, closeouts — follows the conversation's language, even when this skill is read in isolation.
 
 ## Source mode — no consumer runtime
 
@@ -345,7 +345,7 @@ Source mode, or no hook and no ledger: silent no-op.
 - Running the accepted overlay here, or patching with a fix/doc after the seal, instead of
   returning to the cycle.
 - Repeating at closeout the offer of an overlay that already ran during execution.
-- Declaring `phase: done` here (finish-task closes in `delivered`; `done` is observed later).
+- Declaring `phase: done` here (`pelizzai-finish` closes in `delivered`; `done` is observed later).
 - Squash/reset/rebase/amend after validated-head.
 - `git add -A` in the closure commit.
 - A second cursor commit to record the destination.

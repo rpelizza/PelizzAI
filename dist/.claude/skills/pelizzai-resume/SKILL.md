@@ -9,7 +9,7 @@ description: "Use after an interruption, crash, orphaned worktree, or resumption
 
 Rebuild reality without losing work and without turning every divergence into a Git menu.
 
-**Announce**, in the conversation's language: that you are using the PelizzAI Recovery skill to reconcile the record with Git without losing WIP.
+**Announce**, in the conversation's language: that you are using the PelizzAI Resume skill to reconcile the record with Git without losing WIP.
 
 ## 1. Read-only diagnosis
 
@@ -136,7 +136,7 @@ limitations/pending decision
 ```
 
 If the task was sealed and any content changed, invalidate `validated-head` and go back to review +
-Verification. Recovery never calls finish-task with a stale seal.
+Verification. Resume never calls `pelizzai-finish` with a stale seal.
 
 ## Red flags
 
@@ -151,6 +151,6 @@ Verification. Recovery never calls finish-task with a stale seal.
 
 ## Integration
 
-Called by router/starting-branch/execution-plans when the record and Git diverge. Uses
-`pelizzai-isolate` for safe rescue and returns the work to the lifecycle; finish-task only
+Called by router/`pelizzai-isolate`/`pelizzai-execute` when the record and Git diverge. Uses
+`pelizzai-isolate` for safe rescue and returns the work to the lifecycle; `pelizzai-finish` only
 enters after new content is consolidated and sealed.

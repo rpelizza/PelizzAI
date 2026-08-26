@@ -1,6 +1,6 @@
 # Visual Companion Guide
 
-Browser-based brainstorming visual companion for showing mockups, diagrams, and options.
+Browser-based discovery visual companion for showing mockups, diagrams, and options.
 
 ## When to Use
 
@@ -54,6 +54,12 @@ Save `screen_dir` and `state_dir` from the response. With `--open`/`-Open`, the 
 
 **Finding connection info:** The server writes its startup JSON to `$STATE_DIR/server-info`. If you started the server in the background and did not capture stdout, read that file to get the URL and port. When using `--project-dir`, check `<project>/pelizzai/data/mockups/` to find the session directory.
 
+**Source mode (the PelizzAI source repo, by sentinel `scripts/pelizzai-source-repo.txt`):** never
+pass `--project-dir`/`-ProjectDir` — it would create `pelizzai/` runtime, which source mode
+forbids. Start the temporary session instead (omit the flag on either platform): the files live in
+the temporary directory and are cleaned up with the session. The persistent examples above are for
+a bootstrapped consumer with the ignore confirmed.
+
 **Persistence and ignore:** The consumer bootstrap creates `pelizzai/.gitignore` with `data/mockups/`, but confirm the protection in the project with `git check-ignore` before using `--project-dir`/`-ProjectDir`. If the bootstrap does not exist or the ignore was not proven, use the temporary session (no project dir) or fix the bootstrap on the authorized task branch. With a project dir, that session's files persist in `pelizzai/data/mockups/`; without it, they stay in the temporary directory and are cleaned up. Each new run creates its own session, with a new port and a new URL — the persistent files do not revive the old session.
 
 The default idle timeout is **4 hours (240 minutes)**. Adjust when needed with `--idle-timeout-minutes <n>` on POSIX or `-IdleTimeoutMinutes <n>` on PowerShell.
@@ -97,19 +103,29 @@ scripts/start-server.sh --project-dir /path/to/project --open --foreground
 
 **Other environments:** The server must keep running in the background across conversation turns. If your environment kills detached processes, use `--foreground` and run the command with your platform's background execution mechanism.
 
-If the URL is unreachable from the browser (common in remote/containerized environments), bind to a non-loopback host:
+If the URL is unreachable from the browser (common in remote/containerized environments), prefer
+an **SSH local forward** — it keeps the server bound to loopback and encrypts the whole path, with
+no server flag at all:
 
 ```bash
-scripts/start-server.sh \
-  --project-dir /path/to/project \
-  --host 0.0.0.0 \
-  --url-host <browser-reachable-host>
+ssh -L <port>:localhost:<port> <remote-host>
+# then open the printed localhost URL in the local browser
 ```
 
-Use `--url-host` to control which hostname is printed in the returned URL JSON. It must be a host
-the USER's browser can reach — the remote/container hostname, a tunnel address, or the host the
-platform forwards. `localhost` only works when the browser runs on the same machine as the server;
-from a remote browser it resolves to the user's own machine and never reaches the bound port.
+Binding to a non-loopback host directly is refused by default: the session key and every event
+would travel in cleartext. It is allowed only behind an **authenticated HTTPS tunnel** that
+terminates TLS in front of the port, declared explicitly:
+
+```bash
+BRAINSTORM_REMOTE_TRANSPORT=tls-tunnel scripts/start-server.sh \
+  --project-dir /path/to/project \
+  --host 0.0.0.0 \
+  --url-host <tunnel-host>
+```
+
+Use `--url-host` to control which hostname is printed in the returned URL JSON (advertised as
+`https://` in this mode). It must be the tunnel address the USER's browser reaches. `localhost`
+only works when the browser runs on the same machine as the server.
 
 ## The Loop
 
@@ -174,6 +190,9 @@ Write only the content that goes inside the page. The server automatically wraps
 ```
 
 That's it. No `<html>`, CSS, or `<script>` tags needed. The server provides all of that.
+Keyboard access comes wired: every `[data-choice]` element is made focusable (`tabindex`,
+`role="button"`, `aria-pressed`), gets a visible focus outline, and Enter/Space select exactly
+like a click — do not remove those attributes in custom full documents.
 
 ## Available CSS Classes
 

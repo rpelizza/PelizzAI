@@ -5,7 +5,7 @@ description: "Use when a git merge or rebase conflict is in progress. Preserves 
 
 # PelizzAI Merge Recovery
 
-**Announce at start**, in the conversation's language: that you are using the PelizzAI Resolving Merge Conflicts skill to resolve the conflicts.
+**Announce at start**, in the conversation's language: that you are using the PelizzAI Merge Recovery skill to resolve the conflicts.
 
 ## Process
 

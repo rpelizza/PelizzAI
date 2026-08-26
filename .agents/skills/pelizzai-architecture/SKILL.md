@@ -11,7 +11,7 @@ Find where the architecture is charging an **observable** cost and return a few 
 opportunities, without turning aesthetic preference into a refactor or a read-only analysis into
 writes.
 
-**Announce**, in the conversation's language: that you are using the PelizzAI Improving Architecture skill to review the architecture by evidence.
+**Announce**, in the conversation's language: that you are using the PelizzAI Architecture skill to review the architecture by evidence.
 
 ## Effect contract
 
@@ -123,7 +123,7 @@ At the end of the analysis, without leaving read-only mode, offer to record what
 propose-and-confirm, never writing by reflex:
 
 - Chosen candidate: the router decides `bounded | standard | exploratory`; open architecture
-  usually goes through brainstorming, but a clear refactor can go straight to the plan.
+  usually goes through `pelizzai-discovery`, but a clear refactor can go straight to the plan.
 - A durable architectural decision worth remembering (adopting a new boundary, or keeping the
   current one for a real trade-off): **offer** to record an ADR via `pelizzai-domain-modeling`. The
   write only happens after reclassifying to `write-local` and passing the first-write gate; the

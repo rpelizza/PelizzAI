@@ -29,7 +29,8 @@ when there are mirrors, synced and verified; never assume `.claude/skills` in ev
 > between `<>` (the menu below, `<unset>`) reads as NOT ratified; the SessionStart hook recap
 > fires on ANY raw value outside `<...>` and `unset` — including `branch`, `inline`, or
 > `squash-final`. The hook reads only `isolation-default`, `execution-mode-default`, and
-> `commit-strategy-default`; `review-policy-default` stays out of the recap.
+> `commit-strategy-default`; `executor-tier-default` stays out of the recap — the setup gate
+> reads it directly at step 4.
 
 - isolation-default: <branch|worktree|unset>
 - execution-mode-default: <inline|subagents|team|unset>

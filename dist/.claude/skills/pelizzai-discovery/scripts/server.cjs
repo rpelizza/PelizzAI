@@ -87,6 +87,27 @@ function decodeFrame(buffer) {
 const PORT = process.env.BRAINSTORM_PORT || 49152 + Math.floor(Math.random() * 16383);
 const HOST = process.env.BRAINSTORM_HOST || '127.0.0.1';
 const URL_HOST = process.env.BRAINSTORM_URL_HOST || (HOST === '127.0.0.1' ? 'localhost' : HOST);
+const LOOPBACK = HOST === '127.0.0.1' || HOST === '::1' || HOST === 'localhost';
+// A non-loopback bind sends the session key and every event in cleartext: anyone on the path can
+// read screens or inject choices. Remote use therefore requires a TLS-terminating layer in front
+// (an authenticated HTTPS tunnel), declared explicitly — or better, an SSH local forward, which
+// keeps the bind on loopback and needs no flag at all.
+if (!LOOPBACK && process.env.BRAINSTORM_REMOTE_TRANSPORT !== 'tls-tunnel') {
+	console.error(
+		JSON.stringify({
+			type: 'server-refused',
+			reason: 'non-loopback host without a TLS transport',
+			hint:
+				'prefer an SSH local forward (ssh -L <port>:localhost:<port>) which keeps the bind on ' +
+				'loopback; to bind remotely anyway, front the port with an authenticated HTTPS tunnel ' +
+				'and set BRAINSTORM_REMOTE_TRANSPORT=tls-tunnel',
+		})
+	);
+	process.exit(1);
+}
+// Loopback speaks plain http; the only allowed remote path sits behind a TLS tunnel, so the
+// advertised URL (and the page's WebSocket, which follows the page protocol) is https there.
+const SCHEME = LOOPBACK ? 'http' : 'https';
 const SESSION_DIR = process.env.BRAINSTORM_DIR || '/tmp/brainstorm';
 const CONTENT_DIR = path.join(SESSION_DIR, 'content');
 const STATE_DIR = path.join(SESSION_DIR, 'state');
@@ -392,6 +413,13 @@ function startServer() {
 		console.log(JSON.stringify({ type: 'server-stopped', reason }));
 		const infoFile = path.join(STATE_DIR, 'server-info');
 		if (fs.existsSync(infoFile)) fs.unlinkSync(infoFile);
+		// The start scripts persist server.pid; leaving it behind after an idle-timeout or
+		// owner-death exit lets the OS reuse the PID and a later stop-server kill an unrelated
+		// process. The self-initiated exit is the one place that KNOWS the PID is done — clean it.
+		try {
+			const pidFile = path.join(STATE_DIR, 'server.pid');
+			if (fs.existsSync(pidFile)) fs.unlinkSync(pidFile);
+		} catch {}
 		fs.writeFileSync(
 			path.join(STATE_DIR, 'server-stopped'),
 			JSON.stringify({ reason, timestamp: Date.now() }) + '\n'
@@ -433,7 +461,7 @@ function startServer() {
 	}
 
 	server.listen(PORT, HOST, () => {
-		const url = 'http://' + URL_HOST + ':' + PORT + '/?key=' + SESSION_KEY;
+		const url = SCHEME + '://' + URL_HOST + ':' + PORT + '/?key=' + SESSION_KEY;
 		const info = JSON.stringify({
 			type: 'server-started',
 			port: Number(PORT),

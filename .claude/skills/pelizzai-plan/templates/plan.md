@@ -106,7 +106,7 @@ non-obvious call; otherwise, name the interface, the invariant, and one short ex
 Run: `[exact command]`
 Expected: `[observable result]`
 
-- [ ] **Step 4: Ready for review → consolidate** — do not commit mid-task; the commit is the coordinator's gate after the spec ✅ + quality ✅ lenses in the recorded profile. → verify: `git status` contains only this task's scope
+- [ ] **Step 4: Ready for review → consolidate** — do not commit mid-task; the commit is the coordinator's gate after the spec ✅ + quality ✅ lenses at the recorded review depth. → verify: `git status` contains only this task's scope
 ````
 
 Adapt the order without losing the proof:
@@ -125,7 +125,7 @@ Adapt the order without losing the proof:
 - An executor with zero context on the repository completes each task without asking a single question.
 - Paths, interfaces, content, commands, and outputs are concrete.
 - Every step has `→ verify:`.
-- Each task records cross-cutting skills, implementation/validation strategy, and review profile.
+- Each task records cross-cutting skills, implementation/validation strategy, and review depth.
 - UI never omits `pelizzai-interface`; Playwright/browser is a tool, not an overlay.
 - No artificial RED for refactoring, CSS, docs, config, IaC, or migration.
 - No TBD/TODO, "handle edge cases", "same as Task N", or undefined references.

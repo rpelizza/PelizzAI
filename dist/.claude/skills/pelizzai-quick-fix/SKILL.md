@@ -32,7 +32,7 @@ It is a `quick-fix` when the change:
 Lines and files help detect growth, but they never decide alone. Clear acceptance is an ENTRY
 criterion of the quick-fix, never a reason for promotion. Promote only when something new appears:
 a NEW public surface/contract with clear acceptance → `bounded` lane and a compact plan; a real
-design decision or uncertainty → `standard`/`exploratory` and proportional brainstorming. In doubt
+design decision or uncertainty → `standard`/`exploratory` and proportional discovery. In doubt
 between tweak and bounded, recommend `tweak` at kickoff — promoting later is cheap; a plan to swap
 a button is not. Something **broken** uses debugging.
 
@@ -82,7 +82,7 @@ open no gates: apply the briefing and escalate to the coordinator whatever requi
    project's relevant suite. Fix before consolidating.
 3.5. Commit the **content** with exact paths and a definitive message
    `<type>(<scope>): <description>`. A quick-fix already produces a single commit; do not create
-   WIP nor leave a squash for finish-task.
+   WIP nor leave a squash for `pelizzai-finish`.
 4. Seal and close — run `pelizzai-verify` against that HEAD, record
    `validated-head` only after success, and invoke `pelizzai-finish`: a consumer adds
    only the metadata closure (state + the task's history file);

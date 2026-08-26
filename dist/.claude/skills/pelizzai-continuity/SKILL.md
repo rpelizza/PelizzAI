@@ -10,7 +10,7 @@ description: "Use at a phase edge — handing work to a new session, harness, or
 Give the next session everything it needs to resume, without copying an entire narrative or
 inventing state that Git can prove.
 
-**Announce**, in the conversation's language: that you are using PelizzAI Handoff to prepare the next session.
+**Announce**, in the conversation's language: that you are using PelizzAI Continuity to prepare the next session.
 
 ## Handoff or compaction?
 

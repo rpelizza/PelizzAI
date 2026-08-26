@@ -111,12 +111,25 @@ function makeScratch(id) {
    * separate from `--hooks` so the two variables never move together.
    */
   if (withGit) {
-    const git = (...a) => spawnSync('git', a, { cwd: project, encoding: 'utf8', windowsHide: true });
+    // A git step that fails silently leaves the scratch without the protected branch the flag
+    // promises — the writegate then guards nothing and the case scores a transcript that never
+    // exercised the protection. Fail the case loudly instead of measuring that.
+    const git = (...a) => {
+      const r = spawnSync('git', a, { cwd: project, encoding: 'utf8', windowsHide: true });
+      if (r.status !== 0) {
+        throw new Error(`--git setup failed at "git ${a.join(' ')}" (${r.status}): ${r.stderr || r.stdout}`);
+      }
+      return r;
+    };
     git('init', '-b', 'main');
     git('config', 'user.email', 'trigger@pelizzai.test');
     git('config', 'user.name', 'trigger');
     git('add', '-A');
     git('commit', '-m', 'scratch baseline');
+  } else if (withHooks) {
+    // Deliberately allowed (the two variables never move together), but never silently: without a
+    // repo the writegate has no branch to protect and only the other hooks are exercised.
+    console.error('trigger: --hooks without --git — the writegate is inert in this configuration.');
   }
 
   /**

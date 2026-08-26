@@ -1,6 +1,6 @@
 ---
 name: pelizzai-execute
-description: "Use when an approved plan is ready to implement. Runs it task by task with fresh briefs and proportional review, and seals the validated candidate."
+description: "Use when an approved plan is ready to implement: 'execute the plan', 'implement this plan', 'run the tasks'. Task by task with fresh briefs and review, sealing the validated candidate."
 ---
 
 # PelizzAI Execute
@@ -14,7 +14,7 @@ consolidated. At the end, overlays that may write run before the content is seal
 review, suite, and checklist. The skill keeps resumable state and prevents integrating content
 different from what was validated.
 
-**Announce on start**, in the conversation's language: that you are using the PelizzAI Execution Plans skill to execute the plan, task by task.
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Execute skill to execute the plan, task by task.
 
 <TEAM-MEMBER-STOP>
 If you are a **member** (teammate/subagent) in charge of **one task**, implement only yours:
@@ -90,7 +90,9 @@ profile — push/PR/publication are decided per task in `pelizzai-finish`.
    Recommended: <session tier | mid tier> — <one-line why grounded in the tasks' risk and shape>.
    Question: which tier do the implementers run on?
    The harness never switches models on its own; the bill is the user's. The round-4 escalation
-   of the fix loop (task-cycle §5) also recommends and waits.
+   of the fix loop (task-cycle §5) also recommends and waits. Record the answer as
+   `executor-tier` in the state (source mode: in the native execution record): dispatches fill
+   `model`/`effort` from the persisted value, so a resumption never re-defaults it silently.
 ```
 
 Rules: the mode keeps **the three options always visible** — **team is never omitted**. There is
@@ -443,7 +445,7 @@ GATES (recommend-and-ratify; never apply a structural decision in silence):
   user request**), and review are asked ONE PER TURN, always with a recommendation,
   and ratified before Task 1. Branch base and name were already ratified before planning.
 - External destination: push / PR / worktree discard and removal require a PER-TASK decision;
-  without an external request, finish-task keeps it local by default. `destination` is never
+  without an external request, `pelizzai-finish` keeps it local by default. `destination` is never
   inherited from profile policy.
 - Completion.
 
@@ -487,13 +489,13 @@ Re-evaluate `base-sha..HEAD` and run, when applicable, **before** the final revi
 - pelizzai-docs: documentation required for a new stable surface.
 ```
 
-An applicable overlay is not a late offer from finish-task. A fix or generated doc becomes
+An applicable overlay is not a late offer from `pelizzai-finish`. A fix or generated doc becomes
 delivery content, receives proportional evidence, and is committed before proceeding.
 
 ### 2. Freeze the commit strategy
 
 - `granular`: confirm a clean working tree and keep the definitive commits.
-- `squash-final`: consolidate **now**, never in finish-task. Prefer the recoverable alternative
+- `squash-final`: consolidate **now**, never in `pelizzai-finish`. Prefer the recoverable alternative
   to `reset --soft`: rename the current branch to a unique name `<branch>-preseal-<timestamp>`,
   recreate `<branch>` at `base-sha`, apply `git merge --squash <preseal>`, and make the approved
   final commit. The preseal branch preserves the history; do not delete it automatically. Stop
@@ -525,7 +527,7 @@ Any fix in steps 2–5 — including security, UI, or docs — invalidates the c
 strategy is squash-final, and **reopen the final review**. Apply the task-cycle circuit breaker
 to the loop.
 
-### 4. Seal and hand off to finish-task
+### 4. Seal and hand off to `pelizzai-finish`
 
 With everything approved and HEAD still equal to `candidate-head`, in a consumer write
 `validated-head: <full SHA of candidate-head>` to the state, without committing; that is the only
@@ -579,7 +581,7 @@ config, or doc may change after the seal.
   making `--working-tree` impossible to scope.
 - One worktree per agent (it is one per task, with disjoint paths per front).
 - Running security/frontend/docs after the final validation, or not reopening review after a fix.
-- Running squash/reset/rebase in finish-task after `validated-head`.
+- Running squash/reset/rebase in `pelizzai-finish` after `validated-head`.
 ```
 
 ---

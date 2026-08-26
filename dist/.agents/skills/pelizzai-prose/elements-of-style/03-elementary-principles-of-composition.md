@@ -69,17 +69,17 @@ Depending on his purpose, the writer may, as noted above, relate the body of the
 In narration and description, the paragraph sometimes begins with a concise, comprehensive statement that serves to hold together the details that follow.
 
 > The breeze served us admirably.
-
+>
 > The campaign opened with a series of reverses.
-
+>
 > The next ten or twelve pages were filled with a curious set of entries.
 
 But this device, used too often, would become a mannerism. More commonly, the opening sentence simply indicates, through its subject, what the paragraph will chiefly be about.
 
 > At length I thought I might return towards the stockade.
-
+>
 > He picked up the heavy lamp from the table and began to explore.
-
+>
 > Another flight of steps, and they emerged on the roof.
 
 The brief paragraphs of a lively narrative, however, often lack even this semblance of a topic sentence. The break between them works as a rhetorical pause, throwing some detail of the action into relief.
@@ -103,7 +103,7 @@ it becomes indefinite: is it the writer, some undisclosed person, or the world a
 This rule does not, of course, mean that the writer should discard the passive voice altogether; it is frequently convenient and sometimes necessary.
 
 > The dramatists of the Romantic period are little esteemed today.
-
+>
 > Today's readers have little esteem for the dramatists of the Romantic period.
 
 The first would be the right form in a paragraph about the dramatists of the Romantic period; the second, in a paragraph about the tastes of today's readers. The need to make a particular word the subject of the sentence will often, as in these examples, determine which voice to use.
@@ -165,7 +165,7 @@ All three examples show the weakness inherent in the word "not." Consciously or 
 The antithesis of negative and positive is strong:
 
 > Not charity, but simple justice.
-
+>
 > Not that I loved Caesar less, but Rome the more. (Shakespeare, Julius Caesar)
 
 Negative words other than "not" are usually strong:
@@ -348,7 +348,7 @@ Modifiers should come, if possible, next to the word they modify. If several exp
 In summarizing the action of a drama, the writer should always use the present tense. In summarizing a poem, story, or novel, he should preferably use the present, though he may use the past if he prefers. If the summary is in the present tense, antecedent action should be expressed by the perfect; if in the past, by the past perfect.
 
 > An unforeseen chance prevents Friar John from delivering Friar Laurence's letter to Romeo. Meanwhile, owing to her father's arbitrary change of the day set for the wedding, Juliet has been compelled to drink the potion on Tuesday night, so that Balthasar informs Romeo of her supposed death before Friar Laurence learns that the letter was never delivered. (A summary of Shakespeare's Romeo and Juliet.)
-
+>
 > Note the interplay of tenses in this present-tense summary. The base narration stays in the present ("prevents", "informs"); action prior to that present goes into the perfect ("has been compelled"). If the summary were in the past, the base would shift to the past ("prevented", "informed") and the antecedent action to the past perfect ("had been compelled").
 
 But whichever tense is used in the summary, a past tense in indirect discourse or in an indirect question remains unchanged.
@@ -375,13 +375,13 @@ The word or group of words entitled to this position of prominence is usually th
 The effectiveness of the periodic sentence comes from the prominence it gives to the main statement.
 
 > Four centuries ago, Christopher Columbus, one of the Italian mariners whom the decline of their own republics had put at the service of the world and of adventure, seeking for Spain a westward passage to the Indies as a set-off against the achievements of Portuguese discoverers, lighted on America.
-
+>
 > With these hopes and in this belief I would urge you, laying aside all hindrance, thrusting away all private aims, to devote yourself unswervingly and unflinchingly to the vigorous and successful prosecution of this war.
 
 The other prominent position in the sentence is the beginning. Any element of the sentence other than the subject can become emphatic when placed first.
 
 > Deceit or treachery he could never forgive.
-
+>
 > So vast and rude, worn by the action of nearly three thousand years, the fragments of this architecture may often seem, at first sight, works of nature.
 
 A subject that comes first in its sentence may be emphatic, but hardly by its position alone. In the sentence:

@@ -129,10 +129,13 @@ one dispatch with **[references/task-reviewer.md](references/task-reviewer.md)**
 order). On the final range, two dispatches: the blind spec lens with
 **[references/spec-reviewer.md](references/spec-reviewer.md)** and quality/evidence with
 **[references/code-reviewer.md](references/code-reviewer.md)**. When no independent reviewer can
-be dispatched in the environment, the degradation is DECLARED, never silent: the coordinator
-applies the rubrics inline, in order, and the report's first line states
-`review degraded: single-context (<reason>)` — inconvenient does not count as unavailable. Fill in
-with:
+be dispatched in the environment, the degradation is DECLARED, never silent — and it is a last
+resort for environments that CANNOT dispatch (headless, no subagent tooling), not for a dispatch
+that failed once: retry or repair the dispatch before degrading, because the inline fallback is
+self-review by nature. Only then does the coordinator apply the rubrics inline, in order, with the
+report's first line stating `review degraded: single-context (<reason>)` — inconvenient does not
+count as unavailable, and a declared degradation never blocks the delivery seal from naming it.
+Fill in with:
 
 ```text
 - Description: what was built.
@@ -234,7 +237,7 @@ final review** over the new HEAD. "It was reviewed before the fix" does not coun
 **Who triggers the final review:** `pelizzai-execute` (plan closeout). A bug fix
 (`pelizzai-diagnose`) uses the **standalone change review** below while still in the working tree;
 then debugging consolidates the content, runs Verification against the HEAD, and only then calls
-finish-task. The tweak track (`pelizzai-quick-fix`) waives formal review as long as it stays trivial.
+`pelizzai-finish`. The tweak track (`pelizzai-quick-fix`) waives formal review as long as it stays trivial.
 
 **Standalone change review** (a bug outside a plan, or a tweak reclassified before the commit): use
 `review-package --working-tree` (staged + unstaged + untracked) and apply **Stage 2**

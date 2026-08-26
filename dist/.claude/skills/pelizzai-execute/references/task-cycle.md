@@ -317,11 +317,14 @@ The asymmetry has evidence behind it: plans and reviews concentrate the judgment
 **orchestrator** — not just a weaker reviewer — is what ships planted defects. That is why the
 coordinator never runs below the session's tier, whatever the executors run. Specify model and
 effort explicitly when dispatching members and reviewers, so nobody inherits a default smaller
-than intended.
+than intended — and take the value from the persisted `executor-tier` (state field in a
+consumer; native execution record in source mode), never from memory of the gate: after a
+resumption the record is what was ratified. A `pending`/missing field means the tier was never
+ratified — reopen setup-gate step 4 instead of defaulting.
 
 The harness elevates the reasoning of **any** model: the right technique, a verifiable protocol,
 and fresh evidence do not depend on the model's capability. Proportionality still applies to the
-depth of the process (interview, brainstorming, TDD, overlays) — and it is **never lowered to
+depth of the process (interview, discovery, TDD, overlays) — and it is **never lowered to
 compensate for a smaller model**: a mid-tier executor demands an intact process, not a shallower
 one, and the session-tier review is exactly the net under it.
 

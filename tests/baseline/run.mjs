@@ -169,13 +169,17 @@ for (const [label, a, b] of rows) {
 const report = { task: taskId, model, withHarness, without, capturedAt: null };
 writeFileSync(join(workspace, 'baseline.json'), JSON.stringify(report, null, 2));
 
-console.log(`\n  answers written side by side, for the half a number cannot judge:`);
-console.log(`    ${join(withHarness.dir, 'answer.md')}`);
-console.log(`    ${join(without.dir, 'answer.md')}`);
-console.log(`  data: ${join(workspace, 'baseline.json')}`);
-
-if (!flags.has('--keep') && withHarness.ok && without.ok) {
-  console.log('  (--keep to retain the transcripts)');
+if (flags.has('--keep') || !withHarness.ok || !without.ok) {
+  // A failed run keeps its workspace regardless of the flag: the transcript IS the diagnosis.
+  console.log(`\n  answers written side by side, for the half a number cannot judge:`);
+  console.log(`    ${join(withHarness.dir, 'answer.md')}`);
+  console.log(`    ${join(without.dir, 'answer.md')}`);
+  console.log(`  data: ${join(workspace, 'baseline.json')}`);
+} else {
+  // Each run copies the harness twice into tmpdir(); without cleanup the directory grows by
+  // megabytes per baseline. Printing paths into a directory about to be removed would lie.
+  rmSync(workspace, { recursive: true, force: true });
+  console.log('\n  workspace removed (--keep to retain answers and transcripts)');
 }
 
 process.exit(withHarness.ok && without.ok ? 0 : 1);

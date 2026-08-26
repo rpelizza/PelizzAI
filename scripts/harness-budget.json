@@ -26,7 +26,7 @@
       ],
       "metadata": true,
       "head": [],
-      "ceilingBytes": 30505,
+      "ceilingBytes": 30617,
       "targetBytes": 20000
     },
     {
@@ -39,7 +39,7 @@
       ],
       "metadata": true,
       "head": [],
-      "ceilingBytes": 54872,
+      "ceilingBytes": 55302,
       "targetBytes": 24000
     },
     {
@@ -55,7 +55,7 @@
       "head": [
         ".claude/skills/pelizzai-experiment/SKILL.md"
       ],
-      "ceilingBytes": 73365,
+      "ceilingBytes": 73989,
       "targetBytes": 40000
     },
     {
@@ -71,7 +71,7 @@
       "head": [
         ".claude/skills/pelizzai-quick-fix/SKILL.md"
       ],
-      "ceilingBytes": 75602,
+      "ceilingBytes": 76034,
       "targetBytes": 45000
     },
     {
@@ -87,7 +87,7 @@
       "head": [
         ".claude/skills/pelizzai-diagnose/SKILL.md"
       ],
-      "ceilingBytes": 82509,
+      "ceilingBytes": 83135,
       "targetBytes": 55000
     },
     {
@@ -103,7 +103,7 @@
       "head": [
         ".claude/skills/pelizzai-discovery/SKILL.md"
       ],
-      "ceilingBytes": 81825,
+      "ceilingBytes": 82239,
       "targetBytes": 60000
     },
     {
@@ -119,7 +119,7 @@
       "head": [
         ".claude/skills/pelizzai-plan/SKILL.md"
       ],
-      "ceilingBytes": 85037,
+      "ceilingBytes": 85461,
       "targetBytes": 60000
     },
     {
@@ -136,7 +136,7 @@
         ".claude/skills/pelizzai-execute/SKILL.md",
         ".claude/skills/pelizzai-execute/references/task-cycle.md"
       ],
-      "ceilingBytes": 129758,
+      "ceilingBytes": 130773,
       "targetBytes": 85000
     },
     {
@@ -152,7 +152,7 @@
       "head": [
         ".claude/skills/pelizzai-review/SKILL.md"
       ],
-      "ceilingBytes": 89039,
+      "ceilingBytes": 89800,
       "targetBytes": 60000
     }
   ],

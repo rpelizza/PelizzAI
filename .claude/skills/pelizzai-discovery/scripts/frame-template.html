@@ -175,6 +175,10 @@
 			.option:hover {
 				border-color: var(--accent);
 			}
+			.option:focus-visible {
+				outline: 2px solid var(--accent);
+				outline-offset: 2px;
+			}
 			.option.selected {
 				background: var(--selected-bg);
 				border-color: var(--selected-border);
@@ -227,6 +231,10 @@
 				border-color: var(--accent);
 				transform: translateY(-2px);
 				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+			}
+			.card:focus-visible {
+				outline: 2px solid var(--accent);
+				outline-offset: 2px;
 			}
 			.card.selected {
 				border-color: var(--selected-border);

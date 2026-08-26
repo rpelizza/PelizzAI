@@ -14,7 +14,7 @@ This skill is the PelizzAI harness's **skill authoring and maintenance engine**.
 | **Authoring**  | The user wants a new skill; or `pelizzai-onboard` requests domain skills at bootstrap | One or several well-written, grounded, cataloged skills          |
 | **Maintenance** | The stack changes version; patterns repeat in git; the cadence comes due | Domain skills updated (with diff and confirmation) and recorded |
 
-**Announce on start**, in the conversation's language: that you are using the PelizzAI Writing Skills skill to create/maintain skills.
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Skill Lab skill to create/maintain skills. Everything this flow says to the user — questions, proposals, evidence, verdicts, confirmations, closeouts — follows the conversation's language, even when this skill is read in isolation.
 
 <TEAM-MEMBER-STOP>
 If you are a **member** of a team (subagent/teammate) tasked with writing **one** domain skill, write only yours and return the draft to the coordinator — do not orchestrate the whole bootstrap or touch the catalog/ledger.

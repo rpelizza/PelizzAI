@@ -14,7 +14,7 @@
  *
  * Usage: node tests/mutation/run.mjs        Exit 0 all caught; 1 any missed or stale.
  */
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -69,6 +69,7 @@ const MUTATIONS = [
     edit: (t) => t + '\nSee [extra rules](references/extra-rules.md) for details.\n',
     prepare: (sandbox) => {
       const dir = join(sandbox, '.claude', 'skills', 'pelizzai-quick-fix', 'references');
+      mkdirSync(dir, { recursive: true }); // the lean skill ships no references/ — cpSync alone would ENOENT
       cpSync(join(sandbox, '.claude', 'skills', 'pelizzai-quick-fix', 'SKILL.md'), join(dir, 'extra-rules.md'));
     },
     tool: (s) => runTool(s, 'measure-hotpath.mjs'),
@@ -79,7 +80,10 @@ const MUTATIONS = [
     file: 'scripts/pelizzai-core-skills.txt',
     edit: (t) => t.replace(/^pelizzai-evolve\r?\n/m, ''),
     tool: (s) => runTool(s, 'sync-harness.mjs', ['--check', '--source-mode']),
-    expect: /manifest|outside|pelizzai-evolve/i,
+    // The sandbox now carries dist/, so --check --source-mode passes clean without the mutation —
+    // and the expect names the ONE message this defect produces. The old broad regex over an
+    // always-failing run was an assertion that could not fail.
+    expect: /source repo has skills outside the manifest[\s\S]*pelizzai-evolve/i,
   },
   {
     defect: "the managed block's end marker is deleted from AGENTS.md",
@@ -96,7 +100,7 @@ let missed = 0;
 try {
   for (const [i, m] of MUTATIONS.entries()) {
     const sandbox = join(sandboxRoot, `m${i}`);
-    for (const dir of ['.claude', '.agents', '.cursor', 'scripts']) {
+    for (const dir of ['.claude', '.agents', '.cursor', 'scripts', 'dist']) {
       cpSync(join(root, dir), join(sandbox, dir), { recursive: true });
     }
     for (const f of ['CLAUDE.md', 'AGENTS.md', 'GEMINI.md', 'README.md']) {

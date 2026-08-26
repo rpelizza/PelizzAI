@@ -16,7 +16,7 @@ choice looks obvious and reversible.
 Efficiency here means well-ordered questions, not batched decisions or presumed answers.
 The interview does not replace reading the project, nor does it exist to fabricate gaps.
 
-**Announce**, in the conversation's language: that you are using the PelizzAI Interview Me skill to resolve the material decisions still open.
+**Announce**, in the conversation's language: that you are using the PelizzAI Interview skill to resolve the material decisions still open. Everything this flow says to the user — questions, proposals, evidence, verdicts, confirmations, closeouts — follows the conversation's language, even when this skill is read in isolation.
 
 ## Modes
 
@@ -28,7 +28,7 @@ The interview does not replace reading the project, nor does it exist to fabrica
 | explicit interview | the user asked for questions/an interview | the depth requested, without stretching past usefulness |
 
 `pelizzai-discovery` creates the design. This skill resolves pending human decisions; if there
-is no design or concrete options yet, hand back to brainstorming.
+is no design or concrete options yet, hand back to `pelizzai-discovery`.
 
 ## Where it is mandatory
 
@@ -40,7 +40,7 @@ handing control back.
    anything.
 2. **After design, before the spec closes** — stress-test the design and **expose the gaps**
    (unhandled cases, missing validation, authorization/security failures, undefined states,
-   contradictions). Return control to brainstorming so it can conclude spec and approval.
+   contradictions). Return control to `pelizzai-discovery` so it can conclude spec and approval.
 3. **After the plan, before execution** — stress-test the `pelizzai-plan` plan: every
    material technical decision without a ratification origin becomes a question here, never a fait
    accompli.

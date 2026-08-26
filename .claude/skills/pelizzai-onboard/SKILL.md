@@ -23,7 +23,7 @@ workspace, new or existing), what it is built with, what infrastructure already 
 authorized, turn each finding into a useful artifact: the domain skills and documentation that make
 the agent assertive. A versionable, portable bootstrap, never a report for its own sake.
 
-**Announce**, in the conversation's language: that you are using the PelizzAI Audit skill in `<scan-only|bootstrap-write>` mode to map the project proportionally.
+**Announce**, in the conversation's language: that you are using the PelizzAI Onboard skill in `<scan-only|bootstrap-write>` mode to map the project proportionally.
 
 ## Choosing the mode
 
@@ -346,7 +346,7 @@ depth raised when hooks/settings/security are touched — commit the approved ar
 exact paths, and only then run
 `pelizzai-verify` against that HEAD. After recording `validated-head`,
 close the transaction via `pelizzai-finish`. Do not leave the bootstrap uncommitted or expect
-finish-task to consolidate it.
+`pelizzai-finish` to consolidate it.
 
 ## Partial state
 

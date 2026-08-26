@@ -10,7 +10,7 @@ description: "Use before implementing a greenfield product or any change with op
 Turn intent into a design decided by the user before implementation. The skill investigates,
 surfaces alternatives, and recommends; it never fills in a product decision to gain speed.
 
-**Announce**, in the conversation's language: that you are using the PelizzAI Brainstorming skill in `<compact|full>` mode to resolve the design decisions before implementing.
+**Announce**, in the conversation's language: that you are using the PelizzAI Discovery skill in `<compact|full>` mode to resolve the design decisions before implementing.
 
 <HARD-GATE>
 Do NOT invoke an implementation skill, write code, create scaffolding, or take any implementation
@@ -19,7 +19,7 @@ projects, regardless of apparent simplicity** — the design can be short (a few
 truly simple scope), but it must be presented and approved.
 
 The only exit lies before this skill: a pinpoint fix and a `bounded` lane already specified by the user
-are resolved by `pelizzai-router` BEFORE brainstorming (see Preconditions). Once inside
+are resolved by `pelizzai-router` BEFORE discovery (see Preconditions). Once inside
 this phase, the rule holds in full — "too simple to need design" is not a
 justification; it is the anti-pattern the rule exists to block.
 </HARD-GATE>
@@ -29,7 +29,7 @@ justification; it is the anti-pattern the rule exists to block.
 - The router has already classified effect, risk, uncertainty, and overlays.
 - For any spec/ADR/prototype write, the task/planning branch already exists.
 - In the `bounded` lane of an existing product, with goal, acceptance, and approach already supplied
-  by the user, return to the router and proceed without brainstorming. Greenfield never uses this exception.
+  by the user, return to the router and proceed without discovery. Greenfield never uses this exception.
 - In the `standard`/`exploratory` lanes, no implementation starts before the design spec exists and has been presented at the design edge — barring an explicit waiver from the user. Depth scales with the lane (lean for a `standard` with clear acceptance, full for `exploratory`); the classifier never concludes on its own "no trade-off here, I'll skip the spec".
 
 ## Choosing depth
@@ -226,7 +226,7 @@ If accepted, read [visual-companion.md](visual-companion.md), use only documente
 ## Anti-patterns
 
 ```text
-- Full brainstorming for a bounded feature.
+- Full discovery for a bounded feature.
 - Treating a greenfield project as bounded because the stack was stated.
 - Full repo scan without a concrete question.
 - A question whose answer is already in the code/spec.

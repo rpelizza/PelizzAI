@@ -5,7 +5,9 @@ description: "Use when building or changing UI — pages, components, dashboards
 
 # PelizzAI Interface
 
-The design overlay for UI work. It exists to kill two failure modes: **generic AI convergence** (the same faces, the same gradient hero, the same card grid — measured: a model asked 16 times produced 30/35 identical concepts) and **vibe-only direction** ("modern and clean" is not a decision). The operating principle: **commitment beats refinement** — a decided direction executed firmly beats timid iteration every time.
+The design overlay for UI work. It exists to kill two failure modes: **generic AI convergence** (the same faces, the same gradient hero, the same card grid — measured: a model asked 16 times produced 30/35 identical concepts) and **vibe-only direction** ("modern and clean" is not a decision). The operating principle: **commitment beats refinement** — a decided direction executed firmly beats timid iteration every time. 
+
+Everything this flow says to the user — questions, proposals, evidence, verdicts, confirmations, closeouts — follows the conversation's language, even when this skill is read in isolation.
 
 ## The direction contract — before any screen
 

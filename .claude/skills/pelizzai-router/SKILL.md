@@ -108,7 +108,8 @@ If `pelizzai/domain-skills.md` does NOT exist — or it is the first interaction
 the user typed `bootstrap` — **propose** the bootstrap via `pelizzai-onboard` (maps the project,
 creates the domain skills and docs) as the first thing in the turn and wait for the answer.
 The router does not wait for the user to remember to ask: a missing catalog is signal enough to
-raise the proposal, in one line, with the reason.
+raise the proposal, in one line, with the reason. Both bootstrap routes speak the conversation's
+language in everything they emit — proposal, kickoff, and confirmations included.
 
 Proposing is not executing. The bootstrap only writes after an explicit "yes" — once accepted, the
 effect becomes `write-local` and the first-write gate applies. If the user declines or defers, the
@@ -194,7 +195,7 @@ Never create a worktree from the clean base after writing spec/plan in another w
 | Git conflict in progress | `pelizzai-merge-recovery` |
 | Greenfield product/project, even with the stack specified | `exploratory` → `pelizzai-discovery` + `pelizzai-interview` → spec → plan |
 | Feature/refactor/infra with design already approved and a plan ready | `pelizzai-execute` |
-| Approved design/spec/Figma, clear acceptance, but no plan | `pelizzai-plan`; brainstorming/interview-me **proposed** when the Proposal analysis flags a material gap |
+| Approved design/spec/Figma, clear acceptance, but no plan | `pelizzai-plan`; discovery/interview **proposed** when the Proposal analysis flags a material gap |
 | Stress-test an existing design/plan, resolve a flagged material gap, or an interview request | proposed by the Proposal analysis or by the user → `pelizzai-interview` |
 | Existing feature/refactor/infra with ratified requirements but no plan | use the lanes below |
 
@@ -202,8 +203,8 @@ Never create a worktree from the clean base after writing spec/plan in another w
 
 | Lane | Predicate | Route |
 | --- | --- | --- |
-| `bounded` | low uncertainty/risk; one cohesive behavior; clear acceptance; no architectural decision | `pelizzai-plan` in compact mode; do not force brainstorming. |
-| `standard` | medium risk and/or a few parts/contracts, with a clear solution and acceptance | `pelizzai-plan`; prepend a compact brainstorming only if a real trade-off remains. |
+| `bounded` | low uncertainty/risk; one cohesive behavior; clear acceptance; no architectural decision | `pelizzai-plan` in compact mode; do not force discovery. |
+| `standard` | medium risk and/or a few parts/contracts, with a clear solution and acceptance | `pelizzai-plan`; prepend a compact discovery only if a real trade-off remains. |
 | `exploratory` | high uncertainty, or high risk that demands discovery/design mitigation; architecture or sensitive coupled decisions | full `pelizzai-discovery` + proportional stress → plan. |
 
 ### Greenfield rule
@@ -268,7 +269,12 @@ squash-final:
 
 The router does not apply these defaults — it computes the recommendation and forwards it for ratification:
 
-- **Tracks with a plan** (bounded/standard/exploratory): defer isolation, mode, and commit to the consolidated **post-plan setup gate** of `pelizzai-execute` — that is where the three mode options (inline · subagents · **team**) are always visible and the commit strategy is always shown.
+- **Tracks with a plan** (bounded/standard/exploratory): isolation is NOT deferred — the
+  first-write gate opens a normal task/planning branch via `pelizzai-isolate` before the first
+  persistent artifact. What defers to the consolidated **post-plan setup gate** of
+  `pelizzai-execute` is the rest: worktree conversion, execution mode, and commit strategy —
+  that is where the three mode options (inline · subagents · **team**) are always visible and
+  the commit strategy is always shown.
 - **Write-local without a plan** (tweak/bug): hand the recommendation to the head skill; the head
   skill itself (`pelizzai-quick-fix`/`pelizzai-diagnose`) issues the compact ONE-line confirm —
   base, name, isolation, mode, and commits visible and named; one "ok" ratifies everything, a named
@@ -331,7 +337,7 @@ A new task never inherits decisions from the previous one. Closeout belongs to `
 - A mutating bootstrap to answer a read-only request without proposing and getting the user's "yes".
 - Finding a missing catalog and proceeding in silence, without proposing the bootstrap.
 - Writing state/spec/plan before isolation.
-- Forcing full brainstorming on a bounded feature.
+- Forcing full discovery on a bounded feature.
 - Classifying a greenfield product/project as bounded because the stack was specified.
 - Using lines/files as the only measure of complexity.
 - Treating frontend/security as a late offer.

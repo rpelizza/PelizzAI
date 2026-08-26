@@ -11,7 +11,7 @@ Review the diff and the affected trust boundaries, finding plausible paths of ex
 safe failure before integrating — whatever the stack. The skill is stack-aware: the SURFACE picks
 the lens set, and the web OWASP taxonomy is one lens set among several, never the whole skill.
 
-**Announce**, in the conversation's language: that you are using the PelizzAI Security skill to review this change's security surfaces.
+**Announce**, in the conversation's language: that you are using the PelizzAI Security skill to review this change's security surfaces. Everything this flow says to the user — questions, proposals, evidence, verdicts, confirmations, closeouts — follows the conversation's language, even when this skill is read in isolation.
 
 ## Choose the lens set by the surface
 
@@ -92,7 +92,7 @@ this overlay.
 ## Red flags
 
 ```text
-- A late offer in finish-task.
+- A late offer in `pelizzai-finish`.
 - A ten-category checklist unrelated to the diff.
 - A theoretical critical finding without boundary/path.
 - Approving input/authorization without following the data to the enforcement point.
@@ -102,6 +102,6 @@ this overlay.
 
 ## Integration
 
-It is an overlay of the router/writing-plans/execution-plans/review and composes with domain
+It is an overlay of the router/`pelizzai-plan`/`pelizzai-execute`/review and composes with domain
 skills. Use Evidence Synthesis when logs/scanners/sources diverge; do not turn the taxonomy into
 universal reasoning.

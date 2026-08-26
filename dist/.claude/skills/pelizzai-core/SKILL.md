@@ -194,10 +194,10 @@ flowchart TD
     G --> CONC{"Purely conceptual<br/>question?"}
     CONC -- "Yes" --> ANSC["Answer directly<br/>without bootstrap"]
     CONC -- "No" --> RT["pelizzai-router: effect, intent, risk,<br/>uncertainty, and surfaces"]
-    RT --> BOOT{"Harness initialized?<br/>pelizzai/domain-skills.md exists?"}
-    BOOT -- "No / 1st interaction / 'bootstrap'" --> AUD["pelizzai-onboard: maps project/workspace,<br/>MCPs, git/host, creates domain skills + docs"]
+    RT --> BOOT{"Consumer harness initialized?<br/>pelizzai/domain-skills.md exists?<br/>(source repo, by sentinel: skip)"}
+    BOOT -- "No, in a consumer / 1st interaction / 'bootstrap'" --> AUD["pelizzai-onboard: maps project/workspace,<br/>MCPs, git/host, creates domain skills + docs"]
     AUD --> CLS
-    BOOT -- "Yes" --> CLS{"Classify the intent and the lane"}
+    BOOT -- "Yes / source mode" --> CLS{"Classify the intent and the lane"}
     CLS --> KICK["Kickoff gate: route as a recommendation to ratify"]
     KICK --> HEAD["One head skill + mandatory overlays"]
     HEAD --> GAP{"Material gap<br/>in any phase?"}

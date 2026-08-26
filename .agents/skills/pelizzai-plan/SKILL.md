@@ -18,7 +18,7 @@ Zero context is about **complete context**, not about transcribing the future co
 decisions, contracts, and criteria (see *Plan depth*) and does not anticipate the whole
 implementation.
 
-**Announce**, in the conversation's language: that you are using the PelizzAI Writing Plans skill to turn the requirements into an executable plan.
+**Announce**, in the conversation's language: that you are using the PelizzAI Plan skill to turn the requirements into an executable plan.
 
 In a consumer, the plan is **always materialized** at `pelizzai/plans/YYYY-MM-DD-<topic>.md`
 (unless a different location is explicitly requested); it is the durable artifact execution reads.
@@ -39,7 +39,7 @@ state is mandatory only in the consumer.
 - Greenfield/standard/exploratory has an approved spec, or an explicit waiver on record.
 ```
 
-If the technical question still cannot be stated precisely, go back to brainstorming. If the
+If the technical question still cannot be stated precisely, go back to `pelizzai-discovery`. If the
 question is precise but the answer depends on evidence, create a short investigation or prototype
 task with an output and a stop criterion.
 
@@ -260,7 +260,7 @@ The decision tree is `pelizzai-continuity` → `references/phase-boundaries.md`.
 
 ```text
 - Writing the plan before the task branch.
-- Forcing brainstorming/interview on a clear bounded lane.
+- Forcing discovery/interview on a clear bounded lane.
 - Planning greenfield without an approved spec or an explicit waiver.
 - Skipping stress and plan approval to start implementing.
 - Duplicating in the plan all the code execution should write.

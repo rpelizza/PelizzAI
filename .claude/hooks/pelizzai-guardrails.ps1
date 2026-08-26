@@ -118,7 +118,7 @@ try {
   foreach ($seg in $segments) {
     foreach ($rule in $rules) {
       if (& $rule.Test $seg) {
-        [Console]::Error.WriteLine("PelizzAI guardrails: command blocked - $($rule.Name).")
+        [Console]::Error.WriteLine("PelizzAI guardrails: command redirected - $($rule.Name).")
         [Console]::Error.WriteLine("Why: $($rule.Why)")
         [Console]::Error.WriteLine("Redirected to: $($rule.Safe)")
         [Console]::Error.WriteLine('(Opt-in git guard hook. If the user EXPLICITLY asked for this operation, ask them to run it manually or to disable the hook in .claude/settings.json.)')

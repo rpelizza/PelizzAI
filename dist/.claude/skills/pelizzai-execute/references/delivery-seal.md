@@ -17,9 +17,12 @@ Order of operations (lossless → verifiable):
 
 ```text
 1. Copy the intact block to data/history/<YYYY-MM-DD>-<slug>.md — a faithful copy, nothing rewritten.
-2. Return `## Active task` to the template placeholders, PRESERVING the fields that the
-   destination and the later observation still read: slug, phase: delivered, branch, base-ref,
-   base-sha, validated-head, commit-strategy, worktree-path, and confirm.
+2. Split `## Active task` in two disjoint sets. KEEP the real values of the nine fields the
+   destination and the later observation still read — slug, phase: delivered, branch, base-ref,
+   base-sha, validated-head, commit-strategy, worktree-path, and confirm — they hold the
+   delivery's identity until the `delivered → done` observation frees them (see below). EVERY
+   other `## Active task` field returns to its template placeholder. Writing placeholders over
+   any of the nine is destructive: reconciliation loses the delivery.
 3. Remove the migrated T<n>/next/pending lines from `## Progress` (they return to placeholders).
 4. Insert under `## History`: `- <date> <slug> — delivered — <result ≤10 words> →
    data/history/<file>`.

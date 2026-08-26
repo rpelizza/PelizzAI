@@ -11,7 +11,7 @@ Create the isolation **before spec, plan, or code**, from a proven base. The sam
 the task/planning branch; if the user chooses a worktree after the plan, the worktree is created
 **from that branch**, preserving the artifacts already produced.
 
-**Announce on start**, in the conversation's language: that you are using the PelizzAI Starting Branch skill to prepare this task's isolation.
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Isolate skill to prepare this task's isolation.
 
 ## Invariants
 
@@ -289,7 +289,7 @@ divergence calls `pelizzai-resume`, not heuristics.
 
 ## Integration
 
-**Called by:** the router before brainstorming/spec/plan; `pelizzai-execute` at the
+**Called by:** the router before discovery/spec/plan; `pelizzai-execute` at the
 post-plan gate; debugging/quick-fix before writing code.
 
 **Combines with:** `pelizzai-execute`, `pelizzai-resume`, `pelizzai-finish`, and

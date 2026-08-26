@@ -9,7 +9,7 @@ description: "Head skill for anything broken — a bug, an incident, a test brea
 
 Fix the proven cause with the least process that preserves evidence, safety, and regression coverage.
 
-**Announce on start**, in the conversation's language: that you are using the PelizzAI Debugging skill to classify the failure, contain impact if needed, and fix it with evidence.
+**Announce on start**, in the conversation's language: that you are using the PelizzAI Diagnose skill to classify the failure, contain impact if needed, and fix it with evidence. Everything this flow says to the user — questions, proposals, evidence, verdicts, confirmations, closeouts — follows the conversation's language, even when this skill is read in isolation.
 
 ## Invariants
 
@@ -93,7 +93,7 @@ the Step 0 containment comes before any cut.
 
 ## Step 3 — test hypotheses proportionally
 
-A provable direct cause needs no causal brainstorming. When there is uncertainty:
+A provable direct cause needs no causal exploration. When there is uncertainty:
 
 ```text
 1. Record confirmed facts separately from hypotheses.
@@ -177,7 +177,7 @@ Then:
 2. Run the relevant validation and confirm no regressions.
 3. Review the working tree with `pelizzai-review`; apply findings and re-run the affected proofs.
 4. Consolidate the content into a definitive commit. If an explicitly authorized squash-final
-   strategy produced WIPs, consolidate it now, before the seal; finish-task does not rewrite history.
+   strategy produced WIPs, consolidate it now, before the seal; `pelizzai-finish` does not rewrite history.
 5. Run `pelizzai-verify` against the consolidated HEAD, record
    `validated-head`, and only then call `pelizzai-finish`: metadata-only closure in a consumer;
    closing of the execution record, with no runtime/closure, in source mode.

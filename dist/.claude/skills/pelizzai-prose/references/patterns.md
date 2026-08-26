@@ -9,7 +9,9 @@ state the fix in a few words. In Edit mode, apply the fix directly.
 robust, cutting-edge, paradigm shift, game changer, tapestry, realm, beacon, multifaceted,
 meticulous, intricate, paramount, transformative, elevate, embark, supercharge, harness (as a
 verb), ever-evolving, seamless, pivotal, underscore. On level 2, the technical subset (`robust`,
-`seamless`, `elevate`, `underscore`, `pivotal`, `harness`) is released.
+`seamless`, `elevate`, `underscore`, `pivotal`, `harness`, `leverage`) is released — `leverage`
+is a canonical term in `pelizzai-module-design`, and skill files must keep canonical vocabulary
+exact.
 
 **Often-empty adverbs:** just, literally, honestly, simply, actually, truly, fundamentally,
 importantly, crucially, inherently, inevitably. Cut when they add nothing; keep when they carry

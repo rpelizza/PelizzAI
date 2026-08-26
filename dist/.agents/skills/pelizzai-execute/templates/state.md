@@ -11,7 +11,7 @@
 - slug: <none>
 - track: <feature | bug | tweak | refactor | infra | review>
 - lane: <bounded | standard | exploratory>   # depth classified by the router, ratified at kickoff (high risk lands in `exploratory`; severity lives in `risk:`)
-- phase: <brainstorm | plan | exec | review | delivered | done | abandoned | blocked>   # finish-task does NOT declare `done`: it seals `delivered` (content + destination executed); `done` is observed later against git; `abandoned` = archived without merge
+- phase: <brainstorm | plan | exec | review | delivered | done | abandoned | blocked>   # pelizzai-finish does NOT declare `done`: it seals `delivered` (content + destination executed); `done` is observed later against git; `abandoned` = archived without merge
 - branch: <branch-name>
 - base-ref: <exact ref used to create the branch, e.g. origin/main or refs/heads/trunk>
 - base-sha: <full SHA resolved from base-ref before the first change>
@@ -22,6 +22,7 @@
 - worktree-path: <none | path of the worktree, when isolation: worktree>
 - execution-mode: <pending | team | subagents | inline>   # <pending> until ratification; the three options always visible (team never omitted)
 - commit-strategy: <pending | granular | squash-final>   # <pending> until ratification; squash-final only on the user's explicit request
+- executor-tier: <pending | session | mid>   # implementers' tier ratified at setup-gate step 4; inline mode = session; dispatches read THIS value — a missing/pending field after resumption means not ratified, ask again
 - effect: <read-only | write-local | external>
 - risk: <low | medium | high>
 - overlays: <none | comma-separated names>   # required cross-cutting skills, e.g. pelizzai-interface, pelizzai-security

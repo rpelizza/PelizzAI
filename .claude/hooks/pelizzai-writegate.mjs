@@ -63,8 +63,8 @@
  * On fleets without Node, use the PowerShell variant pelizzai-writegate.ps1 (identical behavior).
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join, resolve, isAbsolute } from 'node:path';
+import { readFileSync, writeFileSync, existsSync, realpathSync } from 'node:fs';
+import { join, resolve, isAbsolute, dirname, basename } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 
@@ -112,6 +112,26 @@ function norm(p) {
 
 // Windows and macOS compare paths case-insensitively; Linux is case-sensitive.
 const CI = process.platform === 'win32' || process.platform === 'darwin';
+
+// macOS pitfall the CI caught: the temp tree lives behind a symlink (/var -> /private/var), so
+// `git rev-parse --show-toplevel` reports the PHYSICAL root while the payload's cwd — and every
+// relative target joined to it — stays LOGICAL. All in-root writes then looked outside the root
+// and the hook failed OPEN on exactly the platform the suite first ran on. Canonicalize to the
+// physical path; a target that does not exist yet resolves through its parent; anything that
+// cannot be resolved keeps its raw spelling (fail-open, as everywhere else in this file).
+function realpathOr(p) {
+  if (!p) return p; // '' must stay '' — resolving it would invent a root out of the cwd
+  try {
+    return realpathSync(p);
+  } catch {
+    /* not on disk yet — resolve through the parent */
+  }
+  try {
+    return join(realpathSync(dirname(p)), basename(p));
+  } catch {
+    return p;
+  }
+}
 
 // child is the root itself or is INSIDE it.
 function eqOrInside(child, root) {
@@ -314,13 +334,14 @@ function main() {
   if (typeof ti.command === 'string' && ti.command) targets.push(...extractShellTargets(ti.command));
   if (targets.length === 0) return 0; // nothing to guard (e.g. read-only Bash)
 
-  const gitRoot = git(cwd, ['rev-parse', '--show-toplevel']);
+  const gitRoot = realpathOr(git(cwd, ['rev-parse', '--show-toplevel']));
   if (!gitRoot) return 0; // outside a git repo (scratchpad/external) or git missing → allow
+  cwd = realpathOr(cwd); // physical cwd, so relative targets land on the same spelling as gitRoot
 
   // Only targets INSIDE the root matter; scratchpad/temp outside the root never blocks.
   const inRoot = targets
     .map((t) => (isAbsolute(t) ? t : join(cwd, t)))
-    .map((t) => resolve(t))
+    .map((t) => realpathOr(resolve(t)))
     .filter((t) => eqOrInside(t, gitRoot));
   if (inRoot.length === 0) return 0;
 

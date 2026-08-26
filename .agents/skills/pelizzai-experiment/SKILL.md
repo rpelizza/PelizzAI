@@ -11,7 +11,7 @@ A prototype is **throwaway code that answers a question** — and the question d
 Buy information with the smallest possible experiment: **one** question per prototype; when the
 answer appears, it ends.
 
-**Announce**, in the conversation's language: that you are using PelizzAI Prototype to answer `<question>` with a throwaway experiment.
+**Announce**, in the conversation's language: that you are using PelizzAI Experiment to answer `<question>` with a throwaway experiment. Everything this flow says to the user — questions, proposals, evidence, verdicts, confirmations, closeouts — follows the conversation's language, even when this skill is read in isolation.
 
 ## Gate
 

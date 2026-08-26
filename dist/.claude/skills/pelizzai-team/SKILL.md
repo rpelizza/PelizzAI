@@ -498,7 +498,7 @@ Apply the **effort budget**: verification depth is proportional to the change's 
 
 - `pelizzai-preferences` — the global layer instructed in each member's briefing (domain skills prevail).
 - `pelizzai-subagents` — lightweight delegation to **one** isolated subagent (no team).
-- `pelizzai-router` / `pelizzai-execute` — where the `team` mode arrives from (setup gate); execution-plans defines the per-task cycle each front follows.
+- `pelizzai-router` / `pelizzai-execute` — where the `team` mode arrives from (setup gate); `pelizzai-execute` defines the per-task cycle each front follows.
 - `pelizzai-interview` — destination of the material gaps named by the members: the coordinator consolidates them and takes them to the human before the front continues.
 - `pelizzai-verify` — the evidence gate before accepting an implementation deliverable.
 - `pelizzai-discovery` / `pelizzai-plan` — where the team's task usually comes from.

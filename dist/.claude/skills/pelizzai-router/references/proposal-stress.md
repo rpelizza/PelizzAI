@@ -55,7 +55,7 @@ Given a request:
    architecture, security, data, or acceptance. A reversible product decision still belongs to the
    user; only a mechanical detail covered by a ratified contract may become an operational assumption.
 4. **Emit the compact analysis** and point out **which material gaps justify PROPOSING discovery**
-   (compact brainstorming or a focused `pelizzai-interview`).
+   (compact discovery or a focused `pelizzai-interview`).
 
 ## Analysis format (≤ 6 bullets, proportional)
 

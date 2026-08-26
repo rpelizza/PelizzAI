@@ -48,6 +48,22 @@ try {
 
 const spec = budget.skillLimits?.spec ?? {};
 const limits = budget.skillLimits?.budget ?? {};
+
+// A missing or non-numeric limit makes every `x > limit` comparison false and disarms the rule
+// without a sound — the same silent-green failure this whole file exists to prevent. The budget
+// being unusable is exit 2, like a broken JSON.
+for (const [where, obj, keys] of [
+  ['skillLimits.spec', spec, ['nameMaxChars', 'descriptionMaxChars']],
+  ['skillLimits.budget', limits, ['descriptionMaxWords', 'skillMaxLines', 'referenceTocAfterLines']],
+]) {
+  for (const key of keys) {
+    const value = where === 'skillLimits.spec' ? obj[key] : obj[key]?.max;
+    if (!Number.isFinite(value) || value <= 0) {
+      console.error(`validate-skills: ${where}.${key} is not a positive number — the limit would silently stop applying.`);
+      process.exit(2);
+    }
+  }
+}
 const skillsDir = join(root, budget.metadataFrom);
 const toPosix = (p) => p.split(sep).join('/');
 const rel = (abs) => toPosix(relative(root, abs));

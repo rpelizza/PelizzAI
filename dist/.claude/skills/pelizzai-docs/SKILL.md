@@ -10,7 +10,7 @@ description: "Overlay for human documentation of a feature's stable contract —
 Explain to humans the delivery's observable, durable contract, without narrating internal details
 that go stale in the next refactor.
 
-**Announce**, in the conversation's language: that you are using the PelizzAI Documenting Features skill to document the feature's contract.
+**Announce**, in the conversation's language: that you are using the PelizzAI Docs skill to document the feature's contract.
 
 ## Where
 
@@ -75,5 +75,5 @@ block, and it does not replace the normal path either, which is running here bef
 
 ## Integration
 
-Router/plan register this overlay; execution-plans runs it before the final review. Combine with
+Router/plan register this overlay; `pelizzai-execute` runs it before the final review. Combine with
 domain skills and `pelizzai-prose` when that changes the wording.
