@@ -1,6 +1,6 @@
 ---
 name: pelizzai-tdd
-description: Test-driven development (TDD) — the harness's PER-TASK test-first discipline. Use to build features or fix bugs test-first (red → green → refactor, vertical slices, integration tests); trigger it when implementing each code task of a plan (via `pelizzai-execution-plans`) and whenever a `pelizzai-team`/`pelizzai-subagents` member writes code. The suitability gate decides the legitimate exceptions: preserving refactors, visual CSS, documentation, configuration, IaC, migrations, and generated code use characterization, native validation, dry-run, visual QA, or static checks.
+description: "Test-driven development (TDD) — the harness's PER-TASK test-first discipline. Use to build features or fix bugs test-first (red → green → refactor, vertical slices, integration tests); trigger it when implementing each code task of a plan (via `pelizzai-execution-plans`) and whenever a `pelizzai-team`/`pelizzai-subagents` member writes code. The suitability gate decides the legitimate exceptions: preserving refactors, visual CSS, documentation, configuration, IaC, migrations, and generated code use characterization, native validation, dry-run, visual QA, or static checks."
 ---
 
 # PelizzAI TDD
