@@ -47,7 +47,11 @@ in one line, with the decisions visible and named, and waits:
 `Kickoff: quick-fix on branch <type>/<slug> @ <base-ref> (<short-sha>) — isolation: branch · mode: inline · commits: granular. Ok? (overrides: worktree · subagents/team · squash-final · different name/base)`
 
 One "ok" ratifies base, name, and the three decisions at once — all are named in the line, nothing
-was silent; a named override adjusts only that item and keeps the rest. Only then is the branch
+was silent; a named override adjusts only that item and keeps the rest. **Silence is not an ok:
+without the affirmative answer, HOLD THE TURN — no branch, no edit.** "The user already told me to
+skip the process" is the rationalization this line exists against: what they waived was spec and
+plan, which the tweak never had; the one-line confirm is the part that cannot be waived by
+implication. A run with nobody to answer stops here by design. Only then is the branch
 created. Do not scatter this line across separate questions: the one-decision-per-turn menu
 belongs to the post-plan gate of the tracks with a plan. Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP),
 open no gates: apply the briefing and escalate to the coordinator whatever requires a decision.

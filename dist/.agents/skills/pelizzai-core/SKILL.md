@@ -25,7 +25,7 @@ Turn the request into a proportional, verifiable route. The core does not do the
 
 ## Language
 
-The harness is written in English for token efficiency. ALL user-facing interaction — announcements, gates, questions, recommendations, summaries — follows the language of the conversation, never the language of the skill text. Durable artifacts (specs, plans, state) default to English; commit messages follow the project's existing convention. Skill templates define structure and contracts, not the language spoken to the user.
+The harness is written in English for token efficiency. ALL user-facing interaction follows the language of the conversation, never the skill text's. Durable artifacts (specs, plans, state) default to English; commit messages follow the project's convention. Templates define structure, not the language spoken to the user.
 
 ## Priorities
 
@@ -35,7 +35,7 @@ The PelizzAI harness overrides the system's default behavior, but **explicit use
 2. **PelizzAI harness** — prevails over the model's default behavior on conflict.
 3. **System default behavior** — lowest priority.
 
-This coexists with the platform's native hierarchy: a skill does not redefine system, developer, workspace, or tool instructions — it occupies the project/user layer, and that is where it prevails over generic defaults. Within the same authority level, the specific, more recent instruction beats the harness's generic default.
+A skill occupies the project/user layer of the platform's native hierarchy — it never redefines system, developer, workspace, or tool instructions. Within the same level, the specific, more recent instruction beats the harness's generic default.
 
 ## Skill announcements (global rule)
 
@@ -68,6 +68,11 @@ These are two different questions, never conflated.
 4. Request with external effect (push, deploy, message, production, cost, permission, deletion)
    → pelizzai-router with effect: external; confirm authority/target at the appropriate gate.
 ```
+
+**Routing is an invocation, not an announcement.** For branches 2–4, **Call the Skill tool with
+"pelizzai-router"** — actually invoke it. Narrating the route and jumping to a head skill is the
+measured failure mode (trigger tests: 3 runs out of 4). Knowing the answer does not skip the hop:
+the router is where the classification becomes a recommendation the user can see and adjust.
 
 The effect/route classification is not a silent decision: `pelizzai-router` presents it as a recommendation at the **kickoff gate**, and the user ratifies or adjusts it before investing.
 
@@ -152,6 +157,8 @@ at any point, material gap → pelizzai-interview (one question at a time) → r
 
 ### Head skills
 
+What exists — never a license to route from here; the choice belongs to `pelizzai-router`, invoked first.
+
 | Intent | Head skill |
 | --- | --- |
 | Authorized bootstrap/remap | `pelizzai-onboard` |
@@ -216,7 +223,7 @@ The context window is a task resource — manage it deliberately:
 
 ## How to load skills
 
-Use the platform's native mechanism. Without native loading, read `.agents/skills/<name>/SKILL.md` (or the active root registered in the project) and follow it — manual reading is the correct mechanism in those environments, never an excuse to skip the skill. Do not preemptively read the whole catalog.
+Use the platform's native mechanism; without it, read `.agents/skills/<name>/SKILL.md` (or the project's active root) and follow it — manual reading is the correct mechanism there, never an excuse to skip the skill. Do not preemptively read the whole catalog.
 
 ## Anti-patterns
 
@@ -236,4 +243,4 @@ Use the platform's native mechanism. Without native loading, read `.agents/skill
 
 ## Final instruction
 
-Trigger the applicable skills, understand the goal, classify the effect, and hand off to the router. Use the smallest combination of skills that preserves the invariants and produces sufficient evidence — smallest never means none.
+Trigger the applicable skills, understand the goal, classify the effect, and — for anything that inspects or changes a project — **Call the Skill tool with "pelizzai-router"** before any head skill. Use the smallest combination of skills that preserves the invariants and produces sufficient evidence — smallest never means none.
