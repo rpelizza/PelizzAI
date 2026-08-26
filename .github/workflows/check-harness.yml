@@ -37,12 +37,21 @@ jobs:
           node scripts/sync-harness.mjs --build-dist
           git add -A -- dist
           git diff --cached --exit-code -- dist
+      - name: Skill conformance (spec + budget ratchets)
+        run: node scripts/validate-skills.mjs
+      - name: Hot-path budget (ceilings are a ratchet)
+        run: node scripts/measure-hotpath.mjs
+      - name: Mutation suite (the instruments catch planted defects)
+        if: runner.os == 'Linux'
+        run: node tests/mutation/run.mjs
 
   contract-tests:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        # macOS included: the writegate's case-insensitive path comparison covers darwin,
+        # and until now no contract test ever executed there (v3 audit, F7).
+        os: [windows-latest, ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
