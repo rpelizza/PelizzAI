@@ -1,0 +1,14 @@
+# LF normalization stops depending on each author's autocrlf (issue #42 — it cost
+# a review round in PR #39 and a warning wall on every commit since).
+* text=auto
+*.md   text eol=lf
+*.mdc  text eol=lf
+*.mjs  text eol=lf
+*.json text eol=lf
+*.sh   text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.txt  text eol=lf
+# PowerShell stays CRLF: Windows PowerShell 5.1 mishandles LF in some constructs,
+# and the .ps1 legs exist precisely for hosts where nothing else is guaranteed.
+*.ps1  text eol=crlf
