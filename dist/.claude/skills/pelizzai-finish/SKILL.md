@@ -1,6 +1,6 @@
 ---
 name: pelizzai-finish
-description: Use after overlays, consolidation, and final validation have sealed the content at validated-head. Before the destination, checks as a safety net whether security, UI, or documentation went uncovered and offers — without blocking — to return the delivery to the cycle. In a consumer, closes the task in phase delivered with a metadata-only commit of state.md + the data/history/ file from the migration (done is observed later, not here); in the source repo, validates the seal without creating runtime/closure. Keeps local by default or publishes/opens a PR with authorization. Never alters content or history after the seal.
+description: "Use after final validation seals validated-head. Integrates exactly the validated content, runs the coverage safety net, seals delivery, and resolves the destination — local, push, or PR."
 ---
 
 # PelizzAI Finish

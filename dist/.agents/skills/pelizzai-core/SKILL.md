@@ -1,6 +1,6 @@
 ---
 name: pelizzai-core
-description: Use in every conversation. Establishes how to find and trigger the PelizzAI harness SKILLS, requiring the applicable skills to be invoked before ANY response, including clarifying questions. Understands the goal, classifies the effect, and hands off to the router before any mutation; a purely conceptual question is answered without the full cycle, never without checking the applicable skills.
+description: "Use in every conversation. Sweeps the skill catalog before any response, understands the goal, classifies the effect, and hands project work to pelizzai-router before any mutation."
 ---
 
 # PelizzAI Core

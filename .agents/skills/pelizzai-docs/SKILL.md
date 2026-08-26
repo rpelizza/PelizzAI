@@ -1,6 +1,6 @@
 ---
 name: pelizzai-docs
-description: Overlay for HUMAN documentation of a feature's stable contract, such as routes, commands, APIs, and screens. Use when docs are part of the scope, the diff creates a stable surface that needs explaining, or the user asks for usage documentation. Runs before the final review and validated-head; finish-task does not execute it (it only flags the gap as a safety net), and it does not apply to the harness's specs/plans/ADRs.
+description: "Overlay for human documentation of a feature's stable contract — routes, commands, APIs, screens. Use when docs are in scope or the diff creates a surface that needs explaining."
 ---
 
 # PelizzAI Docs

@@ -1,6 +1,6 @@
 ---
 name: pelizzai-domain-modeling
-description: Overlay that makes the domain model explicit and consistent during design or authorized documentation. Use when the task actually changes terminology, relationships, invariants, bounded contexts, ADRs, or a durable rejection. Merely reading the glossary does not trigger this skill. Respects source mode and never creates consumer documentation by reflex.
+description: "Overlay that makes the domain model explicit when the task changes terminology, relationships, invariants, or bounded contexts — and the place where ADRs are actually written."
 ---
 
 # PelizzAI Domain Modeling

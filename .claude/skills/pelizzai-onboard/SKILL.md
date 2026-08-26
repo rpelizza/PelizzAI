@@ -1,6 +1,6 @@
 ---
 name: pelizzai-onboard
-description: Harness bootstrap and project mapping, in two modes. This is the skill that initializes PelizzAI in a project or workspace — invoke it on the user's FIRST contact with the harness, whenever they type "bootstrap", "remap", "rescan", or "reinitialize", and whenever the harness has not yet been initialized here (no `pelizzai/domain-skills.md`). Use `scan-only` for read-only analyses/reviews that create no files; use `bootstrap-write` when the user authorizes preparing the catalog, profile, and domain skills. A purely conceptual question does not trigger it. Never run a consumer bootstrap in the PelizzAI source repo itself.
+description: "Initializes PelizzAI in a project or workspace. Invoke on the user's first contact with the harness, or on 'bootstrap', 'remap', 'onboard'. Scans first; writes only after ratification."
 ---
 
 # PelizzAI Onboard

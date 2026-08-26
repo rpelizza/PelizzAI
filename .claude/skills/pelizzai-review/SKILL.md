@@ -1,6 +1,6 @@
 ---
 name: pelizzai-review
-description: Code review skill of the PelizzAI harness. Use after EVERY task during plan execution, when a relevant feature is complete, before integrating a delivery, or when the user asks for a review of a working tree, branch, or PR. Applies the (blind) spec lens and the quality/evidence lens — by default in two dispatches (`split`) — and teaches how to receive feedback with technical rigor. For security/OWASP, compose `pelizzai-security`.
+description: "Use after every task in plan execution, when a feature completes, before integrating, or when the user asks to review a working tree, branch, diff, or PR."
 ---
 
 # PelizzAI Review

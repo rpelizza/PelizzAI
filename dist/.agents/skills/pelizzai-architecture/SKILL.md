@@ -1,6 +1,6 @@
 ---
 name: pelizzai-architecture
-description: Read-only head skill for PROACTIVE codebase-wide review of architecture, technical debt, and missing seams. Use periodically (every few days of intense work on the project), when the user asks for a broad architectural analysis or what is worth refactoring, and when debugging records a structural gap. Delivers candidates prioritized by evidence; does not edit code, report, ADR, or out-of-scope. Diff/branch/PR review uses pelizzai-review.
+description: "Read-only head skill for a proactive, codebase-wide architecture and debt review. Use periodically (every few days of intense work) or on request. Returns prioritized candidates; writes nothing."
 ---
 
 # PelizzAI Architecture

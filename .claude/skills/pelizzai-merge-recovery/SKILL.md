@@ -1,6 +1,6 @@
 ---
 name: pelizzai-merge-recovery
-description: Use when there is a git merge/rebase conflict in progress to resolve — the goal is to preserve the intent of BOTH sides. Never uses `--abort` on its own to escape the conflict; if the original intent cannot be safely preserved, it STOPS and escalates to the user. Trigger when the user says "resolve this conflict", "there's a merge conflict", "rebase conflict".
+description: "Use when a git merge or rebase conflict is in progress. Preserves the intent of both sides; never aborts on its own — an unresolvable conflict escalates to the user."
 ---
 
 # PelizzAI Merge Recovery

@@ -1,6 +1,6 @@
 ---
 name: pelizzai-resume
-description: Safely reconciles divergences between the task record and Git after an interruption, crash, orphaned worktree, or resumption in the wrong directory. Uses state in the consumer and execution record in source mode. Starts read-only, distinguishes false alarms from real risk, and preserves WIP before any operation that could move or discard it. Never stashes/resets/deletes/aborts automatically.
+description: "Use after an interruption, crash, orphaned worktree, or resumption in the wrong directory. Reconciles the task record with Git, read-only first; never stashes, resets, or deletes on its own."
 ---
 
 # PelizzAI Resume

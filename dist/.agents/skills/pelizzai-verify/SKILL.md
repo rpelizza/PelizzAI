@@ -1,6 +1,6 @@
 ---
 name: pelizzai-verify
-description: "Use WHENEVER you are about to claim that something is done, fixed, passing, or working — before committing, integrating, pushing, or opening a PR, and before moving to the next task. Requires RUNNING the proof and READING the output (exit code, failure counts) BEFORE any claim of success: evidence before assertion, always. Chooses proof proportional to the effect, invalidates evidence after a relevant mutation, requires visual verification when there is frontend, and seals the exact SHA of the validated content in validated-head. Does not repeat checks over a message-only change nor turn every intermediate action into final validation."
+description: "Use before claiming anything is done, fixed, or passing — before committing, integrating, pushing, or opening a PR. Run the proof, read the output, then claim; evidence before assertion."
 ---
 
 # PelizzAI Verify

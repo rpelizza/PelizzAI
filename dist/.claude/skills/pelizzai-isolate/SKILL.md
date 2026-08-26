@@ -1,6 +1,6 @@
 ---
 name: pelizzai-isolate
-description: Use before the first artifact of a task that may produce commits. Detects a multi-project workspace and confirms the affected set with the user, discovers the repository's real base, creates the task/planning branch and, after the plan, keeps the branch in the current working tree or safely moves it to a worktree. Never imposes develop and never works on a detached/protected HEAD.
+description: "Use before the first artifact of any task that may commit. Detects the workspace, discovers the real base, and creates the task branch or worktree before anything is written."
 ---
 
 # PelizzAI Isolate

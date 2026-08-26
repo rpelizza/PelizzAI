@@ -1,6 +1,6 @@
 ---
 name: pelizzai-continuity
-description: Prepares a new session or workstream with minimal, verifiable, safe context. Use when the user asks for a handoff/continuation in another conversation or when changing direction at a phase edge. To continue the same work in the same session, use native compaction. Respects consumer state and the source execution record without creating improper runtime.
+description: "Use at a phase edge — handing work to a new session, harness, or teammate, or forking a side workstream. Minimal verifiable context; compaction continues same-session work."
 ---
 
 # PelizzAI Continuity

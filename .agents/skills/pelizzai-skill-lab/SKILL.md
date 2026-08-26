@@ -1,6 +1,6 @@
 ---
 name: pelizzai-skill-lab
-description: "Use this skill to create, edit, validate, or optimize a skill **at the user's request**, and as the authoring and maintenance engine for a project's **DOMAIN** skills. Trigger it (a) at bootstrap, called by `pelizzai-onboard`, to generously enumerate the candidates the repo's patterns justify — one per recurring flow/responsibility — and write them after the user ratifies the list; (b) for domain-skill maintenance — a stack that changes version, rework that repeats in git, a newly adopted stack with no coverage, or an overdue cadence (10+ commits, 10+ days, repo-scan every 15 days); and (c) when the user says \"create a skill\", \"turn this into a skill\", \"optimize the description\", or \"update the domain skills\". Proactive maintenance acts ONLY on domain skills — harness skills (`pelizzai-*`) are only created or edited at the user's explicit request. And it NEVER overwrites a skill blindly: the diff goes to the user before writing, with per-skill approval."
+description: "Creates, edits, validates, and maintains skills, the authoring engine for a project's domain skills. Use at bootstrap via pelizzai-onboard, on maintenance cadence, or when the user asks for a skill."
 ---
 
 # PelizzAI Skill Lab

@@ -1,6 +1,6 @@
 ---
 name: pelizzai-experiment
-description: Overlay for building a throwaway experiment that answers a design question more cheaply than implementing or debating. Use for concrete uncertainty about state, integration, feasibility, or UI. Do not use as a mandatory step, a polished demo, or a shortcut to production; requires a branch before writing and removal/absorption before the seal.
+description: "Head skill for a feasibility question — 'can we', 'is it possible', 'quick and dirty is fine'. The output is an answer, not code you keep. Also an overlay mid-route."
 ---
 
 # PelizzAI Experiment

@@ -1,6 +1,6 @@
 ---
 name: pelizzai-security
-description: Security overlay for changes that touch authentication/authorization, untrusted input, SQL/queries, sensitive data, uploads, CORS/SSRF, dependencies/supply chain, integrity, logging, or exceptions. Applies the current OWASP Top 10 to the diff and produces fixes/evidence before the final review and validated-head. Use also when the user asks for an OWASP review; never defer it to finish-task.
+description: "Security overlay for any diff touching auth, untrusted input, queries, sensitive data, uploads, CORS/SSRF, dependencies, integrity, or logging — web, API, or AI systems, whatever the stack."
 ---
 
 # PelizzAI Security

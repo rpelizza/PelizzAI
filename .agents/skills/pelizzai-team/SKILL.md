@@ -1,6 +1,6 @@
 ---
 name: pelizzai-team
-description: Use this skill when the user asks to work with a "team" of agents, or when the task benefits from real parallelism — independent roles, competing hypotheses, multi-perspective review, broad research, or cross-layer work. Covers both team modes — Claude Code's native "Agent Teams" (teammates that talk to each other) and the subagents equivalent when the native feature is not enabled. Do NOT use for sequential or trivial tasks, tasks with many step-by-step dependencies, or tasks that edit the same files — prefer a single session or a single subagent (`pelizzai-subagents`).
+description: "Use when the user asks for a team of agents or the task needs real parallelism — independent roles, competing hypotheses, multi-perspective review. Coordinates teammates natively or via subagents."
 ---
 
 # PelizzAI Team

@@ -1,6 +1,6 @@
 ---
 name: pelizzai-prose
-description: A skill that applies William Strunk Jr.'s timeless writing principles to produce clearer, more vigorous, professional prose while avoiding common AI writing patterns.
+description: "Use when writing or editing text for humans — docs, READMEs, UI copy, reports, commit messages. Clear, vigorous prose; names and removes AI-writing patterns."
 ---
 
 # PelizzAI Prose

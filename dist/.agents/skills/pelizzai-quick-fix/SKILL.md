@@ -1,6 +1,6 @@
 ---
 name: pelizzai-quick-fix
-description: "Head skill for a local, cohesive, clear, low-risk tweak — text, label, color, button, or field on an existing screen, a constant, a mechanical rename/refactor, an obvious configuration. Typical signals: ~1 file and under ~50 lines (scale signals, not hard limits). Public surface = a NEW route, command, endpoint, API, or config — a tweak creates none of them and changes no business rule. Something broken uses `pelizzai-diagnose`; a new surface/contract or a design decision reclassifies through the router's lane."
+description: "The cheapest mutating route. Use for a local low-risk tweak — text, label, color, a field on an existing screen, a constant, an obvious config. No spec, no plan."
 ---
 
 # PelizzAI Quick Fix

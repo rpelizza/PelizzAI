@@ -1,6 +1,6 @@
 ---
 name: pelizzai-preferences
-description: Global layer for communication, engineering, code, concurrency, validation, security, documentation, and portability, applicable to projects, workspaces, and stacks. It is the behavioral floor of every non-trivial task — consider it alongside the main routing, not only when its rules change the execution.
+description: "The behavioral floor of every non-trivial task — communication, engineering, code, concurrency, validation, security, documentation, portability. Loaded as an overlay on every mutating route."
 ---
 
 # PelizzAI Preferences

@@ -1,6 +1,6 @@
 ---
 name: pelizzai-subagents
-description: Use to delegate a focused, independent task to ONE isolated subagent (or a few independent subagents that only report back) — research, code sweep/mapping, analysis, or a contained implementation. Subagents do not talk to each other; for a TEAM of roles that need to dialogue/coordinate, use `pelizzai-team`. Trigger when the user says "delegate this", "send a subagent", or when execution runs in subagents mode.
+description: "Use to delegate one focused, independent task to an isolated subagent that executes and reports — research, a code sweep, analysis, a contained implementation. For dialogue between roles, pelizzai-team."
 ---
 
 # PelizzAI Subagents

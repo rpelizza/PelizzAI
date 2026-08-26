@@ -136,7 +136,9 @@ try {
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'bounded[\s\S]*standard[\s\S]*exploratory' 'router has adaptive lanes'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'before the first write|first-write' 'router protects the first write'
     Check-Match '.claude/skills/pelizzai-onboard/SKILL.md' 'scan-only' 'audit has a scan-only mode'
-    Check-Match '.claude/skills/pelizzai-diagnose/SKILL.md' 'direct cause.*uncertain deterministic.*flaky.*incident' 'debugging triages proportionally'
+    # v3 slice 1b: the triage taxonomy left the description (trigger format) and lives in the body
+    # table — the guarantee moved, it did not vanish; the assertion follows it.
+    Check-Match '.claude/skills/pelizzai-diagnose/SKILL.md' 'direct cause[\s\S]*Uncertain deterministic[\s\S]*flaky[\s\S]*incident' 'debugging triages proportionally'
     Check-Match '.claude/skills/pelizzai-diagnose/SKILL.md' 'Do not invent a hypothesis count|never.*fixed number' 'debugging does not fix a hypothesis count'
     Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'Test/validation strategy|Primary strategy' 'task-cycle picks proof by artifact'
     Check-Match '.claude/skills/pelizzai-plan/templates/plan.md' 'Cross-cutting harness skills' 'plan propagates overlays'
@@ -587,7 +589,9 @@ try {
     # BASE detected the workspace and never closed the set on its own; the pivot deleted the whole
     # section. It comes back reconciled with the HEAD invariant (one task = one Git repository):
     # a monorepo gets single isolation, a multi-repo workspace opens one per repository.
-    Check-Match '.claude/skills/pelizzai-isolate/SKILL.md' 'description:[^\n]*Detects a multi-project workspace and confirms the affected set with the user' 'starting-branch: the description announces workspace detection again'
+    # v3 slice 1b: the workspace-detection guarantee left the description (trigger format) and now
+    # opens the body's Principles — the assertion follows the guarantee to where it lives.
+    Check-Match '.claude/skills/pelizzai-isolate/SKILL.md' 'workspace is detected, never assumed[\s\S]*ALWAYS confirmed with the user' 'starting-branch: workspace detection stays a body guarantee'
     Check-Match '.claude/skills/pelizzai-isolate/SKILL.md' '^##\s+2\.\s+Detect a multi-project workspace' 'starting-branch has the workspace-detection section'
     Check-Match '.claude/skills/pelizzai-isolate/SKILL.md' 'pnpm-workspace\.yaml[\s\S]{0,120}go\.work' 'starting-branch checks the BASE workspace markers'
     Check-Match '.claude/skills/pelizzai-isolate/SKILL.md' 'one level up' 'starting-branch also looks for markers one level up from cwd'

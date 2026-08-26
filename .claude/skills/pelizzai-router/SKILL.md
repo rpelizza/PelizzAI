@@ -1,6 +1,6 @@
 ---
 name: pelizzai-router
-description: Orchestrator for any request that needs to inspect or change a project. Classifies effect, intent, risk, uncertainty, and surfaces; recommends one head skill and overlays; guarantees ratification and isolation before writing. On the first interaction with a consumer project, with the harness not initialized (no `pelizzai/domain-skills.md`), or when the user says "bootstrap", proposes the bootstrap via `pelizzai-onboard` before routing. Every greenfield product/project goes through approved discovery, spec, and plan even with the stack specified. Use after `pelizzai-core`; do not use in a purely conceptual conversation without a project.
+description: "Use for any request that inspects or changes a project. Classifies effect, intent, risk, and surfaces; recommends one head skill plus overlays; the kickoff gate ratifies before writes."
 ---
 
 # PelizzAI Router

@@ -1,6 +1,6 @@
 ---
 name: pelizzai-loop
-description: Use to drive macro loops through to delivery — task-by-task execution, fix→re-review, or investigation across multiple rounds — with OODA (Observe → Orient → Decide → Act), Definition of Done, and stop criteria. Do not use to turn every test micro-cycle or single action into OODA.
+description: "Use to drive macro loops to delivery — task-by-task execution, fix and re-review, or investigation in rounds — with OODA, a Definition of Done, and an explicit stop criterion."
 ---
 
 # PelizzAI Loop

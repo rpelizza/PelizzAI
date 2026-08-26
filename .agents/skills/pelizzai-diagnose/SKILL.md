@@ -1,6 +1,6 @@
 ---
 name: pelizzai-diagnose
-description: Head skill of the bug track. Use when encountering a bug, test failure, incident, or unexpected behavior — including when the user says "it doesn't work", "it's buggy", "it broke", "strange behavior", or "stop guessing", and when a test breaks in the middle of another task. Triages between direct cause, uncertain deterministic bug, flaky/distributed failure, and incident with active damage; picks proportional reasoning and validation, contains damage reversibly before investigating, and never mandates RCA, OODA, or a fixed number of hypotheses.
+description: "Head skill for anything broken — a bug, an incident, a test breaks in the middle of another task, 'it doesn't work', 'it broke', 'stop guessing'. Contain damage reversibly first."
 ---
 
 # PelizzAI Diagnose

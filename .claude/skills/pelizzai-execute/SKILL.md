@@ -1,6 +1,6 @@
 ---
 name: pelizzai-execute
-description: Executes an approved plan task by task, choosing proportional proof/review, keeping state in the consumer or the execution record in source mode, and sealing the final candidate. Use when a plan/PRD/issues are ready to implement. Never write on a protected branch; starting-branch prepares the isolation before execution.
+description: "Use when an approved plan is ready to implement. Runs it task by task with fresh briefs and proportional review, and seals the validated candidate."
 ---
 
 # PelizzAI Execute

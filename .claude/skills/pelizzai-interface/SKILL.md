@@ -1,6 +1,6 @@
 ---
 name: pelizzai-interface
-description: Use when building or changing frontend interfaces — pages, components, dashboards, app shells, forms, empty states; when the user asks for UI design, redesign, polish, or critique; or when a task's diff touches templates, styles, or client-side components.
+description: "Use when building or changing UI — pages, components, dashboards, forms, empty states — or when the user asks for design, redesign, polish, or critique. Direction is decided before pixels."
 ---
 
 # PelizzAI Interface

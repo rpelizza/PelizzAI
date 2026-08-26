@@ -1,6 +1,6 @@
 ---
 name: pelizzai-plan
-description: Turns ratified requirements, an approved spec, PRD, or design into a durable implementation plan, stress-tested and approved before code. Use for bounded, standard, and exploratory features and for every greenfield product/project, or when the user asks for a plan/decomposition. Sizes detail, validation, overlays, and review by risk without deciding requirements for the user.
+description: "Use when a ratified spec, PRD, or design needs an implementation plan. Produces a durable, stress-tested plan executable with zero repo context, approved before any code."
 ---
 
 # PelizzAI Plan
