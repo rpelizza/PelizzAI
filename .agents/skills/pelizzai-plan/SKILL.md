@@ -99,6 +99,13 @@ trade-off. Each item states, in one line: **what** was decided, **where it was r
 The plan only closes when **every** material decision is ratified — no weighty technical choice
 travels hidden in the middle of an N-task plan to be rubber-stamped along with it.
 
+**A ratified decision with architectural weight also becomes an ADR** — chosen pattern or library
+with a rejected alternative, a boundary/contract that future work must honor, a durable rejection.
+Trigger `pelizzai-domain-modeling` (its §recording gate and `templates/adr.md`) right after the
+ratification, while the why is fresh; a decision that only lives in a plan file stops being
+findable the day the plan is archived. This is the wiring that makes ADRs actually get written
+instead of remaining a template no flow reaches.
+
 When the plan is purely mechanical and introduces no material technical decision, write explicitly
 `no material technical decision — purely mechanical plan`. Never leave the section empty or omit
 it: the absence of decisions is itself a claim to ratify.

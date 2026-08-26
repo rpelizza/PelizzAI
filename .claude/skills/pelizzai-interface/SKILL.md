@@ -25,6 +25,14 @@ An existing brand or design system **is** the direction — no sortition; record
 
 **Visual questions get visual answers.** During direction and build, a genuinely visual question is answered with disposable mockups: quick HTML rendered in the browser or preview — the `pelizzai-discovery` visual companion serves exactly this — showing 2–3 **structurally different** variants; slightly adjusted grids are wallpaper, not variants. Mockups are scratch (temp dir or the visual companion's workspace), never committed as product code.
 
+**Know your own accent.** AI-generated design today clusters around three looks, measured
+independently by two teams: warm cream (≈`#F4F1EA`) with a high-contrast serif and a terracotta
+accent; near-black with a single acid-green or vermilion pop; and hairline-rule broadsheet with
+dense columns and zero border-radius. All three are legitimate for some briefs — **the brief's own
+words always win, including when it asks for one of these looks** — but they are defaults, not
+choices, and they appear regardless of subject. Where the brief leaves an axis free, do not spend
+that freedom on one of them; treat your first palette instinct as already spent.
+
 ## Anti-convergence sortition
 
 When the direction is open (no brand imposed):
@@ -35,7 +43,17 @@ When the direction is open (no brand imposed):
 
 ## Build rules
 
-- Follow the [Craft Floor](references/craft-floor.md) — numeric, Verify/Refuse format. Floors are **category defaults, not bans**: deviating is legitimate only as a declared exception in the direction contract, never silently.
+- **Temporal gate:** load [references/craft-floor.md](references/craft-floor.md) immediately
+  before editing UI — never during analysis or direction work. The context cost is paid when it
+  changes behavior, and a ban-list read at design time biases the direction toward timid output.
+  Build to the floor without announcing the checklist.
+- The Craft Floor is numeric, Verify/Refuse format. Floors are **category defaults, not bans**: deviating is legitimate only as a declared exception in the direction contract, never silently.
+- **Copy is design material, not decoration.** Name things by what the person controls, never by
+  the system's construction (a person manages *notifications*, not *webhook config*); active
+  voice; a control says exactly what happens and keeps its name through the flow (button
+  "Publish" → toast "Published"); errors name the problem and the recovery, never apologize, and
+  are never vague; an empty state is an invitation to act. Register (vigor, no filler) comes from
+  `pelizzai-prose`; interface vocabulary lives here.
 - Real content over lorem whenever it exists — lorem hides layout failures that real strings expose.
 - **Every state is designed**: loading, empty, error, disabled. Empty states are design, not leftovers.
 - Accessibility floors are the exception to "defaults, not bans": those are Refuse lines, non-negotiable.
@@ -46,10 +64,20 @@ UI claims are verified rendered, never from source reading alone:
 
 - **Machine-checkable floors** (contrast ratios, tap targets, page overflow at 375px, focus visibility, reduced-motion) are measured in a real browser — playwright/browser MCP when installed (the harness recommends it at bootstrap). These are machine oracles: iterate freely until they pass.
 - **Aesthetic judgment** is an attestation oracle: screenshots or a live preview presented against the direction contract; the user judges. Presenting evidence is not claiming success (`pelizzai-verify`).
+- **Verify in bounded passes, not a loop:** build complete, inspect once in a batched round
+  (desktop + mobile together — a screenshot is worth a thousand tokens), fix everything in one
+  batch, confirm with at most one more round, stop. Open-ended self-QA burns the user's money.
 
 ## Fresh-eyes design review
 
-For substantial UI deliveries, dispatch a fresh-context, read-only reviewer carrying: the direction contract, the screenshots/preview, and the craft floor. It returns a **fidelity matrix** — per contract block: followed / drifted, with evidence, typography and color/material lines mandatory — plus floor violations with **measured values**. The coordinator cannot soften the verdict — the same anti-pre-judging rule as `pelizzai-review`.
+For substantial UI deliveries, dispatch a fresh-context, read-only reviewer with the briefing
+template [references/interface-reviewer.md](references/interface-reviewer.md): check 0 validates
+the evidence before any judgment (a verdict derived from a broken capture launders the breakage
+into approval), the reviewer has **no browser** (it judges exactly the evidence the builder
+captured, which keeps the capture auditable), and it returns a closed verdict —
+`recapture | rebuild | fix | ship` — that the coordinator reports **verbatim** and has no
+authority to soften, plus the fidelity matrix (typography and color/material lines mandatory) and
+floor violations with **measured values**.
 
 ## Red flags
 

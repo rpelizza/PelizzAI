@@ -5,89 +5,73 @@ description: "Use when writing or editing text for humans — docs, READMEs, UI 
 
 # PelizzAI Prose
 
-## Overview
+The writing overlay. Two failure modes it exists to kill: prose that buries the point under
+ceremony, and prose that reads as generated — the recognizable AI register of hedged symmetry,
+importance puffery, and fake-profound endings. The operating principle: **every sentence earns its
+place, and the writer's real voice survives the edit.**
 
-Write with clarity and force. This skill covers what to do (Strunk) and what not to do (AI patterns).
+## Two modes
 
-## When to Use This Skill
+**Edit (default).** The text is yours to improve: make the minimum effective edit using the
+principles below and the pattern catalog, and say what changed in one short block. A rough draft
+with a real voice still sounds like the same person afterward.
 
-Use this skill whenever you write text for humans:
+**Detect.** Asked whether a text reads as AI, or to audit without rewriting: name each pattern
+from [references/patterns.md](references/patterns.md) that appears, quote the offending line, and
+give the fix in a few words. Do not rewrite, do not score, and never claim to know whether an AI
+wrote it — detectors guess; a named pattern with a quoted line is evidence the reader can check.
 
-- Documentation, README files, technical explanations
-- Commit messages, pull request descriptions
-- Error messages, UI text, help text, comments
-- Reports, summaries, or any kind of explanation
-- Editing for clarity
+## Editing principles
 
-**If you are writing sentences for a human to read, use this skill.**
+- **Preserve the voice.** Note the draft's vocabulary, cadence, bluntness, humor, and level of
+  polish before touching anything; keep what is personal. Equal tidiness in every paragraph is a
+  loss, not a win.
+- **Lead with the point.** Cut throat-clearing; keep an aside or admission that builds character
+  or context. Front-load conclusions when it helps the reader — not as a universal shape.
+- **Concrete beats abstract.** Names, numbers, dates, mechanisms. "Cut deploy time from 40 minutes
+  to 4" beats "improved efficiency". Protect the specific fact: never smooth a useful detail into
+  generic importance.
+- **The portability test.** A sentence that could move unchanged to another company, product, or
+  person is filler — replace it with a fact, consequence, or judgment specific to THIS subject.
+- **Show, don't label.** Cut commentary that tells the reader something is important, surprising,
+  or subtle instead of demonstrating why. If the prose already shows it, trust the reader.
+- **Verbs do the work.** Active voice; "decided" not "made a decision"; "is" and "has" over
+  fake-strong verbs ("serves as a centralized hub for").
+- **Keep the meaning.** Never invent claims, examples, or sources; a missing source is a question
+  to the user, not a "studies show".
+- **The bar:** for each paragraph, point to the sentence that makes it specifically YOURS — about
+  this subject, this project, this decision. A paragraph with no such sentence is generic filler
+  by default, whoever typed it.
 
-## Strategy for Limited Context
+## Two levels of rigor
 
-When context is tight:
+The full catalog does not apply to everything the harness writes:
 
-1. Write your draft using your own judgment
-2. Launch a subagent with your draft and the relevant section file
-3. Ask the subagent to review the text and return the corrected version
-
-Loading a single section (~1,350 to ~11,800 tokens depending on the section; file `03` is the largest) instead of everything saves a significant amount of context.
-
-## Elements of Style
-
-William Strunk Jr.'s _The Elements of Style_ (1918) teaches how to write clearly and cut the superfluous without mercy.
-
-### Rules
-
-**Elementary Rules of Usage (Grammar/Punctuation)**:
-
-1. Form the possessive singular of nouns by adding _'s_
-2. In a series of three or more terms with a single conjunction, use a comma after each term except the last (the serial comma)
-3. Enclose parenthetic (incidental) expressions between commas
-4. Place a comma before a conjunction introducing a co-ordinate clause
-5. Do not join independent clauses with only a comma
-6. Do not break sentences in two
-7. A participial phrase at the beginning of a sentence must refer to the grammatical subject
-
-**Elementary Principles of Composition**:
-
-8. One paragraph per topic
-9. Begin each paragraph with a sentence that states the main topic
-10. **Use the active voice**
-11. **Put statements in positive form**
-12. **Use definite, specific, concrete language**
-13. **Omit needless words**
-14. Avoid a succession of loose sentences (with no clear connection)
-15. Express co-ordinate ideas in similar form
-16. **Keep related words together**
-17. In summaries, keep to one tense
-18. **Place the emphatic words at the end of the sentence**
-
-### Reference Files
-
-The rules above summarize Strunk's original text. For full explanations with examples:
-
-| Section | File | ~Tokens |
+| Level | Applies to | Rules |
 | --- | --- | --- |
-| Grammar, punctuation, comma usage | `02-elementary-rules-of-usage.md` | ~3,900 |
-| Paragraphs, active voice, concision | `03-elementary-principles-of-composition.md` | ~11,800 |
-| Headings, quotations, formatting | `04-a-few-matters-of-form.md` | ~1,350 |
-| Word choice (crutch words and commonly confused pairs) | `05-words-and-expressions-commonly-misused.md` | ~1,800 |
+| **1 — human copy** | READMEs, docs, reports, commit/PR messages, UI copy, specs and plans | the whole of [references/patterns.md](references/patterns.md): word lists, named patterns, judgment patterns, em-dash discipline |
+| **2 — LLM instruction** | the harness's own SKILL.md files, subagent briefings, prompt templates | word lists and named patterns only, with the technical vocabulary released (`robust`, `seamless`, `elevate`, `underscore`, `pivotal` have legitimate technical readings) — and the hardening repetition and triadic checklists those files use exist ON PURPOSE; do not strip the mechanisms that make an instruction survive |
 
-**Most tasks need only `03-elementary-principles-of-composition.md`** — it covers active voice, positive form, concrete language, and the elimination of needless words.
+Applying level 1 to a skill file attacks exactly what makes skills work; applying level 2 to a
+README ships slop. Say which level you are applying when it is not obvious.
 
-## AI Writing Patterns to Avoid
+## Governance
 
-LLMs tend to converge on statistical averages, producing generic, inflated prose. Avoid:
+A rule that produces a false positive is not silently bypassed — propose the amendment to this
+skill (via the harness's normal flow) so the rule improves for everyone. Rewording to sneak past a
+pattern the catalog names is the failure, not the fix.
 
-- **Inflated terms:** pivotal, crucial, vital, testament, enduring legacy
-- **Empty -ing phrases:** ensuring reliability, showcasing features, highlighting capabilities
-- **Promotional adjectives:** revolutionary, seamless, robust, cutting-edge
-- **Overused AI vocabulary:** delve, leverage, multifaceted, foster, realm, tapestry
-- **Formatting excess:** too many bulleted lists, emoji decoration, mechanical bolding of repeated key terms
+## Integration
 
-Be specific, not grandiose. Say what it actually does.
+**Combines with:** `pelizzai-interface` (interface vocabulary and control naming live there; this
+skill supplies the register), `pelizzai-docs` (documentation content), `pelizzai-skill-lab`
+(level 2 applies to skill authoring), `pelizzai-finish` (commit/PR messages). Deep dives on
+composition — active voice, positive form, omitting needless words — live in
+[elements-of-style/03-elementary-principles-of-composition.md](elements-of-style/03-elementary-principles-of-composition.md),
+consulted when a passage resists the quick rules.
 
-For detailed research on why these patterns occur, see `signs-of-ai-writing.md`. Wikipedia editors developed that guide to detect AI-generated submissions — its patterns are well documented and field-tested.
+## Final instruction
 
-## Summary
-
-Writing for humans? Load the relevant section of `elements-of-style/` and apply the rules. For most tasks, `03-elementary-principles-of-composition.md` covers what matters most.
+Read the whole text first. Identify the core point and the voice signals to preserve. Then either
+name the patterns (Detect) or make the minimum effective edit (Edit) — and end on the clearest
+concrete sentence, never on a kicker.

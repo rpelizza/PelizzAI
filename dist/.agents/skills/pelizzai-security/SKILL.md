@@ -8,13 +8,23 @@ description: "Security overlay for any diff touching auth, untrusted input, quer
 ## Goal
 
 Review the diff and the affected trust boundaries, finding plausible paths of exploitation or of
-safe failure before integrating.
+safe failure before integrating — whatever the stack. The skill is stack-aware: the SURFACE picks
+the lens set, and the web OWASP taxonomy is one lens set among several, never the whole skill.
 
-Baseline: [OWASP Top 10:2025](https://owasp.org/Top10/2025/0x00_2025-Introduction/). When
-maintaining this skill, confirm the current official edition; do not preserve old categories from
-memory.
+**Announce**, in the conversation's language: that you are using the PelizzAI Security skill to review this change's security surfaces.
 
-**Announce**, in the conversation's language: that you are using the PelizzAI OWASP skill to review this change's security surfaces.
+## Choose the lens set by the surface
+
+| Surface in the diff | Lens set |
+| --- | --- |
+| Web app, API, service | OWASP Top 10 (table below) |
+| **AI/LLM feature** — prompts, tools, agents, RAG, model calls | LLM lenses: prompt injection (direct and via retrieved/ingested content), tool authority (what the model can invoke and with whose credentials), output handling (model output treated as data, never executed or rendered raw), data exfiltration through outputs/logs, training/context data leakage, model and prompt supply chain. Baseline: the current OWASP LLM Top 10 — confirm the edition, never cite from memory. |
+| Infra/IaC, CI/CD, containers | secrets in state/env/history; least privilege on roles and tokens; pinned actions/images with provenance; network exposure defaults; destructive-change blast radius |
+| Data pipeline / analytics | PII classification and minimization at each hop; retention; access to raw vs derived data; poisoning of ingested sources |
+| Desktop/CLI/mobile | local storage of secrets, IPC/URL-scheme surfaces, update integrity, filesystem/permissions scope |
+
+A diff can cross sets (an AI feature behind a web endpoint takes both). For each set, confirm the
+current official taxonomy when maintaining this skill; the tables here are lenses, not tickboxes.
 
 ## When
 
@@ -33,7 +43,11 @@ List inputs, actors, trust boundaries, assets, and external effects. Do not revi
 by reflex, but follow a chain called from the diff when that is necessary to prove authorization
 or sanitization.
 
-## OWASP Top 10:2025 — applicable lenses
+## OWASP Top 10:2025 — the web/API lens set
+
+Baseline: [OWASP Top 10:2025](https://owasp.org/Top10/2025/0x00_2025-Introduction/). When
+maintaining this skill, confirm the current official edition; do not preserve old categories from
+memory.
 
 | # | Category | Question for the diff |
 | --- | --- | --- |
