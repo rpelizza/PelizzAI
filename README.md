@@ -481,7 +481,7 @@ copies it to the consumer project along with the rest of the harness.
 | Group | Skills | Responsibility |
 | --- | --- | --- |
 | Entry and orchestration | `pelizzai-core`, `pelizzai-router`, `pelizzai-onboard`, `pelizzai-preferences` | mandatory entry, route classification and kickoff gate, bootstrap, global behavior floor |
-| Reasoning and conversation | `pelizzai-reasoning`, `pelizzai-interview`, `pelizzai-prose` | proportional reasoning techniques (including OODA), the interview that resolves every material gap, clear writing |
+| Reasoning and conversation | `pelizzai-interview`, `pelizzai-prose` | the interview that resolves every material gap, clear writing; reasoning technique vocabulary lives inside each head skill |
 | Design, plan, and execution | `pelizzai-discovery`, `pelizzai-plan`, `pelizzai-execute` | ratified design with spec, executable and stress-tested plan, setup gate and task-by-task execution |
 | Per-task execution | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop`, `pelizzai-continuity` | proof strategy per artifact, delegation and teams, macro loop and forking into a new session |
 | Dedicated tracks | `pelizzai-diagnose`, `pelizzai-quick-fix` | bug with triage and root cause; local tweak without losing isolation, proof, and closeout |

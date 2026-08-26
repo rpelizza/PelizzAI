@@ -571,7 +571,7 @@ config, or doc may change after the seal.
 
 ---
 
-## Reasoning — `pelizzai-reasoning`
+## Reasoning
 
 - Known sequence: *Plan and Execute*; dependencies: *Structured Decomposition*.
 - Unexpected failure: hypothesis + *Root Cause Analysis*; decision between alternatives: *Decision Making* (comparison; search with pruning and backtracking for interdependent paths).
@@ -627,7 +627,6 @@ config, or doc may change after the seal.
 - `pelizzai-review` — per-task review (spec + quality) and the final branch review.
 - `pelizzai-loop` — OODA when a real loop exists, Definition of Done, and stopping on doubt.
 - `pelizzai-interview` — the mandatory destination of the material-gap stop during execution.
-- `pelizzai-reasoning` — ordering, diagnosis, and verification.
 - `pelizzai-verify` / `pelizzai-finish` — completion with gates.
 - `pelizzai-onboard` — the `pelizzai/` directory pattern and the domain-skill catalog.
 

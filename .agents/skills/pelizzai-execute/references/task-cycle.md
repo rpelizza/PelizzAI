@@ -59,12 +59,12 @@ Each task's briefing includes:
   not enough.
 - The necessary conventions and contracts (paths, interfaces, decisions already made).
 - Global layer: apply `pelizzai-preferences` (language, secrets, .env, production quality) and
-  reason via `pelizzai-reasoning`; on conflict, the DOMAIN SKILLS pasted into this briefing and
+  on conflict, the DOMAIN SKILLS pasted into this briefing and
   the project rules PREVAIL over preferences/reasoning.
 - Test/validation strategy chosen by the matrix in §2. For external APIs, ground it in Context7
   for the observed version; current official documentation is the fallback, never memory.
 - Reasoning: when the task involves uncertainty, a decision, or a diagnosis, the suggested
-  dominant technique from `pelizzai-reasoning` (decomposition, RCA, comparison, verification —
+  dominant reasoning technique (decomposition, RCA, comparison, verification —
   see the skill's matrix); omit it for a mechanical task with a clear contract — do not impose a
   technique without a trigger.
 - The review profile recorded in the plan: `split` (default) or ratified `combined`, with the
@@ -233,7 +233,7 @@ stays at the highest level the user's platform offers. Specify the model and the
 when dispatching members and reviewers, so they do not inherit a default smaller than the
 session's.
 
-The harness elevates the reasoning of **any** model via `pelizzai-reasoning`: the right technique,
+The harness elevates the reasoning of **any** model: the right technique,
 a verifiable protocol, and fresh evidence do not depend on the model's capability. Proportionality
 still applies to the depth of the process (interview, brainstorming, TDD, review profile,
 overlays) — and it is **never lowered to compensate for a smaller model**. In architecture, in the

@@ -19,7 +19,7 @@ Delegate work to an **isolated subagent**: its own context, without polluting yo
 > parallel inside the task's single worktree.
 
 <TEAM-MEMBER-STOP>
-If you are the dispatched subagent, execute only your task: trigger `pelizzai-reasoning`, apply the domain skills pasted into your briefing (they prevail over generic patterns) and the global layer `pelizzai-preferences`, and return the result in the agreed format. Do not delegate sub-subagents or orchestrate the flow. On an implementation task, **do not commit** — consolidation belongs to the coordinator, after review and verification.
+If you are the dispatched subagent, execute only your task: apply the domain skills pasted into your briefing (they prevail over generic patterns) and the global layer `pelizzai-preferences`, and return the result in the agreed format. Do not delegate sub-subagents or orchestrate the flow. On an implementation task, **do not commit** — consolidation belongs to the coordinator, after review and verification.
 
 Under a closed briefing (TEAM-MEMBER-STOP/SUBAGENT-STOP), do not produce route analyses or open gates: apply the briefing, **flag in your return** (`DONE_WITH_CONCERNS`/`NEEDS_CONTEXT`) if a domain skill covering your task's stack was missing, and escalate to the coordinator whatever requires a decision.
 
@@ -66,10 +66,9 @@ The handoff dir is gitignored in the consumer and temp in source mode (see task-
   include it: the cost of including is lower than the cost of ignoring a project rule. Paste the
   operational points — the subagent must apply them instead of generic patterns. If the area has no
   covering skill, say so and ask the subagent to flag the gap in its return.
-- Global layer: instruct the subagent to apply `pelizzai-preferences` and to reason via
-  `pelizzai-reasoning`; on conflict, the pasted DOMAIN SKILLS and the project rules PREVAIL.
-- Reasoning: main suggested technique from `pelizzai-reasoning` per the task. For external library
-  APIs, ground in the current official documentation available — not in memory.
+- Global layer: instruct the subagent to apply `pelizzai-preferences`; on conflict, the pasted
+  DOMAIN SKILLS and the project rules PREVAIL. For external library APIs, ground in the current
+  official documentation available — not in memory.
 - Delivery contract: the EXACT return format (list of findings file:line; diff; X/Y/Z report).
 - Safe harbor (in the briefing text): it is always OK to stop and say "this is too hard for me" —
   bad work is worse than no work; the subagent will not be penalized for escalating.
@@ -130,7 +129,7 @@ continue.
 **Composes with:**
 
 - `pelizzai-team` — the full team (multiple roles, task list, dialogue); subagents is delegation to ONE agent.
-- `pelizzai-reasoning` / `pelizzai-preferences` — reasoning layer and global floor instructed in the briefing (domain skills prevail).
+- `pelizzai-preferences` — global floor instructed in the briefing (domain skills prevail).
 - `pelizzai-execute` — `subagents` mode: one subagent per task, dispatched by the coordinator.
 - `pelizzai-interview` — destination of the material gap the subagent names: the coordinator takes it to the human before re-dispatching.
 - `pelizzai-review` / `pelizzai-verify` — check the result before consolidating.

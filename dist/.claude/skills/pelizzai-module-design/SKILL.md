@@ -66,10 +66,10 @@ Small surface: fewer methods = fewer tests; fewer params = simpler test setup.
 
 ## Design the interface twice
 
-When the interface's shape is uncertain and the impact is high, **design it in several radically different ways** and compare them by depth, locality, and seam position. Use `pelizzai-team`/`pelizzai-subagents` to generate the alternatives — in parallel only when the exploration is read/analysis or when each alternative writes to disjoint paths under the ratified isolation; prototypes that share paths are generated serially — and `pelizzai-reasoning` (*Decision Making*, in search-with-pruning mode for the interdependent paths) to compare and **recommend** — choosing among the alternatives is architecture, and architecture is the user's decision: present the recommended one for ratification and take any material gap to `pelizzai-interview`.
+When the interface's shape is uncertain and the impact is high, **design it in several radically different ways** and compare them by depth, locality, and seam position. Use `pelizzai-team`/`pelizzai-subagents` to generate the alternatives — in parallel only when the exploration is read/analysis or when each alternative writes to disjoint paths under the ratified isolation; prototypes that share paths are generated serially — and *decision making* — search with pruning for the interdependent paths — to compare and **recommend** — choosing among the alternatives is architecture, and architecture is the user's decision: present the recommended one for ratification and take any material gap to `pelizzai-interview`.
 
 ## Integration
 
 **Used by:** `pelizzai-tdd` (planning — deep modules and testability), `pelizzai-discovery` (isolation and clarity), `pelizzai-plan` (file structure), `pelizzai-architecture` (the deletion test and this vocabulary guide the proactive review; a missing seam caught by `pelizzai-diagnose` in the regression test is an architectural finding that lands there as a candidate).
 
-**Combines with:** `pelizzai-reasoning` (Structured Decomposition, Decision Making), `pelizzai-domain-modeling` (the domain vocabulary that names these modules).
+**Combines with:** `pelizzai-domain-modeling` (the domain vocabulary that names these modules).

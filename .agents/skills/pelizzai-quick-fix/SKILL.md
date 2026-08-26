@@ -107,8 +107,7 @@ Never: treat as quick-fix something that creates a new surface or changes a busi
 
 **Routed by:** `pelizzai-router` (track `tweak`).
 
-**Uses:** `pelizzai-isolate`, local rules/skills, `pelizzai-reasoning` (strategy
-selection), `pelizzai-tdd` only for behavior, `pelizzai-interface` as the mandatory overlay
+**Uses:** `pelizzai-isolate`, local rules/skills, `pelizzai-tdd` only for behavior, `pelizzai-interface` as the mandatory overlay
 for UI, `pelizzai-verify`, and `pelizzai-finish`.
 
 **Escalates to:** `pelizzai-plan` for bounded, `pelizzai-discovery` when there is a

@@ -178,7 +178,7 @@ Overlays do not replace the head skill:
 - project patterns → domain skills from the catalog (when in doubt whether a domain skill applies to the task, include it: the cost of including is lower than the cost of ignoring a project rule);
 - new human documentation → `pelizzai-docs` when it is part of the scope.
 
-`pelizzai-preferences` is not an optional overlay: it is the behavior floor described above and follows every non-trivial task. `pelizzai-reasoning` selects proportional heuristics; it does not add ceremony by itself.
+`pelizzai-preferences` is not an optional overlay: it is the behavior floor described above and follows every non-trivial task. Reasoning depth is proportional to uncertainty; it never adds ceremony by itself.
 
 ## Harness flow map
 

@@ -397,7 +397,7 @@ Structure of the file **you create** inside the skill, at evals/evals.json (no s
 
 The `expectations` field (objectively verifiable assertions) is what the **grader** checks — it is what makes the eval "verifiable". Add it when writing the assertions. The full `evals.json`/`grading.json` schema **does not live in this repository**: it comes from Anthropic's `skill-creator`, in the references/schemas.md file **of that skill's package**. Confirm the exact field name in the version you have installed instead of assuming what is written here.
 
-When the criterion is about **routing** rather than literal output, the harness uses Markdown scenarios inside `evals/` (e.g. `.claude/skills/pelizzai-router/evals/adaptive-user-control.md`, `.claude/skills/pelizzai-reasoning/evals/`). Same requirement: each case names the expected route, the forbidden route, and the regression it protects against.
+When the criterion is about **routing** rather than literal output, the harness uses Markdown scenarios inside `evals/` (e.g. `.claude/skills/pelizzai-router/evals/adaptive-user-control.md`). Same requirement: each case names the expected route, the forbidden route, and the regression it protects against.
 
 Procedure (when subagents are available):
 

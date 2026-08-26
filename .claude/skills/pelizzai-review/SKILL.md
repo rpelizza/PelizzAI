@@ -343,7 +343,6 @@ On a GitHub PR, reply in the inline comment THREAD (not as a top-level PR commen
 - `pelizzai-execute` — per-task review (combined/split) and final review; see `task-cycle.md`.
 - `pelizzai-tdd` — the tests the review checks are born from the TDD cycle.
 - `pelizzai-isolate` — handback when acting on feedback turns into writing code.
-- `pelizzai-reasoning` — *Critique and Refine* (acting on the feedback) and *Verification* (fresh evidence).
 - `pelizzai-security` — the review's security (OWASP) dimension.
 - `pelizzai-verify` / `pelizzai-finish` — completion after the final review.
 

@@ -340,8 +340,8 @@ try {
     Check-NotMatch '.claude/skills/pelizzai-discovery/SKILL.md' 'React, Express, SQLite' 'normative brainstorming does not overfit the historical prompt'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'greenfield product/project[\s\S]{0,120}always `exploratory`' 'router classifies greenfield as exploratory'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Context7/official documentation is read-only technical reconnaissance' 'router uses Context7 early without mutating effect'
-    Check-Match '.claude/skills/pelizzai-reasoning/SKILL.md' 'Use Context7 from the initial reconnaissance' 'reasoning makes Context7 cross-cutting'
-    Check-Match '.claude/skills/pelizzai-reasoning/SKILL.md' 'Context7 can confirm[\s\S]{0,180}never chooses a requirement' 'reasoning keeps Context7 from deciding the product'
+    # v3 slice 9: pelizzai-reasoning dissolved — the Context7 doctrine's homes are CLAUDE.md,
+    # core, and the router, asserted above and below.
     Check-Match 'CLAUDE.md' 'Context7 is the harness''s preferred technical source' 'CLAUDE pins Context7 as the cross-cutting technical weapon'
 
     # =====================================================================
@@ -569,13 +569,8 @@ try {
     Check-NotMatch '.claude/skills/pelizzai-diagnose/SKILL.md' 'NO FIX WITHOUT ROOT CAUSE INVESTIGATION' 'debugging keeps the proportional invariant (containment may precede the cause)'
     Check-NotMatch '.claude/skills/pelizzai-diagnose/SKILL.md' 'question hypothesis/architecture before trying another' 'debugging does not return to the anonymous circuit breaker (no named destination)'
 
-    # -- F7: the technique quota leaves the reasoning carriers as well --
-    # `There is no fixed quota` (Progressive loading) had two orphan contradictions: the per-phase
-    # cap in Compositions and the auxiliary numbered/justified by impact in eval R-14.
-    Check-Match '.claude/skills/pelizzai-reasoning/SKILL.md' 'There is no numeric cap' 'reasoning: compositions load per phase, no numeric cap'
-    Check-NotMatch '.claude/skills/pelizzai-reasoning/SKILL.md' 'per-phase loading cap' 'reasoning keeps no orphan cap contradicting "no fixed quota"'
-    Check-Match '.claude/skills/pelizzai-reasoning/evals/routing.md' 'enters to close that gap, never because the\s+decision is high-impact' 'routing: auxiliary technique enters for a gap, not for impact'
-    Check-NotMatch '.claude/skills/pelizzai-reasoning/evals/routing.md' '\d. OPTIONAL auxiliary' 'routing does not number the auxiliaries (quota residue)'
+    # -- F7: the technique quota history — pelizzai-reasoning was dissolved in v3 slice 9; the
+    # quota regression it guarded against cannot return through a skill that no longer exists.
 
     # =====================================================================
     # F8 — Leftovers from the pre-2026-07-11 restoration.
@@ -992,7 +987,6 @@ try {
 
     # Effect→proof matrix: the distributed copies agree on the essential anchors.
     $proofMatrixFiles = @(
-        '.claude/skills/pelizzai-reasoning/SKILL.md',
         '.claude/skills/pelizzai-tdd/SKILL.md',
         '.claude/skills/pelizzai-execute/references/task-cycle.md',
         '.claude/skills/pelizzai-plan/SKILL.md',
@@ -1237,18 +1231,17 @@ try {
 # name of the premortem routine is Proposal Stress (Assumption Tracking applied).
 # ---------------------------------------------------------------------------
 try {
-    Check (-not (Test-Path (Join-Path $root '.claude/skills/pelizzai-reasoning/techniques/tree-of-thoughts.md'))) 'tree-of-thoughts.md no longer exists as a standalone technique'
-    Check (-not (Test-Path (Join-Path $root '.claude/skills/pelizzai-reasoning/techniques/self-consistency.md'))) 'self-consistency.md no longer exists as a standalone technique'
-    Check-NotMatch '.claude/skills/pelizzai-reasoning/SKILL.md' 'tree-of-thoughts|self-consistency|Tree of Thoughts|Self-Consistency' 'reasoning catalog without standalone ToT/Self-Consistency'
-    Check-Match '.claude/skills/pelizzai-reasoning/SKILL.md' 'includes search with pruning/backtracking for interdependent paths' 'catalog: Decision Making absorbs the pruning search mode'
-    Check-Match '.claude/skills/pelizzai-reasoning/SKILL.md' 'includes cross-check via independent runs \(multi-agent\)' 'catalog: Verification absorbs the multi-agent cross-check'
-    Check-Match '.claude/skills/pelizzai-reasoning/techniques/decision-making.md' '## Interdependent paths \(search with pruning and backtracking\)' 'decision-making has the interdependent-paths section'
-    Check-Match '.claude/skills/pelizzai-reasoning/techniques/verification.md' '## Cross-check via independent runs' 'verification has the cross-check section'
-    Check-Match '.claude/skills/pelizzai-reasoning/techniques/verification.md' 'convergence raises confidence, never replaces validation against external reality' 'cross-check never replaces external reality'
-    Check-Match '.claude/skills/pelizzai-reasoning/techniques/react.md' 'Never fabricate the result of a tool' 'lean react keeps the anti-fabrication discipline'
-    Check ((Get-Content -LiteralPath (Join-Path $root '.claude/skills/pelizzai-reasoning/techniques/react.md') | Measure-Object -Line).Lines -le 250) 'react.md stays lean (≤250 lines)'
-    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Proposal Stress\s+\(Assumption Tracking applied\)' 'router uses the canonical name Proposal Stress'
-    Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'Proposal Stress\s+\(Assumption Tracking applied\)' 'interview-me uses the canonical Proposal Stress name'
+    # v3 slice 9: the whole skill dissolved. The invocation layer is gone; the vocabulary stays
+    # where each head skill uses it. Proposal Stress moved to the router's references, OODA to
+    # the loop's. The merged-technique residue scan below still guards the historical merge.
+    Check (-not (Test-Path (Join-Path $root '.claude/skills/pelizzai-reasoning'))) 'pelizzai-reasoning no longer exists as a skill'
+    $reasoningRefs = Get-ChildItem -LiteralPath (Join-Path $root '.claude/skills') -Recurse -File -Filter '*.md' |
+        Where-Object { (Get-Content -LiteralPath $_.FullName -Raw -Encoding utf8) -match 'pelizzai-reasoning' }
+    Check (@($reasoningRefs).Count -eq 0) 'no skill still references pelizzai-reasoning' (@($reasoningRefs | ForEach-Object { $_.FullName }) -join '; ')
+    Check-Match '.claude/skills/pelizzai-router/references/proposal-stress.md' 'Proposal Stress' 'proposal-stress lives in the router references'
+    Check-Match '.claude/skills/pelizzai-loop/references/ooda.md' 'OODA' 'ooda lives in the loop references'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Proposal Stress' 'router uses the canonical name Proposal Stress'
+    Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'proposal-stress\.md' 'interview points at the router-owned Proposal Stress routine'
     Check-NotMatch '.claude/skills/pelizzai-team/SKILL.md' 'Self-Consistency|Tree of Thoughts' 'team migrated to cross-check (Verification) and Decision Making'
     Check-NotMatch '.claude/skills/pelizzai-module-design/SKILL.md' 'Tree of Thoughts|(?-i:\bToT\b)' 'codebase-design migrated to Decision Making (search with pruning)'
     Check-NotMatch '.claude/skills/pelizzai-execute/SKILL.md' 'comparison/ToT' 'execution-plans no longer cites ToT'

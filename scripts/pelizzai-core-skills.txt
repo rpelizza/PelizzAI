@@ -21,7 +21,6 @@ pelizzai-plan
 pelizzai-preferences
 pelizzai-prose
 pelizzai-quick-fix
-pelizzai-reasoning
 pelizzai-resume
 pelizzai-review
 pelizzai-router

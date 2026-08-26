@@ -263,8 +263,7 @@ and keep it local unless an external destination is requested.
 
 ## Integration
 
-Combines with `pelizzai-discovery` when there was design, `pelizzai-reasoning` for
-decomposition, `pelizzai-interview` for focal stress of a material residual assumption,
+Combines with `pelizzai-discovery` when there was design, `pelizzai-interview` for focal stress of a material residual assumption,
 `pelizzai-interface`/`pelizzai-security` as overlays, and `pelizzai-execute` for execution.
 
 ## Final instruction

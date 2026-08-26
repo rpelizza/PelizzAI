@@ -24,7 +24,7 @@ Use TDD when all of these are true:
 [ ] The automated test reduces regression risk and is more stable than the detail under test.
 ```
 
-Otherwise, use the strategy selected by `pelizzai-reasoning` and recorded in the plan:
+Otherwise, use the strategy recorded in the plan:
 
 | Effect | Correct strategy |
 | --- | --- |
@@ -95,8 +95,8 @@ and real seams) — confirm them; outside it, agree them here, with the vocabula
 `pelizzai-module-design`.
 
 While agreeing the seam, identify opportunities for deep modules (simple interface, robust
-implementation) using the vocabulary of `pelizzai-module-design` and `pelizzai-reasoning`'s
-*Structured Decomposition* to map behaviors and testability; in new design, this already comes from
+implementation) using the vocabulary of `pelizzai-module-design` and *structured decomposition* to map
+behaviors and testability; in new design, this already comes from
 `pelizzai-discovery`.
 
 If the needed seam does not exist, that is an architectural signal. Do not contort the test: record the gap and use `pelizzai-architecture` when it requires a design change.
@@ -232,7 +232,7 @@ Follow the triage in `pelizzai-diagnose`.
 - `pelizzai-interface` remains mandatory for UI even when component tests pass.
 - `pelizzai-verify` validates the complete result before any claim.
 
-**Reasoning — `pelizzai-reasoning`:**
+**Reasoning:**
 
 - Planning: list the behaviors with *Structured Decomposition* (behaviors, not implementation steps).
 - Unexpected red test or bug: `pelizzai-diagnose` triage before touching the code.

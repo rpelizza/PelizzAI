@@ -19,7 +19,7 @@ The coordination and delegation protocol is **the same in both modes**; only the
 **Announce on start**, in the conversation's language: that you are using the PelizzAI Team skill to coordinate a team of agents.
 
 <TEAM-MEMBER-STOP>
-If you were assigned as a **member** of a team (a teammate or a subagent executing a subtask), **do not invoke this skill** to create a sub-team. There are no nested teams. Execute your subtask, invoke `pelizzai-reasoning` to reason about it, **apply the domain skills pasted into your briefing** (they prevail over generic patterns) and the global layer `pelizzai-preferences`, and return the deliverable in the format agreed in your briefing. **Do not commit** — consolidation (commit) belongs to the coordinator, after the reviews; leave the work in the working tree.
+If you were assigned as a **member** of a team (a teammate or a subagent executing a subtask), **do not invoke this skill** to create a sub-team. There are no nested teams. Execute your subtask, **apply the domain skills pasted into your briefing** (they prevail over generic patterns) and the global layer `pelizzai-preferences`, and return the deliverable in the format agreed in your briefing. **Do not commit** — consolidation (commit) belongs to the coordinator, after the reviews; leave the work in the working tree.
 
 A member **produces artifacts** (spec, report, diff) as a **deliverable for the coordinator** — it does not run, on its own, flows that require user approval (`pelizzai-discovery`, `pelizzai-plan`). Those flows belong to the coordinator / the main session.
 
@@ -129,7 +129,7 @@ swap the ratified mode on your own.
 flowchart TD
     A[Task that calls for a team] --> B{Is a team worth it?}
     B -- No --> Z[Single session or pelizzai-subagents]
-    B -- Yes --> C[Decompose with pelizzai-reasoning]
+    B -- Yes --> C[Decompose into roles and contracts]
     C --> D{Claude Code with Agent Teams enabled?}
     D -- No --> S[Subagents Mode]
     D -- Yes --> E{Do members need to talk to each other?}
@@ -221,9 +221,9 @@ In Teammates Mode, this roster mirrors the **shared task list** (which has the s
 
 ---
 
-## Coordinator reasoning (pelizzai-reasoning)
+## Coordinator reasoning
 
-The coordinator **must** invoke `pelizzai-reasoning` for the planning and delegation phase. Recommended pipeline:
+The coordinator reasons deliberately through the planning and delegation phase. Recommended pipeline:
 
 ```text
 Structured Decomposition   (split into cohesive roles, contracts, and dependencies)
@@ -235,16 +235,16 @@ Structured Decomposition   (split into cohesive roles, contracts, and dependenci
 
 - Use **Constraint Satisfaction** when there are hard requirements, compatibility, security, or prohibitions that all members must respect.
 - For investigation, the coordinator runs **Root Cause Analysis** and distributes **competing hypotheses** among the members (each one defends/refutes a theory).
-- Load the dominant technique and only auxiliaries that fill distinct gaps, per
-  `pelizzai-reasoning`; do not distribute techniques by quota or as decorative roles.
+- Load the dominant technique and only auxiliaries that fill distinct gaps; do not distribute
+  techniques by quota or as decorative roles.
 
-Each **member** reasons too: the briefing instructs the member to invoke `pelizzai-reasoning` for their subtask (see the delegation protocol).
+Each **member** reasons too: the briefing names the technique that serves their subtask (see the delegation protocol).
 
 ---
 
 ## Team composition: role catalog
 
-Choose roles with boundaries that do not overlap. Common roles and the `pelizzai-reasoning` technique that usually serves them:
+Choose roles with boundaries that do not overlap. Common roles and the reasoning technique that usually serves them:
 
 **Implementation roles are SPECIALISTS by area.** Name the role by area (e.g.,
 `backend-implementer`, `frontend-implementer`, `data-implementer`) and paste into the briefing the
@@ -254,7 +254,7 @@ decides boundaries with the context the history would have given, instead of rea
 slice. Fronts remain **disjoint by file** (the anti-conflict invariant): the area defines the skill
 package the member receives; it does not widen the files they may write.
 
-| Role                          | Mandate                                                                    | Suggested primary technique (pelizzai-reasoning) |
+| Role                          | Mandate                                                                    | Suggested primary technique |
 | ----------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------- |
 | Investigator / Researcher     | Gather evidence, map the code, test a specific hypothesis                  | Root Cause Analysis                             |
 | Implementer (per front)       | Build a module/layer with its own, well-delimited files                    | Structured Decomposition                        |
@@ -291,10 +291,10 @@ Briefing for [member name] — role: [role named by AREA, e.g., backend-implemen
   whether a catalog domain skill belongs to the area, include it: the cost of including is lower
   than the cost of ignoring a project rule. If the front's area has no covering skill, say so and
   instruct the member to flag the gap in their return
-- Global layer: apply `pelizzai-preferences` and reason via `pelizzai-reasoning`; on
+- Global layer: apply `pelizzai-preferences`; on
   conflict, the DOMAIN SKILLS pasted above and the project rules PREVAIL over them
 - Dependencies: [what needs another member; what can start now]        (HARD-GATE 3)
-- Reasoning: suggested primary `pelizzai-reasoning` technique: [see the role catalog]
+- Reasoning: suggested primary technique: [see the role catalog]
 - Delivery contract: [EXACT format of the return — e.g., list of findings with
   severity and file:line; diff + test output; report with sections X/Y/Z]  (HARD-GATE 4)
 - Success criterion: [how the member itself knows it finished correctly]
@@ -374,7 +374,7 @@ Round N — convergence:   stop as soon as the positions stabilize.
 Caution: in Subagents there is NO continuity across rounds. Each round and each verifier is a
 NEW SPAWN, with no memory of the previous round and no access to the others' work — the coordinator
 must re-inject everything into the prompt. Cap the confrontation rounds (typically 1–2) and apply
-the effort budget from `pelizzai-reasoning`: more rounds only if they reduce real risk.
+the effort budget: more rounds only if they reduce real risk.
 ```
 
 - **Adversarial cross-check:** spawn **skeptical verifiers** whose only job is to try to **refute** the findings/implementations. Since the verifier is stateless, **paste into its prompt the artifact to refute**. Keep a finding only if it survives.
@@ -386,7 +386,7 @@ the effort budget from `pelizzai-reasoning`: more rounds only if they reduce rea
   review-package, or the shared directory transactional — which is why review, stage, commit,
   and cursor remain serialized by the coordinator.
 - **Task list:** it is **your** roster (there is no native shared list) — update it every round.
-- **Synthesis:** the coordinator integrates the deliverables and crosses the divergences with `pelizzai-reasoning` (`Evidence Synthesis`, with `Verification` as auxiliary).
+- **Synthesis:** the coordinator integrates the deliverables and crosses the divergences via *evidence synthesis*, with *verification* as auxiliary.
 
 > To delegate to a **single** isolated subagent (not a team), use the sibling skill `pelizzai-subagents` (the canonical home of that pattern).
 
@@ -407,7 +407,7 @@ Applies to both modes. The coordinator never concludes silently with a front lef
     (it neither forces nor ignores) — it never implements the front itself.
 ```
 
-Anchor the recovery in `pelizzai-reasoning`: `Critique and Refine` (fix a failed deliverable) and `Plan and Execute` (replan when the decomposition does not hold).
+Anchor the recovery in *critique and refine* (fix a failed deliverable) and *plan and execute* (replan when the decomposition does not hold).
 
 ---
 
@@ -423,7 +423,7 @@ Member results are **not** truth until they are cross-checked.
 - **Synthesis:** cross the deliverables with `Evidence Synthesis` and produce **one** delivery, making clear what is consensus, what was resolved divergence, and what remains open.
 - **Deadlock:** if the confrontation does **not** converge, the coordinator does **not** force an artificial consensus: it decides by the task's dominant criterion (invoking `Decision Making`) and, when the choice belongs to the user or the impact is high, **escalates via `pelizzai-interview`** — naming the gap, with the positions turned into 2–3 real options, the recommended one, and each one's trade-off.
 
-Apply the **effort budget** from `pelizzai-reasoning`: verification depth is proportional to the change's risk.
+Apply the **effort budget**: verification depth is proportional to the change's risk.
 
 ---
 
@@ -480,7 +480,7 @@ Apply the **effort budget** from `pelizzai-reasoning`: verification depth is pro
 
 ```text
 1. Assess whether a team adds real value. If not, use a single session or `pelizzai-subagents`.
-2. Decompose with `pelizzai-reasoning` (Structured Decomposition) into roles, contracts, and disjoint fronts.
+2. Decompose — *structured decomposition* — into roles, contracts, and disjoint fronts.
 3. Derive the number of members from the fronts and detect capability; choose the mode (Teammates vs. Subagents).
 4. Build the roster (the 5 HARD-GATE items per member) and write a self-contained briefing.
 5. Delegate (spawn), in parallel when independent, with user confirmation.
@@ -496,7 +496,6 @@ Apply the **effort budget** from `pelizzai-reasoning`: verification depth is pro
 
 **Combines with:**
 
-- `pelizzai-reasoning` — the coordinator's reasoning (decomposition, plan, synthesis, verification) and each member's; it is also where the `Verification` technique for closeout lives.
 - `pelizzai-preferences` — the global layer instructed in each member's briefing (domain skills prevail).
 - `pelizzai-subagents` — lightweight delegation to **one** isolated subagent (no team).
 - `pelizzai-router` / `pelizzai-execute` — where the `team` mode arrives from (setup gate); execution-plans defines the per-task cycle each front follows.

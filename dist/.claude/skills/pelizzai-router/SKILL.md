@@ -11,7 +11,7 @@ If you received a closed subtask, do not route again. Follow the briefing and es
 
 ## Purpose
 
-Produce the smallest route that solves the task safely. The router decides the **lifecycle**; `pelizzai-reasoning` decides the **heuristics** within each phase.
+Produce the smallest route that solves the task safely. The router decides the **lifecycle**; the head skill decides the **heuristics** within each phase.
 
 **Announce**, in the conversation's language: that you are using the PelizzAI Router skill to classify the task's effect, risk, and flow.
 
@@ -63,7 +63,7 @@ user's decision.
 
 ## Proposal analysis (whenever there is a non-trivial mutating effect)
 
-After deriving the envelope and BEFORE choosing the head skill, run a compact stress pass over the request — trigger the **Proposal Stress (Assumption Tracking applied)** routine from `pelizzai-reasoning` ([proposal-stress.md](../pelizzai-reasoning/techniques/proposal-stress.md)). Present in ≤6 bullets:
+After deriving the envelope and BEFORE choosing the head skill, run a compact stress pass over the request — trigger the **Proposal Stress** routine ([references/proposal-stress.md](references/proposal-stress.md)). Present in ≤6 bullets:
 
 - material assumptions that would need ratification to proceed;
 - gaps that change scope/UX/architecture/security/data;

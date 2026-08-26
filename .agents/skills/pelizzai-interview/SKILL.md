@@ -162,7 +162,7 @@ sequentially and stops when spec/plan can be approved without the LLM inventing 
 
 When the gap arrives flagged by the **Proposal analysis** — output of the **Proposal Stress
 (Assumption Tracking applied)** routine of `pelizzai-router`
-([proposal-stress.md](../pelizzai-reasoning/techniques/proposal-stress.md)) — go straight into
+([proposal-stress.md](../pelizzai-router/references/proposal-stress.md)) — go straight into
 focused stress on the material premises it pointed out: that analysis is the inventory; this
 interview is the resolution.
 
@@ -233,6 +233,6 @@ subagents, branch, or commit strategy.
 - `pelizzai-plan` — mandatory stress of the plan; an emergent decision becomes a question here.
 - `pelizzai-execute` / `pelizzai-loop` — destination of the stop for material doubt
   mid-execution (gap mode); `pelizzai-subagents` and `pelizzai-team` escalate to the coordinator.
-- `pelizzai-reasoning` — the Proposal analysis
-  ([proposal-stress.md](../pelizzai-reasoning/techniques/proposal-stress.md)) inventories the
+- `pelizzai-router` — the Proposal analysis
+  ([proposal-stress.md](../pelizzai-router/references/proposal-stress.md)) inventories the
   material premises this interview resolves.

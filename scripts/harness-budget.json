@@ -26,7 +26,7 @@
       ],
       "metadata": true,
       "head": [],
-      "ceilingBytes": 30387,
+      "ceilingBytes": 29993,
       "targetBytes": 20000
     },
     {
@@ -39,7 +39,7 @@
       ],
       "metadata": true,
       "head": [],
-      "ceilingBytes": 55274,
+      "ceilingBytes": 54807,
       "targetBytes": 24000
     },
     {
@@ -55,7 +55,7 @@
       "head": [
         ".claude/skills/pelizzai-quick-fix/SKILL.md"
       ],
-      "ceilingBytes": 75551,
+      "ceilingBytes": 75041,
       "targetBytes": 45000
     },
     {
@@ -71,7 +71,7 @@
       "head": [
         ".claude/skills/pelizzai-diagnose/SKILL.md"
       ],
-      "ceilingBytes": 82498,
+      "ceilingBytes": 81950,
       "targetBytes": 55000
     },
     {
@@ -87,7 +87,7 @@
       "head": [
         ".claude/skills/pelizzai-discovery/SKILL.md"
       ],
-      "ceilingBytes": 82227,
+      "ceilingBytes": 81760,
       "targetBytes": 60000
     },
     {
@@ -103,7 +103,7 @@
       "head": [
         ".claude/skills/pelizzai-plan/SKILL.md"
       ],
-      "ceilingBytes": 84193,
+      "ceilingBytes": 83686,
       "targetBytes": 60000
     },
     {
@@ -120,7 +120,7 @@
         ".claude/skills/pelizzai-execute/SKILL.md",
         ".claude/skills/pelizzai-execute/references/task-cycle.md"
       ],
-      "ceilingBytes": 125950,
+      "ceilingBytes": 125318,
       "targetBytes": 85000
     },
     {
@@ -136,7 +136,7 @@
       "head": [
         ".claude/skills/pelizzai-review/SKILL.md"
       ],
-      "ceilingBytes": 91221,
+      "ceilingBytes": 90643,
       "targetBytes": 60000
     }
   ],
@@ -160,15 +160,15 @@
     "budget": {
       "descriptionMaxWords": {
         "max": 30,
-        "allowed": 1
+        "allowed": 0
       },
       "skillMaxLines": {
         "max": 400,
-        "allowed": 4
+        "allowed": 3
       },
       "referenceTocAfterLines": {
         "max": 300,
-        "allowed": 18
+        "allowed": 3
       }
     }
   },

@@ -15,7 +15,7 @@ Give the harness the discipline of the **loop**: repeat the work cycle until del
 
 ## The macro loop is OODA
 
-**Macro** loops, in which reality can change between iterations, follow **OODA** (full technique: `pelizzai-reasoning` → [techniques/ooda.md](../pelizzai-reasoning/techniques/ooda.md)):
+**Macro** loops, in which reality can change between iterations, follow **OODA** (full technique: [references/ooda.md](references/ooda.md)):
 
 ```text
 OBSERVE — collect CURRENT reality: git, fresh test/lint/build output, review verdicts,
@@ -69,7 +69,7 @@ The loop only ends when the DoD is reached **and verified** (`pelizzai-verify`).
 
 Outside these five, do not ask permission for every already-approved mechanical step. Continuous
 execution is not decision autonomy: any new product choice triggers criterion 2. These five
-criteria are the canonical list; `techniques/ooda.md` points back to it.
+criteria are the canonical list; `references/ooda.md` points back to it.
 
 ---
 
@@ -82,7 +82,7 @@ Outside code execution, a "loop" is also a recurring pattern in the user's life 
 ## Integration
 
 - `pelizzai-execute` — drives the macro loop of plans with this lens (OODA + DoD + stop on doubt).
-- `pelizzai-reasoning` — the OODA (macro) and ReAct (micro) techniques live there; Verification confirms the DoD.
+- [references/ooda.md](references/ooda.md) — the full OODA technique; `pelizzai-verify` confirms the DoD.
 - `pelizzai-tdd` — micro-cycle for behavior when that is the selected strategy; does not make OODA mandatory.
 - `pelizzai-interview` — mandatory destination of the stop for material doubt.
 - `pelizzai-verify` — no loop exit without fresh evidence.

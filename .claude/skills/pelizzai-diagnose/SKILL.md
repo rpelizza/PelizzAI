@@ -144,7 +144,7 @@ the first product mutation, run the confirm and record the marker before it. Und
 briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route analyses and open no gates: apply the briefing and
 escalate to the coordinator whatever requires a decision.
 
-Choose the strategy by the nature of the change, per `pelizzai-reasoning`:
+Choose the strategy by the nature of the change:
 
 ```text
 - Behavioral bug with an automatable seam: red→green regression test via pelizzai-tdd.
@@ -224,7 +224,7 @@ User phrases that carry a diagnosis — decode and act, do not argue:
 
 **Routed by:** `pelizzai-router` (track `bug`).
 
-**Uses conditionally:** `pelizzai-reasoning` (selection above), `pelizzai-loop` (macro-loop across rounds only), [feedback-loops.md](references/feedback-loops.md), domain skills, `pelizzai-isolate`, `pelizzai-tdd` (automatable behavioral bug), `pelizzai-interface` (UI), `pelizzai-team` (read-only investigation of independent hypotheses), `pelizzai-interview` (the three-fix circuit breaker and any other material gap), `pelizzai-discovery` (when the interview reveals a structural problem), `pelizzai-verify`, `pelizzai-review`, and `pelizzai-finish`.
+**Uses conditionally:** `pelizzai-loop` (macro-loop across rounds only), [feedback-loops.md](references/feedback-loops.md), domain skills, `pelizzai-isolate`, `pelizzai-tdd` (automatable behavioral bug), `pelizzai-interface` (UI), `pelizzai-team` (read-only investigation of independent hypotheses), `pelizzai-interview` (the three-fix circuit breaker and any other material gap), `pelizzai-discovery` (when the interview reveals a structural problem), `pelizzai-verify`, `pelizzai-review`, and `pelizzai-finish`.
 
 For external APIs/libs, derive the version from manifests/lockfiles and consult Context7 before
 committing to a hypothesis; current official documentation is the fallback. For a missing seam, use

@@ -17,7 +17,7 @@ This skill is the PelizzAI harness's **skill authoring and maintenance engine**.
 **Announce on start**, in the conversation's language: that you are using the PelizzAI Writing Skills skill to create/maintain skills.
 
 <TEAM-MEMBER-STOP>
-If you are a **member** of a team (subagent/teammate) tasked with writing **one** domain skill, write only yours and return the draft to the coordinator — do not orchestrate the whole bootstrap or touch the catalog/ledger. Invoke `pelizzai-reasoning` for your subtask.
+If you are a **member** of a team (subagent/teammate) tasked with writing **one** domain skill, write only yours and return the draft to the coordinator — do not orchestrate the whole bootstrap or touch the catalog/ledger.
 </TEAM-MEMBER-STOP>
 
 ---
@@ -292,7 +292,6 @@ Once a skill is ready, you can **optimize the `description`** to improve trigger
 
 - `pelizzai-onboard` — calls this skill at bootstrap; the domain-skill creation engine lives here.
 - `pelizzai-team` — write many candidate skills in parallel; `pelizzai-subagents` for delegation to a single subagent.
-- `pelizzai-reasoning` — reasoning for authoring (Structured Decomposition) and maintenance (Critique and Refine, Evidence Synthesis).
 - `pelizzai-interview` / `pelizzai-discovery` — the new-project branch, before creating the first skills.
 - `pelizzai-prose` — write skill bodies with clarity.
 
