@@ -759,6 +759,29 @@ try {
                 Check ((Invoke-Writegate $wg @{ command = 'git commit -m "a > b"' } $wgTemp) -eq 0) "writegate does not mistake quoted text for a redirect ($leaf)"
             }
 
+            # -- Carve-out bypass regression (2026-08-26): `..` AFTER a directory link. --
+            # `pelizzai/link/../srcreal/app.ts` collapses LEXICALLY to pelizzai/srcreal/app.ts
+            # (metadata, allowed) while the OS resolves `link` first and lands the write on real
+            # product at the repo root. The physical walk must classify it as product and block.
+            New-Item -ItemType Directory -Path (Join-Path $wgTemp 'srcreal') -Force | Out-Null
+            New-Item -ItemType Directory -Path (Join-Path $wgTemp 'pelizzai') -Force | Out-Null
+            $wgLink = Join-Path $wgTemp 'pelizzai/link'
+            $wgLinkOk = $false
+            try { $null = New-Item -ItemType Junction -Path $wgLink -Target (Join-Path $wgTemp 'srcreal') -ErrorAction Stop; $wgLinkOk = $true } catch {
+                try { $null = New-Item -ItemType SymbolicLink -Path $wgLink -Target (Join-Path $wgTemp 'srcreal') -ErrorAction Stop; $wgLinkOk = $true } catch {}
+            }
+            if ($wgLinkOk) {
+                foreach ($wg in @($wgMjs, $wgPs1)) {
+                    $leaf = Split-Path -Leaf $wg
+                    Check -Condition ((Invoke-Writegate $wg @{ file_path = 'pelizzai/link/../srcreal/app.ts' } $wgTemp) -eq 2) -Name "writegate: '..' after a directory link cannot smuggle product into the metadata carve-out ($leaf)"
+                }
+                # Remove the reparse point ONLY - a recursive delete through a link follows it.
+                Remove-Item -LiteralPath $wgLink -Force
+            } else {
+                Write-Host 'SKIP: this environment cannot create links; the ..-after-link regression runs where it can.'
+            }
+            Remove-Item -LiteralPath (Join-Path $wgTemp 'pelizzai') -Recurse -Force
+
             git -C $wgTemp checkout -q -b feat/x  # task branch (not protected)
 
             # -- Rule B, missing-state.md matrix (2026-08-26 hardening) --
@@ -1108,7 +1131,7 @@ try {
     }
     $mjsDenial = Get-GuardrailStderr $hooks[0] 'git reset --hard'
     $ps1Denial = Get-GuardrailStderr $hooks[1] 'git reset --hard'
-    Check ($mjsDenial -ne '' -and $mjsDenial.Trim() -eq $ps1Denial.Trim()) 'guardrails: both legs emit an identical denial message' "mjs=$($mjsDenial.Trim() | Select-Object -First 1)"
+    Check -Condition ($mjsDenial -ne '' -and $mjsDenial -eq $ps1Denial) -Name 'guardrails: both legs emit an identical denial message' -Detail "mjs=$(($mjsDenial -split "`n")[0])"
 
     # Syntax and interface of the visual scripts.
     Run-Native { node --check .claude/hooks/pelizzai-guardrails.mjs } 'node parse guardrails'

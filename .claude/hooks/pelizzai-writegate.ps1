@@ -291,48 +291,45 @@ try {
   # it - stays LOGICAL. All in-root writes then looked outside the root and the hook failed OPEN.
   # Canonicalize via `pwd -P` on POSIX (Windows has no such split and stays untouched); anything
   # that cannot be resolved keeps its raw spelling (fail-open, as everywhere else in this file).
+  # Physical resolution with `..` applied AFTER the link resolution, never before: a lexical
+  # normalize collapses `pelizzai/link/../src` to `pelizzai/src` (metadata, allowed) while the OS
+  # resolves `link` first and lands the write on real product OUTSIDE pelizzai/ - a clean bypass
+  # of Rules A and B through the carve-out. Each component resolves against the PHYSICAL prefix
+  # built so far ($IsWindows is absent on Windows PowerShell 5.1 - the env check covers it);
+  # anything unresolvable keeps its raw spelling - fail-open, as everywhere else in this file.
   function Get-PhysicalPath([string]$p) {
     if (-not $p) { return $p }
-    # $IsWindows is absent on Windows PowerShell 5.1 - the env check keeps the branch true there.
-    if ($env:OS -eq 'Windows_NT' -or $IsWindows) {
-      # Windows: resolve junctions/symlinks component-by-component so both hook variants share one
-      # policy (the Node leg resolves them through realpathSync). Anything unresolvable keeps its
-      # raw spelling - fail-open, as everywhere else in this file.
-      try {
-        $full = [System.IO.Path]::GetFullPath($p)
-        $qualifier = [System.IO.Path]::GetPathRoot($full)
-        $rest = @($full.Substring($qualifier.Length) -split '[\\/]' | Where-Object { $_ })
-        $cur = $qualifier
-        foreach ($seg in $rest) {
-          $next = Join-Path $cur $seg
-          if (Test-Path -LiteralPath $next) {
-            $item = Get-Item -LiteralPath $next -Force -ErrorAction SilentlyContinue
-            while ($item -and $item.LinkType) {
-              $t = $item.ResolveLinkTarget($true) # .NET 6+; a miss falls to the catch below
-              if (-not $t) { break }
-              $item = $t
-            }
-            $cur = if ($item) { $item.FullName } else { $next }
-          } else {
-            $cur = $next # not on disk yet - keep building on the resolved prefix
-          }
-        }
-        return $cur
-      } catch { return $p }
-    }
     try {
-      if (Test-Path -LiteralPath $p) {
-        $out = & sh -c 'if [ -d "$0" ]; then cd "$0" && pwd -P; else cd "$(dirname "$0")" && printf "%s/%s\n" "$(pwd -P)" "$(basename "$0")"; fi' $p 2>$null
-        if ($LASTEXITCODE -eq 0 -and $out) { return ([string]($out | Select-Object -Last 1)).Trim() }
-      } else {
-        $parent = Split-Path -Parent $p
-        if ($parent -and (Test-Path -LiteralPath $parent)) {
-          $out = & sh -c 'cd "$0" && pwd -P' $parent 2>$null
-          if ($LASTEXITCODE -eq 0 -and $out) { return (Join-Path ([string]($out | Select-Object -Last 1)).Trim() (Split-Path -Leaf $p)) }
+      $isWin = ($env:OS -eq 'Windows_NT' -or $IsWindows)
+      $qualifier = [System.IO.Path]::GetPathRoot($p)
+      if (-not $qualifier) { return $p } # relative input never reaches here; the caller joins cwd first
+      $rest = @($p.Substring($qualifier.Length) -split '[\\/]' | Where-Object { $_ -and $_ -ne '.' })
+      $cur = $qualifier
+      foreach ($seg in $rest) {
+        if ($seg -eq '..') {
+          $parent = Split-Path -Parent $cur
+          if ($parent) { $cur = $parent }
+          continue
+        }
+        $next = Join-Path $cur $seg
+        if (-not (Test-Path -LiteralPath $next)) { $cur = $next; continue } # not on disk yet
+        if ($isWin) {
+          $item = Get-Item -LiteralPath $next -Force -ErrorAction SilentlyContinue
+          while ($item -and $item.LinkType) {
+            $t = $item.ResolveLinkTarget($true) # .NET 6+; a miss falls to the catch below
+            if (-not $t) { break }
+            $item = $t
+          }
+          $cur = if ($item) { $item.FullName } else { $next }
+        } elseif (Test-Path -LiteralPath $next -PathType Container) {
+          $out = & sh -c 'cd -P -- "$0" && pwd -P' $next 2>$null
+          $cur = if ($LASTEXITCODE -eq 0 -and $out) { ([string]($out | Select-Object -Last 1)).Trim() } else { $next }
+        } else {
+          $cur = $next # POSIX file component: kept as spelled (dir prefix already physical)
         }
       }
-    } catch {}
-    return $p
+      return $cur
+    } catch { return $p }
   }
   $gitRoot = Get-PhysicalPath $gitRoot
   $cwd = Get-PhysicalPath $cwd # physical cwd, so relative targets land on the same spelling as gitRoot
@@ -340,8 +337,9 @@ try {
   # Only targets INSIDE the root matter; scratchpad/temp outside the root never blocks.
   $inRoot = [System.Collections.Generic.List[string]]::new()
   foreach ($t in $targets) {
+    # No GetFullPath here: it would collapse `..` lexically BEFORE the link walk - the exact
+    # bypass Get-PhysicalPath exists to close. The walk owns the whole normalization.
     $abs = if ([System.IO.Path]::IsPathRooted($t)) { $t } else { Join-Path $cwd $t }
-    try { $abs = [System.IO.Path]::GetFullPath($abs) } catch { continue }
     $abs = Get-PhysicalPath $abs
     if (Test-Inside $abs $gitRoot) { [void]$inRoot.Add($abs) }
   }
@@ -360,12 +358,12 @@ try {
   # product or commit loophole - product (outside pelizzai/) stays blocked by this same Rule A;
   # the metadata is only COMMITTED in the first commit of the new task branch (the flow never
   # requires a commit on a protected branch); and pelizzai-guardrails keeps blocking destructive
-  # git. LIMIT (symlink): the metadata-vs-product classification is by PATH - GetFullPath normalizes
-  # `..` (which is why `pelizzai/../src` correctly counts as product) but does NOT follow symlinks.
-  # A symlink inside pelizzai/ pointing outside (e.g. `pelizzai/link -> ../src`) could make a real
-  # product write be read as metadata and allowed on a protected branch. The carve-out is NOT
-  # airtight against symlinks; the compensating controls remain: pelizzai-guardrails blocks
-  # destructive git and human review sees the real target.
+  # git. LIMIT (symlink): the classification is by PHYSICAL path - Get-PhysicalPath follows
+  # directory links component-by-component and applies `..` on the RESOLVED parent, so both
+  # `pelizzai/../src` and `pelizzai/link/../src` (link -> product) correctly count as product.
+  # Residual limits: a link created BETWEEN this check and the write (TOCTOU) is not seen, and
+  # the POSIX walk keeps a final FILE-symlink component as spelled; the compensating controls
+  # remain - pelizzai-guardrails blocks destructive git and human review sees the real target.
   $branch = Invoke-Git $cwd @('branch', '--show-current') # '' = detached HEAD (or no branch)
   $isProtected = ($branch -eq '') -or ($PROTECTED -contains $branch)
   if (-not $isProtected) {

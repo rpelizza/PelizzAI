@@ -64,7 +64,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, realpathSync } from 'node:fs';
-import { join, resolve, isAbsolute, dirname, basename } from 'node:path';
+import { join, parse, isAbsolute, dirname, basename } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 
@@ -131,6 +131,27 @@ function realpathOr(p) {
   } catch {
     return p;
   }
+}
+
+// `..` must be applied AFTER the link resolution, never before: a lexical normalize collapses
+// `pelizzai/link/../src` to `pelizzai/src` (metadata, allowed) while the OS resolves `link`
+// first and lands the write on real product OUTSIDE pelizzai/ — a clean bypass of Rules A and
+// B through the carve-out. So each component is resolved against the PHYSICAL path built so
+// far, and `..` climbs the resolved parent. `baseDir` must already be physical.
+function physicalResolve(baseDir, target) {
+  const abs = isAbsolute(target);
+  const root = abs ? parse(target).root : '';
+  let cur = abs ? realpathOr(root) : baseDir;
+  const rest = abs ? target.slice(root.length) : target;
+  for (const seg of rest.split(/[\\/]+/)) {
+    if (!seg || seg === '.') continue;
+    if (seg === '..') {
+      cur = dirname(cur);
+      continue;
+    }
+    cur = realpathOr(join(cur, seg)); // resolves a link component; a not-yet-existing one appends
+  }
+  return cur;
 }
 
 // child is the root itself or is INSIDE it.
@@ -340,8 +361,7 @@ function main() {
 
   // Only targets INSIDE the root matter; scratchpad/temp outside the root never blocks.
   const inRoot = targets
-    .map((t) => (isAbsolute(t) ? t : join(cwd, t)))
-    .map((t) => realpathOr(resolve(t)))
+    .map((t) => physicalResolve(cwd, t))
     .filter((t) => eqOrInside(t, gitRoot));
   if (inRoot.length === 0) return 0;
 
@@ -358,12 +378,12 @@ function main() {
   // product or commit loophole — product (outside pelizzai/) stays blocked by this same Rule A;
   // the metadata is only COMMITTED in the first commit of the new task branch (the flow never
   // requires a commit on a protected branch); and pelizzai-guardrails keeps blocking destructive
-  // git. LIMIT (symlink): the metadata-vs-product classification is by PATH — resolve() normalizes
-  // `..` (which is why `pelizzai/../src` correctly counts as product) but does NOT follow symlinks.
-  // A symlink inside pelizzai/ pointing outside (e.g. `pelizzai/link -> ../src`) could make a real
-  // product write be read as metadata and allowed on a protected branch. The carve-out is NOT
-  // airtight against symlinks; the compensating controls remain: pelizzai-guardrails blocks
-  // destructive git and human review sees the real target.
+  // git. LIMIT (symlink): the classification is by PHYSICAL path — physicalResolve follows
+  // directory links component-by-component and applies `..` on the RESOLVED parent, so both
+  // `pelizzai/../src` and `pelizzai/link/../src` (link -> product) correctly count as product.
+  // Residual limit: a link created BETWEEN this check and the actual write (TOCTOU) is not seen;
+  // the compensating controls remain — pelizzai-guardrails blocks destructive git and human
+  // review sees the real target.
   const branch = git(cwd, ['branch', '--show-current']); // '' = detached HEAD (or no branch)
   let isProtected = branch === '' || PROTECTED.includes(branch);
   if (!isProtected) {
