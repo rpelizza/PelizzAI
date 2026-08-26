@@ -7,7 +7,7 @@ Use this template when dispatching a spec document reviewer subagent or teammate
 **Invoke after:** The specification exists as a file in the consumer or as native content in
 source mode. Do not create `pelizzai/specs/` just to use this prompt.
 
-```
+```text
 Task tool (general-purpose):
   description: "Review spec document"
   prompt: |

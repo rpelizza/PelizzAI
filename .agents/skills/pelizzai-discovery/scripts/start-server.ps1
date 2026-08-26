@@ -101,7 +101,9 @@ for ($i = 0; $i -lt 50; $i++) {
             Start-Sleep -Milliseconds 100
         }
         if (-not $alive) {
-            $retry = "$scriptDir\start-server.ps1$(if ($ProjectDir) { " -ProjectDir $ProjectDir" }) -BindHost $BindHost -UrlHost $UrlHost -IdleTimeoutMinutes $IdleTimeoutMinutes -Foreground"
+            # Quoted paths + call operator, or a path with spaces splits into broken arguments.
+            $projArg = if ($ProjectDir) { ' -ProjectDir "' + $ProjectDir + '"' } else { '' }
+            $retry = '& "' + $scriptDir + '\start-server.ps1"' + $projArg + " -BindHost $BindHost -UrlHost $UrlHost -IdleTimeoutMinutes $IdleTimeoutMinutes -Foreground"
             Write-Output "{`"error`": `"Server started but was killed. Retry in a persistent terminal with: $retry`"}"
             exit 1
         }

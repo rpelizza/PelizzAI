@@ -30,14 +30,17 @@ IDLE_TIMEOUT_MINUTES="240"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --project-dir)
+      [[ $# -ge 2 && -n "$2" ]] || { echo '{"error": "--project-dir requires a value"}'; exit 1; }
       PROJECT_DIR="$2"
       shift 2
       ;;
     --host)
+      [[ $# -ge 2 && -n "$2" ]] || { echo '{"error": "--host requires a value"}'; exit 1; }
       BIND_HOST="$2"
       shift 2
       ;;
     --url-host)
+      [[ $# -ge 2 && -n "$2" ]] || { echo '{"error": "--url-host requires a value"}'; exit 1; }
       URL_HOST="$2"
       shift 2
       ;;
