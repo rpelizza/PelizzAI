@@ -63,7 +63,7 @@
  * On fleets without Node, use the PowerShell variant pelizzai-writegate.ps1 (identical behavior).
  */
 
-import { readFileSync, writeFileSync, existsSync, realpathSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, realpathSync, statSync } from 'node:fs';
 import { join, parse, isAbsolute, dirname, basename } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
@@ -381,9 +381,9 @@ function main() {
   // git. LIMIT (symlink): the classification is by PHYSICAL path — physicalResolve follows
   // directory links component-by-component and applies `..` on the RESOLVED parent, so both
   // `pelizzai/../src` and `pelizzai/link/../src` (link -> product) correctly count as product.
-  // Residual limit: a link created BETWEEN this check and the actual write (TOCTOU) is not seen;
-  // the compensating controls remain — pelizzai-guardrails blocks destructive git and human
-  // review sees the real target.
+  // Residual limit: a link created BETWEEN this check and the actual write (TOCTOU) is not
+  // seen; the compensating controls remain — pelizzai-guardrails blocks destructive git and
+  // human review sees the real target.
   const branch = git(cwd, ['branch', '--show-current']); // '' = detached HEAD (or no branch)
   let isProtected = branch === '' || PROTECTED.includes(branch);
   if (!isProtected) {
@@ -420,10 +420,19 @@ function main() {
     // here locks out no legitimate flow: ratifying the gate creates the file. The fail-open +
     // warn survives ONLY where it is honest — a repo with no trace of the harness at all
     // (e.g. the hook registered off-label in global settings).
+    // DIRECTORIES only: a repo that happens to carry a regular FILE named `pelizzai` is not a
+    // harness footprint, and reading it as one would hard-block an unrelated project.
+    const isDir = (p) => {
+      try {
+        return statSync(p).isDirectory();
+      } catch {
+        return false;
+      }
+    };
     const harnessPresent =
-      existsSync(join(gitRoot, 'pelizzai')) ||
-      existsSync(join(gitRoot, '.claude', 'skills', 'pelizzai-core')) ||
-      existsSync(join(gitRoot, '.agents', 'skills', 'pelizzai-core'));
+      isDir(join(gitRoot, 'pelizzai')) ||
+      isDir(join(gitRoot, '.claude', 'skills', 'pelizzai-core')) ||
+      isDir(join(gitRoot, '.agents', 'skills', 'pelizzai-core'));
     if (harnessPresent) {
       return block(
         'this consumer carries the harness but pelizzai/data/state.md does not exist — the kickoff ' +

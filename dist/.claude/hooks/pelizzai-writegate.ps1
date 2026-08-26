@@ -325,7 +325,20 @@ try {
           $out = & sh -c 'cd -P -- "$0" && pwd -P' $next 2>$null
           $cur = if ($LASTEXITCODE -eq 0 -and $out) { ([string]($out | Select-Object -Last 1)).Trim() } else { $next }
         } else {
-          $cur = $next # POSIX file component: kept as spelled (dir prefix already physical)
+          # POSIX file component: resolve a symlink CHAIN with plain readlink (readlink -f is not
+          # portable to older macOS), physicalizing each hop's parent via cd -P. Without this,
+          # `pelizzai/alias -> src/app.ts` stayed spelled as metadata while the OS writes product
+          # - the file-symlink twin of the ..-after-link bypass. A plain file walks zero hops.
+          $out = & sh -c 'p="$0"; i=0
+            while [ -L "$p" ] && [ "$i" -lt 40 ]; do
+              t=$(readlink -- "$p") || break
+              case "$t" in /*) p="$t";; *) p="$(dirname -- "$p")/$t";; esac
+              d=$(cd -P -- "$(dirname -- "$p")" 2>/dev/null && pwd -P) || break
+              p="$d/$(basename -- "$p")"
+              i=$((i+1))
+            done
+            printf "%s\n" "$p"' $next 2>$null
+          $cur = if ($LASTEXITCODE -eq 0 -and $out) { ([string]($out | Select-Object -Last 1)).Trim() } else { $next }
         }
       }
       return $cur
@@ -361,9 +374,9 @@ try {
   # git. LIMIT (symlink): the classification is by PHYSICAL path - Get-PhysicalPath follows
   # directory links component-by-component and applies `..` on the RESOLVED parent, so both
   # `pelizzai/../src` and `pelizzai/link/../src` (link -> product) correctly count as product.
-  # Residual limits: a link created BETWEEN this check and the write (TOCTOU) is not seen, and
-  # the POSIX walk keeps a final FILE-symlink component as spelled; the compensating controls
-  # remain - pelizzai-guardrails blocks destructive git and human review sees the real target.
+  # Residual limit: a link created BETWEEN this check and the write (TOCTOU) is not seen; the
+  # compensating controls remain - pelizzai-guardrails blocks destructive git and human review
+  # sees the real target.
   $branch = Invoke-Git $cwd @('branch', '--show-current') # '' = detached HEAD (or no branch)
   $isProtected = ($branch -eq '') -or ($PROTECTED -contains $branch)
   if (-not $isProtected) {
@@ -398,9 +411,11 @@ try {
     # BEFORE the first product write and writing pelizzai/data/state.md is always allowed, so
     # blocking here locks out no legitimate flow: ratifying the gate creates the file. The
     # fail-open + warn survives ONLY where it is honest - a repo with no trace of the harness.
-    $harnessPresent = (Test-Path -LiteralPath (Join-Path $gitRoot 'pelizzai')) -or
-      (Test-Path -LiteralPath (Join-Path $gitRoot '.claude/skills/pelizzai-core')) -or
-      (Test-Path -LiteralPath (Join-Path $gitRoot '.agents/skills/pelizzai-core'))
+    # DIRECTORIES only: a repo carrying a regular FILE named `pelizzai` is not a harness
+    # footprint, and reading it as one would hard-block an unrelated project.
+    $harnessPresent = (Test-Path -LiteralPath (Join-Path $gitRoot 'pelizzai') -PathType Container) -or
+      (Test-Path -LiteralPath (Join-Path $gitRoot '.claude/skills/pelizzai-core') -PathType Container) -or
+      (Test-Path -LiteralPath (Join-Path $gitRoot '.agents/skills/pelizzai-core') -PathType Container)
     if ($harnessPresent) {
       Invoke-Block 'this consumer carries the harness but pelizzai/data/state.md does not exist - the kickoff gate never ran. Run the kickoff/post-plan gate WITH the user - isolation, execution mode, and commit strategy -, record "kickoff: ratified" in pelizzai/data/state.md (writes under pelizzai/ are always allowed and create the file), and then write the product.'
     }

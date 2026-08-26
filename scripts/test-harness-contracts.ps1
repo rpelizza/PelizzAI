@@ -775,17 +775,47 @@ try {
                 # disk, which turned this regression into a false FAIL and aborted the suite.
                 & sh -c 'ln -s "$0" "$1"' (Join-Path $wgTemp 'srcreal') $wgLink 2>$null
             }
-            # VERIFIED existence, never inferred from an exception path.
+            # File-symlink twin of the same bypass: pelizzai/alias -> srcreal/app2.ts spells as
+            # metadata while the OS writes product. Both legs must resolve it and block.
+            Set-Content -LiteralPath (Join-Path $wgTemp 'srcreal/app2.ts') -Value 'x' -Encoding utf8
+            $wgAlias = Join-Path $wgTemp 'pelizzai/alias'
+            if ($env:OS -eq 'Windows_NT' -or $IsWindows) {
+                try { $null = New-Item -ItemType SymbolicLink -Path $wgAlias -Target (Join-Path $wgTemp 'srcreal/app2.ts') -ErrorAction Stop } catch {}
+            } else {
+                & sh -c 'ln -s "$0" "$1"' (Join-Path $wgTemp 'srcreal/app2.ts') $wgAlias 2>$null
+            }
+
+            # VERIFIED existence, never inferred from an exception path. A silent SKIP on CI would
+            # let the suite go green without ever proving the bypass is closed - on CI a missing
+            # link capability is a FAILURE; the SKIP is for local machines without the privilege.
+            $onCI = [bool]$env:CI
             if (Test-Path -LiteralPath $wgLink) {
                 foreach ($wg in @($wgMjs, $wgPs1)) {
                     $leaf = Split-Path -Leaf $wg
                     Check -Condition ((Invoke-Writegate $wg @{ file_path = 'pelizzai/link/../srcreal/app.ts' } $wgTemp) -eq 2) -Name "writegate: '..' after a directory link cannot smuggle product into the metadata carve-out ($leaf)"
                 }
-                # Remove the reparse point/link ONLY - a recursive delete through a link follows it.
-                if ($env:OS -eq 'Windows_NT' -or $IsWindows) { Remove-Item -LiteralPath $wgLink -Force -ErrorAction SilentlyContinue }
-                else { & sh -c 'rm -- "$0"' $wgLink 2>$null }
+            } elseif ($onCI) {
+                Check -Condition $false -Name 'writegate: CI must be able to create the directory link for the ..-after-link regression'
             } else {
                 Write-Host 'SKIP: this environment cannot create links; the ..-after-link regression runs where it can.'
+            }
+            if (Test-Path -LiteralPath $wgAlias) {
+                foreach ($wg in @($wgMjs, $wgPs1)) {
+                    $leaf = Split-Path -Leaf $wg
+                    Check -Condition ((Invoke-Writegate $wg @{ file_path = 'pelizzai/alias' } $wgTemp) -eq 2) -Name "writegate: a file symlink under pelizzai/ pointing at product is classified as product ($leaf)"
+                }
+            } elseif ($onCI -and -not ($env:OS -eq 'Windows_NT' -or $IsWindows)) {
+                # Windows CI may legitimately lack the file-symlink privilege; POSIX never does.
+                Check -Condition $false -Name 'writegate: POSIX CI must be able to create the file symlink for the alias regression'
+            } else {
+                Write-Host 'SKIP: this environment cannot create file symlinks; the alias regression runs where it can.'
+            }
+            # Remove the reparse points/links ONLY - a recursive delete through a link follows it.
+            foreach ($lnk in @($wgLink, $wgAlias)) {
+                if (Test-Path -LiteralPath $lnk) {
+                    if ($env:OS -eq 'Windows_NT' -or $IsWindows) { Remove-Item -LiteralPath $lnk -Force -ErrorAction SilentlyContinue }
+                    else { & sh -c 'rm -- "$0"' $lnk 2>$null }
+                }
             }
             Remove-Item -LiteralPath (Join-Path $wgTemp 'pelizzai') -Recurse -Force -ErrorAction SilentlyContinue
 
@@ -798,6 +828,15 @@ try {
                 $leaf = Split-Path -Leaf $wg
                 Check ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 0) "writegate: no state.md and no harness footprint fails open ($leaf)"
             }
+            # A regular FILE named `pelizzai` is NOT a footprint — an unrelated repo carrying one
+            # must keep the fail-open, or Rule B would hard-block a project that never opted in.
+            Set-Content -LiteralPath (Join-Path $wgTemp 'pelizzai') -Value 'not a harness' -Encoding utf8
+            foreach ($wg in @($wgMjs, $wgPs1)) {
+                $leaf = Split-Path -Leaf $wg
+                Check -Condition ((Invoke-Writegate $wg @{ file_path = 'src/app.ts' } $wgTemp) -eq 0) -Name "writegate: a regular file named pelizzai is not a harness footprint ($leaf)"
+            }
+            Remove-Item -LiteralPath (Join-Path $wgTemp 'pelizzai') -Force
+
             # A harness footprint (here: the pelizzai/ dir) with NO state.md means the kickoff gate
             # never ran — the product write BLOCKS instead of warning. This is the gap the trigger
             # tests exposed: an agent skipped the compact confirm and edited product right through
