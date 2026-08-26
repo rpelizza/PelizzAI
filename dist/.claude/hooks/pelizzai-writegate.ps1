@@ -242,7 +242,7 @@ function Get-ShellTargets([string]$command) {
 
 # Blocks: reason + safe path on stderr and exit 2.
 function Invoke-Block([string]$reason) {
-  [Console]::Error.WriteLine("PelizzAI writegate: write blocked - $reason")
+  [Console]::Error.WriteLine("PelizzAI writegate: write redirected - $reason")
   [Console]::Error.WriteLine('(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, isolate via pelizzai-isolate, ratify the gate, or disable the hook in .claude/settings.json.)')
   exit 2
 }

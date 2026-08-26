@@ -178,9 +178,9 @@ function main() {
     for (const rule of RULES) {
       if (rule.test(seg)) {
         process.stderr.write(
-          `PelizzAI guardrails: command blocked — ${rule.name}.\n` +
+          `PelizzAI guardrails: command redirected — ${rule.name}.\n` +
             `Why: ${rule.why}\n` +
-            `Safe path: ${rule.safe}\n` +
+            `Redirected to: ${rule.safe}\n` +
             `(Opt-in git guard hook. If the user EXPLICITLY asked for this operation, ` +
             `ask them to run it manually or to disable the hook in .claude/settings.json.)\n`
         );
