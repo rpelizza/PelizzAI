@@ -292,8 +292,34 @@ try {
   # Canonicalize via `pwd -P` on POSIX (Windows has no such split and stays untouched); anything
   # that cannot be resolved keeps its raw spelling (fail-open, as everywhere else in this file).
   function Get-PhysicalPath([string]$p) {
-    # $IsWindows is absent on Windows PowerShell 5.1 - the env check keeps the guard true there.
-    if ($env:OS -eq 'Windows_NT' -or $IsWindows -or -not $p) { return $p }
+    if (-not $p) { return $p }
+    # $IsWindows is absent on Windows PowerShell 5.1 - the env check keeps the branch true there.
+    if ($env:OS -eq 'Windows_NT' -or $IsWindows) {
+      # Windows: resolve junctions/symlinks component-by-component so both hook variants share one
+      # policy (the Node leg resolves them through realpathSync). Anything unresolvable keeps its
+      # raw spelling - fail-open, as everywhere else in this file.
+      try {
+        $full = [System.IO.Path]::GetFullPath($p)
+        $qualifier = [System.IO.Path]::GetPathRoot($full)
+        $rest = @($full.Substring($qualifier.Length) -split '[\\/]' | Where-Object { $_ })
+        $cur = $qualifier
+        foreach ($seg in $rest) {
+          $next = Join-Path $cur $seg
+          if (Test-Path -LiteralPath $next) {
+            $item = Get-Item -LiteralPath $next -Force -ErrorAction SilentlyContinue
+            while ($item -and $item.LinkType) {
+              $t = $item.ResolveLinkTarget($true) # .NET 6+; a miss falls to the catch below
+              if (-not $t) { break }
+              $item = $t
+            }
+            $cur = if ($item) { $item.FullName } else { $next }
+          } else {
+            $cur = $next # not on disk yet - keep building on the resolved prefix
+          }
+        }
+        return $cur
+      } catch { return $p }
+    }
     try {
       if (Test-Path -LiteralPath $p) {
         $out = & sh -c 'if [ -d "$0" ]; then cd "$0" && pwd -P; else cd "$(dirname "$0")" && printf "%s/%s\n" "$(pwd -P)" "$(basename "$0")"; fi' $p 2>$null

@@ -32,8 +32,9 @@ at the skill's internal gate:
 - with discovery/plan → propose the spike at the discovery gate (`pelizzai-discovery`) or at the post-plan setup gate;
 - writing track without a plan → include the spike in the head skill's kickoff confirm.
 
-Recommend and wait: "may I spend `<timebox>` on a throwaway spike to answer `<question>`?
-destination: `<delete|absorb|turn into a task>`". Without a "yes", do not write the experiment.
+Recommend and wait, in the conversation's language (the quoted shape below is the CONTENT, not the
+wording): ask whether you may spend `<timebox>` on a throwaway spike to answer `<question>`, with
+`destination: <delete|absorb|turn into a task>` named. Without a "yes", do not write the experiment.
 
 ## Spike route (head skill)
 

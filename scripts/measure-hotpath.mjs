@@ -147,8 +147,10 @@ const declared = new Set([
 // class the Set fix above closed — so the same remedy: a missing or malformed entry fails the build.
 for (const entry of budget.onDemand ?? []) {
   const p = typeof entry === 'string' ? entry : entry?.path;
-  if (!p) {
-    missing.push(`onDemand entry ${JSON.stringify(entry)} has no path`);
+  if (typeof p !== 'string' || p === '') {
+    // A truthy non-string path would reach join() and throw, killing the run before the
+    // diagnostic — the budget being malformed is a budget failure, not a crash.
+    missing.push(`onDemand entry ${JSON.stringify(entry)} has no usable path`);
     continue;
   }
   if (!existsSync(join(root, p))) {

@@ -178,7 +178,7 @@ function main() {
     for (const rule of RULES) {
       if (rule.test(seg)) {
         process.stderr.write(
-          `PelizzAI guardrails: command redirected — ${rule.name}.\n` +
+          `PelizzAI guardrails: command redirected - ${rule.name}.\n` +
             `Why: ${rule.why}\n` +
             `Redirected to: ${rule.safe}\n` +
             `(Opt-in git guard hook. If the user EXPLICITLY asked for this operation, ` +

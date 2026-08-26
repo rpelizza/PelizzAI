@@ -18,10 +18,13 @@ action until the design has been presented and the user has approved it. **This 
 projects, regardless of apparent simplicity** — the design can be short (a few sentences for a
 truly simple scope), but it must be presented and approved.
 
-The only exit lies before this skill: a pinpoint fix and a `bounded` lane already specified by the user
-are resolved by `pelizzai-router` BEFORE discovery (see Preconditions). Once inside
-this phase, the rule holds in full — "too simple to need design" is not a
-justification; it is the anti-pattern the rule exists to block.
+Two exits exist, both owned by the USER, never by the classifier: (1) before this skill — a
+pinpoint fix and a `bounded` lane already specified by the user are resolved by `pelizzai-router`
+BEFORE discovery (see Preconditions); (2) an EXPLICIT user waiver of the design spec in
+`standard`/`exploratory`, recorded as `spec: explicitly waived <YYYY-MM-DD>` in the state (or the
+native execution record) — greenfield never uses it. Once inside this phase with neither exit,
+the rule holds in full — "too simple to need design" is not a justification; it is the
+anti-pattern the rule exists to block.
 </HARD-GATE>
 
 ## Preconditions

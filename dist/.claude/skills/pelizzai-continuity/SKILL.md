@@ -1,6 +1,6 @@
 ---
 name: pelizzai-continuity
-description: "Use at a phase edge — handing work to a new session, harness, or teammate, or forking a side workstream. Minimal verifiable context; compaction continues same-session work."
+description: "Use at a phase edge or when asked to continue in a new session, save context, or hand work to a teammate or another harness. Compaction continues same-session work."
 ---
 
 # PelizzAI Continuity
@@ -16,7 +16,10 @@ inventing state that Git can prove.
 
 At a real phase boundary (a phase just ended and the next is about to start), read
 [references/phase-boundaries.md](references/phase-boundaries.md) and walk its five moves in order —
-continue, clear, handoff, subagent, compact; the first honest yes wins. The quick form:
+continue, clear, handoff, subagent, compact; the first honest yes is the RECOMMENDATION, presented
+with its one-line why for the user to ratify before it is applied — a boundary move can change
+route, scope, or execution mode, and those are never chosen in silence. A material gap at the
+boundary stops and goes to `pelizzai-interview`. The quick form:
 
 ```text
 same mission + same direction → native compaction/continuation

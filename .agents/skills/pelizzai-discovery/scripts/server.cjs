@@ -426,6 +426,14 @@ function startServer() {
 		);
 		watcher.close();
 		clearInterval(lifecycleCheck);
+		// server.close() never closes upgraded WebSocket sockets: with a browser still connected the
+		// callback would not run, leaving the process alive after its pidfile was removed above —
+		// and stop-server would then report not_running for a live server. Destroy them first,
+		// and keep a hard exit as the backstop in case close still stalls.
+		for (const socket of clients) socket.destroy();
+		clients.clear();
+		const failsafe = setTimeout(() => process.exit(0), 2000);
+		failsafe.unref();
 		server.close(() => process.exit(0));
 	}
 

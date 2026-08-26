@@ -21,7 +21,7 @@ if [[ -f "$PID_FILE" ]]; then
 
   # A stale pidfile after PID reuse would aim the kill at an unrelated process. Only signal a
   # PID whose command line still looks like this server; otherwise just clean the stale file.
-  if ! ps -p "$pid" -o args= 2>/dev/null | grep -q 'server\.cjs'; then
+  if ! ps -p "$pid" -o args= 2>/dev/null | grep -Eq '(^|[/ ])server\.cjs( |$)'; then
     rm -f "$PID_FILE"
     echo '{"status": "not_running", "note": "stale pidfile removed"}'
     exit 0

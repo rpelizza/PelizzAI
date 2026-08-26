@@ -56,7 +56,7 @@ head skill consolidates with the others **before** the final review. The protect
 `pelizzai-isolate` applies: never commit to `main`/`master`/`develop`/`dev` or to the
 actual discovered default.
 
-Finish-task never generates or fixes documentation: after the seal it is too late to write there.
+`pelizzai-finish` never generates or fixes documentation: after the seal it is too late to write there.
 What it does is the safety-net check — if a documentable surface got through without this skill, it
 offers **once** to return the delivery to the cycle (the seal falls and the doc becomes validated
 content again, with the final review redone). Informed refusal ships without docs; the net does not

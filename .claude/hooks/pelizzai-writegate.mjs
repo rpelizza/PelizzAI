@@ -285,7 +285,7 @@ function extractShellTargets(command) {
 
 function block(reason) {
   process.stderr.write(
-    `PelizzAI writegate: write redirected — ${reason}\n` +
+    `PelizzAI writegate: write redirected - ${reason}\n` +
       `(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, ` +
       `isolate via pelizzai-isolate, ratify the gate, or disable the hook in .claude/settings.json.)\n`
   );

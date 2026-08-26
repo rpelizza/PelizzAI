@@ -46,6 +46,9 @@ in one line, with the decisions visible and named, and waits:
 
 `Kickoff: quick-fix on branch <type>/<slug> @ <base-ref> (<short-sha>) — isolation: branch · mode: inline · commits: granular. Ok? (overrides: worktree · subagents/team · squash-final · different name/base)`
 
+The line is emitted in the conversation's language — the template above fixes the STRUCTURE and
+the technical identifiers (branch, refs, decision names stay verbatim), not the prose around them.
+
 One "ok" ratifies base, name, and the three decisions at once — all are named in the line, nothing
 was silent; a named override adjusts only that item and keeps the rest. **Silence is not an ok:
 without the affirmative answer, HOLD THE TURN — no branch, no edit.** "The user already told me to

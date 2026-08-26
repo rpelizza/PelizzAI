@@ -1093,6 +1093,23 @@ try {
         }
     }
 
+    # Parity is more than exit codes: the agent READS the denial, so the two legs must say the
+    # same thing. Compare the full stderr of one blocked command, normalized only for EOL.
+    function Get-GuardrailStderr([string]$Hook, [string]$Command) {
+        $payload = @{ tool_input = @{ command = $Command } } | ConvertTo-Json -Compress
+        $errFile = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-stderr-{0}.txt" -f [guid]::NewGuid().ToString('N'))
+        try {
+            if ($Hook.EndsWith('.mjs')) { $null = $payload | & node $Hook 2>$errFile }
+            else { $null = $payload | & pwsh -NoProfile -File $Hook 2>$errFile }
+            return ((Get-Content -LiteralPath $errFile -Raw -ErrorAction SilentlyContinue) ?? '') -replace "`r`n", "`n"
+        } finally {
+            Remove-Item -LiteralPath $errFile -Force -ErrorAction SilentlyContinue
+        }
+    }
+    $mjsDenial = Get-GuardrailStderr $hooks[0] 'git reset --hard'
+    $ps1Denial = Get-GuardrailStderr $hooks[1] 'git reset --hard'
+    Check ($mjsDenial -ne '' -and $mjsDenial.Trim() -eq $ps1Denial.Trim()) 'guardrails: both legs emit an identical denial message' "mjs=$($mjsDenial.Trim() | Select-Object -First 1)"
+
     # Syntax and interface of the visual scripts.
     Run-Native { node --check .claude/hooks/pelizzai-guardrails.mjs } 'node parse guardrails'
     Run-Native { node --check .claude/skills/pelizzai-discovery/scripts/server.cjs } 'node parse visual server'

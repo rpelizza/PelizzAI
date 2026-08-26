@@ -26,7 +26,7 @@ $serverPid = Get-Content $pidFile
 # A stale pidfile after PID reuse would aim the kill at an unrelated process. Only signal a
 # PID whose command line still looks like this server; otherwise just clean the stale file.
 $cmdline = (Get-CimInstance Win32_Process -Filter "ProcessId=$serverPid" -ErrorAction SilentlyContinue).CommandLine
-if (-not $cmdline -or $cmdline -notmatch 'server\.cjs') {
+if (-not $cmdline -or $cmdline -notmatch '(^|[\\/\s"])server\.cjs([\s"]|$)') {
     Remove-Item $pidFile -Force -ErrorAction SilentlyContinue
     Write-Output '{"status": "not_running", "note": "stale pidfile removed"}'
     exit 0

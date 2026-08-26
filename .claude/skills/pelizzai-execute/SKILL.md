@@ -95,8 +95,9 @@ profile — push/PR/publication are decided per task in `pelizzai-finish`.
    `model`/`effort` from the persisted value, so a resumption never re-defaults it silently.
 ```
 
-Rules: the mode keeps **the three options always visible** — **team is never omitted**. There is
-no universal ranking. **Squash-final only on explicit user request**. The plan's content (the
+Rules: every option, recommendation, question, and confirmation of this gate is emitted in the
+conversation's language (identifiers verbatim). The mode keeps **the three options always visible**
+— **team is never omitted**. There is no universal ranking. **Squash-final only on explicit user request**. The plan's content (the
 WHAT) was already approved at the previous edge; this gate ratifies the HOW without hiding
 several decisions behind a single "ok". Silence and recommendation do not count as an answer. Do
 not write code, move a worktree, squash, or record final decisions until steps 0–4 are complete.
@@ -114,7 +115,10 @@ does not change the profile; changing the policy requires separate confirmation 
 In source mode, use the native execution record as the task's memory, never as inherited
 authorization.
 
-**Applying the isolation — invoke `pelizzai-isolate` (POST-ratification).** Only after the four answers:
+**Applying the isolation — invoke `pelizzai-isolate` (POST-ratification).** Only after EVERY step
+of the gate has its answer — 0 through 4, where step 4 is skipped only in inline mode (the
+session's model executes); in subagents/team, applying anything before the tier's answer starts
+Task 1 without a ratified tier:
 branch checkpoints the persistent setup when it exists and keeps the current branch; worktree
 captures `checkpoint-sha` after the optional checkpoint, frees the branch in the main working
 tree, adds the worktree with the **existing branch**, and records the new path before Task 1.
@@ -381,7 +385,7 @@ Common invariants:
   `pelizzai/profile.md` is not inheritance: it pre-selects the recap's recommendation, re-shown
   and ratifiable at each new task.
 - `phase: delivered` = delivery sealed + destination executed, awaiting the observation of `done`
-  (see Reconciliation of the previous delivery). Finish-task closes in `delivered`, never in `done`.
+  (see Reconciliation of the previous delivery). `pelizzai-finish` closes in `delivered`, never in `done`.
 - `base-ref`/`base-sha` are the initial snapshot and are never recalculated at the end.
 - a content change invalidates `validated-head`; it is only born after the final validation.
 - `project` is exactly one repo; another repo gets another execution record.
@@ -442,8 +446,10 @@ GATES (recommend-and-ratify; never apply a structural decision in silence):
 - Plan: content and stress-test are approved before setup.
 - Post-plan setup: isolation, execution mode with **the three options
   always visible** (**team is never omitted**), commit strategy (**squash-final only on explicit
-  user request**), and review are asked ONE PER TURN, always with a recommendation,
-  and ratified before Task 1. Branch base and name were already ratified before planning.
+  user request**), and the executor tier (step 4; skipped in inline mode) are asked ONE PER TURN,
+  always with a recommendation, and ratified before Task 1 — the task review itself is never a
+  question (one independent dispatch, both verdicts, in every lane). Branch base and name were
+  already ratified before planning.
 - External destination: push / PR / worktree discard and removal require a PER-TASK decision;
   without an external request, `pelizzai-finish` keeps it local by default. `destination` is never
   inherited from profile policy.
