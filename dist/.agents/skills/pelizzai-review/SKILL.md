@@ -107,7 +107,7 @@ confirm by running the check is **UNVERIFIED**, never ✅. Use the full rubric i
   patterns, the domain skills and the project's rules PREVAIL.
 ```
 
-If the reviewer flags a **sensitive surface** (auth, user input, query/SQL, secrets, upload, new dependencies), trigger `pelizzai-security` (OWASP) before concluding.
+If the diff touches a **sensitive surface** (auth, user input, query/SQL, secrets, upload, new dependencies), or the reviewer flags one, trigger `pelizzai-security` (OWASP) before concluding.
 
 ---
 
@@ -154,7 +154,8 @@ Fill in with:
   templates**: the blind spec lens receives diff + spec/plan + domain skills; the quality/evidence lens
   receives the same skills plus the report. In a consumer, also paste the applicable acceptance
   criteria of `pelizzai/data/verification-standard.md` into the `{VERIFICATION_STANDARD}` slot of
-  both templates — the reviewer judges against what "correct" means HERE, not against taste (see
+  every dispatched template (`task-reviewer.md` per task; `spec-reviewer.md` and
+  `code-reviewer.md` on the final range) — the reviewer judges against what "correct" means HERE, not against taste (see
   `pelizzai-evolve`); a criterion read but not pasted never reaches the reviewer. File absent:
   write `none — standard absent`, propose creating it from the `pelizzai-evolve` template, and ask
   the reviewer to flag the gap. Source mode:
@@ -200,7 +201,6 @@ The reviewer returns, in this structure (detail in `references/code-reviewer.md`
   #### Critical      — bugs, security, data loss, broken functionality (fix now)
   #### Important     — architecture, missing feature, mishandled error, test gap (fix before moving on)
   #### Minor         — style, optimization, doc polish (note for later)
-  (each issue: file:line, what is wrong, why it matters, how to fix)
 ### Recommendations
 ### Verification     — applicable checks actually RUN + output + exit code; relevant check not run = UNVERIFIED
 ### Assessment       — Ready to merge? [Yes | No | With fixes] + 1-2 sentences of rationale
@@ -296,10 +296,9 @@ NEVER: "you're absolutely right", "great point", "great feedback", nor thanking 
 WHEN you fix it: "Fixed. [what changed]" — and the code shows you listened.
 YAGNI: if the reviewer suggests "implementing it properly", grep the real usage; if it is unused, propose removing it.
 Push back when: it breaks something existing, the reviewer lacks full context, it violates YAGNI, it is incorrect for the stack,
-       or it conflicts with a user architecture decision — with technical reasoning, not defensiveness.
+       or it conflicts with a user architecture decision.
 Cannot verify? Say: "I cannot verify this without [X] — investigate / ask / proceed?"
-       (never implement blind).
-On a GitHub PR, reply in the inline comment THREAD (not as a top-level PR comment).
+On a GitHub PR, reply in the inline comment THREAD.
 ```
 
 ---
