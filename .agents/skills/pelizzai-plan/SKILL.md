@@ -14,16 +14,15 @@ house conventions — whatever the plan lacks becomes a material gap that STOPS 
 back to the user via `pelizzai-interview`. Every question execution has to ask is a failure of
 the plan, never a license to guess.
 
-Zero context is about **complete context**, not about transcribing the future code: the plan fixes
-decisions, contracts, and criteria (see *Plan depth*) and does not anticipate the whole
-implementation.
+Zero context is about **complete context**, not about transcribing the future code: the plan
+records ratified decisions, contracts, and criteria (see *Plan depth*), not the whole implementation.
 
 **Announce**, in the conversation's language: that you are using the PelizzAI Plan skill to turn the requirements into an executable plan.
 
 In a consumer, the plan is **always materialized** at `pelizzai/plans/YYYY-MM-DD-<topic>.md`
 (unless a different location is explicitly requested); it is the durable artifact execution reads.
 In source mode, record the plan in the native execution record in a **discoverable and verifiable**
-way (the tasks and the requirement→task map stay traceable, not ephemeral) and **offer to
+way (tasks and the requirement→task map stay traceable) and **offer to
 materialize** it as a file at the repo's native path when the user wants durability; never create
 consumer `pelizzai/` runtime in the source repo. The task/planning branch must already exist;
 state is mandatory only in the consumer.
@@ -108,8 +107,7 @@ Task 1, so the artifact and the record agree.
 with a rejected alternative, a boundary/contract that future work must honor, a durable rejection.
 Trigger `pelizzai-domain-modeling` (its §recording gate and `templates/adr.md`) right after the
 ratification, while the why is fresh; a decision that only lives in a plan file stops being
-findable the day the plan is archived. This is the wiring that makes ADRs actually get written
-instead of remaining a template no flow reaches.
+findable the day the plan is archived.
 
 When the plan is purely mechanical and introduces no material technical decision, write explicitly
 `no material technical decision — purely mechanical plan`. Never leave the section empty or omit
@@ -129,10 +127,12 @@ handed back as an open question without options. Agreeing with the recommendatio
 ## Applicable skills
 
 **In a consumer, read the Active rules of `pelizzai/data/learnings.md` BEFORE choosing approaches**
-(the short section only; the Incident log is consulted on demand). A rule read after the approach is
-picked can only be an audit; read before, it removes an approach from the table. Most of them are
-about how this project proves something works, which is what a plan gets wrong by omission. Source
-mode: use the repo's own rules; never create `pelizzai/` for this.
+(the short section only; the Incident log is consulted on demand) and, with them,
+`pelizzai/data/verification-standard.md` — what *correct* means here grounds each task's
+validation strategy (see `pelizzai-evolve`). A rule read after the approach is picked can only be
+an audit; read before, it removes an approach from the table. If either file is absent, note it,
+propose creating it from the corresponding template, and continue without blocking. Source mode:
+use the repo's own rules; never create `pelizzai/` for this.
 
 - In the header: the catalog's domain skills that apply to the whole plan, or `none`.
 - In each task: that slice's domain skills and the **Cross-cutting harness skills** it requires,
@@ -255,8 +255,8 @@ sequential gate; the plan informs and the gate ratifies before Task 1. If the us
 plan only**, do not execute code: validate the artifact, consolidate/seal the planning delivery,
 and keep it local unless an external destination is requested.
 
-**Session boundary.** The approved plan is a phase boundary — and the plan is written to run with
-zero repo context, so execution rarely needs this session's reasoning verbatim. At the closing
+**Session boundary.** The approved plan is a phase boundary — it runs on zero repo context, so
+execution rarely needs this session's reasoning. At the closing
 gate, alongside the setup recommendations, offer the choice: **continue executing here, or start a
 fresh session (or handoff) seeded with the plan's path** — recommend the fresh session when the
 planning conversation is long, and continuing when the remaining room clearly fits the execution.

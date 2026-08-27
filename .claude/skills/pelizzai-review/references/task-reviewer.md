@@ -29,6 +29,18 @@ the task text but violates a domain skill pasted here is a finding, not a style 
 with generic patterns, the domain skills PREVAIL. If the slot arrives empty or "none" and the
 change clearly belongs to an area with conventions of its own, say so in the verdict.
 
+## Acceptance criteria of this project
+
+{VERIFICATION_STANDARD}   # consumer: the applicable criteria from pelizzai/data/verification-standard.md,
+                          # including how each proof is read; source mode: "none — source mode"
+
+These criteria are what *correct* means in this project — contract, with the same force as the
+domain skills, and they feed BOTH verdicts: a bar they add that the task text does not repeat is
+still part of what was asked (Verdict 1), and each proof is read the way the criterion declares —
+a proof that cannot be read that way (a missing table row, a file absent by name) is UNVERIFIED,
+never ✅ (Verdict 2). If the slot arrives "none" and the change clearly sits on a surface the
+project measures, say so in the verdict.
+
 ## VERDICT 1 — Spec compliance (form it BEFORE reading the report below)
 
 The implementer has NOT committed — the code is in the working tree (`git diff`,
@@ -42,6 +54,7 @@ Read that code against the contract above, line by line, before you read the aut
   requirement of the request? A line with no trace is a finding, not a detail.
 - Misunderstandings: interpreted differently from what was intended? Solved the wrong problem?
 - Domain skills: does the change respect the rules pasted above?
+- Acceptance criteria: does the change meet the project criteria pasted above?
 
 Spec verdict: ✅ Matches the spec · ❌ Issues (file:line) · ⚠️ Not verifiable (what and why).
 
@@ -87,5 +100,7 @@ DO NOT: accept a claim without running the check; mark a nitpick as Critical; op
 ````
 
 **Placeholders:** `{FULL_TASK_TEXT}` (pasted from the plan, with the Global Constraints) ·
-`{DOMAIN_SKILLS}` (operational points of the area's skills, or `none`) · `{IMPLEMENTER_REPORT}`
-(the author's claims — placed after the spec rubric by design).
+`{DOMAIN_SKILLS}` (operational points of the area's skills, or `none`) · `{VERIFICATION_STANDARD}`
+(the applicable acceptance criteria of `pelizzai/data/verification-standard.md`, or
+`none — source mode`) · `{IMPLEMENTER_REPORT}` (the author's claims — placed after the spec rubric
+by design).

@@ -23,6 +23,17 @@ and identify problems before they propagate.
 These are this project's rules. In conflict with generic patterns or with your own repertoire, the
 domain skills pasted here PREVAIL.
 
+## Acceptance criteria of this project
+
+{VERIFICATION_STANDARD}   # consumer: the applicable criteria from pelizzai/data/verification-standard.md,
+                          # including how each proof is read; source mode: "none — source mode"
+
+These criteria are what *correct* means in this project — contract, with the same force as the
+domain skills. Judge the delivery against them, and read each proof the way its criterion declares
+(a threshold read from a table, a file that must appear by name): a proof that cannot be read that
+way is UNVERIFIED, never ✅. If the slot arrives "none" and the change clearly sits on a surface
+the project measures, say so in the verdict.
+
 ## Implementer's report — claims to verify
 
 {IMPLEMENTER_REPORT}   # paste the author's report; this lens (quality/evidence) RECEIVES and VERIFIES it
@@ -52,6 +63,7 @@ Alignment with the plan:
 - Is all the planned functionality present?
 - Does the change respect the DOMAIN SKILLS pasted above? A violation of a project rule is a
   first-class finding, not a style nitpick.
+- Does the delivery meet the ACCEPTANCE CRITERIA pasted above, with each proof read as declared?
 
 Code quality:
 - Clean separation of concerns? Adequate error handling? Type safety?
@@ -143,4 +155,4 @@ DO NOT: say "looks good" without checking; mark a nitpick as Critical; opine on 
     you did not read; be vague ("improve error handling"); dodge the verdict.
 ````
 
-**Placeholders:** `{DESCRIPTION}` (what was built) · `{REQUIREMENTS_OR_PLAN}` (task text, consumer plan path in `pelizzai/plans/`, or the native plan/execution record in source mode) · `{DOMAIN_SKILLS}` · `{IMPLEMENTER_REPORT}` (the author's claims — only this lens receives it) · `<BASE_SHA>`/`<HEAD_SHA>` (range, in the final review).
+**Placeholders:** `{DESCRIPTION}` (what was built) · `{REQUIREMENTS_OR_PLAN}` (task text, consumer plan path in `pelizzai/plans/`, or the native plan/execution record in source mode) · `{DOMAIN_SKILLS}` · `{VERIFICATION_STANDARD}` (the applicable acceptance criteria of `pelizzai/data/verification-standard.md`, or `none — source mode`) · `{IMPLEMENTER_REPORT}` (the author's claims — only this lens receives it) · `<BASE_SHA>`/`<HEAD_SHA>` (range, in the final review).
