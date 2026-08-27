@@ -107,7 +107,7 @@ confirm by running the check is **UNVERIFIED**, never ✅. Use the full rubric i
   patterns, the domain skills and the project's rules PREVAIL.
 ```
 
-If the reviewer flags a **sensitive surface** (auth, user input, query/SQL, secrets, upload, new dependencies), trigger `pelizzai-security` (OWASP) before concluding — do not leave security as a mere checklist item.
+If the reviewer flags a **sensitive surface** (auth, user input, query/SQL, secrets, upload, new dependencies), trigger `pelizzai-security` (OWASP) before concluding.
 
 ---
 
@@ -155,7 +155,9 @@ Fill in with:
   receives the same skills plus the report. In a consumer, also paste the applicable acceptance
   criteria of `pelizzai/data/verification-standard.md` into the `{VERIFICATION_STANDARD}` slot of
   both templates — the reviewer judges against what "correct" means HERE, not against taste (see
-  `pelizzai-evolve`); a criterion read but not pasted never reaches the reviewer. Source mode:
+  `pelizzai-evolve`); a criterion read but not pasted never reaches the reviewer. File absent:
+  write `none — standard absent`, propose creating it from the `pelizzai-evolve` template, and ask
+  the reviewer to flag the gap. Source mode:
   write `none — source mode`. A domain skill promised but not pasted is a blind lens
   without a contract — paste the operational points, not just the names. With no coverage for the
   area, write "none" and ask the reviewer to flag the gap.
@@ -168,8 +170,6 @@ Use `pwsh scripts/review-package.ps1 --working-tree` or
 gitignored handoff dir, or into the system temp in source mode; pass that file to the reviewer. The
 `<BASE> <HEAD>` mode is used in the delivery's final review; outside the lifecycle, only when the
 user explicitly asked for a standalone range.
-
-The reviewer **never** receives the session history.
 
 ---
 
@@ -272,7 +272,7 @@ Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route ana
 - Critical → fix immediately.
 - Important → fix before moving on.
 - Minor → note for the final review.
-- Reviewer wrong → push back with technical reasoning (show code/tests that prove it).
+- Reviewer wrong → push back with technical reasoning.
 ```
 
 This feeds the `pelizzai-execute` circuit breaker (5 rounds per task in three regimes, then the
