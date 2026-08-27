@@ -544,6 +544,16 @@ try {
     Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'BEFORE Task 1' 'writing-plans: domain skill coverage is decided before Task 1'
     Check-Match '.claude/skills/pelizzai-onboard/SKILL.md' 'Who invokes this gate' 'audit names who invokes the Proactive gate (brainstorming + writing-plans)'
 
+    # -- Issue #67: dead-name sweep in the remap (Partial state) --
+    Check-Match '.claude/skills/pelizzai-onboard/SKILL.md' 'dead `pelizzai-\*` names in `pelizzai/\*\*\.md`' 'onboard: Partial state names the dead-name sweep'
+    Check-Match '.claude/skills/pelizzai-onboard/SKILL.md' '\[remap-sweep\.md\]\(references/remap-sweep\.md\)' 'onboard: the sweep doctrine lives behind an on-demand pointer'
+    Check (Test-Path (Join-Path $root '.claude/skills/pelizzai-onboard/references/remap-sweep.md')) 'onboard: remap-sweep reference exists'
+    Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' 'Ground truth is the catalog on disk' 'remap-sweep: validates against the catalog, not a memorized table'
+    Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' 'excluding `data/history/`' 'remap-sweep: history is record, never rewritten'
+    Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' 'Propose, never rewrite silently' 'remap-sweep: substitutions are recommend-and-ratify'
+    Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' 'scan-only`, list the dead names[\s\S]{0,80}rewrite waits' 'remap-sweep: read-only entry reports and stops'
+    Check-Match 'scripts/harness-budget.json' 'remap-sweep\.md' 'budget: the remap-sweep reference is declared onDemand'
+
     # -- F3: model sovereignty — the model belongs to the user; the harness never downgrades anything --
     # User decision (2026-07-22): the harness respects the model chosen on the platform (simple
     # plans included) and elevates the reasoning of ANY model via pelizzai-reasoning. What stays
