@@ -7,7 +7,7 @@ description: "Use after every task in plan execution, when a feature completes, 
 
 ## Goal
 
-Catch problems before they propagate. The reviewer receives **fabricated context** — description, requirements/plan, and the diff — **never your session history**. That keeps the reviewer focused on the product, not on your reasoning, and preserves your context to continue.
+Catch problems before they propagate. The reviewer receives **fabricated context** — description, requirements/plan, and the diff — **never your session history**. That keeps the reviewer focused on the product, not on your reasoning.
 
 **Announce on start**, in the conversation's language: that you are using the PelizzAI Review skill to review the code.
 
@@ -47,7 +47,7 @@ During plan execution, each task is reviewed by **ONE independent reviewer in ON
 applying the **spec** rubric and then the **quality/evidence** rubric, in that order — in any
 lane, including bounded. The implementer has **not committed** — the code is in the working tree.
 There is no profile to pick: the sequential split-per-task was the harness's largest latency
-multiplier, and the per-task blindness it bought was reading order, not blindness. The
+multiplier and bought reading order, not blindness. The
 **truly blind spec lens runs on the FINAL range**, in its own dispatch (§Final branch review) —
 that is also where a requirement that fell between tasks becomes visible.
 
@@ -95,7 +95,7 @@ Applied after the spec verdict is formed. **This is the rubric that receives the
 verifies the claims — did the tests actually run? Is the proof fresh (command + output + exit
 code)? Were deviations from the plan declared in the `Deviations from plan:` field? A claim you could not
 confirm by running the check is **UNVERIFIED**, never ✅. Use the full rubric in
-**[references/code-reviewer.md](references/code-reviewer.md)**. Assess: separation of concerns, error handling, type safety, DRY without premature abstraction, edge cases, architecture, security, tests (they verify real behavior, not mocks), production readiness. Additionally:
+**[references/code-reviewer.md](references/code-reviewer.md)**. Additionally:
 
 ```text
 - Does each file have ONE clear responsibility and a well-defined interface?
@@ -153,7 +153,11 @@ Fill in with:
 - DOMAIN SKILLS for the area (pasted) — from the `pelizzai/domain-skills.md` catalog in a consumer, or
   from the source repo's rules/skills in source mode. They fill the `{DOMAIN_SKILLS}` slot **of both
   templates**: the blind spec lens receives diff + spec/plan + domain skills; the quality/evidence lens
-  receives the same skills plus the report. A domain skill promised but not pasted is a blind lens
+  receives the same skills plus the report. In a consumer, also paste the applicable acceptance
+  criteria of `pelizzai/data/verification-standard.md` into the `{VERIFICATION_STANDARD}` slot of
+  both templates — the reviewer judges against what "correct" means HERE, not against taste (see
+  `pelizzai-evolve`); a criterion read but not pasted never reaches the reviewer. Source mode:
+  write `none — source mode`. A domain skill promised but not pasted is a blind lens
   without a contract — paste the operational points, not just the names. With no coverage for the
   area, write "none" and ask the reviewer to flag the gap.
 - Cross-cutting skills/overlays recorded in the state/execution record (pasted) — frontend, security,
@@ -203,7 +207,7 @@ The reviewer returns, in this structure (detail in `references/code-reviewer.md`
 ### Assessment       — Ready to merge? [Yes | No | With fixes] + 1-2 sentences of rationale
 ```
 
-Categorize by REAL severity — not everything is Critical; a nitpick is not Critical.
+Categorize by REAL severity — not everything is Critical.
 
 ---
 
@@ -212,9 +216,8 @@ Categorize by REAL severity — not everything is Critical; a nitpick is not Cri
 When all tasks are complete, review the **entire branch** over the committed range
 `<base-sha>..<HEAD>` — after the `squash-final` consolidation, when chosen — and not only per
 task. Use an independent reviewer, with the **session's model** — the one the user chose, never
-a lesser one — and the **highest effort the platform allows**: the final review is the last filter
-before the seal, not a place to economize on your own initiative nor to tune the process to
-compensate for a lesser model. It is step 1 of the coordinator's
+a lesser one — and the **highest effort the platform allows**: the last filter before the seal is
+no place to economize or to tune the process around a lesser model. It is step 1 of the coordinator's
 **final delivery validation** (`pelizzai-execute` → "Final delivery
 validation") and happens **after** the overlays that may write (security, frontend, and documentation)
 and before the full suite, checklist, and `pelizzai-verify`. Open
@@ -249,7 +252,7 @@ router and apply the new route's review before the commit.
 
 **Standalone review track:** recommend the scope derived from the request and from Git, and
 **confirm when it is ambiguous** — working tree, `<BASE>..<HEAD>` range, and PR are materially
-different interpretations; do not review the wrong target on an assumption. With a single plausible
+different interpretations. With a single plausible
 reading, proceed without asking. Apply the quality lens + Verification. This track is read-only and
 creates no state. A Critical finding is not fixed inside the review: it becomes a new bug/tweak
 track via the router; the remaining findings are handed to the user for decision.

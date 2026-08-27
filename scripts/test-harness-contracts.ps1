@@ -518,6 +518,21 @@ try {
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'pelizzai/domain-skills\.md' 'review names the domain skills catalog (not just "the catalog")'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' '.\{DOMAIN_SKILLS\}. slot\s+empty' 'review: anti-pattern of dispatching a briefing with an empty domain skills slot'
 
+    # -- Issue #69: the verification standard's declared readers all exist (evolve's table names three) --
+    foreach ($reader in 'pelizzai-plan', 'pelizzai-review', 'pelizzai-verify') {
+        Check-Match ".claude/skills/$reader/SKILL.md" 'verification-standard\.md' "verification-standard: declared reader $reader references the artifact"
+    }
+    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'BEFORE choosing approaches\*\*[\s\S]{0,160}verification-standard\.md' 'plan reads the standard together with the Active rules, before approaches are chosen'
+    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'verification-standard\.md[\s\S]{0,80}grounds each task[\s\S]{0,10}\s+validation strategy' 'plan grounds each task''s validation strategy in the standard'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'paste the applicable acceptance\s+criteria of .pelizzai/data/verification-standard\.md. into the .\{VERIFICATION_STANDARD\}. slot of\s+both templates' 'review briefing pastes the acceptance criteria into the slot of BOTH templates'
+    Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'criterion read but not pasted never reaches the reviewer' 'review: pasting the criteria carries the same force as pasting the rules'
+    Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '\{VERIFICATION_STANDARD\}[\s\S]*\{IMPLEMENTER_REPORT\}' 'task-reviewer carries the standard slot, placed before the report'
+    Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'feed BOTH verdicts' 'task-reviewer: the acceptance criteria feed both verdicts'
+    Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' '\{VERIFICATION_STANDARD\}' 'spec-reviewer (blind lens) receives the acceptance criteria slot'
+    Check-Match '.claude/skills/pelizzai-review/references/spec-reviewer.md' 'Acceptance criteria: does the change meet the project criteria' 'spec-reviewer: acceptance criteria enter the blind lens checklist'
+    Check-Match '.claude/skills/pelizzai-review/references/code-reviewer.md' '\{VERIFICATION_STANDARD\}[\s\S]*\{IMPLEMENTER_REPORT\}' 'code-reviewer carries the standard slot, placed before the report'
+    Check-Match '.claude/skills/pelizzai-review/references/code-reviewer.md' 'read each proof the way its criterion declares' 'code-reviewer reads each proof the way the standard declares'
+
     # -- Reuse exception for the final review: narrowed, not removed --
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' 'Reuse exception \(narrow, and never the default path\)' 'review: the reuse exception is declared narrow'
     Check-Match '.claude/skills/pelizzai-review/SKILL.md' '.read-only. or .write-local. effect, low risk' 'review: the exception requires local effect and low risk'

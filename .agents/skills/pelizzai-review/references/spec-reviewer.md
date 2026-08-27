@@ -23,6 +23,16 @@ the task text but violates a domain skill pasted here is a finding, not a style 
 In conflict with generic patterns, the domain skills PREVAIL. If the slot arrives empty or
 "none" and the change clearly belongs to an area with conventions of its own, say so in the verdict.
 
+## Acceptance criteria of this project
+
+{VERIFICATION_STANDARD}   # consumer: the applicable criteria from pelizzai/data/verification-standard.md,
+                          # including how each proof is read; source mode: "none — source mode"
+
+These criteria are what *correct* means in this project — contract, with the same force as the
+domain skills. A bar they add that the task text does not repeat is still part of what was asked:
+a delivery that meets the task text but misses a pasted criterion is ❌, not ✅. If the slot
+arrives "none" and the change clearly sits on a surface the project measures, say so in the verdict.
+
 ## CRITICAL: you do NOT receive the implementer's report
 
 This is the blind lens. You do not have the author's narrative about what they claim to have done —
@@ -39,6 +49,7 @@ and new files via `git status`). Read that code and check:
   requirement of the request? A line with no trace is a finding, not a detail.
 - Misunderstandings: interpreted differently from what was intended? Solved the wrong problem? Right, but the wrong way?
 - Domain skills: does the change respect the rules pasted in the section above?
+- Acceptance criteria: does the change meet the project criteria pasted above?
 
 Verify by READING THE CODE against the contract.
 
@@ -49,4 +60,4 @@ Verify by READING THE CODE against the contract.
 - ⚠️ Not verifiable: [what could not be confirmed and why] — the coordinator assesses against the plan.
 ````
 
-**Placeholders:** `{FULL_TASK_TEXT}` (pasted from the plan) · `{DOMAIN_SKILLS}` (operational points of the area's skills, or `none` — same slot as in `code-reviewer.md`). The implementer's report is **not** a placeholder of this lens — it goes only to the quality/evidence lens (see `code-reviewer.md`).
+**Placeholders:** `{FULL_TASK_TEXT}` (pasted from the plan) · `{DOMAIN_SKILLS}` (operational points of the area's skills, or `none` — same slot as in `code-reviewer.md`) · `{VERIFICATION_STANDARD}` (the applicable acceptance criteria of `pelizzai/data/verification-standard.md`, or `none — source mode`). The implementer's report is **not** a placeholder of this lens — it goes only to the quality/evidence lens (see `code-reviewer.md`).

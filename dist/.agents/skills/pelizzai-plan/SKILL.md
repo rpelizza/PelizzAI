@@ -108,8 +108,7 @@ Task 1, so the artifact and the record agree.
 with a rejected alternative, a boundary/contract that future work must honor, a durable rejection.
 Trigger `pelizzai-domain-modeling` (its §recording gate and `templates/adr.md`) right after the
 ratification, while the why is fresh; a decision that only lives in a plan file stops being
-findable the day the plan is archived. This is the wiring that makes ADRs actually get written
-instead of remaining a template no flow reaches.
+findable the day the plan is archived.
 
 When the plan is purely mechanical and introduces no material technical decision, write explicitly
 `no material technical decision — purely mechanical plan`. Never leave the section empty or omit
@@ -129,10 +128,11 @@ handed back as an open question without options. Agreeing with the recommendatio
 ## Applicable skills
 
 **In a consumer, read the Active rules of `pelizzai/data/learnings.md` BEFORE choosing approaches**
-(the short section only; the Incident log is consulted on demand). A rule read after the approach is
-picked can only be an audit; read before, it removes an approach from the table. Most of them are
-about how this project proves something works, which is what a plan gets wrong by omission. Source
-mode: use the repo's own rules; never create `pelizzai/` for this.
+(the short section only; the Incident log is consulted on demand) and, with them,
+`pelizzai/data/verification-standard.md` — what *correct* means here grounds each task's
+validation strategy (see `pelizzai-evolve`). A rule read after the approach is picked can only be
+an audit; read before, it removes an approach from the table. Either file absent is not a blocker:
+note it and move on. Source mode: use the repo's own rules; never create `pelizzai/` for this.
 
 - In the header: the catalog's domain skills that apply to the whole plan, or `none`.
 - In each task: that slice's domain skills and the **Cross-cutting harness skills** it requires,
