@@ -246,6 +246,9 @@ try {
     Check-Match '.claude/skills/pelizzai-discovery/SKILL.md' 'Every question, native or prose, follows the conversation''s language' 'discovery: questions follow the conversation language in both deliveries'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' '^With a native option-selection tool, deliver this single question through it — the block as\s+context, accept first, marked in its label, reason in its description, adjust as the\s+alternative; in prose, the block is the fallback' 'router: native kickoff carries context, accept-first, label mark, reason, adjust, and prose fallback'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Both deliveries speak the conversation''s\s+language' 'router: kickoff speaks the conversation language in both deliveries'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Both bootstrap routes speak the conversation''s\s+language' 'router: bootstrap routes speak the conversation language'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Every mutating route stops at kickoff, including `bounded`, tweak, and bug' 'router: every mutating route stops at kickoff'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'the affirmative answer is mandatory' 'router: the kickoff affirmative answer is mandatory'
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'forbids fabricating choices;\s+it never forbids using the platform''s selector' 'interview: anti-format bullet does not ban the selector'
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'prose format is the fallback, not a\s+preference' 'interview: prose is fallback, not preference'
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'as `## How to ask` prescribes' 'interview: gap mode step 3 inherits the delivery rule'
@@ -1033,9 +1036,18 @@ try {
     if (Test-Path (Join-Path $root 'dist/.claude/skills')) {
         $srcSkillFiles = Get-RelativeFiles (Join-Path $root '.claude/skills')
         $distSkillFiles = Get-RelativeFiles (Join-Path $root 'dist/.claude/skills')
-        Check ((Compare-Object $srcSkillFiles $distSkillFiles | Measure-Object).Count -eq 0) 'dist/.claude/skills mirrors the source (same file list)'
+        $distTreeDiff = @(Compare-Object $srcSkillFiles $distSkillFiles)
+        $distHashDiff = 0
+        if ($distTreeDiff.Count -eq 0) {
+            foreach ($rel in $srcSkillFiles) {
+                $a = Join-Path $root (Join-Path '.claude/skills' $rel)
+                $b = Join-Path $root (Join-Path 'dist/.claude/skills' $rel)
+                if ((Get-FileHash $a).Hash -ne (Get-FileHash $b).Hash) { $distHashDiff++ }
+            }
+        }
+        Check ($distTreeDiff.Count -eq 0 -and $distHashDiff -eq 0) 'dist/.claude/skills mirrors the source (same paths and hashes)' "paths=$($distTreeDiff.Count) hashes=$distHashDiff"
     } else {
-        Check $false 'dist/.claude/skills mirrors the source (same file list)' 'dist/.claude/skills missing'
+        Check $false 'dist/.claude/skills mirrors the source (same paths and hashes)' 'dist/.claude/skills missing'
     }
 
     # Hook installer: idempotent merge and surgical removal.
