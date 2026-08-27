@@ -65,9 +65,9 @@ Read only what you need to answer:
 Use a read-only subagent only when the search has independent fronts. Do not run a full repo scan by reflex.
 
 When external technology affects feasibility or options, identify the version in manifests/lockfiles
-and consult Context7 before formulating the corresponding question. In greenfield with no
-dependencies installed, consult the current documentation of the stated stack or of the candidates
-you intend to recommend. Use that evidence to discard incompatible options and explain trade-offs;
+and consult Context7 before formulating the question. In greenfield with no dependencies
+installed, consult the current documentation of the stated or candidate stack. Use that evidence
+to discard incompatible options and explain trade-offs;
 the choice stays at the user's gate.
 
 ### 2. Fix goal and boundaries
@@ -91,30 +91,17 @@ Recommendation: <best option> — <one-line reason>
 Question: <a single question>
 ```
 
-This block is the **content contract, not the delivery format**: when the platform offers a native
-option-selection tool, deliver the question through it — options selectable, the recommended one
-first and marked in its label (e.g. `<option> (Recommended)`), decision and reason as context —
-and keep the block as the prose fallback where no such tool exists. An open question is valid when
-options would bias the answer. Never hide a decision inside a "safe assumption".
+This block is the **content contract, not the delivery format**: with a native option-selection
+tool, deliver the question through it — recommended option first, marked in its label, decision
+and reason as context; the block is the prose fallback. An open question is valid when options
+would bias the answer. Never hide a decision inside a "safe assumption".
 
 ### 3. Run discovery when there is a material gap
 
 When context and goal reveal gaps in scope, UX, architecture, security, or data, do not resolve
 them by assumption. Order the gaps internally by dependency and impact, but present only the next
-decision. Example:
-
-```text
-I found product decisions still open. The first conditions the others:
-
-Decision: <gap> — changes <scope|UX|architecture|security|data>.
-Options: A) <...> · B) <...> · C) <...>.
-Recommendation: <B> — <reason>.
-Question: which option do you choose?
-```
-
-The same delivery rule applies: native option-selection tool when the platform has one, this prose
-otherwise. The turn stops after the question. Silence, a recommendation, and Context7 do not count
-as an answer. After the choice, record the decision, recompute the gaps, and ask only the next question.
+decision, in the section 2 turn format — the same delivery rule applies. The turn stops after the
+question. Silence, a recommendation, and Context7 do not count as an answer. After the choice, record the decision, recompute the gaps, and ask only the next question.
 Skipping the entire discovery requires an explicit request AND is only available in
 `standard`/`exploratory` — greenfield never has this exit (the HARD-GATE's rule). Record the
 waiver (`spec: explicitly waived <YYYY-MM-DD>`) and do not invent answers: record the untaken

@@ -238,7 +238,9 @@ try {
     # -- Issue #64: question delivery — prefer the native selector, recommendation in the label --
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'native option-selection tool, use it' 'interview: prefers the platform native selector'
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'where the user reads the choice' 'interview: recommendation lands where the choice is read'
-    Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'in its label' 'interview: recommended option marked in the label, first position'
+    Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'recommended option comes \*\*first\*\*[\s\S]{0,60}mark \*\*in its label\*\*' 'interview: recommended option is first AND marked in the label'
+    Check-Match '.claude/skills/pelizzai-discovery/SKILL.md' 'recommended option first, marked in its label' 'discovery: recommended option is first AND marked in the label'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'accept first,\s+marked in its label' 'router: accept option is first AND marked in the label'
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'forbids fabricating choices;\s+it never forbids using the platform''s selector' 'interview: anti-format bullet does not ban the selector'
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'prose format is the fallback, not a\s+preference' 'interview: prose is fallback, not preference'
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'as `## How to ask` prescribes' 'interview: gap mode step 3 inherits the delivery rule'
