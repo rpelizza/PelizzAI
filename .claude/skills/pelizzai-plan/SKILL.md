@@ -15,15 +15,14 @@ back to the user via `pelizzai-interview`. Every question execution has to ask i
 the plan, never a license to guess.
 
 Zero context is about **complete context**, not about transcribing the future code: the plan fixes
-decisions, contracts, and criteria (see *Plan depth*) and does not anticipate the whole
-implementation.
+decisions, contracts, and criteria (see *Plan depth*), not the whole implementation.
 
 **Announce**, in the conversation's language: that you are using the PelizzAI Plan skill to turn the requirements into an executable plan.
 
 In a consumer, the plan is **always materialized** at `pelizzai/plans/YYYY-MM-DD-<topic>.md`
 (unless a different location is explicitly requested); it is the durable artifact execution reads.
 In source mode, record the plan in the native execution record in a **discoverable and verifiable**
-way (the tasks and the requirement→task map stay traceable, not ephemeral) and **offer to
+way (tasks and the requirement→task map stay traceable) and **offer to
 materialize** it as a file at the repo's native path when the user wants durability; never create
 consumer `pelizzai/` runtime in the source repo. The task/planning branch must already exist;
 state is mandatory only in the consumer.
@@ -131,8 +130,9 @@ handed back as an open question without options. Agreeing with the recommendatio
 (the short section only; the Incident log is consulted on demand) and, with them,
 `pelizzai/data/verification-standard.md` — what *correct* means here grounds each task's
 validation strategy (see `pelizzai-evolve`). A rule read after the approach is picked can only be
-an audit; read before, it removes an approach from the table. Either file absent is not a blocker:
-note it and move on. Source mode: use the repo's own rules; never create `pelizzai/` for this.
+an audit; read before, it removes an approach from the table. If either file is absent, note it,
+propose creating it from the corresponding template, and continue without blocking. Source mode:
+use the repo's own rules; never create `pelizzai/` for this.
 
 - In the header: the catalog's domain skills that apply to the whole plan, or `none`.
 - In each task: that slice's domain skills and the **Cross-cutting harness skills** it requires,
@@ -255,8 +255,8 @@ sequential gate; the plan informs and the gate ratifies before Task 1. If the us
 plan only**, do not execute code: validate the artifact, consolidate/seal the planning delivery,
 and keep it local unless an external destination is requested.
 
-**Session boundary.** The approved plan is a phase boundary — and the plan is written to run with
-zero repo context, so execution rarely needs this session's reasoning verbatim. At the closing
+**Session boundary.** The approved plan is a phase boundary — it runs on zero repo context, so
+execution rarely needs this session's reasoning. At the closing
 gate, alongside the setup recommendations, offer the choice: **continue executing here, or start a
 fresh session (or handoff) seeded with the plan's path** — recommend the fresh session when the
 planning conversation is long, and continuing when the remaining room clearly fits the execution.
