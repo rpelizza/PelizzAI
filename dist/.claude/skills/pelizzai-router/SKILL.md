@@ -385,6 +385,11 @@ Recommendation: accept this route because <reason>.
 Single question: May I proceed with this route? (yes or adjust)
 ```
 
+When the platform offers a native option-selection tool, deliver this single question through it —
+the route block as context, the accept option first and marked in its label (e.g.
+`Accept the proposed route (Recommended)`), adjusting as the alternative. The block above is the
+content contract and the prose fallback where no such tool exists.
+
 An affirmative answer accepts the route; the user may adjust lane, discovery, artifacts, or overlay.
 Without an affirmative answer, hold the turn. After kickoff, discovery asks **one decision per
 turn**, always with a recommendation; do not turn the route block into a requirements questionnaire.

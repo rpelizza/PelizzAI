@@ -91,8 +91,11 @@ Recommendation: <best option> — <one-line reason>
 Question: <a single question>
 ```
 
-An open question is valid when options would bias the answer. Never hide a decision inside a
-"safe assumption".
+This block is the **content contract, not the delivery format**: when the platform offers a native
+option-selection tool, deliver the question through it — options selectable, the recommended one
+first and marked in its label (e.g. `<option> (Recommended)`), decision and reason as context —
+and keep the block as the prose fallback where no such tool exists. An open question is valid when
+options would bias the answer. Never hide a decision inside a "safe assumption".
 
 ### 3. Run discovery when there is a material gap
 
@@ -109,8 +112,9 @@ Recommendation: <B> — <reason>.
 Question: which option do you choose?
 ```
 
-The turn stops after the question. Silence, a recommendation, and Context7 do not count as an
-answer. After the choice, record the decision, recompute the gaps, and ask only the next question.
+The same delivery rule applies: native option-selection tool when the platform has one, this prose
+otherwise. The turn stops after the question. Silence, a recommendation, and Context7 do not count
+as an answer. After the choice, record the decision, recompute the gaps, and ask only the next question.
 Skipping the entire discovery requires an explicit request AND is only available in
 `standard`/`exploratory` — greenfield never has this exit (the HARD-GATE's rule). Record the
 waiver (`spec: explicitly waived <YYYY-MM-DD>`) and do not invent answers: record the untaken

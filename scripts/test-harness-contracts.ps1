@@ -235,6 +235,17 @@ try {
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'exactly one question per turn' 'interview-me asks exactly one question per turn'
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'Recommended:' 'interview-me highlights the best option'
 
+    # -- Issue #64: question delivery — prefer the native selector, recommendation in the label --
+    Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'native option-selection tool, use it' 'interview: prefers the platform native selector'
+    Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'where the user reads the choice' 'interview: recommendation lands where the choice is read'
+    Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'in its label' 'interview: recommended option marked in the label, first position'
+    Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'forbids fabricating choices;\s+it never forbids using the platform''s selector' 'interview: anti-format bullet does not ban the selector'
+    Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'prose format is the fallback, not a\s+preference' 'interview: prose is fallback, not preference'
+    Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'as `## How to ask` prescribes' 'interview: gap mode step 3 inherits the delivery rule'
+    Check-Match '.claude/skills/pelizzai-discovery/SKILL.md' 'content contract, not the delivery format' 'discovery: question block is content contract, native delivery preferred'
+    Check-Match '.claude/skills/pelizzai-discovery/SKILL.md' 'same delivery rule applies' 'discovery: gap example inherits the delivery rule'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'deliver this single question through it' 'router: kickoff gate goes through the native selector when available'
+
     # -- F5: interview-me is the canonical gap-closing mechanism (pre-2026-07-11 restoration) --
     # The skill is MANDATORY again at the three BASE points (pre-design, post-design, post-plan) and
     # gains a fourth: the gap that shows up mid-execution. The anti-ceremony clause ("what is NOT a
