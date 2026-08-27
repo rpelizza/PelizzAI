@@ -10,7 +10,7 @@ description: "Use before implementing a greenfield product or any change with op
 Turn intent into a design decided by the user before implementation. The skill investigates,
 surfaces alternatives, and recommends; it never fills in a product decision to gain speed.
 
-**Announce**, in the conversation's language: that you are using the PelizzAI Discovery skill in `<compact|full>` mode to resolve the design decisions before implementing.
+**Announce**, in the conversation's language: that you are using the PelizzAI Discovery skill in `<compact|full>` mode to resolve the design decisions before implementing. Every question, native or prose, follows the conversation's language.
 
 <HARD-GATE>
 Do NOT invoke an implementation skill, write code, create scaffolding, or take any implementation
@@ -80,9 +80,8 @@ Define:
 - constraints and compatibility;
 - reversible vs hard-to-reverse decisions.
 
-Consult evidence before asking so you never request facts already observable. For user decisions,
-ask **one question at a time**, even when they seem independent: the answer can change the priority,
-vocabulary, and options of the next ones. Each discovery turn contains:
+Never ask for facts already observable. For user decisions, ask **one question at a time**, even
+when they seem independent: each answer can reshape the next ones. Each discovery turn contains:
 
 ```text
 Decision: <why this changes the solution>
