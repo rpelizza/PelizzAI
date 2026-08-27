@@ -203,6 +203,10 @@
     {
       "path": ".claude/skills/pelizzai-review/references/task-reviewer.md",
       "reason": "The task reviewer briefing template — read by the coordinator when dispatching the per-task review, pasted into the reviewer prompt; never resident."
+    },
+    {
+      "path": ".claude/skills/pelizzai-onboard/references/remap-sweep.md",
+      "reason": "Dead-name sweep consulted only inside the Partial state remap branch — a consumer whose artifacts predate a harness skill rename; never resident."
     }
   ]
 }
