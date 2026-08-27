@@ -14,8 +14,8 @@ house conventions — whatever the plan lacks becomes a material gap that STOPS 
 back to the user via `pelizzai-interview`. Every question execution has to ask is a failure of
 the plan, never a license to guess.
 
-Zero context is about **complete context**, not about transcribing the future code: the plan fixes
-decisions, contracts, and criteria (see *Plan depth*), not the whole implementation.
+Zero context is about **complete context**, not about transcribing the future code: the plan
+records ratified decisions, contracts, and criteria (see *Plan depth*), not the whole implementation.
 
 **Announce**, in the conversation's language: that you are using the PelizzAI Plan skill to turn the requirements into an executable plan.
 
