@@ -359,7 +359,7 @@ A new task never inherits decisions from the previous one. Closeout belongs to `
 
 ## Kickoff gate (route as a recommendation)
 
-After assembling envelope → Proposal analysis → lane → head skill → overlays, present the **proposed route** as a **recommendation to ratify** before investing — never a form, a single block with the default pre-selected. The classification remains yours; following or adjusting it is the user's. The router is the **sole** issuer of the kickoff; the core only flags intent/audience/ambiguity and hands off.
+After assembling envelope → Proposal analysis → lane → head skill → overlays, present the **proposed route** as a **recommendation to ratify** before investing — never a form, a single block with the default marked, not pre-chosen. The classification remains yours; following or adjusting it is the user's. The router is the **sole** issuer of the kickoff; the core only flags intent/audience/ambiguity and hands off.
 
 **When it informs and proceeds:** only `read-only` review/analysis/explanation — no mutation to
 authorize. Every mutating route stops at kickoff, including `bounded`, tweak, and bug;
@@ -367,8 +367,8 @@ the block can be a single line; the affirmative answer is mandatory.
 
 **Before the kickoff:** in a consumer project without a catalog, the bootstrap proposal (§Source
 mode and bootstrap) comes first and applies even in `read-only`. It is not the kickoff — a one-line
-question about initializing the harness; a "no" returns the request to its original route
-without creating anything.
+question about initializing the harness; a "no" returns the request to its route without
+creating anything.
 
 **For every mutating task:** stop and wait for ratification. Ask a single question about the
 route, details as context:
