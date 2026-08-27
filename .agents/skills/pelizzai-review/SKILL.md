@@ -27,8 +27,7 @@ Catch problems before they propagate. The reviewer receives **fabricated context
 ```text
 Mandatory:
 - After EVERY task during plan execution (pelizzai-execute) — no exception for "it's simple".
-  The per-task form is fixed: ONE independent dispatch, both verdicts (below); risk changes the
-  DEPTH of each rubric, never whether the review happens.
+  The per-task form is fixed: ONE independent dispatch, both verdicts (below).
 - When a relevant feature is complete.
 - On the final candidate of a planned delivery, before `validated-head` — and before integrating into the base.
 - When the user asks for a review.
@@ -250,10 +249,10 @@ circuit-breaker machinery.
 A valid quick-fix does not enter this procedure. If the diff raises the risk, reclassify through the
 router and apply the new route's review before the commit.
 
-**Standalone review track:** recommend the scope derived from the request and from Git, and
-**confirm when it is ambiguous** — working tree, `<BASE>..<HEAD>` range, and PR are materially
-different interpretations. With a single plausible
-reading, proceed without asking. Apply the quality lens + Verification. This track is read-only and
+**Standalone review track:** recommend the scope derived from the request and from Git — working
+tree, `<BASE>..<HEAD>` range, and PR are materially different interpretations. An ambiguous scope
+is a material gap: close it via `pelizzai-interview`, one question at a time; proceed without
+asking only when a single plausible reading exists. Apply the quality lens + Verification. This track is read-only and
 creates no state. A Critical finding is not fixed inside the review: it becomes a new bug/tweak
 track via the router; the remaining findings are handed to the user for decision.
 
