@@ -132,7 +132,8 @@ land in the artifact at the first AUTHORIZED write, never on the current branch 
 
 If the platform's tool imposes a specific question format, follow it without changing this
 contract's semantics; where no native tool exists, the prose format is the fallback, not a
-preference.
+preference. Both delivery forms — labels, descriptions, and prose — speak the conversation's
+language.
 
 ## Gap mode: closing the hole mid-execution
 
@@ -146,9 +147,11 @@ it is not approved — present it before implementing.**
    file while holding the doubt. Code written over a self-filled gap is rework, not progress.
 2. **Name the gap in one sentence**: what is undefined and which of the material effects it changes
    (product/UX, scope, architecture, data, security, cost, or acceptance).
-3. **Bring 2–3 real options**, each with its consequence in one line, and mark the recommended one
-   as `## How to ask` prescribes — native selector when the platform has one, mark in the option's
-   label; in prose, `Recommended: <option> — <reason>`.
+3. **Bring 2–3 real options** when they are complete and do not bias the answer — each with its
+   consequence in one line, the recommended one marked as `## How to ask` prescribes: native
+   selector when the platform has one, mark in the option's label; in prose,
+   `Recommended: <option> — <reason>`. When real options would be fabricated or would bias the
+   answer, ask an open question instead.
    Facade options (one good and two absurd) are not options;
    the intelligence lies in building good alternatives and grounding them in repo/Context7 evidence.
 4. **One question at a time**, starting with the decision that conditions the rest; recompute the

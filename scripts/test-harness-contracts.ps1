@@ -252,6 +252,8 @@ try {
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'forbids fabricating choices;\s+it never forbids using the platform''s selector' 'interview: anti-format bullet does not ban the selector'
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'prose format is the fallback, not a\s+preference' 'interview: prose is fallback, not preference'
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'as `## How to ask` prescribes' 'interview: gap mode step 3 inherits the delivery rule'
+    Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'labels, descriptions, and prose — speak the conversation''s\s+language' 'interview: both delivery forms speak the conversation language'
+    Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'would bias the\s+answer, ask an open question instead' 'interview: gap mode allows an open question when options would bias'
     Check-Match '.claude/skills/pelizzai-discovery/SKILL.md' 'content contract, not the delivery format' 'discovery: question block is content contract, native delivery preferred'
     Check-Match '.claude/skills/pelizzai-discovery/SKILL.md' 'same delivery rule applies' 'discovery: gap example inherits the delivery rule'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'deliver this single question through it' 'router: kickoff gate goes through the native selector when available'
