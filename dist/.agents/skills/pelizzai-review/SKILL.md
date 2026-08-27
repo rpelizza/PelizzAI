@@ -47,7 +47,7 @@ During plan execution, each task is reviewed by **ONE independent reviewer in ON
 applying the **spec** rubric and then the **quality/evidence** rubric, in that order — in any
 lane, including bounded. The implementer has **not committed** — the code is in the working tree.
 There is no profile to pick: the sequential split-per-task was the harness's largest latency
-multiplier and bought reading order, not blindness. The
+multiplier, and what it bought was reading order, not blindness. The
 **truly blind spec lens runs on the FINAL range**, in its own dispatch (§Final branch review) —
 that is also where a requirement that fell between tasks becomes visible.
 
