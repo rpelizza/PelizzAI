@@ -108,7 +108,7 @@ If `pelizzai/domain-skills.md` does NOT exist — or it is the first interaction
 the user typed `bootstrap` — **propose** the bootstrap via `pelizzai-onboard` (maps the project,
 creates the domain skills and docs) as the first thing in the turn and wait for the answer.
 The router does not wait for the user to remember to ask: a missing catalog is signal enough to
-raise the proposal, in one line, with the reason. Both bootstrap routes speak the conversation's
+raise the proposal. Both bootstrap routes speak the conversation's
 language in everything they emit — proposal, kickoff, and confirmations included.
 
 Proposing is not executing. The bootstrap only writes after an explicit "yes" — once accepted, the
@@ -359,19 +359,19 @@ A new task never inherits decisions from the previous one. Closeout belongs to `
 
 ## Kickoff gate (route as a recommendation)
 
-After assembling envelope → Proposal analysis → lane → head skill → overlays, present the **proposed route** as a **recommendation to ratify** before investing — never a form, a single block with the default already pre-selected. The classification remains yours; following or adjusting it is the user's. The router is the **sole** issuer of the kickoff; the core only flags intent/audience/ambiguity and hands off.
+After assembling envelope → Proposal analysis → lane → head skill → overlays, present the **proposed route** as a **recommendation to ratify** before investing — never a form, a single block with the default marked, not pre-chosen. The classification remains yours; following or adjusting it is the user's. The router is the **sole** issuer of the kickoff; the core only flags intent/audience/ambiguity and hands off.
 
-**When it informs and proceeds:** only `read-only` review/analysis/explanation, because there is no
-mutation to authorize. Every mutating route stops at kickoff, including `bounded`, tweak, and bug;
-the block's depth can be a single line, but the affirmative answer is mandatory.
+**When it informs and proceeds:** only `read-only` review/analysis/explanation — no mutation to
+authorize. Every mutating route stops at kickoff, including `bounded`, tweak, and bug;
+the block can be a single line; the affirmative answer is mandatory.
 
 **Before the kickoff:** in a consumer project without a catalog, the bootstrap proposal (§Source
-mode and bootstrap) comes first and applies even in `read-only`. It is not the kickoff — it is a
-one-line question about initializing the harness; a "no" returns the request to its original route
-without creating anything.
+mode and bootstrap) comes first and applies even in `read-only`. It is not the kickoff — a one-line
+question about initializing the harness; a "no" returns the request to its route without
+creating anything.
 
-**For every mutating task:** stop and wait for ratification. Ask a single question about the route;
-show details as context, not as several simultaneous questions:
+**For every mutating task:** stop and wait for ratification. Ask a single question about the
+route:
 
 ```text
 **Kickoff gate — proposed route:**
@@ -385,18 +385,22 @@ Recommendation: accept this route because <reason>.
 Single question: May I proceed with this route? (yes or adjust)
 ```
 
-An affirmative answer accepts the route; the user may adjust lane, discovery, artifacts, or overlay.
-Without an affirmative answer, hold the turn. After kickoff, discovery asks **one decision per
+With a native option-selection tool, deliver this single question through it — the block as
+context, accept first, marked in its label, reason in its description, adjust as the
+alternative; in prose, the block is the fallback. Both deliveries speak the conversation's
+language.
+
+An affirmative answer accepts the route; the user may adjust lane, discovery, artifacts, or
+overlay; without one, hold the turn. After kickoff, discovery asks **one decision per
 turn**, always with a recommendation; do not turn the route block into a requirements questionnaire.
 
 In a greenfield/exploratory lane with a missing catalog or a new stack, the Artifacts line
-anticipates the "stack domain skills (proposed at the design edge)": they will be proposed by the
-**proactive domain skills gate** of `pelizzai-onboard` at the design→plan edge — the user already sees
-at kickoff that they are coming and decides there.
+anticipates the "stack domain skills (proposed at the design edge)": they come from the
+**proactive domain skills gate** of `pelizzai-onboard` at the design→plan edge.
 
-**Audience:** when the user seems non-technical or the intent admits ≥2 material readings, the block's first line re-presents the understanding (handshake) before routing; record `audience: technical | layperson` (see Execution record). Do not dump jargon; follow `pelizzai-prose`.
+**Audience:** when the user seems non-technical or the intent admits ≥2 material readings, the block's first line re-presents the understanding before routing; record `audience: technical | layperson`. No jargon; follow `pelizzai-prose`.
 
-**Discovery:** when there is a material gap, recommend `pelizzai-discovery`/`pelizzai-interview`.
+**Discovery:** a material gap → recommend `pelizzai-discovery`/`pelizzai-interview`.
 Accepting starts the sequential interview. Skipping discovery requires an explicit request and
 records which decisions were left unvalidated; the LLM does not fill those decisions on its own.
 

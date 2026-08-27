@@ -111,17 +111,29 @@ land in the artifact at the first AUTHORIZED write, never on the current branch 
 
 - Ask **exactly one question per turn**. Order it by the highest-impact decision that conditions
   the following ones; after the answer, recompute the interview script.
-- Use 2–3 options only when they are real and sufficiently complete; highlight
+- **When the platform offers a native option-selection tool, use it** — never deliver a closed
+  question as prose the user has to answer by typing when they could select. The contract holds
+  inside the tool: one question per turn, 2–3 real options, explicit recommendation.
+- The recommendation goes **where the user reads the choice**. In a native format with a short
+  label and a longer description per option, the recommended option comes **first** and carries
+  the mark **in its label** (e.g. `<option> (Recommended)`); the reason goes in the description.
+  A recommendation buried in a description the user does not read is a recommendation not made.
+  In prose — no native tool, or an open question — highlight
   `Recommended: <option> — <reason>` before the question.
+- Use 2–3 options only when they are real and sufficiently complete.
 - Use an open question for discovery, product language, or when listing options would bias the
   answer.
-- Do not force "Other", four options, or multiple choice for the sake of format.
+- Do not invent options to fill a format — no facade "Other", no fourth option for symmetry, no
+  closed question where the decision is genuinely open. This bullet forbids fabricating choices;
+  it never forbids using the platform's selector for real ones.
 - Explain why the answer changes the delivery. Cut cosmetic questions that do not alter the result;
   reversible product choices still belong to the user, but he can explicitly delegate
   them.
 
 If the platform's tool imposes a specific question format, follow it without changing this
-contract's semantics.
+contract's semantics; where no native tool exists, the prose format is the fallback, not a
+preference. Both delivery forms — labels, descriptions, and prose — speak the conversation's
+language.
 
 ## Gap mode: closing the hole mid-execution
 
@@ -135,8 +147,12 @@ it is not approved — present it before implementing.**
    file while holding the doubt. Code written over a self-filled gap is rework, not progress.
 2. **Name the gap in one sentence**: what is undefined and which of the material effects it changes
    (product/UX, scope, architecture, data, security, cost, or acceptance).
-3. **Bring 2–3 real options**, each with its consequence in one line, and mark
-   `Recommended: <option> — <reason>`. Facade options (one good and two absurd) are not options;
+3. **Bring 2–3 real options** when they are complete and do not bias the answer — each with its
+   consequence in one line, the recommended one marked as `## How to ask` prescribes: native
+   selector when the platform has one, mark in the option's label; in prose,
+   `Recommended: <option> — <reason>`. When real options would be fabricated or would bias the
+   answer, ask an open question instead.
+   Facade options (one good and two absurd) are not options;
    the intelligence lies in building good alternatives and grounding them in repo/Context7 evidence.
 4. **One question at a time**, starting with the decision that conditions the rest; recompute the
    following options after each answer. Never dump the whole block of gaps as a questionnaire.
