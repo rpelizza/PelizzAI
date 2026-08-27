@@ -108,7 +108,7 @@ If `pelizzai/domain-skills.md` does NOT exist — or it is the first interaction
 the user typed `bootstrap` — **propose** the bootstrap via `pelizzai-onboard` (maps the project,
 creates the domain skills and docs) as the first thing in the turn and wait for the answer.
 The router does not wait for the user to remember to ask: a missing catalog is signal enough to
-raise the proposal, in one line, with the reason. Both bootstrap routes speak the conversation's
+raise the proposal. Both bootstrap routes speak the conversation's
 language in everything they emit — proposal, kickoff, and confirmations included.
 
 Proposing is not executing. The bootstrap only writes after an explicit "yes" — once accepted, the
@@ -385,20 +385,21 @@ Recommendation: accept this route because <reason>.
 Single question: May I proceed with this route? (yes or adjust)
 ```
 
-With a native option-selection tool, deliver this single question through it — accept first,
-marked in its label, adjust as the alternative; the block is the prose fallback.
+With a native option-selection tool, deliver this single question through it — the block as
+context, accept first, marked in its label, reason in its description, adjust as the
+alternative; in prose, the block is the fallback.
 
 An affirmative answer accepts the route; the user may adjust lane, discovery, artifacts, or
 overlay; without one, hold the turn. After kickoff, discovery asks **one decision per
 turn**, always with a recommendation; do not turn the route block into a requirements questionnaire.
 
 In a greenfield/exploratory lane with a missing catalog or a new stack, the Artifacts line
-anticipates the "stack domain skills (proposed at the design edge)": they will be proposed by the
+anticipates the "stack domain skills (proposed at the design edge)": they come from the
 **proactive domain skills gate** of `pelizzai-onboard` at the design→plan edge.
 
-**Audience:** when the user seems non-technical or the intent admits ≥2 material readings, the block's first line re-presents the understanding (handshake) before routing; record `audience: technical | layperson` (see Execution record). Do not dump jargon; follow `pelizzai-prose`.
+**Audience:** when the user seems non-technical or the intent admits ≥2 material readings, the block's first line re-presents the understanding (handshake) before routing; record `audience: technical | layperson` (see Execution record). No jargon; follow `pelizzai-prose`.
 
-**Discovery:** when there is a material gap, recommend `pelizzai-discovery`/`pelizzai-interview`.
+**Discovery:** a material gap → recommend `pelizzai-discovery`/`pelizzai-interview`.
 Accepting starts the sequential interview. Skipping discovery requires an explicit request and
 records which decisions were left unvalidated; the LLM does not fill those decisions on its own.
 
