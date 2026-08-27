@@ -557,9 +557,11 @@ try {
     Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' 'Verify by re-scanning[\s\S]{0,160}returns zero dead names' 'remap-sweep: post-write re-scan must reach zero dead names'
     Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' '`pelizzai/data/history/` is never the destination' 'remap-sweep: the remap record never lands in data/history'
     Check-Match '.claude/skills/pelizzai-onboard/SKILL.md' 'commit the approved artifacts with exact\s+paths' 'onboard: bootstrap commits with exact paths before the verify'
+    Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' 'never spells\s+the dead `pelizzai-\*` identifier' 'remap-sweep: the remap note cannot reintroduce a dead identifier'
     $budgetJson = Get-Content -LiteralPath (Join-Path $root 'scripts/harness-budget.json') -Raw -Encoding utf8 | ConvertFrom-Json
-    $sweepEntry = @($budgetJson.onDemand | Where-Object { $_.path -eq '.claude/skills/pelizzai-onboard/references/remap-sweep.md' })
-    Check ($sweepEntry.Count -eq 1 -and $sweepEntry[0].reason -match 'never resident') 'budget: remap-sweep is an onDemand entry with a never-resident reason' "entries=$($sweepEntry.Count)"
+    $sweepPath = '.claude/skills/pelizzai-onboard/references/remap-sweep.md'
+    $sweepEntries = @($budgetJson.onDemand | Where-Object { ($_ -is [string] -and $_ -eq $sweepPath) -or ($_ -isnot [string] -and $_.path -eq $sweepPath) })
+    Check ($sweepEntries.Count -eq 1 -and $sweepEntries[0] -isnot [string] -and $sweepEntries[0].reason -match 'never resident') 'budget: remap-sweep is exactly one onDemand object entry with a never-resident reason' "entries=$($sweepEntries.Count)"
 
     # -- F3: model sovereignty — the model belongs to the user; the harness never downgrades anything --
     # User decision (2026-07-22): the harness respects the model chosen on the platform (simple

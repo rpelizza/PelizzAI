@@ -34,7 +34,10 @@ the router triggers real skills, not headers — but navigability and trust do (
 5. **Verify by re-scanning.** After the ratified rewrite, the sweep over `pelizzai/**/*.md` minus
    `pelizzai/data/history/` returns zero dead names. Record the remap inside the rewritten
    artifact itself — where it already keeps provenance remarks, as `profile.md` does with its
-   remap notes; `pelizzai/data/history/` is never the destination and never changes.
+   remap notes; `pelizzai/data/history/` is never the destination and never changes. The note
+   names the current skill and the remap date and describes the origin in words — it never spells
+   the dead `pelizzai-*` identifier, or the note itself would re-enter the sweep's scope and the
+   re-scan could never reach zero.
 
 ## Red flags
 
