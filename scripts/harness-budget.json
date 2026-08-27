@@ -206,7 +206,7 @@
     },
     {
       "path": ".claude/skills/pelizzai-onboard/references/remap-sweep.md",
-      "reason": "Dead-name sweep read only inside the Partial state remap branch — a consumer whose artifacts predate a harness skill rename; never resident."
+      "reason": "Dead-name sweep consulted only inside the Partial state remap branch — a consumer whose artifacts predate a harness skill rename; never resident."
     }
   ]
 }

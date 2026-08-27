@@ -355,7 +355,7 @@ close the transaction via `pelizzai-finish`. Do not leave the bootstrap uncommit
 - catalog exists, ledger missing → propose/repair only the ledger in write mode;
 - a skill exists outside the catalog → catalog it after confirming origin/content;
 - outdated profile → update only the affected fields;
-- dead `pelizzai-*` names in `pelizzai/**.md` (skills renamed since bootstrap) → run the dead-name sweep ([remap-sweep.md](references/remap-sweep.md)): catalog on disk is the ground truth, `data/history/` stays untouched, substitutions are proposed and ratified, never silent;
+- dead `pelizzai-*` names in `pelizzai/**/*.md` (skills renamed since bootstrap) → run the dead-name sweep ([remap-sweep.md](references/remap-sweep.md)): catalog on disk is the ground truth, `pelizzai/data/history/` stays untouched, substitutions are proposed and ratified, never silent;
 - read-only → just report the inconsistency.
 
 ## Canonical layout

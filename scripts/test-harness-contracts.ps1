@@ -545,14 +545,21 @@ try {
     Check-Match '.claude/skills/pelizzai-onboard/SKILL.md' 'Who invokes this gate' 'audit names who invokes the Proactive gate (brainstorming + writing-plans)'
 
     # -- Issue #67: dead-name sweep in the remap (Partial state) --
-    Check-Match '.claude/skills/pelizzai-onboard/SKILL.md' 'dead `pelizzai-\*` names in `pelizzai/\*\*\.md`' 'onboard: Partial state names the dead-name sweep'
+    Check-Match '.claude/skills/pelizzai-onboard/SKILL.md' 'dead `pelizzai-\*` names in `pelizzai/\*\*/\*\.md`' 'onboard: Partial state names the dead-name sweep'
     Check-Match '.claude/skills/pelizzai-onboard/SKILL.md' '\[remap-sweep\.md\]\(references/remap-sweep\.md\)' 'onboard: the sweep doctrine lives behind an on-demand pointer'
     Check (Test-Path (Join-Path $root '.claude/skills/pelizzai-onboard/references/remap-sweep.md')) 'onboard: remap-sweep reference exists'
     Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' 'Ground truth is the catalog on disk' 'remap-sweep: validates against the catalog, not a memorized table'
-    Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' 'excluding `data/history/`' 'remap-sweep: history is record, never rewritten'
+    Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' 'dead when no directory of that name contains a `SKILL\.md`' 'remap-sweep: installed-skill criterion is SKILL.md, matching the validator'
+    Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' 'excluding `pelizzai/data/history/`' 'remap-sweep: history is record, never rewritten'
     Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' 'Propose, never rewrite silently' 'remap-sweep: substitutions are recommend-and-ratify'
+    Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' 'material gap: close it through `pelizzai-interview`, one\s+question at a time' 'remap-sweep: ambiguous mapping goes through the canonical interview'
     Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' 'scan-only`, list the dead names[\s\S]{0,80}rewrite waits' 'remap-sweep: read-only entry reports and stops'
-    Check-Match 'scripts/harness-budget.json' 'remap-sweep\.md' 'budget: the remap-sweep reference is declared onDemand'
+    Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' 'Verify by re-scanning[\s\S]{0,160}returns zero dead names' 'remap-sweep: post-write re-scan must reach zero dead names'
+    Check-Match '.claude/skills/pelizzai-onboard/references/remap-sweep.md' '`pelizzai/data/history/` is never the destination' 'remap-sweep: the remap record never lands in data/history'
+    Check-Match '.claude/skills/pelizzai-onboard/SKILL.md' 'commit the approved artifacts with exact\s+paths' 'onboard: bootstrap commits with exact paths before the verify'
+    $budgetJson = Get-Content -LiteralPath (Join-Path $root 'scripts/harness-budget.json') -Raw -Encoding utf8 | ConvertFrom-Json
+    $sweepEntry = @($budgetJson.onDemand | Where-Object { $_.path -eq '.claude/skills/pelizzai-onboard/references/remap-sweep.md' })
+    Check ($sweepEntry.Count -eq 1 -and $sweepEntry[0].reason -match 'never resident') 'budget: remap-sweep is an onDemand entry with a never-resident reason' "entries=$($sweepEntry.Count)"
 
     # -- F3: model sovereignty — the model belongs to the user; the harness never downgrades anything --
     # User decision (2026-07-22): the harness respects the model chosen on the platform (simple

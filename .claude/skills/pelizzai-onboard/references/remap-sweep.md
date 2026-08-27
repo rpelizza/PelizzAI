@@ -14,22 +14,27 @@ the router triggers real skills, not headers — but navigability and trust do (
 ## The sweep
 
 1. **Ground truth is the catalog on disk.** List the directories under `.claude/skills/`. A
-   `pelizzai-*` identifier is dead when no directory carries that name. Never validate against a
-   hardcoded table: tables drift exactly like the artifacts being fixed.
-2. **Scan `pelizzai/**.md`, excluding `data/history/`.** History files are the record of what held
-   at the time — `overlays:` lines naming that era's skills; rewriting them falsifies the record. Everything
-   else — `profile.md`, `data/learnings.md`, `data/verification-standard.md`, `state.md`, specs
-   and plans still active — is in scope.
+   `pelizzai-*` identifier is dead when no directory of that name contains a `SKILL.md` — the
+   installed-skill criterion the validator uses; an auxiliary folder without `SKILL.md` does not
+   make a name live. Never validate against a hardcoded table: tables drift exactly like the
+   artifacts being fixed.
+2. **Scan every `.md` under `pelizzai/` (`pelizzai/**/*.md`), excluding `pelizzai/data/history/`.**
+   History files are the record of what held at the time — `overlays:` lines naming that era's
+   skills; rewriting them falsifies the record. Everything else — `profile.md`,
+   `data/learnings.md`, `data/verification-standard.md`, `state.md`, specs and plans still
+   active — is in scope.
 3. **Propose, never rewrite silently.** The artifacts belong to the user. For each dead name, find
    the current skill that owns the same role (read the descriptions in the catalog; the rename
    usually preserves the role) and present the substitution list in one block — old name, proposed
    name, files touched — with a recommendation, and wait for ratification. When no current skill
-   clearly owns the role, ask instead of guessing.
+   clearly owns the role, that is a material gap: close it through `pelizzai-interview`, one
+   question at a time, before proposing or writing anything.
 4. **Read-only entry reports and stops.** In `scan-only`, list the dead names and where they
    point; the rewrite waits for a write-authorized pass, like every Partial state repair.
-5. **Verify by re-scanning.** After the ratified rewrite, the sweep over `pelizzai/**.md` minus
-   `data/history/` returns zero dead names. Record the remap in the artifact's own history when it
-   has one.
+5. **Verify by re-scanning.** After the ratified rewrite, the sweep over `pelizzai/**/*.md` minus
+   `pelizzai/data/history/` returns zero dead names. Record the remap inside the rewritten
+   artifact itself — where it already keeps provenance remarks, as `profile.md` does with its
+   remap notes; `pelizzai/data/history/` is never the destination and never changes.
 
 ## Red flags
 
