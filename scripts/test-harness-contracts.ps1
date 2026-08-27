@@ -245,6 +245,7 @@ try {
     Check-Match '.claude/skills/pelizzai-discovery/SKILL.md' 'reason as context; the block is the prose fallback' 'discovery: prose block is the fallback'
     Check-Match '.claude/skills/pelizzai-discovery/SKILL.md' 'Every question, native or prose, follows the conversation''s language' 'discovery: questions follow the conversation language in both deliveries'
     Check-Match '.claude/skills/pelizzai-router/SKILL.md' '^With a native option-selection tool, deliver this single question through it — the block as\s+context, accept first, marked in its label, reason in its description, adjust as the\s+alternative; in prose, the block is the fallback' 'router: native kickoff carries context, accept-first, label mark, reason, adjust, and prose fallback'
+    Check-Match '.claude/skills/pelizzai-router/SKILL.md' 'Both deliveries speak the conversation''s\s+language' 'router: kickoff speaks the conversation language in both deliveries'
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'forbids fabricating choices;\s+it never forbids using the platform''s selector' 'interview: anti-format bullet does not ban the selector'
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'prose format is the fallback, not a\s+preference' 'interview: prose is fallback, not preference'
     Check-Match '.claude/skills/pelizzai-interview/SKILL.md' 'as `## How to ask` prescribes' 'interview: gap mode step 3 inherits the delivery rule'

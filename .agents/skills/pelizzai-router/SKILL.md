@@ -371,7 +371,7 @@ question about initializing the harness; a "no" returns the request to its route
 creating anything.
 
 **For every mutating task:** stop and wait for ratification. Ask a single question about the
-route, details as context:
+route:
 
 ```text
 **Kickoff gate — proposed route:**
@@ -387,7 +387,8 @@ Single question: May I proceed with this route? (yes or adjust)
 
 With a native option-selection tool, deliver this single question through it — the block as
 context, accept first, marked in its label, reason in its description, adjust as the
-alternative; in prose, the block is the fallback.
+alternative; in prose, the block is the fallback. Both deliveries speak the conversation's
+language.
 
 An affirmative answer accepts the route; the user may adjust lane, discovery, artifacts, or
 overlay; without one, hold the turn. After kickoff, discovery asks **one decision per
@@ -397,7 +398,7 @@ In a greenfield/exploratory lane with a missing catalog or a new stack, the Arti
 anticipates the "stack domain skills (proposed at the design edge)": they come from the
 **proactive domain skills gate** of `pelizzai-onboard` at the design→plan edge.
 
-**Audience:** when the user seems non-technical or the intent admits ≥2 material readings, the block's first line re-presents the understanding (handshake) before routing; record `audience: technical | layperson` (see Execution record). No jargon; follow `pelizzai-prose`.
+**Audience:** when the user seems non-technical or the intent admits ≥2 material readings, the block's first line re-presents the understanding before routing; record `audience: technical | layperson`. No jargon; follow `pelizzai-prose`.
 
 **Discovery:** a material gap → recommend `pelizzai-discovery`/`pelizzai-interview`.
 Accepting starts the sequential interview. Skipping discovery requires an explicit request and
