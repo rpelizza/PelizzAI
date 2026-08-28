@@ -82,11 +82,13 @@ A conversation-only change does not invalidate proof. A product change does.
 
 Combine rows for mixed tasks. Do not run unrelated checks just to inflate output volume.
 
-**The service-starts row is mandatory when the diff touches initialization, migration, index,
-schema, runtime configuration, a dependency, or the application code of a runnable surface.** A
-green suite proves units; it does not prove the process initializes. When the project runs in
-containers (or any managed stack), the final verification **brings the affected stack back up and
-observes the service become healthy** — per touched surface:
+**When the project has a runnable surface, the service-starts row is mandatory for a diff that
+touches initialization, migration, index, schema, runtime configuration, a dependency, or that
+surface's application code.** A project with no service or stack — a purely static build, a
+library — has no boot to prove. A green suite proves units; it does not prove the process
+initializes. When the project runs in containers (or any managed stack), the final verification
+**brings the affected stack back up and observes the service become healthy** — per touched
+surface:
 
 ```text
 frontend touched            → production build + the frontend's own suite and lint; an SSR or

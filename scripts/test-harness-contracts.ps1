@@ -157,7 +157,9 @@ try {
     # Issue #71 — startup proof: a green suite never substitutes for the service observed rising.
     Check-Match '.claude/skills/pelizzai-verify/SKILL.md' '\| service starts \(boot/runtime\) \|' 'verify: proof-by-effect has a service-starts row'
     Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'against\s+the\s+data\s+state\s+it\s+actually\s+has' 'verify: startup proof runs against the real data state'
-    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'service-starts\s+row\s+is\s+mandatory\s+when\s+the\s+diff\s+touches\s+initialization,\s+migration,\s+index,\s+schema,\s+runtime\s+configuration,\s+a\s+dependency,\s+or\s+the\s+application\s+code\s+of\s+a\s+runnable\s+surface' 'verify: service-starts is mandatory for the full boot-touching trigger list'
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'When\s+the\s+project\s+has\s+a\s+runnable\s+surface,\s+the\s+service-starts\s+row\s+is\s+mandatory' 'verify: service-starts scoped to projects with a runnable surface'
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'touches\s+initialization,\s+migration,\s+index,\s+schema,\s+runtime\s+configuration,\s+a\s+dependency' 'verify: service-starts is mandatory for the full boot-touching trigger list'
+    Check-Match '.claude/skills/pelizzai-execute/references/task-cycle.md' 'runnable surface[\s\S]{0,160}initialization,\s+migration,\s+index,\s+schema,\s+runtime\s+configuration,\s+or\s+a\s+dependency' 'task-cycle: startup trigger set remains complete'
     Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'brings\s+the\s+affected\s+stack\s+back\s+up\s+and\s+observes\s+the\s+service\s+become\s+healthy' 'verify: final verification brings the stack back up'
     Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'build\s+--no-cache' 'verify: build-time inputs demand a no-cache rebuild'
     Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'fixtures\s+are born clean' 'verify: names the clean-fixture fallacy'
