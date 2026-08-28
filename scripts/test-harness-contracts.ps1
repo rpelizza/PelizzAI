@@ -1548,6 +1548,7 @@ try {
     Check-Match '.claude/skills/pelizzai-review/references/code-reviewer.md' 'structurally blind\s+to .this code solves the wrong problem.' 'code-reviewer: names the blindness of checking the code against itself'
     Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'A predicate with N conditions demands N scenarios, one per condition' 'tdd: N conditions demand N scenarios'
     Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'proves the SET, not each condition' 'tdd: the combined scenario proves the set'
+    Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'Define a baseline case; for each condition, add\s+one scenario' 'tdd: each predicate scenario has an explicit baseline case'
     Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'changes ONLY that condition, holding the others at values that make the\s+observable result depend on it' 'tdd: each scenario isolates its condition against the baseline case'
     Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'assert the expected result of every scenario' 'tdd: every scenario asserts its observable result'
     Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'Enumerate ALL writers of the same field/document' 'verify: an atomic guarantee enumerates every writer'
