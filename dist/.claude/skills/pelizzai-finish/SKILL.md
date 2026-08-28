@@ -51,9 +51,12 @@ The state/closure sections below apply only to consumer projects.
   doc generator, or fix runs.
 - A coverage gap (security, UI, documentation) becomes an explicit offer in §1.5, never silence;
   accepting it returns the task to the validation cycle — it never becomes a post-seal patch.
-- The single new commit touches only harness metadata: pelizzai/data/state.md, the
+- In consumer mode only, the single new commit touches only harness metadata:
+  pelizzai/data/state.md, the
   pelizzai/data/history/<YYYY-MM-DD>-<slug>.md the seal's migration just generated, and — only
   when §1.6 ratified them — pelizzai/data/verification-standard.md and pelizzai/data/learnings.md.
+  Source mode (sentinel scripts/pelizzai-source-repo.txt, the sole criterion) creates no
+  pelizzai/ and makes no closure commit: delivery-head = validated-head.
 - Every §1.6 write is recommend-and-ratify: nothing lands in verification-standard.md or
   learnings.md without the user's explicit yes, and a decline is recorded, never silent.
 - Keeping local is the default recommendation, but it still requires an answer at the gate.
@@ -247,6 +250,10 @@ Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), produce no route ana
 gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
 ### 2b. Seal the closure in `delivered` (metadata-only commit)
+
+**Consumer only.** In source mode (sentinel `scripts/pelizzai-source-repo.txt`, the sole
+criterion) there is no cursor, no migration, and no closure commit: skip this whole subsection —
+`delivery-head = validated-head` — and execute the destination (§3) directly.
 
 `delivered` = content sealed + destination executed; it is recorded BEFORE leaving the task branch
 (it rides along in the PR). In the `pelizzai/data/state.md` already modified by the seal:

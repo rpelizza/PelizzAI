@@ -79,7 +79,10 @@ them in a commit or stash.
 
 Use a safe default when unambiguous:
 
-- cursor provably lagging and no identity conflict → update only the evidenced fields;
+- cursor provably lagging and no identity conflict → update only the evidenced fields — EXCEPT
+  the stale cursor short of `delivered` (§1): a full-SHA `validated-head` already contained in
+  `base-ref` makes that branch MANDATORY, with its atomic recovery — never a field-only update
+  that frees the cursor past the migration and the write-back;
 - active record points to a valid worktree → run from there;
 - coherent WIP **outside** a mid-plan resumption (standalone tweak/bug on the right branch) →
   resume in place.
