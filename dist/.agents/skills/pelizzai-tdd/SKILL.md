@@ -216,7 +216,11 @@ flowchart LR
 [ ] No speculative functionality got in.
 ```
 
-For a regression bug, `pelizzai-verify` requires the reinforced proof: green with the fix, failing when only the fix is removed/reverted, green after restoring it.
+For a regression bug, `pelizzai-verify` requires the reinforced proof that the test detects the
+defect, by any of the same safe means the seal accepts — a preserved RED, a controlled mutation
+the test kills, or the reversion cycle (green with the fix → failing with only the fix
+removed/reverted → green after restoring it) — always with the `kills:` line naming the rejected
+implementation. The three are equivalent forms of one requirement, not competing bars.
 
 ## When a test fails unexpectedly
 

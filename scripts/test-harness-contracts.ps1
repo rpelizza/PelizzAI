@@ -1510,6 +1510,7 @@ try {
     Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'An observed RED is necessary, not sufficient\.[\s\S]{0,900}evidence that names nothing does not discriminate' 'tdd: the RED step rejects unnamed evidence'
     Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'Mutation details are required only when the\s+chosen means IS a controlled mutation' 'tdd: preserved RED and reversion carry kills without a mutation (review round 2)'
     Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'demand the discriminating proof[\s\S]{0,300}name the wrong implementation\s+rejected' 'task-reviewer: the demand itself names the rejected implementation'
+    Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'For a regression bug[\s\S]{0,120}by any of the same safe means the seal accepts[\s\S]{0,300}equivalent forms of one requirement, not competing bars' 'tdd: the regression proof accepts the three safe means (full review)'
 } catch {
     Check $false 'issue #75 discriminating-test bar' $_.Exception.Message
 }
