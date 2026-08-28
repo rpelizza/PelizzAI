@@ -57,15 +57,29 @@ task branch** — never a commit on a protected branch. Source mode: the same ob
 in the native execution record, without creating `pelizzai/` or `history/` runtime.
 
 **Stale cursor — the delivery bypassed the closeout.** A cursor whose phase is EARLIER than
-`delivered` but whose `validated-head` is set and already contained in `base-ref`
+`delivered`, whose `validated-head` is a full SHA (a `<none>`/missing value never enters this
+path), and whose `validated-head` is already contained in `base-ref`
 (`git merge-base --is-ancestor <validated-head> <base-ref>`) means the content was integrated
 outside `pelizzai-finish` — merged by hand between sessions, or the closeout was skipped. Do not
 overwrite it as WIP and do not open the new task over it. Propose-and-confirm the closure
-recovery: run the SAME lossless migration (the block never migrated), stamp the `## History`
-index line and `phase: done` with the git evidence, and offer the `pelizzai-finish` §1.6
-write-back from the migrated block — baseline rows, incident candidates, and marked lessons never
-ran either, and this observation is their last exit. A stale cursor left "in delivery" makes
-every next opening read a task that no longer exists.
+recovery as ONE atomic movement, in this order:
+
+```text
+1. Run the SAME lossless migration (the block never migrated).
+2. Present the `pelizzai-finish` §1.6 candidates read from the migrated block — baseline rows,
+   incident candidates, marked lessons: they never ran, and this observation is their last exit.
+   A declined proposal is recorded in the history file; no knowledge file is touched for it.
+3. Stamp the `## History` index line and `phase: done` with the git evidence. The integration is
+   already observed, so this is the reconciliation's stamp — not a seal, and not a `delivered`
+   this recovery would invent: `pelizzai-finish` never ran for this delivery.
+4. Commit cursor, history file, and the knowledge files the user ratified in the SAME metadata
+   commit — on the new task branch, as always (never a commit on a protected branch). Only then
+   free slug/branch/base-*/validated-head/confirm for the new task.
+```
+
+Source mode: the same observation applies to the native execution record, with no `pelizzai/`
+write-back. A stale cursor left "in delivery" makes every next opening read a task that no
+longer exists.
 
 In both modes, validate the branch with `git branch --show-current` and the worktree via
 `git worktree list`/a command run inside the recorded path. A material divergence calls

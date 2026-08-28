@@ -51,12 +51,14 @@ the new task branch (never on a protected one). Failed (PR closed without merge)
 in this observation. Source mode: the same observation applies to the native execution record,
 without creating `pelizzai/` or `history/`.
 
-**Stale cursor short of `delivered`.** If the phase is earlier than `delivered` but `base-ref`
-already contains `validated-head` (branch merged or deleted, release cut), the delivery bypassed
+**Stale cursor short of `delivered`.** If the phase is earlier than `delivered`,
+`validated-head` is a full SHA (a `<none>`/missing value never enters this path), and `base-ref`
+already contains it (branch merged or deleted, release cut), the delivery bypassed
 the closeout — this is not WIP divergence either, and resuming work on top of an integrated
 cursor is the failure. Apply `pelizzai-execute` → `references/delivery-seal.md` §Stale cursor:
-propose-and-confirm the lossless migration plus the `done` stamp, and offer the `pelizzai-finish`
-§1.6 write-back from the migrated block.
+propose-and-confirm the atomic recovery — lossless migration, the `pelizzai-finish` §1.6
+proposals from the migrated block, and the `done` stamp, all landing in the same metadata
+commit on the new task branch.
 
 ## 2. Inventory the WIP
 

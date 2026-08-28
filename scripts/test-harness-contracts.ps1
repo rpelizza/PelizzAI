@@ -186,9 +186,17 @@ try {
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'only\s+when §1\.6 ratified them — pelizzai/data/verification-standard\.md and pelizzai/data/learnings\.md' 'finish: closure commit admits the two ratified files'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'nothing lands in verification-standard\.md or\s+learnings\.md without the user''s explicit yes' 'finish: write-back is recommend-and-ratify'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' ':\(exclude\)pelizzai/data/verification-standard\.md' 'finish: product guard excludes the ratified standard'
-    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'Stale cursor[\s\S]{0,260}merge-base --is-ancestor' 'delivery-seal: stale cursor observed against git'
-    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'offer the .pelizzai-finish. §1\.6\s+write-back from the migrated block' 'delivery-seal: recovery offers the write-back'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'Stale cursor[\s\S]{0,400}merge-base --is-ancestor' 'delivery-seal: stale cursor observed against git'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' '.pelizzai-finish. §1\.6 candidates read from the migrated block' 'delivery-seal: recovery presents the write-back candidates'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'ONE atomic movement' 'delivery-seal: the recovery is one atomic movement (review round 1)'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'SAME metadata\s+commit' 'delivery-seal: ratified knowledge rides the same metadata commit (review round 1)'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'full SHA \(a .<none>./missing value never enters this\s+path\)' 'delivery-seal: stale path requires a full validated-head (review round 1)'
     Check-Match '.claude/skills/pelizzai-resume/SKILL.md' 'Stale cursor short of .delivered.' 'resume: stale pre-delivered cursor is not WIP divergence'
+    Check-Match '.claude/skills/pelizzai-resume/SKILL.md' 'never enters this path' 'resume: stale path requires a full validated-head (review round 1)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'symptom similarity is not identity' 'finish: recurrence identity is deterministic (review round 1)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'equivalence is\s+never inferred' 'finish: the lesson sweep accepts only the explicit marker (review round 1)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'explicit \*\*allowlist\*\*' 'finish: ratification produces the guard allowlist (review round 1)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'unratified write[\s\S]{0,60}stop' 'finish: a knowledge file off the allowlist invalidates the closeout (review round 1)'
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'Baseline row replacement .pelizzai-finish. proposes at closeout' 'evolve: standard writers include the closeout proposal'
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'incident candidates for defects confirmed during the delivery' 'evolve: learnings writers include closeout candidates'
     Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'closeout for defects confirmed during any delivery, review rounds included' 'learnings template: finish presents incident candidates'
@@ -1454,7 +1462,7 @@ try {
 
     # The closure metadata set: state.md + the block migrated to history/, plus the two
     # pelizzai/data files only when the §1.6 write-back ratified them (issue #66).
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'only the closure metadata files[\s\S]{0,300}§1\.6 ratified' 'finish-task: pre-destination guard requires the closure metadata set'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'only the closure metadata files[\s\S]{0,300}§1\.6 allowlist' 'finish-task: pre-destination guard requires the closure metadata set'
 
     # A plan gap goes to the interview; guessing stopped being expected behavior.
     Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'whatever the plan lacks[\s\S]{0,140}pelizzai-interview' 'writing-plans: a plan gap goes to interview-me, never to guessing'
