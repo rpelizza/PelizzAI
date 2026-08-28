@@ -17,9 +17,11 @@
 > their place, the pointer
 > `<!-- archived to pelizzai/data/history/learnings-<YYYY>.md — consult on a recurrence check -->`.
 >
-> Incidents are written when a defect's root cause is CONFIRMED (usually by `pelizzai-diagnose`,
-> inside the fix's own commit); `pelizzai-finish` counts recurrences at closeout;
-> `pelizzai-evolve` promotes and retires, ratified by the user.
+> Incidents are written when a defect's root cause is CONFIRMED — by `pelizzai-diagnose` inside
+> the fix's own commit when the task is a bug, or offered as candidates by `pelizzai-finish` at
+> closeout for defects confirmed during any delivery, review rounds included; `pelizzai-finish`
+> also counts recurrences at closeout; `pelizzai-evolve` promotes and retires, ratified by the
+> user.
 
 ## Active rules
 

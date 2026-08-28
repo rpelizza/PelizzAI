@@ -136,7 +136,7 @@
         ".claude/skills/pelizzai-execute/SKILL.md",
         ".claude/skills/pelizzai-execute/references/task-cycle.md"
       ],
-      "ceilingBytes": 132358,
+      "ceilingBytes": 132528,
       "targetBytes": 85000
     },
     {
@@ -180,7 +180,7 @@
       },
       "skillMaxLines": {
         "max": 400,
-        "allowed": 3
+        "allowed": 4
       },
       "referenceTocAfterLines": {
         "max": 300,

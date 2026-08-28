@@ -56,6 +56,17 @@ branch. That is why the reconciliation **reads** on the current branch (even a p
 task branch** — never a commit on a protected branch. Source mode: the same observation applies
 in the native execution record, without creating `pelizzai/` or `history/` runtime.
 
+**Stale cursor — the delivery bypassed the closeout.** A cursor whose phase is EARLIER than
+`delivered` but whose `validated-head` is set and already contained in `base-ref`
+(`git merge-base --is-ancestor <validated-head> <base-ref>`) means the content was integrated
+outside `pelizzai-finish` — merged by hand between sessions, or the closeout was skipped. Do not
+overwrite it as WIP and do not open the new task over it. Propose-and-confirm the closure
+recovery: run the SAME lossless migration (the block never migrated), stamp the `## History`
+index line and `phase: done` with the git evidence, and offer the `pelizzai-finish` §1.6
+write-back from the migrated block — baseline rows, incident candidates, and marked lessons never
+ran either, and this observation is their last exit. A stale cursor left "in delivery" makes
+every next opening read a task that no longer exists.
+
 In both modes, validate the branch with `git branch --show-current` and the worktree via
 `git worktree list`/a command run inside the recorded path. A material divergence calls
 `pelizzai-resume` in the corresponding mode; it preserves WIP before reconciling.

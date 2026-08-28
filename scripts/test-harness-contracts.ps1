@@ -170,6 +170,31 @@ try {
     Check-Match '.claude/skills/pelizzai-evolve/templates/verification-standard.md' '\| Surface \| Bring-up[^\n]*\| Healthy means \|' 'verification-standard template: bring-up table names surface, command, and healthy'
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'four parts' 'evolve: standard documented with four parts'
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' '\*\*Stack startup\*\*' 'evolve: the four parts include Stack startup'
+    # Issue #66 — closure write-back: the delivery feeds pelizzai/data instead of burying its
+    # knowledge in the cursor, and a cursor left behind by a bypassed closeout is observed, not
+    # overwritten. Recovered in part from the pre-rollback finish (PR #39 semantics).
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '## 1\.6\. Closure write-back' 'finish: closure write-back section exists'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'after the §1\.5 net and BEFORE the destination offer' 'finish: write-back runs before the destination'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'REPLACEMENT \(replace, never\s+append' 'finish: baseline row is replaced, never appended'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'found and fixed in review rounds inside a feature task' 'finish: review-found defects become incident candidates'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'is one confirmation path, not the only\s+one' 'finish: diagnose is not the only incident path'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'rule ALREADY in Active rules[\s\S]{0,260}worth-it gate' 'finish: recurrence despite the rule routes to the worth-it gate'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'WHOLE corpus[\s\S]{0,120}history/learnings-<YYYY>\.md' 'finish: recurrence counts over the whole corpus'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'budgets \*\*per section, never summed\*\*' 'finish: budget check per section returns to the closeout'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'lesson\(evolve\):' 'finish: sweeps the lesson(evolve) marker'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'a lesson not swept here dies as archaeology' 'finish: names the cost of skipping the sweep'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'only\s+when §1\.6 ratified them — pelizzai/data/verification-standard\.md and pelizzai/data/learnings\.md' 'finish: closure commit admits the two ratified files'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'nothing lands in verification-standard\.md or\s+learnings\.md without the user''s explicit yes' 'finish: write-back is recommend-and-ratify'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' ':\(exclude\)pelizzai/data/verification-standard\.md' 'finish: product guard excludes the ratified standard'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'Stale cursor[\s\S]{0,260}merge-base --is-ancestor' 'delivery-seal: stale cursor observed against git'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'offer the .pelizzai-finish. §1\.6\s+write-back from the migrated block' 'delivery-seal: recovery offers the write-back'
+    Check-Match '.claude/skills/pelizzai-resume/SKILL.md' 'Stale cursor short of .delivered.' 'resume: stale pre-delivered cursor is not WIP divergence'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'Baseline row replacement .pelizzai-finish. proposes at closeout' 'evolve: standard writers include the closeout proposal'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'incident candidates for defects confirmed during the delivery' 'evolve: learnings writers include closeout candidates'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'closeout for defects confirmed during any delivery, review rounds included' 'learnings template: finish presents incident candidates'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/verification-standard.md' 'Baseline row replacement when a surface was approved with new numbers' 'verification-standard template: closeout replacement is taught'
+    Check-Match '.claude/skills/pelizzai-execute/templates/state.md' 'lesson\(evolve\):' 'state template: the lesson marker has a placeholder'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'lesson\(evolve\):' 'execute: teaches the lesson marker in progress hygiene'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'metadata-only' 'finish limits closeout to metadata'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Offer the destination[\s\S]{0,180}Keep local[^\n]*recommend' 'finish presents the destination with local recommended'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'never auto-confirmed' 'finish requires an explicit decision even to keep local'
@@ -1427,8 +1452,9 @@ try {
     Check-Match '.claude/skills/pelizzai-preferences/SKILL.md' 'disjoint paths' 'preferences: the floor does not deny parallel writes on disjoint paths'
     Check-Match '.claude/skills/pelizzai-preferences/SKILL.md' 'never one worktree per agent' 'preferences: the floor repeats the one-worktree-per-agent ban'
 
-    # The closure is TWO metadata files: state.md + the block migrated to history/.
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'the two closure metadata files' 'finish-task: pre-destination guard requires state + history, not just state'
+    # The closure metadata set: state.md + the block migrated to history/, plus the two
+    # pelizzai/data files only when the §1.6 write-back ratified them (issue #66).
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'only the closure metadata files[\s\S]{0,300}§1\.6 ratified' 'finish-task: pre-destination guard requires the closure metadata set'
 
     # A plan gap goes to the interview; guessing stopped being expected behavior.
     Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'whatever the plan lacks[\s\S]{0,140}pelizzai-interview' 'writing-plans: a plan gap goes to interview-me, never to guessing'

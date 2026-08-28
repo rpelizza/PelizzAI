@@ -418,7 +418,9 @@ divergence.
 **Progress hygiene (consumer).** Record **one line per task** of the plan under `## Progress`
 (`T<n> ✅ <sha|date> — short note if any`); long reports (QA, review, investigation, round
 decisions) go to `pelizzai/data/reports/<YYYY-MM-DD>-<slug>-<topic>.md` (ignored) with the link
-in the state, never pasted into the cursor's body. When `state.md` exceeds ~60 lines, propose
+in the state, never pasted into the cursor's body. A lesson meant to outlive the task is marked
+`- lesson(evolve): <imperative>` — `pelizzai-finish` sweeps these at closeout; an unmarked lesson
+dies with the migration. When `state.md` exceeds ~60 lines, propose
 compacting once (advisory, same model as the cadence; it never blocks): the whole template is
 ~50 lines, so that threshold already exposes a bloated cursor. Apart from migrating an intact
 block to `history/` (lossless), any condensation of content is propose-confirm.
