@@ -513,7 +513,11 @@ After this step, `git status --porcelain` must be empty and `validated-head` rem
 
 ```text
 1. Capture candidate-head = `git rev-parse HEAD`.
-2. FINAL REVIEW via pelizzai-review on the exact range `base-sha..candidate-head`. Use an
+2. Run, by the coordinator itself, all applicable checks of the profile (test/lint/build/render/
+   dry-run/stack bring-up/visual etc.), from scratch, with output and exit code — the full suite
+   and the stack bring-up hold this position, before the final review (task-cycle §2). Do not
+   invent a suite for a static artifact.
+3. FINAL REVIEW via pelizzai-review on the exact range `base-sha..candidate-head`. Use an
    independent reviewer, at the session's model — never a smaller one — and the
    highest effort the platform allows (see task-cycle §8).
    Narrow exception: a single `bounded` task, `read-only`/`write-local` effect, low risk,
@@ -521,9 +525,6 @@ After this step, `git status --porcelain` must be empty and `validated-head` rem
    if `reviewed-tree == candidate-head^{tree}`. Missing any item — `write-shared` effect,
    medium/high risk, or a sensitive surface — requires a normal
    review (see `pelizzai-review` → "Final branch review"). Critical/Important block.
-3. Run, by the coordinator itself, all applicable checks of the profile (test/lint/build/render/
-   dry-run/visual etc.), from scratch, with output and exit code. Do not invent a suite for a
-   static artifact.
 4. Re-read the plan/spec requirement by requirement and point to where each one was delivered.
 5. Run pelizzai-verify with the fresh evidence.
 ```
