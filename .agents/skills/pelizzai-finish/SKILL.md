@@ -286,6 +286,11 @@ git add -- pelizzai/data/verification-standard.md pelizzai/data/learnings.md
 # the guard interrupts the action; it does not report it after the fact.
 git diff --cached --name-only
 
+# and judge the PATCH, not only the path: every hunk below must correspond to one
+# §1.6 proposal the user ratified — a hunk no proposal covers is an unratified write
+# even inside an allowlisted file: unstage and stop.
+git diff --cached -- pelizzai/data/verification-standard.md pelizzai/data/learnings.md
+
 git commit -m "chore: seal task as delivered"
 ```
 
@@ -295,7 +300,9 @@ Before executing the destination, prove the three guards:
 # second guard, after the commit: the committed set must repeat the staged set —
 # state.md + the history file + the §1.6 allowlist, nothing more; a knowledge file
 # here that the allowlist does not name is an unratified write that got past the
-# pre-commit guard — the closeout is invalid.
+# pre-commit guard — the closeout is invalid. Repeat the patch judgment too:
+# git diff <validated-head>..HEAD -- <the allowlisted files> must show only
+# ratified hunks.
 git diff --name-only <validated-head>..HEAD
 
 # no product difference outside the harness metadata (the two knowledge files are excluded

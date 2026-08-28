@@ -200,10 +200,13 @@ try {
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'equivalence is\s+never inferred' 'finish: the lesson sweep accepts only the explicit marker (review round 1)'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'explicit \*\*allowlist\*\*' 'finish: ratification produces the guard allowlist (review round 1)'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'unratified write[\s\S]{0,80}stop' 'finish: a knowledge file off the allowlist invalidates the closeout (review round 1)'
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'PRE-COMMIT guard — read and judge BEFORE git commit[\s\S]{0,300}git diff --cached --name-only' 'finish: the allowlist is judged on the staged set before the commit (full review)'
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'second guard, after the commit' 'finish: the post-commit check remains as the second guard (full review)'
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'value is .none. or a template placeholder \(.<\.\.\.>.\)' 'finish: the lesson sweep skips none and template placeholders (full review)'
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'superseded row, the new numbers, and the evidence' 'finish: a ratified replacement records the superseded baseline in history (full review)'
+    # Block-scoped (full review rounds 3-4): each phrase is pinned INSIDE the block that
+    # consumes it, with the commands, paths, and stop action required together and in order —
+    # the phrase surviving elsewhere in the file cannot keep the suite green.
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'PRE-COMMIT guard — read and judge BEFORE git commit[\s\S]{0,340}unratified write: unstage it and stop[\s\S]{0,160}git diff --cached --name-only[\s\S]{0,60}judge the PATCH, not only the path[\s\S]{0,300}git diff --cached -- pelizzai/data/verification-standard\.md pelizzai/data/learnings\.md[\s\S]{0,20}git commit -m "chore: seal task as delivered"' 'finish: pre-commit block judges names AND patch, in order, before the commit'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'second guard, after the commit[\s\S]{0,440}ratified hunks\.[\s\S]{0,10}git diff --name-only <validated-head>\.\.HEAD' 'finish: the post-commit second guard repeats names and patch judgment'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '\*\*c\) Marked lessons[\s\S]{0,700}value is .none. or a template placeholder \(.<\.\.\.>.\)[\s\S]{0,120}never\s+let it reach .learnings\.md.' 'finish: the lesson-sweep block itself skips none and placeholders'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '\*\*a\) Baseline rows[\s\S]{0,1100}records, in the .pelizzai/data/history/<YYYY-MM-DD>-<slug>\.md. file the §2b\s+migration creates[\s\S]{0,60}superseded row, the new numbers, and the evidence' 'finish: the baseline block itself writes the superseded row to history'
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'Baseline row replacement .pelizzai-finish. proposes at closeout' 'evolve: standard writers include the closeout proposal'
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'incident candidates for defects confirmed during the delivery' 'evolve: learnings writers include closeout candidates'
     Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'closeout for defects confirmed during any delivery, review rounds included' 'learnings template: finish presents incident candidates'
@@ -1470,7 +1473,7 @@ try {
     # The closure metadata set: state.md + the block migrated to history/, plus the two
     # pelizzai/data files only when the §1.6 write-back ratified them (issue #66).
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'only the closure metadata files: .pelizzai/data/state\.md., the\s+.pelizzai/data/history/<YYYY-MM-DD>-<slug>\.md.[\s\S]{0,120}§1\.6 allowlist — nothing more' 'finish-task: pre-destination guard names each closure path and the allowlist'
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'allowlist does not name is an unratified write: stop, do not publish' 'finish-task: a knowledge file off the allowlist blocks publication'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'git diff --name-only <validated-head>\.\.<delivery-head>[\s\S]{0,440}allowlist does not name is an unratified write: stop, do not publish' 'finish-task: the pre-destination block itself blocks publication off the allowlist'
 
     # A plan gap goes to the interview; guessing stopped being expected behavior.
     Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'whatever the plan lacks[\s\S]{0,140}pelizzai-interview' 'writing-plans: a plan gap goes to interview-me, never to guessing'
