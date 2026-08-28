@@ -23,6 +23,19 @@
 
 - <criterion> → <command / interaction> → <output that proves it>
 
+## Stack startup
+
+<!-- Per runnable surface (service, container, worker, frontend): the bring-up command and what
+     observed HEALTHY means. At final verification, pelizzai-verify brings the affected stack
+     back up with these commands and watches for that signal — a green suite never substitutes
+     for it.
+     When the diff touches build-time inputs (Dockerfile, .env consumed by containers, build
+     args, dependencies), use the no-cache path: the observed process must contain the diff. -->
+
+| Surface | Bring-up (regular / no-cache when build inputs changed) | Healthy means |
+| --- | --- | --- |
+| <service> | <e.g. docker compose up -d / down → build --no-cache → up -d> | <healthcheck, readiness endpoint, or startup log line> |
+
 ## Baseline
 
 <!-- The latest known-good state PER SURFACE (endpoint, screen, command, bundle, suite) — one

@@ -74,6 +74,7 @@ A conversation-only change does not invalidate proof. A product change does.
 | preserving refactor | characterization/equivalent suite before and after | new test invented on green |
 | build/type/lint | the matching canonical command + exit code | extrapolating one check to another |
 | config/schema/migration/IaC | parser/validate/plan/dry-run, delta, and applicable rollback | unit test without observing the artifact |
+| service starts (boot/runtime) | process/stack started and observed healthy (healthcheck, readiness, startup log) in that stack's environment, against the data state it actually has | green suite; test that calls the migration functions outside the service lifecycle |
 | integration | real fixture/sandbox/contract at the boundary | mock that removes the boundary |
 | UI | `pelizzai-interface`: app running, states, viewports, accessibility/visual | green build or a single screenshot without the flow |
 | docs/prompt/policy | lint/render/links/schema/grep or a consumption scenario | fabricating a unit test |
@@ -81,9 +82,33 @@ A conversation-only change does not invalidate proof. A product change does.
 
 Combine rows for mixed tasks. Do not run unrelated checks just to inflate output volume.
 
+**The service-starts row is mandatory when the diff touches initialization, migration, index,
+schema, runtime configuration, a dependency, or the application code of a runnable surface.** A
+green suite proves units; it does not prove the process initializes. When the project runs in
+containers (or any managed stack), the final verification **brings the affected stack back up and
+observes the service become healthy** — per touched surface:
+
+```text
+frontend touched            → production build + the frontend's own suite and lint
+backend/service touched     → stack up + readiness/healthcheck observed
+database/migration/index    → the migration executed in the service's REAL lifecycle (boot or
+                              deploy hook), against the data state that environment actually has
+.env / build inputs touched → the stack RECREATED without cache before observing health
+```
+
+The proof only counts if the observed process **contains the diff**: a change that enters the
+image or the environment at build time (Dockerfile, `.env` consumed by containers, build args,
+dependencies) requires the no-cache path — e.g. `docker compose down` → `docker compose build
+--no-cache` → `docker compose up` — because a reused image or stale container proves the OLD
+artifact, not the change. A change that enters at boot requires at least a fresh restart. And a
+test that exercises migration functions outside the application lifecycle is not proof that the
+boot works: the real environment carries historical state no fixture reproduces, because fixtures
+are born clean.
+
 **Scope during a task, whole suite at the end.** A task proves the files it touched; the full
-suite runs once, before the final review, and it is not optional — it is the only run positioned to
-catch an interaction no single task could see. Two exceptions, both narrow: a task whose subject is
+suite — and the stack bring-up, when the delivery runs as a service — runs once, before the final
+review, and neither is optional: that final position is the only one placed to catch an
+interaction no single task could see. Two exceptions, both narrow: a task whose subject is
 itself cross-cutting (a shared type, a global config, a migration) has no meaningful touched-files
 scope and runs the suite; and a red inherited from an already-failing module is named in the
 briefing, or it gets reported as this task's failure. See `pelizzai-execute` →
@@ -154,6 +179,7 @@ the state. Do not use destructive reversion or leave the working tree ambiguous.
 - Using a partial proof for a broad claim.
 - Forcing TDD/mutation testing on an artifact with no automatable behavior.
 - Declaring UI done without the frontend overlay and an explicit visual limit.
+- Declaring migration/boot/startup work done without having started the service.
 - Recording validated-head before squash/overlays/fixes/final review.
 - Delivering a HEAD different from the validated content.
 - Re-running checks just because the message changed, without a relevant mutation.

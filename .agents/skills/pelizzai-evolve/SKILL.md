@@ -42,12 +42,15 @@ a learnings file nobody reads before designing is a log.
 failure is not the node tempted to soften the standard, and the node that designs is not the one
 that decides what counts as a lesson.
 
-### `verification-standard.md` — three parts
+### `verification-standard.md` — four parts
 
 1. **Acceptance criteria: pass/fail, never a 0–5 score.** Concrete, objective, observable.
 2. **The procedure.** Reading the code is not exercising the artifact — review proves intent,
    execution proves behavior. Name the command and the output that proves each criterion.
-3. **The baseline** — the latest known-good state **per surface**, one row each, with numbers
+3. **Stack startup** — per runnable surface, the bring-up command (regular and no-cache paths)
+   and what observed *healthy* means; `pelizzai-verify` brings the affected stack back up with
+   these at final verification.
+4. **The baseline** — the latest known-good state **per surface**, one row each, with numbers
    and evidence. A new approval of a surface **replaces its row**; the superseded numbers live
    in `pelizzai/data/history/`, where "when did p95 move, and which delivery moved it?" is
    actually answered.

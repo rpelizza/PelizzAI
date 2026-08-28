@@ -522,8 +522,8 @@ After this step, `git status --porcelain` must be empty and `validated-head` rem
    medium/high risk, or a sensitive surface — requires a normal
    review (see `pelizzai-review` → "Final branch review"). Critical/Important block.
 3. Run, by the coordinator itself, all applicable checks of the profile (test/lint/build/render/
-   dry-run/visual etc.), from scratch, with output and exit code. Do not invent a suite for a
-   static artifact.
+   dry-run/stack bring-up/visual etc.), from scratch, with output and exit code. Do not invent a
+   suite for a static artifact.
 4. Re-read the plan/spec requirement by requirement and point to where each one was delivered.
 5. Run pelizzai-verify with the fresh evidence.
 ```
