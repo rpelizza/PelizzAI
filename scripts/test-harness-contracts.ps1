@@ -1486,6 +1486,23 @@ try {
     Check $false 'reasoning technique merge' $_.Exception.Message
 }
 
+# ---------------------------------------------------------------------------
+# Issue #76 — mutation is a self-consistency check, structurally blind to "this code solves the
+# wrong problem": the real boot defect survived 4 adversarial rounds and every mutation and was
+# caught by reading the sibling predicate. Three facets, three homes.
+# ---------------------------------------------------------------------------
+try {
+    Check-Match '.claude/skills/pelizzai-review/references/code-reviewer.md' 'The sibling check \(a distinct step' 'code-reviewer: the sibling check is a named step'
+    Check-Match '.claude/skills/pelizzai-review/references/code-reviewer.md' 'LOCATE the other place\(s\) in the\s+repository that solve the same problem' 'code-reviewer: guards/predicates are compared with their siblings'
+    Check-Match '.claude/skills/pelizzai-review/references/code-reviewer.md' 'structurally blind\s+to .this code solves the wrong problem.' 'code-reviewer: names the blindness of checking the code against itself'
+    Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'A predicate with N conditions demands N scenarios, one per condition' 'tdd: N conditions demand N scenarios'
+    Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'proves the SET, not each condition' 'tdd: the combined scenario proves the set'
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'Enumerate ALL writers of the same field/document' 'verify: an atomic guarantee enumerates every writer'
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'the guarantee belongs to the set of writers' 'verify: the guarantee is a property of the writer set'
+} catch {
+    Check $false 'issue #76 read-the-sibling' $_.Exception.Message
+}
+
 Write-Host "`nResult: $passes PASS; $($failures.Count) FAIL."
 if ($failures.Count -gt 0) {
     foreach ($failure in $failures) { Write-Host " - $failure" }
