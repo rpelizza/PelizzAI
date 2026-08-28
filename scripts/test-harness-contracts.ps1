@@ -1502,6 +1502,11 @@ try {
     Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'kills: <the wrong implementation it rejects>' 'tdd: the RED records which mutation the test kills'
     Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'demand the discriminating proof' 'task-reviewer: the reviewer demands the discriminating proof'
     Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '"The tests are green" alone is UNVERIFIED' 'task-reviewer: green alone is unverified as detection'
+    # Review round 1 (PR #78): whichever safe means is used, the evidence names what it kills.
+    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'identifies\s+the wrong implementation the test rejects' 'plan: the criterion requires naming the rejected implementation'
+    Check-Match '.claude/skills/pelizzai-plan/templates/plan.md' 'kills: <wrong implementation rejected>' 'plan template: the proof field carries the kills line'
+    Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'evidence that names nothing does not discriminate' 'tdd: unnamed evidence does not discriminate'
+    Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'name the wrong implementation\s+rejected' 'task-reviewer: the report names the rejected implementation'
 } catch {
     Check $false 'issue #75 discriminating-test bar' $_.Exception.Message
 }

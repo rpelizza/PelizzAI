@@ -194,7 +194,10 @@ proves nothing: a test nobody has seen fail against the defect contracts green, 
 demands discrimination, and the difference returns as a review round. When the task's strategy is
 TDD/regression, the completion criterion must name HOW the test is proven to detect the defect —
 a preserved RED, a controlled mutation the test kills, or a reversion in the editor: the same
-safe means `pelizzai-verify` accepts at the seal. This puts the seal's bar in the contract the
+safe means `pelizzai-verify` accepts at the seal. Whichever means is used, the record identifies
+the wrong implementation the test rejects — the `kills:` line the RED step of `pelizzai-tdd`
+records; a preserved RED that only shows an old failure names nothing and does not discriminate.
+This puts the seal's bar in the contract the
 executor reads, instead of leaving it to be discovered at the end.
 
 Defects: `TBD`, "handle edge cases" without naming them, nonexistent commands, an API recalled

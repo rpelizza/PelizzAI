@@ -161,7 +161,8 @@ by a wrong one. Record, next to the RED, which mutation of the implementation th
 one line, `kills: <the wrong implementation it rejects>` — because that is the discriminating
 proof the plan's completion criterion contracts and the reviewer will demand
 (`pelizzai-verify` accepts the same safe means at the seal: preserved RED, controlled mutation,
-or reversion in the editor).
+or reversion in the editor — and whichever means is used, the `kills:` line names what was
+rejected; evidence that names nothing does not discriminate).
 
 ### 2. GREEN
 

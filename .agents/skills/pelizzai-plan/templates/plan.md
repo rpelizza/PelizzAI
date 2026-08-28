@@ -106,7 +106,8 @@ non-obvious call; otherwise, name the interface, the invariant, and one short ex
 Run: `[exact command]`
 Expected: `[observable result]`
 Discriminating proof (TDD/regression only): `[preserved RED | controlled mutation the test
-kills | reversion in the editor — how the test is shown to detect the defect, not just pass]`
+kills | reversion in the editor — how the test is shown to detect the defect, not just pass;
+whichever means, name what it kills: kills: <wrong implementation rejected>]`
 
 - [ ] **Step 4: Ready for review → consolidate** — do not commit mid-task; the commit is the coordinator's gate after the spec ✅ + quality ✅ lenses at the recorded review depth. → verify: `git status` contains only this task's scope
 ````
