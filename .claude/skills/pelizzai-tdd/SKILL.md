@@ -163,6 +163,17 @@ Write **one** test for **one** observable behavior. Run it and confirm:
 
 A test that already passes has neither proven the regression nor guided the implementation. Fix the test/seam before moving on.
 
+**An observed RED is necessary, not sufficient.** It proves the test failed BEFORE the
+implementation existed; it does not prove the test fails again if the implementation is replaced
+by a wrong one. Record, next to the RED, the discriminating evidence in one line —
+`kills: <the wrong implementation it rejects>` — because that is the proof the plan's completion
+criterion contracts and the reviewer will demand. Mutation details are required only when the
+chosen means IS a controlled mutation; a preserved RED or an editor reversion carries the same
+`kills:` line with no mutation to describe
+(`pelizzai-verify` accepts the same safe means at the seal: preserved RED, controlled mutation,
+or reversion in the editor — and whichever means is used, the `kills:` line names what was
+rejected; evidence that names nothing does not discriminate).
+
 ### 2. GREEN
 
 Implement the minimum coherent code to satisfy the behavior. Run the test and read the exit code/counts. Do not anticipate future cases or mix in a broad refactor.
@@ -213,7 +224,11 @@ flowchart LR
 [ ] No speculative functionality got in.
 ```
 
-For a regression bug, `pelizzai-verify` requires the reinforced proof: green with the fix, failing when only the fix is removed/reverted, green after restoring it.
+For a regression bug, `pelizzai-verify` requires the reinforced proof that the test detects the
+defect, by any of the same safe means the seal accepts — a preserved RED, a controlled mutation
+the test kills, or the reversion cycle (green with the fix → failing with only the fix
+removed/reverted → green after restoring it) — always with the `kills:` line naming the rejected
+implementation. The three are equivalent forms of one requirement, not competing bars.
 
 ## When a test fails unexpectedly
 

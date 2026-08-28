@@ -170,6 +170,53 @@ try {
     Check-Match '.claude/skills/pelizzai-evolve/templates/verification-standard.md' '\| Surface \| Bring-up[^\n]*\| Healthy means \|' 'verification-standard template: bring-up table names surface, command, and healthy'
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'four parts' 'evolve: standard documented with four parts'
     Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' '\*\*Stack startup\*\*' 'evolve: the four parts include Stack startup'
+    # Issue #66 — closure write-back: the delivery feeds pelizzai/data instead of burying its
+    # knowledge in the cursor, and a cursor left behind by a bypassed closeout is observed, not
+    # overwritten. Recovered in part from the pre-rollback finish (PR #39 semantics).
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '## 1\.6\. Closure write-back' 'finish: closure write-back section exists'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'after the §1\.5 net and BEFORE the destination offer' 'finish: write-back runs before the destination'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'REPLACEMENT \(replace, never\s+append' 'finish: baseline row is replaced, never appended'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'found and fixed in review rounds inside a feature task' 'finish: review-found defects become incident candidates'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'is one confirmation path, not the only\s+one' 'finish: diagnose is not the only incident path'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'rule ALREADY in Active rules[\s\S]{0,260}worth-it gate' 'finish: recurrence despite the rule routes to the worth-it gate'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'WHOLE corpus[\s\S]{0,120}history/learnings-<YYYY>\.md' 'finish: recurrence counts over the whole corpus'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'budgets \*\*per section, never summed\*\*' 'finish: budget check per section returns to the closeout'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'lesson\(evolve\):' 'finish: sweeps the lesson(evolve) marker'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'a lesson not swept here dies as archaeology' 'finish: names the cost of skipping the sweep'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'only\s+when §1\.6 ratified them — pelizzai/data/verification-standard\.md and pelizzai/data/learnings\.md' 'finish: closure commit admits the two ratified files'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'nothing lands in verification-standard\.md or\s+learnings\.md without the user''s explicit yes' 'finish: write-back is recommend-and-ratify'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' ':\(exclude\)pelizzai/data/verification-standard\.md' 'finish: product guard excludes the ratified standard'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'Stale cursor[\s\S]{0,400}merge-base --is-ancestor' 'delivery-seal: stale cursor observed against git'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' '.pelizzai-finish. §1\.6 candidates read from the migrated block' 'delivery-seal: recovery presents the write-back candidates'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'ONE atomic movement' 'delivery-seal: the recovery is one atomic movement (review round 1)'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'SAME metadata\s+commit' 'delivery-seal: ratified knowledge rides the same metadata commit (review round 1)'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'full SHA \(a .<none>./missing value never enters this\s+path\)' 'delivery-seal: stale path requires a full validated-head (review round 1)'
+    Check-Match '.claude/skills/pelizzai-resume/SKILL.md' 'Stale cursor short of .delivered.' 'resume: stale pre-delivered cursor is not WIP divergence'
+    Check-Match '.claude/skills/pelizzai-resume/SKILL.md' '.validated-head. is a full SHA \(a .<none>./missing value never enters this path\)' 'resume: stale path requires a full validated-head (review rounds 1-2)'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'append the\s+same observation[\s\S]{0,80}pelizzai/data/history/<YYYY-MM-DD>-<slug>\.md' 'delivery-seal: the recovery stamps the history file too (review round 2)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Entry already present with .status: candidate. or .promoted.' 'finish: only candidate/promoted entries count as recurrence (review round 2)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Entry present but .retired.[^\n]*no count, no promotion' 'finish: a retired entry only flags the wrong retirement (review round 2)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '\*\*Recurrence identity is deterministic:\*\*[\s\S]{0,160}same causal mechanism AND its .scope:. covers the defect.s path —\s+symptom similarity is not identity[\s\S]{0,60}presented to the user, never resolved\s+silently' 'finish: recurrence identity requires mechanism, scope, and the user route together'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '\*\*c\) Marked lessons[\s\S]{0,340}for the explicit .lesson\(evolve\):.\s+marker from the state template\. The marker is the ONLY form the sweep recognizes; equivalence is\s+never inferred' 'finish: the sweep block itself accepts only the explicit marker'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'carries no marker is pointed out to the user\s+as exactly that — an unmarked candidate — and only the user.s answer turns it into one' 'finish: an unmarked lesson-looking line routes to the user, never to inference'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'In consumer mode only, the single new commit touches only harness metadata' 'finish: the closure-commit invariant is consumer-only (review round 6)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '### 2b\.[\s\S]{0,80}\*\*Consumer only\.\*\*[\s\S]{0,240}skip this whole subsection' 'finish: §2b opens with the source-mode exit (review round 6)'
+    Check-Match '.claude/skills/pelizzai-resume/SKILL.md' 'EXCEPT\s+the stale cursor short of .delivered.[\s\S]{0,140}MANDATORY' 'resume: the stale-cursor branch precedes the generic lagging rule (review round 6)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'explicit \*\*allowlist\*\*' 'finish: ratification produces the guard allowlist (review round 1)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'unratified write[\s\S]{0,80}stop' 'finish: a knowledge file off the allowlist invalidates the closeout (review round 1)'
+    # Block-scoped (full review rounds 3-4): each phrase is pinned INSIDE the block that
+    # consumes it, with the commands, paths, and stop action required together and in order —
+    # the phrase surviving elsewhere in the file cannot keep the suite green.
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'PRE-COMMIT guard — read and judge BEFORE git commit[\s\S]{0,340}unratified write: unstage it and stop[\s\S]{0,160}git diff --cached --name-only[\s\S]{0,60}judge the PATCH, not only the path[\s\S]{0,300}git diff --cached -- pelizzai/data/verification-standard\.md pelizzai/data/learnings\.md[\s\S]{0,20}git commit -m "chore: seal task as delivered"' 'finish: pre-commit block judges names AND patch, in order, before the commit'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'second guard, after the commit[\s\S]{0,340}git diff --name-only <validated-head>\.\.HEAD[\s\S]{0,60}repeat the per-hunk decision after the commit[\s\S]{0,240}git diff <validated-head>\.\.HEAD -- pelizzai/data/verification-standard\.md pelizzai/data/learnings\.md' 'finish: the post-commit second guard runs names AND the per-hunk decision'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '\*\*c\) Marked lessons[\s\S]{0,700}value is .none. or a template placeholder \(.<\.\.\.>.\)[\s\S]{0,120}never\s+let it reach .learnings\.md.' 'finish: the lesson-sweep block itself skips none and placeholders'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' '\*\*a\) Baseline rows[\s\S]{0,1100}records, in the .pelizzai/data/history/<YYYY-MM-DD>-<slug>\.md. file the §2b\s+migration creates[\s\S]{0,60}superseded row, the new numbers, and the evidence' 'finish: the baseline block itself writes the superseded row to history'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'Baseline row replacement .pelizzai-finish. proposes at closeout' 'evolve: standard writers include the closeout proposal'
+    Check-Match '.claude/skills/pelizzai-evolve/SKILL.md' 'incident candidates for defects confirmed during the delivery' 'evolve: learnings writers include closeout candidates'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/learnings.md' 'closeout for defects confirmed during any delivery, review rounds included' 'learnings template: finish presents incident candidates'
+    Check-Match '.claude/skills/pelizzai-evolve/templates/verification-standard.md' 'Baseline row replacement when a surface was approved with new numbers' 'verification-standard template: closeout replacement is taught'
+    Check-Match '.claude/skills/pelizzai-execute/templates/state.md' 'lesson\(evolve\):' 'state template: the lesson marker has a placeholder'
+    Check-Match '.claude/skills/pelizzai-execute/SKILL.md' 'lesson\(evolve\):' 'execute: teaches the lesson marker in progress hygiene'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'metadata-only' 'finish limits closeout to metadata'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Offer the destination[\s\S]{0,180}Keep local[^\n]*recommend' 'finish presents the destination with local recommended'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'never auto-confirmed' 'finish requires an explicit decision even to keep local'
@@ -1427,8 +1474,11 @@ try {
     Check-Match '.claude/skills/pelizzai-preferences/SKILL.md' 'disjoint paths' 'preferences: the floor does not deny parallel writes on disjoint paths'
     Check-Match '.claude/skills/pelizzai-preferences/SKILL.md' 'never one worktree per agent' 'preferences: the floor repeats the one-worktree-per-agent ban'
 
-    # The closure is TWO metadata files: state.md + the block migrated to history/.
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'the two closure metadata files' 'finish-task: pre-destination guard requires state + history, not just state'
+    # The closure metadata set: state.md + the block migrated to history/, plus the two
+    # pelizzai/data files only when the §1.6 write-back ratified them (issue #66).
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'only the closure metadata files: .pelizzai/data/state\.md., the\s+.pelizzai/data/history/<YYYY-MM-DD>-<slug>\.md.[\s\S]{0,120}§1\.6 allowlist — nothing more' 'finish-task: pre-destination guard names each closure path and the allowlist'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'git diff --name-only <validated-head>\.\.<delivery-head>[\s\S]{0,440}allowlist does not name is an unratified write: stop, do not publish' 'finish-task: the pre-destination block itself blocks publication off the allowlist'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'stop, do not publish\. Repeat the per-hunk\s+judgment as well: .git diff <validated-head>\.\.<delivery-head> --\s+pelizzai/data/verification-standard\.md pelizzai/data/learnings\.md.[\s\S]{0,60}only ratified\s+§1\.6 hunks' 'finish-task: the pre-destination guard also decides per hunk (review round 5)'
 
     # A plan gap goes to the interview; guessing stopped being expected behavior.
     Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'whatever the plan lacks[\s\S]{0,140}pelizzai-interview' 'writing-plans: a plan gap goes to interview-me, never to guessing'
@@ -1505,6 +1555,35 @@ try {
     Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'the guarantee belongs to the set of writers' 'verify: the guarantee is a property of the writer set'
 } catch {
     Check $false 'issue #76 read-the-sibling' $_.Exception.Message
+}
+
+# ---------------------------------------------------------------------------
+# Issue #75 — the discriminating-test bar reaches the executor: the plan contracts it, TDD
+# records the kill, the reviewer demands it. Before, it lived only in pelizzai-verify, read at
+# the seal by nobody who writes tests — the plan contracted "green" and review charged
+# "discriminating", and the difference returned as review rounds.
+# ---------------------------------------------------------------------------
+try {
+    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'discriminating when the strategy is TDD/regression' 'plan: completion criterion contracts discrimination for TDD/regression'
+    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' '\*\*Observable is not discriminating\.\*\*' 'plan: names the observable-vs-discriminating gap'
+    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'safe means .pelizzai-verify. accepts at the seal' 'plan: the criterion names the same safe means as the seal'
+    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'satisfiable by "tests green" alone' 'plan: green-only criterion is a listed defect'
+    Check-Match '.claude/skills/pelizzai-plan/templates/plan.md' 'Discriminating proof \(TDD/regression only\)' 'plan template: step 3 asks for the discriminating proof'
+    Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'An observed RED is necessary, not sufficient' 'tdd: RED alone does not discriminate'
+    Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'kills: <the wrong implementation it rejects>' 'tdd: the RED records which mutation the test kills'
+    Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'demand the discriminating proof' 'task-reviewer: the reviewer demands the discriminating proof'
+    Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '"The tests are green" alone is UNVERIFIED' 'task-reviewer: green alone is unverified as detection'
+    # Review rounds 1-2 (PR #78): whichever safe means is used, the evidence names what it
+    # kills — and each regex is scoped to the executable field/section that consumes the rule,
+    # so text surviving in a comment elsewhere cannot keep the suite green.
+    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'safe means .pelizzai-verify. accepts at the seal\. Whichever means is used, the record identifies\s+the wrong implementation the test rejects' 'plan: the criterion requires naming the rejected implementation'
+    Check-Match '.claude/skills/pelizzai-plan/templates/plan.md' 'Discriminating proof \(TDD/regression only\):[\s\S]{0,220}kills: <wrong implementation rejected>' 'plan template: the proof field itself carries the kills line'
+    Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'An observed RED is necessary, not sufficient\.[\s\S]{0,900}evidence that names nothing does not discriminate' 'tdd: the RED step rejects unnamed evidence'
+    Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'Mutation details are required only when the\s+chosen means IS a controlled mutation' 'tdd: preserved RED and reversion carry kills without a mutation (review round 2)'
+    Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'demand the discriminating proof[\s\S]{0,300}name the wrong implementation\s+rejected' 'task-reviewer: the demand itself names the rejected implementation'
+    Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'For a regression bug[\s\S]{0,120}by any of the same safe means the seal accepts[\s\S]{0,300}equivalent forms of one requirement, not competing bars' 'tdd: the regression proof accepts the three safe means (full review)'
+} catch {
+    Check $false 'issue #75 discriminating-test bar' $_.Exception.Message
 }
 
 Write-Host "`nResult: $passes PASS; $($failures.Count) FAIL."
