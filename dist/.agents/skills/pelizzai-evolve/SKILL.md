@@ -27,8 +27,8 @@ in the native execution record.
 
 | File | Holds | Read by, and when | Written by, and when |
 | --- | --- | --- | --- |
-| `pelizzai/data/verification-standard.md` | what *correct* means here | `pelizzai-verify` before judging a delivery · `pelizzai-review` when briefing reviewers · `pelizzai-plan` when drafting validation | `pelizzai-onboard` at bootstrap · here, in its own ratified change — **never during a correction** |
-| `pelizzai/data/learnings.md` (**Active rules**) | what execution already learned | `pelizzai-plan` before approaches · `pelizzai-execute` before Task 1 **and pasted into every task briefing** · `pelizzai-quick-fix` before the change · `pelizzai-diagnose` on entering the investigation and again when choosing the proof | incident entries at root-cause confirmation (usually `pelizzai-diagnose`, in the fix's own commit) · `pelizzai-finish` counts recurrences at closeout · here, on promotion and retirement |
+| `pelizzai/data/verification-standard.md` | what *correct* means here | `pelizzai-verify` before judging a delivery · `pelizzai-review` when briefing reviewers · `pelizzai-plan` when drafting validation | `pelizzai-onboard` at bootstrap · here, in its own ratified change — **never during a correction** · the Baseline row replacement `pelizzai-finish` proposes at closeout (§1.6a), ratified |
+| `pelizzai/data/learnings.md` (**Active rules**) | what execution already learned | `pelizzai-plan` before approaches · `pelizzai-execute` before Task 1 **and pasted into every task briefing** · `pelizzai-quick-fix` before the change · `pelizzai-diagnose` on entering the investigation and again when choosing the proof | incident entries at root-cause confirmation (usually `pelizzai-diagnose`, in the fix's own commit) · `pelizzai-finish` at closeout (§1.6b/c): incident candidates for defects confirmed during the delivery, recurrence count, and the sweep of marked lessons — all ratified · here, on promotion and retirement |
 | `pelizzai/data/learnings.md` (**Incident log**) | the evidence that earned each rule | on demand — **not** loaded at task start: promotion, recurrence check, and when a rule's origin is in doubt; those three read `learnings.md` **and** every existing `pelizzai/data/history/learnings-<YYYY>.md`, never the active file alone | same as above |
 
 `verification-standard.md` missing in a consumer → propose creating it from
@@ -181,9 +181,10 @@ consumes.
 
 ## Integration
 
-**Called by:** `pelizzai-finish` (recurrence or budget flagged at closeout), the user
-directly, and `pelizzai-diagnose` when a confirmed root cause deserves more than an incident
-entry.
+**Called by:** `pelizzai-finish` (its §1.6 write-back is this cycle's channel at the delivery
+edge: baseline delta, incident candidates, recurrence, marked lessons, or a budget flagged at
+closeout), the user directly, and `pelizzai-diagnose` when a confirmed root cause deserves more
+than an incident entry.
 
 **Combines with:** `pelizzai-interview` — one ratification per promotion, standard change, or
 opportunity adoption; `pelizzai-verify` and `pelizzai-review` — the

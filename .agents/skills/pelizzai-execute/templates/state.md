@@ -35,11 +35,14 @@
 
 <!-- One line per task of the plan. A long report (QA, review, investigation, round decision)
      does NOT live here: write it to pelizzai/data/reports/<YYYY-MM-DD>-<slug>-<topic>.md (ignored)
-     and leave only the link. Over ~60 lines? The harness proposes compacting once (advisory, never blocks). -->
+     and leave only the link. Over ~60 lines? The harness proposes compacting once (advisory, never blocks).
+     A lesson meant to outlive the task is marked `- lesson(evolve): <imperative>` —
+     pelizzai-finish sweeps these at closeout (§1.6c); anything unmarked dies with the migration. -->
 
 - T1 ✅ <sha|YYYY-MM-DD> — <note ≤1 line | → data/reports/<file>>
 - next: <next concrete step>
 - pending: <open items / doubts>
+- lesson(evolve): <imperative worth promoting | none>
 
 ## History
 
