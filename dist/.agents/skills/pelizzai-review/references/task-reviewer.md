@@ -74,6 +74,11 @@ readiness — plus the evidence check above. Fill the `### Verification` block w
 actually RAN (test / lint / build) and the result + exit code. A check that could not run is
 UNVERIFIED — never reported as passing. Do NOT infer pass/fail from the diff.
 
+For a TDD/regression task, demand the discriminating proof the completion criterion contracts:
+the report must show HOW the test detects the defect — a preserved RED, a named mutation the
+test kills, or a reversion in the editor. "The tests are green" alone is UNVERIFIED for that
+claim: a test nobody has seen fail against the defect proves nothing about detecting it.
+
 ## Output format
 
 ### Verdict 1 — Spec

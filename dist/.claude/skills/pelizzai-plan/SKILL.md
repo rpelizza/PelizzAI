@@ -185,11 +185,21 @@ dependencies/constraints
 implementation and validation strategy
 review profile
 sufficient steps and commands
-observable completion criterion and rollback when applicable
+observable completion criterion — discriminating when the strategy is TDD/regression — and
+rollback when applicable
 ```
+
+**Observable is not discriminating.** "The two tests are green" satisfies observability and
+proves nothing: a test nobody has seen fail against the defect contracts green, the reviewer
+demands discrimination, and the difference returns as a review round. When the task's strategy is
+TDD/regression, the completion criterion must name HOW the test is proven to detect the defect —
+a preserved RED, a controlled mutation the test kills, or a reversion in the editor: the same
+safe means `pelizzai-verify` accepts at the seal. This puts the seal's bar in the contract the
+executor reads, instead of leaving it to be discovered at the end.
 
 Defects: `TBD`, "handle edge cases" without naming them, nonexistent commands, an API recalled
 without a current source, placeholders, a horizontal task, proof that does not observe the effect,
+a TDD/regression task whose criterion is satisfiable by "tests green" alone,
 or a requirement created by the LLM without ratification.
 
 ## Verify the plan

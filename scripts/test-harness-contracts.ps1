@@ -1486,6 +1486,26 @@ try {
     Check $false 'reasoning technique merge' $_.Exception.Message
 }
 
+# ---------------------------------------------------------------------------
+# Issue #75 — the discriminating-test bar reaches the executor: the plan contracts it, TDD
+# records the kill, the reviewer demands it. Before, it lived only in pelizzai-verify, read at
+# the seal by nobody who writes tests — the plan contracted "green" and review charged
+# "discriminating", and the difference returned as review rounds.
+# ---------------------------------------------------------------------------
+try {
+    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'discriminating when the strategy is TDD/regression' 'plan: completion criterion contracts discrimination for TDD/regression'
+    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' '\*\*Observable is not discriminating\.\*\*' 'plan: names the observable-vs-discriminating gap'
+    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'safe means .pelizzai-verify. accepts at the seal' 'plan: the criterion names the same safe means as the seal'
+    Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'satisfiable by "tests green" alone' 'plan: green-only criterion is a listed defect'
+    Check-Match '.claude/skills/pelizzai-plan/templates/plan.md' 'Discriminating proof \(TDD/regression only\)' 'plan template: step 3 asks for the discriminating proof'
+    Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'An observed RED is necessary, not sufficient' 'tdd: RED alone does not discriminate'
+    Check-Match '.claude/skills/pelizzai-tdd/SKILL.md' 'kills: <the wrong implementation it rejects>' 'tdd: the RED records which mutation the test kills'
+    Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' 'demand the discriminating proof' 'task-reviewer: the reviewer demands the discriminating proof'
+    Check-Match '.claude/skills/pelizzai-review/references/task-reviewer.md' '"The tests are green" alone is UNVERIFIED' 'task-reviewer: green alone is unverified as detection'
+} catch {
+    Check $false 'issue #75 discriminating-test bar' $_.Exception.Message
+}
+
 Write-Host "`nResult: $passes PASS; $($failures.Count) FAIL."
 if ($failures.Count -gt 0) {
     foreach ($failure in $failures) { Write-Host " - $failure" }
