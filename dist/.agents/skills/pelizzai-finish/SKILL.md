@@ -11,7 +11,10 @@ Integrate **the content that was validated**, with no hidden final round of muta
 security, frontend, documentation, fixes, and tests belong to the preceding flow and this skill
 runs none of them. What it does before any destination is a **safety-net check** (§1.5): if a
 touched surface got through without the matching overlay, it offers once to return the delivery to
-the cycle — without blocking and without patching after the seal. This skill closes in
+the cycle — without blocking and without patching after the seal. It then runs the **closure
+write-back** (§1.6): the knowledge this delivery produced — approved baseline numbers, confirmed
+defects, lessons marked for promotion — returns to `pelizzai/data/` before the seal,
+recommend-and-ratify, so the happy path feeds the memory instead of burying it in the cursor. This skill closes in
 `phase: delivered` (content sealed + destination executed) and records `confirm:`; `done` is
 observed, not declared — the observation happens at the next opening/resumption, never here. This
 skill:
@@ -48,8 +51,14 @@ The state/closure sections below apply only to consumer projects.
   doc generator, or fix runs.
 - A coverage gap (security, UI, documentation) becomes an explicit offer in §1.5, never silence;
   accepting it returns the task to the validation cycle — it never becomes a post-seal patch.
-- The single new commit touches only harness metadata: pelizzai/data/state.md and the
-  pelizzai/data/history/<YYYY-MM-DD>-<slug>.md the seal's migration just generated.
+- In consumer mode only, the single new commit touches only harness metadata:
+  pelizzai/data/state.md, the
+  pelizzai/data/history/<YYYY-MM-DD>-<slug>.md the seal's migration just generated, and — only
+  when §1.6 ratified them — pelizzai/data/verification-standard.md and pelizzai/data/learnings.md.
+  Source mode (sentinel scripts/pelizzai-source-repo.txt, the sole criterion) creates no
+  pelizzai/ and makes no closure commit: delivery-head = validated-head.
+- Every §1.6 write is recommend-and-ratify: nothing lands in verification-standard.md or
+  learnings.md without the user's explicit yes, and a decline is recorded, never silent.
 - Keeping local is the default recommendation, but it still requires an answer at the gate.
   Push/PR, worktree removal, and discard require an explicit per-task decision: they are never
   applied from a profile default nor inherited from another task.
@@ -90,12 +99,6 @@ If there are stray commits on a protected branch, preserve them by creating a re
 stop. Hand over manual instructions to reconcile the protected branch; do not auto-reset.
 
 ## 1.5. Coverage safety net (an offer — it does not block)
-
-**Recurrence check (consumer).** Before sealing, compare what this delivery fixed against the
-Incident log of `pelizzai/data/learnings.md` and the archived `pelizzai/data/history/learnings-*.md`.
-A defect that already has an entry is a **recurrence**, and a recurrence is the trigger for
-`pelizzai-evolve`: the existing rule did not prevent it, so either it is not being read, its scope
-is wrong, or it was never promoted. Count it and say so; do not open the cycle here.
 
 Overlays are the router's and the plan's responsibility and run **during execution**, before the
 final review and `validated-head`; this section does not pull them here. It is the **last net**: it
@@ -148,6 +151,78 @@ Run it now, or proceed to the destination accepting the gap?
 Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not open the offer: report the uncovered surface to
 the coordinator and follow the briefing.
 
+## 1.6. Closure write-back — the delivery feeds pelizzai/data (recommend-and-ratify)
+
+Consumer only; source mode skips this section (no `pelizzai/` runtime — a lesson about the
+harness itself becomes a proposal through the normal task flow, per `pelizzai-evolve`). Run it
+once, after the §1.5 net and BEFORE the destination offer (§2a): every ratified write below lands
+in the working tree first and travels **inside the §2b closure commit** — never a second commit,
+never after the seal. A delivery produces knowledge in three shapes, each with a versioned home
+the happy path must feed — the migration at the seal erases whatever stays behind in the cursor.
+
+**a) Baseline rows → `pelizzai/data/verification-standard.md`.** Cross the surfaces the final
+validation approved (the same evidence §1.5 reads) against the Baseline table. A surface approved
+with numbers different from its recorded row → propose the row's REPLACEMENT (replace, never
+append; the superseded numbers survive in this task's `pelizzai/data/history/` file). The
+closeout is the moment the new number is proven, and this is the deliberate ratified change the
+standard demands — never during a correction: at this point the delivery is already approved and
+sealed content, so the "fix the output, not the criterion" guard does not apply to it. A ratified
+replacement also records, in the `pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` file the §2b
+migration creates, one line with the superseded row, the new numbers, and the evidence — that is
+how "the superseded numbers survive in history/" actually happens: the migration alone copies
+only the task block. Declined →
+the stale row stays; record the gap in the destination report, because a baseline nobody replaces
+judges the next regression against the wrong number.
+
+**b) Incidents and recurrence → `pelizzai/data/learnings.md`.** Enumerate the defects CONFIRMED
+during this delivery — including those found and fixed in review rounds inside a feature task,
+not only work that entered as a bug: `pelizzai-diagnose` is one confirmation path, not the only
+one. **Recurrence identity is deterministic:** an existing entry MATCHES a confirmed defect only
+when its `root cause` names the same causal mechanism AND its `scope:` covers the defect's path —
+symptom similarity is not identity, and a doubtful match is presented to the user, never resolved
+silently. Entries with `status: candidate` or `promoted` count, in the active file and in every
+archive; a `retired` entry never counts as recurrence — its failure mode was declared impossible,
+so a new occurrence means the retirement was wrong: flag exactly that. For each confirmed defect:
+
+- **No entry in the Incident log** → offer it ONCE as an incident candidate, with every
+  `pelizzai-evolve` field (trigger, root cause, smallest durable fix, rule learned, scope,
+  revert, `status: candidate`). An entry that was expected from the fix's own commit and is
+  missing gets flagged as such — the offer repairs the omission, it does not normalize it.
+- **Entry already present with `status: candidate` or `promoted`** → it is a **recurrence**.
+  Count it over the WHOLE corpus
+  (`learnings.md` plus every existing `pelizzai/data/history/learnings-<YYYY>.md`) and at 2–3
+  occurrences offer the promotion via `pelizzai-evolve` (ratified, never automatic).
+- **Entry present but `retired`** → no count, no promotion: only the wrong-retirement flag from
+  the identity rule above — the failure mode declared impossible happened again.
+- **Recurrence with the rule ALREADY in Active rules** → not silence either: the standing rule
+  did not prevent the defect, which is the worth-it gate's second condition — flag THAT to
+  `pelizzai-evolve` in place of the promotion.
+
+While touching the file, check its budgets **per section, never summed** — Active rules at or
+past 40 lines, Incident log at or past 160, `verification-standard.md` at or past 150 — and
+route the valve (retire / archive with pointer / split) to `pelizzai-evolve`: the ceilings are
+hard, so reaching one already engages it.
+
+**c) Marked lessons — swept from the cursor before the migration buries them.** Scan the block
+the seal is about to migrate — the `## Progress` lines and the `data/reports/` files they link
+(reports are git-ignored: this sweep is their only exit) — for the explicit `lesson(evolve):`
+marker from the state template. The marker is the ONLY form the sweep recognizes; equivalence is
+never inferred. A marker whose value is `none` or a template placeholder (`<...>`) is the
+template's own scaffolding, not a lesson: skip it — never present it for ratification and never
+let it reach `learnings.md`. A line that reads like a lesson but carries no marker is pointed out to the user
+as exactly that — an unmarked candidate — and only the user's answer turns it into one: record
+the absence, do not promote inferred text. Present each marked lesson for promotion or
+registration via `pelizzai-evolve`. The migration keeps the block intact in `history/`, but
+nobody re-reads history looking for rules: a lesson not swept here dies as archaeology.
+
+The ratifications of (a)+(b)+(c) produce an explicit **allowlist** — the knowledge files
+(`verification-standard.md`, `learnings.md`) actually ratified this closeout, possibly empty.
+The §2b guards judge the closure against it.
+
+Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), open no ratification gate: report the
+candidates — baseline deltas, incident candidates, marked lessons — to the coordinator and follow
+the briefing.
+
 ## 2. Resolve the destination and seal the closure (`delivered`)
 
 ### 2a. Offer the destination
@@ -176,6 +251,10 @@ gates: apply the briefing and escalate to the coordinator whatever requires a de
 
 ### 2b. Seal the closure in `delivered` (metadata-only commit)
 
+**Consumer only.** In source mode (sentinel `scripts/pelizzai-source-repo.txt`, the sole
+criterion) there is no cursor, no migration, and no closure commit: skip this whole subsection —
+`delivery-head = validated-head` — and execute the destination (§3) directly.
+
 `delivered` = content sealed + destination executed; it is recorded BEFORE leaving the task branch
 (it rides along in the PR). In the `pelizzai/data/state.md` already modified by the seal:
 
@@ -199,24 +278,46 @@ gates: apply the briefing and escalate to the coordinator whatever requires a de
    merge/`done` yet — that stamp comes from the later observation.
 4. Update the date.
 
-Stage **only** the harness metadata — the cursor and the history file it just generated (the
-step 1 migration creates a versioned file; it travels in this same closure, never in an extra
-commit):
+Stage **only** the harness metadata — the cursor, the history file the migration just generated,
+and the `pelizzai/data/` files §1.6 ratified, when any (all of it travels in this same closure,
+never in an extra commit):
 
 ```bash
 git add -- pelizzai/data/state.md pelizzai/data/history/<YYYY-MM-DD>-<slug>.md
+# only when §1.6 ratified writes to them:
+git add -- pelizzai/data/verification-standard.md pelizzai/data/learnings.md
+
+# PRE-COMMIT guard — read and judge BEFORE git commit: the staged set must equal
+# EXACTLY state.md + the history file + the §1.6 allowlist, nothing more. A knowledge
+# file staged but NOT on the allowlist is an unratified write: unstage it and stop —
+# the guard interrupts the action; it does not report it after the fact.
 git diff --cached --name-only
+
+# and judge the PATCH, not only the path: every hunk below must correspond to one
+# §1.6 proposal the user ratified — a hunk no proposal covers is an unratified write
+# even inside an allowlisted file: unstage and stop.
+git diff --cached -- pelizzai/data/verification-standard.md pelizzai/data/learnings.md
+
 git commit -m "chore: seal task as delivered"
 ```
 
 Before executing the destination, prove the three guards:
 
 ```bash
-# must list exactly these two metadata files, nothing more
+# second guard, after the commit: the committed set must repeat the staged set —
+# state.md + the history file + the §1.6 allowlist, nothing more; a knowledge file
+# here that the allowlist does not name is an unratified write that got past the
+# pre-commit guard — the closeout is invalid.
 git diff --name-only <validated-head>..HEAD
 
-# no product difference outside the harness metadata
-git diff --quiet <validated-head>..HEAD -- . ':(exclude)pelizzai/data/state.md' ':(exclude)pelizzai/data/history/*'
+# and repeat the per-hunk decision after the commit: every hunk below must correspond
+# to one ratified §1.6 proposal — an extra hunk invalidates the closeout, exactly as
+# it did before the commit.
+git diff <validated-head>..HEAD -- pelizzai/data/verification-standard.md pelizzai/data/learnings.md
+
+# no product difference outside the harness metadata (the two knowledge files are excluded
+# here because the allowlist check above already judges them — excluded is not exempt)
+git diff --quiet <validated-head>..HEAD -- . ':(exclude)pelizzai/data/state.md' ':(exclude)pelizzai/data/history/*' ':(exclude)pelizzai/data/verification-standard.md' ':(exclude)pelizzai/data/learnings.md'
 
 # must be empty
 git status --porcelain --untracked-files=all
@@ -240,8 +341,13 @@ git status --porcelain --untracked-files=all
 ```
 
 In a consumer, also repeat `git diff --name-only <validated-head>..<delivery-head>` and require
-only the two closure metadata files: `pelizzai/data/state.md` and the
-`pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` generated by the seal's migration — nothing more.
+only the closure metadata files: `pelizzai/data/state.md`, the
+`pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` generated by the seal's migration, and the
+knowledge files on the §1.6 allowlist — nothing more. A knowledge file in the diff that the
+allowlist does not name is an unratified write: stop, do not publish. Repeat the per-hunk
+judgment as well: `git diff <validated-head>..<delivery-head> --
+pelizzai/data/verification-standard.md pelizzai/data/learnings.md` must contain only ratified
+§1.6 hunks — an extra hunk blocks the publication the same way.
 In source mode, require `delivery-head == validated-head`.
 Diverged? Stop; do not publish.
 
@@ -342,6 +448,11 @@ Source mode, or no hook and no ledger: silent no-op.
 
 ```text
 - Delivering a sensitive, UI, or documentable surface without an overlay and without the §1.5 offer.
+- A surface approved with new numbers, closed without the §1.6a Baseline replacement offer.
+- A defect confirmed in review during a feature task, closed without the §1.6b incident offer.
+- A lesson marked for pelizzai-evolve left to die in the cursor migration (§1.6c sweep skipped).
+- Writing verification-standard.md or learnings.md at closeout without ratification — or in a
+  second commit after the seal instead of inside the closure commit.
 - Running the accepted overlay here, or patching with a fix/doc after the seal, instead of
   returning to the cycle.
 - Repeating at closeout the offer of an overlay that already ran during execution.
@@ -362,4 +473,6 @@ after their overlays and validation have recorded `validated-head`.
 **Combines with:** `pelizzai-isolate`, `pelizzai-verify`,
 `pelizzai-review`, `pelizzai-resume`, and `pelizzai-merge-recovery`. The §1.5 net
 points to `pelizzai-security`, `pelizzai-interface`, and `pelizzai-docs` — always via
-the return to `pelizzai-execute`, never by running the overlay inside this skill.
+the return to `pelizzai-execute`, never by running the overlay inside this skill. The §1.6
+write-back is `pelizzai-evolve`'s ratified channel invoked at the delivery edge: the proposals
+are made here, the doctrine of what enters each file stays there.

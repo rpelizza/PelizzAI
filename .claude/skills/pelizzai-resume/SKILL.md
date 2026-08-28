@@ -1,6 +1,6 @@
 ---
 name: pelizzai-resume
-description: "Use after an interruption, crash, orphaned worktree, or resumption in the wrong directory. Reconciles the task record with Git, read-only first; never stashes, resets, or deletes on its own."
+description: "Use to continue where work left off: interruption, crash, orphaned worktree, wrong directory, or Git and the task record disagreeing. Reconciles read-only first; never stashes, resets, or deletes."
 ---
 
 # PelizzAI Resume
@@ -51,6 +51,15 @@ the new task branch (never on a protected one). Failed (PR closed without merge)
 in this observation. Source mode: the same observation applies to the native execution record,
 without creating `pelizzai/` or `history/`.
 
+**Stale cursor short of `delivered`.** If the phase is earlier than `delivered`,
+`validated-head` is a full SHA (a `<none>`/missing value never enters this path), and `base-ref`
+already contains it (branch merged or deleted, release cut), the delivery bypassed
+the closeout — this is not WIP divergence either, and resuming work on top of an integrated
+cursor is the failure. Apply `pelizzai-execute` → `references/delivery-seal.md` §Stale cursor:
+propose-and-confirm the atomic recovery — lossless migration, the `pelizzai-finish` §1.6
+proposals from the migrated block, and the `done` stamp, all landing in the same metadata
+commit on the new task branch.
+
 ## 2. Inventory the WIP
 
 Before proposing any mutation, show:
@@ -70,7 +79,10 @@ them in a commit or stash.
 
 Use a safe default when unambiguous:
 
-- cursor provably lagging and no identity conflict → update only the evidenced fields;
+- cursor provably lagging and no identity conflict → update only the evidenced fields — EXCEPT
+  the stale cursor short of `delivered` (§1): a full-SHA `validated-head` already contained in
+  `base-ref` makes that branch MANDATORY, with its atomic recovery — never a field-only update
+  that frees the cursor past the migration and the write-back;
 - active record points to a valid worktree → run from there;
 - coherent WIP **outside** a mid-plan resumption (standalone tweak/bug on the right branch) →
   resume in place.

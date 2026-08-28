@@ -4,7 +4,9 @@
 > before judging a delivery, by `pelizzai-review` when briefing reviewers, and by
 > `pelizzai-plan` when drafting validation. Written by `pelizzai-onboard` at bootstrap
 > and by `pelizzai-evolve` in its own ratified change — **never during a correction**: if an
-> output fails, fix the output, not the criterion.
+> output fails, fix the output, not the criterion. At closeout, `pelizzai-finish` proposes the
+> Baseline row replacement when a surface was approved with new numbers — still ratified, never
+> automatic.
 > Budget: **150 lines hard**; Baseline at most **25 rows** (split per package before trimming).
 
 ## Acceptance criteria
