@@ -181,9 +181,12 @@ so a new occurrence means the retirement was wrong: flag exactly that. For each 
   `pelizzai-evolve` field (trigger, root cause, smallest durable fix, rule learned, scope,
   revert, `status: candidate`). An entry that was expected from the fix's own commit and is
   missing gets flagged as such — the offer repairs the omission, it does not normalize it.
-- **Entry already present** → it is a **recurrence**. Count it over the WHOLE corpus
+- **Entry already present with `status: candidate` or `promoted`** → it is a **recurrence**.
+  Count it over the WHOLE corpus
   (`learnings.md` plus every existing `pelizzai/data/history/learnings-<YYYY>.md`) and at 2–3
   occurrences offer the promotion via `pelizzai-evolve` (ratified, never automatic).
+- **Entry present but `retired`** → no count, no promotion: only the wrong-retirement flag from
+  the identity rule above — the failure mode declared impossible happened again.
 - **Recurrence with the rule ALREADY in Active rules** → not silence either: the standing rule
   did not prevent the defect, which is the worth-it gate's second condition — flag THAT to
   `pelizzai-evolve` in place of the promotion.

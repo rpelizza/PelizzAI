@@ -1,6 +1,6 @@
 ---
 name: pelizzai-resume
-description: "Use after an interruption, crash, orphaned worktree, or resumption in the wrong directory. Reconciles the task record with Git, read-only first; never stashes, resets, or deletes on its own."
+description: "Use to continue where work left off: interruption, crash, orphaned worktree, wrong directory, or Git and the task record disagreeing. Reconciles read-only first; never stashes, resets, or deletes."
 ---
 
 # PelizzAI Resume

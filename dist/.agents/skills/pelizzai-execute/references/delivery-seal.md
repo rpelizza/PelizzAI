@@ -69,9 +69,12 @@ recovery as ONE atomic movement, in this order:
 2. Present the `pelizzai-finish` §1.6 candidates read from the migrated block — baseline rows,
    incident candidates, marked lessons: they never ran, and this observation is their last exit.
    A declined proposal is recorded in the history file; no knowledge file is touched for it.
-3. Stamp the `## History` index line and `phase: done` with the git evidence. The integration is
-   already observed, so this is the reconciliation's stamp — not a seal, and not a `delivered`
-   this recovery would invent: `pelizzai-finish` never ran for this delivery.
+3. Stamp the `## History` index line and `phase: done` with the git evidence, and append the
+   same observation — date + one-line git evidence — to the migrated
+   `pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` file, exactly as the normal reconciliation
+   does: the versioned record carries the integration evidence, not only the cursor. The
+   integration is already observed, so this is the reconciliation's stamp — not a seal, and not
+   a `delivered` this recovery would invent: `pelizzai-finish` never ran for this delivery.
 4. Commit cursor, history file, and the knowledge files the user ratified in the SAME metadata
    commit — on the new task branch, as always (never a commit on a protected branch). Only then
    free slug/branch/base-*/validated-head/confirm for the new task.

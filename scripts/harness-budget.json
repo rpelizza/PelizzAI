@@ -136,7 +136,7 @@
         ".claude/skills/pelizzai-execute/SKILL.md",
         ".claude/skills/pelizzai-execute/references/task-cycle.md"
       ],
-      "ceilingBytes": 132528,
+      "ceilingBytes": 132534,
       "targetBytes": 85000
     },
     {

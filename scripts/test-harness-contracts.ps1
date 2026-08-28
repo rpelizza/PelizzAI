@@ -192,7 +192,10 @@ try {
     Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'SAME metadata\s+commit' 'delivery-seal: ratified knowledge rides the same metadata commit (review round 1)'
     Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'full SHA \(a .<none>./missing value never enters this\s+path\)' 'delivery-seal: stale path requires a full validated-head (review round 1)'
     Check-Match '.claude/skills/pelizzai-resume/SKILL.md' 'Stale cursor short of .delivered.' 'resume: stale pre-delivered cursor is not WIP divergence'
-    Check-Match '.claude/skills/pelizzai-resume/SKILL.md' 'never enters this path' 'resume: stale path requires a full validated-head (review round 1)'
+    Check-Match '.claude/skills/pelizzai-resume/SKILL.md' '.validated-head. is a full SHA \(a .<none>./missing value never enters this path\)' 'resume: stale path requires a full validated-head (review rounds 1-2)'
+    Check-Match '.claude/skills/pelizzai-execute/references/delivery-seal.md' 'append the\s+same observation[\s\S]{0,80}pelizzai/data/history/<YYYY-MM-DD>-<slug>\.md' 'delivery-seal: the recovery stamps the history file too (review round 2)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Entry already present with .status: candidate. or .promoted.' 'finish: only candidate/promoted entries count as recurrence (review round 2)'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'Entry present but .retired.[^\n]*no count, no promotion' 'finish: a retired entry only flags the wrong retirement (review round 2)'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'symptom similarity is not identity' 'finish: recurrence identity is deterministic (review round 1)'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'equivalence is\s+never inferred' 'finish: the lesson sweep accepts only the explicit marker (review round 1)'
     Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'explicit \*\*allowlist\*\*' 'finish: ratification produces the guard allowlist (review round 1)'
@@ -1462,7 +1465,8 @@ try {
 
     # The closure metadata set: state.md + the block migrated to history/, plus the two
     # pelizzai/data files only when the §1.6 write-back ratified them (issue #66).
-    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'only the closure metadata files[\s\S]{0,300}§1\.6 allowlist' 'finish-task: pre-destination guard requires the closure metadata set'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'only the closure metadata files: .pelizzai/data/state\.md., the\s+.pelizzai/data/history/<YYYY-MM-DD>-<slug>\.md.[\s\S]{0,120}§1\.6 allowlist — nothing more' 'finish-task: pre-destination guard names each closure path and the allowlist'
+    Check-Match '.claude/skills/pelizzai-finish/SKILL.md' 'allowlist does not name is an unratified write: stop, do not publish' 'finish-task: a knowledge file off the allowlist blocks publication'
 
     # A plan gap goes to the interview; guessing stopped being expected behavior.
     Check-Match '.claude/skills/pelizzai-plan/SKILL.md' 'whatever the plan lacks[\s\S]{0,140}pelizzai-interview' 'writing-plans: a plan gap goes to interview-me, never to guessing'
