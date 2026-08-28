@@ -163,7 +163,11 @@ with numbers different from its recorded row → propose the row's REPLACEMENT (
 append; the superseded numbers survive in this task's `pelizzai/data/history/` file). The
 closeout is the moment the new number is proven, and this is the deliberate ratified change the
 standard demands — never during a correction: at this point the delivery is already approved and
-sealed content, so the "fix the output, not the criterion" guard does not apply to it. Declined →
+sealed content, so the "fix the output, not the criterion" guard does not apply to it. A ratified
+replacement also records, in the `pelizzai/data/history/<YYYY-MM-DD>-<slug>.md` file the §2b
+migration creates, one line with the superseded row, the new numbers, and the evidence — that is
+how "the superseded numbers survive in history/" actually happens: the migration alone copies
+only the task block. Declined →
 the stale row stays; record the gap in the destination report, because a baseline nobody replaces
 judges the next regression against the wrong number.
 
@@ -200,7 +204,9 @@ hard, so reaching one already engages it.
 the seal is about to migrate — the `## Progress` lines and the `data/reports/` files they link
 (reports are git-ignored: this sweep is their only exit) — for the explicit `lesson(evolve):`
 marker from the state template. The marker is the ONLY form the sweep recognizes; equivalence is
-never inferred. A line that reads like a lesson but carries no marker is pointed out to the user
+never inferred. A marker whose value is `none` or a template placeholder (`<...>`) is the
+template's own scaffolding, not a lesson: skip it — never present it for ratification and never
+let it reach `learnings.md`. A line that reads like a lesson but carries no marker is pointed out to the user
 as exactly that — an unmarked candidate — and only the user's answer turns it into one: record
 the absence, do not promote inferred text. Present each marked lesson for promotion or
 registration via `pelizzai-evolve`. The migration keeps the block intact in `history/`, but
@@ -273,16 +279,23 @@ never in an extra commit):
 git add -- pelizzai/data/state.md pelizzai/data/history/<YYYY-MM-DD>-<slug>.md
 # only when §1.6 ratified writes to them:
 git add -- pelizzai/data/verification-standard.md pelizzai/data/learnings.md
+
+# PRE-COMMIT guard — read and judge BEFORE git commit: the staged set must equal
+# EXACTLY state.md + the history file + the §1.6 allowlist, nothing more. A knowledge
+# file staged but NOT on the allowlist is an unratified write: unstage it and stop —
+# the guard interrupts the action; it does not report it after the fact.
 git diff --cached --name-only
+
 git commit -m "chore: seal task as delivered"
 ```
 
 Before executing the destination, prove the three guards:
 
 ```bash
-# must equal EXACTLY state.md + the history file + the §1.6 allowlist, nothing more.
-# A knowledge file listed here but NOT on the allowlist is an unratified write:
-# the closeout is invalid — stop, unstage, do not commit.
+# second guard, after the commit: the committed set must repeat the staged set —
+# state.md + the history file + the §1.6 allowlist, nothing more; a knowledge file
+# here that the allowlist does not name is an unratified write that got past the
+# pre-commit guard — the closeout is invalid.
 git diff --name-only <validated-head>..HEAD
 
 # no product difference outside the harness metadata (the two knowledge files are excluded
