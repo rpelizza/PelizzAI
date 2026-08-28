@@ -89,7 +89,9 @@ containers (or any managed stack), the final verification **brings the affected 
 observes the service become healthy** — per touched surface:
 
 ```text
-frontend touched            → production build + the frontend's own suite and lint
+frontend touched            → production build + the frontend's own suite and lint; an SSR or
+                              containerized frontend is ALSO a runnable surface (stack up +
+                              readiness) — only a purely static build has no boot to observe
 backend/service touched     → stack up + readiness/healthcheck observed
 database/migration/index    → the migration executed in the service's REAL lifecycle (boot or
                               deploy hook), against the data state that environment actually has

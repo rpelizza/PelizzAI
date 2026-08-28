@@ -138,9 +138,10 @@ migration) has no touched-files scope and runs the suite; and a module already r
 such, or the member reports someone else's failure as its own.
 
 The same position holds the **startup proof**: when the delivery runs as a service or stack
-(containers included) and the diff touched a runnable surface, the coordinator brings the
-affected stack back up and observes it healthy — healthcheck, readiness, or the startup log —
-before the final review. `pelizzai-verify` → "Proof by effect" (service starts) owns what counts
+(containers included) and the diff touched a runnable surface — or initialization, migration,
+index, schema, runtime configuration, or a dependency — the coordinator brings the affected
+stack back up and observes it healthy — healthcheck, readiness, or the startup log — before the
+final review. `pelizzai-verify` → "Proof by effect" (service starts) owns what counts
 as healthy and when the bring-up must invalidate caches (build-time inputs like
 Dockerfile/`.env`/dependencies → recreate without cache). The suite proves units; only the
 running process proves the boot.
