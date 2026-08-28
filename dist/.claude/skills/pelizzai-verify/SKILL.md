@@ -155,6 +155,11 @@ Requirements:
 Subagent delegation:
 ✅ Subagent reports success → check the git diff → verify the changes → report the REAL state
 ❌ Trusting the subagent's report
+
+Atomic transition / guarded write:
+✅ Enumerate ALL writers of the same field/document → each one honors the guarantee → seal
+❌ "The path I changed is atomic" (the guarantee belongs to the set of writers, not to the one
+   path the diff touched — the writer the PR did not touch is the one that undoes it)
 ```
 
 ## TDD and regression

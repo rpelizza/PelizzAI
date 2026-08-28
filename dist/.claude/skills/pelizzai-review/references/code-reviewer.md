@@ -95,6 +95,17 @@ Smells (Fowler baseline — what it is → how to fix):
 Smell valves: the REPO prevails (a documented project pattern suppresses the smell); a smell is a
 judgement call, never a hard violation; skip what the project's tooling already enforces (lint/formatter).
 
+The sibling check (a distinct step — reading the neighbor is not mutating the code):
+- Before judging a guard, predicate, or state transition, LOCATE the other place(s) in the
+  repository that solve the same problem — the sibling predicate ten lines above, the twin guard
+  in the neighboring module — and COMPARE. A divergence between siblings is a finding until
+  justified: two predicates answering the same question differently means one of them is wrong.
+- This step exists because adversarial rounds and mutation testing check the code against
+  itself: they start from the code under review as the reference, so they are structurally blind
+  to "this code solves the wrong problem". A real boot defect has survived four adversarial rounds and
+  every mutation, and was caught only by reading the sibling predicate. No number of rounds
+  closes that blindness; the neighbor comparison is the step that does.
+
 Architecture:
 - Sound design decisions? Reasonable scalability/performance? Does it integrate cleanly?
 - Security concerns? (for OWASP in depth, see pelizzai-security)

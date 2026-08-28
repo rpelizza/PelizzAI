@@ -126,6 +126,14 @@ Proposed test plan (answer "ok" or adjust):
 The canonical planning question: "What is the public interface, and on which seams will we test?
 Which behaviors matter most?"
 
+**A predicate with N conditions demands N scenarios, one per condition.** A test that only
+exercises the conditions together proves the SET, not each condition: drop any one condition from
+the predicate and the combined scenario still refuses, so the mutant survives — and the survival
+is invisible precisely because mutation WAS run. Define a baseline case; for each condition, add
+one scenario that changes ONLY that condition, holding the others at values that make the
+observable result depend on it, and assert the expected result of every scenario. The extra
+scenarios are the price of knowing which condition each test actually holds.
+
 Waived from this gate — with no self-declared "obviousness":
 
 ```text
