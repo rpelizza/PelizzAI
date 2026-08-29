@@ -89,6 +89,22 @@ function Invoke-Git([string]$Cwd, [string[]]$GitArgs) {
 # carve-out (the OS writes one root-level file literally named "pelizzai\x").
 $script:IsWin = ($env:OS -eq 'Windows_NT' -or $IsWindows)
 
+# PowerShell's Join-Path/Split-Path treat `\` as a separator on EVERY platform, silently
+# rewriting a POSIX filename that contains a literal backslash (pelizzai\x -> pelizzai/x) —
+# which reopens the exact carve-out bypass the per-OS split closes. Compose and climb paths
+# with plain string work on POSIX; the cmdlets stay on Windows, where `\` IS a separator.
+function Join-TargetPath([string]$base, [string]$child) {
+  if ($script:IsWin) { return (Join-Path $base $child) }
+  return (($base -replace '/+$', '') + '/' + $child)
+}
+function Get-ParentPath([string]$p) {
+  if ($script:IsWin) { return (Split-Path -Parent $p) }
+  $trimmed = $p.TrimEnd('/')
+  $idx = $trimmed.LastIndexOf('/')
+  if ($idx -le 0) { return '/' }
+  return $trimmed.Substring(0, $idx)
+}
+
 # Forward slashes and no trailing slash, for prefix comparison robust to \ and / (Windows only).
 function Get-Norm([string]$p) {
   $s = $p
@@ -448,11 +464,11 @@ try {
       $cur = $qualifier
       foreach ($seg in $rest) {
         if ($seg -eq '..') {
-          $parent = Split-Path -Parent $cur
+          $parent = Get-ParentPath $cur
           if ($parent) { $cur = $parent }
           continue
         }
-        $next = Join-Path $cur $seg
+        $next = Join-TargetPath $cur $seg
         if (-not (Test-Path -LiteralPath $next)) {
           # Test-Path FOLLOWS links, so a DANGLING link looks "not on disk" — yet a write through
           # it lands on the target. See the link itself and resolve its target physically.
@@ -470,7 +486,7 @@ try {
             }
           }
           if ($linkTarget) {
-            if (-not [System.IO.Path]::IsPathRooted($linkTarget)) { $linkTarget = Join-Path $cur $linkTarget }
+            if (-not [System.IO.Path]::IsPathRooted($linkTarget)) { $linkTarget = Join-TargetPath $cur $linkTarget }
             $cur = Get-PhysicalPath $linkTarget ($Depth + 1)
           } else {
             $cur = $next # genuinely not on disk yet
@@ -510,7 +526,9 @@ try {
   foreach ($t in $targets) {
     # No GetFullPath here: it would collapse `..` lexically BEFORE the link walk - the exact
     # bypass Get-PhysicalPath exists to close. The walk owns the whole normalization.
-    $abs = if ([System.IO.Path]::IsPathRooted($t)) { $t } else { Join-Path $cwd $t }
+    # Join-TargetPath, not Join-Path: the cmdlet rewrites a literal `\` in the target into a
+    # separator even on POSIX, where it is a filename character.
+    $abs = if ([System.IO.Path]::IsPathRooted($t)) { $t } else { Join-TargetPath $cwd $t }
     $abs = Get-PhysicalPath $abs
     if (Test-Inside $abs $gitRoot) { [void]$inRoot.Add($abs) }
   }
