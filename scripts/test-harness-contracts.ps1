@@ -906,6 +906,18 @@ try {
                         Check ((Invoke-Writegate $wg @{ command = "echo ${wgQuote}a${wgSep}b${wgQuote} > produto.txt" } $wgTemp) -eq 2) "writegate: $wgQuoteName '$wgSepName' does not hide a product redirect ($leaf)"
                     }
                 }
+                # Escapes (CodeRabbit PR #82 r3): \" must not close a double-quoted string, so the
+                # quoted ; stays text and the REAL redirect after the closing quote is still seen.
+                Check ((Invoke-Writegate $wg @{ command = 'printf "a\";b" > produto.txt' } $wgTemp) -eq 2) "writegate: escaped double quote does not hide a product redirect ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'printf "a\";b" > pelizzai/data/x' } $wgTemp) -eq 0) "writegate: escaped double quote does not corrupt a pelizzai/ redirect target ($leaf)"
+                # Single quotes are POSIX-literal: backslash does not escape and the quote closes.
+                Check ((Invoke-Writegate $wg @{ command = "grep 'a\' seed.txt > produto.txt" } $wgTemp) -eq 2) "writegate: backslash inside single quotes stays literal, product redirect still seen ($leaf)"
+                # Line continuation: backslash-newline joins the physical lines into one segment.
+                Check ((Invoke-Writegate $wg @{ command = "npm test \`n > produto.txt" } $wgTemp) -eq 2) "writegate: a line continuation does not hide a product redirect ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "npm test \`n > pelizzai/data/x" } $wgTemp) -eq 0) "writegate: a line continuation keeps a pelizzai/ target allowed ($leaf)"
+                # Windows-path guard: a backslash before an ordinary character is a path separator,
+                # never an escape — the quoted-and-redirected path must still resolve as spelled.
+                Check ((Invoke-Writegate $wg @{ command = 'echo x > "sub\produto.txt"' } $wgTemp) -eq 2) "writegate: backslash path separators survive escape handling ($leaf)"
             }
 
             # -- Carve-out bypass regression (2026-08-26): `..` AFTER a directory link. --

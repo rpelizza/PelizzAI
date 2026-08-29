@@ -121,8 +121,19 @@ function Get-ParsedSegment([string]$seg) {
   $expectTarget = $false
   for ($i = 0; $i -lt $seg.Length; $i++) {
     $ch = $seg.Substring($i, 1)
+    $next = if (($i + 1) -lt $seg.Length) { $seg.Substring($i + 1, 1) } else { '' }
+    # Same escape model as Split-ShellSegments; here the escape RESOLVES into the token content
+    # (\" is a literal quote in the word, \\ a backslash). Single quotes stay POSIX-literal.
+    if ($quote -eq '"' -and $ch -eq '\' -and ($next -eq '"' -or $next -eq '\')) {
+      $cur += $next; $i++
+      continue
+    }
     if ($null -ne $quote) {
       if ($ch -eq $quote) { $quote = $null } else { $cur += $ch }
+      continue
+    }
+    if ($ch -eq '\' -and ($next -eq '"' -or $next -eq "'" -or $next -eq '\')) {
+      $cur += $next; $i++
       continue
     }
     if ($ch -eq '"' -or $ch -eq "'") { $quote = $ch; continue }
@@ -194,10 +205,27 @@ function Split-ShellSegments([string]$command) {
   $quote = $null
   for ($i = 0; $i -lt $command.Length; $i++) {
     $ch = $command.Substring($i, 1)
+    $next = if (($i + 1) -lt $command.Length) { $command.Substring($i + 1, 1) } else { '' }
+    # Escapes (issue #74 follow-up): inside double quotes \" does not close the string; outside
+    # quotes \x escapes a quote/backslash and \<newline> is a line continuation. Single quotes
+    # are POSIX-literal (no escapes). A backslash before any OTHER character is an ordinary
+    # character - Windows paths (C:\temp\x) must survive untouched.
+    if ($quote -eq '"' -and $ch -eq '\' -and ($next -eq '"' -or $next -eq '\')) {
+      $cur += $ch + $next; $i++
+      continue
+    }
     if ($null -ne $quote) {
       if ($ch -eq $quote) { $quote = $null }
       $cur += $ch
       continue
+    }
+    if ($ch -eq '\') {
+      if ($next -eq "`r" -and ($i + 2) -lt $command.Length -and $command.Substring($i + 2, 1) -eq "`n") {
+        $i += 2 # line continuation: join the physical lines
+        continue
+      }
+      if ($next -eq "`n") { $i++; continue }
+      if ($next -eq '"' -or $next -eq "'" -or $next -eq '\') { $cur += $ch + $next; $i++; continue }
     }
     if ($ch -eq '"' -or $ch -eq "'") { $quote = $ch; $cur += $ch; continue }
     if ($ch -eq '&' -and ($i + 1) -lt $command.Length -and $command.Substring($i + 1, 1) -eq '&') {

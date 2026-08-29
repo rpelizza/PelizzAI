@@ -198,9 +198,21 @@ function parseSegment(seg) {
   };
   for (let i = 0; i < seg.length; i++) {
     const ch = seg[i];
+    // Same escape model as splitSegments; here the escape RESOLVES into the token content
+    // (\" is a literal quote in the word, \\ a backslash). Single quotes stay POSIX-literal.
+    if (quote === '"' && ch === '\\' && (seg[i + 1] === '"' || seg[i + 1] === '\\')) {
+      cur += seg[i + 1];
+      i++;
+      continue;
+    }
     if (quote) {
       if (ch === quote) quote = null;
       else cur += ch;
+      continue;
+    }
+    if (ch === '\\' && (seg[i + 1] === '"' || seg[i + 1] === "'" || seg[i + 1] === '\\')) {
+      cur += seg[i + 1];
+      i++;
       continue;
     }
     if (ch === '"' || ch === "'") {
@@ -270,10 +282,35 @@ function splitSegments(command) {
   let quote = null;
   for (let i = 0; i < command.length; i++) {
     const ch = command[i];
+    // Escapes (issue #74 follow-up): inside double quotes \" does not close the string; outside
+    // quotes \x escapes a quote/backslash and \<newline> is a line continuation. Single quotes
+    // are POSIX-literal (no escapes). A backslash before any OTHER character is an ordinary
+    // character — Windows paths (C:\temp\x) must survive untouched.
+    if (quote === '"' && ch === '\\' && (command[i + 1] === '"' || command[i + 1] === '\\')) {
+      cur += ch + command[i + 1];
+      i++;
+      continue;
+    }
     if (quote) {
       if (ch === quote) quote = null;
       cur += ch;
       continue;
+    }
+    if (ch === '\\') {
+      const next = command[i + 1];
+      if (next === '\r' && command[i + 2] === '\n') {
+        i += 2; // line continuation: join the physical lines
+        continue;
+      }
+      if (next === '\n') {
+        i++;
+        continue;
+      }
+      if (next === '"' || next === "'" || next === '\\') {
+        cur += ch + next;
+        i++;
+        continue;
+      }
     }
     if (ch === '"' || ch === "'") {
       quote = ch;
