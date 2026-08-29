@@ -79,6 +79,10 @@ Domain skills capture **this project's** patterns, stacks, and conventions, maki
   skill — ground it or defer (never invent from memory). A skill for an internal convention is
   grounded in the project's own code, tests, ADRs, and history, where `context7` is preferred,
   not a blocker.
+- A CORRECTION to an assertion is a new assertion: it carries the same grounding requirement as
+  the original (context7/current official docs for an external stack; reading the cited code for
+  an internal convention). "Minor edit" does not waive the source — the field failure was exactly
+  a correction rewritten from memory that the pinned version's documentation contradicted.
 - In a CONSUMER, every domain skill created/updated enters the catalog `pelizzai/domain-skills.md`
   and the ledger `pelizzai/data/review-domain-skills.md` (see Templates). In the PelizzAI source
   repo (sentinel `scripts/pelizzai-source-repo.txt`) that runtime does not exist: record the same
@@ -204,6 +208,12 @@ An update is always **propose → confirm → apply → record**. There is no "h
 edit the user already requested, the proposal is the diff itself: show it before writing, within
 the requested scope, without reopening the authorization they just gave.
 
+Editing the BODY of a domain skill opens the review of its catalog entry in the same step: the
+catalog `pelizzai/domain-skills.md` has wider reach than the skill (it is what the router reads
+to pick overlays), so a corrected body under a stale entry keeps the wrong version circulating
+more than the corrected one. Reconcile entry and body before closing the edit — creation already
+enters the catalog; this closes the reverse loop.
+
 ---
 
 ## Cadence and triggers (hybrid)
@@ -256,6 +266,7 @@ Once a skill is ready, you can **optimize the `description`** to improve trigger
 - Inventing domain skills with no real project pattern behind them.
 - Letting the cadence block the work, or repeating the nudge more than once.
 - Forgetting to update the catalog and the ledger after creating/changing a skill.
+- Correcting a skill's body and leaving its catalog entry announcing the old assertions.
 - Making a behavioral edit without a baseline/eval/forward-test proportional to the risk.
 - Summarizing the workflow in the description (the agent follows the summary and skips the body).
 - A vague trigger that contends for every request without naming the near misses (skill storm) —

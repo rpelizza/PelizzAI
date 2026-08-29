@@ -72,6 +72,9 @@ Non-negotiable rule when updating an **existing** skill:
 - Change ONLY what the new version/pattern requires.
 - PRESERVE the customizations the project added (do not recreate from scratch on top).
 - SHOW the diff to the user BEFORE writing.
+- RECONCILE the catalog entry (`pelizzai/domain-skills.md`) in the same step as any body edit:
+  the router reads the catalog, not the skill, so a stale entry outlives and outreaches the
+  corrected body.
 - Approval is PER skill — never in bulk, never inherited from the "yes" given to another skill.
   Without confirmation, nothing is written.
 ```
