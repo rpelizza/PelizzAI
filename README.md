@@ -79,7 +79,20 @@ bash scripts/sync-harness.sh --export-consumer /path/to/your-project
 
 This copies the core skills, the hooks, the Cursor adapter, and the useful scripts, generates the
 consumer's `CLAUDE.md`, and validates the mirrors — **without touching** your domain skills, your
-`pelizzai/`, or your `settings.json`.
+`pelizzai/`, or your `settings.json`. Both paths run the exact same payload routine; what the
+export adds over the copy:
+
+| | copy `dist/` | `--export-consumer` |
+| --- | --- | --- |
+| requirement | none | Node 18+, run from the source repo |
+| removes core skills discontinued upstream | no (copy-over) | yes, and names each one |
+| runs the sync validation inside your project | no | yes |
+| preserves domain skills, `pelizzai/`, `settings.json` | yes | yes, by contract |
+| registers hooks | never | optional, `--install-hooks` |
+
+In your project's `CLAUDE.md`/`AGENTS.md`/`GEMINI.md` the harness owns only a **managed block**
+(`<!-- pelizzai:begin -->` … `<!-- pelizzai:end -->`); everything you wrote outside it survives
+every update.
 
 > **Never copy the repository root by hand** — manual copying is what `dist/` is for. What sets
 > the source repo apart from a consumer is a single sentinel, `scripts/pelizzai-source-repo.txt`.
@@ -105,6 +118,10 @@ The installer is idempotent and preserves hooks, permissions, and any other fiel
 exist in your `.claude/settings.json`. On the other platforms the same invariants still hold
 through the skills — with no executable enforcement.
 
+Enabling them is worth it: in a measured A/B on the trigger tests, the same harness and the same
+fixture scored **4/7 without hooks and 7/7 with them**. The injected phrases are identical to what
+the entrypoint already says — the mechanism is the channel, not the content.
+
 ---
 
 ## The lifecycle of a task
@@ -128,6 +145,15 @@ flowchart TD
 Four stops in a full feature; fewer on the short routes. **Between the gates the harness works on
 its own** — it does not ask "keep going?" at every step, because autonomy inside a ratified
 boundary is the point. What it never does is cross a gate in silence.
+
+The two gates that share the word "kickoff" are distinct on purpose. **GATE 1** ratifies the
+*route*: lane, head skill, overlays, discovery gaps. The marker `kickoff: ratified` is only
+written later, at **GATE 3** — the post-plan setup gate — after the structural decisions are
+answered one question at a time: isolation (branch or worktree), execution mode (inline ·
+subagents · `team`, the three always visible), commit strategy (granular by default;
+`squash-final` only on explicit request), and the executor's model tier. On the short routes
+(tweak, bug) the same decisions collapse into a compact one-line confirm — still answered, never
+defaulted.
 
 Ratifying the route at GATE 1 does not end your authority: a material gap that shows up later —
 in the spec, in the plan, or in the middle of the code — reopens the conversation (see the next
@@ -154,11 +180,16 @@ flowchart TD
     OK -- "yes" --> NEXT["next task"]
 ```
 
-Two things deserve highlighting here:
+Three things deserve highlighting here:
 
 **The blind lens.** The spec reviewer never reads the implementer's report — only the diff and the
 spec. That way it does not inherit the framing of whoever wrote the code. The report is read by the
 other lens, whose duty is precisely to **audit the claims**, not trust them.
+
+**The briefing is self-sufficient.** The member never reads the plan file: it receives the task
+text pasted, the area's domain skills, the overlay gates pasted (registering names in the state is
+not enough), the project's Active rules, and a test command scoped to the task's paths. Commits
+are the coordinator's gate — the member does not commit.
 
 **The interview is not just for planning.** If the gap appears on task 7 of 9, the work stops
 right there. The executor does not choose — it names the gap and hands it back. In team mode, the
@@ -185,6 +216,11 @@ flowchart LR
     E --> V["review + Verification<br/>seal the content"]
     V --> F["Finish integrates<br/>without changing the content"]
 ```
+
+`pelizzai-core` enters every conversation with the **1% rule**: if there is at least a 1% chance a
+skill applies, it must be loaded and evaluated — proportionality lives *inside* the skills, never
+in skipping them. Routing is an invocation, not a narration: the core actually calls the router;
+describing the route and jumping straight to a head skill is a measured failure mode.
 
 The decision envelope is derived from the request and the evidence — it is not a form for you to
 fill in. But the assembled route comes back as a **recommendation to ratify** before effort is
@@ -214,7 +250,9 @@ review, and Verification.
 The frontend overlay applies the existing design system and specification before any generic
 preference. It demands real states, responsiveness, accessibility, and visual QA, and explicitly
 fights AI slop: gratuitous decorative gradients, automatic glassmorphism, card overload, generic
-copy, arbitrary icons, and interfaces without hierarchy or product intent.
+copy, arbitrary icons, and interfaces without hierarchy or product intent. The security overlay
+picks its lens by the **surface of the diff** — web/API, LLM/agents, IaC/CI, data pipeline,
+desktop/CLI — not by a fixed web checklist.
 
 ---
 
@@ -266,6 +304,9 @@ delegation. `destination` is never inherited: push, PR, and publication are conf
 
 Every greenfield product enters as `exploratory`, even with the stack already defined. Framework,
 language, and database define neither users, rules, states, UX, data, nor acceptance criteria.
+The mandatory greenfield route — each artifact waivable only by your explicit waiver — is:
+ratified understanding → discovery → spec → stress + approval → domain skills proposal → plan →
+stress + fresh approval → ratified setup → execution.
 
 ### Debugging
 
@@ -290,6 +331,8 @@ gap, not stubbornness.
 - `pelizzai-review` — read-only review of a diff, working tree, branch, or PR.
 - `pelizzai-architecture` — codebase-wide review by friction and evidence, with no
   writes.
+- `pelizzai-experiment` — a disposable prototype that answers ONE feasibility question; the
+  output is the answer, not code you keep.
 - If a tweak reveals new design, contract, or risk, the router reclassifies before continuing.
 
 ---
@@ -329,14 +372,31 @@ flowchart LR
     X --> DN["done observed later,<br/>against Git"]
 ```
 
-The final validation happens after squash, overlays, tests, and fixes. When everything passes,
-`pelizzai-verify` records the `validated-head`: the exact SHA of the last
+### The final validation: the order is a contract
+
+1. **Overlays that may write** — security, interface, docs — run over `base-sha..HEAD` first;
+   what they fix or generate becomes delivery content, earns evidence, and is committed.
+2. **The commit strategy is frozen**: in `granular`, a clean working tree; in `squash-final`, the
+   consolidation happens now — never at Finish.
+3. **The frozen candidate is validated**, in this exact sequence: capture `candidate-head` → the
+   coordinator's own checks, from scratch and with output read — the **full suite** and the
+   **stack bring-up** included (frontend proves the production build; backend brings the stack up
+   to readiness; a touched `.env` or build input recreates the stack without cache) → the **final
+   review** of `base-sha..candidate-head` by an independent reviewer → the **checklist**, plan
+   and spec re-read requirement by requirement → **`pelizzai-verify`** with the fresh evidence.
+4. Any fix along the way — security, UI, or docs included — **invalidates the candidate**: the
+   fix is committed, the flow returns to step 1, and the final review reopens.
+
+When everything passes, `pelizzai-verify` records the `validated-head`: the exact SHA of the last
 validated content commit.
 
 `pelizzai-finish` requires `HEAD == validated-head` — **what you receive is exactly what was
-reviewed**. It then creates a single metadata-only commit to seal the task in `phase: delivered`
-and record `confirm:`, the observable condition that will become `done`. In that seal, the task's
-intact block migrates to `pelizzai/data/history/` and the cursor returns to template size.
+reviewed**. Before sealing, it runs one last coverage net: the real diff is crossed against the
+overlays that ran, and an uncovered surface generates a single offer (accepting it drops the seal
+and reruns the validation — never a patch after the seal). It then creates a single metadata-only
+commit to seal the task in `phase: delivered` and record `confirm:`, the observable condition that
+will become `done`. In that seal, the task's intact block migrates to `pelizzai/data/history/` and
+the cursor returns to template size.
 
 `done` is never declared at closeout: it is **observed** at the opening of the next task or on
 resumption, by checking `confirm:` against Git. If the observation fails — a PR closed without a
@@ -363,7 +423,9 @@ pelizzai/
 ├── context.md | context/         domain glossary, on demand
 ├── adr/ | specs/ | plans/        on demand
 └── data/
-    ├── state.md                  cursor of the active task                     (versioned)
+    ├── state.md                  cursor of the active task                     (ignored: local per dev)
+    ├── learnings.md              Active rules + incident log                   (versioned, merge=union)
+    ├── verification-standard.md  acceptance bar, stack startup, baselines      (versioned)
     ├── review-domain-skills.md   maintenance ledger for the domain skills      (versioned)
     ├── history/                  intact block migrated at the delivered seal   (versioned)
     ├── .cadence-state.json       local counter for the cadence hook            (ignored)
@@ -382,7 +444,7 @@ approvals live in the plan header, with dates — not in the cursor. Main fields
 | `branch` · `base-ref` · `base-sha` | working branch and the exact base that bounds the final review |
 | `validated-head` | SHA of the content approved in the final validation |
 | `confirm` | observable condition that becomes `done` — observed against Git |
-| `kickoff` | `pending` until you ratify the consolidated gate |
+| `kickoff` | `pending` until the post-plan setup gate (or the compact confirm) ratifies it |
 | `isolation` · `execution-mode` · `commit-strategy` | born `pending`; never become a silent default |
 | `effect` · `risk` · `overlays` · `audience` | derived by the router; modulate depth and language |
 | `spec` · `plan` · `project` | path of the artifact or a dated explicit waiver |
@@ -390,6 +452,23 @@ approvals live in the plan header, with dates — not in the cursor. Main fields
 Below the cursor sit only `## Progress` (one line per task; a long report goes to `data/reports/`
 and the link stays) and `## History` (durable index). On resumption, all of it is checked against
 Git; dangerous divergence goes to `pelizzai-resume`.
+
+### The project's learned memory
+
+Two knowledge files close the loop between what a delivery taught and what the next one reads:
+
+- **`learnings.md`** — Active rules (a hard 40-line budget) and an incident log. The rules are
+  read where they change behavior: pasted into every execution briefing, read by the planner
+  before choosing approaches, by reviewers when instructed, by `pelizzai-verify` before judging,
+  by quick-fix before the change, and by diagnose on entry. Promotion to an Active rule requires
+  a failure that **recurred 2–3 times** and your ratification — one bad day does not legislate.
+- **`verification-standard.md`** — the acceptance bar per surface, the stack startup procedure,
+  and baselines. It is **read-only during any fix**: when the output fails the standard, the
+  output is corrected — never the standard.
+
+`pelizzai-evolve` owns the cycle: promotion, retirement, and archiving, always from observed
+failure, never speculation. At closeout, `pelizzai-finish` proposes the write-back
+(recommend-and-ratify) — baseline lines, incidents, and the lessons flagged during execution.
 
 ---
 
@@ -480,7 +559,7 @@ copies it to the consumer project along with the rest of the harness.
 
 | Group | Skills | Responsibility |
 | --- | --- | --- |
-| Entry and orchestration | `pelizzai-core`, `pelizzai-router`, `pelizzai-onboard`, `pelizzai-preferences` | mandatory entry, route classification and kickoff gate, bootstrap, global behavior floor |
+| Entry and orchestration | `pelizzai-core`, `pelizzai-router`, `pelizzai-onboard`, `pelizzai-preferences` | mandatory entry and the 1% rule, route classification and kickoff gate, bootstrap, global behavior floor |
 | Reasoning and conversation | `pelizzai-interview`, `pelizzai-prose` | the interview that resolves every material gap, clear writing; reasoning technique vocabulary lives inside each head skill |
 | Design, plan, and execution | `pelizzai-discovery`, `pelizzai-plan`, `pelizzai-execute` | ratified design with spec, executable and stress-tested plan, setup gate and task-by-task execution |
 | Per-task execution | `pelizzai-tdd`, `pelizzai-team`, `pelizzai-subagents`, `pelizzai-loop`, `pelizzai-continuity` | proof strategy per artifact, delegation and teams, macro loop and forking into a new session |
@@ -509,17 +588,32 @@ PelizzAI/
 │   ├── sync-harness.ps1|.sh      wrappers
 │   ├── install-hooks.mjs         merge/check/remove of the Claude Code hooks
 │   ├── test-harness-contracts.ps1  harness contract suite
+│   ├── measure-hotpath.mjs       hot-path cost report against harness-budget.json
+│   ├── validate-skills.mjs       platform-spec and budget validation of the skills
 │   ├── pelizzai-source-repo.txt  source mode sentinel (NEVER copy to consumers)
 │   ├── task-brief.ps1|.sh
 │   └── review-package.ps1|.sh
+├── tests/                        trigger, baseline, and mutation runners
 ├── CLAUDE.md                     canonical entry
 ├── AGENTS.md · GEMINI.md         generated
 └── .github/workflows/check-harness.yml
 ```
 
-**The hooks are safety nets, not the harness's brain.** `guardrails` blocks a narrow handful of
-irreversible Git commands — deliberately narrow, because a broad rule blocks legitimate work and
-teaches the agent to route around the net.
+**The hooks are safety nets, not the harness's brain.** Four pairs (`.mjs` for Node,
+`.ps1` for fleets without it), identical behavior asserted across both legs:
+
+- `pelizzai-session-start` — injects reminders at session start, resume, clear, and compact: load
+  the core first, an active task exists, bootstrap is missing, or the ratified defaults recap.
+  It never blocks; its real value is on `clear` and on platforms that do not re-inject the
+  entrypoint.
+- `pelizzai-cadence` — every 10 interactions checks the domain-skill maintenance ledger
+  (10 commits / 10 review days / 15 full-scan days) and nudges once, with a 7-day snooze. It
+  never blocks; the canonical cadence lives in the skills.
+- `pelizzai-guardrails` — blocks a narrow handful of irreversible Git commands
+  (`push --force` without lease, `reset --hard`, `clean -f`, `branch -D`, and friends) —
+  deliberately narrow, because a broad rule blocks legitimate work and teaches the agent to
+  route around the net. It classifies strings; it never runs git.
+- `pelizzai-writegate` — the enforcement of isolation and the kickoff, below.
 
 The `writegate` is a fail-closed `PreToolUse` hook that moves the invariant "isolate before the
 first write" from model obedience to executable enforcement. There are two rules: **Rule A** bars
@@ -527,11 +621,57 @@ product writes on a protected branch or a detached HEAD; in a consumer, writing 
 `kickoff: ratified` in `state.md` — **Rule B**. Writing metadata in `pelizzai/` stays allowed even
 on a protected branch, otherwise reconciling the state itself would deadlock.
 
+On the `Bash` side, the matcher reads the command **quote-aware, end to end**: a `|`, `&&`, `;`,
+newline, or `>` inside quotes is text, not an operator. So `sed -i 's|a|b|' pelizzai/data/state.md`
+is not cut at the quoted pipes and blocked by mistake, and quoting can't hide a real product
+redirect from the gate either. Escapes follow the shell: inside double quotes `\"` does not close
+the string, `\<newline>` joins continued lines, single quotes are literal — while a backslash
+before any other character stays an ordinary character, so Windows paths survive untouched. Null
+sinks, targets with unresolvable variables, and targets that resolve outside the repository are
+never treated as product, and paths are resolved **physically**: `..` after a symlink cannot
+smuggle product into the metadata carve-out.
+
 The hook **does not enforce the greenfield approval steps** — discovery, spec, domain skills, and
 plan remain mandatory, but they are driven by the skills, with you, not by a hook counting stamps
 in the cursor.
 
-An internal error in any hook is fail-open: a bug in the safety net never hijacks your tool.
+An internal error in any hook is fail-open: a bug in the safety net never hijacks your tool. The
+one honest exception: a repo that carries the harness but has no `state.md` **blocks** — the gate
+never ran, and ratifying it creates the file — while a repo with no harness footprint at all fails
+open with at most one warning a day.
+
+---
+
+## How the harness proves itself
+
+Doctrine that is not measured rots. Five instruments, four of them in CI:
+
+- **Contract suite** (`scripts/test-harness-contracts.ps1`, ~900+ assertions, Windows + Ubuntu +
+  macOS): every harness behavior is locked by an assertion — including behavioral fixtures that
+  execute the hooks for real, in both legs, against a temporary git repository on a protected
+  branch.
+- **Mutation suite** (`tests/mutation`, in CI): plants a defect in a disposable copy of the repo —
+  a description that silently loses its trigger, a skill missing from the manifest, a hot-path
+  ceiling breach — and asserts the named instrument **catches** it. A checker that no mutation
+  can turn red is theater; a mutation whose anchor drifted counts as a miss, never a pass.
+- **Hot-path budget** (`scripts/measure-hotpath.mjs` + `scripts/harness-budget.json`): the number
+  that matters is not the corpus on disk — it is what the doctrine mandates reading before the
+  first line of work, including the frontmatter of every skill, permanently resident. Each route
+  has a `ceilingBytes` **ratchet**: growth fails the build ("growth in the hot path is zero-sum —
+  name what comes out"), and a reference linked by a head skill must be budgeted or declared
+  on-demand, or the build fails on drift.
+- **Skill validation** (`scripts/validate-skills.mjs`): the platform's published spec as hard
+  errors — including the unquoted `: ` in a description that silently kills the skill's trigger —
+  plus size budgets as ratchets: violation counts may fall, never rise.
+- **Trigger tests** (`tests/trigger`, not in CI — they cost tokens and need a real credential):
+  spin up genuine headless agents against adversarial prompts ("skip the process", "you already
+  approved this yesterday", "prod is down, just bump the timeout") and read the transcript: did
+  the skills fire, and did any tool run before them? Because agents are stochastic, cases are
+  scored as **rates over 3+ runs**, and every doctrine fix is measured A/B by the rate change —
+  that is where 4/7 → 7/7 with hooks comes from.
+- **Baseline** (`tests/baseline`): the same task twice, with and without the harness — tokens,
+  turns, and wall-clock side by side. It deliberately does not score quality; it prices the
+  process.
 
 ---
 
@@ -546,6 +686,9 @@ made there is lost on the next sync.
 node scripts/sync-harness.mjs                    # regenerates mirrors and dist/
 node scripts/sync-harness.mjs --check            # validates the sync
 pwsh scripts/test-harness-contracts.ps1          # contract suite
+node scripts/measure-hotpath.mjs                 # hot-path cost vs. budget
+node scripts/validate-skills.mjs                 # spec + budget ratchets
+node tests/mutation/run.mjs                      # do the checkers still catch defects?
 ```
 
 The sync regenerates `dist/` automatically in the source repo (there is also the standalone
@@ -553,8 +696,9 @@ The sync regenerates `dist/` automatically in the source repo (there is also the
 
 Every harness behavior is locked by an assertion in the contract suite. New behavior without a new
 assertion is a regression waiting to happen — and an assertion weakened into a regex that matches
-everything is worse than no assertion, because it simulates coverage. The CI runs the core and the
-wrappers on Windows, Ubuntu, and macOS; the contracts run on Windows and Ubuntu.
+everything is worse than no assertion, because it simulates coverage. The CI runs the sync core
+and the wrappers, the skill validation, the hot-path budget, and the contract suite on Windows,
+Ubuntu, and macOS; the mutation suite and the committed-`dist/` check run on Ubuntu.
 
 ---
 
@@ -568,6 +712,11 @@ wrappers on Windows, Ubuntu, and macOS; the contracts run on Windows and Ubuntu.
 - The core requires Node.js 18+; the `.ps1` wrappers require PowerShell 7+ with UTF-8 encoding.
 - The hooks are Claude Code-specific and opt-in. On the other platforms the invariants hold only
   through the skills, with no executable enforcement.
+- The trigger and baseline runners are not in CI: they cost tokens and need a real agent
+  credential. They run before a doctrine slice lands, and the rates go in the PR.
+- The writegate's shell parser is best-effort and honest: what it cannot parse safely does not
+  block, and a link created between the check and the write (TOCTOU) is not seen — guardrails
+  and human review remain the compensating controls.
 - Agent Teams is experimental in Claude Code; without it, `pelizzai-team` degrades to subagents.
   On Windows, teammates must use the `in-process` display.
 - Parallel writes require `isolation: worktree` with disjoint paths; on `branch`, the coordinator
