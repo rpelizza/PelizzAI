@@ -103,6 +103,14 @@ Scope of the law:
   not invent a skill without evidence of a failure or a real pattern behind it.
 ```
 
+The repo-scan baseline establishes that the skill is USEFUL — a real pattern exists behind it.
+It does not establish that each assertion is TRUE: truth is checked per assertion, against the
+source that grounds that kind of claim — the cited code/tests for an assertion about code
+behavior; context7 or current official documentation for an external stack; the ADR or referenced
+discussion for a decision (see "Evidence hierarchy" below and the domain-skill row in
+`pelizzai-verify`'s proof-by-effect matrix). Treating the two as one claim is how thirty false
+assertions once rode a green gate.
+
 Why the law is hard: in a field-tested reference harness, the TDD skill needed **6 iterations** and **more than 10 unique rationalizations** captured and blocked one by one before reaching **100% compliance** under pressure. Without the RED baseline, each of those rationalizations would have survived invisible — the skill "looked good" on paper and failed in the field.
 
 ## Evidence and behavioral validation
@@ -121,6 +129,19 @@ The Iron Law demands evidence of real failure. This section says **which form** 
 The failing baseline is mandatory when the behavior is still unknown, the change is high-impact, or the agent tends to rationalize exceptions. Evidence already observed in the repository, in a regression, or in user feedback fulfills that role — it is real failure, just captured elsewhere. What does not qualify is imagined failure: do not fabricate a scenario to fill the table, nor demand a pressure-test file for every wording tweak.
 
 For complex changes, do *forward testing*: give a fresh session only the request and the new skill, without revealing the desired diagnosis. Observe the chosen route and fix the instruction, not the test's answer.
+
+### Evidence hierarchy (grounding an assertion about code)
+
+Code and tests are **evidence** of behavior: they are what executes. Comments, identifier names,
+and commit messages are **clues** — unverified human assertions that age and that no gate ever
+re-validates. A clue may point the way, but the assertion that lands in a skill is confirmed
+against code, tests, an ADR, or the referenced discussion itself — and, for an external stack,
+against the pinned version's documentation (context7 or current official docs), which plays the
+code's role there: a comment attributing a
+decision to an issue is confirmed by READING the issue, not by trusting the comment (the field
+case: the issue said the opposite, and the skill propagated the comment's error toward every
+future agent). This hierarchy applies to corrections as much as to creations — a correction is a
+new assertion (see `pelizzai-skill-lab` → Domain skills: specific rules).
 
 ## Versioned pressure tests (`test-pressure-<n>.md`)
 
@@ -282,6 +303,15 @@ In a consumer project, detect the active root before writing. Use `.claude/skill
 - **Include examples** (input → output) when they reduce ambiguity.
 - Prefer one central rule to scattered repetitions.
 - Name limits and fallback paths; say when **not** to use the skill.
+- Name the guarantee's real boundary: prefer "what is guaranteed is X; Y is not" over
+  "always/never". The absolute form is the one the next agent ACTS on — removing a legitimate
+  protection in its name, or trusting a guarantee that does not exist. A skill that documents
+  the real gap is worth more than one that documents the intention.
+- Prefer the rule to the enumeration. When the assertion is about a SET of code artifacts, state
+  the discriminator and name only the exceptions that break intuition; a list inside prose ages
+  with every new member and no gate reproves the missing one. An unavoidable enumeration needs a
+  mechanical proof — a test or script that compares member identity (not a bare count: a swap
+  preserves cardinality) and fails on divergence.
 - Start with a draft; then revisit with fresh eyes and improve.
 
 ## Degree of freedom

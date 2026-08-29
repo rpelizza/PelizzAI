@@ -1587,6 +1587,70 @@ try {
     Check $false 'issue #75 discriminating-test bar' $_.Exception.Message
 }
 
+# ---------------------------------------------------------------------------
+# Issue #63 — the domain-skill gate validated form, not truth: 30+ false assertions rode a green
+# gate (valid frontmatter, resolving links, root parity, symbol grep) because no proof row
+# observed the assertion itself. Five patterns, three homes: verify gains the assertion row plus
+# the block-scope and enumeration rules; skill-lab closes the catalog↔skill loop and grounds
+# corrections like creations; skill-authoring names the evidence hierarchy, the useful-vs-true
+# distinction, and the wording notes (no absolute guarantees; rule over enumeration).
+# ---------------------------------------------------------------------------
+try {
+    # Pattern 1 — a proof-matrix row of its own: each behavioral assertion is read against the
+    # cited code, not grepped for existence.
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' '\| domain skill / doc asserting code behavior \|[^\n]*cited excerpt read and matched against the claim[^\n]*\|[^\n]*grep that the cited symbols exist[^\n]*\|' 'verify: the proof matrix has a row for behavioral assertions'
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'set of assertions about the code — form checks cannot reprove a false' 'verify: names the form-vs-truth gap'
+    # Issue comment — the re-verification scope of an edit is the block, not the sentence.
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 're-verification scope of an edit is the BLOCK, not the sentence' 'verify: edit re-verification scope is the block'
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'antecedent of an untouched neighbor' 'verify: the block scope names the anaphora hazard'
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'enumeration of code artifacts is an assertion with an expiry date' 'verify: an enumeration is a decaying assertion'
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'the error is an ABSENCE' 'verify: symbol grep cannot catch the missing member'
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'state the discriminating rule and\s+name only the exceptions, or back the list with a mechanical set comparison' 'verify: an enumeration demands the rule or a mechanical set comparison'
+
+    # Pattern 3 — a correction is a new assertion and carries the original's grounding.
+    Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' 'A CORRECTION to an assertion is a new assertion' 'skill-lab: a correction is a new assertion'
+    Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' '"Minor edit" does not waive the source' 'skill-lab: minor-edit framing does not waive grounding'
+
+    # Pattern 2 — editing a skill body opens the catalog-entry review in the same step.
+    Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' 'opens the review of its catalog entry in the\s+same step' 'skill-lab: a body edit reopens the catalog entry'
+    Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' 'wider reach than the skill' 'skill-lab: the catalog has wider reach than the skill'
+    Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' 'body and leaving its catalog entry announcing the old assertions' 'skill-lab: the stale catalog entry is a named anti-pattern'
+    Check-Match '.claude/skills/pelizzai-skill-lab/references/domain-skill-maintenance.md' 'RECONCILE the catalog entry' 'maintenance: refresh reconciles the catalog entry in the same step'
+
+    # Pattern 4 — evidence hierarchy: code/tests are evidence; comment/name/commit are clues.
+    Check-Match '.claude/skills/pelizzai-skill-lab/references/skill-authoring.md' 'Code and tests are \*\*evidence\*\* of behavior' 'skill-authoring: code and tests are evidence'
+    Check-Match '.claude/skills/pelizzai-skill-lab/references/skill-authoring.md' 'commit messages are \*\*clues\*\*' 'skill-authoring: comment/name/commit are clues to confirm'
+    Check-Match '.claude/skills/pelizzai-skill-lab/references/skill-authoring.md' 'confirmed by READING the issue' 'skill-authoring: an attribution clue is confirmed at its source'
+
+    # Pattern 1 (aggravator) — the bootstrap baseline proves the skill USEFUL, not TRUE.
+    Check-Match '.claude/skills/pelizzai-skill-lab/references/skill-authoring.md' 'does not establish that each assertion is TRUE' 'skill-authoring: useful and true are distinct claims'
+
+    # Pattern 5 — the wording notes: no absolute guarantees; rule over enumeration.
+    Check-Match '.claude/skills/pelizzai-skill-lab/references/skill-authoring.md' '"what is guaranteed is X; Y is not" over\s+"always/never"' 'skill-authoring: the guarantee names its real boundary'
+    Check-Match '.claude/skills/pelizzai-skill-lab/references/skill-authoring.md' 'Prefer the rule to the enumeration' 'skill-authoring: prefer the rule to the enumeration'
+
+    # Review round 1 (PR #81, CodeRabbit): three sharpenings, none weakening an assertion above.
+    # (a) The truth source matches the claim type — cited code is not the only prover.
+    Check-Match '.claude/skills/pelizzai-skill-lab/references/skill-authoring.md' 'the\s+source that grounds that kind of claim' 'skill-authoring: the truth source matches the claim type'
+    Check-Match '.claude/skills/pelizzai-skill-lab/references/skill-authoring.md' 'for an external stack,\s+against the pinned version.s documentation' 'skill-authoring: external-stack claims are proved by the pinned docs'
+    # (b) Catalog reconciliation is consumer-only; source mode records in the native record.
+    Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' 'In a CONSUMER, editing the BODY of a domain skill opens the review of its catalog entry' 'skill-lab: the catalog loop is qualified as consumer-only'
+    Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' 'this closes the reverse loop\. In the source repo neither catalog nor ledger\s+exists: record the same fact in the native execution record' 'skill-lab: source mode routes the same fact to the native record'
+    Check-Match '.claude/skills/pelizzai-skill-lab/references/domain-skill-maintenance.md' 'RECONCILE the catalog entry[\s\S]{0,240}Consumer only — in the source repo the catalog does not exist' 'maintenance: the RECONCILE step itself carries the mode boundary'
+    # Review round 2 (PR #81, full review): verify itself carries the source-per-claim-type
+    # contract — without it, the agent rejects the correct external-stack evidence or reads an
+    # irrelevant local excerpt.
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'The source follows the claim type' 'verify: the assertion proof names the source per claim type'
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'an assertion about an external stack is proved against the pinned\s+version.s documentation' 'verify: external-stack claims are proved by the pinned docs'
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'a recorded decision is proved at its source' 'verify: decisions are proved at their recorded source'
+
+    # (c) An enumeration's mechanical proof compares member identity, not cardinality.
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'member identity,\s+not a bare count: a swap preserves cardinality' 'verify: the set comparison rejects the bare count'
+    Check-Match '.claude/skills/pelizzai-skill-lab/references/skill-authoring.md' 'compares member identity \(not a bare count: a swap\s+preserves cardinality\)' 'skill-authoring: the enumeration proof compares member identity'
+} catch {
+    Check $false 'issue #63 assertion-truth gate' $_.Exception.Message
+}
+
 Write-Host "`nResult: $passes PASS; $($failures.Count) FAIL."
 if ($failures.Count -gt 0) {
     foreach ($failure in $failures) { Write-Host " - $failure" }
