@@ -932,6 +932,25 @@ try {
                 Check ((Invoke-Writegate $wg @{ command = 'printf x \| tee produto.txt' } $wgTemp) -eq 2) "writegate: tee behind a literal pipe still blocks the product target ($leaf)"
                 Check ((Invoke-Writegate $wg @{ command = 'echo a\;b > pelizzai/data/x' } $wgTemp) -eq 0) "writegate: escaped semicolon does not corrupt a pelizzai/ redirect target ($leaf)"
                 Check ((Invoke-Writegate $wg @{ command = 'echo a\;b > produto.txt' } $wgTemp) -eq 2) "writegate: escaped semicolon does not hide a product redirect ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo a\&\&b > pelizzai/data/x' } $wgTemp) -eq 0) "writegate: escaped ampersands do not corrupt a pelizzai/ redirect target ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo a\&\&b > produto.txt' } $wgTemp) -eq 2) "writegate: escaped ampersands do not hide a product redirect ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo \" > pelizzai/data/x' } $wgTemp) -eq 0) "writegate: escaped double quote outside quotes keeps a pelizzai/ redirect allowed ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo \" > produto.txt' } $wgTemp) -eq 2) "writegate: escaped double quote outside quotes does not hide a product redirect ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "echo \' > pelizzai/data/x" } $wgTemp) -eq 0) "writegate: escaped single quote outside quotes keeps a pelizzai/ redirect allowed ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "echo \' > produto.txt" } $wgTemp) -eq 2) "writegate: escaped single quote outside quotes does not hide a product redirect ($leaf)"
+                # Command substitution (CodeRabbit PR #82 r6): bash RUNS $() and backticks even
+                # inside double quotes — a redirect hidden there is a real write.
+                Check ((Invoke-Writegate $wg @{ command = 'echo "$(printf x > produto.txt)"' } $wgTemp) -eq 2) "writegate: a redirect inside a quoted \$() cannot hide a product write ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo "$(printf x > pelizzai/data/x)"' } $wgTemp) -eq 0) "writegate: a redirect inside a quoted \$() targeting pelizzai/ stays allowed ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo `printf x > produto.txt`' } $wgTemp) -eq 2) "writegate: a redirect inside backticks still blocks the product target ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo ''$(printf x > produto.txt)''' } $wgTemp) -eq 0) "writegate: single quotes keep a \$() literal — no substitution, no write ($leaf)"
+                # Backslash semantics are per-OS (r6): a path separator on Windows, a literal
+                # filename character on POSIX — `pelizzai\x` is metadata there vs. product here.
+                if ($env:OS -eq 'Windows_NT' -or $IsWindows) {
+                    Check ((Invoke-Writegate $wg @{ command = 'printf x > pelizzai\x' } $wgTemp) -eq 0) "writegate: backslash is a path separator on Windows, pelizzai\x is metadata ($leaf)"
+                } else {
+                    Check ((Invoke-Writegate $wg @{ command = 'printf x > pelizzai\x' } $wgTemp) -eq 2) "writegate: backslash is literal on POSIX, pelizzai\x is a product filename ($leaf)"
+                }
             }
 
             # -- Carve-out bypass regression (2026-08-26): `..` AFTER a directory link. --

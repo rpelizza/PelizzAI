@@ -628,7 +628,9 @@ redirect from the gate either. Escapes follow the shell: inside double quotes `\
 the string, `\<newline>` joins continued lines, a backslash followed by a space, tab, or shell
 operator keeps it literal (a filename with spaces stays whole; an escaped `>` is text, not a
 redirect), single quotes are literal — while a backslash before any other character stays an
-ordinary character, so Windows paths survive untouched. Null
+ordinary character. Backslash is a path separator only on Windows; on POSIX it is a literal
+filename character. Command substitutions — `$(…)` and backticks, which the shell runs even
+inside double quotes — are parsed recursively, so a redirect hidden inside one is still seen. Null
 sinks, targets with unresolvable variables, and targets that resolve outside the repository are
 never treated as product, and paths are resolved **physically**: `..` after a symlink cannot
 smuggle product into the metadata carve-out.
@@ -663,7 +665,8 @@ Doctrine that is not measured rots. Five instruments, four of them in CI:
   name what comes out"), and a reference linked by a head skill must be budgeted or declared
   on-demand, or the build fails on drift.
 - **Skill validation** (`scripts/validate-skills.mjs`): the platform's published spec as hard
-  errors — including the unquoted `: ` in a description that silently kills the skill's trigger —
+  errors — including an unquoted colon followed by a space in a description, which silently kills
+the skill's trigger —
   plus size budgets as ratchets: violation counts may fall, never rise.
 - **Trigger tests** (`tests/trigger`, not in CI — they cost tokens and need a real credential):
   spin up genuine headless agents against adversarial prompts ("skip the process", "you already

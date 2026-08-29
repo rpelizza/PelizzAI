@@ -105,9 +105,16 @@ function git(cwd, args) {
   }
 }
 
-// Forward slashes and no trailing slash, for prefix comparison robust to \ and /.
+// Backslash is a path separator ONLY on Windows. On POSIX it is a legal filename character —
+// treating `pelizzai\x` as `pelizzai/x` there collapsed a PRODUCT file into the metadata
+// carve-out (the OS writes one root-level file literally named "pelizzai\x").
+const WIN = process.platform === 'win32';
+
+// Forward slashes and no trailing slash, for prefix comparison robust to \ and / (Windows only).
 function norm(p) {
-  return String(p).replace(/\\/g, '/').replace(/\/+$/, '');
+  let s = String(p);
+  if (WIN) s = s.replace(/\\/g, '/');
+  return s.replace(/\/+$/, '');
 }
 
 // Windows and macOS compare paths case-insensitively; Linux is case-sensitive.
@@ -155,7 +162,7 @@ function physicalResolve(baseDir, target, depth = 0) {
   const root = abs ? parse(target).root : '';
   let cur = abs ? realpathOr(root, depth) : baseDir;
   const rest = abs ? target.slice(root.length) : target;
-  for (const seg of rest.split(/[\\/]+/)) {
+  for (const seg of rest.split(WIN ? /[\\/]+/ : /\/+/)) {
     if (!seg || seg === '.') continue;
     if (seg === '..') {
       cur = dirname(cur);
@@ -356,10 +363,72 @@ function splitSegments(command) {
   return segments;
 }
 
+// Command substitutions — $(...) with nesting, and `...` — are REAL executions: bash runs them
+// even inside double quotes, so `echo "$(printf x > product)"` writes product. Extracts every
+// inner script for a recursive parse and replaces the span with a neutral token in the outer
+// text, so the outer parse is not mangled by the substitution's own operators. Single quotes
+// keep substitutions literal. Best-effort like the rest of the matcher (a quoted paren inside
+// $() can shorten the span; what it cannot parse safely does not block).
+function extractSubstitutions(command) {
+  const inners = [];
+  let outer = '';
+  let quote = null;
+  for (let i = 0; i < command.length; i++) {
+    const ch = command[i];
+    if (quote === "'") {
+      if (ch === "'") quote = null;
+      outer += ch;
+      continue;
+    }
+    if (ch === '\\') {
+      outer += ch + (command[i + 1] ?? '');
+      i++;
+      continue;
+    }
+    if (ch === "'") {
+      quote = "'";
+      outer += ch;
+      continue;
+    }
+    if (ch === '"') {
+      quote = quote === '"' ? null : '"';
+      outer += ch;
+      continue;
+    }
+    if (ch === '$' && command[i + 1] === '(') {
+      let depth = 1;
+      let j = i + 2;
+      for (; j < command.length && depth > 0; j++) {
+        if (command[j] === '(') depth++;
+        else if (command[j] === ')') depth--;
+      }
+      inners.push(command.slice(i + 2, j - 1));
+      outer += 'SUBST';
+      i = j - 1;
+      continue;
+    }
+    if (ch === '`') {
+      let j = i + 1;
+      while (j < command.length && command[j] !== '`') j++;
+      inners.push(command.slice(i + 1, j));
+      outer += 'SUBST';
+      i = j;
+      continue;
+    }
+    outer += ch;
+  }
+  return { outer, inners };
+}
+
 // Write targets of a shell command (Bash sibling matcher). Best-effort and honest:
 // covers the common cases; what it cannot parse safely does not block.
-function extractShellTargets(command) {
+function extractShellTargets(command, depth = 0) {
   const targets = [];
+  if (depth < 5) {
+    const { outer, inners } = extractSubstitutions(command);
+    for (const inner of inners) targets.push(...extractShellTargets(inner, depth + 1));
+    command = outer;
+  }
   for (const seg of splitSegments(command)) {
     const { tokens, redirects } = parseSegment(seg);
     for (const r of redirects) targets.push(r);

@@ -84,9 +84,16 @@ function Invoke-Git([string]$Cwd, [string[]]$GitArgs) {
   } catch { return '' }
 }
 
-# Forward slashes and no trailing slash, for prefix comparison robust to \ and /.
+# Backslash is a path separator ONLY on Windows. On POSIX it is a legal filename character -
+# treating `pelizzai\x` as `pelizzai/x` there collapsed a PRODUCT file into the metadata
+# carve-out (the OS writes one root-level file literally named "pelizzai\x").
+$script:IsWin = ($env:OS -eq 'Windows_NT' -or $IsWindows)
+
+# Forward slashes and no trailing slash, for prefix comparison robust to \ and / (Windows only).
 function Get-Norm([string]$p) {
-  return (($p -replace '\\', '/') -replace '/+$', '')
+  $s = $p
+  if ($script:IsWin) { $s = $s -replace '\\', '/' }
+  return ($s -replace '/+$', '')
 }
 
 # child is the root itself or is INSIDE it (case per the OS).
@@ -261,10 +268,63 @@ function Split-ShellSegments([string]$command) {
   return @($segments)
 }
 
+# Command substitutions - $(...) with nesting, and `...` - are REAL executions: bash runs them
+# even inside double quotes, so `echo "$(printf x > product)"` writes product. Extracts every
+# inner script for a recursive parse and replaces the span with a neutral token in the outer
+# text, so the outer parse is not mangled by the substitution's own operators. Single quotes
+# keep substitutions literal. Best-effort like the rest of the matcher.
+function Get-CommandSubstitutions([string]$command) {
+  $inners = [System.Collections.Generic.List[string]]::new()
+  $outer = ''
+  $quote = $null
+  for ($i = 0; $i -lt $command.Length; $i++) {
+    $ch = $command.Substring($i, 1)
+    $next = if (($i + 1) -lt $command.Length) { $command.Substring($i + 1, 1) } else { '' }
+    if ($quote -eq "'") {
+      if ($ch -eq "'") { $quote = $null }
+      $outer += $ch
+      continue
+    }
+    if ($ch -eq '\') { $outer += $ch + $next; $i++; continue }
+    if ($ch -eq "'") { $quote = "'"; $outer += $ch; continue }
+    if ($ch -eq '"') { $quote = if ($quote -eq '"') { $null } else { '"' }; $outer += $ch; continue }
+    if ($ch -eq '$' -and $next -eq '(') {
+      $depth = 1
+      $j = $i + 2
+      while ($j -lt $command.Length -and $depth -gt 0) {
+        $c = $command.Substring($j, 1)
+        if ($c -eq '(') { $depth++ } elseif ($c -eq ')') { $depth-- }
+        $j++
+      }
+      [void]$inners.Add($command.Substring($i + 2, [Math]::Max(0, $j - 1 - ($i + 2))))
+      $outer += 'SUBST'
+      $i = $j - 1
+      continue
+    }
+    if ($ch -eq '`') {
+      $j = $i + 1
+      while ($j -lt $command.Length -and $command.Substring($j, 1) -ne '`') { $j++ }
+      [void]$inners.Add($command.Substring($i + 1, $j - ($i + 1)))
+      $outer += 'SUBST'
+      $i = $j
+      continue
+    }
+    $outer += $ch
+  }
+  return @{ Outer = $outer; Inners = $inners }
+}
+
 # Write targets of a shell command (Bash sibling matcher). Best-effort and honest:
 # covers the common cases; what it cannot parse safely does not block.
-function Get-ShellTargets([string]$command) {
+function Get-ShellTargets([string]$command, [int]$Depth = 0) {
   $targets = [System.Collections.Generic.List[string]]::new()
+  if ($Depth -lt 5) {
+    $subst = Get-CommandSubstitutions $command
+    foreach ($inner in $subst.Inners) {
+      foreach ($t in (Get-ShellTargets $inner ($Depth + 1))) { [void]$targets.Add($t) }
+    }
+    $command = $subst.Outer
+  }
   foreach ($seg in (Split-ShellSegments $command)) {
     $parsed = Get-ParsedSegment $seg
     $tokens = $parsed.Tokens
@@ -383,7 +443,8 @@ try {
       $isWin = ($env:OS -eq 'Windows_NT' -or $IsWindows)
       $qualifier = [System.IO.Path]::GetPathRoot($p)
       if (-not $qualifier) { return $p } # relative input never reaches here; the caller joins cwd first
-      $rest = @($p.Substring($qualifier.Length) -split '[\\/]' | Where-Object { $_ -and $_ -ne '.' })
+      $sepPattern = if ($isWin) { '[\\/]' } else { '/' } # backslash separates only on Windows
+      $rest = @($p.Substring($qualifier.Length) -split $sepPattern | Where-Object { $_ -and $_ -ne '.' })
       $cur = $qualifier
       foreach ($seg in $rest) {
         if ($seg -eq '..') {
