@@ -257,11 +257,63 @@ function expandVars(target) {
   return unresolved ? null : expanded;
 }
 
+// Splits a command into segments at &&, ||, ;, | and newlines — ONLY when the separator
+// sits OUTSIDE quotes (same quote model as parseSegment: plain '/" toggling). The raw
+// regex split was quote-blind: `sed -i 's|a|b|' pelizzai/...` broke mid-expression, the
+// wrong "last operand" became the target and the hook blocked the very pelizzai/ carve-out
+// its message promises (issue #74) — while `grep 'a|b' x > product` hid a REAL product
+// redirect inside the mangled quote and failed open. Quote chars stay in the output;
+// parseSegment strips them.
+function splitSegments(command) {
+  const segments = [];
+  let cur = '';
+  let quote = null;
+  for (let i = 0; i < command.length; i++) {
+    const ch = command[i];
+    if (quote) {
+      if (ch === quote) quote = null;
+      cur += ch;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      cur += ch;
+      continue;
+    }
+    if (ch === '&' && command[i + 1] === '&') {
+      segments.push(cur);
+      cur = '';
+      i++;
+      continue;
+    }
+    if (ch === '|') {
+      if (command[i + 1] === '|') i++;
+      segments.push(cur);
+      cur = '';
+      continue;
+    }
+    if (ch === ';' || ch === '\n') {
+      segments.push(cur);
+      cur = '';
+      continue;
+    }
+    if (ch === '\r' && command[i + 1] === '\n') {
+      segments.push(cur);
+      cur = '';
+      i++;
+      continue;
+    }
+    cur += ch;
+  }
+  segments.push(cur);
+  return segments;
+}
+
 // Write targets of a shell command (Bash sibling matcher). Best-effort and honest:
 // covers the common cases; what it cannot parse safely does not block.
 function extractShellTargets(command) {
   const targets = [];
-  for (const seg of command.split(/&&|\|\||;|\||\r?\n/)) {
+  for (const seg of splitSegments(command)) {
     const { tokens, redirects } = parseSegment(seg);
     for (const r of redirects) targets.push(r);
     for (let i = 0; i < tokens.length; i++) {
