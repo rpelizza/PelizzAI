@@ -210,7 +210,13 @@ function parseSegment(seg) {
       else cur += ch;
       continue;
     }
-    if (ch === '\\' && (seg[i + 1] === '"' || seg[i + 1] === "'" || seg[i + 1] === '\\')) {
+    // Outside quotes, backslash also escapes whitespace: `> pelizzai\ x` names the PRODUCT
+    // file "pelizzai x" — cutting the token at the space made the target collapse into the
+    // pelizzai/ carve-out and slip past Rule A.
+    if (
+      ch === '\\' &&
+      (seg[i + 1] === '"' || seg[i + 1] === "'" || seg[i + 1] === '\\' || seg[i + 1] === ' ' || seg[i + 1] === '\t')
+    ) {
       cur += seg[i + 1];
       i++;
       continue;

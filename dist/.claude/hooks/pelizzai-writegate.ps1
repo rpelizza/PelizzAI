@@ -132,7 +132,10 @@ function Get-ParsedSegment([string]$seg) {
       if ($ch -eq $quote) { $quote = $null } else { $cur += $ch }
       continue
     }
-    if ($ch -eq '\' -and ($next -eq '"' -or $next -eq "'" -or $next -eq '\')) {
+    # Outside quotes, backslash also escapes whitespace: `> pelizzai\ x` names the PRODUCT
+    # file "pelizzai x" - cutting the token at the space made the target collapse into the
+    # pelizzai/ carve-out and slip past Rule A.
+    if ($ch -eq '\' -and ($next -eq '"' -or $next -eq "'" -or $next -eq '\' -or $next -eq ' ' -or $next -eq "`t")) {
       $cur += $next; $i++
       continue
     }

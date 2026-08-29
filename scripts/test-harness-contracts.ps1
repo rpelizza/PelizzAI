@@ -918,6 +918,11 @@ try {
                 # Windows-path guard: a backslash before an ordinary character is a path separator,
                 # never an escape — the quoted-and-redirected path must still resolve as spelled.
                 Check ((Invoke-Writegate $wg @{ command = 'echo x > "sub\produto.txt"' } $wgTemp) -eq 2) "writegate: backslash path separators survive escape handling ($leaf)"
+                # Escaped space (CodeRabbit PR #82 r4): `> pelizzai\ x` writes the PRODUCT file
+                # "pelizzai x" at the root — the target must not be cut at the space and then
+                # collapse into the pelizzai/ carve-out.
+                Check ((Invoke-Writegate $wg @{ command = 'printf x > pelizzai\ x' } $wgTemp) -eq 2) "writegate: escaped space cannot smuggle product into the pelizzai/ carve-out ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'printf x > pelizzai/data/my\ notes.md' } $wgTemp) -eq 0) "writegate: escaped space inside a real pelizzai/ path stays allowed ($leaf)"
             }
 
             # -- Carve-out bypass regression (2026-08-26): `..` AFTER a directory link. --

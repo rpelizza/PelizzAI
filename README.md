@@ -625,8 +625,9 @@ On the `Bash` side, the matcher reads the command **quote-aware, end to end**: a
 newline, or `>` inside quotes is text, not an operator. So `sed -i 's|a|b|' pelizzai/data/state.md`
 is not cut at the quoted pipes and blocked by mistake, and quoting can't hide a real product
 redirect from the gate either. Escapes follow the shell: inside double quotes `\"` does not close
-the string, `\<newline>` joins continued lines, single quotes are literal — while a backslash
-before any other character stays an ordinary character, so Windows paths survive untouched. Null
+the string, `\<newline>` joins continued lines, `\ ` keeps a filename with spaces whole, single
+quotes are literal — while a backslash before any other character stays an ordinary character, so
+Windows paths survive untouched. Null
 sinks, targets with unresolvable variables, and targets that resolve outside the repository are
 never treated as product, and paths are resolved **physically**: `..` after a symlink cannot
 smuggle product into the metadata carve-out.
