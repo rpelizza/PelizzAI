@@ -78,7 +78,7 @@ A conversation-only change does not invalidate proof. A product change does.
 | integration | real fixture/sandbox/contract at the boundary | mock that removes the boundary |
 | UI | `pelizzai-interface`: app running, states, viewports, accessibility/visual | green build or a single screenshot without the flow |
 | docs/prompt/policy | lint/render/links/schema/grep or a consumption scenario | fabricating a unit test |
-| domain skill / doc asserting code behavior | every behavioral assertion checked against the code it points to: the pointer (file + symbol) resolved AND the cited excerpt read and matched against the claim | frontmatter/links/schema green; grep that the cited symbols exist |
+| domain skill / doc asserting code behavior | every behavioral assertion checked against the code it points to: the pointer (file + symbol) resolved AND the cited excerpt read and matched against the claim (for an external-stack claim, the pinned version's docs play the excerpt's role) | frontmatter/links/schema green; grep that the cited symbols exist |
 | plan requirements | traceability requirement → task/diff/proof | “the tests pass” |
 
 Combine rows for mixed tasks. Do not run unrelated checks just to inflate output volume.
@@ -88,7 +88,11 @@ one.** Valid frontmatter, resolving links, root parity, and a `grep` proving eve
 exists establish that the skill is well formed; none of them observes whether the claimed
 behavior is what the code does. The proof for each behavioral assertion is reading the cited
 excerpt and confirming it sustains the claim — cheap, but a different act from checking
-existence. Two rules sharpen it:
+existence. The source follows the claim type: an assertion about the repository's code is proved
+by the cited excerpt; an assertion about an external stack is proved against the pinned
+version's documentation (context7 or current official docs), which plays the excerpt's role
+there; a recorded decision is proved at its source (ADR/issue/PR discussion). Two rules sharpen
+it:
 
 - **The re-verification scope of an edit is the BLOCK, not the sentence.** Editing one assertion
   can change the antecedent of an untouched neighbor (“those four”, “the same way”, “it”) and

@@ -1637,6 +1637,13 @@ try {
     Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' 'In a CONSUMER, editing the BODY of a domain skill opens the review of its catalog entry' 'skill-lab: the catalog loop is qualified as consumer-only'
     Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' 'this closes the reverse loop\. In the source repo neither catalog nor ledger\s+exists: record the same fact in the native execution record' 'skill-lab: source mode routes the same fact to the native record'
     Check-Match '.claude/skills/pelizzai-skill-lab/references/domain-skill-maintenance.md' 'RECONCILE the catalog entry[\s\S]{0,240}Consumer only — in the source repo the catalog does not exist' 'maintenance: the RECONCILE step itself carries the mode boundary'
+    # Review round 2 (PR #81, full review): verify itself carries the source-per-claim-type
+    # contract — without it, the agent rejects the correct external-stack evidence or reads an
+    # irrelevant local excerpt.
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'The source follows the claim type' 'verify: the assertion proof names the source per claim type'
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'an assertion about an external stack is proved against the pinned\s+version.s documentation' 'verify: external-stack claims are proved by the pinned docs'
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'a recorded decision is proved at its source' 'verify: decisions are proved at their recorded source'
+
     # (c) An enumeration's mechanical proof compares member identity, not cardinality.
     Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'member identity,\s+not a bare count: a swap preserves cardinality' 'verify: the set comparison rejects the bare count'
     Check-Match '.claude/skills/pelizzai-skill-lab/references/skill-authoring.md' 'compares member identity \(not a bare count: a swap\s+preserves cardinality\)' 'skill-authoring: the enumeration proof compares member identity'
