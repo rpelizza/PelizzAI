@@ -923,6 +923,15 @@ try {
                 # collapse into the pelizzai/ carve-out.
                 Check ((Invoke-Writegate $wg @{ command = 'printf x > pelizzai\ x' } $wgTemp) -eq 2) "writegate: escaped space cannot smuggle product into the pelizzai/ carve-out ($leaf)"
                 Check ((Invoke-Writegate $wg @{ command = 'printf x > pelizzai/data/my\ notes.md' } $wgTemp) -eq 0) "writegate: escaped space inside a real pelizzai/ path stays allowed ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "printf x > pelizzai\`tx" } $wgTemp) -eq 2) "writegate: escaped tab cannot smuggle product into the pelizzai/ carve-out ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "printf x > pelizzai/data/my\`tnotes.md" } $wgTemp) -eq 0) "writegate: escaped tab inside a real pelizzai/ path stays allowed ($leaf)"
+                # Escaped operators (CodeRabbit PR #82 r5): \> is a literal argument, never a
+                # redirect; \; and \| stay literal too — and the tee behind a literal pipe still
+                # elects its own target, so the conservative block on product is preserved.
+                Check ((Invoke-Writegate $wg @{ command = 'echo \> produto.txt' } $wgTemp) -eq 0) "writegate: escaped > is text, not a redirect ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'printf x \| tee produto.txt' } $wgTemp) -eq 2) "writegate: tee behind a literal pipe still blocks the product target ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo a\;b > pelizzai/data/x' } $wgTemp) -eq 0) "writegate: escaped semicolon does not corrupt a pelizzai/ redirect target ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo a\;b > produto.txt' } $wgTemp) -eq 2) "writegate: escaped semicolon does not hide a product redirect ($leaf)"
             }
 
             # -- Carve-out bypass regression (2026-08-26): `..` AFTER a directory link. --

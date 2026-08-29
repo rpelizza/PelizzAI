@@ -132,10 +132,11 @@ function Get-ParsedSegment([string]$seg) {
       if ($ch -eq $quote) { $quote = $null } else { $cur += $ch }
       continue
     }
-    # Outside quotes, backslash also escapes whitespace: `> pelizzai\ x` names the PRODUCT
-    # file "pelizzai x" - cutting the token at the space made the target collapse into the
-    # pelizzai/ carve-out and slip past Rule A.
-    if ($ch -eq '\' -and ($next -eq '"' -or $next -eq "'" -or $next -eq '\' -or $next -eq ' ' -or $next -eq "`t")) {
+    # Outside quotes, backslash also escapes whitespace and the shell operators: `> pelizzai\ x`
+    # names the PRODUCT file "pelizzai x" (cutting the token at the space made the target
+    # collapse into the pelizzai/ carve-out and slip past Rule A), and `echo \> file` passes
+    # a literal ">" - inventing a redirect there blocked commands that write nothing.
+    if ($ch -eq '\' -and ($script:WgEscapable -contains $next)) {
       $cur += $next; $i++
       continue
     }
@@ -195,6 +196,13 @@ function Expand-ShellVars([string]$target) {
   return $out
 }
 
+# Characters a backslash escapes OUTSIDE quotes (shared by Split-ShellSegments and
+# Get-ParsedSegment): quotes and the backslash itself, whitespace (`\ ` names a file with a
+# space), and the shell operators (`\>` is a literal ">", never a redirect; `\|`, `\;`, `\&`
+# never separate). A backslash before any OTHER character is an ordinary character - Windows
+# paths (C:\temp\x) must survive untouched.
+$script:WgEscapable = @('"', "'", '\', ' ', "`t", '>', '|', ';', '&')
+
 # Splits a command into segments at &&, ||, ;, | and newlines - ONLY when the separator
 # sits OUTSIDE quotes (same quote model as Get-ParsedSegment: plain '/" toggling). The raw
 # regex split was quote-blind: `sed -i 's|a|b|' pelizzai/...` broke mid-expression, the
@@ -210,9 +218,8 @@ function Split-ShellSegments([string]$command) {
     $ch = $command.Substring($i, 1)
     $next = if (($i + 1) -lt $command.Length) { $command.Substring($i + 1, 1) } else { '' }
     # Escapes (issue #74 follow-up): inside double quotes \" does not close the string; outside
-    # quotes \x escapes a quote/backslash and \<newline> is a line continuation. Single quotes
-    # are POSIX-literal (no escapes). A backslash before any OTHER character is an ordinary
-    # character - Windows paths (C:\temp\x) must survive untouched.
+    # quotes \x escapes the WgEscapable set and \<newline> is a line continuation. Single quotes
+    # are POSIX-literal (no escapes).
     if ($quote -eq '"' -and $ch -eq '\' -and ($next -eq '"' -or $next -eq '\')) {
       $cur += $ch + $next; $i++
       continue
@@ -228,7 +235,7 @@ function Split-ShellSegments([string]$command) {
         continue
       }
       if ($next -eq "`n") { $i++; continue }
-      if ($next -eq '"' -or $next -eq "'" -or $next -eq '\') { $cur += $ch + $next; $i++; continue }
+      if ($script:WgEscapable -contains $next) { $cur += $ch + $next; $i++; continue } # kept raw: the parser resolves the pair
     }
     if ($ch -eq '"' -or $ch -eq "'") { $quote = $ch; $cur += $ch; continue }
     if ($ch -eq '&' -and ($i + 1) -lt $command.Length -and $command.Substring($i + 1, 1) -eq '&') {

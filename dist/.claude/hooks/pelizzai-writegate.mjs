@@ -210,13 +210,11 @@ function parseSegment(seg) {
       else cur += ch;
       continue;
     }
-    // Outside quotes, backslash also escapes whitespace: `> pelizzai\ x` names the PRODUCT
-    // file "pelizzai x" — cutting the token at the space made the target collapse into the
-    // pelizzai/ carve-out and slip past Rule A.
-    if (
-      ch === '\\' &&
-      (seg[i + 1] === '"' || seg[i + 1] === "'" || seg[i + 1] === '\\' || seg[i + 1] === ' ' || seg[i + 1] === '\t')
-    ) {
+    // Outside quotes, backslash also escapes whitespace and the shell operators: `> pelizzai\ x`
+    // names the PRODUCT file "pelizzai x" (cutting the token at the space made the target
+    // collapse into the pelizzai/ carve-out and slip past Rule A), and `echo \> file` passes
+    // a literal ">" — inventing a redirect there blocked commands that write nothing.
+    if (ch === '\\' && ESCAPABLE.has(seg[i + 1])) {
       cur += seg[i + 1];
       i++;
       continue;
@@ -275,6 +273,13 @@ function expandVars(target) {
   return unresolved ? null : expanded;
 }
 
+// Characters a backslash escapes OUTSIDE quotes (shared by splitSegments and parseSegment):
+// quotes and the backslash itself, whitespace (`\ ` names a file with a space), and the shell
+// operators (`\>` is a literal ">", never a redirect; `\|`, `\;`, `\&` never separate). A
+// backslash before any OTHER character is an ordinary character — Windows paths (C:\temp\x)
+// must survive untouched.
+const ESCAPABLE = new Set(['"', "'", '\\', ' ', '\t', '>', '|', ';', '&']);
+
 // Splits a command into segments at &&, ||, ;, | and newlines — ONLY when the separator
 // sits OUTSIDE quotes (same quote model as parseSegment: plain '/" toggling). The raw
 // regex split was quote-blind: `sed -i 's|a|b|' pelizzai/...` broke mid-expression, the
@@ -289,9 +294,8 @@ function splitSegments(command) {
   for (let i = 0; i < command.length; i++) {
     const ch = command[i];
     // Escapes (issue #74 follow-up): inside double quotes \" does not close the string; outside
-    // quotes \x escapes a quote/backslash and \<newline> is a line continuation. Single quotes
-    // are POSIX-literal (no escapes). A backslash before any OTHER character is an ordinary
-    // character — Windows paths (C:\temp\x) must survive untouched.
+    // quotes \x escapes the ESCAPABLE set and \<newline> is a line continuation. Single quotes
+    // are POSIX-literal (no escapes).
     if (quote === '"' && ch === '\\' && (command[i + 1] === '"' || command[i + 1] === '\\')) {
       cur += ch + command[i + 1];
       i++;
@@ -312,8 +316,8 @@ function splitSegments(command) {
         i++;
         continue;
       }
-      if (next === '"' || next === "'" || next === '\\') {
-        cur += ch + next;
+      if (ESCAPABLE.has(next)) {
+        cur += ch + next; // kept raw: parseSegment resolves the pair
         i++;
         continue;
       }
