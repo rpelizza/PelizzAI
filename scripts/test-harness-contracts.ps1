@@ -1605,14 +1605,14 @@ try {
     Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'antecedent of an untouched neighbor' 'verify: the block scope names the anaphora hazard'
     Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'enumeration of code artifacts is an assertion with an expiry date' 'verify: an enumeration is a decaying assertion'
     Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'the error is an ABSENCE' 'verify: symbol grep cannot catch the missing member'
-    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'state the discriminating rule and\s+name only the exceptions, or back the list with a mechanical count' 'verify: an enumeration demands the rule or a mechanical count'
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'state the discriminating rule and\s+name only the exceptions, or back the list with a mechanical set comparison' 'verify: an enumeration demands the rule or a mechanical set comparison'
 
     # Pattern 3 — a correction is a new assertion and carries the original's grounding.
     Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' 'A CORRECTION to an assertion is a new assertion' 'skill-lab: a correction is a new assertion'
     Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' '"Minor edit" does not waive the source' 'skill-lab: minor-edit framing does not waive grounding'
 
     # Pattern 2 — editing a skill body opens the catalog-entry review in the same step.
-    Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' 'opens the review of its catalog entry in the same step' 'skill-lab: a body edit reopens the catalog entry'
+    Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' 'opens the review of its catalog entry in the\s+same step' 'skill-lab: a body edit reopens the catalog entry'
     Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' 'wider reach than the skill' 'skill-lab: the catalog has wider reach than the skill'
     Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' 'body and leaving its catalog entry announcing the old assertions' 'skill-lab: the stale catalog entry is a named anti-pattern'
     Check-Match '.claude/skills/pelizzai-skill-lab/references/domain-skill-maintenance.md' 'RECONCILE the catalog entry' 'maintenance: refresh reconciles the catalog entry in the same step'
@@ -1628,6 +1628,18 @@ try {
     # Pattern 5 — the wording notes: no absolute guarantees; rule over enumeration.
     Check-Match '.claude/skills/pelizzai-skill-lab/references/skill-authoring.md' '"what is guaranteed is X; Y is not" over\s+"always/never"' 'skill-authoring: the guarantee names its real boundary'
     Check-Match '.claude/skills/pelizzai-skill-lab/references/skill-authoring.md' 'Prefer the rule to the enumeration' 'skill-authoring: prefer the rule to the enumeration'
+
+    # Review round 1 (PR #81, CodeRabbit): three sharpenings, none weakening an assertion above.
+    # (a) The truth source matches the claim type — cited code is not the only prover.
+    Check-Match '.claude/skills/pelizzai-skill-lab/references/skill-authoring.md' 'the\s+source that grounds that kind of claim' 'skill-authoring: the truth source matches the claim type'
+    Check-Match '.claude/skills/pelizzai-skill-lab/references/skill-authoring.md' 'for an external stack,\s+against the pinned version.s documentation' 'skill-authoring: external-stack claims are proved by the pinned docs'
+    # (b) Catalog reconciliation is consumer-only; source mode records in the native record.
+    Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' 'In a CONSUMER, editing the BODY of a domain skill opens the review of its catalog entry' 'skill-lab: the catalog loop is qualified as consumer-only'
+    Check-Match '.claude/skills/pelizzai-skill-lab/SKILL.md' 'this closes the reverse loop\. In the source repo neither catalog nor ledger\s+exists: record the same fact in the native execution record' 'skill-lab: source mode routes the same fact to the native record'
+    Check-Match '.claude/skills/pelizzai-skill-lab/references/domain-skill-maintenance.md' 'RECONCILE the catalog entry[\s\S]{0,240}Consumer only — in the source repo the catalog does not exist' 'maintenance: the RECONCILE step itself carries the mode boundary'
+    # (c) An enumeration's mechanical proof compares member identity, not cardinality.
+    Check-Match '.claude/skills/pelizzai-verify/SKILL.md' 'member identity,\s+not a bare count: a swap preserves cardinality' 'verify: the set comparison rejects the bare count'
+    Check-Match '.claude/skills/pelizzai-skill-lab/references/skill-authoring.md' 'compares member identity \(not a bare count: a swap\s+preserves cardinality\)' 'skill-authoring: the enumeration proof compares member identity'
 } catch {
     Check $false 'issue #63 assertion-truth gate' $_.Exception.Message
 }

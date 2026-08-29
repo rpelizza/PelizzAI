@@ -97,7 +97,8 @@ existence. Two rules sharpen it:
 - **An enumeration of code artifacts is an assertion with an expiry date.** It ages with every
   new member, and a symbol `grep` cannot reprove it because the error is an ABSENCE from the
   list, not a dead name. Either state the discriminating rule and
-  name only the exceptions, or back the list with a mechanical count that fails on divergence.
+  name only the exceptions, or back the list with a mechanical set comparison — member identity,
+  not a bare count: a swap preserves cardinality — that fails on divergence.
 
 **When the project has a runnable surface, the service-starts row is mandatory for a diff that
 touches initialization, migration, index, schema, runtime configuration, a dependency, or that
