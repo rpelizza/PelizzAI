@@ -894,13 +894,17 @@ try {
                 # Same hole beyond sed: any literal `|` in quotes (grep alternation, awk -F'|').
                 Check ((Invoke-Writegate $wg @{ command = "grep 'a|b' seed.txt > pelizzai/data/x" } $wgTemp) -eq 0) "writegate: quoted pipe in grep does not corrupt a pelizzai/ redirect target ($leaf)"
                 Check ((Invoke-Writegate $wg @{ command = "grep 'a|b' seed.txt > produto.txt" } $wgTemp) -eq 2) "writegate: quoted pipe in grep does not hide a product redirect ($leaf)"
-                # EVERY quote-sensitive separator, not just `|` (CodeRabbit PR #82 r1): a quoted
-                # literal &&, ||, ; or newline must neither corrupt a pelizzai/ target (false
-                # positive) nor hide a product redirect (false negative).
-                foreach ($wgSep in @('&&', '||', ';', "`n")) {
-                    $wgSepName = if ($wgSep -eq "`n") { 'newline' } else { $wgSep }
-                    Check ((Invoke-Writegate $wg @{ command = "echo 'a${wgSep}b' > pelizzai/data/x" } $wgTemp) -eq 0) "writegate: quoted '$wgSepName' does not corrupt a pelizzai/ redirect target ($leaf)"
-                    Check ((Invoke-Writegate $wg @{ command = "echo 'a${wgSep}b' > produto.txt" } $wgTemp) -eq 2) "writegate: quoted '$wgSepName' does not hide a product redirect ($leaf)"
+                # FULL separator × quote matrix (CodeRabbit PR #82 r1+r2): every separator the
+                # splitter recognizes (&&, ||, ;, |, LF, CRLF), quoted with BOTH quote forms,
+                # must neither corrupt a pelizzai/ target (false positive) nor hide a product
+                # redirect (false negative).
+                foreach ($wgQuote in @("'", '"')) {
+                    $wgQuoteName = if ($wgQuote -eq "'") { 'single-quoted' } else { 'double-quoted' }
+                    foreach ($wgSep in @('&&', '||', ';', '|', "`n", "`r`n")) {
+                        $wgSepName = switch ($wgSep) { "`n" { 'newline' } "`r`n" { 'crlf' } default { $wgSep } }
+                        Check ((Invoke-Writegate $wg @{ command = "echo ${wgQuote}a${wgSep}b${wgQuote} > pelizzai/data/x" } $wgTemp) -eq 0) "writegate: $wgQuoteName '$wgSepName' does not corrupt a pelizzai/ redirect target ($leaf)"
+                        Check ((Invoke-Writegate $wg @{ command = "echo ${wgQuote}a${wgSep}b${wgQuote} > produto.txt" } $wgTemp) -eq 2) "writegate: $wgQuoteName '$wgSepName' does not hide a product redirect ($leaf)"
+                    }
                 }
             }
 
