@@ -881,6 +881,19 @@ try {
                 Check ((Invoke-Writegate $wg @{ command = 'npm test > $env:PELIZZAI_NAO_EXISTE_XYZ/f.log' } $wgTemp) -eq 0) "writegate does not block a target with an unresolvable variable ($leaf)"
                 # Non-regression: `>` inside quotes is text, not a redirect.
                 Check ((Invoke-Writegate $wg @{ command = 'git commit -m "a > b"' } $wgTemp) -eq 0) "writegate does not mistake quoted text for a redirect ($leaf)"
+
+                # -- Quote-aware SEGMENTATION (issue #74): a `|` inside quotes is text, not a pipe. --
+                # The raw split broke `sed -i 's|a|b|' pelizzai/...` mid-expression, elected a wrong
+                # target, and blocked the very carve-out the hook's message promises. Matrix from the
+                # issue: A must pass, B stays passing, C/D stay blocking, E (real pipe) stays passing.
+                Check ((Invoke-Writegate $wg @{ command = "sed -i -e 's|^- phase: exec|- phase: done|' pelizzai/data/state.md" } $wgTemp) -eq 0) "writegate: sed with pipe delimiter targeting pelizzai/ is allowed on a protected branch ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "sed -i -e 's#^- phase: exec#- phase: done#' pelizzai/data/state.md" } $wgTemp) -eq 0) "writegate: sed with hash delimiter targeting pelizzai/ is allowed on a protected branch ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "sed -i -e 's|seed|x|' seed.txt" } $wgTemp) -eq 2) "writegate: sed with pipe delimiter targeting product still blocks ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "sed -i -e 's#seed#x#' seed.txt" } $wgTemp) -eq 2) "writegate: sed with hash delimiter targeting product still blocks ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'grep x seed.txt | tee pelizzai/data/state.md' } $wgTemp) -eq 0) "writegate: a real pipe into tee targeting pelizzai/ stays allowed ($leaf)"
+                # Same hole beyond sed: any literal `|` in quotes (grep alternation, awk -F'|').
+                Check ((Invoke-Writegate $wg @{ command = "grep 'a|b' seed.txt > pelizzai/data/x" } $wgTemp) -eq 0) "writegate: quoted pipe in grep does not corrupt a pelizzai/ redirect target ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "grep 'a|b' seed.txt > produto.txt" } $wgTemp) -eq 2) "writegate: quoted pipe in grep does not hide a product redirect ($leaf)"
             }
 
             # -- Carve-out bypass regression (2026-08-26): `..` AFTER a directory link. --

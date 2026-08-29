@@ -181,11 +181,53 @@ function Expand-ShellVars([string]$target) {
   return $out
 }
 
+# Splits a command into segments at &&, ||, ;, | and newlines - ONLY when the separator
+# sits OUTSIDE quotes (same quote model as Get-ParsedSegment: plain '/" toggling). The raw
+# regex split was quote-blind: `sed -i 's|a|b|' pelizzai/...` broke mid-expression, the
+# wrong "last operand" became the target and the hook blocked the very pelizzai/ carve-out
+# its message promises (issue #74) - while `grep 'a|b' x > product` hid a REAL product
+# redirect inside the mangled quote and failed open. Quote chars stay in the output;
+# Get-ParsedSegment strips them.
+function Split-ShellSegments([string]$command) {
+  $segments = [System.Collections.Generic.List[string]]::new()
+  $cur = ''
+  $quote = $null
+  for ($i = 0; $i -lt $command.Length; $i++) {
+    $ch = $command.Substring($i, 1)
+    if ($null -ne $quote) {
+      if ($ch -eq $quote) { $quote = $null }
+      $cur += $ch
+      continue
+    }
+    if ($ch -eq '"' -or $ch -eq "'") { $quote = $ch; $cur += $ch; continue }
+    if ($ch -eq '&' -and ($i + 1) -lt $command.Length -and $command.Substring($i + 1, 1) -eq '&') {
+      [void]$segments.Add($cur); $cur = ''; $i++
+      continue
+    }
+    if ($ch -eq '|') {
+      if (($i + 1) -lt $command.Length -and $command.Substring($i + 1, 1) -eq '|') { $i++ }
+      [void]$segments.Add($cur); $cur = ''
+      continue
+    }
+    if ($ch -eq ';' -or $ch -eq "`n") {
+      [void]$segments.Add($cur); $cur = ''
+      continue
+    }
+    if ($ch -eq "`r" -and ($i + 1) -lt $command.Length -and $command.Substring($i + 1, 1) -eq "`n") {
+      [void]$segments.Add($cur); $cur = ''; $i++
+      continue
+    }
+    $cur += $ch
+  }
+  [void]$segments.Add($cur)
+  return @($segments)
+}
+
 # Write targets of a shell command (Bash sibling matcher). Best-effort and honest:
 # covers the common cases; what it cannot parse safely does not block.
 function Get-ShellTargets([string]$command) {
   $targets = [System.Collections.Generic.List[string]]::new()
-  foreach ($seg in ($command -split '&&|\|\||;|\||\r?\n')) {
+  foreach ($seg in (Split-ShellSegments $command)) {
     $parsed = Get-ParsedSegment $seg
     $tokens = $parsed.Tokens
     foreach ($r in $parsed.Redirects) { [void]$targets.Add($r) }
