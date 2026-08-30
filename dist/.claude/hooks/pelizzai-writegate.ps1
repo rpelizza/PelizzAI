@@ -84,9 +84,32 @@ function Invoke-Git([string]$Cwd, [string[]]$GitArgs) {
   } catch { return '' }
 }
 
-# Forward slashes and no trailing slash, for prefix comparison robust to \ and /.
+# Backslash is a path separator ONLY on Windows. On POSIX it is a legal filename character -
+# treating `pelizzai\x` as `pelizzai/x` there collapsed a PRODUCT file into the metadata
+# carve-out (the OS writes one root-level file literally named "pelizzai\x").
+$script:IsWin = ($env:OS -eq 'Windows_NT' -or $IsWindows)
+
+# PowerShell's Join-Path/Split-Path treat `\` as a separator on EVERY platform, silently
+# rewriting a POSIX filename that contains a literal backslash (pelizzai\x -> pelizzai/x) —
+# which reopens the exact carve-out bypass the per-OS split closes. Compose and climb paths
+# with plain string work on POSIX; the cmdlets stay on Windows, where `\` IS a separator.
+function Join-TargetPath([string]$base, [string]$child) {
+  if ($script:IsWin) { return (Join-Path $base $child) }
+  return (($base -replace '/+$', '') + '/' + $child)
+}
+function Get-ParentPath([string]$p) {
+  if ($script:IsWin) { return (Split-Path -Parent $p) }
+  $trimmed = $p.TrimEnd('/')
+  $idx = $trimmed.LastIndexOf('/')
+  if ($idx -le 0) { return '/' }
+  return $trimmed.Substring(0, $idx)
+}
+
+# Forward slashes and no trailing slash, for prefix comparison robust to \ and / (Windows only).
 function Get-Norm([string]$p) {
-  return (($p -replace '\\', '/') -replace '/+$', '')
+  $s = $p
+  if ($script:IsWin) { $s = $s -replace '\\', '/' }
+  return ($s -replace '/+$', '')
 }
 
 # child is the root itself or is INSIDE it (case per the OS).
@@ -121,8 +144,23 @@ function Get-ParsedSegment([string]$seg) {
   $expectTarget = $false
   for ($i = 0; $i -lt $seg.Length; $i++) {
     $ch = $seg.Substring($i, 1)
+    $next = if (($i + 1) -lt $seg.Length) { $seg.Substring($i + 1, 1) } else { '' }
+    # Same escape model as Split-ShellSegments; here the escape RESOLVES into the token content
+    # (\" is a literal quote in the word, \\ a backslash). Single quotes stay POSIX-literal.
+    if ($quote -eq '"' -and $ch -eq '\' -and ($next -eq '"' -or $next -eq '\')) {
+      $cur += $next; $i++
+      continue
+    }
     if ($null -ne $quote) {
       if ($ch -eq $quote) { $quote = $null } else { $cur += $ch }
+      continue
+    }
+    # Outside quotes, backslash also escapes whitespace and the shell operators: `> pelizzai\ x`
+    # names the PRODUCT file "pelizzai x" (cutting the token at the space made the target
+    # collapse into the pelizzai/ carve-out and slip past Rule A), and `echo \> file` passes
+    # a literal ">" - inventing a redirect there blocked commands that write nothing.
+    if ($ch -eq '\' -and ($script:WgEscapable -contains $next)) {
+      $cur += $next; $i++
       continue
     }
     if ($ch -eq '"' -or $ch -eq "'") { $quote = $ch; continue }
@@ -181,11 +219,129 @@ function Expand-ShellVars([string]$target) {
   return $out
 }
 
+# Characters a backslash escapes OUTSIDE quotes (shared by Split-ShellSegments and
+# Get-ParsedSegment): quotes and the backslash itself, whitespace (`\ ` names a file with a
+# space), and the shell operators (`\>` is a literal ">", never a redirect; `\|`, `\;`, `\&`
+# never separate). A backslash before any OTHER character is an ordinary character - Windows
+# paths (C:\temp\x) must survive untouched.
+$script:WgEscapable = @('"', "'", '\', ' ', "`t", '>', '|', ';', '&')
+
+# Splits a command into segments at &&, ||, ;, | and newlines - ONLY when the separator
+# sits OUTSIDE quotes (same quote model as Get-ParsedSegment: plain '/" toggling). The raw
+# regex split was quote-blind: `sed -i 's|a|b|' pelizzai/...` broke mid-expression, the
+# wrong "last operand" became the target and the hook blocked the very pelizzai/ carve-out
+# its message promises (issue #74) - while `grep 'a|b' x > product` hid a REAL product
+# redirect inside the mangled quote and failed open. Quote chars stay in the output;
+# Get-ParsedSegment strips them.
+function Split-ShellSegments([string]$command) {
+  $segments = [System.Collections.Generic.List[string]]::new()
+  $cur = ''
+  $quote = $null
+  for ($i = 0; $i -lt $command.Length; $i++) {
+    $ch = $command.Substring($i, 1)
+    $next = if (($i + 1) -lt $command.Length) { $command.Substring($i + 1, 1) } else { '' }
+    # Escapes (issue #74 follow-up): inside double quotes \" does not close the string; outside
+    # quotes \x escapes the WgEscapable set and \<newline> is a line continuation. Single quotes
+    # are POSIX-literal (no escapes).
+    if ($quote -eq '"' -and $ch -eq '\' -and ($next -eq '"' -or $next -eq '\')) {
+      $cur += $ch + $next; $i++
+      continue
+    }
+    if ($null -ne $quote) {
+      if ($ch -eq $quote) { $quote = $null }
+      $cur += $ch
+      continue
+    }
+    if ($ch -eq '\') {
+      if ($next -eq "`r" -and ($i + 2) -lt $command.Length -and $command.Substring($i + 2, 1) -eq "`n") {
+        $i += 2 # line continuation: join the physical lines
+        continue
+      }
+      if ($next -eq "`n") { $i++; continue }
+      if ($script:WgEscapable -contains $next) { $cur += $ch + $next; $i++; continue } # kept raw: the parser resolves the pair
+    }
+    if ($ch -eq '"' -or $ch -eq "'") { $quote = $ch; $cur += $ch; continue }
+    if ($ch -eq '&' -and ($i + 1) -lt $command.Length -and $command.Substring($i + 1, 1) -eq '&') {
+      [void]$segments.Add($cur); $cur = ''; $i++
+      continue
+    }
+    if ($ch -eq '|') {
+      if (($i + 1) -lt $command.Length -and $command.Substring($i + 1, 1) -eq '|') { $i++ }
+      [void]$segments.Add($cur); $cur = ''
+      continue
+    }
+    if ($ch -eq ';' -or $ch -eq "`n") {
+      [void]$segments.Add($cur); $cur = ''
+      continue
+    }
+    if ($ch -eq "`r" -and ($i + 1) -lt $command.Length -and $command.Substring($i + 1, 1) -eq "`n") {
+      [void]$segments.Add($cur); $cur = ''; $i++
+      continue
+    }
+    $cur += $ch
+  }
+  [void]$segments.Add($cur)
+  return @($segments)
+}
+
+# Command substitutions - $(...) with nesting, and `...` - are REAL executions: bash runs them
+# even inside double quotes, so `echo "$(printf x > product)"` writes product. Extracts every
+# inner script for a recursive parse and replaces the span with a neutral token in the outer
+# text, so the outer parse is not mangled by the substitution's own operators. Single quotes
+# keep substitutions literal. Best-effort like the rest of the matcher.
+function Get-CommandSubstitutions([string]$command) {
+  $inners = [System.Collections.Generic.List[string]]::new()
+  $outer = ''
+  $quote = $null
+  for ($i = 0; $i -lt $command.Length; $i++) {
+    $ch = $command.Substring($i, 1)
+    $next = if (($i + 1) -lt $command.Length) { $command.Substring($i + 1, 1) } else { '' }
+    if ($quote -eq "'") {
+      if ($ch -eq "'") { $quote = $null }
+      $outer += $ch
+      continue
+    }
+    if ($ch -eq '\') { $outer += $ch + $next; $i++; continue }
+    if ($ch -eq "'") { $quote = "'"; $outer += $ch; continue }
+    if ($ch -eq '"') { $quote = if ($quote -eq '"') { $null } else { '"' }; $outer += $ch; continue }
+    if ($ch -eq '$' -and $next -eq '(') {
+      $depth = 1
+      $j = $i + 2
+      while ($j -lt $command.Length -and $depth -gt 0) {
+        $c = $command.Substring($j, 1)
+        if ($c -eq '(') { $depth++ } elseif ($c -eq ')') { $depth-- }
+        $j++
+      }
+      [void]$inners.Add($command.Substring($i + 2, [Math]::Max(0, $j - 1 - ($i + 2))))
+      $outer += 'SUBST'
+      $i = $j - 1
+      continue
+    }
+    if ($ch -eq '`') {
+      $j = $i + 1
+      while ($j -lt $command.Length -and $command.Substring($j, 1) -ne '`') { $j++ }
+      [void]$inners.Add($command.Substring($i + 1, $j - ($i + 1)))
+      $outer += 'SUBST'
+      $i = $j
+      continue
+    }
+    $outer += $ch
+  }
+  return @{ Outer = $outer; Inners = $inners }
+}
+
 # Write targets of a shell command (Bash sibling matcher). Best-effort and honest:
 # covers the common cases; what it cannot parse safely does not block.
-function Get-ShellTargets([string]$command) {
+function Get-ShellTargets([string]$command, [int]$Depth = 0) {
   $targets = [System.Collections.Generic.List[string]]::new()
-  foreach ($seg in ($command -split '&&|\|\||;|\||\r?\n')) {
+  if ($Depth -lt 5) {
+    $subst = Get-CommandSubstitutions $command
+    foreach ($inner in $subst.Inners) {
+      foreach ($t in (Get-ShellTargets $inner ($Depth + 1))) { [void]$targets.Add($t) }
+    }
+    $command = $subst.Outer
+  }
+  foreach ($seg in (Split-ShellSegments $command)) {
     $parsed = Get-ParsedSegment $seg
     $tokens = $parsed.Tokens
     foreach ($r in $parsed.Redirects) { [void]$targets.Add($r) }
@@ -303,15 +459,16 @@ try {
       $isWin = ($env:OS -eq 'Windows_NT' -or $IsWindows)
       $qualifier = [System.IO.Path]::GetPathRoot($p)
       if (-not $qualifier) { return $p } # relative input never reaches here; the caller joins cwd first
-      $rest = @($p.Substring($qualifier.Length) -split '[\\/]' | Where-Object { $_ -and $_ -ne '.' })
+      $sepPattern = if ($isWin) { '[\\/]' } else { '/' } # backslash separates only on Windows
+      $rest = @($p.Substring($qualifier.Length) -split $sepPattern | Where-Object { $_ -and $_ -ne '.' })
       $cur = $qualifier
       foreach ($seg in $rest) {
         if ($seg -eq '..') {
-          $parent = Split-Path -Parent $cur
+          $parent = Get-ParentPath $cur
           if ($parent) { $cur = $parent }
           continue
         }
-        $next = Join-Path $cur $seg
+        $next = Join-TargetPath $cur $seg
         if (-not (Test-Path -LiteralPath $next)) {
           # Test-Path FOLLOWS links, so a DANGLING link looks "not on disk" — yet a write through
           # it lands on the target. See the link itself and resolve its target physically.
@@ -329,7 +486,7 @@ try {
             }
           }
           if ($linkTarget) {
-            if (-not [System.IO.Path]::IsPathRooted($linkTarget)) { $linkTarget = Join-Path $cur $linkTarget }
+            if (-not [System.IO.Path]::IsPathRooted($linkTarget)) { $linkTarget = Join-TargetPath $cur $linkTarget }
             $cur = Get-PhysicalPath $linkTarget ($Depth + 1)
           } else {
             $cur = $next # genuinely not on disk yet
@@ -369,7 +526,9 @@ try {
   foreach ($t in $targets) {
     # No GetFullPath here: it would collapse `..` lexically BEFORE the link walk - the exact
     # bypass Get-PhysicalPath exists to close. The walk owns the whole normalization.
-    $abs = if ([System.IO.Path]::IsPathRooted($t)) { $t } else { Join-Path $cwd $t }
+    # Join-TargetPath, not Join-Path: the cmdlet rewrites a literal `\` in the target into a
+    # separator even on POSIX, where it is a filename character.
+    $abs = if ([System.IO.Path]::IsPathRooted($t)) { $t } else { Join-TargetPath $cwd $t }
     $abs = Get-PhysicalPath $abs
     if (Test-Inside $abs $gitRoot) { [void]$inRoot.Add($abs) }
   }

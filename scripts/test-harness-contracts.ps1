@@ -881,6 +881,76 @@ try {
                 Check ((Invoke-Writegate $wg @{ command = 'npm test > $env:PELIZZAI_NAO_EXISTE_XYZ/f.log' } $wgTemp) -eq 0) "writegate does not block a target with an unresolvable variable ($leaf)"
                 # Non-regression: `>` inside quotes is text, not a redirect.
                 Check ((Invoke-Writegate $wg @{ command = 'git commit -m "a > b"' } $wgTemp) -eq 0) "writegate does not mistake quoted text for a redirect ($leaf)"
+
+                # -- Quote-aware SEGMENTATION (issue #74): a `|` inside quotes is text, not a pipe. --
+                # The raw split broke `sed -i 's|a|b|' pelizzai/...` mid-expression, elected a wrong
+                # target, and blocked the very carve-out the hook's message promises. Matrix from the
+                # issue: A must pass, B stays passing, C/D stay blocking, E (real pipe) stays passing.
+                Check ((Invoke-Writegate $wg @{ command = "sed -i -e 's|^- phase: exec|- phase: done|' pelizzai/data/state.md" } $wgTemp) -eq 0) "writegate: sed with pipe delimiter targeting pelizzai/ is allowed on a protected branch ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "sed -i -e 's#^- phase: exec#- phase: done#' pelizzai/data/state.md" } $wgTemp) -eq 0) "writegate: sed with hash delimiter targeting pelizzai/ is allowed on a protected branch ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "sed -i -e 's|seed|x|' seed.txt" } $wgTemp) -eq 2) "writegate: sed with pipe delimiter targeting product still blocks ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "sed -i -e 's#seed#x#' seed.txt" } $wgTemp) -eq 2) "writegate: sed with hash delimiter targeting product still blocks ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'grep x seed.txt | tee pelizzai/data/state.md' } $wgTemp) -eq 0) "writegate: a real pipe into tee targeting pelizzai/ stays allowed ($leaf)"
+                # Same hole beyond sed: any literal `|` in quotes (grep alternation, awk -F'|').
+                Check ((Invoke-Writegate $wg @{ command = "grep 'a|b' seed.txt > pelizzai/data/x" } $wgTemp) -eq 0) "writegate: quoted pipe in grep does not corrupt a pelizzai/ redirect target ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "grep 'a|b' seed.txt > produto.txt" } $wgTemp) -eq 2) "writegate: quoted pipe in grep does not hide a product redirect ($leaf)"
+                # FULL separator × quote matrix (CodeRabbit PR #82 r1+r2): every separator the
+                # splitter recognizes (&&, ||, ;, |, LF, CRLF), quoted with BOTH quote forms,
+                # must neither corrupt a pelizzai/ target (false positive) nor hide a product
+                # redirect (false negative).
+                foreach ($wgQuote in @("'", '"')) {
+                    $wgQuoteName = if ($wgQuote -eq "'") { 'single-quoted' } else { 'double-quoted' }
+                    foreach ($wgSep in @('&&', '||', ';', '|', "`n", "`r`n")) {
+                        $wgSepName = switch ($wgSep) { "`n" { 'newline' } "`r`n" { 'crlf' } default { $wgSep } }
+                        Check ((Invoke-Writegate $wg @{ command = "echo ${wgQuote}a${wgSep}b${wgQuote} > pelizzai/data/x" } $wgTemp) -eq 0) "writegate: $wgQuoteName '$wgSepName' does not corrupt a pelizzai/ redirect target ($leaf)"
+                        Check ((Invoke-Writegate $wg @{ command = "echo ${wgQuote}a${wgSep}b${wgQuote} > produto.txt" } $wgTemp) -eq 2) "writegate: $wgQuoteName '$wgSepName' does not hide a product redirect ($leaf)"
+                    }
+                }
+                # Escapes (CodeRabbit PR #82 r3): \" must not close a double-quoted string, so the
+                # quoted ; stays text and the REAL redirect after the closing quote is still seen.
+                Check ((Invoke-Writegate $wg @{ command = 'printf "a\";b" > produto.txt' } $wgTemp) -eq 2) "writegate: escaped double quote does not hide a product redirect ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'printf "a\";b" > pelizzai/data/x' } $wgTemp) -eq 0) "writegate: escaped double quote does not corrupt a pelizzai/ redirect target ($leaf)"
+                # Single quotes are POSIX-literal: backslash does not escape and the quote closes.
+                Check ((Invoke-Writegate $wg @{ command = "grep 'a\' seed.txt > produto.txt" } $wgTemp) -eq 2) "writegate: backslash inside single quotes stays literal, product redirect still seen ($leaf)"
+                # Line continuation: backslash-newline joins the physical lines into one segment.
+                Check ((Invoke-Writegate $wg @{ command = "npm test \`n > produto.txt" } $wgTemp) -eq 2) "writegate: a line continuation does not hide a product redirect ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "npm test \`n > pelizzai/data/x" } $wgTemp) -eq 0) "writegate: a line continuation keeps a pelizzai/ target allowed ($leaf)"
+                # Windows-path guard: a backslash before an ordinary character is a path separator,
+                # never an escape — the quoted-and-redirected path must still resolve as spelled.
+                Check ((Invoke-Writegate $wg @{ command = 'echo x > "sub\produto.txt"' } $wgTemp) -eq 2) "writegate: backslash path separators survive escape handling ($leaf)"
+                # Escaped space (CodeRabbit PR #82 r4): `> pelizzai\ x` writes the PRODUCT file
+                # "pelizzai x" at the root — the target must not be cut at the space and then
+                # collapse into the pelizzai/ carve-out.
+                Check ((Invoke-Writegate $wg @{ command = 'printf x > pelizzai\ x' } $wgTemp) -eq 2) "writegate: escaped space cannot smuggle product into the pelizzai/ carve-out ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'printf x > pelizzai/data/my\ notes.md' } $wgTemp) -eq 0) "writegate: escaped space inside a real pelizzai/ path stays allowed ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "printf x > pelizzai\`tx" } $wgTemp) -eq 2) "writegate: escaped tab cannot smuggle product into the pelizzai/ carve-out ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "printf x > pelizzai/data/my\`tnotes.md" } $wgTemp) -eq 0) "writegate: escaped tab inside a real pelizzai/ path stays allowed ($leaf)"
+                # Escaped operators (CodeRabbit PR #82 r5): \> is a literal argument, never a
+                # redirect; \; and \| stay literal too — and the tee behind a literal pipe still
+                # elects its own target, so the conservative block on product is preserved.
+                Check ((Invoke-Writegate $wg @{ command = 'echo \> produto.txt' } $wgTemp) -eq 0) "writegate: escaped > is text, not a redirect ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'printf x \| tee produto.txt' } $wgTemp) -eq 2) "writegate: tee behind a literal pipe still blocks the product target ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo a\;b > pelizzai/data/x' } $wgTemp) -eq 0) "writegate: escaped semicolon does not corrupt a pelizzai/ redirect target ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo a\;b > produto.txt' } $wgTemp) -eq 2) "writegate: escaped semicolon does not hide a product redirect ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo a\&\&b > pelizzai/data/x' } $wgTemp) -eq 0) "writegate: escaped ampersands do not corrupt a pelizzai/ redirect target ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo a\&\&b > produto.txt' } $wgTemp) -eq 2) "writegate: escaped ampersands do not hide a product redirect ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo \" > pelizzai/data/x' } $wgTemp) -eq 0) "writegate: escaped double quote outside quotes keeps a pelizzai/ redirect allowed ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo \" > produto.txt' } $wgTemp) -eq 2) "writegate: escaped double quote outside quotes does not hide a product redirect ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "echo \' > pelizzai/data/x" } $wgTemp) -eq 0) "writegate: escaped single quote outside quotes keeps a pelizzai/ redirect allowed ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = "echo \' > produto.txt" } $wgTemp) -eq 2) "writegate: escaped single quote outside quotes does not hide a product redirect ($leaf)"
+                # Command substitution (CodeRabbit PR #82 r6): bash RUNS $() and backticks even
+                # inside double quotes — a redirect hidden there is a real write.
+                Check ((Invoke-Writegate $wg @{ command = 'echo "$(printf x > produto.txt)"' } $wgTemp) -eq 2) "writegate: a redirect inside a quoted \$() cannot hide a product write ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo "$(printf x > pelizzai/data/x)"' } $wgTemp) -eq 0) "writegate: a redirect inside a quoted \$() targeting pelizzai/ stays allowed ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo `printf x > produto.txt`' } $wgTemp) -eq 2) "writegate: a redirect inside backticks still blocks the product target ($leaf)"
+                Check ((Invoke-Writegate $wg @{ command = 'echo ''$(printf x > produto.txt)''' } $wgTemp) -eq 0) "writegate: single quotes keep a \$() literal — no substitution, no write ($leaf)"
+                # Backslash semantics are per-OS (r6): a path separator on Windows, a literal
+                # filename character on POSIX — `pelizzai\x` is metadata there vs. product here.
+                if ($env:OS -eq 'Windows_NT' -or $IsWindows) {
+                    Check ((Invoke-Writegate $wg @{ command = 'printf x > pelizzai\x' } $wgTemp) -eq 0) "writegate: backslash is a path separator on Windows, pelizzai\x is metadata ($leaf)"
+                } else {
+                    Check ((Invoke-Writegate $wg @{ command = 'printf x > pelizzai\x' } $wgTemp) -eq 2) "writegate: backslash is literal on POSIX, pelizzai\x is a product filename ($leaf)"
+                }
             }
 
             # -- Carve-out bypass regression (2026-08-26): `..` AFTER a directory link. --
