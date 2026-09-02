@@ -663,7 +663,10 @@ stale anchors. They are gone.
   repository on a protected branch (Rule A, Rule B, source mode, the metadata carve-out, the
   quote-aware shell parser, the link bypasses); the guardrails matrix plus an identical-stderr
   parity check between the `.mjs` and `.ps1` legs; the advisory hooks run in a bare directory and
-  on malformed input and must exit 0; the hook installer (merge, idempotence, `--only`, surgical
+  on malformed input and must exit 0, the cadence hook is driven through a seeded counter, real
+  commits and a backdated ledger until it nudges and then snoozes (both legs byte-identical), and
+  the SessionStart hook is proven to suppress the catalog nudge only behind the source-mode
+  sentinel; the hook installer (merge, idempotence, `--only`, surgical
   removal); a real consumer export (Cursor adapter carried, sentinel and suite removed, nested
   target rejected, exported consumer passes its own `--check`); a fresh `--build-dist` that must
   leave the committed `dist/` untouched; the handoff/review helpers in a temporary repo;
