@@ -24,7 +24,8 @@
  *   node scripts/measure-hotpath.mjs --markdown table for pasting into a report
  *
  * Exit codes: 0 report produced; 1 a declared file is missing or a reference
- * drifted; 2 the budget file itself is unusable.
+ * drifted; 2 the budget file itself is unusable (unreadable JSON, no routes, or
+ * a route without a finite positive targetBytes).
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
@@ -76,6 +77,22 @@ try {
   process.exit(2);
 }
 
+// A target that is not a positive number would print a NaN gap and report nothing: the budget
+// itself is unusable, which is exit 2 — the same class as a broken JSON, not a missing file.
+if (!Array.isArray(budget.routes)) {
+  console.error('measure-hotpath: harness-budget.json has no `routes` array — nothing to measure.');
+  process.exit(2);
+}
+const unusableTargets = budget.routes.filter(
+  (route) => !Number.isFinite(route.targetBytes) || route.targetBytes <= 0,
+);
+if (unusableTargets.length > 0) {
+  for (const route of unusableTargets) {
+    console.error(`measure-hotpath: route "${route.id}" has no positive targetBytes (got ${JSON.stringify(route.targetBytes)}).`);
+  }
+  process.exit(2);
+}
+
 const missing = [];
 const skillFiles = listSkillFiles(budget.metadataFrom);
 const metadataBytes = skillFiles.reduce((sum, file) => sum + frontmatterBytes(file), 0);
@@ -119,11 +136,6 @@ const rows = budget.routes.map((route) => {
     }
     parts.push({ file, bytes });
     total += bytes;
-  }
-
-  // A target that is not a number would print a NaN gap and report nothing: the budget is unusable.
-  if (!Number.isFinite(route.targetBytes) || route.targetBytes <= 0) {
-    missing.push(`route "${route.id}" has no positive targetBytes`);
   }
 
   return {
@@ -215,7 +227,12 @@ if (asMarkdown) {
   console.log(`  ${pad('route', 12)} ${lpad('bytes', 9)} ${lpad('tokens', 8)} ${lpad('target', 9)}  gap to target`);
   console.log(`  ${'-'.repeat(12)} ${'-'.repeat(9)} ${'-'.repeat(8)} ${'-'.repeat(9)}  -------------`);
   for (const row of rows) {
-    const gap = row.gapToTarget > 0 ? `+${fmt(row.gapToTarget)} above target` : 'at target';
+    const gap =
+      row.gapToTarget > 0
+        ? `+${fmt(row.gapToTarget)} above target`
+        : row.gapToTarget < 0
+          ? `${fmt(row.gapToTarget)} below target`
+          : 'at target';
     console.log(
       `  ${pad(row.id, 12)} ${lpad(fmt(row.bytes), 9)} ${lpad('~' + fmt(row.tokens), 8)} ${lpad(fmt(row.targetBytes), 9)}  ${gap}`,
     );

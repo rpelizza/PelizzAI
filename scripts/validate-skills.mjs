@@ -54,11 +54,22 @@ if (!Array.isArray(spec.allowedFrontmatterKeys) || spec.allowedFrontmatterKeys.l
   console.error('validate-skills: skillLimits.spec.allowedFrontmatterKeys is not a non-empty list — every key would be rejected.');
   process.exit(2);
 }
-if (!existsSync(join(root, budget.metadataFrom ?? ''))) {
-  console.error(`validate-skills: metadataFrom "${budget.metadataFrom}" does not exist — nothing would be validated.`);
+// `metadataFrom` names the skills directory. An empty or missing value would resolve to the repo
+// root and scan whatever happens to sit there; a path outside the repo would validate someone
+// else's skills. Both are an unusable budget, exit 2.
+if (typeof budget.metadataFrom !== 'string' || budget.metadataFrom.trim() === '') {
+  console.error('validate-skills: metadataFrom must be a non-empty string naming the skills directory (relative to the repo root).');
   process.exit(2);
 }
-const skillsDir = join(root, budget.metadataFrom);
+const skillsDir = resolve(root, budget.metadataFrom);
+if (skillsDir === root || !(skillsDir + sep).startsWith(root + sep)) {
+  console.error(`validate-skills: metadataFrom "${budget.metadataFrom}" must name a directory under the repo root, not the root itself or a path outside it.`);
+  process.exit(2);
+}
+if (!existsSync(skillsDir) || !statSync(skillsDir).isDirectory()) {
+  console.error(`validate-skills: metadataFrom "${budget.metadataFrom}" is not an existing directory — nothing would be validated.`);
+  process.exit(2);
+}
 const toPosix = (p) => p.split(sep).join('/');
 const rel = (abs) => toPosix(relative(root, abs));
 

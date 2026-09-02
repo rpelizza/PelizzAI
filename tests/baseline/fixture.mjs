@@ -285,10 +285,37 @@ export default function App() {
 }
 `;
 
+const INDEX_HTML = `<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ACME Billing</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+`;
+
+const MAIN = `import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App';
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);
+`;
+
 const FILES = [
   ['package.json', PACKAGE],
   ['tsconfig.json', TSCONFIG],
   ['vitest.config.ts', VITEST_CONFIG],
+  ['index.html', INDEX_HTML],
+  ['src/main.tsx', MAIN],
   ['src/App.tsx', APP],
   ['src/api/invoices.ts', INVOICES_API],
   ['src/components/InvoiceForm.tsx', INVOICE_FORM],

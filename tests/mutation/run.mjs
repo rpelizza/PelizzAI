@@ -61,6 +61,14 @@ const MUTATIONS = [
     expect: /BUDGET ERRORS[\s\S]*task-cycle-v2\.md, which does not exist/,
   },
   {
+    defect: 'a route loses its target (the budget is unusable, not merely over)',
+    file: 'scripts/harness-budget.json',
+    edit: (t) => t.replace('"targetBytes": 24000', '"targetBytes": 0'),
+    tool: (s) => runTool(s, 'measure-hotpath.mjs'),
+    status: 2,
+    expect: /route "read-only" has no positive targetBytes/,
+  },
+  {
     defect: 'a head skill links a reference nobody budgeted (invisible hot-path growth)',
     file: '.claude/skills/pelizzai-quick-fix/SKILL.md',
     edit: (t) => t + '\nSee [extra rules](references/extra-rules.md) for details.\n',
@@ -117,10 +125,13 @@ try {
 
     const result = m.tool(sandbox);
     const output = `${result.stdout}\n${result.stderr}`;
-    if (result.status !== 0 && m.expect.test(output)) {
+    // `status`, when a mutation names one, pins the exit code (2 = unusable budget, 1 = a finding):
+    // an instrument that catches the defect under the wrong code has confused two failure classes.
+    const statusOk = m.status === undefined ? result.status !== 0 : result.status === m.status;
+    if (statusOk && m.expect.test(output)) {
       console.log(`caught ${m.defect}`);
     } else {
-      console.error(`MISSED ${m.defect} — exit ${result.status}; reported instead:`);
+      console.error(`MISSED ${m.defect} — exit ${result.status}${m.status !== undefined ? ` (expected ${m.status})` : ''}; reported instead:`);
       console.error(output.split('\n').slice(0, 8).map((l) => `  ${l}`).join('\n'));
       missed++;
     }

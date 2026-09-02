@@ -67,7 +67,10 @@ If your PR changes what a script or hook does, it needs to touch the contracts:
 If your PR changes doctrine (a SKILL.md, `CLAUDE.md`, a template), do **not** add a regex that
 checks the new sentence is present. Such a check passes the day it is written and never fails
 again; the suite carried 574 of them and none ever caught a regression. Doctrine is measured by
-the trigger tests and the baseline (`tests/`), out of CI.
+the trigger tests (`tests/trigger`) and the baseline (`tests/baseline`). Those two are run by hand
+before a doctrine slice lands, because they spend tokens and need a real agent credential; the CI
+workflow does not execute them. Every other instrument (contract suite, skill validation, hot-path
+report, mutation suite, sync check) runs in the CI workflow on every push.
 
 One specific anti-pattern will be rejected in review: **weakening a fixture until it passes**. A
 fixture whose expected exit code was relaxed, or whose scenario was narrowed until the defect no
