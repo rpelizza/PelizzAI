@@ -156,7 +156,7 @@
       "targetBytes": 60000
     }
   ],
-  "_skillLimits": "Two kinds of rule. `spec` rules come from the published Agent Skills specification and from anthropics/skills quick_validate.py; they are hard errors because a violating skill can be rejected by the platform. `budget` rules are context-budget thresholds; they use a violation ratchet instead of a hard cap, because the v1 corpus already breaks them and a hard cap would block every commit while a bare warning would be ignored. `allowed` is frozen at today's count: introducing one more violation fails the build, and every slice of the v3 migration lowers the number in the commit that earned it.",
+  "_skillLimits": "One kind of rule. `spec` rules come from the published Agent Skills specification and from anthropics/skills quick_validate.py, plus the two silent-trigger failures the platform does not report (unquoted colon in the description, H1 naming a dead skill). A violating skill can be rejected or never fire, so every violation is an error with no allowance. There are no size rules.",
   "skillLimits": {
     "spec": {
       "nameMaxChars": 64,
@@ -170,22 +170,7 @@
         "allowed-tools",
         "metadata",
         "compatibility"
-      ],
-      "allowedViolations": 0
-    },
-    "budget": {
-      "descriptionMaxWords": {
-        "max": 30,
-        "allowed": 0
-      },
-      "skillMaxLines": {
-        "max": 400,
-        "allowed": 4
-      },
-      "referenceTocAfterLines": {
-        "max": 300,
-        "allowed": 2
-      }
+      ]
     }
   },
   "_driftCheck": "Every reference a head skill links to is either declared in the route that loads it, or listed under `onDemand` as consulted only inside a named branch. A link that appears in neither is drift: the doctrine grew a mandatory read that nobody budgeted.",
