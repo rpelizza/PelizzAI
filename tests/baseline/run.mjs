@@ -8,10 +8,15 @@
  * each side and reports the delta.
  *
  * This is the only measurement in the repository that can answer the question the
- * harness exists to answer. The contract suite proves a sentence is present. The
- * trigger tests prove a skill fired. Neither says whether the delivery is better
- * than it would have been without any of it, and no amount of doctrine substitutes
- * for running the task both ways.
+ * harness exists to answer. The contract suite proves the scripts behave and the
+ * structure holds. The trigger tests prove a skill fired. Neither says whether the
+ * delivery is better than it would have been without any of it, and no amount of
+ * doctrine substitutes for running the task both ways.
+ *
+ * Both sides work on the project in ./fixture.mjs — the invoice app the task files
+ * describe. The runner refuses to start if that project does not materialize
+ * (issue #83: it used to fall back to a bare package.json and price two agents
+ * improvising about code that was not there).
  *
  * The numbers are the cheap half. Quality is judged by reading both outputs, which
  * is why the runner writes them side by side and stops there rather than scoring
@@ -23,14 +28,16 @@
  *   node tests/baseline/run.mjs tasks/add-validation.txt --model sonnet --keep
  *
  * Exit codes: 0 both sides ran; 1 a side failed to produce a transcript;
- * 2 the agent CLI is unavailable or the task file is missing.
+ * 2 the agent CLI is unavailable, the task file is missing, or the fixture did
+ * not materialize the files the task refers to.
  */
 
-import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync, cpSync } from 'node:fs';
+import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync, cpSync, statSync } from 'node:fs';
 import { dirname, join, resolve, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
+import { writeFixture, REQUIRED_BY_TASK } from './fixture.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..', '..');
@@ -66,6 +73,33 @@ const prompt = readFileSync(taskFile, 'utf8');
 const stamp = `${taskId}-${process.pid}`;
 const workspace = join(tmpdir(), 'pelizzai-baseline', stamp);
 
+const required = REQUIRED_BY_TASK[taskId];
+if (!required) {
+  console.error(
+    `baseline: task "${taskId}" names no files in fixture.mjs (REQUIRED_BY_TASK). A task the fixture ` +
+      'does not ground would price two agents improvising — declare what it refers to before running it.',
+  );
+  process.exit(2);
+}
+
+/**
+ * Writes the fixture and proves the task's subject is on disk. Never degrades: a side whose
+ * project is missing the code the prompt talks about would be scored on a different task.
+ */
+function materialize(project) {
+  mkdirSync(project, { recursive: true });
+  const written = writeFixture(project);
+  const absent = required.filter((rel) => {
+    const abs = join(project, rel);
+    return !written.includes(rel) || !existsSync(abs) || statSync(abs).size === 0;
+  });
+  if (absent.length > 0) {
+    console.error(`baseline: the fixture did not materialize what "${taskId}" refers to:`);
+    for (const rel of absent) console.error(`  missing or empty: ${rel}`);
+    process.exit(2);
+  }
+}
+
 /**
  * The two sides differ in exactly one thing: whether the harness is present.
  * Same fixture, same prompt, same model, same turn budget. Anything else that
@@ -74,11 +108,7 @@ const workspace = join(tmpdir(), 'pelizzai-baseline', stamp);
 function makeSide(name, withHarness) {
   const dir = join(workspace, name);
   const project = join(dir, 'project');
-  mkdirSync(join(project, 'src'), { recursive: true });
-
-  const fixture = join(here, 'fixtures', taskId);
-  if (existsSync(fixture)) cpSync(fixture, project, { recursive: true });
-  else writeFileSync(join(project, 'package.json'), '{\n  "name": "baseline",\n  "private": true\n}\n');
+  materialize(project);
 
   if (withHarness) {
     cpSync(join(root, '.claude'), join(project, '.claude'), { recursive: true });

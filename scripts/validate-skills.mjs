@@ -3,31 +3,24 @@
 /**
  * PelizzAI — skill conformance validator.
  *
- * Two kinds of rule, from scripts/harness-budget.json.
- *
- * `spec` rules mirror the published Agent Skills specification, as encoded in
- * anthropics/skills quick_validate.py. A skill that breaks one can be rejected
- * by the platform, so these are counted against a ratchet frozen at today's
- * value and any new violation fails the build.
- *
- * `budget` rules are the ECC context-budget thresholds (description length,
- * skill length, table of contents on long references). The current corpus
- * already breaks them, so a hard cap would block every commit and a bare
- * warning would be ignored, which is exactly how ECC grew to 51 MB with its own
- * thresholds published and unenforced. The middle path is a violation ratchet:
- * the count may fall, never rise, and each drop belongs in the commit that
- * earned it.
+ * One kind of rule, from `skillLimits.spec` in scripts/harness-budget.json: the
+ * published Agent Skills specification, as encoded in anthropics/skills
+ * quick_validate.py, plus the two failure modes the platform does not report
+ * but that silently disarm a skill (an unquoted colon in the description, an
+ * H1 that names a skill that no longer exists). A skill that breaks one can be
+ * rejected by the platform or sit in the catalogue without a trigger, so every
+ * violation is an error. There are no size rules here: size is reported by
+ * measure-hotpath.mjs and never enforced.
  *
  * Usage:
  *   node scripts/validate-skills.mjs          report and enforce
  *   node scripts/validate-skills.mjs --json   machine-readable
- *   node scripts/validate-skills.mjs --list   name every current violation
  *
- * Exit codes: 0 no ratchet exceeded; 1 a ratchet rose; 2 the budget file is unusable.
+ * Exit codes: 0 no violation; 1 any violation; 2 the budget file is unusable.
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { dirname, join, resolve, relative, sep } from 'node:path';
+import { dirname, join, resolve, relative, sep, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
@@ -36,7 +29,6 @@ const budgetPath = join(scriptDir, 'harness-budget.json');
 
 const args = new Set(process.argv.slice(2));
 const asJson = args.has('--json');
-const listAll = args.has('--list');
 
 let budget;
 try {
@@ -47,24 +39,54 @@ try {
 }
 
 const spec = budget.skillLimits?.spec ?? {};
-const limits = budget.skillLimits?.budget ?? {};
 
 // A missing or non-numeric limit makes every `x > limit` comparison false and disarms the rule
 // without a sound — the same silent-green failure this whole file exists to prevent. The budget
 // being unusable is exit 2, like a broken JSON.
-for (const [where, obj, keys] of [
-  ['skillLimits.spec', spec, ['nameMaxChars', 'descriptionMaxChars']],
-  ['skillLimits.budget', limits, ['descriptionMaxWords', 'skillMaxLines', 'referenceTocAfterLines']],
-]) {
-  for (const key of keys) {
-    const value = where === 'skillLimits.spec' ? obj[key] : obj[key]?.max;
-    if (!Number.isFinite(value) || value <= 0) {
-      console.error(`validate-skills: ${where}.${key} is not a positive number — the limit would silently stop applying.`);
-      process.exit(2);
-    }
+for (const key of ['nameMaxChars', 'descriptionMaxChars']) {
+  const value = spec[key];
+  if (!Number.isFinite(value) || value <= 0) {
+    console.error(`validate-skills: skillLimits.spec.${key} is not a positive number — the limit would silently stop applying.`);
+    process.exit(2);
   }
 }
-const skillsDir = join(root, budget.metadataFrom);
+if (
+  !Array.isArray(spec.allowedFrontmatterKeys) ||
+  spec.allowedFrontmatterKeys.length === 0 ||
+  spec.allowedFrontmatterKeys.some((key) => typeof key !== 'string' || key.trim() === '')
+) {
+  console.error('validate-skills: skillLimits.spec.allowedFrontmatterKeys must be a non-empty list of non-empty strings — otherwise keys would be rejected or matched by accident.');
+  process.exit(2);
+}
+// The kebab-case rule is only as real as its pattern: a missing, empty, or invalid namePattern
+// would either skip the check or throw mid-scan. Compile it once, here, and reuse it below.
+if (typeof spec.namePattern !== 'string' || spec.namePattern.trim() === '') {
+  console.error('validate-skills: skillLimits.spec.namePattern must be a non-empty regular expression string.');
+  process.exit(2);
+}
+let namePattern;
+try {
+  namePattern = new RegExp(spec.namePattern);
+} catch (error) {
+  console.error(`validate-skills: skillLimits.spec.namePattern is not a valid regular expression: ${error.message}`);
+  process.exit(2);
+}
+// `metadataFrom` names the skills directory. An empty or missing value would resolve to the repo
+// root and scan whatever happens to sit there; a path outside the repo would validate someone
+// else's skills. Both are an unusable budget, exit 2.
+if (typeof budget.metadataFrom !== 'string' || budget.metadataFrom.trim() === '') {
+  console.error('validate-skills: metadataFrom must be a non-empty string naming the skills directory (relative to the repo root).');
+  process.exit(2);
+}
+const skillsDir = resolve(root, budget.metadataFrom);
+if (skillsDir === root || !(skillsDir + sep).startsWith(root + sep)) {
+  console.error(`validate-skills: metadataFrom "${budget.metadataFrom}" must name a directory under the repo root, not the root itself or a path outside it.`);
+  process.exit(2);
+}
+if (!existsSync(skillsDir) || !statSync(skillsDir).isDirectory()) {
+  console.error(`validate-skills: metadataFrom "${budget.metadataFrom}" is not an existing directory — nothing would be validated.`);
+  process.exit(2);
+}
 const toPosix = (p) => p.split(sep).join('/');
 const rel = (abs) => toPosix(relative(root, abs));
 
@@ -99,64 +121,56 @@ function readFrontmatter(absFile) {
 }
 
 function listSkills() {
-  if (!existsSync(skillsDir)) return [];
   return readdirSync(skillsDir)
     .map((name) => join(skillsDir, name, 'SKILL.md'))
     .filter((file) => existsSync(file) && statSync(file).isFile())
     .sort();
 }
 
-function listReferences() {
-  const out = [];
-  const walk = (dir) => {
-    for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      const abs = join(dir, entry.name);
-      if (entry.isDirectory()) walk(abs);
-      else if (entry.isFile() && entry.name.endsWith('.md') && entry.name !== 'SKILL.md') out.push(abs);
-    }
-  };
-  if (existsSync(skillsDir)) walk(skillsDir);
-  return out.sort();
-}
-
-const specViolations = [];
-const budgetViolations = { descriptionMaxWords: [], skillMaxLines: [], referenceTocAfterLines: [] };
+const violations = [];
 
 for (const file of listSkills()) {
   const name = rel(file);
   const fm = readFrontmatter(file);
 
   if (!fm.ok) {
-    specViolations.push({ file: name, rule: 'frontmatter', detail: fm.reason });
+    violations.push({ file: name, rule: 'frontmatter', detail: fm.reason });
     continue;
   }
 
-  const unexpected = Object.keys(fm.keys).filter(
-    (key) => !(spec.allowedFrontmatterKeys ?? []).includes(key),
-  );
+  const unexpected = Object.keys(fm.keys).filter((key) => !spec.allowedFrontmatterKeys.includes(key));
   if (unexpected.length > 0) {
-    specViolations.push({ file: name, rule: 'frontmatter-keys', detail: `unexpected: ${unexpected.join(', ')}` });
+    violations.push({ file: name, rule: 'frontmatter-keys', detail: `unexpected: ${unexpected.join(', ')}` });
   }
 
   const declaredName = fm.keys.name ?? '';
   if (!declaredName) {
-    specViolations.push({ file: name, rule: 'name', detail: 'missing' });
+    violations.push({ file: name, rule: 'name', detail: 'missing' });
   } else {
     if (declaredName.length > spec.nameMaxChars) {
-      specViolations.push({ file: name, rule: 'name-length', detail: `${declaredName.length} chars` });
+      violations.push({ file: name, rule: 'name-length', detail: `${declaredName.length} chars` });
     }
-    if (spec.namePattern && !new RegExp(spec.namePattern).test(declaredName)) {
-      specViolations.push({ file: name, rule: 'name-kebab-case', detail: declaredName });
+    if (!namePattern.test(declaredName)) {
+      violations.push({ file: name, rule: 'name-kebab-case', detail: declaredName });
+    }
+    /**
+     * The specification binds `name` to the parent directory. A skill whose name drifts from its
+     * directory is registered under one identifier and referenced under the other, and every
+     * `pelizzai-*` citation of it becomes a dangling reference the moment the platform resolves it.
+     */
+    const directory = basename(dirname(file));
+    if (declaredName !== directory) {
+      violations.push({ file: name, rule: 'name-matches-directory', detail: `name "${declaredName}" in directory "${directory}"` });
     }
   }
 
   const description = (fm.keys.description ?? '').replace(/^["']|["']$/g, '');
   if (!description) {
-    specViolations.push({ file: name, rule: 'description', detail: 'missing' });
+    violations.push({ file: name, rule: 'description', detail: 'missing' });
     continue;
   }
   if (description.length > spec.descriptionMaxChars) {
-    specViolations.push({
+    violations.push({
       file: name,
       rule: 'description-length',
       detail: `${description.length} chars, spec allows ${spec.descriptionMaxChars}`,
@@ -172,7 +186,7 @@ for (const file of listSkills()) {
   const expected = declaredName.replace(/^pelizzai-/, '').replace(/-/g, '');
   const seen = heading.toLowerCase().replace(/[^a-z0-9]/g, '');
   if (declaredName && (!heading || !seen.includes(expected))) {
-    specViolations.push({
+    violations.push({
       file: name,
       rule: 'h1-matches-name',
       detail: heading ? `"${heading}" does not name ${declaredName}` : 'no H1',
@@ -189,7 +203,7 @@ for (const file of listSkills()) {
   const rawDescription = fm.keys.description ?? '';
   const quoted = /^\s*(["'|>])/.test(rawDescription);
   if (!quoted && /:(\s|$)/.test(rawDescription)) {
-    specViolations.push({
+    violations.push({
       file: name,
       rule: 'description-yaml-scalar',
       detail: `unquoted colon near "${rawDescription.match(/\S*:(?:\s|$)/)?.[0] ?? ''}"`,
@@ -197,107 +211,26 @@ for (const file of listSkills()) {
   }
   if (spec.descriptionForbidsAngleBrackets && /[<>]/.test(description)) {
     const found = description.match(/[^\s]*[<>][^\s]*/)?.[0] ?? '';
-    specViolations.push({ file: name, rule: 'description-angle-brackets', detail: found });
-  }
-
-  const words = description.split(/\s+/).filter(Boolean).length;
-  if (limits.descriptionMaxWords && words > limits.descriptionMaxWords.max) {
-    budgetViolations.descriptionMaxWords.push({ file: name, detail: `${words} words` });
-  }
-
-  const lines = readFileSync(file, 'utf8').replace(/\r\n/g, '\n').split('\n').length;
-  if (limits.skillMaxLines && lines > limits.skillMaxLines.max) {
-    budgetViolations.skillMaxLines.push({ file: name, detail: `${lines} lines` });
+    violations.push({ file: name, rule: 'description-angle-brackets', detail: found });
   }
 }
 
-for (const file of listReferences()) {
-  const text = readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
-  const lines = text.split('\n').length;
-  if (!limits.referenceTocAfterLines || lines <= limits.referenceTocAfterLines.max) continue;
-  const hasToc =
-    /^#{2,3}\s+(Contents|Table of contents)\b/im.test(text) ||
-    /^\s*(?:[-*]|\d+\.)\s+\[[^\]]+\]\(#/m.test(text);
-  if (!hasToc) {
-    budgetViolations.referenceTocAfterLines.push({ file: rel(file), detail: `${lines} lines, no table of contents` });
-  }
-}
-
-const checks = [
-  {
-    id: 'spec',
-    label: 'Agent Skills specification',
-    count: specViolations.length,
-    allowed: spec.allowedViolations ?? 0,
-    items: specViolations,
-  },
-  ...Object.entries(budgetViolations).map(([id, items]) => ({
-    id,
-    label: `budget: ${id}`,
-    count: items.length,
-    allowed: limits[id]?.allowed ?? 0,
-    items,
-  })),
-];
-
-// The same silent-green trap as the max limits: a non-numeric `allowed` (say, "invalid") makes
-// `count > allowed` false forever and the ratchet stops ratcheting. Validate the EFFECTIVE
-// values, after the ?? 0 defaults above — the budget being unusable is exit 2.
-for (const check of checks) {
-  if (!Number.isInteger(check.allowed) || check.allowed < 0) {
-    console.error(
-      `validate-skills: the "allowed" value for ${check.id} is not a non-negative integer — the ratchet would silently stop applying.`
-    );
-    process.exit(2);
-  }
-}
-
-const risen = checks.filter((check) => check.count > check.allowed);
-const fell = checks.filter((check) => check.count < check.allowed);
-const ok = risen.length === 0;
+const skillCount = listSkills().length;
+const ok = violations.length === 0;
 
 if (asJson) {
-  console.log(JSON.stringify({ checks, ok }, null, 2));
+  console.log(JSON.stringify({ skills: skillCount, violations, ok }, null, 2));
   process.exit(ok ? 0 : 1);
 }
 
-console.log('PelizzAI skill conformance\n');
-const pad = (s, n) => String(s).padEnd(n);
-const lpad = (s, n) => String(s).padStart(n);
-console.log(`  ${pad('check', 26)} ${lpad('found', 7)} ${lpad('allowed', 8)}  status`);
-console.log(`  ${'-'.repeat(26)} ${'-'.repeat(7)} ${'-'.repeat(8)}  ------`);
-for (const check of checks) {
-  const status =
-    check.count > check.allowed
-      ? `ROSE by ${check.count - check.allowed}`
-      : check.count < check.allowed
-        ? `fell by ${check.allowed - check.count} — lower "allowed"`
-        : 'held';
-  console.log(`  ${pad(check.id, 26)} ${lpad(check.count, 7)} ${lpad(check.allowed, 8)}  ${status}`);
-}
-
-if (listAll || !ok) {
-  for (const check of checks) {
-    const show = listAll ? check.items : check.count > check.allowed ? check.items : [];
-    if (show.length === 0) continue;
-    console.log(`\n  ${check.label}:`);
-    for (const item of show) {
-      console.log(`    ${item.file}${item.rule ? ` [${item.rule}]` : ''} — ${item.detail}`);
-    }
-  }
-}
-
-if (fell.length > 0) {
-  console.log(
-    '\nSome counts are below their ratchet. Lower the "allowed" value in harness-budget.json\n' +
-      'in this same commit, so the gain is locked in and cannot be spent later.',
-  );
-}
-
+console.log('PelizzAI skill conformance (Agent Skills specification)\n');
+console.log(`  skills checked: ${skillCount}   violations: ${violations.length}`);
 if (!ok) {
-  console.error(
-    '\nA violation count rose. Fix the new violation, or state in the commit why the ratchet moves.',
-  );
+  console.log('');
+  for (const item of violations) {
+    console.log(`    ${item.file} [${item.rule}] — ${item.detail}`);
+  }
+  console.error('\nA skill violates the platform specification and may be rejected or lose its trigger. Fix it; there is no allowance.');
 }
 
 process.exit(ok ? 0 : 1);

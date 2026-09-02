@@ -37,9 +37,9 @@ jobs:
           node scripts/sync-harness.mjs --build-dist
           git add -A -- dist
           git diff --cached --exit-code -- dist
-      - name: Skill conformance (spec + budget ratchets)
+      - name: Skill conformance (platform spec + silent-trigger checks)
         run: node scripts/validate-skills.mjs
-      - name: Hot-path budget (ceilings are a ratchet)
+      - name: Hot-path report
         run: node scripts/measure-hotpath.mjs
       - name: Mutation suite (the instruments catch planted defects)
         if: runner.os == 'Linux'
