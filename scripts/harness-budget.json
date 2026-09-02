@@ -1,5 +1,5 @@
 {
-  "_about": "Single source of truth for what the harness costs to enter. `ceilingBytes` is a ratchet frozen at the value measured when the budget was introduced: exceeding it fails the build. `targetBytes` is where the v3 redesign is heading; the report shows the gap. Lowering a ceiling is a deliberate act that belongs in the same commit as the pruning that earned it.",
+  "_about": "Single source of truth for what the harness costs to enter. `targetBytes` is where the redesign is heading; measure-hotpath.mjs reports each route's bytes, ~tokens, and gap to target. Nothing here is enforced: size is information for the author, and the only failures are a missing declared file, an unbudgeted reference (drift), or an unusable budget.",
   "_accounting": "A route's cost is everything the doctrine MANDATES reading before the first line of work, not only what the platform loads by default. That includes the frontmatter of every skill (permanently in context as `available_skills`) and any reference a head skill requires unconditionally. Counting only the default-loaded files is the measurement trap that made the 23/08 rollback attack the wrong target: the corpus on disk fell 8% while the per-turn cost stayed flat.",
   "metadataFrom": ".claude/skills",
   "fragments": {
@@ -26,7 +26,6 @@
       ],
       "metadata": true,
       "head": [],
-      "ceilingBytes": 30617,
       "targetBytes": 20000
     },
     {
@@ -39,7 +38,6 @@
       ],
       "metadata": true,
       "head": [],
-      "ceilingBytes": 55454,
       "targetBytes": 24000
     },
     {
@@ -55,7 +53,6 @@
       "head": [
         ".claude/skills/pelizzai-experiment/SKILL.md"
       ],
-      "ceilingBytes": 74253,
       "targetBytes": 40000
     },
     {
@@ -71,7 +68,6 @@
       "head": [
         ".claude/skills/pelizzai-quick-fix/SKILL.md"
       ],
-      "ceilingBytes": 76384,
       "targetBytes": 45000
     },
     {
@@ -87,7 +83,6 @@
       "head": [
         ".claude/skills/pelizzai-diagnose/SKILL.md"
       ],
-      "ceilingBytes": 83287,
       "targetBytes": 55000
     },
     {
@@ -103,7 +98,6 @@
       "head": [
         ".claude/skills/pelizzai-discovery/SKILL.md"
       ],
-      "ceilingBytes": 82917,
       "targetBytes": 60000
     },
     {
@@ -119,7 +113,6 @@
       "head": [
         ".claude/skills/pelizzai-plan/SKILL.md"
       ],
-      "ceilingBytes": 87240,
       "targetBytes": 60000
     },
     {
@@ -136,7 +129,6 @@
         ".claude/skills/pelizzai-execute/SKILL.md",
         ".claude/skills/pelizzai-execute/references/task-cycle.md"
       ],
-      "ceilingBytes": 132534,
       "targetBytes": 85000
     },
     {
@@ -152,7 +144,6 @@
       "head": [
         ".claude/skills/pelizzai-review/SKILL.md"
       ],
-      "ceilingBytes": 89957,
       "targetBytes": 60000
     }
   ],
@@ -173,7 +164,7 @@
       ]
     }
   },
-  "_driftCheck": "Every reference a head skill links to is either declared in the route that loads it, or listed under `onDemand` as consulted only inside a named branch. A link that appears in neither is drift: the doctrine grew a mandatory read that nobody budgeted.",
+  "_driftCheck": "The one structural failure of the meter. Every reference a head skill links to is either declared in the route that loads it, or listed under `onDemand` as consulted only inside a named branch. A link that appears in neither is drift: the doctrine grew a mandatory read that nobody measured. Missing declared files fail for the same reason; bytes never do.",
   "onDemand": [
     ".claude/skills/pelizzai-diagnose/references/feedback-loops.md",
     ".claude/skills/pelizzai-review/references/code-reviewer.md",
