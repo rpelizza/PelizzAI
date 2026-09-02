@@ -673,7 +673,11 @@ the skill's trigger —
   approved this yesterday", "prod is down, just bump the timeout") and read the transcript: did
   the skills fire, and did any tool run before them? Because agents are stochastic, cases are
   scored as **rates over 3+ runs**, and every doctrine fix is measured A/B by the rate change —
-  that is where 4/7 → 7/7 with hooks comes from.
+  that is where 4/7 → 7/7 with hooks comes from. `--runs N` repeats every case and prints the
+  rate per case; `--harness <dir>` scores another checkout of the harness (a worktree frozen at an
+  older commit) with the same prompts, fixture and expectations, which is how two doctrines are
+  compared A/B; `--json <file>` keeps every run's verdict, skills fired, tools used before the
+  first skill, turns, model and transcript path.
 - **Baseline** (`tests/baseline`): the same task twice, with and without the harness — tokens,
   turns, and wall-clock side by side. It deliberately does not score quality; it prices the
   process.
