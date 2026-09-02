@@ -35,14 +35,23 @@
  *   node tests/trigger/run.mjs --keep           keep the scratch dirs
  *   node tests/trigger/run.mjs --hooks          register the opt-in hooks first
  *   node tests/trigger/run.mjs --git            make the scratch a repo on a protected branch
+ *   node tests/trigger/run.mjs --runs 5         repeat every case N times and report rates
+ *   node tests/trigger/run.mjs --harness <dir>  test another checkout of the harness (an A/B arm)
+ *   node tests/trigger/run.mjs --json <file>    write every run's verdict, notes and transcript path
+ *
+ * `--harness` points at any directory holding `.claude/` and `CLAUDE.md` — typically a git
+ * worktree frozen at an older commit. The prompts, the fixture and the expectations always come
+ * from THIS checkout, so two arms are scored by the same rule; only the doctrine under test moves.
+ * Agents are stochastic: a single run is an anecdote, and `--runs` is how a case becomes a rate.
  *
  * This is NOT wired into CI: it costs tokens and needs credentials. It is run
  * before a slice lands, and its output belongs in the slice's PR.
  *
- * Exit codes: 0 all cases pass; 1 a case failed; 2 the agent CLI is unavailable.
+ * Exit codes: 0 every run of every case passed; 1 any run failed; 2 the agent CLI is
+ * unavailable or the arguments are unusable.
  */
 
-import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync, cpSync } from 'node:fs';
+import { readFileSync, existsSync, mkdirSync, rmSync, writeFileSync, cpSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -54,12 +63,30 @@ const root = resolve(here, '..', '..');
 
 const argv = process.argv.slice(2);
 const flags = new Set(argv.filter((a) => a.startsWith('--')));
-const modelIndex = argv.indexOf('--model');
-const model = modelIndex !== -1 ? argv[modelIndex + 1] : null;
-const only = argv.filter((a) => !a.startsWith('--') && a !== model);
-const keep = flags.has('--keep');
+function valueOf(flag) {
+  const index = argv.indexOf(flag);
+  return index !== -1 ? argv[index + 1] : null;
+}
+const model = valueOf('--model');
+const harnessArg = valueOf('--harness');
+const runsArg = valueOf('--runs');
+const jsonArg = valueOf('--json');
+const consumed = new Set([model, harnessArg, runsArg, jsonArg].filter(Boolean));
+const only = argv.filter((a) => !a.startsWith('--') && !consumed.has(a));
+const keep = flags.has('--keep') || Boolean(jsonArg);
 const withHooks = flags.has('--hooks');
 const withGit = flags.has('--git');
+const harness = harnessArg ? resolve(harnessArg) : root;
+const runs = runsArg ? Number(runsArg) : 1;
+
+if (!Number.isInteger(runs) || runs < 1) {
+  console.error('trigger: --runs requires a positive integer');
+  process.exit(2);
+}
+if (!existsSync(join(harness, '.claude', 'skills')) || !existsSync(join(harness, 'CLAUDE.md'))) {
+  console.error(`trigger: --harness ${harness} has no .claude/skills or CLAUDE.md — nothing to install`);
+  process.exit(2);
+}
 
 const spec = JSON.parse(readFileSync(join(here, 'expectations.json'), 'utf8'));
 const cases = only.length > 0 ? spec.cases.filter((c) => only.includes(c.id)) : spec.cases;
@@ -82,14 +109,14 @@ if (cli.status !== 0) {
  * A minimal project. Enough shape for a route to be classifiable, not enough to
  * distract: one source file the prompts refer to, one plan, and the harness.
  */
-function makeScratch(id) {
-  const dir = join(tmpdir(), 'pelizzai-trigger', `${id}-${process.pid}`);
+function makeScratch(id, run) {
+  const dir = join(tmpdir(), 'pelizzai-trigger', `${id}-${process.pid}-r${run}`);
   rmSync(dir, { recursive: true, force: true });
   mkdirSync(join(dir, 'project', 'src', 'pages'), { recursive: true });
   const project = join(dir, 'project');
 
-  cpSync(join(root, '.claude'), join(project, '.claude'), { recursive: true });
-  cpSync(join(root, 'CLAUDE.md'), join(project, 'CLAUDE.md'));
+  cpSync(join(harness, '.claude'), join(project, '.claude'), { recursive: true });
+  cpSync(join(harness, 'CLAUDE.md'), join(project, 'CLAUDE.md'));
 
   writeFixture(project);
 
@@ -138,11 +165,24 @@ function makeScratch(id) {
    * test should find that too.
    */
   if (withHooks) {
-    const install = spawnSync(
-      process.execPath,
-      [join(root, 'scripts', 'install-hooks.mjs'), '--project', project],
-      { encoding: 'utf8', windowsHide: true },
-    );
+    // The harness under test brings its own installer when it has one. An older snapshot without
+    // one (an A/B arm) is installed by THIS checkout's installer, restricted to the hooks that
+    // snapshot actually ships: registering a hook file that does not exist would only add
+    // "cannot find module" noise to every tool call of the arm being measured.
+    const ownInstaller = join(harness, 'scripts', 'install-hooks.mjs');
+    const installer = existsSync(ownInstaller) ? ownInstaller : join(root, 'scripts', 'install-hooks.mjs');
+    const installArgs = [installer, '--project', project];
+    if (installer !== ownInstaller) {
+      const hooksDir = join(harness, '.claude', 'hooks');
+      const shipped = existsSync(hooksDir)
+        ? readdirSync(hooksDir)
+            .map((file) => /^pelizzai-(guardrails|writegate|cadence|session-start)\.mjs$/.exec(file)?.[1])
+            .filter(Boolean)
+        : [];
+      if (shipped.length === 0) throw new Error(`--hooks: ${harness} ships no installable hook`);
+      installArgs.push('--only', shipped.join(','));
+    }
+    const install = spawnSync(process.execPath, installArgs, { encoding: 'utf8', windowsHide: true });
     if (install.status !== 0) {
       throw new Error(`install-hooks failed (${install.status}): ${install.stderr || install.stdout}`);
     }
@@ -156,6 +196,7 @@ function parseTranscript(raw) {
   const tools = [];
   const shellCommands = [];
   let assistantTurns = 0;
+  let modelSeen = null;
   for (const line of raw.split('\n')) {
     if (!line.trim().startsWith('{')) continue;
     let event;
@@ -163,6 +204,11 @@ function parseTranscript(raw) {
       event = JSON.parse(line);
     } catch {
       continue;
+    }
+    // The init event names the model that actually answered — the only honest record of it when
+    // `--model` was not given and the CLI default moved between two batteries.
+    if (event?.type === 'system' && event.subtype === 'init' && typeof event.model === 'string') {
+      modelSeen = event.model;
     }
     if (event?.type === 'assistant' && event.message) assistantTurns += 1;
     const content = event?.message?.content;
@@ -181,7 +227,7 @@ function parseTranscript(raw) {
       }
     }
   }
-  return { skills, tools, shellCommands, assistantTurns };
+  return { skills, tools, shellCommands, assistantTurns, modelSeen };
 }
 
 /**
@@ -208,14 +254,15 @@ function shellWriteSignature(command) {
 
 const results = [];
 
+for (let run = 1; run <= runs; run += 1) {
 for (const testCase of cases) {
   const promptFile = join(here, 'prompts', `${testCase.id}.txt`);
   if (!existsSync(promptFile)) {
-    results.push({ id: testCase.id, pass: false, notes: ['prompt file missing'] });
+    results.push({ id: testCase.id, run, pass: false, notes: ['prompt file missing'] });
     continue;
   }
 
-  const scratch = makeScratch(testCase.id);
+  const scratch = makeScratch(testCase.id, run);
   const prompt = readFileSync(promptFile, 'utf8');
   const args = [
     '-p',
@@ -232,8 +279,9 @@ for (const testCase of cases) {
   // No shell. The CLI is a native executable, and routing the call through cmd.exe
   // mangles any prompt containing an apostrophe: the first version of this file
   // silently delivered two words of a two-sentence question and reported a pass.
-  process.stdout.write(`  running ${testCase.id} ... `);
-  const run = spawnSync('claude', args, {
+  process.stdout.write(`  running ${testCase.id}${runs > 1 ? ` [${run}/${runs}]` : ''} ... `);
+  const started = Date.now();
+  const agent = spawnSync('claude', args, {
     cwd: scratch.project,
     encoding: 'utf8',
     timeout: 300_000,
@@ -241,9 +289,9 @@ for (const testCase of cases) {
     env: process.env,
   });
 
-  const raw = `${run.stdout ?? ''}\n${run.stderr ?? ''}`;
+  const raw = `${agent.stdout ?? ''}\n${agent.stderr ?? ''}`;
   writeFileSync(join(scratch.dir, 'transcript.jsonl'), raw);
-  const { skills, tools, shellCommands, assistantTurns } = parseTranscript(raw);
+  const { skills, tools, shellCommands, assistantTurns, modelSeen } = parseTranscript(raw);
   const firstSkillAt = skills.length > 0 ? skills[0].at : Infinity;
   const notes = [];
 
@@ -285,22 +333,59 @@ for (const testCase of cases) {
   console.log(pass ? 'pass' : 'FAIL');
   results.push({
     id: testCase.id,
+    run,
     pass,
     notes,
     fired: skills.map((s) => s.name),
+    toolsBeforeFirstSkill: tools.filter((t) => t.at < firstSkillAt).map((t) => t.name),
+    assistantTurns,
+    model: modelSeen,
+    seconds: Math.round((Date.now() - started) / 1000),
     transcript: join(scratch.dir, 'transcript.jsonl'),
   });
   if (!keep && pass) rmSync(scratch.dir, { recursive: true, force: true });
+}
 }
 
 console.log('');
 const failed = results.filter((r) => !r.pass);
 for (const result of failed) {
-  console.log(`FAIL ${result.id}`);
+  console.log(`FAIL ${result.id}${runs > 1 ? ` [run ${result.run}]` : ''}`);
   for (const note of result.notes) console.log(`     ${note}`);
   console.log(`     skills fired: ${result.fired?.length ? result.fired.join(', ') : '(none)'}`);
   console.log(`     transcript:   ${result.transcript}`);
 }
-console.log(`${results.length - failed.length}/${results.length} cases pass${model ? ` (model: ${model})` : ''}`);
+
+// With `--runs`, the unit of report is the RATE per case: a case that passes 3 of 5 is neither a
+// pass nor a failure of the doctrine, it is a number the next doctrine change has to move.
+if (runs > 1) {
+  console.log('rates per case:');
+  for (const testCase of cases) {
+    const mine = results.filter((r) => r.id === testCase.id);
+    const passes = mine.filter((r) => r.pass).length;
+    const signatures = [...new Set(mine.flatMap((r) => r.notes))];
+    console.log(`  ${testCase.id.padEnd(22)} ${passes}/${mine.length}${signatures.length ? `  — ${signatures.join(' | ')}` : ''}`);
+  }
+  console.log('');
+}
+const modelsSeen = [...new Set(results.map((r) => r.model).filter(Boolean))];
+console.log(
+  `${results.length - failed.length}/${results.length} runs pass` +
+    `${runs > 1 ? ` (${cases.length} cases × ${runs} runs)` : ''}` +
+    `${modelsSeen.length ? ` (model: ${modelsSeen.join(', ')})` : model ? ` (model: ${model})` : ''}` +
+    `${harnessArg ? ` (harness: ${harness})` : ''}`,
+);
+
+if (jsonArg) {
+  writeFileSync(
+    resolve(jsonArg),
+    JSON.stringify(
+      { harness, hooks: withHooks, git: withGit, modelRequested: model, modelsSeen, runs, cases: cases.map((c) => c.id), results },
+      null,
+      2,
+    ),
+  );
+  console.log(`verdicts written to ${resolve(jsonArg)}`);
+}
 
 process.exit(failed.length === 0 ? 0 : 1);
