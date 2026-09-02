@@ -235,9 +235,10 @@ evidence — never as a form for you to fill in — and the assembled route come
 
 Until 2026-09 the router derived a five-field envelope (effect, intent, risk, uncertainty, surfaces)
 before choosing. Measured against the 2026-07-04 lookup router, that version held the gates better
-(38/40 vs 16/40 on the adversarial trigger battery) but cost 55 KB of always-loaded doctrine; the
-current router keeps the gates that were measured to matter and returns to the table shape, at
-30 KB always loaded.
+(38/40 vs 16/40 on the adversarial trigger battery) but cost 55 KB of always-loaded doctrine. The
+current router keeps every gate that was measured to matter and returns to the table shape; the
+entry (CLAUDE.md, core, router, resident frontmatter) now costs 39 KB per turn — a 30 KB version
+was measured too, and lost the trivial tweak at the entry, so it stayed in the history.
 
 ### One head skill, cross-cutting overlays
 
