@@ -67,7 +67,16 @@ const argv = process.argv.slice(2);
 const flags = new Set(argv.filter((a) => a.startsWith('--')));
 function valueOf(flag) {
   const index = argv.indexOf(flag);
-  return index !== -1 ? argv[index + 1] : null;
+  if (index === -1) return null;
+  const value = argv[index + 1];
+  // A flag without its value is never silently ignored: `--rescore` alone would run a real battery
+  // and spend tokens, `--json` alone would drop every transcript, and `--json --keep` would write the
+  // battery to a file named "--keep". Exit 2, the documented "arguments unusable" code.
+  if (value === undefined || value.startsWith('--')) {
+    console.error(`trigger: ${flag} requires a value`);
+    process.exit(2);
+  }
+  return value;
 }
 const model = valueOf('--model');
 const harnessArg = valueOf('--harness');
@@ -101,7 +110,17 @@ const spec = JSON.parse(readFileSync(join(here, 'expectations.json'), 'utf8'));
  */
 if (rescoreArg) {
   const file = resolve(rescoreArg);
-  const battery = JSON.parse(readFileSync(file, 'utf8'));
+  let battery;
+  try {
+    battery = JSON.parse(readFileSync(file, 'utf8'));
+  } catch (error) {
+    console.error(`trigger: --rescore cannot read ${file}: ${error.message}`);
+    process.exit(2);
+  }
+  if (!battery || !Array.isArray(battery.results)) {
+    console.error(`trigger: --rescore ${file} has no results array — not a recorded battery`);
+    process.exit(2);
+  }
   const rescored = battery.results.map((recorded) => {
     const testCase = spec.cases.find((c) => c.id === recorded.id);
     if (!testCase) return { ...recorded, pass: false, notes: [`no expectation named ${recorded.id}`] };
