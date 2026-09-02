@@ -99,8 +99,13 @@ line ("no material gaps; stated contract: …"); in greenfield it never collapse
 
 ## 5. Kickoff gate
 
-Every mutating route stops here, `bounded`, tweak, and bug included; `read-only` review, analysis, or
-explanation informs the route and proceeds. The router is the **sole** issuer of the kickoff.
+Every mutating route that will produce a plan, a spec, or a probe stops here — `bounded` included.
+Two routes do not: a **tweak** or a **bug** whose goal and acceptance the user already stated hands
+off directly, and the head skill's one-line compact confirm (branch, base, isolation, mode, commits,
+all named, one "ok") **is** the kickoff of that track — one stop before the first write, never two. A
+tweak or bug whose contract is still open, or that the proposal analysis promotes, stops here like
+the others. `read-only` review, analysis, or explanation informs the route and proceeds. The router
+is the sole issuer of this block; the head skill is the sole issuer of the compact confirm.
 
 ```text
 **Kickoff gate — proposed route:**
@@ -132,8 +137,10 @@ never applies `worktree` or `squash-final` on its own and never repeats the ques
 
 ## 6. Hand off
 
-After the "yes": **Call the Skill tool with the head skill's name** — exactly one — and pass what you
-understood: the row, lane, effect, overlays, audience, the state read, and the recommended setup. In a
+After the "yes" — immediately, for a tweak or bug with a stated contract — **Call the Skill tool with
+the head skill's name** — exactly one — and pass what you understood: the row, lane, effect, overlays,
+audience, the state read, and the recommended setup. Announcing the head skill in prose and working on
+is the measured failure; the hop is an invocation. In a
 consumer, record `slug`, `track`, `lane`, `effect`, `overlays`, `audience` in `pelizzai/data/state.md`
 and leave `kickoff: pending`: the `kickoff: ratified <YYYY-MM-DD>` marker belongs to the head skill's
 compact confirm or to the post-plan gate, before the first product write (the writegate's Rule B reads
@@ -169,6 +176,7 @@ and the trigger battery (`tests/trigger`, `--runs 5`, compared A/B against the p
 ## Final instruction
 
 Classify the effect, find the row, derive lane and overlays, run the proposal analysis when a material
-reading is open, present the kickoff gate, and — only after an explicit "yes" on a mutating task —
-**Call the Skill tool with the head skill's name**. Greenfield always discovers, specifies, stress-tests,
-and plans before implementing. The route is the harness's recommendation; the decision is the user's.
+reading is open, and **Call the Skill tool with the head skill's name**: right away for a tweak or bug
+with a stated contract (its compact confirm is the stop), only after an explicit "yes" at the kickoff
+gate for every other mutating route. Greenfield always discovers, specifies, stress-tests, and plans
+before implementing. The route is the harness's recommendation; the decision is the user's.

@@ -33,7 +33,7 @@ The sentinel `scripts/pelizzai-source-repo.txt` is the sole mark of source mode 
 - at kickoff, the route (track, lane, overlays, discovery) is presented for the user to ratify or adjust before effort is invested;
 - greenfield projects go through discovery → spec → stress → approval → plan → stress → approval;
 - every material gap becomes a `pelizzai-interview` question — never filled by Context7, convention, default, or inference, including mid-execution;
-- a trivial tweak reaches the first write with at most TWO stops (kickoff gate + compact confirm) and never produces a spec or plan;
+- a trivial tweak reaches the first write with ONE stop (the head skill's compact confirm, which is that track's kickoff) and never produces a spec or plan;
 - a read-only task creates no state and no artifacts;
 - the delivered content is exactly the validated content, and the history has fewer "fix of the fix" commits.
 
