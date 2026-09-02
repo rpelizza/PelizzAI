@@ -50,23 +50,30 @@ the CI `sync-check` job.
 **Requirements:** Node.js 18+ for the core; PowerShell 7+ for the contract suite and the `.ps1`
 wrappers.
 
-## Contracts: new behavior requires a new assertion
+## Contracts: behavior is executed, structure is compared, prose is not grepped
 
-`scripts/test-harness-contracts.ps1` is what keeps the harness from regressing silently. Every
-relevant behavior has an assertion that locks it in.
+`scripts/test-harness-contracts.ps1` is what keeps the scripts and hooks from regressing silently.
+It holds exactly two kinds of check: fixtures that **execute** a script or hook and judge its exit
+code and output, and **structural** comparisons of files or sets (manifest, mirrors, references).
+Size is reported by `scripts/measure-hotpath.mjs`, never enforced.
 
-If your PR changes behavior, it needs to touch the contracts:
+If your PR changes what a script or hook does, it needs to touch the contracts:
 
-- **new behavior** → a new assertion that would fail without your change;
-- **behavior removed on purpose** → remove the assertion and explain in the commit body why it no
+- **new behavior** → a new executed fixture that would fail without your change;
+- **behavior removed on purpose** → remove the fixture and explain in the commit body why it no
   longer holds;
-- **behavior that moved to another file** → repoint the assertion.
+- **behavior that moved to another file** → repoint the fixture.
 
-One specific anti-pattern will be rejected in review: **weakening an assertion until it passes**.
-A regex that matches almost anything, or a `Check-NotMatch` turned into a no-op, is worse than no
-assertion at all — because it simulates coverage that does not exist. If an assertion is in your
-way, either its behavior still holds (and your change is wrong), or it no longer holds (and the
-assertion should be removed with justification). There is no third way.
+If your PR changes doctrine (a SKILL.md, `CLAUDE.md`, a template), do **not** add a regex that
+checks the new sentence is present. Such a check passes the day it is written and never fails
+again; the suite carried 574 of them and none ever caught a regression. Doctrine is measured by
+the trigger tests and the baseline (`tests/`), out of CI.
+
+One specific anti-pattern will be rejected in review: **weakening a fixture until it passes**. A
+fixture whose expected exit code was relaxed, or whose scenario was narrowed until the defect no
+longer reaches it, is worse than no fixture at all — because it simulates coverage that does not
+exist. If a fixture is in your way, either its behavior still holds (and your change is wrong), or
+it no longer holds (and the fixture should be removed with justification). There is no third way.
 
 ## Writing a skill
 
