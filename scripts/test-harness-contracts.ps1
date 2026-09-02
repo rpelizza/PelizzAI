@@ -63,6 +63,22 @@ function Invoke-Hook([string]$Hook, [string]$Payload) {
     return $LASTEXITCODE
 }
 
+# Same as Invoke-Hook, but keeps stdout: advisory hooks speak through `additionalContext`.
+function Invoke-HookOutput([string]$Hook, [string]$Payload) {
+    if ($Hook.EndsWith('.mjs')) {
+        $out = @($Payload | & node $Hook 2>$null)
+    } else {
+        $out = @($Payload | & pwsh -NoProfile -File $Hook 2>$null)
+    }
+    return @{ Exit = $LASTEXITCODE; Out = (($out | ForEach-Object { [string]$_ }) -join "`n") }
+}
+
+# The `additionalContext` a hook emitted, or '' when it stayed silent or spoke no JSON.
+function Get-AdditionalContext([string]$Stdout) {
+    if (-not $Stdout.Trim()) { return '' }
+    try { return [string](($Stdout | ConvertFrom-Json).hookSpecificOutput.additionalContext) } catch { return '' }
+}
+
 function Invoke-Guardrail([string]$Hook, [string]$Command) {
     $payload = @{ tool_input = @{ command = $Command } } | ConvertTo-Json -Compress
     return Invoke-Hook $Hook $payload
@@ -146,6 +162,36 @@ try {
     Check ($coreHeads.Count -ge 8 -and $headsMissingInRouter.Count -eq 0) `
         'router routes every head skill announced by core' "heads=$($coreHeads.Count) missing=$($headsMissingInRouter -join ',')"
 
+    # The CI workflow still runs every instrument: the set of `run:` commands (inline and block
+    # scalars) must contain the five, each in the form the workflow invokes it.
+    $wfLines = (Text '.github/workflows/check-harness.yml') -split "`r?`n"
+    $wfRuns = [System.Collections.Generic.List[string]]::new()
+    for ($i = 0; $i -lt $wfLines.Count; $i++) {
+        if ($wfLines[$i] -match '^(\s*)run:\s*[|>][-+]?\s*$') {
+            $runIndent = $Matches[1].Length
+            for ($j = $i + 1; $j -lt $wfLines.Count; $j++) {
+                if ($wfLines[$j].Trim() -eq '') { continue }
+                if (($wfLines[$j] -replace '^(\s*).*$', '$1').Length -le $runIndent) { break }
+                $wfRuns.Add($wfLines[$j].Trim())
+            }
+        } elseif ($wfLines[$i] -match '^\s*run:\s*(\S.*?)\s*$') {
+            $wfRuns.Add($Matches[1])
+        }
+    }
+    $wfRequired = @(
+        'pwsh scripts/test-harness-contracts.ps1',
+        'node scripts/sync-harness.mjs --check --source-mode',
+        'pwsh scripts/sync-harness.ps1 -Check -SourceMode',
+        'bash scripts/sync-harness.sh --check --source-mode',
+        'node scripts/sync-harness.mjs --build-dist',
+        'git diff --cached --exit-code -- dist',
+        'node scripts/validate-skills.mjs',
+        'node scripts/measure-hotpath.mjs',
+        'node tests/mutation/run.mjs'
+    )
+    $wfMissing = @($wfRequired | Where-Object { $wfRuns -notcontains $_ })
+    Check ($wfRuns.Count -ge $wfRequired.Count -and $wfMissing.Count -eq 0) 'CI workflow runs every instrument' "parsed=$($wfRuns.Count) missing=$($wfMissing -join ' | ')"
+
     # =====================================================================
     # Executed: scripts parse, hooks decide, fixtures run.
     # =====================================================================
@@ -187,6 +233,100 @@ try {
         Check (-not (Test-Path (Join-Path $bareTemp 'pelizzai'))) 'cadence writes nothing where the ledger is absent'
     } finally {
         if (Test-Path -LiteralPath $bareTemp) { Remove-Item -LiteralPath $bareTemp -Recurse -Force }
+    }
+
+    # -- SessionStart: the catalog nudge fires in a consumer without a catalog, never in the source repo. --
+    # Source mode is the dedicated sentinel; a manifest plus a sync script is a consumer, not the source.
+    $ssSource = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-ss-source-{0}" -f [guid]::NewGuid().ToString('N'))
+    $ssConsumer = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-ss-consumer-{0}" -f [guid]::NewGuid().ToString('N'))
+    try {
+        New-Item -ItemType Directory -Path (Join-Path $ssSource 'scripts') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $ssSource 'scripts/pelizzai-source-repo.txt') -Value 'x' -Encoding utf8
+        New-Item -ItemType Directory -Path (Join-Path $ssConsumer 'scripts') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $ssConsumer 'scripts/pelizzai-core-skills.txt') -Value 'pelizzai-core' -Encoding utf8
+        Set-Content -LiteralPath (Join-Path $ssConsumer 'scripts/sync-harness.mjs') -Value '// stub' -Encoding utf8
+        $nudge = 'no domain-skill catalog'
+        foreach ($ss in @('pelizzai-session-start.mjs', 'pelizzai-session-start.ps1')) {
+            $ssHook = Join-Path $root ".claude/hooks/$ss"
+            $inSource = Invoke-HookOutput $ssHook (@{ cwd = $ssSource } | ConvertTo-Json -Compress)
+            $inConsumer = Invoke-HookOutput $ssHook (@{ cwd = $ssConsumer } | ConvertTo-Json -Compress)
+            $sourceCtx = Get-AdditionalContext $inSource.Out
+            $consumerCtx = Get-AdditionalContext $inConsumer.Out
+            Check ($inSource.Exit -eq 0 -and $sourceCtx -match 'pelizzai-core' -and $sourceCtx -notmatch $nudge) "session-start: source repo (sentinel) gets the reminder without the catalog nudge ($ss)" "exit=$($inSource.Exit)"
+            Check ($inConsumer.Exit -eq 0 -and $consumerCtx -match $nudge) "session-start: consumer (manifest+sync, no sentinel, no catalog) gets the catalog nudge ($ss)" "exit=$($inConsumer.Exit)"
+        }
+    } finally {
+        foreach ($d in @($ssSource, $ssConsumer)) { if (Test-Path -LiteralPath $d) { Remove-Item -LiteralPath $d -Recurse -Force } }
+    }
+
+    # -- Cadence: the nudge fires at the Nth interaction once a threshold is crossed, and only then. --
+    # State shape read from the hooks: pelizzai/data/.cadence-state.json = { count, snoozeUntil };
+    # the ledger pelizzai/data/review-domain-skills.md carries `last-review:` / `last-full-scan:`.
+    # Fixture 1 crosses the COMMIT axis for real (10 commits since a review dated today);
+    # fixture 2 crosses the DAY axes by backdating the ledger 30 days in a one-commit repo.
+    function New-CadenceRepo([int]$Commits, [string]$LastReview, [string]$LastScan) {
+        $dir = Join-Path ([IO.Path]::GetTempPath()) ("pelizzai-cadence-{0}" -f [guid]::NewGuid().ToString('N'))
+        New-Item -ItemType Directory -Path (Join-Path $dir 'pelizzai/data') -Force | Out-Null
+        git -C $dir init -q
+        git -C $dir config user.email 'contract@pelizzai.local'
+        git -C $dir config user.name 'PelizzAI Contract'
+        for ($c = 1; $c -le $Commits; $c++) {
+            Set-Content -LiteralPath (Join-Path $dir 'work.txt') -Value "commit $c" -Encoding utf8
+            git -C $dir add work.txt
+            git -C $dir commit -q -m "feat: change $c"
+        }
+        Set-Content -LiteralPath (Join-Path $dir 'pelizzai/data/review-domain-skills.md') -Value "# Ledger`n- last-review: $LastReview`n- last-full-scan: $LastScan`n" -Encoding utf8
+        return $dir
+    }
+    function Set-CadenceState([string]$Dir, [int]$Count, [long]$SnoozeUntil) {
+        Set-Content -LiteralPath (Join-Path $Dir 'pelizzai/data/.cadence-state.json') -Value ("{""count"":$Count,""snoozeUntil"":$SnoozeUntil}") -Encoding utf8 -NoNewline
+    }
+    function Get-CadenceState([string]$Dir) {
+        return Get-Content -LiteralPath (Join-Path $Dir 'pelizzai/data/.cadence-state.json') -Raw | ConvertFrom-Json
+    }
+    $today = (Get-Date).ToString('yyyy-MM-dd')
+    $thirtyDaysAgo = (Get-Date).AddDays(-30).ToString('yyyy-MM-dd')
+    $cadCommits = New-CadenceRepo 10 $today $today
+    $cadDays = New-CadenceRepo 1 $thirtyDaysAgo $thirtyDaysAgo
+    try {
+        $cadNudges = @{}
+        foreach ($cad in @('pelizzai-cadence.mjs', 'pelizzai-cadence.ps1')) {
+            $cadHook = Join-Path $root ".claude/hooks/$cad"
+            $payload = @{ cwd = $cadCommits } | ConvertTo-Json -Compress
+
+            # (b) N-1: the counter advances, nothing is said.
+            Set-CadenceState $cadCommits 8 0
+            $r = Invoke-HookOutput $cadHook $payload
+            Check ($r.Exit -eq 0 -and (Get-AdditionalContext $r.Out) -eq '' -and (Get-CadenceState $cadCommits).count -eq 9) "cadence: interaction N-1 counts and stays silent ($cad)" "exit=$($r.Exit) out=$($r.Out)"
+
+            # (a) N: 10 commits since a review dated today crosses COMMIT_THRESHOLD -> nudge.
+            $r = Invoke-HookOutput $cadHook $payload
+            $ctx = Get-AdditionalContext $r.Out
+            $cadNudges[$cad] = $ctx
+            Check ($r.Exit -eq 0 -and $ctx -match 'PelizzAI \(cadence\)' -and $ctx -match '10 commit\(s\)' -and $ctx -match 'pelizzai-skill-lab') "cadence: interaction N with the commit threshold crossed emits the nudge ($cad)" "out=$($r.Out)"
+
+            # (d) The nudge arms the snooze; the next window stays silent while it lasts.
+            $after = Get-CadenceState $cadCommits
+            $nowMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+            Check ($after.count -eq 10 -and [long]$after.snoozeUntil -gt $nowMs) "cadence: the nudge persists a future snoozeUntil ($cad)" "state=$($after | ConvertTo-Json -Compress)"
+            Set-CadenceState $cadCommits 19 ([long]$after.snoozeUntil)
+            $r = Invoke-HookOutput $cadHook $payload
+            Check ($r.Exit -eq 0 -and (Get-AdditionalContext $r.Out) -eq '' -and (Get-CadenceState $cadCommits).count -eq 20) "cadence: the next window is suppressed by the snooze ($cad)" "out=$($r.Out)"
+            # An expired snooze no longer suppresses: same window, snoozeUntil in the past -> nudge again.
+            Set-CadenceState $cadCommits 29 ($nowMs - 1000)
+            $r = Invoke-HookOutput $cadHook $payload
+            Check ($r.Exit -eq 0 -and (Get-AdditionalContext $r.Out) -match '10 commit\(s\)') "cadence: an expired snooze lets the nudge fire again ($cad)" "out=$($r.Out)"
+
+            # Day axes: one commit, ledger backdated 30 days -> review due by days AND full scan due.
+            Set-CadenceState $cadDays 9 0
+            $r = Invoke-HookOutput $cadHook (@{ cwd = $cadDays } | ConvertTo-Json -Compress)
+            $ctx = Get-AdditionalContext $r.Out
+            Check ($r.Exit -eq 0 -and $ctx -match '1 commit\(s\) and (29|30|31) day\(s\) since the last domain-skill review' -and $ctx -match '(29|30|31) day\(s\) since the last full repo-scan') "cadence: backdated ledger crosses the review-day and full-scan-day thresholds ($cad)" "out=$($r.Out)"
+        }
+        # (c) Both legs say the same thing for the same state.
+        Check ($cadNudges['pelizzai-cadence.mjs'] -ne '' -and $cadNudges['pelizzai-cadence.mjs'] -eq $cadNudges['pelizzai-cadence.ps1']) 'cadence: both legs emit an identical nudge' "mjs=$($cadNudges['pelizzai-cadence.mjs'])"
+    } finally {
+        foreach ($d in @($cadCommits, $cadDays)) { if (Test-Path -LiteralPath $d) { Remove-Item -LiteralPath $d -Recurse -Force } }
     }
 
     # -- Writegate: scenario matrix across BOTH legs in a temporary git repository --
