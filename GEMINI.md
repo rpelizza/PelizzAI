@@ -7,13 +7,22 @@
 
 ## PelizzAI harness (mandatory entry)
 
-This repository is the **source repo** of the PelizzAI harness. For requests that inspect or change the project, enter through `pelizzai-core` → `pelizzai-router`; a conceptual question with no project context may be answered directly. The router looks up one head skill and the overlays from the request and presents the route for ratification. When announcing, use the spelling **"PelizzAI"**.
+This repository is the **source repo** of the PelizzAI harness. For requests that inspect or change the project, enter through `pelizzai-core` → `pelizzai-router`; conceptual questions with no project context may be answered directly. The router looks the request up in its table — one row, one head skill, the overlays by observable signals — and presents the route for ratification. For process (effect, isolation, review, validation, and closeout), follow the skills' canonical contracts. When announcing, use the spelling **"PelizzAI"**.
 
-The sentinel `scripts/pelizzai-source-repo.txt` is the sole mark of source mode — manifest and sync scripts exist in consumers too and prove nothing. Here: no consumer bootstrap, no `pelizzai/` runtime; the platform's native plan/execution record is the cursor, Verification seals the SHA in it, and Finish creates no closure commit. Distribute with `node scripts/sync-harness.mjs --export-consumer <target>` (or the `.ps1`/`.sh` wrapper), never by manual copy: a copy carries the sentinel and promotes the consumer to source repo.
+What marks this repository as the source repo is the sentinel `scripts/pelizzai-source-repo.txt`
+(the sole criterion for source mode — manifest and sync also exist in consumers and prove
+nothing). Here, do not run consumer bootstrap and do not create `pelizzai/` runtime. Use the
+native plan/execution record; Verification seals the SHA in memory/record and Finish creates no
+state closure commit in source mode. To distribute to consumer projects, use the portable sync
+(`node scripts/sync-harness.mjs --export-consumer <target>`, or the `.ps1`/`.sh` wrapper) — never
+a manual copy (it would carry the
+sentinel along and mistakenly promote the consumer to source repo).
 
 ## Behavioral guidelines
 
-**Invariants versus heuristics.** Safety, user authority, isolation before the first write, and evidence before completion are not optional. Discovery, TDD, OODA, team, and the number of reviews vary with effect, risk, and uncertainty — and that proportionality lives INSIDE the skills, never in skipping them: the 1% rule of `pelizzai-core` holds for a trivial tweak too (`pelizzai-quick-fix`). Model capability is tiered by role and ratified at the setup gate, never switched silently; the process is never lowered to compensate for a smaller model (`pelizzai-execute` → `references/task-cycle.md` §8).
+Guidelines to reduce common coding mistakes made by LLMs. Combine with project-specific instructions as needed.
+
+**Trade-off:** preserve invariants; adapt heuristics. Safety, user authority, isolation before the first write, and evidence before completion are not optional. Brainstorming, TDD, OODA, team, and the number of reviews vary with effect, risk, and uncertainty. Model capability is **tiered by role and ratified, never switched silently**: spec, plan, orchestration, every review, and final validation run on the session's tier (the model the user chose); implementation subagents may run a mid-tier model when the user ratifies it at the setup gate — and the process is never downgraded to compensate for a smaller model (`pelizzai-execute` → `references/task-cycle.md` §8). For trivial tasks, use good judgment — but "good judgment" does not void the 1% rule from `pelizzai-core`: if a skill applies (even to a trivial tweak, e.g. `pelizzai-quick-fix`), invoke it; proportionality lives INSIDE the skills, not in skipping them. The harness may choose how to reason, investigate, and recommend; it may not choose for the user requirements, scope, UX, architecture, data, accepted risk, or acceptance criteria.
 
 > **The LLM never decides alone.** Every gap found during development — an ambiguous
 > requirement, a scope/UX/architecture/data/security decision the spec or the plan does not cover,
@@ -23,24 +32,94 @@ The sentinel `scripts/pelizzai-source-repo.txt` is the sole mark of source mode 
 > obvious and reversible. This holds after kickoff, after the spec, and mid-execution. Autonomy
 > covers only mechanical, verifiable steps within boundaries already ratified.
 
-**Context7 is the harness's preferred technical source.** Whenever a library, framework, API, service, tool, or version could change the solution, identify in the repository what is actually in use, then consult Context7 to confirm APIs, limits, migrations, and alternatives — before kickoff when it improves the classification, from the first technical read in greenfield. If unavailable, use current official documentation and state the limitation. Context7 removes **factual** doubt; it never ratifies a decision that belongs to the user.
+**Context7 is the harness's preferred technical source.** Whenever a library, framework, API,
+service, tool, version, or external capability could change the solution, first identify in the
+repository the technology and version actually in use; then consult Context7 to confirm APIs,
+limits, migrations, and alternatives. In greenfield, use it from the initial technical read to
+qualify suggestions and questions. In an existing project, combine it with manifests, lockfiles,
+code, and tests. If unavailable, use current official documentation and state the limitation.
+Context7 removes **factual** doubt and improves recommendations; it never ratifies a decision that
+belongs to the user — that decision goes to `pelizzai-interview`, not to the documentation.
 
-**Recommend and ratify.** `pelizzai-router` presents the route at the kickoff gate and the user ratifies it before any mutating task. Structural decisions — base and branch, isolation, mode with `team` visible, commits, review, destination — are recommended and ratified: one at a time in tracks with a plan, in a single compact line in tweak and bug, never as a silent default. Specs and plans are the durable default, omitted only by the user's explicit waiver; a greenfield product is never bounded because the stack was given.
+## 1. Think Before You Code
 
-**Code discipline.** Think before you code: state only material assumptions, present the best recommendation when readings differ, say so when a simpler approach exists. Simplicity first: the minimum code that solves the problem, nothing speculative. Surgical changes: touch only what the request needs, remove only the orphans your own diff created, mention the rest instead of fixing it. Goal-oriented execution: turn the task into a verifiable goal ("fix the bug" → "a test reproduces it, then passes") and iterate until verified. The full floor, with the language, testing, and documentation rules, is `pelizzai-preferences`.
+**Do not assume. Do not hide doubts. Expose the trade-offs.**
+
+Before implementing:
+
+- State only material assumptions. If there is uncertainty that changes the solution, consult evidence and then ask.
+- If materially different interpretations exist, present the best recommendation and ask which one the user picks.
+- If a simpler approach exists, say so. Push back when it makes sense.
+- If something that belongs to the product is not explicit, stop and use `pelizzai-interview` with **one question at a time**, starting with the decision that conditions the others. Offer 2–3 real options when they help, mark the recommended one, and explain why in one line. Clarification comes BEFORE implementation, not after the mistake.
+- Project evidence and Context7/official documentation eliminate factual questions; they do not authorize the LLM to answer product decisions for the user. A reversible decision may be taken mechanically only when it is already contained in a ratified spec or plan.
+
+## 2. Simplicity First
+
+**The minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" nobody requested.
+- No error handling for impossible scenarios.
+- If you wrote 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## 3. Surgical Changes
+
+**Touch only what is necessary. Clean up only your own mess.**
+
+When editing existing code:
+
+- Do not "improve" adjacent code, comments, or formatting.
+- Do not refactor things that are not broken.
+- Follow the existing style, even if you would do it differently.
+- If you notice unrelated dead code, mention it; do not delete it.
+
+When your changes create orphans:
+
+- Remove imports, variables, and functions that YOUR changes made unused.
+- Do not remove pre-existing dead code unless asked to.
+
+The test: every changed line must be directly tied to the user's request.
+
+## 4. Goal-Oriented Execution
+
+**Define success criteria. Iterate until verified.**
+
+Turn tasks into verifiable goals:
+
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For response micro-plans (a few steps, within a single message), present a brief plan:
+
+```text
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+`pelizzai-router` picks and recommends the lane, head skill, overlays, and reasoning techniques; the user ratifies the route before any mutating task. A bounded change may use a compact plan and skip the interview when the user themselves already provided goal, acceptance, and approach. **A greenfield product/project is never bounded just because the stack was provided:** run discovery one question at a time, produce a spec, stress-test it, get approval, produce a plan, stress-test it, and get a fresh approval before execution. Specs and plans are the durable default; they are omitted only by the user's explicit waiver. **Recommend and ratify: reasoning belongs to the harness; deciding belongs to the user.**
+
+Once criteria, spec, and plan are ratified, the LLM may execute mechanical, verifiable steps within those boundaries. Any emergent decision that changes product, scope, UX, architecture, data, security, cost, or acceptance interrupts execution and goes back to the user.
 
 ---
 
 ## This harness is working if…
 
+Observable signs that these guidelines and the skills are doing their job:
+
 - diffs are smaller and free of changes unrelated to the request;
-- clarifying questions come **BEFORE** implementation, one decision per turn, with the best option recommended;
-- at kickoff, the route (track, lane, overlays, discovery) is presented for the user to ratify or adjust before effort is invested;
+- clarifying questions come **BEFORE** implementation, not after the mistake — one decision per turn, with the best option recommended;
+- at kickoff, the classified route (lane, discovery, overlays) is presented for the user to ratify or adjust before effort is invested;
 - greenfield projects go through discovery → spec → stress → approval → plan → stress → approval;
-- every material gap becomes a `pelizzai-interview` question — never filled by Context7, convention, default, or inference, including mid-execution;
-- a trivial tweak reaches the first write with ONE stop (the head skill's compact confirm, which is that track's kickoff) and never produces a spec or plan;
+- every material gap becomes a `pelizzai-interview` question — it is never filled by Context7, convention, default, or "reasonable inference", including mid-execution;
+- structural decisions (base/branch, isolation, mode with `team` visible, commits, review, destination) are recommended and ratified — one at a time in tracks with a plan; in tweak/bug, in a compact one-line confirm with all of them visible and named — never as a silent default;
+- a trivial tweak (a label, a button on an existing screen, an obvious config) reaches the first write with ONE stop (the head skill's compact confirm, which is that track's kickoff) and never produces a spec/plan;
 - a read-only task creates no state and no artifacts;
-- the delivered content is exactly the validated content, and the history has fewer "fix of the fix" commits.
+- the delivered content is exactly the validated content, and the history has fewer "fix of the fix" commits (commits correcting the immediately preceding commit).
 
 Signs in the opposite direction are a trigger to revise the skills — not to abandon them.
 

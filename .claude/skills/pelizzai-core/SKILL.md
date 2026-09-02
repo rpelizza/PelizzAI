@@ -84,6 +84,73 @@ code, validation, security, documentation, portability. It does not replace spec
 `CLAUDE.md`/`AGENTS.md`, domain skills, and a specialized skill's instructions keep their priority. A
 trivial task answered directly, with no risk and no project context, has nothing to apply.
 
+## Harness layers
+
+```text
+core
+→ router: effect → one row of the table → lane → overlays
+→ one head skill
+→ the necessary overlays
+→ proportional execution and quality gates
+→ Verification seals the result
+→ Finish integrates it without altering it
+
+at any point, material gap → pelizzai-interview (one question at a time) → resume the phase
+```
+
+### Head skills
+
+What exists — never a license to route from here; the choice belongs to `pelizzai-router`, invoked first.
+
+| Intent | Head skill |
+| --- | --- |
+| Authorized bootstrap/remap | `pelizzai-onboard` |
+| Greenfield product/project, or feature/refactor/infra with a design decision | `pelizzai-discovery` |
+| Plan/design already clear | `pelizzai-plan` or `pelizzai-execute` |
+| Bug/unexpected behavior | `pelizzai-diagnose` |
+| Local tweak without a new rule/contract | `pelizzai-quick-fix` |
+| Feasibility question answered by a throwaway experiment | `pelizzai-experiment` |
+| Review of a diff/branch/PR | `pelizzai-review` |
+| Codebase-wide architectural review | `pelizzai-architecture` |
+| Git conflict | `pelizzai-merge-recovery` |
+| State × Git divergence | `pelizzai-resume` |
+
+### Overlays
+
+Overlays do not replace the head skill:
+
+- UI/UX/CSS/component/screen → `pelizzai-interface`;
+- auth/input/SQL/upload/secret/dependency/sensitive surface → `pelizzai-security` at review;
+- project patterns → domain skills from the catalog (when in doubt whether a domain skill applies to the task, include it: the cost of including is lower than the cost of ignoring a project rule);
+- new human documentation → `pelizzai-docs` when it is part of the scope.
+
+`pelizzai-preferences` is not an optional overlay: it is the behavior floor described above and follows every non-trivial task. Reasoning depth is proportional to uncertainty; it never adds ceremony by itself.
+
+## Harness flow map
+
+The entry point is always this skill (`pelizzai-core`); after understanding the goal, `pelizzai-router` orchestrates. On the first interaction with a consumer project (or when the user types **"bootstrap"**), `pelizzai-onboard` maps the project and creates the domain skills before any task. A **purely conceptual** question does not trigger the bootstrap — `pelizzai-onboard` only enters when the answer requires touching or understanding the project. In the source repo (sentinel `scripts/pelizzai-source-repo.txt`) there is no consumer catalog: the bootstrap branch does not apply.
+
+```mermaid
+flowchart TD
+    U(["User message"]) --> P["pelizzai-core: require skill before responding"]
+    P --> G["Understand the goal and classify the effect"]
+    G --> CONC{"Purely conceptual<br/>question?"}
+    CONC -- "Yes" --> ANSC["Answer directly<br/>without bootstrap"]
+    CONC -- "No" --> RT["pelizzai-router: effect,<br/>one row of the table, lane, overlays"]
+    RT --> BOOT{"Consumer harness initialized?<br/>pelizzai/domain-skills.md exists?<br/>(source repo, by sentinel: skip)"}
+    BOOT -- "No, in a consumer / 1st interaction / 'bootstrap'" --> AUD["pelizzai-onboard: maps project/workspace,<br/>MCPs, git/host, creates domain skills + docs"]
+    AUD --> CLS
+    BOOT -- "Yes / source mode" --> CLS{"Classify the intent and the lane"}
+    CLS --> KICK["Kickoff gate: route as a recommendation to ratify"]
+    KICK --> HEAD["One head skill + mandatory overlays"]
+    HEAD --> GAP{"Material gap<br/>in any phase?"}
+    GAP -- "Yes" --> IV["pelizzai-interview:<br/>one question at a time, with a recommendation"]
+    IV --> HEAD
+    GAP -- "No" --> GO["Mechanical step within<br/>what was already ratified"]
+```
+
+The detail of each track (lanes, gates, and chaining) lives in `pelizzai-router`.
+
 ## How to load skills
 
 Use the platform's native mechanism; without one, read `.agents/skills/<name>/SKILL.md` (or the
