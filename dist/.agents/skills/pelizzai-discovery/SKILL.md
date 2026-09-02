@@ -29,7 +29,7 @@ anti-pattern the rule exists to block.
 
 ## Preconditions
 
-- The router has already classified effect, risk, uncertainty, and overlays.
+- The router has already classified the effect, found the row, derived the lane, and named the overlays.
 - For any spec/ADR/prototype write, the task/planning branch already exists.
 - In the `bounded` lane of an existing product, with goal, acceptance, and approach already supplied
   by the user, return to the router and proceed without discovery. Greenfield never uses this exception.

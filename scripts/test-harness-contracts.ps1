@@ -150,17 +150,20 @@ try {
     $danglingRefs = @($danglingRefs | Sort-Object -Unique)
     Check ($danglingRefs.Count -eq 0) 'skills and entry files cite no nonexistent pelizzai-*' ($danglingRefs -join '; ')
 
-    # Core and router agree on the head-skills catalog: the set core announces is the set the
-    # router routes. The floor on the count guards the extraction itself - an empty set would
-    # pass vacuously.
-    $coreText = Text '.claude/skills/pelizzai-core/SKILL.md'
+    # The router's table is the single home of the head-skills catalog: every head it routes must
+    # exist as a skill, and every skill that declares itself routed by the router must have a row.
+    # The floor on the count guards the extraction itself - an empty set would pass vacuously.
     $routerText = Text '.claude/skills/pelizzai-router/SKILL.md'
-    $coreHeadsSection = [regex]::Match($coreText, '(?s)### Head skills.*?### Overlays').Value
-    $coreHeads = @([regex]::Matches($coreHeadsSection, 'pelizzai-[a-z][a-z0-9-]*') |
-        ForEach-Object { $_.Value } | Sort-Object -Unique)
-    $headsMissingInRouter = @($coreHeads | Where-Object { $routerText -notmatch [regex]::Escape($_) })
-    Check ($coreHeads.Count -ge 8 -and $headsMissingInRouter.Count -eq 0) `
-        'router routes every head skill announced by core' "heads=$($coreHeads.Count) missing=$($headsMissingInRouter -join ',')"
+    $routerTable = [regex]::Match($routerText, '(?s)## 2\. Head skill.*?### Lanes').Value
+    $routerHeads = @([regex]::Matches($routerTable, '(?m)^\|[^|]*\|[^|]*\|\s*`(pelizzai-[a-z][a-z0-9-]*)`') |
+        ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+    $headsWithoutSkill = @($routerHeads | Where-Object { $dirNames -notcontains $_ })
+    $selfDeclaredHeads = @(Get-ChildItem -LiteralPath $skillRoot -Directory | Where-Object {
+        (Get-Content -LiteralPath (Join-Path $_.FullName 'SKILL.md') -Raw -Encoding utf8) -match '\*\*Routed by:\*\*\s*`pelizzai-router`'
+    } | ForEach-Object { $_.Name })
+    $declaredButUnrouted = @($selfDeclaredHeads | Where-Object { $routerHeads -notcontains $_ })
+    Check ($routerHeads.Count -ge 8 -and $headsWithoutSkill.Count -eq 0 -and $declaredButUnrouted.Count -eq 0) `
+        'the router table routes only existing skills and every self-declared head' "heads=$($routerHeads.Count) missing-skill=$($headsWithoutSkill -join ',') unrouted=$($declaredButUnrouted -join ',')"
 
     # The CI workflow still runs every instrument: the set of `run:` commands (inline and block
     # scalars) must contain the five, each in the form the workflow invokes it.

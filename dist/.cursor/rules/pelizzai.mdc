@@ -12,10 +12,12 @@ may be answered directly.
 
 ## Entry contract
 
-The router derives `effect`, `intent`, `risk`, `uncertainty`, and `surfaces`; it picks exactly one
-head skill and adds overlays only by observable signals. The classified route (lane, head skill,
-overlays) is presented as a **recommendation to ratify** at the kickoff gate. The harness chooses
-how to reason; the user decides requirements, scope, UX, architecture, data, risk, and acceptance.
+The router classifies the `effect`, looks the request up in its table of rows (one row → one head
+skill and what follows it), derives the lane for feature/refactor/infra, and adds overlays only by
+observable signals. The route (track, lane, head skill, overlays, discovery) is presented as a
+**recommendation to ratify** at the kickoff gate; the head skill is invoked only after the "yes". The
+harness chooses how to reason; the user decides requirements, scope, UX, architecture, data, risk,
+and acceptance.
 
 - `read-only`: inspect without creating branch, state, profile, catalog, report, or bootstrap.
 - `write-local`: go through the first write gate before any persistent file.
@@ -26,9 +28,9 @@ how to reason; the user decides requirements, scope, UX, architecture, data, ris
 
 For feature/refactor/infra, pick the lane by risk and uncertainty:
 
-- `bounded`: compact plan, no mandatory brainstorming;
-- `standard`: compact brainstorming and a plan;
-- `exploratory`: proportional discovery and stress-testing before the plan.
+- `bounded`: compact plan, no discovery forced;
+- `standard`: a plan, with a compact discovery only if a real trade-off remains;
+- `exploratory`: full discovery and stress-testing before the plan.
 
 A greenfield product/project is always `exploratory`, even with the stack defined: ask one question
 at a time, always recommend the best option, produce and stress-test spec and plan, get approval,

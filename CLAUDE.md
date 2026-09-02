@@ -2,7 +2,7 @@
 
 ## PelizzAI harness (mandatory entry)
 
-This repository is the **source repo** of the PelizzAI harness. For requests that inspect or change the project, enter through `pelizzai-core` → `pelizzai-router`; conceptual questions with no project context may be answered directly. The router picks a head skill and overlays by observable signals — not by a probabilistic rule. For process (effect, isolation, review, validation, and closeout), follow the skills' canonical contracts. When announcing, use the spelling **"PelizzAI"**.
+This repository is the **source repo** of the PelizzAI harness. For requests that inspect or change the project, enter through `pelizzai-core` → `pelizzai-router`; conceptual questions with no project context may be answered directly. The router looks the request up in its table — one row, one head skill, the overlays by observable signals — and presents the route for ratification. For process (effect, isolation, review, validation, and closeout), follow the skills' canonical contracts. When announcing, use the spelling **"PelizzAI"**.
 
 What marks this repository as the source repo is the sentinel `scripts/pelizzai-source-repo.txt`
 (the sole criterion for source mode — manifest and sync also exist in consumers and prove
@@ -112,7 +112,7 @@ Observable signs that these guidelines and the skills are doing their job:
 - greenfield projects go through discovery → spec → stress → approval → plan → stress → approval;
 - every material gap becomes a `pelizzai-interview` question — it is never filled by Context7, convention, default, or "reasonable inference", including mid-execution;
 - structural decisions (base/branch, isolation, mode with `team` visible, commits, review, destination) are recommended and ratified — one at a time in tracks with a plan; in tweak/bug, in a compact one-line confirm with all of them visible and named — never as a silent default;
-- a trivial tweak (a label, a button on an existing screen, an obvious config) reaches the first write with at most TWO stops (kickoff gate + compact confirm) and never produces a spec/plan;
+- a trivial tweak (a label, a button on an existing screen, an obvious config) reaches the first write with ONE stop (the head skill's compact confirm, which is that track's kickoff) and never produces a spec/plan;
 - a read-only task creates no state and no artifacts;
 - the delivered content is exactly the validated content, and the history has fewer "fix of the fix" commits (commits correcting the immediately preceding commit).
 

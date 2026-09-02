@@ -207,7 +207,7 @@ subagents are **situational tools**: they choose how to work, never what the pro
 ```mermaid
 flowchart LR
     U["Request"] --> C["pelizzai-core<br/>goal and success"]
-    C --> R["pelizzai-router<br/>effect · intent · risk<br/>uncertainty · surfaces"]
+    C --> R["pelizzai-router<br/>effect · one row of the table<br/>lane · overlays"]
     R --> K["kickoff gate<br/>route recommended · ratified"]
     K --> H["exactly one head skill"]
     K --> O["mandatory overlays<br/>per surface"]
@@ -222,17 +222,23 @@ skill applies, it must be loaded and evaluated — proportionality lives *inside
 in skipping them. Routing is an invocation, not a narration: the core actually calls the router;
 describing the route and jumping straight to a head skill is a measured failure mode.
 
-The decision envelope is derived from the request and the evidence — it is not a form for you to
-fill in. But the assembled route comes back as a **recommendation to ratify** before effort is
-invested:
+The router is a **lookup, not a deliberation**. It answers three things from the request and the
+evidence — never as a form for you to fill in — and the assembled route comes back as a
+**recommendation to ratify** before effort is invested:
 
-| Field | Values | Decision it governs |
+| Question | Answer | Decision it governs |
 | --- | --- | --- |
-| `effect` | `read-only`, `write-local`, `external` | whether it may write and which confirmations are required |
-| `intent` | bootstrap, feature, bug, tweak, refactor, infra, review, conflict | which head skill drives the lifecycle |
-| `risk` | low, medium, high | depth of validation, review, and containment |
-| `uncertainty` | low, medium, high | how much to discover before implementing |
-| `surfaces` | UI, security, data, public-contract, docs, none | which overlays run through the flow |
+| `effect` | `read-only`, `write-local`, `external` | whether it may write, and whether the kickoff gate stops |
+| the row | one line of the router's table: what the request says → track → head skill → what follows | which head skill drives the lifecycle and what chain comes after it |
+| the lane (feature, refactor, infra) | `bounded`, `standard`, `exploratory` | how much to discover before implementing; greenfield is always `exploratory` |
+| overlays | by signal: UI, security, project patterns, documentation | which cross-cutting skills travel through the flow |
+
+Until 2026-09 the router derived a five-field envelope (effect, intent, risk, uncertainty, surfaces)
+before choosing. Measured against the 2026-07-04 lookup router, that version held the gates better
+(38/40 vs 16/40 on the adversarial trigger battery) but cost 55 KB of always-loaded doctrine. The
+current router keeps every gate that was measured to matter and returns to the table shape; the
+entry (CLAUDE.md, core, router, resident frontmatter) now costs 39 KB per turn — a 30 KB version
+was measured too, and lost the trivial tweak at the entry, so it stayed in the history.
 
 ### One head skill, cross-cutting overlays
 
@@ -446,7 +452,7 @@ approvals live in the plan header, with dates — not in the cursor. Main fields
 | `confirm` | observable condition that becomes `done` — observed against Git |
 | `kickoff` | `pending` until the post-plan setup gate (or the compact confirm) ratifies it |
 | `isolation` · `execution-mode` · `commit-strategy` | born `pending`; never become a silent default |
-| `effect` · `risk` · `overlays` · `audience` | derived by the router; modulate depth and language |
+| `effect` · `lane` · `overlays` · `audience` | derived by the router; modulate depth and language |
 | `spec` · `plan` · `project` | path of the artifact or a dated explicit waiver |
 
 Below the cursor sit only `## Progress` (one line per task; a long report goes to `data/reports/`
