@@ -587,9 +587,9 @@ PelizzAI/
 │   ├── sync-harness.mjs          portable core of sync + distribution
 │   ├── sync-harness.ps1|.sh      wrappers
 │   ├── install-hooks.mjs         merge/check/remove of the Claude Code hooks
-│   ├── test-harness-contracts.ps1  harness contract suite
-│   ├── measure-hotpath.mjs       hot-path cost report against harness-budget.json
-│   ├── validate-skills.mjs       platform-spec and budget validation of the skills
+│   ├── test-harness-contracts.ps1  executed fixtures and structural checks (no prose regexes)
+│   ├── measure-hotpath.mjs       hot-path cost report per route (bytes vs. target; reported, not enforced)
+│   ├── validate-skills.mjs       platform-spec validation of the skills (hard errors, no size rules)
 │   ├── pelizzai-source-repo.txt  source mode sentinel (NEVER copy to consumers)
 │   ├── task-brief.ps1|.sh
 │   └── review-package.ps1|.sh
@@ -648,35 +648,68 @@ open with at most one warning a day.
 
 ## How the harness proves itself
 
-Doctrine that is not measured rots. Five instruments, four of them in CI:
+Doctrine that is not measured rots — and a check that proves a sentence exists measures nothing.
+The rule for every instrument here: it tests **behavior** (something executes and its exit code
+or output is judged) or **structure** (files or sets are compared), never the presence of a
+phrase. Size is **reported, never enforced**. The suite used to carry ~900 assertions, 574 of
+them regexes over prose; they passed by construction (each PR added anchors for the phrases it
+had just written), never caught a regression, and taxed every doctrine rewrite with hundreds of
+stale anchors. They are gone.
 
-- **Contract suite** (`scripts/test-harness-contracts.ps1`, ~900+ assertions, Windows + Ubuntu +
-  macOS): every harness behavior is locked by an assertion — including behavioral fixtures that
-  execute the hooks for real, in both legs, against a temporary git repository on a protected
-  branch.
-- **Mutation suite** (`tests/mutation`, in CI): plants a defect in a disposable copy of the repo —
-  a description that silently loses its trigger, a skill missing from the manifest, a hot-path
-  ceiling breach — and asserts the named instrument **catches** it. A checker that no mutation
-  can turn red is theater; a mutation whose anchor drifted counts as a miss, never a pass.
-- **Hot-path budget** (`scripts/measure-hotpath.mjs` + `scripts/harness-budget.json`): the number
+**Enforced in CI** (a red build):
+
+- **Contract suite** (`scripts/test-harness-contracts.ps1`, Windows + Ubuntu + macOS) — two
+  families only. *Executed:* the writegate scenario matrix in both legs against a temporary git
+  repository on a protected branch (Rule A, Rule B, source mode, the metadata carve-out, the
+  quote-aware shell parser, the link bypasses); the guardrails matrix plus an identical-stderr
+  parity check between the `.mjs` and `.ps1` legs; the advisory hooks run in a bare directory and
+  on malformed input and must exit 0, the cadence hook is driven through a seeded counter, real
+  commits and a backdated ledger until it nudges and then snoozes (both legs byte-identical), and
+  the SessionStart hook is proven to suppress the catalog nudge only behind the source-mode
+  sentinel; the hook installer (merge, idempotence, `--only`, surgical
+  removal); a real consumer export (Cursor adapter carried, sentinel and suite removed, nested
+  target rejected, exported consumer passes its own `--check`); a fresh `--build-dist` that must
+  leave the committed `dist/` untouched; the handoff/review helpers in a temporary repo;
+  `node --check` / `bash -n` / `-Help` of every script. *Structural:* the manifest is an exact set
+  with no duplicates; `.agents/` and `dist/` mirror `.claude/skills` by paths and hashes; every
+  `pelizzai-*` token in the skills, `CLAUDE.md`, and the Cursor adapter resolves to a skill, a
+  hook, or a known script; the head-skill set core announces is the set the router routes.
+- **Skill validation** (`scripts/validate-skills.mjs`): two scopes, all hard errors. The
+  platform-specification rules from the published Agent Skills spec — frontmatter shape and keys,
+  name length, kebab-case, `name` matching the directory, description length, no angle brackets.
+  Plus two repository-specific silent-trigger checks that go beyond the spec: an unquoted colon
+  followed by a space in a description (which killed the trigger of 5/31 skills once) and an H1
+  that names a skill that no longer exists. No size rules, no allowance.
+- **Mutation suite** (`tests/mutation`, Ubuntu): plants a defect in a disposable copy of the
+  repo — a description that loses its trigger, a skill renamed in its frontmatter but not on
+  disk, a route declaring a file that moved, a head skill linking an unbudgeted reference, a
+  skill missing from the manifest, a deleted managed-block marker — and asserts the named
+  instrument **catches** it. A checker that no mutation can turn red is theater; a mutation whose
+  anchor drifted counts as a miss, never a pass.
+- **Drift** (`scripts/measure-hotpath.mjs`): the one size-adjacent failure. A reference linked by
+  a head skill must be budgeted in its route or declared on-demand; a declared file must exist.
+  That is how the hot path grows without anyone measuring it, so it fails the build.
+
+**Reported in CI** (a number, never a red build):
+
+- **Hot-path report** (`scripts/measure-hotpath.mjs` + `scripts/harness-budget.json`): the number
   that matters is not the corpus on disk — it is what the doctrine mandates reading before the
   first line of work, including the frontmatter of every skill, permanently resident. Each route
-  has a `ceilingBytes` **ratchet**: growth fails the build ("growth in the hot path is zero-sum —
-  name what comes out"), and a reference linked by a head skill must be budgeted or declared
-  on-demand, or the build fails on drift.
-- **Skill validation** (`scripts/validate-skills.mjs`): the platform's published spec as hard
-  errors — including an unquoted colon followed by a space in a description, which silently kills
-the skill's trigger —
-  plus size budgets as ratchets: violation counts may fall, never rise.
-- **Trigger tests** (`tests/trigger`, not in CI — they cost tokens and need a real credential):
-  spin up genuine headless agents against adversarial prompts ("skip the process", "you already
-  approved this yesterday", "prod is down, just bump the timeout") and read the transcript: did
-  the skills fire, and did any tool run before them? Because agents are stochastic, cases are
-  scored as **rates over 3+ runs**, and every doctrine fix is measured A/B by the rate change —
-  that is where 4/7 → 7/7 with hooks comes from.
+  prints bytes, ~tokens, and the gap to its `targetBytes`. There is no ceiling: the previous
+  ratchet was raised 94 times across 23 commits and sat with zero slack, which is to say it
+  enforced nothing and taxed every legitimate change.
+
+**Measured outside CI** (they cost tokens and need a real agent credential):
+
+- **Trigger tests** (`tests/trigger`): spin up genuine headless agents against adversarial
+  prompts ("skip the process", "you already approved this yesterday", "prod is down, just bump
+  the timeout") and read the transcript: did the skills fire, and did any tool run before them?
+  Because agents are stochastic, cases are scored as **rates over 3+ runs**, and every doctrine
+  fix is measured A/B by the rate change — that is where 4/7 → 7/7 with hooks comes from.
 - **Baseline** (`tests/baseline`): the same task twice, with and without the harness — tokens,
-  turns, and wall-clock side by side. It deliberately does not score quality; it prices the
-  process.
+  turns, and wall-clock side by side, both sides working on the same small invoice app that
+  `tests/baseline/fixture.mjs` materializes (the runner refuses to start without it). It
+  deliberately does not score quality; it prices the process.
 
 ---
 
@@ -690,20 +723,22 @@ made there is lost on the next sync.
 ```bash
 node scripts/sync-harness.mjs                    # regenerates mirrors and dist/
 node scripts/sync-harness.mjs --check            # validates the sync
-pwsh scripts/test-harness-contracts.ps1          # contract suite
-node scripts/measure-hotpath.mjs                 # hot-path cost vs. budget
-node scripts/validate-skills.mjs                 # spec + budget ratchets
+pwsh scripts/test-harness-contracts.ps1          # executed fixtures + structural checks
+node scripts/measure-hotpath.mjs                 # hot-path bytes per route vs. target (report)
+node scripts/validate-skills.mjs                 # platform spec (hard errors)
 node tests/mutation/run.mjs                      # do the checkers still catch defects?
 ```
 
 The sync regenerates `dist/` automatically in the source repo (there is also the standalone
 `--build-dist`); the CI fails if it is committed out of sync with `.claude/`.
 
-Every harness behavior is locked by an assertion in the contract suite. New behavior without a new
-assertion is a regression waiting to happen — and an assertion weakened into a regex that matches
-everything is worse than no assertion, because it simulates coverage. The CI runs the sync core
-and the wrappers, the skill validation, the hot-path budget, and the contract suite on Windows,
-Ubuntu, and macOS; the mutation suite and the committed-`dist/` check run on Ubuntu.
+A behavior that a script or hook implements is locked by an executed fixture; a property of the
+repository's shape is locked by a structural comparison. Doctrine that lives only in prose is not
+locked by the suite at all — it is measured by the trigger tests and the baseline, which are not
+run in CI. Do not add a regex over a SKILL.md to "cover" a doctrine change: it passes the day it is
+written and never fails again. The CI runs the sync core and the wrappers, the skill validation, the hot-path
+report, and the contract suite on Windows, Ubuntu, and macOS; the mutation suite and the
+committed-`dist/` check run on Ubuntu.
 
 ---
 
@@ -739,8 +774,8 @@ and the license. Apache-2.0 also expressly grants the contributors' patent right
 for anyone embedding this in a product.
 
 - **Contribute:** [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) — read it before your first
-  PR; this repository has rules of its own (edit only `.claude/`, new behavior requires a new
-  assertion).
+  PR; this repository has rules of its own (edit only `.claude/`, new script or hook behavior
+  requires a new executed fixture — never a regex over prose).
 - **Report a vulnerability:** [.github/SECURITY.md](.github/SECURITY.md) — through a private
   channel, never in a public issue.
 

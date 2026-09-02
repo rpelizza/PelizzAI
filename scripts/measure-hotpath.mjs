@@ -11,17 +11,21 @@
  * skill (permanently resident as `available_skills`), and any reference a head
  * skill requires unconditionally.
  *
- * Ceilings in scripts/harness-budget.json are a ratchet: they were frozen at the
- * values measured when the budget was introduced, so any growth fails the build.
- * Lowering one is deliberate and belongs in the commit that earned it.
+ * Size is reported, never enforced. `targetBytes` in scripts/harness-budget.json
+ * is where each route is heading and the report prints the gap; growth is a
+ * number the author reads, not a build failure. What DOES fail is structural:
+ * a route that declares a file that does not exist, and drift — a head skill
+ * linking a reference that no route budgets and onDemand does not list, which
+ * is how the hot path grows without anyone measuring it.
  *
  * Usage:
  *   node scripts/measure-hotpath.mjs            human-readable report
  *   node scripts/measure-hotpath.mjs --json     machine-readable, for BENCHMARK.md
  *   node scripts/measure-hotpath.mjs --markdown table for pasting into a report
  *
- * Exit codes: 0 every route within its ceiling; 1 any ceiling exceeded or any
- * declared file missing; 2 the budget file itself is unusable.
+ * Exit codes: 0 report produced; 1 a declared file is missing or a reference
+ * drifted; 2 the budget file itself is unusable (unreadable JSON, no routes, or
+ * a route without a finite positive targetBytes).
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
@@ -70,6 +74,33 @@ try {
   budget = JSON.parse(readFileSync(budgetPath, 'utf8'));
 } catch (error) {
   console.error(`measure-hotpath: cannot read ${toPosix(relative(root, budgetPath))}: ${error.message}`);
+  process.exit(2);
+}
+
+// A target that is not a positive number would print a NaN gap and report nothing: the budget
+// itself is unusable, which is exit 2 — the same class as a broken JSON, not a missing file.
+if (!Array.isArray(budget.routes)) {
+  console.error('measure-hotpath: harness-budget.json has no `routes` array — nothing to measure.');
+  process.exit(2);
+}
+// Each route must be a plain object before anything is read from it: `[null]` or a bare string
+// would otherwise surface as a TypeError instead of the exit-2 diagnostic.
+const malformedRoutes = budget.routes
+  .map((route, index) => ({ route, index }))
+  .filter(({ route }) => route === null || typeof route !== 'object' || Array.isArray(route));
+if (malformedRoutes.length > 0) {
+  for (const { route, index } of malformedRoutes) {
+    console.error(`measure-hotpath: routes[${index}] is not a route object (got ${JSON.stringify(route)}).`);
+  }
+  process.exit(2);
+}
+const unusableTargets = budget.routes.filter(
+  (route) => !Number.isFinite(route.targetBytes) || route.targetBytes <= 0,
+);
+if (unusableTargets.length > 0) {
+  for (const route of unusableTargets) {
+    console.error(`measure-hotpath: route "${route.id}" has no positive targetBytes (got ${JSON.stringify(route.targetBytes)}).`);
+  }
   process.exit(2);
 }
 
@@ -123,9 +154,7 @@ const rows = budget.routes.map((route) => {
     label: route.label,
     bytes: total,
     tokens: Math.round(total / 4),
-    ceilingBytes: route.ceilingBytes,
     targetBytes: route.targetBytes,
-    overBy: total - route.ceilingBytes,
     gapToTarget: total - route.targetBytes,
     parts,
   };
@@ -176,10 +205,9 @@ for (const route of budget.routes) {
   }
 }
 
-const failures = rows.filter((row) => row.overBy > 0);
 // Drift is a failure, not a note: a mandatory read nobody budgeted is exactly how the hot path
-// grows invisibly — the leak this instrument exists to close.
-const ok = failures.length === 0 && missing.length === 0 && drift.length === 0;
+// grows invisibly — the leak this instrument exists to close. Size itself never fails the run.
+const ok = missing.length === 0 && drift.length === 0;
 
 if (asJson) {
   console.log(
@@ -195,31 +223,29 @@ if (asJson) {
 const fmt = (n) => n.toLocaleString('en-US');
 
 if (asMarkdown) {
-  console.log('| route | bytes | tokens | ceiling | target | gap to target |');
-  console.log('|---|---:|---:|---:|---:|---:|');
+  console.log('| route | bytes | tokens | target | gap to target |');
+  console.log('|---|---:|---:|---:|---:|');
   for (const row of rows) {
     console.log(
-      `| \`${row.id}\` | ${fmt(row.bytes)} | ~${fmt(row.tokens)} | ${fmt(row.ceilingBytes)} | ${fmt(row.targetBytes)} | ${row.gapToTarget > 0 ? '+' : ''}${fmt(row.gapToTarget)} |`,
+      `| \`${row.id}\` | ${fmt(row.bytes)} | ~${fmt(row.tokens)} | ${fmt(row.targetBytes)} | ${row.gapToTarget > 0 ? '+' : ''}${fmt(row.gapToTarget)} |`,
     );
   }
 } else {
-  console.log('PelizzAI hot path — cost of entering each route\n');
+  console.log('PelizzAI hot path — cost of entering each route (reported, not enforced)\n');
   console.log(`  skills: ${skillCount}   frontmatter always resident: ${fmt(metadataBytes)} B\n`);
   const pad = (s, n) => String(s).padEnd(n);
   const lpad = (s, n) => String(s).padStart(n);
-  console.log(
-    `  ${pad('route', 12)} ${lpad('bytes', 9)} ${lpad('tokens', 8)} ${lpad('ceiling', 9)} ${lpad('target', 9)}  status`,
-  );
-  console.log(`  ${'-'.repeat(12)} ${'-'.repeat(9)} ${'-'.repeat(8)} ${'-'.repeat(9)} ${'-'.repeat(9)}  ------`);
+  console.log(`  ${pad('route', 12)} ${lpad('bytes', 9)} ${lpad('tokens', 8)} ${lpad('target', 9)}  gap to target`);
+  console.log(`  ${'-'.repeat(12)} ${'-'.repeat(9)} ${'-'.repeat(8)} ${'-'.repeat(9)}  -------------`);
   for (const row of rows) {
-    const status =
-      row.overBy > 0
-        ? `OVER by ${fmt(row.overBy)}`
-        : row.gapToTarget > 0
-          ? `${fmt(row.gapToTarget)} above target`
+    const gap =
+      row.gapToTarget > 0
+        ? `+${fmt(row.gapToTarget)} above target`
+        : row.gapToTarget < 0
+          ? `${fmt(row.gapToTarget)} below target`
           : 'at target';
     console.log(
-      `  ${pad(row.id, 12)} ${lpad(fmt(row.bytes), 9)} ${lpad('~' + fmt(row.tokens), 8)} ${lpad(fmt(row.ceilingBytes), 9)} ${lpad(fmt(row.targetBytes), 9)}  ${status}`,
+      `  ${pad(row.id, 12)} ${lpad(fmt(row.bytes), 9)} ${lpad('~' + fmt(row.tokens), 8)} ${lpad(fmt(row.targetBytes), 9)}  ${gap}`,
     );
   }
 }
@@ -233,17 +259,6 @@ if (drift.length > 0) {
 if (missing.length > 0) {
   console.error('\nBUDGET ERRORS:');
   for (const item of missing) console.error(`  ${item}`);
-}
-
-if (failures.length > 0) {
-  console.error('\nCEILING EXCEEDED:');
-  for (const row of failures) {
-    console.error(`  ${row.id}: ${fmt(row.bytes)} B against a ceiling of ${fmt(row.ceilingBytes)} B`);
-  }
-  console.error(
-    '\nGrowth in the hot path is zero-sum. Name what comes out, or move the material behind a\n' +
-      'pointer with its token cost declared. Lowering a ceiling belongs in the commit that earned it.',
-  );
 }
 
 process.exit(ok ? 0 : 1);
