@@ -34,6 +34,21 @@ the agent assertive. A versionable, portable bootstrap, never a report for its o
 
 A read-only request never becomes a mutating bootstrap just because `pelizzai/domain-skills.md` does not exist.
 
+The router hands the situation over; this is the row it lands on:
+
+| Situation | Route |
+| --- | --- |
+| Catalog missing, first interaction with the project | `scan-only` at minimum; propose the bootstrap before the kickoff gate. Declining does not block the request. |
+| Catalog missing, `effect: read-only` | Map in `scan-only`, propose, and wait. Yes → `bootstrap-write`; no or later → stay in `scan-only`, no file is created, one line records the limitation. |
+| The user said `bootstrap` or `reinitialize` | `bootstrap-write`. |
+| Mutating task, catalog missing | `scan-only`, present the proposed minimum set of artifacts, get consent for `bootstrap-write`; once accepted the effect is `write-local` and the first-write gate applies. |
+| Catalog exists, ledger missing | In an authorized mutating task, repair only the ledger; read-only just reports. |
+| Catalog exists | Re-running the bootstrap (remap) requires an explicit request or observed drift — proactivity applies to an uninitialized harness, not to rewriting what was ratified. |
+
+Proposing is not executing: the bootstrap only writes after an explicit "yes", in the conversation's
+language, and a purely conceptual question never triggers the proposal. In the source repo there is no
+trigger: there is no consumer catalog to create.
+
 ## Source mode
 
 If the sentinel `scripts/pelizzai-source-repo.txt` exists, treat the project as the PelizzAI source repo. Do not create a consumer `pelizzai/`; do only the scan the task needs. The presence of a manifest/sync-harness does NOT indicate a source repo — consumers installed via `-ExportConsumer` have them too.
