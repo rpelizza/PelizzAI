@@ -674,12 +674,12 @@ stale anchors. They are gone.
   with no duplicates; `.agents/` and `dist/` mirror `.claude/skills` by paths and hashes; every
   `pelizzai-*` token in the skills, `CLAUDE.md`, and the Cursor adapter resolves to a skill, a
   hook, or a known script; the head-skill set core announces is the set the router routes.
-- **Skill validation** (`scripts/validate-skills.mjs`): the platform's published Agent Skills
-  spec as hard errors — frontmatter shape and keys, name length, kebab-case, and `name` matching
-  the directory, description length, no angle brackets — plus the two silent-trigger failures
-  the platform does not report: an unquoted colon followed by a space in a description (which
-  killed the trigger of 5/31 skills once) and an H1 that names a skill that no longer exists.
-  No size rules, no allowance.
+- **Skill validation** (`scripts/validate-skills.mjs`): two scopes, all hard errors. The
+  platform-specification rules from the published Agent Skills spec — frontmatter shape and keys,
+  name length, kebab-case, `name` matching the directory, description length, no angle brackets.
+  Plus two repository-specific silent-trigger checks that go beyond the spec: an unquoted colon
+  followed by a space in a description (which killed the trigger of 5/31 skills once) and an H1
+  that names a skill that no longer exists. No size rules, no allowance.
 - **Mutation suite** (`tests/mutation`, Ubuntu): plants a defect in a disposable copy of the
   repo — a description that loses its trigger, a skill renamed in its frontmatter but not on
   disk, a route declaring a file that moved, a head skill linking an unbudgeted reference, a
@@ -699,7 +699,7 @@ stale anchors. They are gone.
   ratchet was raised 94 times across 23 commits and sat with zero slack, which is to say it
   enforced nothing and taxed every legitimate change.
 
-**Measured out of CI** (they cost tokens and need a real agent credential):
+**Measured outside CI** (they cost tokens and need a real agent credential):
 
 - **Trigger tests** (`tests/trigger`): spin up genuine headless agents against adversarial
   prompts ("skip the process", "you already approved this yesterday", "prod is down, just bump
@@ -734,9 +734,9 @@ The sync regenerates `dist/` automatically in the source repo (there is also the
 
 A behavior that a script or hook implements is locked by an executed fixture; a property of the
 repository's shape is locked by a structural comparison. Doctrine that lives only in prose is not
-locked by the suite at all — it is measured by the trigger tests and the baseline, out of CI. Do
-not add a regex over a SKILL.md to "cover" a doctrine change: it passes the day it is written and
-never fails again. The CI runs the sync core and the wrappers, the skill validation, the hot-path
+locked by the suite at all — it is measured by the trigger tests and the baseline, which are not
+run in CI. Do not add a regex over a SKILL.md to "cover" a doctrine change: it passes the day it is
+written and never fails again. The CI runs the sync core and the wrappers, the skill validation, the hot-path
 report, and the contract suite on Windows, Ubuntu, and macOS; the mutation suite and the
 committed-`dist/` check run on Ubuntu.
 

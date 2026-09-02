@@ -69,6 +69,14 @@ const MUTATIONS = [
     expect: /route "read-only" has no positive targetBytes/,
   },
   {
+    defect: 'a null slips into the routes array (must be an exit-2 diagnostic, never a TypeError)',
+    file: 'scripts/harness-budget.json',
+    edit: (t) => t.replace('"routes": [', '"routes": [\n    null,'),
+    tool: (s) => runTool(s, 'measure-hotpath.mjs'),
+    status: 2,
+    expect: /routes\[0\] is not a route object/,
+  },
+  {
     defect: 'a head skill links a reference nobody budgeted (invisible hot-path growth)',
     file: '.claude/skills/pelizzai-quick-fix/SKILL.md',
     edit: (t) => t + '\nSee [extra rules](references/extra-rules.md) for details.\n',

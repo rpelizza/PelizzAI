@@ -50,8 +50,25 @@ for (const key of ['nameMaxChars', 'descriptionMaxChars']) {
     process.exit(2);
   }
 }
-if (!Array.isArray(spec.allowedFrontmatterKeys) || spec.allowedFrontmatterKeys.length === 0) {
-  console.error('validate-skills: skillLimits.spec.allowedFrontmatterKeys is not a non-empty list — every key would be rejected.');
+if (
+  !Array.isArray(spec.allowedFrontmatterKeys) ||
+  spec.allowedFrontmatterKeys.length === 0 ||
+  spec.allowedFrontmatterKeys.some((key) => typeof key !== 'string' || key.trim() === '')
+) {
+  console.error('validate-skills: skillLimits.spec.allowedFrontmatterKeys must be a non-empty list of non-empty strings — otherwise keys would be rejected or matched by accident.');
+  process.exit(2);
+}
+// The kebab-case rule is only as real as its pattern: a missing, empty, or invalid namePattern
+// would either skip the check or throw mid-scan. Compile it once, here, and reuse it below.
+if (typeof spec.namePattern !== 'string' || spec.namePattern.trim() === '') {
+  console.error('validate-skills: skillLimits.spec.namePattern must be a non-empty regular expression string.');
+  process.exit(2);
+}
+let namePattern;
+try {
+  namePattern = new RegExp(spec.namePattern);
+} catch (error) {
+  console.error(`validate-skills: skillLimits.spec.namePattern is not a valid regular expression: ${error.message}`);
   process.exit(2);
 }
 // `metadataFrom` names the skills directory. An empty or missing value would resolve to the repo
@@ -133,7 +150,7 @@ for (const file of listSkills()) {
     if (declaredName.length > spec.nameMaxChars) {
       violations.push({ file: name, rule: 'name-length', detail: `${declaredName.length} chars` });
     }
-    if (spec.namePattern && !new RegExp(spec.namePattern).test(declaredName)) {
+    if (!namePattern.test(declaredName)) {
       violations.push({ file: name, rule: 'name-kebab-case', detail: declaredName });
     }
     /**

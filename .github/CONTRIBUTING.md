@@ -53,7 +53,7 @@ wrappers.
 ## Contracts: behavior is executed, structure is compared, prose is not grepped
 
 `scripts/test-harness-contracts.ps1` is what keeps the scripts and hooks from regressing silently.
-It holds exactly two kinds of check: fixtures that **execute** a script or hook and judge its exit
+It holds exactly two kinds of checks: fixtures that **execute** a script or hook and judge its exit
 code and output, and **structural** comparisons of files or sets (manifest, mirrors, references).
 Size is reported by `scripts/measure-hotpath.mjs`, never enforced.
 

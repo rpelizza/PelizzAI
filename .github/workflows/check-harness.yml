@@ -37,7 +37,7 @@ jobs:
           node scripts/sync-harness.mjs --build-dist
           git add -A -- dist
           git diff --cached --exit-code -- dist
-      - name: Skill conformance (platform spec)
+      - name: Skill conformance (platform spec + silent-trigger checks)
         run: node scripts/validate-skills.mjs
       - name: Hot-path report
         run: node scripts/measure-hotpath.mjs

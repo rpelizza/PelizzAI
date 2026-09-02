@@ -83,6 +83,17 @@ if (!Array.isArray(budget.routes)) {
   console.error('measure-hotpath: harness-budget.json has no `routes` array — nothing to measure.');
   process.exit(2);
 }
+// Each route must be a plain object before anything is read from it: `[null]` or a bare string
+// would otherwise surface as a TypeError instead of the exit-2 diagnostic.
+const malformedRoutes = budget.routes
+  .map((route, index) => ({ route, index }))
+  .filter(({ route }) => route === null || typeof route !== 'object' || Array.isArray(route));
+if (malformedRoutes.length > 0) {
+  for (const { route, index } of malformedRoutes) {
+    console.error(`measure-hotpath: routes[${index}] is not a route object (got ${JSON.stringify(route)}).`);
+  }
+  process.exit(2);
+}
 const unusableTargets = budget.routes.filter(
   (route) => !Number.isFinite(route.targetBytes) || route.targetBytes <= 0,
 );
