@@ -4,7 +4,8 @@
  *
  * Each mutation plants a defect in a disposable copy of the repository and asserts that the named
  * instrument CATCHES it. A green checker that no mutation can turn red is theater; this file is
- * how the instruments prove they are not.
+ * how the instruments prove they are not. Only defects an instrument still enforces are planted:
+ * size is reported, not enforced, so no mutation grows a file and expects a failure.
  *
  * The STALE guard (from the Noetron oracle suite): if a mutation's edit leaves the file
  * unchanged, the anchor text moved and the mutation tested NOTHING — that counts as a miss, never
@@ -46,22 +47,18 @@ const MUTATIONS = [
     expect: /h1-matches-name/,
   },
   {
-    defect: 'a description balloons past the 30-word trigger budget',
+    defect: 'a skill is renamed in its frontmatter but not on disk (two identifiers for one skill)',
     file: '.claude/skills/pelizzai-experiment/SKILL.md',
-    edit: (t) =>
-      t.replace(
-        /^description: "(.*)"$/m,
-        (m, v) => `description: "${v} ${'padding word repeated many times over the budget '.repeat(3)}"`,
-      ),
+    edit: (t) => t.replace(/^name: pelizzai-experiment$/m, 'name: pelizzai-prototype'),
     tool: (s) => runTool(s, 'validate-skills.mjs'),
-    expect: /descriptionMaxWords[\s\S]*ROSE/,
+    expect: /name-matches-directory/,
   },
   {
-    defect: 'the always-loaded router grows past every route ceiling',
-    file: '.claude/skills/pelizzai-router/SKILL.md',
-    edit: (t) => t + '\n' + 'padding line that someone pasted without paying for it\n'.repeat(40),
+    defect: 'a route declares a head file that was deleted or moved (the budget measures a ghost)',
+    file: 'scripts/harness-budget.json',
+    edit: (t) => t.replace('".claude/skills/pelizzai-execute/references/task-cycle.md"', '".claude/skills/pelizzai-execute/references/task-cycle-v2.md"'),
     tool: (s) => runTool(s, 'measure-hotpath.mjs'),
-    expect: /CEILING EXCEEDED/,
+    expect: /BUDGET ERRORS[\s\S]*task-cycle-v2\.md, which does not exist/,
   },
   {
     defect: 'a head skill links a reference nobody budgeted (invisible hot-path growth)',
