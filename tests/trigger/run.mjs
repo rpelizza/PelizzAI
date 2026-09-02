@@ -38,6 +38,8 @@
  *   node tests/trigger/run.mjs --runs 5         repeat every case N times and report rates
  *   node tests/trigger/run.mjs --harness <dir>  test another checkout of the harness (an A/B arm)
  *   node tests/trigger/run.mjs --json <file>    write every run's verdict, notes and transcript path
+ *   node tests/trigger/run.mjs --rescore <json> re-judge a recorded battery's transcripts with the
+ *                                               rules of THIS checkout — no agent runs, no tokens
  *
  * `--harness` points at any directory holding `.claude/` and `CLAUDE.md` — typically a git
  * worktree frozen at an older commit. The prompts, the fixture and the expectations always come
@@ -71,7 +73,8 @@ const model = valueOf('--model');
 const harnessArg = valueOf('--harness');
 const runsArg = valueOf('--runs');
 const jsonArg = valueOf('--json');
-const consumed = new Set([model, harnessArg, runsArg, jsonArg].filter(Boolean));
+const rescoreArg = valueOf('--rescore');
+const consumed = new Set([model, harnessArg, runsArg, jsonArg, rescoreArg].filter(Boolean));
 const only = argv.filter((a) => !a.startsWith('--') && !consumed.has(a));
 const keep = flags.has('--keep') || Boolean(jsonArg);
 const withHooks = flags.has('--hooks');
@@ -89,6 +92,36 @@ if (!existsSync(join(harness, '.claude', 'skills')) || !existsSync(join(harness,
 }
 
 const spec = JSON.parse(readFileSync(join(here, 'expectations.json'), 'utf8'));
+
+/**
+ * `--rescore`: a recorded battery is evidence, and the judging rules evolve. When a rule was wrong
+ * (the first battery scored thirty read-only `2>/dev/null` probes as mutations), the transcripts
+ * are re-judged in place — same runs, same model, same day — instead of buying a new battery
+ * whose only difference would be the weather of the model that afternoon.
+ */
+if (rescoreArg) {
+  const file = resolve(rescoreArg);
+  const battery = JSON.parse(readFileSync(file, 'utf8'));
+  const rescored = battery.results.map((recorded) => {
+    const testCase = spec.cases.find((c) => c.id === recorded.id);
+    if (!testCase) return { ...recorded, pass: false, notes: [`no expectation named ${recorded.id}`] };
+    if (!recorded.transcript || !existsSync(recorded.transcript)) {
+      return { ...recorded, pass: false, notes: ['transcript missing — cannot rescore'] };
+    }
+    return { ...recorded, ...score(testCase, readFileSync(recorded.transcript, 'utf8')) };
+  });
+  const before = battery.results.filter((r) => r.pass).length;
+  const after = rescored.filter((r) => r.pass).length;
+  for (const id of [...new Set(rescored.map((r) => r.id))]) {
+    const mine = rescored.filter((r) => r.id === id);
+    const signatures = [...new Set(mine.flatMap((r) => r.notes))];
+    console.log(`  ${id.padEnd(22)} ${mine.filter((r) => r.pass).length}/${mine.length}${signatures.length ? `  — ${signatures.join(' | ')}` : ''}`);
+  }
+  console.log(`rescored ${rescored.length} runs: ${before} → ${after} pass under this checkout's rules`);
+  writeFileSync(file, JSON.stringify({ ...battery, results: rescored, rescoredAt: new Date().toISOString() }, null, 2));
+  process.exit(rescored.every((r) => r.pass) ? 0 : 1);
+}
+
 const cases = only.length > 0 ? spec.cases.filter((c) => only.includes(c.id)) : spec.cases;
 
 if (cases.length === 0) {
@@ -238,6 +271,11 @@ function parseTranscript(raw) {
  * a clean pass. Returns the matched signature, or null for a read-only command.
  */
 function shellWriteSignature(command) {
+  // Discarding a stream is not writing a file. `2>/dev/null`, `>/dev/null`, `2>&1`, `>nul` and
+  // `2>$null` are the idioms of a READ-ONLY probe (`ls pelizzai/ 2>/dev/null`), and the first
+  // recorded battery scored thirty of them as mutations, in both arms. Strip them before looking
+  // for a redirect that names a real target.
+  const probe = command.replace(/\d*>{1,2}\s*(?:\/dev\/null|nul\b|\$null|&\d)/gi, ' ');
   const patterns = [
     [/(^|\s)\d*>{1,2}\s*(?![&\s])/, 'output redirect'],
     [/\b(tee|mv|cp|rm|mkdir|touch|chmod|ln)\b/, 'file-mutating utility'],
@@ -247,9 +285,59 @@ function shellWriteSignature(command) {
     [/\b(npm|pnpm|yarn)\s+(install|add|remove|update)\b/, 'package mutation'],
   ];
   for (const [re, label] of patterns) {
-    if (re.test(command)) return label;
+    if (re.test(probe)) return label;
   }
   return null;
+}
+
+/** Judge one transcript against one expectation. Pure: the same transcript always gets the same verdict. */
+function score(testCase, raw) {
+  const { skills, tools, shellCommands, assistantTurns, modelSeen } = parseTranscript(raw);
+  const firstSkillAt = skills.length > 0 ? skills[0].at : Infinity;
+  const notes = [];
+
+  /**
+   * Liveness first. Without this, a case whose only assertions are prohibitions
+   * ("no Edit, no Write") passes when the agent never ran at all: nothing was
+   * forbidden because nothing happened. That is a non-discriminating assertion,
+   * and the negative case — the one that keeps the suite honest — is exactly
+   * where it hides. A run that produced no assistant turn is a broken run.
+   */
+  if (assistantTurns === 0) {
+    const reason = raw.trim().split('\n')[0]?.slice(0, 120) || '(no output at all)';
+    notes.push(`the agent produced no assistant turn — the run did not happen: ${reason}`);
+  }
+
+  for (const wanted of testCase.skills ?? []) {
+    if (!skills.some((s) => s.name === wanted)) notes.push(`skill never fired: ${wanted}`);
+  }
+  for (const forbidden of testCase.forbidBeforeSkill ?? []) {
+    const early = tools.filter((t) => t.name === forbidden && t.at < firstSkillAt);
+    if (early.length > 0) notes.push(`${forbidden} ran before any skill (premature action)`);
+  }
+  for (const forbidden of testCase.forbidTools ?? []) {
+    if (tools.some((t) => t.name === forbidden)) notes.push(`${forbidden} was used at all, and must not be`);
+  }
+  if (testCase.forbidShellWrites) {
+    for (const c of shellCommands) {
+      const signature = shellWriteSignature(c.command);
+      if (signature) {
+        notes.push(`shell mutation (${signature}): ${c.command.replace(/\s+/g, ' ').slice(0, 100)}`);
+      }
+    }
+  }
+  if (skills.length === 0 && (testCase.skills ?? []).length > 0) {
+    notes.push('no Skill invocation found in the transcript');
+  }
+
+  return {
+    pass: notes.length === 0,
+    notes,
+    fired: skills.map((s) => s.name),
+    toolsBeforeFirstSkill: tools.filter((t) => t.at < firstSkillAt).map((t) => t.name),
+    assistantTurns,
+    model: modelSeen,
+  };
 }
 
 const results = [];
@@ -291,59 +379,16 @@ for (const testCase of cases) {
 
   const raw = `${agent.stdout ?? ''}\n${agent.stderr ?? ''}`;
   writeFileSync(join(scratch.dir, 'transcript.jsonl'), raw);
-  const { skills, tools, shellCommands, assistantTurns, modelSeen } = parseTranscript(raw);
-  const firstSkillAt = skills.length > 0 ? skills[0].at : Infinity;
-  const notes = [];
-
-  /**
-   * Liveness first. Without this, a case whose only assertions are prohibitions
-   * ("no Edit, no Write") passes when the agent never ran at all: nothing was
-   * forbidden because nothing happened. That is a non-discriminating assertion,
-   * and the negative case — the one that keeps the suite honest — is exactly
-   * where it hides. A run that produced no assistant turn is a broken run.
-   */
-  if (assistantTurns === 0) {
-    const reason = raw.trim().split('\n')[0]?.slice(0, 120) || '(no output at all)';
-    notes.push(`the agent produced no assistant turn — the run did not happen: ${reason}`);
-  }
-
-  for (const wanted of testCase.skills ?? []) {
-    if (!skills.some((s) => s.name === wanted)) notes.push(`skill never fired: ${wanted}`);
-  }
-  for (const forbidden of testCase.forbidBeforeSkill ?? []) {
-    const early = tools.filter((t) => t.name === forbidden && t.at < firstSkillAt);
-    if (early.length > 0) notes.push(`${forbidden} ran before any skill (premature action)`);
-  }
-  for (const forbidden of testCase.forbidTools ?? []) {
-    if (tools.some((t) => t.name === forbidden)) notes.push(`${forbidden} was used at all, and must not be`);
-  }
-  if (testCase.forbidShellWrites) {
-    for (const c of shellCommands) {
-      const signature = shellWriteSignature(c.command);
-      if (signature) {
-        notes.push(`shell mutation (${signature}): ${c.command.replace(/\s+/g, ' ').slice(0, 100)}`);
-      }
-    }
-  }
-  if (skills.length === 0 && (testCase.skills ?? []).length > 0) {
-    notes.push('no Skill invocation found in the transcript');
-  }
-
-  const pass = notes.length === 0;
-  console.log(pass ? 'pass' : 'FAIL');
+  const verdict = score(testCase, raw);
+  console.log(verdict.pass ? 'pass' : 'FAIL');
   results.push({
     id: testCase.id,
     run,
-    pass,
-    notes,
-    fired: skills.map((s) => s.name),
-    toolsBeforeFirstSkill: tools.filter((t) => t.at < firstSkillAt).map((t) => t.name),
-    assistantTurns,
-    model: modelSeen,
+    ...verdict,
     seconds: Math.round((Date.now() - started) / 1000),
     transcript: join(scratch.dir, 'transcript.jsonl'),
   });
-  if (!keep && pass) rmSync(scratch.dir, { recursive: true, force: true });
+  if (!keep && verdict.pass) rmSync(scratch.dir, { recursive: true, force: true });
 }
 }
 
