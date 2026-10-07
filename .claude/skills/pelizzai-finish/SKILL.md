@@ -225,6 +225,10 @@ the briefing.
 
 ## 2. Resolve the destination and seal the closure (`delivered`)
 
+Territory knowledge belongs before the execution seal. If closeout discovers a new atlas or
+territory correction, propose a follow-up or return through execution and reseal; never widen
+the closure allowlist to smuggle an unvalidated knowledge edit into a sealed delivery.
+
 ### 2a. Offer the destination
 
 **Offer the destination** once. **Keep local** is recommended when no external intent was

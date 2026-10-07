@@ -199,12 +199,13 @@ Keeps the **domain** skills alive as the project evolves. Full detail in **[refe
 <HARD-GATE>
 **Refresh never overwrites blindly.** When updating an existing skill: read the current skill,
 change **only** what the new version/pattern requires, **preserve the customizations** the project
-added, and **show the diff to the user BEFORE writing**. Approval is **per skill** — never in bulk,
-never implicit in the "yes" given to another. Recreating a skill from scratch on top of another is
+added, and **show the diff to the user BEFORE writing**. Each skill must be covered by explicit approval or the bounded standing authorization in
+`references/domain-skill-maintenance.md`; never infer it from approval of another skill. Recreating a skill from scratch on top of another is
 forbidden.
 </HARD-GATE>
 
-An update is always **propose → confirm → apply → record**. There is no "hands-free" mode. In an
+An update follows **detect → diff → validate → check authorization → apply → record**.
+Unbounded hands-free rewriting is unsupported. In an
 edit the user already requested, the proposal is the diff itself: show it before writing, within
 the requested scope, without reopening the authorization they just gave.
 
@@ -327,8 +328,8 @@ Prefer:
 - cataloging and recording over letting maintenance depend on human memory.
 
 Every domain skill enters the catalog and the ledger.
-No skill update is applied without the diff and the user's confirmation; approval is per skill
-and comes with the evidence.
+No skill update is applied without a validated diff and explicit authorization covering that
+skill, either the current answer or a bounded standing policy, with evidence recorded.
 Incremental creation (the adoption axis) follows the same propose→confirm and never writes a
 stack skill without grounding in context7 or current official documentation.
 The cadence suggests; it never blocks.

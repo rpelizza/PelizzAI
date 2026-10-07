@@ -111,9 +111,15 @@ land in the artifact at the first AUTHORIZED write, never on the current branch 
 
 - Ask **exactly one question per turn**. Order it by the highest-impact decision that conditions
   the following ones; after the answer, recompute the interview script.
-- **When the platform offers a native option-selection tool, use it** — never deliver a closed
-  question as prose the user has to answer by typing when they could select. The contract holds
-  inside the tool: one question per turn, 2–3 real options, explicit recommendation.
+- **Codex: use numbered options in the chat for a required decision, then END THE TURN.**
+  The user types the number or their own answer. Do not open an asynchronous selector and
+  continue dependent work: it can disappear before the user responds. A pending question,
+  timeout, preselected option, unrelated message, or silence is never ratification.
+- **Claude Code: prefer its blocking native question tool when available.** If unavailable,
+  use the same numbered chat format and end the turn. Other platforms follow their actual
+  blocking semantics, not the mere presence of a question tool. Explicit user preferences win.
+- Optional asynchronous questions may accompany independent read-only work when the tool
+  supports it. They never grant approval and must not be used for required decisions.
 - The recommendation goes **where the user reads the choice**. In a native format with a short
   label and a longer description per option, the recommended option comes **first** and carries
   the mark **in its label** (e.g. `<option> (Recommended)`); the reason goes in the description.
@@ -130,10 +136,9 @@ land in the artifact at the first AUTHORIZED write, never on the current branch 
   reversible product choices still belong to the user, but he can explicitly delegate
   them.
 
-If the platform's tool imposes a specific question format, follow it without changing this
-contract's semantics; where no native tool exists, the prose format is the fallback, not a
-preference. Both delivery forms — labels, descriptions, and prose — speak the conversation's
-language.
+Follow the platform tool's own restrictions without changing these waiting semantics. Both
+delivery forms use the conversation's language. Reuse an explicit answer already in this
+conversation for the same scope; a new gate label is not a reason to ask it again.
 
 ## Gap mode: closing the hole mid-execution
 

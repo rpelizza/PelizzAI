@@ -40,9 +40,13 @@ function hookId(command) {
 }
 
 function parseArgs(argv) {
-  const options = { project: process.cwd(), check: false, remove: false, only: null };
+  const options = { project: process.cwd(), platform: 'claude', check: false, remove: false, only: null };
   for (let index = 0; index < argv.length; index += 1) {
     switch (argv[index]) {
+      case '--platform':
+        options.platform = argv[++index];
+        if (!['claude', 'codex'].includes(options.platform)) throw new Error('--platform requires claude or codex.');
+        break;
       case '--project':
         index += 1;
         if (!argv[index]) throw new Error('--project requires a path.');
@@ -72,7 +76,7 @@ function parseArgs(argv) {
       case '--help':
       case '-h':
         console.log(
-          'Usage: node scripts/install-hooks.mjs [--project <root>] [--only <list>] [--check|--remove]\n' +
+          'Usage: node scripts/install-hooks.mjs [--project <root>] [--platform claude|codex] [--only <list>] [--check|--remove]\n' +
             `  --only <list>   applies only to these hooks (${HOOK_IDS.join(', ')}), comma-separated.\n` +
             '                  Without --only, the operation covers all four.\n' +
             '  --check         inventory: partial installation is legitimate opt-in and does not fail.\n' +
@@ -89,9 +93,9 @@ function parseArgs(argv) {
 }
 
 // DEFINITIONS trimmed by --only (a group disappears when none of its commands was requested).
-function selectDefinitions(only) {
-  if (!only) return DEFINITIONS;
-  return DEFINITIONS.map((definition) => ({
+function selectDefinitions(only, definitions = DEFINITIONS) {
+  if (!only) return definitions;
+  return definitions.map((definition) => ({
     ...definition,
     commands: definition.commands.filter((command) => only.includes(hookId(command))),
   })).filter((definition) => definition.commands.length > 0);
@@ -166,6 +170,32 @@ function installedCommands(settings) {
   return commands.sort();
 }
 
+// A command in the wrong event/matcher is not an installed protection.
+function registrations(settings) {
+  const found = [];
+  for (const [event, groups] of Object.entries(settings.hooks ?? {})) {
+    for (const group of Array.isArray(groups) ? groups : []) {
+      for (const handler of Array.isArray(group.hooks) ? group.hooks : []) {
+        if (isPelizzai(handler)) found.push(JSON.stringify([event, group.matcher ?? '', handler.command]));
+      }
+    }
+  }
+  return found;
+}
+
+function definitionsFor(platform, project) {
+  if (platform === 'claude') return DEFINITIONS;
+  // Codex has no CLAUDE_PROJECT_DIR expansion. Register the actual installation root,
+  // quoted for spaces; reject shell interpolation rather than generate an unsafe command.
+  const path = project.replace(/\\/g, '/');
+  if (/["$`%\r\n]/.test(path)) throw new Error('Hook installation path contains shell interpolation characters. Use a plain installation path.');
+  return DEFINITIONS.map(definition => ({
+    ...definition,
+    matcher: definition.matcher === 'Write|Edit|MultiEdit|NotebookEdit' ? 'apply_patch' : definition.matcher,
+    commands: definition.commands.map(command => command.replace('$CLAUDE_PROJECT_DIR', path)),
+  }));
+}
+
 function writeAtomic(path, settings) {
   mkdirSync(dirname(path), { recursive: true });
   const temporary = `${path}.pelizzai-tmp-${process.pid}`;
@@ -176,9 +206,11 @@ function writeAtomic(path, settings) {
 try {
   const options = parseArgs(process.argv.slice(2));
   const project = resolve(options.project);
-  const settingsPath = join(project, '.claude', 'settings.json');
+  const settingsPath = options.platform === 'codex'
+    ? join(project, '.codex', 'hooks.json') : join(project, '.claude', 'settings.json');
   const settings = readSettings(settingsPath);
-  const definitions = selectDefinitions(options.only);
+  const allDefinitions = definitionsFor(options.platform, project);
+  const definitions = selectDefinitions(options.only, allDefinitions);
   const escopo = options.only ? ` (--only ${options.only.join(', ')})` : '';
 
   if (options.check) {
@@ -193,11 +225,27 @@ try {
     // NotebookEdit). Duplication means a count ABOVE the standard, never "it showed up repeated".
     const actual = installedCommands(settings);
     const canonical = new Map();
-    for (const command of expectedCommands(DEFINITIONS)) canonical.set(command, (canonical.get(command) ?? 0) + 1);
+    for (const command of expectedCommands(allDefinitions)) canonical.set(command, (canonical.get(command) ?? 0) + 1);
     const counted = new Map();
     for (const command of actual) counted.set(command, (counted.get(command) ?? 0) + 1);
 
     const problems = [];
+    // Opt-in absence is legitimate; a present hook attached to the wrong event is not.
+    const present = new Set(actual.map(hookId));
+    for (const definition of allDefinitions) {
+      for (const command of definition.commands) {
+        const id = hookId(command);
+        if (!present.has(id)) continue;
+        const groups = settings.hooks?.[definition.event] ?? [];
+        const probes = definition.matcher.split('|');
+        const covered = probes.every(probe => groups.some(group => {
+          if (!Array.isArray(group.hooks) || !group.hooks.some(handler => isPelizzai(handler) && hookId(handler.command) === id)) return false;
+          if (!group.matcher || group.matcher === '*' || definition.event === 'UserPromptSubmit') return true;
+          try { return new RegExp(group.matcher).test(probe); } catch { return false; }
+        }));
+        if (!covered) problems.push(`${id}: missing coverage for ${definition.event}/${definition.matcher || '*'}`);
+      }
+    }
     const duplicated = [...counted]
       .filter(([command, n]) => canonical.has(command) && n > canonical.get(command))
       .map(([command]) => hookId(command));
@@ -205,12 +253,14 @@ try {
     if (options.only) {
       // Presence required command by command (multiset): the writegate only counts as registered
       // when BOTH matchers are there.
-      const pool = [...actual];
+      const pool = registrations(settings);
       const absent = [];
-      for (const command of expectedCommands(definitions)) {
-        const at = pool.indexOf(command);
-        if (at === -1) absent.push(hookId(command));
-        else pool.splice(at, 1);
+      for (const definition of definitions) {
+        for (const command of definition.commands) {
+          const at = pool.indexOf(JSON.stringify([definition.event, definition.matcher, command]));
+          if (at === -1) absent.push(hookId(command));
+          else pool.splice(at, 1);
+        }
       }
       if (absent.length) problems.push(`hooks requested via --only and not registered: ${[...new Set(absent)].join(', ')}`);
     }
@@ -238,6 +288,9 @@ try {
     if (missing.length) throw new Error(`Hooks not copied to the project: ${[...new Set(missing)].join(', ')}`);
     writeAtomic(settingsPath, installPelizzai(settings, definitions, options.only));
     console.log(`PelizzAI hooks registered in ${settingsPath}${escopo}; existing settings preserved.`);
+  }
+  if (options.platform === 'codex' && !options.remove) {
+    console.log('Registration only: project trust and review of the current hook definitions in Codex are still required. Inspect /hooks in the CLI; this command does not grant trust or prove live dispatch. Reinstall after moving the checkout.');
   }
 } catch (error) {
   console.error(`FAIL: ${error instanceof Error ? error.message : String(error)}`);

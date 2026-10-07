@@ -38,6 +38,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { writeFixture, REQUIRED_BY_TASK } from './fixture.mjs';
+import { assessRun } from './outcome.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..', '..');
@@ -177,7 +178,8 @@ function runSide(name, withHarness) {
   writeFileSync(join(side.dir, 'answer.md'), text || '(no assistant text captured)');
 
   console.log(`${(durationMs / 1000).toFixed(1)}s, ${usage.output.toLocaleString('en-US')} output tokens`);
-  return { name, dir: side.dir, durationMs, usage, ok: usage.messages > 0 };
+  const outcome = assessRun(run);
+  return { name, dir: side.dir, durationMs, usage, ...outcome, ok: outcome.runCompleted };
 }
 
 console.log(`paired baseline: ${taskId}${model ? ` (model: ${model})` : ''}\n`);

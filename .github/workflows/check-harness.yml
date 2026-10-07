@@ -39,6 +39,8 @@ jobs:
           git diff --cached --exit-code -- dist
       - name: Skill conformance (platform spec + silent-trigger checks)
         run: node scripts/validate-skills.mjs
+      - name: Runtime and memory regressions
+        run: node --test tests/reliability/*.test.mjs
       - name: Hot-path report
         run: node scripts/measure-hotpath.mjs
       - name: Mutation suite (the instruments catch planted defects)

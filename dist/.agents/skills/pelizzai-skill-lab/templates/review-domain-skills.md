@@ -19,4 +19,9 @@
 
 ## Log
 
+For each measured skill, record code/use/source as `clear`, `drifted` or `unknown`, evidence
+paths, source hash and the reviewed SHA. Quiet territories are skipped without advancing the
+cursor. Missing traces cannot establish non-use. Adoption records the approval or bounded
+standing authorization and a rollback; detection itself never authorizes a change.
+
 - <YYYY-MM-DD> — ledger initialized by `pelizzai-skill-lab` at bootstrap (orchestration: `pelizzai-onboard`; baseline = bootstrap date, since the skills are born from the repo-scan of the current HEAD)

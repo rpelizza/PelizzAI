@@ -265,9 +265,10 @@ asked only for bootstrap/design, stop at the approved scope.
 
 ### 6. Hooks and integrations
 
-Claude hooks are opt-in and separate. On a consumer's first mutating interaction, run
-`node scripts/install-hooks.mjs --check` in read-only mode. If they are absent, offer to install
-the **opt-in Claude Code hooks** — **one by one, with confirmation; never impose** — explaining
+Hooks are opt-in and separate. Identify the actual host (`claude` or `codex`) first. On a
+consumer's first mutating interaction, run `node scripts/install-hooks.mjs --platform <host>
+--check` in read-only mode. If absent, offer the **opt-in hooks** — **one by one, with
+confirmation; never impose** — explaining
 the effect of each. Do not reopen the offer once the check passes:
 
 - **Cadence hook** (`pelizzai-cadence.mjs`/`.ps1`, `UserPromptSubmit`): non-blocking reminder to
@@ -291,18 +292,22 @@ the effect of each. Do not reopen the offer once the check passes:
   the hook's. Fail-open on any error of the hook itself (always exit 0 when it cannot decide).
 
 Only edit settings after confirmation, and respect the granularity of the answer: use
-`node scripts/install-hooks.mjs` when the user accepts all four. If they accept only a subset, use
+`node scripts/install-hooks.mjs --platform <host>` when the user accepts all four. If they accept only a subset, use
 `--only <ids>` (`guardrails`, `writegate`, `cadence`, `session-start`, comma-separated) and pass
 the same `--only` to `--check` and `--remove` — never batch-install what was not accepted, and do
-not hand-edit `.claude/settings.json` for a subset the installer already handles in its canonical
+not hand-edit the platform settings for a subset the installer already handles in its canonical
 form. `--only` is additive (it does not drop a hook the user had already accepted), bare `--check`
 is an inventory in which a deliberate partial install is not a failure, and `--check --only <ids>`
 turns into a turnstile that requires exactly those hooks. The installer merges
-`.claude/settings.json` without overwriting existing hooks/permissions and is idempotent. The
-export may register them immediately only when the user explicitly chooses `--install-hooks`.
+`.claude/settings.json` (Claude) or `.codex/hooks.json` (Codex) without overwriting existing
+hooks/permissions and is idempotent. Codex uses a native `apply_patch` matcher and absolute
+installation paths; reinstall after moving the project. Registration is not host trust or proof
+of dispatch: Codex requires project and definition trust in the host. Explain that step without
+granting or bypassing trust, then observe a harmless invocation before claiming the hook works.
+The export flag `--install-hooks` retains Claude as its default; use the platform installer for Codex.
 
 `PreToolUse` has **two** groups: the writegate also runs on `Bash`, otherwise writes via
-redirection/heredoc slip past the gate. This is how `scripts/install-hooks.mjs` writes it:
+recognized shell writes reach the gate too. This is the Claude Code registration shape:
 
 ```json
 {
@@ -381,6 +386,7 @@ pelizzai/
 ├── .gitattributes
 ├── domain-skills.md
 ├── profile.md
+├── atlas.md · territories/       evidence-backed memory, on demand
 ├── context.md | context/ · adr/ | out-of-scope/ · specs/ | plans/   on demand
 └── data/
     ├── state.md                    ignored (local per-dev cursor)
@@ -388,7 +394,7 @@ pelizzai/
     ├── learnings.md                versioned (merge=union)
     ├── verification-standard.md    versioned
     ├── history/                    versioned (each task's intact block, migrated at the seal)
-    └── .cadence-state.json · handoffs/ · mockups/ · reports/   ignored
+    └── memory-index.json · .cadence-state.json · handoffs/ · mockups/ · reports/   ignored
 ```
 
 In a workspace with multiple repositories, do not pretend one scalar state covers them all: bootstrap per repo or explicitly declare which root owns the artifacts.

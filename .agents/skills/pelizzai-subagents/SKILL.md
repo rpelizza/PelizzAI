@@ -36,8 +36,9 @@ takes the gap to the human.
 ## Mechanics
 
 ```text
-- Agent/Task tool: the subagent has its own context window, ONLY returns its final text to the
-  coordinator, does NOT talk to other subagents, and TERMINATES on return (no memory between calls).
+- Inspect the actual agent API: context inheritance, messaging, persistence, model selection and
+  read-only restrictions differ between Claude Code and Codex. Do not assume a call terminates
+  the agent, that messaging exists, or that the briefing is its only context.
 - agentTypes: Explore (read-only search), Plan (read-only architect), general-purpose, or custom.
   Read-only ones (Explore/Plan) do NOT edit files — writing roles require general-purpose or custom.
 - Parallelism: for independent subagents, issue several Agent calls in a single message.
@@ -51,7 +52,8 @@ takes the gap to the human.
 
 ## Self-sufficient briefing
 
-The subagent **does not inherit your context** — build the prompt. In plan execution, use
+The briefing must work **without inherited context**; request fresh context for blind review
+when supported and disclose any inherited context. In plan execution, use
 `task-brief.*` only with a compatible persistent Markdown plan; a native plan uses pasted content.
 The handoff dir is gitignored in the consumer and temp in source mode (see task-cycle §1):
 

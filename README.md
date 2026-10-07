@@ -1,6 +1,7 @@
 # PelizzAI
 
-An engineering harness for coding agents — Claude Code, Codex, Cursor, Gemini CLI, and the like.
+An engineering harness for coding agents, with Claude Code and Codex as the primary runtime
+targets. Cursor and other clients can consume the portable instructions; capabilities differ.
 
 You clone it, copy `dist/` into your project (or run the export), and the agent starts working with
 process: it reads your actual stack, writes rules specific to your project, isolates before
@@ -16,7 +17,8 @@ The rule that organizes everything else:
 
 **Requirements:** none to install by copying `dist/`. Node.js 18+ for the scripts (export,
 sync, hooks); PowerShell 7+ only for the `.ps1` wrappers on Windows. No dependencies are
-installed: the harness is markdown, plus a few scripts.
+installed: the harness is Markdown plus portable scripts. Skill validation includes the pinned
+JS-YAML 4.1.1 parser and its MIT license in `scripts/vendor/`; no npm install is required.
 
 ---
 
@@ -53,9 +55,8 @@ harness's development files.
 2. Copy **the contents** of `dist/` into the root of your project — Ctrl+C, Ctrl+V, done.
 3. Open the agent in the project and type `bootstrap`.
 
-To **update** later, prefer the export below: it preserves your domain skills and your
-`pelizzai/` and validates the installation. Copying the new `dist/` over the top also works, but it
-neither removes core skills discontinued upstream nor runs the validation.
+To **update** later, use the export below. Copy-over can overwrite local customizations and
+does not validate the installation; reserve copying for a fresh installation.
 
 ### With a command line: install and update are the same command
 
@@ -87,12 +88,20 @@ export adds over the copy:
 | requirement | none | Node 18+, run from the source repo |
 | removes core skills discontinued upstream | no (copy-over) | yes, and names each one |
 | runs the sync validation inside your project | no | yes |
+| records delivered hashes and refuses conflicting local edits | receipt included, no preflight | yes, before replacement |
 | preserves domain skills, `pelizzai/`, `settings.json` | yes | yes, by contract |
 | registers hooks | never | optional, `--install-hooks` |
 
 In your project's `CLAUDE.md`/`AGENTS.md`/`GEMINI.md` the harness owns only a **managed block**
 (`<!-- pelizzai:begin -->` … `<!-- pelizzai:end -->`); everything you wrote outside it survives
 every update.
+
+`scripts/pelizzai-installation.json` records normalized content hashes for distributed skills,
+hooks and scripts. Export refuses a conflicting local edit, including an extra reference inside
+a core skill. Legacy installations without a receipt must first be compared and reconciled:
+different existing files are unowned, not permission to overwrite. The receipt establishes
+delivery ownership, not behavioral quality or host hook trust. Keep custom entrypoint text
+outside the managed block. There is no forced-update option.
 
 > **Never copy the repository root by hand** — manual copying is what `dist/` is for. What sets
 > the source repo apart from a consumer is a single sentinel, `scripts/pelizzai-source-repo.txt`.
@@ -102,7 +111,8 @@ every update.
 
 ### Hooks: copied, never enabled without you
 
-The hooks are Claude Code-specific and **opt-in**. You have two paths:
+Hooks are **opt-in** for Claude Code and Codex. `--install-hooks` selects Claude Code for
+backward compatibility; use the installer explicitly for Codex:
 
 - enable them along with the installation, adding `--install-hooks` (or `-InstallHooks`);
 - leave it to the first task that writes something: `pelizzai-onboard` checks, recommends, and asks
@@ -112,13 +122,22 @@ The hooks are Claude Code-specific and **opt-in**. You have two paths:
 node scripts/install-hooks.mjs --check                  # check only
 node scripts/install-hooks.mjs --only cadence,guardrails # install the ones you choose
 node scripts/install-hooks.mjs --remove                 # remove only the PelizzAI hooks
+node scripts/install-hooks.mjs --platform codex --only writegate,guardrails,session-start
+node scripts/install-hooks.mjs --platform codex --check
 ```
 
 The installer is idempotent and preserves hooks, permissions, and any other fields that already
-exist in your `.claude/settings.json`. On the other platforms the same invariants still hold
-through the skills — with no executable enforcement.
+exist in `.claude/settings.json` or `.codex/hooks.json`. Check validates event/matcher coverage,
+including `apply_patch` on Codex. A partial opt-in is valid; a present hook in the wrong event
+is not. Codex commands point at the installation's actual path: reinstall after moving it.
 
-Enabling them is worth it: in a measured A/B on the trigger tests, the same harness and the same
+**Registered is not running.** Codex also requires project trust and review of the current hook
+definitions; inspect `/hooks` in the CLI. The installer never grants or bypasses trust. Verify
+dispatch in the actual client before claiming enforcement. See the official
+[Codex hooks contract](https://learn.chatgpt.com/docs/hooks) and
+[Claude Code hooks reference](https://code.claude.com/docs/en/hooks).
+
+Historical Claude trigger evidence: in an earlier A/B, the same harness and the same
 fixture scored **4/7 without hooks and 7/7 with them**. The injected phrases are identical to what
 the entrypoint already says — the mechanism is the channel, not the content.
 
@@ -150,10 +169,16 @@ The two gates that share the word "kickoff" are distinct on purpose. **GATE 1** 
 *route*: lane, head skill, overlays, discovery gaps. The marker `kickoff: ratified` is only
 written later, at **GATE 3** — the post-plan setup gate — after the structural decisions are
 answered one question at a time: isolation (branch or worktree), execution mode (inline ·
-subagents · `team`, the three always visible), commit strategy (granular by default;
+subagents · `team`, filtered by demonstrated capabilities), commit strategy (granular by default;
 `squash-final` only on explicit request), and the executor's model tier. On the short routes
 (tweak, bug) the same decisions collapse into a compact one-line confirm — still answered, never
 defaulted.
+
+In **Codex**, required decisions use numbered options in the chat and end the turn. The harness
+waits for the user's answer; a dismissed selector, silence, elapsed time, or an unrelated reply
+is not approval. **Claude Code** uses its blocking question tool when available. Asynchronous
+questions are only suitable for optional clarification while independent read-only work proceeds.
+An explicit answer or authorization remains valid within its stated scope; do not ask it again.
 
 Ratifying the route at GATE 1 does not end your authority: a material gap that shows up later —
 in the spec, in the plan, or in the middle of the code — reopens the conversation (see the next
@@ -289,8 +314,15 @@ born on a protected branch.
 
 Branch, inline execution, and granular commits are the **recommended** defaults; worktree, team,
 and subagents come in when genuinely independent fronts justify the cost. None of it is applied in
-silence — after the plan is approved, isolation, mode (with `team` always visible), commits, and
+silence — after the plan is approved, isolation, feasible mode, commits, and
 review are decided **one question at a time**. `squash-final` happens only on explicit request.
+
+Before offering a worktree, verify project policy, reproducible dependencies/configuration and
+isolation of ports, databases and volumes. Using the same framework does not itself prevent a
+worktree. When a task worktree is infeasible, implementation stays inline; independent read-only
+investigation and review can still use subagents. Team implementation additionally requires
+actual coordination tools. Context inheritance, agent lifetime and messaging are checked against
+the session's API. A review with inherited author context is not described as blind.
 
 Ratified structural decisions can become **project policy** in `pelizzai/profile.md` and
 pre-select future recommendations. They do not auto-confirm a new task, barring your explicit
@@ -476,6 +508,28 @@ Two knowledge files close the loop between what a delivery taught and what the n
 failure, never speculation. At closeout, `pelizzai-finish` proposes the write-back
 (recommend-and-ratify) — baseline lines, incidents, and the lessons flagged during execution.
 
+The memory loop also has a retrieval path:
+
+```sh
+node scripts/project-memory.mjs --query "storage ownership deletion"
+node scripts/project-memory.mjs --rebuild  # optional derived, ignored local index
+```
+
+Queries search project-owned context, ADRs, learnings, verification standards and archived
+`data/history/` records. They return paths, line numbers, content hashes and bounded excerpts,
+alongside the full Active rules section, including legacy `Regras ativas`. An unknown heading
+returns an explicit diagnostic and the full learnings source. Queries read current files and
+write nothing; the optional index is never authoritative. Historical evidence must be reconciled
+with current Git/code. No match means unknown, not that an incident never happened.
+
+An evidence-backed `atlas.md` maps territories to paths, skills and traps; optional
+`territories/*.md` hold verified invariants. Execution updates affected knowledge **before** the
+final seal. Active rules are checked again at the risky action, not merely read at kickoff.
+Stable cause and incident identifiers connect repeated failures across archives without counting
+the same incident twice. A missed rule and an ineffective rule require different corrections.
+This is lexical retrieval and an explicit learning workflow; cross-session prevention of repeat
+errors has not yet been established by a controlled behavioral evaluation.
+
 ---
 
 ## Domain skills: creation and maintenance
@@ -493,7 +547,7 @@ flowchart TD
     NUD -- "yes" --> PROP["proposes a review<br/>warns ONCE, never blocks"]
     PROP --> READ["reads the current skill and changes only<br/>what the version or the pattern requires"]
     READ --> DIFF["shows the diff BEFORE writing"]
-    DIFF --> APR{"approval PER skill,<br/>never in batch"}
+    DIFF --> APR{"scoped standing authorization<br/>or explicit approval for this diff?"}
     APR -- "yes" --> W["writes, preserving<br/>your customizations"]
     APR -- "no" --> SKIP["keeps it as is"]
 ```
@@ -505,6 +559,17 @@ suppression after warning.
 
 Proactive maintenance acts **only** on domain skills. The harness skills (`pelizzai-*`) change
 only on explicit request.
+
+During authorized work, maintenance compares each skill's reviewed SHA and territory with
+changed paths, WIP and lockfiles. It separates code drift, observed usage and source freshness;
+each conclusion carries evidence or is marked unknown. With no relevant delta, it skips the
+review without advancing its checkpoint. A global review date is not proof that every skill is fresh.
+
+The default is **propose**. A bounded `apply-approved` policy may authorize named skills and
+mechanical edits, with checks and expiry. A changed source hash invalidates an approved diff;
+security rules and acceptance standards require their own decision. Validation, evidence and
+rollback accompany an applied update. This is selective maintenance, not unrestricted rewriting.
+The atlas, evidence separation and per-territory checkpoints adapt useful ideas from Noetron.
 
 ---
 
@@ -592,21 +657,23 @@ PelizzAI/
 ├── scripts/
 │   ├── sync-harness.mjs          portable core of sync + distribution
 │   ├── sync-harness.ps1|.sh      wrappers
-│   ├── install-hooks.mjs         merge/check/remove of the Claude Code hooks
+│   ├── install-hooks.mjs         merge/check/remove for Claude Code and Codex
+│   ├── project-memory.mjs        project evidence retrieval and optional derived index
+│   ├── vendor/                  pinned YAML parser, license and provenance
 │   ├── test-harness-contracts.ps1  executed fixtures and structural checks (no prose regexes)
 │   ├── measure-hotpath.mjs       hot-path cost report per route (bytes vs. target; reported, not enforced)
 │   ├── validate-skills.mjs       platform-spec validation of the skills (hard errors, no size rules)
 │   ├── pelizzai-source-repo.txt  source mode sentinel (NEVER copy to consumers)
 │   ├── task-brief.ps1|.sh
 │   └── review-package.ps1|.sh
-├── tests/                        trigger, baseline, and mutation runners
+├── tests/                        reliability fixtures, trigger, baseline and mutation runners
 ├── CLAUDE.md                     canonical entry
 ├── AGENTS.md · GEMINI.md         generated
 └── .github/workflows/check-harness.yml
 ```
 
 **The hooks are safety nets, not the harness's brain.** Four pairs (`.mjs` for Node,
-`.ps1` for fleets without it), identical behavior asserted across both legs:
+`.ps1` for fleets without it), with shared contract fixtures for both legs:
 
 - `pelizzai-session-start` — injects reminders at session start, resume, clear, and compact: load
   the core first, an active task exists, bootstrap is missing, or the ratified defaults recap.
@@ -621,25 +688,21 @@ PelizzAI/
   route around the net. It classifies strings; it never runs git.
 - `pelizzai-writegate` — the enforcement of isolation and the kickoff, below.
 
-The `writegate` is a fail-closed `PreToolUse` hook that moves the invariant "isolate before the
-first write" from model obedience to executable enforcement. There are two rules: **Rule A** bars
+The `writegate` is a `PreToolUse` hook that rejects recognized violations of "isolate before the
+first write". There are two rules: **Rule A** bars
 product writes on a protected branch or a detached HEAD; in a consumer, writing product requires
 `kickoff: ratified` in `state.md` — **Rule B**. Writing metadata in `pelizzai/` stays allowed even
 on a protected branch, otherwise reconciling the state itself would deadlock.
 
-On the `Bash` side, the matcher reads the command **quote-aware, end to end**: a `|`, `&&`, `;`,
-newline, or `>` inside quotes is text, not an operator. So `sed -i 's|a|b|' pelizzai/data/state.md`
-is not cut at the quoted pipes and blocked by mistake, and quoting can't hide a real product
-redirect from the gate either. Escapes follow the shell: inside double quotes `\"` does not close
-the string, `\<newline>` joins continued lines, a backslash followed by a space, tab, or shell
-operator keeps it literal (a filename with spaces stays whole; an escaped `>` is text, not a
-redirect), single quotes are literal — while a backslash before any other character stays an
-ordinary character. Backslash is a path separator only on Windows; on POSIX it is a literal
-filename character. Command substitutions — `$(…)` and backticks, which the shell runs even
-inside double quotes — are parsed recursively, so a redirect hidden inside one is still seen. Null
-sinks, targets with unresolvable variables, and targets that resolve outside the repository are
-never treated as product, and paths are resolved **physically**: `..` after a symlink cannot
-smuggle product into the metadata carve-out.
+On shell commands, the writegate recognizes a bounded set of writes, quoting and command
+substitutions covered by fixtures. It is not a complete shell interpreter or a security boundary:
+working-directory changes and complex quoting/heredocs still have known gaps (issues #62 and
+#87). Variables it cannot resolve and paths outside the repository are not classified as product.
+
+For Codex, the native `apply_patch` payload is parsed as patch data, including add, update, delete
+and both sides of a move. Paths containing `$` stay literal. Unified exec accepts `cmd` and
+`workdir`. These deterministic fixtures validate the adapter, not whether a trusted host
+actually dispatched it.
 
 The hook **does not enforce the greenfield approval steps** — discovery, spec, domain skills, and
 plan remain mandatory, but they are driven by the skills, with you, not by a hook counting stamps
@@ -673,19 +736,24 @@ stale anchors. They are gone.
   commits and a backdated ledger until it nudges and then snoozes (both legs byte-identical), and
   the SessionStart hook is proven to suppress the catalog nudge only behind the source-mode
   sentinel; the hook installer (merge, idempotence, `--only`, surgical
-  removal); a real consumer export (Cursor adapter carried, sentinel and suite removed, nested
+  removal); a real consumer export (Cursor adapter carried, sentinel excluded, local suite preserved, nested
   target rejected, exported consumer passes its own `--check`); a fresh `--build-dist` that must
   leave the committed `dist/` untouched; the handoff/review helpers in a temporary repo;
   `node --check` / `bash -n` / `-Help` of every script. *Structural:* the manifest is an exact set
   with no duplicates; `.agents/` and `dist/` mirror `.claude/skills` by paths and hashes; every
   `pelizzai-*` token in the skills, `CLAUDE.md`, and the Cursor adapter resolves to a skill, a
   hook, or a known script; the head-skill set core announces is the set the router routes.
-- **Skill validation** (`scripts/validate-skills.mjs`): two scopes, all hard errors. The
+- **Reliability fixtures** (`node --test tests/reliability/*.test.mjs`): Codex patch targets,
+  `cmd`/`workdir`, hook registration coverage, YAML failures, archived/legacy memory retrieval,
+  incomplete or failed execution traces, and consumer ownership/conflict preservation.
+- **Skill validation** (`scripts/validate-skills.mjs`): all hard errors. The
   platform-specification rules from the published Agent Skills spec — frontmatter shape and keys,
   name length, kebab-case, `name` matching the directory, description length, no angle brackets.
-  Plus two repository-specific silent-trigger checks that go beyond the spec: an unquoted colon
-  followed by a space in a description (which killed the trigger of 5/31 skills once) and an H1
-  that names a skill that no longer exists. No size rules, no allowance.
+  A real YAML parser rejects invalid quoting, duplicate keys and non-string names/descriptions,
+  while accepting folded scalar descriptions. The harness-only H1 check detects obsolete skill
+  names without imposing harness titles on domain skills. Use `--skills-root <directory>` to
+  validate a consumer's domain catalogue; an empty catalogue is not a successful validation.
+  No size rules, no allowance.
 - **Mutation suite** (`tests/mutation`, Ubuntu): plants a defect in a disposable copy of the
   repo — a description that loses its trigger, a skill renamed in its frontmatter but not on
   disk, a route declaring a file that moved, a head skill linking an unbudgeted reference, a
@@ -721,7 +789,10 @@ stale anchors. They are gone.
 - **Baseline** (`tests/baseline`): the same task twice, with and without the harness — tokens,
   turns, and wall-clock side by side, both sides working on the same small invoice app that
   `tests/baseline/fixture.mjs` materializes (the runner refuses to start without it). It
-  deliberately does not score quality; it prices the process.
+  deliberately does not score quality; it prices the process. Messages or attempted writes do not
+  imply success: a completed run requires a successful terminal event and a successful process.
+  Task correctness remains unmeasured until a separate task oracle verifies it. Trace helpers
+  understand Claude and Codex terminal events; the live baseline runner still targets Claude.
 
 ---
 
@@ -738,6 +809,7 @@ node scripts/sync-harness.mjs --check            # validates the sync
 pwsh scripts/test-harness-contracts.ps1          # executed fixtures + structural checks
 node scripts/measure-hotpath.mjs                 # hot-path bytes per route vs. target (report)
 node scripts/validate-skills.mjs                 # platform spec (hard errors)
+node --test tests/reliability/*.test.mjs           # executable regression fixtures
 node tests/mutation/run.mjs                      # do the checkers still catch defects?
 ```
 
@@ -762,10 +834,12 @@ committed-`dist/` check run on Ubuntu.
 - The authoring of `.cursor/rules/pelizzai.mdc` is manual — the sync distributes it to consumers,
   but does not generate it from `CLAUDE.md`, and no CI job compares it against the entrypoints.
 - The core requires Node.js 18+; the `.ps1` wrappers require PowerShell 7+ with UTF-8 encoding.
-- The hooks are Claude Code-specific and opt-in. On the other platforms the invariants hold only
-  through the skills, with no executable enforcement.
+- Hook registration supports Claude Code and Codex, opt-in. Registration and fixture success do
+  not prove host trust or live dispatch in a particular CLI/app build. Other platforms rely on
+  the skills unless their own hook adapter is implemented and verified.
 - The trigger and baseline runners are not in CI: they cost tokens and need a real agent
-  credential. They run before a doctrine slice lands, and the rates go in the PR.
+  credential. Historical rates do not validate the current changes; report the actual revision
+  and runtime whenever a fresh behavioral evaluation is run.
 - The writegate's shell parser is best-effort and honest: what it cannot parse safely does not
   block, and a link created between the check and the write (TOCTOU) is not seen — guardrails
   and human review remain the compensating controls.
@@ -773,6 +847,8 @@ committed-`dist/` check run on Ubuntu.
   On Windows, teammates must use the `in-process` display.
 - Parallel writes require `isolation: worktree` with disjoint paths; on `branch`, the coordinator
   integrates serially.
+- Memory retrieval is keyword-based and project-local. It neither remembers every conversation
+  nor guarantees compliance; historical claims and active rules need verification at use time.
 - Context7 depends on the host for installation and configuration. Without it, the fallback is
   current official documentation, with the limitation declared.
 

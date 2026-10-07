@@ -16,7 +16,41 @@ Two axes **update** skills that already exist; one axis **creates** the first sk
 | **Rework-driven**   | The same fix was made by hand several times in git history            | The repeated pattern becomes a **rule** inside the existing skill |
 | **Adoption-driven** | The task adopted a significant dependency/service NOT YET covered by a catalog skill (new top-level in the manifests/lockfiles, absent from the Stack baseline in `pelizzai/profile.md` AND from the catalog) | **PROPOSE CREATING** the first skill for that stack, grounded in context7 or current official documentation for the pinned version — not just updating |
 
-All three are **opt-in**: the harness detects, **proposes**, the user decides. They never run on their own.
+Detection is automatic within an authorized task; adoption follows the project's recorded
+maintenance authorization. Without that authorization, the harness proposes and the user decides.
+
+## Select by evidence before opening skills
+
+At closeout, compare changed paths with `pelizzai/atlas.md` and each skill's explicit territory.
+Use the per-skill reviewed SHA in `review-domain-skills.md`, not a date alone:
+`git diff --name-only <reviewed-sha>..HEAD -- <territory-paths>`. Include affected lockfiles.
+Also inspect uncommitted changes in that territory; HEAD alone cannot clear ongoing work.
+No change and no incident → skip the skill without advancing its reviewed SHA.
+Missing territory, invalid SHA or missing ledger row → `unknown`, never `clear`.
+
+For a due skill, record three verdicts (`clear`, `drifted`, `unknown`) with evidence:
+code (paths/contracts still exist), use (the skill actually reached work in its territory),
+and source (claims still hold for pinned versions). Absence of a skill name in history is not
+proof of non-use when the execution trace is missing. Read only relevant history returned by
+`scripts/project-memory.mjs --query`; archived failures remain eligible evidence.
+
+The cadence offers a pass; these signals determine its contents. A calendar threshold alone
+never warrants opening or rewriting every skill. A clean pass records what was checked, not
+an invented improvement. Change only the canonical source, validate it, then sync mirrors.
+
+## Bounded automatic adoption
+
+Default: `propose`. A user may authorize `apply-approved` in the project profile, naming skills,
+allowed mechanical edits, checks and expiry/review boundary. This standing authorization may
+cover re-grounding moved references or correcting an already demonstrated instruction; it
+never expands product behavior, security policy, acceptance standards or external effects.
+No matching authorization → show the concrete diff for approval. A new standing rule or a
+change to the verification standard still needs its own human decision.
+
+For either mode: capture source hashes, prepare the smallest diff, run the regression that
+motivated it plus existing checks, and compare hashes again before applying. If the source
+changed, rebuild the proposal instead of overwriting. Record evidence, authorization origin,
+changed skills, reviewed SHA and rollback. Never silently edit core `pelizzai-*` in a consumer.
 
 ### Version-driven (refresh)
 
@@ -56,11 +90,13 @@ Coverage gaps flagged during consumption (inline/subagents/team execution touchi
 Git history is evidence of what the harness did well and of what required manual rework.
 
 ```text
-1. Bound the window: from the ledger's `last-review` to HEAD (git log --since="<last-review>").
+1. Bound the window by the affected skill's last reviewed SHA and territory
+   (`git log <reviewed-sha>..HEAD -- <territory-paths>`), including archived incidents. A global
+   `last-review` date cannot exclude work in a skill skipped by another area's review.
 2. Look for patterns: the same kind of fix made by hand repeatedly; conventions the team applied
    consistently; errors that repeat.
 3. For each recurring pattern, propose turning it into a rule inside the relevant domain skill.
-4. Confirm with the user, apply (refresh), and record in the ledger.
+4. Check explicit approval or bounded standing authorization, apply (refresh), and record in the ledger.
 ```
 
 ## Refresh never overwrites blindly
@@ -76,26 +112,26 @@ Non-negotiable rule when updating an **existing** skill:
   the router reads the catalog, not the skill, so a stale entry outlives and outreaches the
   corrected body. Consumer only — in the source repo the catalog does not exist; the native
   execution record takes its place and no `pelizzai/` file is created.
-- Approval is PER skill — never in bulk, never inherited from the "yes" given to another skill.
-  Without confirmation, nothing is written.
+- Each skill must be covered by explicit approval or the bounded standing authorization above.
+  Approval of a different skill or a generic delivery does not authorize maintenance.
 ```
 
 Recreating a skill from scratch on top of an existing one erases customizations and is forbidden.
-The flow is always **propose → confirm → apply → record**. There is no "hands-free" mode (it was
-tried in the previous harness and failed in the field). In an edit the user already requested, the
+The flow is **detect → concrete diff → validate → check authorization → apply → record**.
+Unbounded hands-free rewriting is unsupported. In an edit the user already requested, the
 proposal IS the diff: show it before writing, within the requested scope, without reopening the
 authorization they just gave.
 
 ## Cadence (triggers)
 
-**Hybrid** model: portable core in the skill + reinforcement hook in Claude Code.
+**Hybrid** model: portable core in the skill + optional reinforcement hooks in Claude Code/Codex.
 
 ### Portable core (when closing the task)
 
 Applies in the active skill roots (`.claude`/`.agents`); Cursor is just an adapter. This block is
 the cadence's **primary trigger**: `pelizzai-finish` consumes it in the closeout's read-only
 nudge (§5), a natural milestone that neither interrupts the flow nor blocks delivery. The hook
-(Claude Code) is only a safety net, every 10 interactions. When completing a task that touched
+is only a safety net, every 10 interactions. When completing a task that touched
 code:
 
 ```bash
@@ -124,7 +160,7 @@ count=$(git rev-list --count --since="$last_review 00:00" HEAD 2>/dev/null || ec
 
 Full repo-scan: if > 15 days have passed since `last-full-scan`, propose a broad re-scan (reusing `pelizzai-onboard`) and update the impacted skills.
 
-### Reinforcement hook (every 10 interactions — Claude Code only)
+### Reinforcement hook (every 10 interactions — Claude Code and Codex)
 
 The hook `.claude/hooks/pelizzai-cadence.mjs` is a `UserPromptSubmit` that counts interactions and, every 10, checks the git delta; if the threshold is crossed, it injects a short reminder. The thresholds are the same as the portable core's (10 commits / 10 review days / 15 full-scan days). Safety characteristics:
 
@@ -141,7 +177,7 @@ The hook `.claude/hooks/pelizzai-cadence.mjs` is a `UserPromptSubmit` that count
 
 > **Sampling ≠ nudge frequency.** `EVERY=10` decides how often the hook LOOKS; whether the nudge APPEARS is decided by the thresholds (10 commits / 10 days) + the 7-day suppression. Do not raise `EVERY` to high values (e.g. 100): that blinds the hook in short sessions without reducing the real warning frequency (already governed by the thresholds and the snooze).
 
-Entry in `settings.json` (installed at bootstrap, with confirmation — opt-in):
+Claude Code entry in `settings.json` (installed at bootstrap, with confirmation — opt-in):
 
 ```json
 {
@@ -157,13 +193,17 @@ Entry in `settings.json` (installed at bootstrap, with confirmation — opt-in):
 }
 ```
 
-**Who installs it (opt-in):** at bootstrap, `pelizzai-skill-lab` **proposes** the installation; if the user accepts, it **merges** the entry into `.claude/settings.json`, preserving existing hooks and permissions (merge, **never** overwrite the file). In Claude Code, the `update-config` skill can perform this edit. Also add `pelizzai/data/.cadence-state.json` to `.gitignore` — it is mutable state (changes on every interaction) and must not be versioned.
+**Who installs it (opt-in):** at bootstrap, `pelizzai-skill-lab` proposes installation. If accepted,
+use `node scripts/install-hooks.mjs --platform <claude|codex> --only cadence`, preserving existing
+hooks and permissions. Codex registration lives in `.codex/hooks.json` and still requires host
+trust and observed dispatch; never copy Claude's environment-variable command into it. Also add
+`pelizzai/data/.cadence-state.json` to `.gitignore` — it changes on interactions and is not versioned.
 
 **No-Node variant:** in a fleet without Node, use the PowerShell hook `.claude/hooks/pelizzai-cadence.ps1` (requires pwsh 7+), with the command `pwsh -NoProfile -File "${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-cadence.ps1"`.
 
 **Assumption:** the hook locates the ledger from the `cwd` and assumes `pelizzai/` at the project root (harness convention; in a monorepo/workspace, `pelizzai/` is root-level).
 
-> Why opt-in rather than on by default: a noisy `UserPromptSubmit` hook already "broke the flow" in a previous harness. The **portable core** (in the skill) is the source of truth; the hook is only reinforcement in Claude Code.
+> Why opt-in rather than on by default: a noisy `UserPromptSubmit` hook already "broke the flow" in a previous harness. The **portable core** (in the skill) is the source of truth; the hook is only reinforcement when the host supports and dispatches it.
 
 ## Seeding and ledger updates
 

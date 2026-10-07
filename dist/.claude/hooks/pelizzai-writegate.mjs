@@ -64,7 +64,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, realpathSync, statSync, lstatSync, readlinkSync } from 'node:fs';
-import { join, parse, isAbsolute, dirname, basename } from 'node:path';
+import { join, parse, isAbsolute, dirname, basename, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 
@@ -488,7 +488,7 @@ function block(reason) {
   process.stderr.write(
     `PelizzAI writegate: write redirected - ${reason}\n` +
       `(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, ` +
-      `isolate via pelizzai-isolate, ratify the gate, or disable the hook in .claude/settings.json.)\n`
+      `isolate via pelizzai-isolate, ratify the gate, or review this hook in your platform's hook settings.)\n`
   );
   return 2;
 }
@@ -527,12 +527,22 @@ function main() {
   let cwd = process.cwd();
   if (data && typeof data.cwd === 'string' && data.cwd) cwd = data.cwd;
   const ti = (data && data.tool_input) || {};
+  if (typeof ti.workdir === 'string' && ti.workdir) cwd = resolve(cwd, ti.workdir);
 
-  // Targets: file_path (Write/Edit/MultiEdit), notebook_path (NotebookEdit), shell (Bash).
+  // Codex canonical apply_patch uses tool_input.command, which is a PATCH, never shell.
+  // Paths are literal (including $ characters); moves affect both source and destination.
   const targets = [];
   if (typeof ti.file_path === 'string' && ti.file_path) targets.push(ti.file_path);
   if (typeof ti.notebook_path === 'string' && ti.notebook_path) targets.push(ti.notebook_path);
-  if (typeof ti.command === 'string' && ti.command) targets.push(...extractShellTargets(ti.command));
+  const command = ti.command ?? ti.cmd;
+  if (data?.tool_name === 'apply_patch') {
+    if (typeof command === 'string') {
+      for (const line of command.replace(/\r\n/g, '\n').split('\n')) {
+        const header = /^\*\*\* (?:Add File|Update File|Delete File|Move to): (.+)$/.exec(line);
+        if (header) targets.push(header[1]);
+      }
+    }
+  } else if (typeof command === 'string' && command) targets.push(...extractShellTargets(command));
   if (targets.length === 0) return 0; // nothing to guard (e.g. read-only Bash)
 
   const gitRoot = realpathOr(git(cwd, ['rev-parse', '--show-toplevel']));

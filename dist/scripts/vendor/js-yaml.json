@@ -1,0 +1,10 @@
+{
+  "name": "js-yaml",
+  "version": "4.1.1",
+  "license": "MIT",
+  "source": "https://github.com/nodeca/js-yaml/tree/4.1.1",
+  "artifact": "dist/js-yaml.mjs",
+  "sha256": "efbc45850bf15f0c8ee3434983f512be656002d7507dc292c7ade4449b5d57fa",
+  "schema": "CORE_SCHEMA",
+  "purpose": "Parse skill frontmatter without requiring dependency installation in consumers."
+}

@@ -71,7 +71,8 @@ profile — push/PR/publication are decided per task in `pelizzai-finish`.
    Question: which isolation do you choose?
 
 2. Mode (only after 1)
-   Options always visible: inline · subagents · team.
+   Read [references/capabilities.md](references/capabilities.md) before recommending modes.
+   Offer only feasible implementation modes; read-only review is a separate capability.
    Recommended: <mode> — <why>.
    Question: which mode do you choose?
 
@@ -96,8 +97,8 @@ profile — push/PR/publication are decided per task in `pelizzai-finish`.
 ```
 
 Rules: every option, recommendation, question, and confirmation of this gate is emitted in the
-conversation's language (identifiers verbatim). The mode keeps **the three options always visible**
-— **team is never omitted**. There is no universal ranking. **Squash-final only on explicit user request**. The plan's content (the
+conversation's language (identifiers verbatim). The mode offers only options proven feasible by
+the capability check; explain a relevant unavailable option once. **Squash-final only on explicit user request**. The plan's content (the
 WHAT) was already approved at the previous edge; this gate ratifies the HOW without hiding
 several decisions behind a single "ok". Silence and recommendation do not count as an answer. Do
 not write code, move a worktree, squash, or record final decisions until steps 0–4 are complete.
@@ -106,9 +107,10 @@ Branch base and name were already ratified before the spec/plan by `pelizzai-iso
 Under a closed briefing (SUBAGENT-STOP / TEAM-MEMBER-STOP), do not produce route analyses or open
 gates: apply the briefing and escalate to the coordinator whatever requires a decision.
 
-**Policy already ratified.** Values from `profile.md` pre-select the recommendation of each step,
-but do not auto-confirm the current task. Ask the sequential questions normally; the user may
-answer "use the policy for the remaining items" and explicitly delegate that application.
+**Policy already ratified.** Reuse explicit answers in this conversation and project policies
+whose recorded scope covers this task. Recap their origin instead of asking again. A preference
+without standing authorization is a recommendation; it cannot approve a new scope or external
+effect. Ask only unanswered decisions or a material departure from the authorized policy.
 
 If the signals diverge from the policy, explain the divergence in the recommendation. An override
 does not change the profile; changing the policy requires separate confirmation before writing.
@@ -172,6 +174,11 @@ In the consumer, the `pelizzai/` directory follows the harness pattern and state
 ---
 
 ## Build the skill package (mandatory in all three modes)
+
+Before final review/verification seals the delivery, reconcile authorized knowledge corrections
+for territories actually verified by this task, following `pelizzai-evolve`'s project-memory
+reference. Atlas/territory edits are part of the reviewed diff, not post-seal metadata. Keep
+historical entries immutable and link superseding decisions. Source mode uses the native record.
 
 Domain skills capture the project's patterns; cross-cutting skills/overlays capture a surface of
 the change. **Every executor and reviewer receives the applicable ones** — the briefing of EACH
@@ -446,8 +453,8 @@ yet another automatic lap, nor the stop into an open-ended "what do you prefer?"
 GATES (recommend-and-ratify; never apply a structural decision in silence):
 - Starting on a protected branch (main/master/develop/dev) — forbidden, no exceptions.
 - Plan: content and stress-test are approved before setup.
-- Post-plan setup: isolation, execution mode with **the three options
-  always visible** (**team is never omitted**), commit strategy (**squash-final only on explicit
+- Post-plan setup: isolation, execution mode with **options
+  filtered by the capability check**, commit strategy (**squash-final only on explicit
   user request**), and the executor tier (step 4; skipped in inline mode) are asked ONE PER TURN,
   always with a recommendation, and ratified before Task 1 — the task review itself is never a
   question (one independent dispatch, both verdicts, in every lane). Branch base and name were
@@ -561,7 +568,7 @@ config, or doc may change after the seal.
 ```text
 - Executing without an approved plan, without the post-plan setup gate, or without isolation (on
   a protected branch).
-- Applying isolation/mode/commit without the user's sequential ratification, or omitting team.
+- Applying isolation/mode/commit without scoped authorization, or offering infeasible modes.
 - Skipping domain skills/overlays — or not pasting them into executor and reviewer briefings.
 - Choosing team out of universal preference, or downgrading model/effort below what the
   user chose to save cost (capability is the user's decision; architecture, review, and final

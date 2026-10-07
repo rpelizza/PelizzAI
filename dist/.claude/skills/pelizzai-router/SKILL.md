@@ -119,9 +119,9 @@ Recommendation: accept this route because <reason>.
 Single question: May I proceed with this route? (yes or adjust)
 ```
 
-With a native option-selection tool, deliver the single question through it: the block as context,
-**accept** first and marked as recommended, **adjust** as the alternative. Both forms speak the
-conversation's language. **Silence is not a yes**: without the affirmative answer, hold the turn — no
+Use `pelizzai-interview` §How to ask: Codex numbered chat options and end of turn; Claude Code's
+blocking selector when available. Both forms speak the conversation's language.
+**Silence is not a yes**: without the affirmative answer, hold the turn — no
 branch, no file, no head skill. The user may adjust lane, discovery, artifacts, or overlays; a
 claimed prior approval that the transcript cannot show re-opens this gate rather than skipping it.
 When the user seems non-technical or the intent admits two material readings, the first line
@@ -132,7 +132,7 @@ Setup stays out of this block. Compute the recommendation silently — `isolatio
 subagents/team only for truly independent fronts, `squash-final` only when the intermediate history has
 no value; a value ratified in `pelizzai/profile.md` §Ratified execution defaults replaces the default —
 and hand it over: the tweak/bug head skill emits the **one-line compact confirm**; tracks with a plan
-ratify at the **post-plan setup gate** of `pelizzai-execute`, where `team` is always visible. The router
+ratify at the **post-plan setup gate** of `pelizzai-execute`, after its capability check filters modes. The router
 never applies `worktree` or `squash-final` on its own and never repeats the question.
 
 ## 6. Hand off
