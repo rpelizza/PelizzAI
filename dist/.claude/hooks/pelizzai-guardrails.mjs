@@ -33,8 +33,9 @@
  * (fail-open — the hook is a safety net, not the primary gate; a bug here never
  * locks the user out).
  *
- * Installation (opt-in, recommended by pelizzai-onboard at bootstrap), in the consumer
- * project's .claude/settings.json:
+ * Installation (opt-in, recommended by pelizzai-onboard at bootstrap). For Codex use
+ * scripts/install-hooks.mjs --platform codex (registers .codex/hooks.json).
+ * Claude Code example in the consumer project's .claude/settings.json:
  *   { "hooks": { "PreToolUse": [ { "matcher": "Bash", "hooks": [
  *       { "type": "command",
  *         "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-guardrails.mjs\"" } ] } ] } }

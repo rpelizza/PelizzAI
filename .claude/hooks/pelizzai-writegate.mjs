@@ -44,7 +44,8 @@
  * at most one warning per window (no spam).
  *
  * Install (opt-in, recommended by pelizzai-onboard at bootstrap, merged without overwriting
- * existing hooks/permissions), in the consumer project's .claude/settings.json — BOTH
+ * existing hooks/permissions). For Codex use scripts/install-hooks.mjs --platform codex
+ * (registers .codex/hooks.json). Claude Code example in .claude/settings.json — BOTH
  * matchers are required to also cover writes via shell:
  *   { "hooks": { "PreToolUse": [
  *       { "matcher": "Write|Edit|MultiEdit|NotebookEdit", "hooks": [
@@ -59,7 +60,7 @@
  *   → on a protected branch or without "kickoff: ratified" in state.md: reason on stderr and exit 2.
  *     On a task branch with the kickoff ratified, or outside the repo: exit 0.
  *
- * The user can disable the hook in .claude/settings.json — it is never an inescapable block.
+ * The user controls the hook in their platform's hook settings; it is never an inescapable block.
  * On fleets without Node, use the PowerShell variant pelizzai-writegate.ps1 (identical behavior).
  */
 

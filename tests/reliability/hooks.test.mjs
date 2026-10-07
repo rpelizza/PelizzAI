@@ -80,6 +80,8 @@ test('PowerShell writegate reads native Codex patch and exec payloads', t => {
   for (const header of ['*** Add File: $HOME.ts','*** Update File: pelizzai/note.md\n*** Move to: src/note.md','*** Delete File: src/note.md']) {
     const result=run('apply_patch',{command:`*** Begin Patch\n${header}\n*** End Patch`});
     assert.equal(result.status,2,result.stderr);
+    assert.match(result.stderr,/review this hook in your platform's hook settings/);
+    assert.doesNotMatch(result.stderr,/\.claude\/settings\.json/);
   }
   assert.equal(run('exec_command',{cmd:'Set-Content -LiteralPath src/a.ts -Value x',workdir:dir}).status,2);
 });

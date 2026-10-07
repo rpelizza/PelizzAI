@@ -42,7 +42,8 @@
 # at all fails open, warning at most once per window.
 #
 # Install (opt-in, recommended by pelizzai-onboard at bootstrap, merged without overwriting
-# existing hooks/permissions), in .claude/settings.json - BOTH matchers are required:
+# existing hooks/permissions). Claude Code example in .claude/settings.json - BOTH matchers:
+# For Codex use scripts/install-hooks.mjs --platform codex (registers .codex/hooks.json).
 #   { "hooks": { "PreToolUse": [
 #       { "matcher": "Write|Edit|MultiEdit|NotebookEdit", "hooks": [
 #           { "type": "command",
@@ -56,7 +57,7 @@
 #   -> on a protected branch or without "kickoff: ratified": reason on stderr and exit 2;
 #      otherwise (task branch with the kickoff ratified, or outside the repo): exit 0.
 #
-# The user can disable the hook in .claude/settings.json - it is never an inescapable block.
+# The user controls the hook in their platform's hook settings; it is never an inescapable block.
 
 $ErrorActionPreference = 'SilentlyContinue'
 
@@ -402,7 +403,7 @@ function Get-ShellTargets([string]$command, [int]$Depth = 0) {
 # Blocks: reason + safe path on stderr and exit 2.
 function Invoke-Block([string]$reason) {
   [Console]::Error.WriteLine("PelizzAI writegate: write redirected - $reason")
-  [Console]::Error.WriteLine('(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, isolate via pelizzai-isolate, ratify the gate, or disable the hook in .claude/settings.json.)')
+  [Console]::Error.WriteLine('(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, isolate via pelizzai-isolate, ratify the gate, or review this hook in your platform''s hook settings.)')
   exit 2
 }
 

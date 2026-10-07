@@ -29,7 +29,8 @@
 # Errors in the hook ITSELF: exit 0 (fail-open - the hook is a safety net, not the
 # primary gate; a bug here never locks the user out).
 #
-# Installation (opt-in, recommended by pelizzai-onboard), in .claude/settings.json:
+# Installation (opt-in, recommended by pelizzai-onboard). Claude Code example in .claude/settings.json:
+# For Codex use scripts/install-hooks.mjs --platform codex (registers .codex/hooks.json).
 #   { "hooks": { "PreToolUse": [ { "matcher": "Bash", "hooks": [
 #       { "type": "command",
 #         "command": "pwsh -NoProfile -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-guardrails.ps1\"" } ] } ] } }
