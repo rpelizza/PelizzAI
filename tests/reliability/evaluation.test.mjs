@@ -20,4 +20,8 @@ test('failed or unfinished tool writes are not evidence',()=>{
  assert.deepEqual(completedClaudeWrites([call]),[]);
  assert.deepEqual(completedClaudeWrites([call,result(true)]),[]);
  assert.equal(completedClaudeWrites([call,result(false)]).length,1);
+ const read=structuredClone(call);read.message.content[0].name='Read';
+ assert.deepEqual(completedClaudeWrites([read,result(false)]),[]);
+ const missingPath=structuredClone(call);missingPath.message.content[0].input={content:'No path'};
+ assert.deepEqual(completedClaudeWrites([missingPath,result(false)]),[]);
 });

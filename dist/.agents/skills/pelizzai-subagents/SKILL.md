@@ -39,9 +39,11 @@ takes the gap to the human.
 - Inspect the actual agent API: context inheritance, messaging, persistence, model selection and
   read-only restrictions differ between Claude Code and Codex. Do not assume a call terminates
   the agent, that messaging exists, or that the briefing is its only context.
-- agentTypes: Explore (read-only search), Plan (read-only architect), general-purpose, or custom.
-  Read-only ones (Explore/Plan) do NOT edit files — writing roles require general-purpose or custom.
-- Parallelism: for independent subagents, issue several Agent calls in a single message.
+- Map each role to the API's demonstrated tools and restrictions. In Claude Code, when offered,
+  Explore/Plan are read-only examples and general-purpose/custom agents may write. Other APIs
+  may use different names or permissions; never send unsupported agentType values.
+- Parallelism: use the verified API's concurrent dispatch mechanism for independent subagents.
+  Several Agent calls in one message are an example only when that tool is available.
   Parallel reading is safe; writing requires disjoint files and depends on the ratified isolation
   (consumer state or source execution record): on `branch`, one writer at a time and the coordinator
   integrates the writes SERIALLY; on `worktree`, parallel writing is allowed on DISJOINT PATHS

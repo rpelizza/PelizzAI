@@ -174,17 +174,16 @@
     ".claude/skills/pelizzai-loop/references/ooda.md",
     {
       "path": ".claude/skills/pelizzai-execute/references/delivery-seal.md",
-      "reason": "Cursor migration at the delivered seal and reconciliation of the previous delivery. Fires at closeout and when opening a task on top of a delivered one â€” never between two tasks of the same plan."
+      "reason": "Cursor migration at the delivered seal and reconciliation of the previous delivery. Fires at closeout and when opening a task on top of a delivered one - never between two tasks of the same plan."
     },
     {
       "path": ".claude/skills/pelizzai-review/references/task-reviewer.md",
-      "reason": "The task reviewer briefing template â€” read by the coordinator when dispatching the per-task review, pasted into the reviewer prompt; never resident."
+      "reason": "The task reviewer briefing template - read by the coordinator when dispatching the per-task review, pasted into the reviewer prompt; never resident."
     },
     {
       "path": ".claude/skills/pelizzai-onboard/references/remap-sweep.md",
-      "reason": "Dead-name sweep consulted only inside the Partial state remap branch â€” a consumer whose artifacts predate a harness skill rename; never resident."
+      "reason": "Dead-name sweep consulted only inside the Partial state remap branch - a consumer whose artifacts predate a harness skill rename; never resident."
     },
-    ".claude/skills/pelizzai-execute/references/capabilities.md",
     ".claude/skills/pelizzai-execute/references/capabilities.md",
     ".claude/skills/pelizzai-evolve/references/project-memory.md"
   ]

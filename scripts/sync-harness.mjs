@@ -55,7 +55,11 @@ function assertOwnedDestination(target, files) {
   for (const path of [join(target,'scripts'),receiptPath]) {
     if (existsSync(path) && lstatSync(path).isSymbolicLink()) throw new Error('Installation receipt must not cross a link.');
   }
-  const previous = existsSync(receiptPath) ? JSON.parse(readText(receiptPath)) : null;
+  let previous = null;
+  if (existsSync(receiptPath)) {
+    try { previous = JSON.parse(readText(receiptPath)); }
+    catch { throw new Error(`Invalid installation receipt at ${receiptPath}; reconcile it before exporting.`); }
+  }
   if (previous && (previous.schema !== 1 || !previous.files || typeof previous.files !== 'object')) throw new Error('Invalid installation receipt; reconcile it before exporting.');
   const conflicts = [];
   for (const [path, source] of files) {
@@ -482,7 +486,7 @@ This is a consumer: there is no \`scripts/pelizzai-source-repo.txt\`. The manife
   runNode(targetSync, ['--check'], target);
   // No timestamp: rebuilding identical sources produces identical distribution bytes.
   const receipt = {schema:1, files:Object.fromEntries([...delivered.keys()].sort().map(path=>[path,fileHash(join(target,path))]))};
-  writeFileSync(join(target,RECEIPT),JSON.stringify(receipt,null,2)+'\n');
+  writeTextAtomic(join(target,RECEIPT),JSON.stringify(receipt,null,2)+'\n');
   return core;
 }
 

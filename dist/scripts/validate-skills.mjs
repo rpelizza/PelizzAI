@@ -91,7 +91,7 @@ if (!requestedDirectory && (skillsDir === root || !(skillsDir + sep).startsWith(
   process.exit(2);
 }
 if (!existsSync(skillsDir) || !statSync(skillsDir).isDirectory()) {
-  console.error(`validate-skills: metadataFrom "${budget.metadataFrom}" is not an existing directory — nothing would be validated.`);
+  console.error(`validate-skills: ${requestedDirectory ? '--skills-root' : 'metadataFrom'} "${requestedDirectory ?? budget.metadataFrom}" is not an existing directory — nothing would be validated.`);
   process.exit(2);
 }
 const toPosix = (p) => p.split(sep).join('/');

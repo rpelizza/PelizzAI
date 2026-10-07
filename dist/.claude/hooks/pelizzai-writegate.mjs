@@ -120,6 +120,14 @@ function norm(p) {
 // Windows and macOS compare paths case-insensitively; Linux is case-sensitive.
 const CI = process.platform === 'win32' || process.platform === 'darwin';
 
+function existingRealpath(path) {
+  if (WIN) {
+    try { return realpathSync.native(path); }
+    catch { /* Restricted hosts may deny the native API; retain the existing resolver. */ }
+  }
+  return realpathSync(path);
+}
+
 // macOS pitfall the CI caught: the temp tree lives behind a symlink (/var -> /private/var), so
 // `git rev-parse --show-toplevel` reports the PHYSICAL root while the payload's cwd — and every
 // relative target joined to it — stays LOGICAL. All in-root writes then looked outside the root
@@ -129,7 +137,7 @@ const CI = process.platform === 'win32' || process.platform === 'darwin';
 function realpathOr(p, depth = 0) {
   if (!p) return p; // '' must stay '' — resolving it would invent a root out of the cwd
   try {
-    return realpathSync(p);
+    return existingRealpath(p);
   } catch {
     /* target missing — but the component itself may still be a DANGLING link */
   }
@@ -146,7 +154,7 @@ function realpathOr(p, depth = 0) {
     /* not a link either — fall through to the parent resolution */
   }
   try {
-    return join(realpathSync(dirname(p)), basename(p));
+    return join(existingRealpath(dirname(p)), basename(p));
   } catch {
     return p;
   }

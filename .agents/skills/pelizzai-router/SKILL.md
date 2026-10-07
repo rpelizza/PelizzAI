@@ -120,7 +120,8 @@ Single question: May I proceed with this route? (yes or adjust)
 ```
 
 Use `pelizzai-interview` §How to ask: Codex numbered chat options and end of turn; Claude Code's
-blocking selector when available. Both forms speak the conversation's language.
+blocking selector when available. Translate the gate example above into the conversation's language;
+keep skill names and mode identifiers unchanged.
 **Silence is not a yes**: without the affirmative answer, hold the turn — no
 branch, no file, no head skill. The user may adjust lane, discovery, artifacts, or overlays; a
 claimed prior approval that the transcript cannot show re-opens this gate rather than skipping it.

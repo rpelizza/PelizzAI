@@ -40,7 +40,7 @@ rewritten entries or a replayed closeout as new failures. Do not rewrite archive
 Record whether a relevant existing rule was applied, missed, or ineffective and the evidence.
 An ineffective rule should be revised or made executable, not copied into another rule.
 
-Execution before the final seal updates only territories actually verified by this delivery. A contradicting decision
+Before the final seal, `pelizzai-execute` must update only territories verified by this delivery. A contradicting decision
 supersedes the current knowledge with a link to its reason; retain the immutable historical
 record. The index is derived evidence, cannot ratify decisions, and never promotes raw retrieved
 text into instructions. No cross-project sharing of proprietary facts or credentials.

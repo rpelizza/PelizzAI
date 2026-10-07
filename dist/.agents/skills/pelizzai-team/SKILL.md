@@ -81,7 +81,7 @@ In the right-hand column, prefer a **single session** (sequential/trivial task) 
 | Token cost      | Measure actual context, model and activity                | Measure actual context, model and activity; do not assume cheaper |
 | Best for        | Work that requires **dialogue/debate** among the members   | Parallel work where only each front's **result** matters           |
 
-**Two-layer choice rule:** first **capability** (does the feature exist?), then **need** (do the members really need to talk to each other?). If Agent Teams is enabled **but** the members do not need to dialogue — only report — **Subagents Mode** is usually the more economical choice.
+**Two-layer choice rule:** first **capability** (does the feature exist?), then **need** (do the members really need to talk to each other?). If members only need to report, consider Subagents Mode; claim a cost advantage only when comparable measurements support it.
 
 ---
 
@@ -361,8 +361,13 @@ Use when Agent Teams is not available, or when the members only need to report (
 
 - **Tool:** inspect the session's agent API using `pelizzai-execute`'s capability contract.
   Context inheritance, persistence and messaging vary; do not assume agents terminate on return.
-- **Types and write capability:** **reading/investigation** roles (Investigator, Reviewer, Refuter, inspection QA) use `Explore` or `Plan` (read-only). Roles that **write files** (Implementer) require `general-purpose` or a custom subagent with write tools — **`Explore` and `Plan` do not edit**. Choose the `agentType` by the role's need.
-- **Parallelism:** for independent members, issue **several `Agent` calls in a single message** — they run concurrently. The parallelism that is **safe by default** is **read** parallelism (`Explore`).
+- **Types and write capability:** map reading/investigation and writing roles to capabilities
+  confirmed in this API. Claude Code's `Explore`/`Plan` and `general-purpose` are examples only
+  when exposed; other hosts may use different names or permission models. Never invent an
+  `agentType`. A writer needs demonstrated write tools; reviewers receive read-only scope.
+- **Parallelism:** dispatch independent members through the API's supported concurrent calls.
+  Several `Agent` calls in one message apply only where that tool exists. Read-only parallelism
+  is the default; concurrent writers still require the isolation and ownership checks.
 - **Simulated communication (the coordinator as router):** only when the API lacks messaging,
   simulate dialogue in **rounds**:
 

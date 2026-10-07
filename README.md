@@ -130,6 +130,9 @@ The installer is idempotent and preserves hooks, permissions, and any other fiel
 exist in `.claude/settings.json` or `.codex/hooks.json`. Check validates event/matcher coverage,
 including `apply_patch` on Codex. A partial opt-in is valid; a present hook in the wrong event
 is not. Codex commands point at the installation's actual path: reinstall after moving it.
+The Codex installer requires a path without double quotes, dollar signs, backticks, percent
+signs or line breaks; it rejects shell interpolation characters instead of assuming one shell's
+escaping rules work in every host.
 
 **Registered is not running.** Codex also requires project trust and review of the current hook
 definitions; inspect `/hooks` in the CLI. The installer never grants or bypasses trust. Verify

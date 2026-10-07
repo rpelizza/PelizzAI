@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, cpSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, cpSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -43,6 +43,22 @@ test('patch paths are literals; consumer kickoff still gates task branches', t =
 test('unified exec cmd and workdir are understood', t => {
   const dir = fixture(t);
   assert.equal(hook(dir, 'exec_command', { cmd: 'Set-Content -LiteralPath src/a.ts -Value x', workdir: dir }).status, 2);
+});
+
+test('Windows short paths remain inside the physical Git root', {skip:process.platform!=='win32'}, t => {
+  const dir=fixture(t);
+  const alias=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',
+    '$p=[Console]::In.ReadToEnd(); (New-Object -ComObject Scripting.FileSystemObject).GetFolder($p).ShortPath'],
+    {input:dir,encoding:'utf8',windowsHide:true});
+  assert.equal(alias.status,0,alias.stderr);
+  const short=alias.stdout.trim();
+  if (!short.includes('~')) {t.skip('This filesystem has no 8.3 aliases');return;}
+  for(const path of ['src/a.ts','$HOME.ts']) {
+    const result=hook(short,'apply_patch',{command:`*** Begin Patch\n*** Add File: ${path}\n+x\n*** End Patch`});
+    assert.equal(result.status,2,result.stderr);
+  }
+  assert.equal(hook(short,'exec_command',{cmd:'Set-Content -LiteralPath src/a.ts -Value x',workdir:short}).status,2);
+  assert.equal(hook(short,'apply_patch',{command:'*** Begin Patch\n*** Add File: pelizzai/a.md\n+x\n*** End Patch'}).status,0);
 });
 
 test('git guard understands unified exec without treating patch contents as commands', () => {
@@ -88,4 +104,13 @@ test('Codex registration is idempotent, preserves other hooks, checks event and 
   assert.equal(run('--check', '--only', 'writegate').status, 1);
   assert.equal(run('--remove', '--only', 'writegate').status, 0);
   assert.deepEqual(JSON.parse(readFileSync(manifest)).hooks.PreToolUse, [other]);
+});
+
+test('Codex registration rejects percent paths before writing shell commands',t=>{
+  const dir=join(fixture(t),'project%PATH%');mkdirSync(dir);
+  cpSync(join(root,'.claude/hooks'),join(dir,'.claude/hooks'),{recursive:true});
+  const result=spawnSync(process.execPath,[join(root,'scripts/install-hooks.mjs'),'--project',dir,'--platform','codex'],{encoding:'utf8'});
+  assert.equal(result.status,1);
+  assert.match(result.stderr,/shell interpolation characters/);
+  assert.equal(existsSync(join(dir,'.codex/hooks.json')),false);
 });

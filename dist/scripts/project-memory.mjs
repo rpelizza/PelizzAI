@@ -41,11 +41,12 @@ export function searchMemory(index, query, limit = 6) {
   const candidates = index.entries.map(entry => {
     const body = tokens(entry.text), path = tokens(entry.path.replace(/[/\.]/g, ' '));
     const score = words.reduce((n, word) => n + (body.includes(word) ? 1 : 0) + (path.includes(word) ? 3 : 0), 0);
+    if (score === 0) return null;
     const lines = entry.text.split('\n');
-    const at = lines.findIndex(line => words.some(word => tokens(line).includes(word)));
+    const at = lines.findIndex(line => { const lineWords=tokens(line); return words.some(word => lineWords.includes(word)); });
     return { path: entry.path, kind: entry.kind, sha256: entry.sha256, score,
       line: Math.max(at, 0) + 1, excerpt: lines.slice(Math.max(at, 0), Math.max(at, 0) + 10).join('\n').slice(0, 1600) };
-  }).filter(entry => entry.score > 0).sort((a,b) => b.score-a.score || a.path.localeCompare(b.path));
+  }).filter(Boolean).sort((a,b) => b.score-a.score || a.path.localeCompare(b.path));
   const learnings = index.entries.find(e => e.path === 'pelizzai/data/learnings.md');
   const section = learnings?.text.match(/^## (?:Active rules|Regras ativas)[^\S\n]*\n([\s\S]*?)(?=^## |(?![\s\S]))/mi);
   // Legacy projects keep their Portuguese heading. Unknown layouts must be visible,
@@ -67,6 +68,7 @@ function main(argv) {
     else throw new Error(`Unknown option: ${argv[i]}`);
   }
   if(!query && !rebuild) throw new Error('Usage: node scripts/project-memory.mjs [--project ROOT] --query TEXT | --rebuild');
+  project=resolve(project);
   // Read current sources even when a saved index exists: stale cache can never hide a new lesson.
   const index=buildIndex(project);
   if(rebuild) {

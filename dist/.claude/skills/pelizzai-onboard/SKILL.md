@@ -229,6 +229,7 @@ data/handoffs/
 data/mockups/
 data/reports/
 data/state.md
+data/memory-index.json
 ```
 
 Mandatory `pelizzai/.gitattributes`:

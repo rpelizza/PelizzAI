@@ -226,8 +226,11 @@ the briefing.
 ## 2. Resolve the destination and seal the closure (`delivered`)
 
 Territory knowledge belongs before the execution seal. If closeout discovers a new atlas or
-territory correction, propose a follow-up or return through execution and reseal; never widen
-the closure allowlist to smuggle an unvalidated knowledge edit into a sealed delivery.
+territory correction, a member under a closed briefing reports it to the coordinator. Otherwise,
+reuse an explicit authorization covering the route; if none exists, use `pelizzai-interview`
+to offer a follow-up or a return through execution and wait for the user's choice. Follow the
+authorized route and reseal when needed; never widen the closure allowlist to admit an
+unvalidated knowledge edit into a sealed delivery.
 
 ### 2a. Offer the destination
 

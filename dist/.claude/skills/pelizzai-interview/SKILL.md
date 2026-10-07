@@ -111,7 +111,8 @@ land in the artifact at the first AUTHORIZED write, never on the current branch 
 
 - Ask **exactly one question per turn**. Order it by the highest-impact decision that conditions
   the following ones; after the answer, recompute the interview script.
-- **Codex: use numbered options in the chat for a required decision, then END THE TURN.**
+- **Codex: use numbered chat options when they do not bias a required decision; otherwise ask
+  an open question. Then END THE TURN.**
   The user types the number or their own answer. Do not open an asynchronous selector and
   continue dependent work: it can disappear before the user responds. A pending question,
   timeout, preselected option, unrelated message, or silence is never ratification.

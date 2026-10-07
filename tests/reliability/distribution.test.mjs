@@ -14,6 +14,9 @@ test('export records ownership and refuses local changes before any replacement'
  assert.equal(JSON.parse(first).schema,1);
  assert.equal(existsSync(join(dir,'scripts/project-memory.mjs')),true);
  result=run();assert.equal(result.status,0,result.stderr);assert.equal(readFileSync(receipt,'utf8'),first);
+ writeFileSync(receipt,'{incomplete');
+ const invalid=run();assert.equal(invalid.status,1);assert.match(invalid.stderr,/Invalid installation receipt.*reconcile/);
+ assert.equal(readFileSync(receipt,'utf8'),'{incomplete');writeFileSync(receipt,first);
  const skill=join(dir,'.claude/skills/pelizzai-core/SKILL.md');
  const original=readFileSync(skill,'utf8');writeFileSync(skill,original+'\nLocal custom rule\n');
  assert.equal(run().status,1);assert.match(readFileSync(skill,'utf8'),/Local custom rule/);assert.equal(readFileSync(receipt,'utf8'),first);
