@@ -187,12 +187,19 @@ Only two fields, both required:
 ```yaml
 ---
 name: kebab-case-name
-description: What the skill does and the observable contexts in which it should be used.
+description: "What the skill does and the observable contexts in which it should be used."
 ---
 ```
 
 - **name** — the skill's identifier (kebab-case), same as the directory name.
 - **description** — **the trigger**. It is the primary triggering mechanism. Include **what the skill does AND the specific contexts of use**. All "when to use" information goes here, not in the body.
+
+Quote descriptions: `: ` can make a plain YAML scalar invalid and ` #` can silently truncate
+it as a comment. Escape embedded quotes and backslashes; `JSON.stringify(description)` emits
+a valid quoted YAML scalar while preserving the text. After authoring or refreshing skills,
+run `node scripts/validate-skills.mjs --skills-root .claude/skills` from the project root.
+This uses a real YAML parser and validates names, keys and descriptions for domain skills too.
+Resolve violations before declaring the edited skills valid; sync alone is not YAML validation.
 
 > Note: the harness tends to **under-trigger**. Make descriptions "incisive". Instead of "Creates an internal data dashboard", write "Creates an internal data dashboard. Use whenever the user mentions dashboards, data visualization, or metrics, or wants to display any company data — even without explicitly asking for a 'dashboard'."
 

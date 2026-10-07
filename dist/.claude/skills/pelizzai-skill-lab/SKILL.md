@@ -38,6 +38,12 @@ Respect the platform's native hierarchy. Within the same level, a specific user/
 
 Full detail in **[references/skill-authoring.md](references/skill-authoring.md)** — read it before writing a skill. In short:
 
+For creation, edits and periodic maintenance, validate the entire canonical skill tree with
+`node scripts/validate-skills.mjs --skills-root .claude/skills` from the project root. Inspect
+the parser's violations; a visual frontmatter check or a successful sync is not a substitute.
+Pre-existing failures outside the authorized edit remain explicit findings, never silently
+reported as valid or rewritten without scope authorization.
+
 - **Frontmatter:** only `name` and `description`. The `description` is the trigger — include **what the skill does AND the observable signals/phrases for when to use it**. Be **incisive**: under-triggering is the dominant failure (the harness tends to trigger too little); naming the *near misses* is what prevents the skill storm, not shrinking the trigger. The `description` **never summarizes the workflow** — a process summary makes the agent follow the description and SKIP the body.
 - **Progressive disclosure (3 levels):** metadata (always in context) → `SKILL.md` body (ideally <500 lines) → bundled resources on demand (`scripts/`, `references/`, `assets/`). If the body exceeds ~500 lines, move depth to `references/` with clear pointers.
 - **Style:** imperative in instructions; explain the why (theory of mind); **generalize** — write for many contexts, not for the test cases; start with a draft and improve with fresh eyes.
