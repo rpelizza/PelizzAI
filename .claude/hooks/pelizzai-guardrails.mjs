@@ -33,8 +33,9 @@
  * (fail-open — the hook is a safety net, not the primary gate; a bug here never
  * locks the user out).
  *
- * Installation (opt-in, recommended by pelizzai-onboard at bootstrap), in the consumer
- * project's .claude/settings.json:
+ * Installation (opt-in, recommended by pelizzai-onboard at bootstrap). For Codex use
+ * scripts/install-hooks.mjs --platform codex (registers .codex/hooks.json).
+ * Claude Code example in the consumer project's .claude/settings.json:
  *   { "hooks": { "PreToolUse": [ { "matcher": "Bash", "hooks": [
  *       { "type": "command",
  *         "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-guardrails.mjs\"" } ] } ] } }
@@ -168,7 +169,8 @@ function main() {
   } catch {
     return 0;
   }
-  const command = data?.tool_input?.command;
+  if (data?.tool_name === 'apply_patch') return 0;
+  const command = data?.tool_input?.command ?? data?.tool_input?.cmd;
   if (typeof command !== 'string' || !/\bgit\b/i.test(command)) return 0;
 
   // Parse per shell segment (&&, ||, ;, |, line breaks) so flags from one command
@@ -182,7 +184,7 @@ function main() {
             `Why: ${rule.why}\n` +
             `Redirected to: ${rule.safe}\n` +
             `(Opt-in git guard hook. If the user EXPLICITLY asked for this operation, ` +
-            `ask them to run it manually or to disable the hook in .claude/settings.json.)\n`
+            `ask them to run it manually or to review the hook in their platform's hook settings.)\n`
         );
         return 2;
       }

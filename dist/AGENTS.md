@@ -109,7 +109,7 @@ Observable signs that these guidelines and the skills are doing their job:
 - at kickoff, the classified route (lane, discovery, overlays) is presented for the user to ratify or adjust before effort is invested;
 - greenfield projects go through discovery → spec → stress → approval → plan → stress → approval;
 - every material gap becomes a `pelizzai-interview` question — it is never filled by Context7, convention, default, or "reasonable inference", including mid-execution;
-- structural decisions (base/branch, isolation, mode with `team` visible, commits, review, destination) are recommended and ratified — one at a time in tracks with a plan; in tweak/bug, in a compact one-line confirm with all of them visible and named — never as a silent default;
+- structural decisions (base/branch, isolation, mode filtered by demonstrated capabilities, commits, review, destination) are recommended and ratified — one at a time in tracks with a plan; in tweak/bug, in a compact one-line confirm with all of them visible and named — never as a silent default;
 - a trivial tweak (a label, a button on an existing screen, an obvious config) reaches the first write with ONE stop (the head skill's compact confirm, which is that track's kickoff) and never produces a spec/plan;
 - a read-only task creates no state and no artifacts;
 - the delivered content is exactly the validated content, and the history has fewer "fix of the fix" commits (commits correcting the immediately preceding commit).
@@ -130,7 +130,7 @@ This project uses the **PelizzAI** skills harness. Skills live in `.agents/skill
 
 **Context7:** treat it as the preferred technical source whenever libraries, frameworks, APIs, versions, or external capabilities influence the task. Inspect manifests/lockfiles first, consult the documentation for the relevant version, and use the evidence to improve questions and recommendations; never turn it into the user's vote.
 
-**Ratification gate:** isolation, execution mode (with `team` always visible), and commit strategy are recommendations ratified before being applied; `squash-final` only on explicit request. Push/PR/publication are confirmed per task.
+**Ratification gate:** isolation, execution mode (filtered by demonstrated capabilities), and commit strategy are recommendations ratified before being applied; `squash-final` only on explicit request. Push/PR/publication are confirmed per task.
 
 Available skills (31): pelizzai-architecture, pelizzai-continuity, pelizzai-core, pelizzai-diagnose, pelizzai-discovery, pelizzai-docs, pelizzai-domain-modeling, pelizzai-evolve, pelizzai-execute, pelizzai-experiment, pelizzai-finish, pelizzai-interface, pelizzai-interview, pelizzai-isolate, pelizzai-loop, pelizzai-merge-recovery, pelizzai-module-design, pelizzai-onboard, pelizzai-plan, pelizzai-preferences, pelizzai-prose, pelizzai-quick-fix, pelizzai-resume, pelizzai-review, pelizzai-router, pelizzai-security, pelizzai-skill-lab, pelizzai-subagents, pelizzai-tdd, pelizzai-team, pelizzai-verify.
 

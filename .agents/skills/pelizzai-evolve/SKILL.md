@@ -5,6 +5,10 @@ description: "Use when a failure recurs, a lesson should become a standing rule,
 
 # PelizzAI Evolve
 
+For territory knowledge, targeted history retrieval, stable incident identity and action-time
+application, read [references/project-memory.md](references/project-memory.md) when revisiting
+past work or maintaining memory. Preserve this skill's separate Active rules/Incident log budgets.
+
 The self-optimization cycle: two files, two channels, one rule.
 
 <EXTREMELY-IMPORTANT>

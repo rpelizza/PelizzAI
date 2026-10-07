@@ -253,7 +253,7 @@ itself (`Plan: approved on YYYY-MM-DD`), not in state. In source mode, hand the 
 plan/execution record to `pelizzai-execute` in a discoverable way. Branch/base are already
 set; **forward to the post-plan setup gate** of `pelizzai-execute` only after content
 approval. The gate ratifies the **how** in sequential decisions — isolation (keep the branch or
-convert to worktree), mode (the three options always visible), commits, and the executor tier;
+convert to a feasible worktree), mode (only feasible options), commits, and the executor tier;
 branch base and name were already ratified by `pelizzai-isolate` BEFORE the spec/plan, and the
 task review is never a question. `pelizzai-plan` carries recommendations, not decisions:
 

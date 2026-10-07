@@ -10,6 +10,7 @@ import {
   renameSync,
   rmSync,
   statSync,
+  lstatSync,
   writeFileSync,
 } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
@@ -26,6 +27,84 @@ const geminiMd = join(root, 'GEMINI.md');
 const coreManifest = join(root, 'scripts', 'pelizzai-core-skills.txt');
 const sourceSentinel = join(root, 'scripts', 'pelizzai-source-repo.txt');
 const distDir = join(root, 'dist');
+const CONSUMER_SCRIPTS = ['pelizzai-core-skills.txt', 'sync-harness.mjs', 'sync-harness.ps1',
+  'sync-harness.sh', 'install-hooks.mjs', 'project-memory.mjs', 'validate-skills.mjs',
+  'harness-budget.json', 'vendor/js-yaml-4.1.1.mjs', 'vendor/js-yaml.LICENSE', 'vendor/js-yaml.json',
+  'task-brief.ps1', 'task-brief.sh', 'review-package.ps1', 'review-package.sh'];
+const RECEIPT = 'scripts/pelizzai-installation.json';
+const fileHash = path => createHash('sha256').update(readText(path)).digest('hex');
+
+function deliveryFiles(core) {
+  const files = new Map();
+  for (const name of core) for (const source of walkFiles(join(srcSkills, name))) {
+    const tail = relative(srcSkills, source).replace(/\\/g, '/');
+    files.set(`.claude/skills/${tail}`, source);
+    files.set(`.agents/skills/${tail}`, source);
+  }
+  for (const source of walkFiles(join(root, '.claude/hooks'))) {
+    if (basename(source).startsWith('pelizzai-')) files.set(`.claude/hooks/${basename(source)}`, source);
+  }
+  for (const name of CONSUMER_SCRIPTS) files.set(`scripts/${name}`, join(root,'scripts',name));
+  files.set('.cursor/rules/pelizzai.mdc',join(root,'.cursor/rules/pelizzai.mdc'));
+  return files;
+}
+
+function assertOwnedDestination(target, files) {
+  if (lstatSync(target).isSymbolicLink()) throw new Error('Export target must not be a link.');
+  const receiptPath = join(target, RECEIPT);
+  for (const path of [join(target,'scripts'),receiptPath]) {
+    if (existsSync(path) && lstatSync(path).isSymbolicLink()) throw new Error('Installation receipt must not cross a link.');
+  }
+  let previous = null;
+  if (existsSync(receiptPath)) {
+    try { previous = JSON.parse(readText(receiptPath)); }
+    catch { throw new Error(`Invalid installation receipt at ${receiptPath}; reconcile it before exporting.`); }
+  }
+  if (previous && (previous.schema !== 1 || !previous.files || typeof previous.files !== 'object')) throw new Error('Invalid installation receipt; reconcile it before exporting.');
+  const conflicts = [];
+  for (const [path, source] of files) {
+    const destination = join(target,path);
+    for (let current=destination; current!==target && current!==dirname(current); current=dirname(current)) {
+      if (existsSync(current) && lstatSync(current).isSymbolicLink()) throw new Error(`Export path crosses a link: ${path}`);
+    }
+    if (!existsSync(destination)) continue;
+    const current = fileHash(destination);
+    if (current !== fileHash(source) && previous?.files[path] !== current) conflicts.push(path);
+  }
+  // copyExact replaces entire owned skill directories, including retired skills. Prove
+  // ownership of extra files too, or a user's local reference would disappear in an update.
+  for (const skillRoot of [join(target,'.claude/skills'),join(target,'.agents/skills')]) {
+    if (!existsSync(skillRoot)) continue;
+    for (const name of listSkillNames(skillRoot).filter(name=>name.startsWith('pelizzai-'))) {
+      const directory=join(skillRoot,name);
+      if (lstatSync(directory).isSymbolicLink()) throw new Error(`Export skill is a link: ${name}`);
+      for (const file of walkFiles(directory)) {
+        const path=relative(target,file).replace(/\\/g,'/');
+        if (!files.has(path) && previous?.files[path] !== fileHash(file)) conflicts.push(path);
+      }
+    }
+  }
+  const mirror=join(target,'.agents/skills'), canonical=join(target,'.claude/skills');
+  // The generated mirror is replaced as a whole. Include loose files and reject
+  // links anywhere in either tree, not just directories with a SKILL.md entry.
+  for (const tree of [mirror,canonical]) if (existsSync(tree)) assertNoLinks(tree);
+  if (existsSync(mirror)) for (const file of walkFiles(mirror)) {
+    const tail=relative(mirror,file);
+    const first=tail.split(sep)[0];
+    const checkedCoreDirectory=first.startsWith('pelizzai-') && tail.includes(sep) && listSkillNames(mirror).includes(first);
+    if (!checkedCoreDirectory) {
+      const peer=join(canonical,relative(mirror,file));
+      if (!existsSync(peer) || fileHash(peer)!==fileHash(file)) conflicts.push(relative(target,file).replace(/\\/g,'/'));
+    }
+  }
+  if (conflicts.length) throw new Error(`Export refused before writing: locally changed or unowned files:\n${conflicts.join('\n')}\nCompare and reconcile these files first; no force-overwrite is performed.`);
+}
+
+function assertNoLinks(path) {
+  const info=lstatSync(path);
+  if (info.isSymbolicLink()) throw new Error(`Export skill tree crosses a link: ${path}`);
+  if (info.isDirectory()) for (const name of readdirSync(path)) assertNoLinks(join(path,name));
+}
 
 const REF_IGNORE = new Set([
   'pelizzai-cadence',
@@ -244,7 +323,7 @@ This project uses the **PelizzAI** skills harness. Skills live in \`.agents/skil
 
 **Context7:** treat it as the preferred technical source whenever libraries, frameworks, APIs, versions, or external capabilities influence the task. Inspect manifests/lockfiles first, consult the documentation for the relevant version, and use the evidence to improve questions and recommendations; never turn it into the user's vote.
 
-**Ratification gate:** isolation, execution mode (with \`team\` always visible), and commit strategy are recommendations ratified before being applied; \`squash-final\` only on explicit request. Push/PR/publication are confirmed per task.
+**Ratification gate:** isolation, execution mode (filtered by demonstrated capabilities), and commit strategy are recommendations ratified before being applied; \`squash-final\` only on explicit request. Push/PR/publication are confirmed per task.
 
 Available skills (${skills.length}): ${skills.join(', ')}.
 `;
@@ -328,6 +407,8 @@ function copyConsumerPayload(target) {
   }
   const core = readCoreManifest();
   if (!core?.length) throw new Error('Core manifest missing; run --update-manifest.');
+  const delivered = deliveryFiles(core);
+  if (resolved !== distDir) assertOwnedDestination(resolved, delivered);
 
   const targetSkills = join(target, '.claude', 'skills');
   mkdirSync(targetSkills, { recursive: true });
@@ -365,23 +446,17 @@ function copyConsumerPayload(target) {
 
   const targetScripts = join(target, 'scripts');
   mkdirSync(targetScripts, { recursive: true });
-  const scripts = [
-    'pelizzai-core-skills.txt',
-    'sync-harness.mjs',
-    'sync-harness.ps1',
-    'sync-harness.sh',
-    'install-hooks.mjs',
-    'task-brief.ps1',
-    'task-brief.sh',
-    'review-package.ps1',
-    'review-package.sh',
-  ];
+  const scripts = CONSUMER_SCRIPTS;
   for (const name of scripts) {
     const source = join(root, 'scripts', name);
-    if (existsSync(source)) cpSync(source, join(targetScripts, name));
+    if (existsSync(source)) {
+      mkdirSync(dirname(join(targetScripts, name)), { recursive: true });
+      cpSync(source, join(targetScripts, name));
+    }
   }
   rmSync(join(targetScripts, 'pelizzai-source-repo.txt'), { force: true });
-  rmSync(join(targetScripts, 'test-harness-contracts.ps1'), { force: true });
+  // Development tests are not distributed. An existing consumer file with this name may
+  // be locally authored; absence from our payload is not ownership or permission to delete.
 
   const cursorAdapter = join(root, '.cursor', 'rules', 'pelizzai.mdc');
   if (!existsSync(cursorAdapter)) {
@@ -409,6 +484,9 @@ This is a consumer: there is no \`scripts/pelizzai-source-repo.txt\`. The manife
   const targetSync = join(targetScripts, 'sync-harness.mjs');
   runNode(targetSync, [], target);
   runNode(targetSync, ['--check'], target);
+  // No timestamp: rebuilding identical sources produces identical distribution bytes.
+  const receipt = {schema:1, files:Object.fromEntries([...delivered.keys()].sort().map(path=>[path,fileHash(join(target,path))]))};
+  writeTextAtomic(join(target,RECEIPT),JSON.stringify(receipt,null,2)+'\n');
   return core;
 }
 

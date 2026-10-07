@@ -42,7 +42,8 @@
 # at all fails open, warning at most once per window.
 #
 # Install (opt-in, recommended by pelizzai-onboard at bootstrap, merged without overwriting
-# existing hooks/permissions), in .claude/settings.json - BOTH matchers are required:
+# existing hooks/permissions). Claude Code example in .claude/settings.json - BOTH matchers:
+# For Codex use scripts/install-hooks.mjs --platform codex (registers .codex/hooks.json).
 #   { "hooks": { "PreToolUse": [
 #       { "matcher": "Write|Edit|MultiEdit|NotebookEdit", "hooks": [
 #           { "type": "command",
@@ -56,7 +57,7 @@
 #   -> on a protected branch or without "kickoff: ratified": reason on stderr and exit 2;
 #      otherwise (task branch with the kickoff ratified, or outside the repo): exit 0.
 #
-# The user can disable the hook in .claude/settings.json - it is never an inescapable block.
+# The user controls the hook in their platform's hook settings; it is never an inescapable block.
 
 $ErrorActionPreference = 'SilentlyContinue'
 
@@ -73,7 +74,7 @@ $SOURCE_SENTINELS = @('scripts/pelizzai-source-repo.txt')
 # "Could not decide" fail-open: warns at most once per window (per repo) to avoid spam.
 $script:WARN_SNOOZE_MS = 86400000L  # 24h
 # Windows and macOS compare paths case-insensitively; Linux is case-sensitive.
-$script:CI = $IsWindows -or $IsMacOS
+$script:CI = ($env:OS -eq 'Windows_NT') -or $IsWindows -or $IsMacOS
 
 # git with the stdin cwd; '' on ANY failure (git missing, outside a repo, nonexistent ref).
 function Invoke-Git([string]$Cwd, [string[]]$GitArgs) {
@@ -402,7 +403,7 @@ function Get-ShellTargets([string]$command, [int]$Depth = 0) {
 # Blocks: reason + safe path on stderr and exit 2.
 function Invoke-Block([string]$reason) {
   [Console]::Error.WriteLine("PelizzAI writegate: write redirected - $reason")
-  [Console]::Error.WriteLine('(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, isolate via pelizzai-isolate, ratify the gate, or disable the hook in .claude/settings.json.)')
+  [Console]::Error.WriteLine('(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, isolate via pelizzai-isolate, ratify the gate, or review this hook in your platform''s hook settings.)')
   exit 2
 }
 
@@ -432,12 +433,22 @@ try {
   $cwd = (Get-Location).Path
   if (($data.cwd -is [string]) -and $data.cwd) { $cwd = $data.cwd }
   $ti = $data.tool_input
+  if (($ti.workdir -is [string]) -and $ti.workdir) {
+    $cwd = if ([IO.Path]::IsPathRooted($ti.workdir)) { $ti.workdir } else { Join-Path $cwd $ti.workdir }
+  }
 
   # Targets: file_path (Write/Edit/MultiEdit), notebook_path (NotebookEdit), shell (Bash).
   $targets = [System.Collections.Generic.List[string]]::new()
   if (($ti.file_path -is [string]) -and $ti.file_path) { [void]$targets.Add($ti.file_path) }
   if (($ti.notebook_path -is [string]) -and $ti.notebook_path) { [void]$targets.Add($ti.notebook_path) }
-  if (($ti.command -is [string]) -and $ti.command) { foreach ($x in (Get-ShellTargets $ti.command)) { [void]$targets.Add($x) } }
+  $command = if ($ti.command -is [string]) { $ti.command } else { $ti.cmd }
+  if ($data.tool_name -eq 'apply_patch') {
+    foreach ($line in ($command -split '\r?\n')) {
+      if ($line -match '^\*\*\* (?:Add File|Update File|Delete File|Move to): (.+)$') { [void]$targets.Add($Matches[1]) }
+    }
+  } elseif (($command -is [string]) -and $command) {
+    foreach ($x in (Get-ShellTargets $command)) { [void]$targets.Add($x) }
+  }
   if ($targets.Count -eq 0) { exit 0 } # nothing to guard (e.g. read-only Bash)
 
   $gitRoot = Invoke-Git $cwd @('rev-parse', '--show-toplevel')
@@ -495,10 +506,20 @@ try {
         }
         if ($isWin) {
           $item = Get-Item -LiteralPath $next -Force -ErrorAction SilentlyContinue
-          while ($item -and $item.LinkType) {
-            $t = $item.ResolveLinkTarget($true) # .NET 6+; a miss falls to the catch below
-            if (-not $t) { break }
-            $item = $t
+          if ($item -and $item.LinkType) {
+            try { $item = $item.ResolveLinkTarget($true) }
+            catch {
+              # Some Windows sandboxes deny the .NET resolver but allow reading Target.
+              # Keep resolving physically instead of reclassifying a product alias as metadata.
+              if ($Depth -ge 8) { throw }
+              $linkTarget = [string]($item.Target | Select-Object -First 1)
+              if (-not $linkTarget) { throw }
+              if (-not [System.IO.Path]::IsPathRooted($linkTarget)) {
+                $linkTarget = Join-TargetPath $cur $linkTarget
+              }
+              $cur = Get-PhysicalPath $linkTarget ($Depth + 1)
+              continue
+            }
           }
           $cur = if ($item) { $item.FullName } else { $next }
         } elseif (Test-Path -LiteralPath $next -PathType Container) {

@@ -29,7 +29,8 @@
 # Errors in the hook ITSELF: exit 0 (fail-open - the hook is a safety net, not the
 # primary gate; a bug here never locks the user out).
 #
-# Installation (opt-in, recommended by pelizzai-onboard), in .claude/settings.json:
+# Installation (opt-in, recommended by pelizzai-onboard). Claude Code example in .claude/settings.json:
+# For Codex use scripts/install-hooks.mjs --platform codex (registers .codex/hooks.json).
 #   { "hooks": { "PreToolUse": [ { "matcher": "Bash", "hooks": [
 #       { "type": "command",
 #         "command": "pwsh -NoProfile -File \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pelizzai-guardrails.ps1\"" } ] } ] } }
@@ -51,7 +52,9 @@ try {
   if (-not $raw) { exit 0 }
   $data = $null
   try { $data = $raw | ConvertFrom-Json } catch { exit 0 }
+  if ($data.tool_name -eq 'apply_patch') { exit 0 }
   $command = $data.tool_input.command
+  if ($null -eq $command) { $command = $data.tool_input.cmd }
   if (-not ($command -is [string]) -or $command -notmatch '\bgit\b') { exit 0 }
 
   # -match (case-insensitive) recognizes the command: "Git reset --hard" is also blocked.
@@ -121,7 +124,7 @@ try {
         [Console]::Error.WriteLine("PelizzAI guardrails: command redirected - $($rule.Name).")
         [Console]::Error.WriteLine("Why: $($rule.Why)")
         [Console]::Error.WriteLine("Redirected to: $($rule.Safe)")
-        [Console]::Error.WriteLine('(Opt-in git guard hook. If the user EXPLICITLY asked for this operation, ask them to run it manually or to disable the hook in .claude/settings.json.)')
+        [Console]::Error.WriteLine('(Opt-in git guard hook. If the user EXPLICITLY asked for this operation, ask them to run it manually or to review the hook in their platform''s hook settings.)')
         exit 2
       }
     }

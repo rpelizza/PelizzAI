@@ -52,6 +52,11 @@ Visual complexity or file count is not enough to pick a mode; use the cost of a 
 
 ### 1. Explore focused context
 
+Consumer: read all Active rules in `pelizzai/data/learnings.md` before choosing approaches.
+For an existing territory or prior decision, query `scripts/project-memory.mjs --query` with
+the task's terms, then inspect the relevant sources; missing retrieval is unknown. Source mode
+uses project rules and the native execution record without consumer files.
+
 Read only what you need to answer:
 
 ```text
@@ -90,10 +95,9 @@ Recommendation: <best option> — <one-line reason>
 Question: <a single question>
 ```
 
-This block is the **content contract, not the delivery format**: with a native option-selection
-tool, deliver the question through it — recommended option first, marked in its label, decision
-and reason as context; the block is the prose fallback. An open question is valid when options
-would bias the answer. Never hide a decision inside a "safe assumption".
+This block is the content contract. Follow `pelizzai-interview` §How to ask: Codex uses numbered
+chat options and ends the turn; Claude Code prefers a blocking native selector. An open question
+is valid when options would bias the answer. Never hide a decision inside a "safe assumption".
 
 ### 3. Run discovery when there is a material gap
 

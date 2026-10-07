@@ -20,7 +20,7 @@
 - kickoff: <pending | ratified YYYY-MM-DD>   # consolidated gate (plan content + isolation/mode/commits) ratified by the user
 - isolation: <pending | branch | worktree>   # <pending> until ratification; never written as a silent default
 - worktree-path: <none | path of the worktree, when isolation: worktree>
-- execution-mode: <pending | team | subagents | inline>   # <pending> until ratification; the three options always visible (team never omitted)
+- execution-mode: <pending | team | subagents | inline>   # <pending> until ratification; offer only feasible modes; read-only review is independent
 - commit-strategy: <pending | granular | squash-final>   # <pending> until ratification; squash-final only on the user's explicit request
 - executor-tier: <pending | session | mid>   # implementers' tier ratified at setup-gate step 4; inline mode = session; dispatches read THIS value — a missing/pending field after resumption means not ratified, ask again
 - effect: <read-only | write-local | external>

@@ -44,7 +44,8 @@
  * at most one warning per window (no spam).
  *
  * Install (opt-in, recommended by pelizzai-onboard at bootstrap, merged without overwriting
- * existing hooks/permissions), in the consumer project's .claude/settings.json — BOTH
+ * existing hooks/permissions). For Codex use scripts/install-hooks.mjs --platform codex
+ * (registers .codex/hooks.json). Claude Code example in .claude/settings.json — BOTH
  * matchers are required to also cover writes via shell:
  *   { "hooks": { "PreToolUse": [
  *       { "matcher": "Write|Edit|MultiEdit|NotebookEdit", "hooks": [
@@ -59,12 +60,12 @@
  *   → on a protected branch or without "kickoff: ratified" in state.md: reason on stderr and exit 2.
  *     On a task branch with the kickoff ratified, or outside the repo: exit 0.
  *
- * The user can disable the hook in .claude/settings.json — it is never an inescapable block.
+ * The user controls the hook in their platform's hook settings; it is never an inescapable block.
  * On fleets without Node, use the PowerShell variant pelizzai-writegate.ps1 (identical behavior).
  */
 
 import { readFileSync, writeFileSync, existsSync, realpathSync, statSync, lstatSync, readlinkSync } from 'node:fs';
-import { join, parse, isAbsolute, dirname, basename } from 'node:path';
+import { join, parse, isAbsolute, dirname, basename, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 
@@ -120,6 +121,14 @@ function norm(p) {
 // Windows and macOS compare paths case-insensitively; Linux is case-sensitive.
 const CI = process.platform === 'win32' || process.platform === 'darwin';
 
+function existingRealpath(path) {
+  if (WIN) {
+    try { return realpathSync.native(path); }
+    catch { /* Restricted hosts may deny the native API; retain the existing resolver. */ }
+  }
+  return realpathSync(path);
+}
+
 // macOS pitfall the CI caught: the temp tree lives behind a symlink (/var -> /private/var), so
 // `git rev-parse --show-toplevel` reports the PHYSICAL root while the payload's cwd — and every
 // relative target joined to it — stays LOGICAL. All in-root writes then looked outside the root
@@ -129,7 +138,7 @@ const CI = process.platform === 'win32' || process.platform === 'darwin';
 function realpathOr(p, depth = 0) {
   if (!p) return p; // '' must stay '' — resolving it would invent a root out of the cwd
   try {
-    return realpathSync(p);
+    return existingRealpath(p);
   } catch {
     /* target missing — but the component itself may still be a DANGLING link */
   }
@@ -146,7 +155,7 @@ function realpathOr(p, depth = 0) {
     /* not a link either — fall through to the parent resolution */
   }
   try {
-    return join(realpathSync(dirname(p)), basename(p));
+    return join(existingRealpath(dirname(p)), basename(p));
   } catch {
     return p;
   }
@@ -488,7 +497,7 @@ function block(reason) {
   process.stderr.write(
     `PelizzAI writegate: write redirected - ${reason}\n` +
       `(Opt-in fail-closed isolation/kickoff hook. If the write is legitimate outside the flow, ` +
-      `isolate via pelizzai-isolate, ratify the gate, or disable the hook in .claude/settings.json.)\n`
+      `isolate via pelizzai-isolate, ratify the gate, or review this hook in your platform's hook settings.)\n`
   );
   return 2;
 }
@@ -527,12 +536,22 @@ function main() {
   let cwd = process.cwd();
   if (data && typeof data.cwd === 'string' && data.cwd) cwd = data.cwd;
   const ti = (data && data.tool_input) || {};
+  if (typeof ti.workdir === 'string' && ti.workdir) cwd = resolve(cwd, ti.workdir);
 
-  // Targets: file_path (Write/Edit/MultiEdit), notebook_path (NotebookEdit), shell (Bash).
+  // Codex canonical apply_patch uses tool_input.command, which is a PATCH, never shell.
+  // Paths are literal (including $ characters); moves affect both source and destination.
   const targets = [];
   if (typeof ti.file_path === 'string' && ti.file_path) targets.push(ti.file_path);
   if (typeof ti.notebook_path === 'string' && ti.notebook_path) targets.push(ti.notebook_path);
-  if (typeof ti.command === 'string' && ti.command) targets.push(...extractShellTargets(ti.command));
+  const command = ti.command ?? ti.cmd;
+  if (data?.tool_name === 'apply_patch') {
+    if (typeof command === 'string') {
+      for (const line of command.replace(/\r\n/g, '\n').split('\n')) {
+        const header = /^\*\*\* (?:Add File|Update File|Delete File|Move to): (.+)$/.exec(line);
+        if (header) targets.push(header[1]);
+      }
+    }
+  } else if (typeof command === 'string' && command) targets.push(...extractShellTargets(command));
   if (targets.length === 0) return 0; // nothing to guard (e.g. read-only Bash)
 
   const gitRoot = realpathOr(git(cwd, ['rev-parse', '--show-toplevel']));

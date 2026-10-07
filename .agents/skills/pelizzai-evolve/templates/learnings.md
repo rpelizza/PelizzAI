@@ -5,7 +5,7 @@
 >
 > **Active rules** — read at task start by EVERY track: `pelizzai-plan` before
 > approaches · `pelizzai-execute` before Task 1 and pasted into every task briefing (the member
-> does not inherit the coordinator's context) · `pelizzai-quick-fix` before the change ·
+> must receive them regardless of context inheritance) · `pelizzai-quick-fix` before the change ·
 > `pelizzai-diagnose` on entering the investigation and again when choosing the proof.
 > **Budget: 40 lines hard.**
 >
@@ -39,6 +39,11 @@
 - <imperative rule> — scope: `<path or glob, e.g. back/**/repository*.py>` — from: <incident dates/slugs>
 
 ## Incident log
+
+New entries carry `cause: <category>/<stable-slug>` and `incident: <delivery>/<id>`.
+Reuse causes across wording changes and count distinct incidents across archives. Record
+whether an applicable existing rule was applied, missed or ineffective, with evidence.
+Legacy entries are reconciled when needed; do not rewrite archives merely to backfill fields.
 
 <!-- Episodic: what happened, once each, newest first. Every entry carries all the fields —
      an entry that cannot name its trigger and root cause is an anecdote, not a learning.

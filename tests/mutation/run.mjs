@@ -37,7 +37,7 @@ const MUTATIONS = [
     file: '.claude/skills/pelizzai-quick-fix/SKILL.md',
     edit: (t) => t.replace(/^description: "(.*)"$/m, 'description: The cheapest route: use for a low-risk tweak.'),
     tool: (s) => runTool(s, 'validate-skills.mjs'),
-    expect: /description-yaml-scalar/,
+    expect: /frontmatter.*bad indentation of a mapping entry/,
   },
   {
     defect: 'a skill H1 reverts to a name that no longer exists',

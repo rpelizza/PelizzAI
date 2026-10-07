@@ -74,14 +74,14 @@ In the right-hand column, prefer a **single session** (sequential/trivial task) 
 
 | Dimension       | Teammates Mode (native)                                    | Subagents Mode (fallback)                                          |
 | --------------- | ---------------------------------------------------------- | ------------------------------------------------------------------ |
-| Availability    | Claude Code only, with Agent Teams enabled                 | Any environment with the `Agent`/`Task` tool                       |
-| Communication   | Teammates talk **to each other** (`SendMessage`/mailbox)   | Subagents do **not** talk; they only report to the coordinator     |
-| Coordination    | Shared task list + teammate self-coordination              | The coordinator is the entire infrastructure (list and routing)    |
-| Context         | Each teammate has its own window and **persists** in the session | Each subagent has its own window and **ends when it returns** |
-| Token cost      | High (each teammate is a full, long-lived Claude)          | Lower (a subagent synthesizes and returns; it does not stay active) |
+| Availability    | Claude Code with Agent Teams enabled                      | A callable and authorized delegation API                         |
+| Communication   | Teammates use native messaging/mailbox                    | Inspect the API: direct messaging or coordinator-routed reports   |
+| Coordination    | Shared task list + teammate self-coordination             | Coordinator plus any demonstrated runtime coordination tools     |
+| Context         | Each teammate has its own window and persists in session | Inheritance and persistence depend on the API; verify both        |
+| Token cost      | Measure actual context, model and activity                | Measure actual context, model and activity; do not assume cheaper |
 | Best for        | Work that requires **dialogue/debate** among the members   | Parallel work where only each front's **result** matters           |
 
-**Two-layer choice rule:** first **capability** (does the feature exist?), then **need** (do the members really need to talk to each other?). If Agent Teams is enabled **but** the members do not need to dialogue — only report — **Subagents Mode** is usually the more economical choice.
+**Two-layer choice rule:** first **capability** (does the feature exist?), then **need** (do the members really need to talk to each other?). If members only need to report, consider Subagents Mode; claim a cost advantage only when comparable measurements support it.
 
 ---
 
@@ -269,7 +269,7 @@ Give each lens/hypothesis its own member — a single agent tends to anchor on o
 
 ## Per-member delegation protocol
 
-For each member, deliver a **self-contained briefing**. Members do not inherit the history. In
+For each member, deliver a **self-contained briefing**. Do not rely on context inheritance. In
 plan execution, use `task-brief.*` only with a compatible persistent Markdown plan; a native plan
 uses pasted content. Handoffs live in the consumer's gitignored path, or in temp in source mode.
 
@@ -359,10 +359,17 @@ Use when Agent Teams is not available, or when the members only need to report (
 
 **Mechanics:**
 
-- **Tool:** `Agent`/`Task`. Each subagent has its own context window and **only returns its final text** to the coordinator; subagents do **not** communicate with each other and **end when they return** (no memory across calls).
-- **Types and write capability:** **reading/investigation** roles (Investigator, Reviewer, Refuter, inspection QA) use `Explore` or `Plan` (read-only). Roles that **write files** (Implementer) require `general-purpose` or a custom subagent with write tools — **`Explore` and `Plan` do not edit**. Choose the `agentType` by the role's need.
-- **Parallelism:** for independent members, issue **several `Agent` calls in a single message** — they run concurrently. The parallelism that is **safe by default** is **read** parallelism (`Explore`).
-- **Simulated communication (the coordinator as router):** since the subagents do not talk, simulate the dialogue in **rounds**:
+- **Tool:** inspect the session's agent API using `pelizzai-execute`'s capability contract.
+  Context inheritance, persistence and messaging vary; do not assume agents terminate on return.
+- **Types and write capability:** map reading/investigation and writing roles to capabilities
+  confirmed in this API. Claude Code's `Explore`/`Plan` and `general-purpose` are examples only
+  when exposed; other hosts may use different names or permission models. Never invent an
+  `agentType`. A writer needs demonstrated write tools; reviewers receive read-only scope.
+- **Parallelism:** dispatch independent members through the API's supported concurrent calls.
+  Several `Agent` calls in one message apply only where that tool exists. Read-only parallelism
+  is the default; concurrent writers still require the isolation and ownership checks.
+- **Simulated communication (the coordinator as router):** only when the API lacks messaging,
+  simulate dialogue in **rounds**:
 
 ```text
 Round 1 — production:    each member executes its front and returns the deliverable.
@@ -371,7 +378,7 @@ Round 2 — confrontation: the coordinator spawns a NEW subagent with the same r
                          asking it to refute, agree, or adjust (simulates the "scientific debate").
 Round N — convergence:   stop as soon as the positions stabilize.
 
-Caution: in Subagents there is NO continuity across rounds. Each round and each verifier is a
+Caution: when the API starts fresh agents, there is no continuity across rounds. Each round and each verifier is a
 NEW SPAWN, with no memory of the previous round and no access to the others' work — the coordinator
 must re-inject everything into the prompt. Cap the confrontation rounds (typically 1–2) and apply
 the effort budget: more rounds only if they reduce real risk.
@@ -398,10 +405,12 @@ Applies to both modes. The coordinator never concludes silently with a front lef
 
 ```text
 - A member fails or returns outside the contract:
-  → re-brief with stricter instructions, reduce the scope, or reassign the front to another member.
+  → inspect its status; re-brief with stricter instructions or reduce the scope.
 - A member stalls or takes longer than expected:
-  → Teammates Mode: nudge via SendMessage, or request shutdown and recreate.
-  → Subagents Mode: reissue the Agent call (a new spawn with the briefing).
+  → use available status/messaging tools to distinguish slow work from termination.
+  → interrupt/shut down when appropriate and verify the prior writer has stopped.
+  → only then replace or reassign its writable territory; never spawn a second writer
+    merely because the first is slow. Without termination evidence, keep the territory owned.
 - A front proves unviable:
   → the coordinator replans the decomposition or redistributes the front to another member
     (it neither forces nor ignores) — it never implements the front itself.
@@ -446,7 +455,7 @@ Apply the **effort budget**: verification depth is proportional to the change's 
 - Two members editing the same file (guaranteed overwrite).
 - A vague briefing, or assuming the member has the conversation history.
 - Delegating a writing role to a read-only agentType (Explore/Plan do not edit).
-- "Continuing the conversation" with a subagent across rounds (each round is a new spawn, no memory).
+- Assuming continuity across agents without checking the API; reusing an author's context for a supposedly blind review.
 - The coordinator starting to implement instead of delegating, waiting, and synthesizing.
 - The coordinator dispatching itself as the blind spec lens (it has already seen the report) — the blind lens is always an independent reviewer.
 - Handing the implementer's report to the blind spec lens, or assembling a member without the complete package of domain skills for its area.

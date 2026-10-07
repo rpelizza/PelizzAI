@@ -699,7 +699,7 @@ try {
         Run-Native { node scripts/sync-harness.mjs --export-consumer $exportTemp } 'real consumer export completes without error'
         Check (Test-Path (Join-Path $exportTemp '.cursor/rules/pelizzai.mdc')) 'export carries the Cursor adapter to the consumer'
         Check (-not (Test-Path (Join-Path $exportTemp 'scripts/pelizzai-source-repo.txt'))) 'export removes a pre-existing source-mode sentinel from the target'
-        Check (-not (Test-Path (Join-Path $exportTemp 'scripts/test-harness-contracts.ps1'))) 'export removes a pre-existing contract suite from the target'
+        Check ((Get-Content -LiteralPath (Join-Path $exportTemp 'scripts/test-harness-contracts.ps1') -Raw).Trim() -eq 'stale') 'export preserves an unowned local contract suite'
         $exportSkills = Compare-Trees $skillRoot (Join-Path $exportTemp '.claude/skills')
         Check $exportSkills.Ok 'export carries the core skills byte-for-byte' $exportSkills.Detail
         Check (Test-Path (Join-Path $exportTemp '.claude/hooks/pelizzai-writegate.mjs')) 'export carries the hooks (without registering them)'
