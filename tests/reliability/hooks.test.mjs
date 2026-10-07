@@ -48,7 +48,7 @@ test('unified exec cmd and workdir are understood', t => {
 test('Windows short paths remain inside the physical Git root', {skip:process.platform!=='win32'}, t => {
   const dir=fixture(t);
   const alias=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',
-    '$p=[Console]::In.ReadToEnd(); (New-Object -ComObject Scripting.FileSystemObject).GetFolder($p).ShortPath'],
+    '[Console]::InputEncoding=[Text.UTF8Encoding]::new($false); [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false); $p=[Console]::In.ReadToEnd(); (New-Object -ComObject Scripting.FileSystemObject).GetFolder($p).ShortPath'],
     {input:dir,encoding:'utf8',windowsHide:true});
   assert.equal(alias.status,0,alias.stderr);
   const short=alias.stdout.trim();
