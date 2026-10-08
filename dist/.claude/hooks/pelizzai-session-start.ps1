@@ -24,6 +24,11 @@ try {
   $raw = [Console]::In.ReadToEnd()
   $cwd = (Get-Location).Path
   if ($raw) { try { $j = $raw | ConvertFrom-Json; if ($j.cwd) { $cwd = $j.cwd } } catch {} }
+  # Session cwd may be a package; memory belongs to the checkout root.
+  try {
+    $hookGitRoot = & git -C $cwd rev-parse --show-toplevel 2>$null
+    if ($LASTEXITCODE -eq 0 -and $hookGitRoot) { $cwd = ([string]$hookGitRoot).Trim() }
+  } catch {} # non-Git consumers retain their original cwd
 
   $lines = @(
     'PelizzAI: before answering ANYTHING, load the pelizzai-core skill and honor the 1% rule - if a skill applies (even to a trivial tweak), invoke it.',

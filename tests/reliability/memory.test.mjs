@@ -4,6 +4,19 @@ import {mkdtempSync,mkdirSync,writeFileSync,rmSync,existsSync,symlinkSync} from 
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {buildIndex,searchMemory} from '../../scripts/project-memory.mjs';
+
+test('slug components, compound identifiers and accents are searchable in paths and excerpts',()=>{
+ const index={corpusHash:'fixture',entries:[
+  {path:'pelizzai/data/history/2026-10-08-atualiza-harness.md',kind:'historical',sha256:'fixture',text:'# Registro\nConfiguração oauth_storage alterada.'},
+ ]};
+ for(const query of ['atualiza','harness','atualiza-harness','storage','oauth_storage','configuracao']) {
+  const result=searchMemory(index,query);
+  assert.equal(result.matches.length,1,query);
+  assert.equal(result.matches[0].line,query.includes('storage')||query==='configuracao'?2:1);
+ }
+ assert.equal(searchMemory(index,'atualiza').matches[0].score,3);
+ assert.equal(searchMemory(index,'unrelated').matches.length,0);
+});
 test('retrieval reaches archives, keeps active rules, and revalidates changed knowledge',t=>{
  const dir=mkdtempSync(join(tmpdir(),'pelizzai-memory-'));t.after(()=>rmSync(dir,{recursive:true,force:true}));
  mkdirSync(join(dir,'pelizzai/data/history'),{recursive:true});
@@ -39,6 +52,24 @@ test('history links cannot import data outside the project memory',t=>{
  try {symlinkSync(outside,join(dir,'pelizzai/data/history/linked.md'));}
  catch(error) {if(process.platform==='win32'&&['EPERM','EACCES'].includes(error.code)){t.skip('Host does not permit file symlinks');return;}throw error;}
  assert.equal(buildIndex(dir).entries.length,0);
+});
+
+test('history cannot crowd all current claims out of bounded results',()=>{
+ const historical=Array.from({length:8},(_,i)=>({path:`pelizzai/data/history/pagamento/incidente-${i}.md`,kind:'historical',sha256:'fixture',text:'pagamento'}));
+ const current=Array.from({length:3},(_,i)=>({path:`pelizzai/adr/decision-${i}.md`,kind:'current-claim',sha256:'fixture',text:'pagamento'}));
+ const index={corpusHash:'fixture',entries:[...historical,...current]};
+ for(const limit of [1,2,6,20]) {
+  const result=searchMemory(index,'pagamento',limit);
+  assert.equal(result.matches.length,Math.min(limit,11));
+  assert.equal(result.totalMatches,11);
+  assert.ok(result.matches.some(x=>x.kind==='current-claim'));
+  assert.equal(new Set(result.matches.map(x=>x.path)).size,result.matches.length);
+  assert.deepEqual(result,searchMemory({...index,entries:[...index.entries].reverse()},'pagamento',limit));
+ }
+ assert.equal(searchMemory({...index,entries:historical},'pagamento').matches.length,6);
+ assert.equal(searchMemory({...index,entries:current},'pagamento').matches.length,3);
+ assert.deepEqual(searchMemory(index,'pagamento',0).matches,[]);
+ for(const limit of [-1,1.5,NaN,Infinity]) assert.throws(()=>searchMemory(index,'pagamento',limit),/limit/);
 });
 
 test('a linked memory root is rejected',t=>{

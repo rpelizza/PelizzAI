@@ -12,8 +12,8 @@
 #  - Full repo-scan: > 15 days since last-full-scan.
 #  - Snooze: after nudging, stays silent for 7 days (avoids repeating every window).
 #
-# Same guarantees as the .mjs: silent no-op without the ledger; the expensive check (git)
-# only every N interactions; ALWAYS exits 0 (never blocks the prompt); swallows any error.
+# Same guarantees as the .mjs: silent no-op without the ledger; Git history scan only every N
+# interactions (root discovery on each prompt); ALWAYS exits 0; swallows any error.
 #
 # Installation (opt-in, at bootstrap), in .claude/settings.json:
 #   { "hooks": { "UserPromptSubmit": [ { "hooks": [
@@ -31,6 +31,10 @@ try {
   $raw = [Console]::In.ReadToEnd()
   $cwd = (Get-Location).Path
   if ($raw) { try { $j = $raw | ConvertFrom-Json; if ($j.cwd) { $cwd = $j.cwd } } catch {} }
+  try {
+    $hookGitRoot = & git -C $cwd rev-parse --show-toplevel 2>$null
+    if ($LASTEXITCODE -eq 0 -and $hookGitRoot) { $cwd = ([string]$hookGitRoot).Trim() }
+  } catch {} # non-Git consumers retain their original cwd
 
   $ledger = Join-Path $cwd 'pelizzai/data/review-domain-skills.md'
   if (-not (Test-Path -LiteralPath $ledger)) { exit 0 } # harness not initialized in this project

@@ -65,6 +65,25 @@ means the evidence:
 
 A conversation-only change does not invalidate proof. A product change does.
 
+### Proof must finish before the commit
+
+The proof owns its exit code. Prefer running it without a pipe. If output is redirected or
+filtered, retain the full log and capture the proof process's status immediately: in Bash use
+`${PIPESTATUS[0]}` for the first process (and check the other pipeline stages); in PowerShell
+capture the native command's `$LASTEXITCODE` before another native command overwrites it.
+`tail`, `head`, `tee`, a successful wrapper, or the last printed line is not the test result.
+
+When a tool returns a running session/job ID, the proof is still pending. Wait for that same
+process's completion, then read its final status and output. A launch acknowledgment, partial
+log, or unrelated success never opens the commit gate. Missing status is unverified.
+
+Run the proof and `git commit` in **separate tool calls**, with the agent reading the completed
+result between them. Never put a commit in the same shell chain, script, or tool batch as the
+proof, even with `&&` or `pipefail`: those cannot prove that the agent inspected the result.
+On failure, fix the cause and rerun the affected proof before a later commit call.
+
+Consumption scenarios for this boundary: [proof-before-commit.md](evals/proof-before-commit.md).
+
 ## Proof by effect
 
 | Claim/effect | Adequate evidence | Not enough |
@@ -76,6 +95,7 @@ A conversation-only change does not invalidate proof. A product change does.
 | config/schema/migration/IaC | parser/validate/plan/dry-run, delta, and applicable rollback | unit test without observing the artifact |
 | service starts (boot/runtime) | process/stack started and observed healthy (healthcheck, readiness, startup log) in that stack's environment, against the data state it actually has | green suite; test that calls the migration functions outside the service lifecycle |
 | integration | real fixture/sandbox/contract at the boundary | mock that removes the boundary |
+| harness installation/update | payload parity AND the consumer's actual lint/format checks, with managed scripts/vendor accounted for and product checks preserved | export exit 0; ownership hashes; harness-only tests |
 | UI | `pelizzai-interface`: app running, states, viewports, accessibility/visual | green build or a single screenshot without the flow |
 | docs/prompt/policy | lint/render/links/schema/grep or a consumption scenario | fabricating a unit test |
 | domain skill / doc asserting code behavior | every behavioral assertion checked against the code it points to: the pointer (file + symbol) resolved AND the cited excerpt read and matched against the claim (for an external-stack claim, the pinned version's docs play the excerpt's role) | frontmatter/links/schema green; grep that the cited symbols exist |

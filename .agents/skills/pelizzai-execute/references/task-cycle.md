@@ -280,6 +280,10 @@ else buys one bounded fix or escalates.
 ```text
 - The member does NOT commit. The work stays in the working tree until BOTH lenses pass.
 - Only after spec ✅ and quality ✅ (with fixes applied) does the COORDINATOR consolidate.
+- Follow `pelizzai-verify`'s proof-before-commit boundary: wait for every required proof to
+  finish, read its output and its own exit code, then commit in a SEPARATE tool call.
+  Never chain proof and commit (`tests | tail -1 && git commit` masks the test's failure);
+  a running background job is pending, even when its launch command succeeded.
 - The coordinator stages the task's exact paths and, in the consumer, the state; inspects
   `git diff --cached` and never uses `git add -A`.
 - To allow safe reuse of the review in a single-task bounded delivery, require that no
