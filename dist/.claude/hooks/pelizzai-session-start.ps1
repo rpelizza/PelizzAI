@@ -27,7 +27,7 @@ try {
   # Session cwd may be a package; memory belongs to the checkout root.
   try {
     $hookGitRoot = & git -C $cwd rev-parse --show-toplevel 2>$null
-    if ($LASTEXITCODE -eq 0 -and $hookGitRoot) { $cwd = ([string]$hookGitRoot).Trim() }
+    if ($LASTEXITCODE -eq 0 -and $hookGitRoot) { $cwd = [string]$hookGitRoot }
   } catch {} # non-Git consumers retain their original cwd
 
   $lines = @(

@@ -11,14 +11,16 @@ test('export preflight is read-only and reports tooling that needs consumer inte
  const dir=mkdtempSync(join(tmpdir(),'pelizzai-preflight-'));t.after(()=>rmSync(dir,{recursive:true,force:true}));
  const config='export default [{ ignores: ["scripts/old-harness.mjs"] }];\n';
  writeFileSync(join(dir,'eslint.config.js'),config);
+ mkdirSync(join(dir,'package.json'));
+ mkdirSync(join(dir,'.eslintrc.d'));
  const run=(...args)=>spawnSync(process.execPath,[join(root,'scripts/sync-harness.mjs'),'--export-consumer',dir,...args],{encoding:'utf8'});
  const preflight=run('--preflight');assert.equal(preflight.status,0,preflight.stderr);
  const report=JSON.parse(preflight.stdout);
  assert.equal(report.integration,'not-verified');
  assert.ok(report.tooling.some(x=>x.path==='scripts/vendor/js-yaml-4.1.1.mjs'&&x.change==='new'));
  assert.ok(report.tooling.some(x=>x.path==='scripts/project-memory.mjs'&&x.change==='new'));
- assert.ok(report.configs.includes('eslint.config.js'));
- assert.deepEqual(readdirSync(dir),['eslint.config.js']);
+ assert.deepEqual(report.configs,['eslint.config.js']);
+ assert.deepEqual(readdirSync(dir).sort(),['.eslintrc.d','eslint.config.js','package.json']);
  const installed=run();assert.equal(installed.status,0,installed.stderr);
  assert.match(installed.stdout,/Consumer integration: NOT VERIFIED/);
  assert.equal(readFileSync(join(dir,'eslint.config.js'),'utf8'),config);

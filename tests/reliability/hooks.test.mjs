@@ -7,9 +7,11 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-function fixture(t) {
-  const dir = mkdtempSync(join(tmpdir(), 'pelizzai-reliability-'));
-  t.after(() => rmSync(dir, { recursive: true, force: true }));
+function fixture(t, name = '') {
+  const temporary = mkdtempSync(join(tmpdir(), 'pelizzai-reliability-'));
+  const dir = name ? join(temporary, name) : temporary;
+  if (name) mkdirSync(dir);
+  t.after(() => rmSync(temporary, { recursive: true, force: true }));
   for (const args of [['init', '-b', 'main'], ['config', 'user.email', 'fixture@example.invalid'], ['config', 'user.name', 'Fixture'], ['commit', '--allow-empty', '-m', 'fixture']]) {
     const r = spawnSync('git', args, { cwd: dir, encoding: 'utf8' });
     assert.equal(r.status, 0, r.stderr);
@@ -117,7 +119,7 @@ test('Codex registration is idempotent, preserves other hooks, checks event and 
 });
 
 test('Codex commands survive another checkout and a nested session cwd',t=>{
-  const dir=fixture(t), other=join(fixture(t),'checkout é $x %PATH%');mkdirSync(other);
+  const dir=fixture(t), other=join(fixture(t),`checkout é $x %PATH%${process.platform==='win32'?'':' '}`);mkdirSync(other);
   assert.equal(spawnSync('git',['init','-b','main'],{cwd:other}).status,0);
   cpSync(join(root,'.claude/hooks'),join(dir,'.claude/hooks'),{recursive:true});
   const result=spawnSync(process.execPath,[join(root,'scripts/install-hooks.mjs'),'--project',dir,'--platform','codex','--only','guardrails'],{encoding:'utf8'});
@@ -146,7 +148,7 @@ test('Codex installation needs the Git root; check/remove remain available witho
 });
 
 test('real advisory hooks find the root memory from a nested session',t=>{
-  const dir=fixture(t), nested=join(dir,'src/nested');mkdirSync(nested,{recursive:true});
+  const dir=fixture(t,process.platform==='win32'?'':'checkout '), nested=join(dir,'src/nested');mkdirSync(nested,{recursive:true});
   mkdirSync(join(dir,'pelizzai/data'),{recursive:true});
   writeFileSync(join(dir,'pelizzai/domain-skills.md'),'# Catalog\n');
   writeFileSync(join(dir,'pelizzai/data/state.md'),'- slug: active-fixture\n- phase: exec\n');

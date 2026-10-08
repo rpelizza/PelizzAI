@@ -196,7 +196,7 @@ function definitionsFor(platform) {
       const code = "const{spawnSync}=require('node:child_process');" +
         "const r=spawnSync('git',['rev-parse','--show-toplevel'],{encoding:'utf8',windowsHide:true});" +
         "if(r.status!==0){console.error('PelizzAI hooks require a Git checkout');process.exit(1);}" +
-        `const p=spawnSync(process.execPath,[require('node:path').join(r.stdout.trim(),'.claude/hooks/${script}')],{stdio:'inherit',windowsHide:true});` +
+        `const p=spawnSync(process.execPath,[require('node:path').join(r.stdout.replace(/\\r?\\n$/,''),'.claude/hooks/${script}')],{stdio:'inherit',windowsHide:true});` +
         "if(p.error)console.error(p.error.message);process.exit(p.status??1);";
       return `node -e "${code}"`;
     }),
@@ -209,7 +209,7 @@ function requireGitRoot(project) {
     const value = realpathSync.native(path);
     return process.platform === 'win32' ? value.toLowerCase() : value;
   };
-  if (result.status !== 0 || physical(result.stdout.trim()) !== physical(project)) {
+  if (result.status !== 0 || physical(result.stdout.replace(/\r?\n$/, '')) !== physical(project)) {
     throw new Error('Codex hooks must be installed at the Git root. Initialize Git or select its root with --project.');
   }
 }

@@ -45,7 +45,7 @@ function main() {
   try {
     cwd = execFileSync('git', ['rev-parse', '--show-toplevel'], {
       cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 4000, windowsHide: true,
-    }).trim() || cwd;
+    }).replace(/\r?\n$/, '') || cwd;
   } catch { /* non-Git consumers keep their original cwd */ }
 
   const lines = [

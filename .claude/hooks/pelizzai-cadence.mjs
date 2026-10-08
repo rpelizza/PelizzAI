@@ -59,7 +59,7 @@ function safeGit(cwd, args) {
       stdio: ['ignore', 'pipe', 'ignore'],
       timeout: 4000,
       windowsHide: true,
-    }).trim();
+    }).replace(/\r?\n$/, '');
   } catch {
     return '';
   }

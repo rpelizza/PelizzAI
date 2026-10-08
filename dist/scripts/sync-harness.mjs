@@ -505,7 +505,9 @@ function consumerIntegration(target, files) {
     return {path, change: !existsSync(destination) ? 'new' : fileHash(destination) === fileHash(source) ? 'unchanged' : 'update'};
   });
   // Inventory only: never execute a consumer config or guess its lint/format command.
-  const configs = readdirSync(target).filter(name => /^(?:eslint\.config\.|\.eslintrc(?:\.|$)|\.eslintignore$|prettier\.config\.|\.prettierrc(?:\.|$)|\.prettierignore$|biome\.jsonc?$|package\.json$|pyproject\.toml$|\.pre-commit-config\.yaml$)/.test(name)).sort();
+  const configs = readdirSync(target, {withFileTypes:true})
+    .filter(entry => entry.isFile() && /^(?:eslint\.config\.|\.eslintrc(?:\.|$)|\.eslintignore$|prettier\.config\.|\.prettierrc(?:\.|$)|\.prettierignore$|biome\.jsonc?$|package\.json$|pyproject\.toml$|\.pre-commit-config\.yaml$)/.test(entry.name))
+    .map(entry => entry.name).sort();
   return {target, integration:'not-verified', tooling, configs,
     next:'Review exact tooling paths in consumer lint/format configuration, then run its real lint/format checks without auto-fix before committing. Harness parity does not prove consumer integration.'};
 }
