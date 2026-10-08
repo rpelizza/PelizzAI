@@ -25,10 +25,34 @@ try {
   $cwd = (Get-Location).Path
   if ($raw) { try { $j = $raw | ConvertFrom-Json; if ($j.cwd) { $cwd = $j.cwd } } catch {} }
   # Session cwd may be a package; memory belongs to the checkout root.
+  $gitProcess = [Diagnostics.Process]::new()
   try {
-    $hookGitRoot = & git -C $cwd rev-parse --show-toplevel 2>$null
-    if ($LASTEXITCODE -eq 0 -and $hookGitRoot) { $cwd = [string]$hookGitRoot }
-  } catch {} # non-Git consumers retain their original cwd
+    $gitProcess.StartInfo = [Diagnostics.ProcessStartInfo]::new('git')
+    $gitProcess.StartInfo.WorkingDirectory = $cwd
+    $gitProcess.StartInfo.UseShellExecute = $false
+    $gitProcess.StartInfo.CreateNoWindow = $true
+    $gitProcess.StartInfo.RedirectStandardOutput = $true
+    $gitProcess.StartInfo.RedirectStandardError = $true
+    $gitProcess.StartInfo.StandardOutputEncoding = [Text.Encoding]::UTF8
+    $gitProcess.StartInfo.ArgumentList.Add('rev-parse')
+    $gitProcess.StartInfo.ArgumentList.Add('--show-toplevel')
+    [void]$gitProcess.Start()
+    $timer = [Diagnostics.Stopwatch]::StartNew()
+    $outputTask = $gitProcess.StandardOutput.ReadToEndAsync()
+    $errorTask = $gitProcess.StandardError.ReadToEndAsync()
+    # Drain both streams within the same deadline; never wait indefinitely for Git.
+    if ($gitProcess.WaitForExit(4000)) {
+      $remaining = [int][Math]::Max(0, 4000 - $timer.ElapsedMilliseconds)
+      if ([Threading.Tasks.Task]::WaitAll([Threading.Tasks.Task[]]@($outputTask, $errorTask), $remaining) -and $gitProcess.ExitCode -eq 0) {
+        $hookGitRoot = $outputTask.Result -replace '\r?\n$', ''
+        if ($hookGitRoot) { $cwd = $hookGitRoot }
+      }
+    }
+  } catch {} # errors and timeout retain the original cwd
+  finally {
+    try { if (-not $gitProcess.HasExited) { $gitProcess.Kill($true) } } catch {}
+    $gitProcess.Dispose()
+  }
 
   $lines = @(
     'PelizzAI: before answering ANYTHING, load the pelizzai-core skill and honor the 1% rule - if a skill applies (even to a trivial tweak), invoke it.',
