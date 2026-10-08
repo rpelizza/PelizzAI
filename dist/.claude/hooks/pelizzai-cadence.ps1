@@ -12,8 +12,8 @@
 #  - Full repo-scan: > 15 days since last-full-scan.
 #  - Snooze: after nudging, stays silent for 7 days (avoids repeating every window).
 #
-# Same guarantees as the .mjs: silent no-op without the ledger; the expensive check (git)
-# only every N interactions; ALWAYS exits 0 (never blocks the prompt); swallows any error.
+# Same guarantees as the .mjs: silent no-op without the ledger; Git history scan only every N
+# interactions (root discovery on each prompt); ALWAYS exits 0; swallows any error.
 #
 # Installation (opt-in, at bootstrap), in .claude/settings.json:
 #   { "hooks": { "UserPromptSubmit": [ { "hooks": [
@@ -31,6 +31,34 @@ try {
   $raw = [Console]::In.ReadToEnd()
   $cwd = (Get-Location).Path
   if ($raw) { try { $j = $raw | ConvertFrom-Json; if ($j.cwd) { $cwd = $j.cwd } } catch {} }
+  $gitProcess = [Diagnostics.Process]::new()
+  try {
+    $gitProcess.StartInfo = [Diagnostics.ProcessStartInfo]::new('git')
+    $gitProcess.StartInfo.WorkingDirectory = $cwd
+    $gitProcess.StartInfo.UseShellExecute = $false
+    $gitProcess.StartInfo.CreateNoWindow = $true
+    $gitProcess.StartInfo.RedirectStandardOutput = $true
+    $gitProcess.StartInfo.RedirectStandardError = $true
+    $gitProcess.StartInfo.StandardOutputEncoding = [Text.Encoding]::UTF8
+    $gitProcess.StartInfo.ArgumentList.Add('rev-parse')
+    $gitProcess.StartInfo.ArgumentList.Add('--show-toplevel')
+    [void]$gitProcess.Start()
+    $timer = [Diagnostics.Stopwatch]::StartNew()
+    $outputTask = $gitProcess.StandardOutput.ReadToEndAsync()
+    $errorTask = $gitProcess.StandardError.ReadToEndAsync()
+    # Drain both streams within the same deadline; never wait indefinitely for Git.
+    if ($gitProcess.WaitForExit(4000)) {
+      $remaining = [int][Math]::Max(0, 4000 - $timer.ElapsedMilliseconds)
+      if ([Threading.Tasks.Task]::WaitAll([Threading.Tasks.Task[]]@($outputTask, $errorTask), $remaining) -and $gitProcess.ExitCode -eq 0) {
+        $hookGitRoot = $outputTask.Result -replace '\r?\n$', ''
+        if ($hookGitRoot) { $cwd = $hookGitRoot }
+      }
+    }
+  } catch {} # errors and timeout retain the original cwd
+  finally {
+    try { if (-not $gitProcess.HasExited) { $gitProcess.Kill($true) } } catch {}
+    $gitProcess.Dispose()
+  }
 
   $ledger = Join-Path $cwd 'pelizzai/data/review-domain-skills.md'
   if (-not (Test-Path -LiteralPath $ledger)) { exit 0 } # harness not initialized in this project

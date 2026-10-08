@@ -1,15 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, cpSync, rmSync, existsSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, cpSync, rmSync, existsSync, chmodSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { resolve, join } from 'node:path';
+import { resolve, join, delimiter } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-function fixture(t) {
-  const dir = mkdtempSync(join(tmpdir(), 'pelizzai-reliability-'));
-  t.after(() => rmSync(dir, { recursive: true, force: true }));
+function fixture(t, name = '') {
+  const temporary = mkdtempSync(join(tmpdir(), 'pelizzai-reliability-'));
+  const dir = name ? join(temporary, name) : temporary;
+  if (name) mkdirSync(dir);
+  t.after(() => rmSync(temporary, { recursive: true, force: true }));
   for (const args of [['init', '-b', 'main'], ['config', 'user.email', 'fixture@example.invalid'], ['config', 'user.name', 'Fixture'], ['commit', '--allow-empty', '-m', 'fixture']]) {
     const r = spawnSync('git', args, { cwd: dir, encoding: 'utf8' });
     assert.equal(r.status, 0, r.stderr);
@@ -100,6 +102,14 @@ test('Codex registration is idempotent, preserves other hooks, checks event and 
   assert.equal(run('--check', '--only', 'writegate').status, 0);
   const config = JSON.parse(installed);
   assert.deepEqual(config.hooks.PreToolUse[0].hooks[0], other.hooks[0]);
+  const legacy=JSON.parse(installed);
+  for(const group of legacy.hooks.PreToolUse) for(const handler of group.hooks) {
+    if(handler.command.includes('pelizzai-writegate.mjs')) handler.command=`node "${dir.replace(/\\/g,'/')}/.claude/hooks/pelizzai-writegate.mjs"`;
+  }
+  writeFileSync(manifest,JSON.stringify(legacy));
+  assert.equal(run('--check','--only','writegate').status,1);
+  assert.equal(run('--only','writegate').status,0);
+  assert.equal(readFileSync(manifest,'utf8'),installed);
   config.hooks.PreToolUse.find(x => x.matcher === 'apply_patch').matcher = 'NeverRuns';
   writeFileSync(manifest, JSON.stringify(config));
   assert.equal(run('--check').status, 1);
@@ -108,11 +118,104 @@ test('Codex registration is idempotent, preserves other hooks, checks event and 
   assert.deepEqual(JSON.parse(readFileSync(manifest)).hooks.PreToolUse, [other]);
 });
 
-test('Codex registration rejects percent paths before writing shell commands',t=>{
-  const dir=join(fixture(t),'project%PATH%');mkdirSync(dir);
+test('Codex commands survive another checkout and a nested session cwd',t=>{
+  const dir=fixture(t), other=join(fixture(t),`checkout é $x %PATH%${process.platform==='win32'?'':' '}`);mkdirSync(other);
+  assert.equal(spawnSync('git',['init','-b','main'],{cwd:other}).status,0);
   cpSync(join(root,'.claude/hooks'),join(dir,'.claude/hooks'),{recursive:true});
-  const result=spawnSync(process.execPath,[join(root,'scripts/install-hooks.mjs'),'--project',dir,'--platform','codex'],{encoding:'utf8'});
-  assert.equal(result.status,1);
-  assert.match(result.stderr,/shell interpolation characters/);
-  assert.equal(existsSync(join(dir,'.codex/hooks.json')),false);
+  const result=spawnSync(process.execPath,[join(root,'scripts/install-hooks.mjs'),'--project',dir,'--platform','codex','--only','guardrails'],{encoding:'utf8'});
+  assert.equal(result.status,0,result.stderr);
+  const command=JSON.parse(readFileSync(join(dir,'.codex/hooks.json'),'utf8')).hooks.PreToolUse[0].hooks[0].command;
+  assert.ok(!command.includes(dir.replace(/\\/g,'/')),'registration must not embed its original checkout');
+  const nested=join(other,'sub pasta é $x %PATH%');mkdirSync(nested);
+  mkdirSync(join(other,'.claude/hooks'),{recursive:true});
+  writeFileSync(join(other,'.claude/hooks/pelizzai-guardrails.mjs'),"import {readFileSync} from 'node:fs'; console.log('RELOCATED:'+JSON.parse(readFileSync(0,'utf8')).marker); process.exitCode=2;\n");
+  const run=process.platform==='win32'
+    ? spawnSync('pwsh',['-NoProfile','-NonInteractive','-Command',command+'; exit $LASTEXITCODE'],{cwd:nested,input:'{"marker":"stdin-preserved"}',encoding:'utf8'})
+    : spawnSync('sh',['-c',command],{cwd:nested,input:'{"marker":"stdin-preserved"}',encoding:'utf8'});
+  assert.equal(run.status,2,run.stderr);
+  assert.match(run.stdout,/RELOCATED:stdin-preserved/);
+});
+
+test('Codex installation needs the Git root; check/remove remain available without Git',t=>{
+  const dir=fixture(t), nested=join(dir,'nested');mkdirSync(nested);
+  cpSync(join(root,'.claude/hooks'),join(nested,'.claude/hooks'),{recursive:true});
+  const run=(...args)=>spawnSync(process.execPath,[join(root,'scripts/install-hooks.mjs'),'--project',nested,'--platform','codex',...args],{encoding:'utf8'});
+  assert.equal(run().status,1);
+  assert.match(run().stderr,/Git root/);
+  assert.equal(existsSync(join(nested,'.codex/hooks.json')),false);
+  assert.equal(run('--check').status,0);
+  assert.equal(run('--remove').status,0);
+});
+
+test('real advisory hooks find the root memory from a nested session',t=>{
+  const dir=fixture(t,process.platform==='win32'?'':'checkout '), nested=join(dir,'src/nested');mkdirSync(nested,{recursive:true});
+  mkdirSync(join(dir,'pelizzai/data'),{recursive:true});
+  writeFileSync(join(dir,'pelizzai/domain-skills.md'),'# Catalog\n');
+  writeFileSync(join(dir,'pelizzai/data/state.md'),'- slug: active-fixture\n- phase: exec\n');
+  writeFileSync(join(dir,'pelizzai/data/review-domain-skills.md'),'last-review: 2000-01-01\nlast-full-scan: 2000-01-01\n');
+  const state=join(dir,'pelizzai/data/.cadence-state.json');
+  const input=JSON.stringify({cwd:nested});
+  cpSync(join(root,'.claude/hooks'),join(dir,'.claude/hooks'),{recursive:true});
+  const install=spawnSync(process.execPath,[join(root,'scripts/install-hooks.mjs'),'--project',dir,'--platform','codex','--only','session-start,cadence'],{encoding:'utf8'});
+  assert.equal(install.status,0,install.stderr);
+  const settings=JSON.parse(readFileSync(join(dir,'.codex/hooks.json'),'utf8'));
+  for(const [name,event] of [['session-start','SessionStart'],['cadence','UserPromptSubmit']]) {
+    const command=settings.hooks[event][0].hooks[0].command;
+    const variants=[process.platform==='win32'?['pwsh',['-NoProfile','-Command',command+'; exit $LASTEXITCODE']]:['sh',['-c',command]],
+      ['pwsh',['-NoProfile','-File',join(dir,`.claude/hooks/pelizzai-${name}.ps1`)]]];
+    for(const [executable,args] of variants) {
+      writeFileSync(state,'{"count":9,"snoozeUntil":0}');
+      const result=spawnSync(executable,args,{cwd:nested,input,encoding:'utf8'});
+      assert.equal(result.status,0,result.stderr);
+      if(name==='session-start') {
+        assert.match(result.stdout,/ACTIVE task.*active-fixture/);
+        assert.doesNotMatch(result.stdout,/no domain-skill catalog/);
+      } else {
+        assert.match(result.stdout,/PelizzAI \(cadence\)/);
+        assert.equal(JSON.parse(readFileSync(state,'utf8').replace(/^\uFEFF/,'')).count,10);
+      }
+      assert.equal(existsSync(join(nested,'pelizzai')),false);
+    }
+  }
+});
+
+test('PowerShell advisory root discovery times out and preserves the original memory directory',t=>{
+  const dir=fixture(t), bin=join(dir,'fake-bin'), pidFile=join(dir,'fake-git.pid');
+  mkdirSync(bin);mkdirSync(join(dir,'pelizzai/data'),{recursive:true});
+  writeFileSync(join(dir,'pelizzai/domain-skills.md'),'# Catalog\n');
+  writeFileSync(join(dir,'pelizzai/data/state.md'),'- slug: timeout-fixture\n- phase: exec\n');
+  writeFileSync(join(dir,'pelizzai/data/review-domain-skills.md'),'last-review: 2000-01-01\n');
+  if(process.platform==='win32') {
+    const source=join(bin,'SlowGit.cs'), executable=join(bin,'git.exe');
+    writeFileSync(source,'public class SlowGit { public static void Main() { System.IO.File.WriteAllText(System.Environment.GetEnvironmentVariable("PELIZZAI_TEST_PID"), System.Diagnostics.Process.GetCurrentProcess().Id.ToString()); System.Threading.Thread.Sleep(30000); } }');
+    const build=spawnSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',
+      "Add-Type -TypeDefinition ([IO.File]::ReadAllText($env:PELIZZAI_TEST_SOURCE)) -OutputAssembly $env:PELIZZAI_TEST_BINARY -OutputType ConsoleApplication"],
+      {encoding:'utf8',env:{...process.env,PELIZZAI_TEST_SOURCE:source,PELIZZAI_TEST_BINARY:executable}});
+    assert.equal(build.status,0,build.stderr);assert.ok(existsSync(executable));
+  } else {
+    const executable=join(bin,'git');
+    writeFileSync(executable,'#!/bin/sh\necho "$$" > "$PELIZZAI_TEST_PID"\nexec sleep 30\n');
+    chmodSync(executable,0o755);
+  }
+  const env={...process.env,PELIZZAI_TEST_PID:pidFile};
+  const pathKey=Object.keys(env).find(key=>key.toLowerCase()==='path');
+  env[pathKey]=`${bin}${delimiter}${env[pathKey]}`;
+  for(const name of ['session-start','cadence']) {
+    if(existsSync(pidFile))rmSync(pidFile);
+    const state=join(dir,'pelizzai/data/.cadence-state.json');
+    writeFileSync(state,'{"count":0,"snoozeUntil":0}');
+    const result=spawnSync('pwsh',['-NoProfile','-File',join(root,`.claude/hooks/pelizzai-${name}.ps1`)],
+      {cwd:dir,input:JSON.stringify({cwd:dir}),encoding:'utf8',env,timeout:12000});
+    const pid=existsSync(pidFile)?Number(readFileSync(pidFile,'utf8').trim()):null;
+    try {
+      assert.ok(pid>0,'The slow Git fixture must actually run');
+      assert.equal(result.error,undefined,`${name} exceeded the outer timeout`);
+      assert.equal(result.status,0,result.stderr);
+      assert.throws(()=>process.kill(pid,0),error=>error.code==='ESRCH','The timed-out Git process must be terminated');
+      if(name==='session-start')assert.match(result.stdout,/ACTIVE task.*timeout-fixture/);
+      else assert.equal(JSON.parse(readFileSync(state,'utf8')).count,1);
+    } finally {
+      if(pid)try{process.kill(pid);}catch(error){if(error.code!=='ESRCH')throw error;}
+    }
+  }
 });

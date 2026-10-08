@@ -19,7 +19,7 @@
  *
  * Safety guarantees:
  *  - Silent no-op if the harness has not been initialized here (no ledger).
- *  - The expensive check (git) only runs every N interactions; the others just bump the counter.
+ *  - The Git history scan only runs every N interactions; root discovery runs on each prompt.
  *  - ALWAYS ends with exit 0 — never blocks the user's prompt.
  *  - Swallows any error (missing git, FS, etc.) without noise.
  *  - At most one reminder per snooze window.
@@ -58,7 +58,8 @@ function safeGit(cwd, args) {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
       timeout: 4000,
-    }).trim();
+      windowsHide: true,
+    }).replace(/\r?\n$/, '');
   } catch {
     return '';
   }
@@ -93,6 +94,7 @@ function main() {
     /* fall back to process.cwd() */
   }
 
+  cwd = safeGit(cwd, ['rev-parse', '--show-toplevel']) || cwd;
   const ledgerPath = join(cwd, 'pelizzai', 'data', 'review-domain-skills.md');
   if (!existsSync(ledgerPath)) return; // harness not initialized in this project
 

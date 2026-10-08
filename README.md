@@ -92,6 +92,35 @@ export adds over the copy:
 | preserves domain skills, `pelizzai/`, `settings.json` | yes | yes, by contract |
 | registers hooks | never | optional, `--install-hooks` |
 
+### Validate integration with the consumer
+
+Before updating, inspect the read-only preflight (PowerShell wrapper: `-Preflight`):
+
+```bash
+node scripts/sync-harness.mjs --export-consumer /path/to/your-project --preflight
+```
+
+It checks payload ownership and lists new, updated and unchanged tooling paths plus root-level
+lint/format configuration names. Normal export prints the same tooling inventory before writing.
+Neither command executes consumer configuration nor changes its lint policy. Export success
+proves harness delivery and parity; **consumer integration remains unverified** until its real
+lint/format checks pass. Run those checks without auto-fix before committing the update, including
+fresh installations copied from `dist/`.
+
+Projects that lint `scripts/` should separate managed harness files from product scripts. For
+example, in an ESLint flat config, an ignores-only object can follow the receipt automatically:
+
+```js
+import { readFileSync } from 'node:fs';
+const receipt = JSON.parse(readFileSync(new URL('./scripts/pelizzai-installation.json', import.meta.url), 'utf8'));
+const harnessScripts = Object.keys(receipt.files).filter(path => path.startsWith('scripts/'));
+// Add { ignores: harnessScripts } to the existing config array.
+```
+
+Review this change against the consumer's actual ESLint version/config; other formatters need
+their own exact-path exclusions. Do not ignore all `scripts/**`, disable product rules, or format
+vendored/managed files to pass a consumer check. Report a harness defect upstream instead.
+
 In your project's `CLAUDE.md`/`AGENTS.md`/`GEMINI.md` the harness owns only a **managed block**
 (`<!-- pelizzai:begin -->` … `<!-- pelizzai:end -->`); everything you wrote outside it survives
 every update.
@@ -129,10 +158,12 @@ node scripts/install-hooks.mjs --platform codex --check
 The installer is idempotent and preserves hooks, permissions, and any other fields that already
 exist in `.claude/settings.json` or `.codex/hooks.json`. Check validates event/matcher coverage,
 including `apply_patch` on Codex. A partial opt-in is valid; a present hook in the wrong event
-is not. Codex commands point at the installation's actual path: reinstall after moving it.
-The Codex installer requires a path without double quotes, dollar signs, backticks, percent
-signs or line breaks; it rejects shell interpolation characters instead of assuming one shell's
-escaping rules work in every host.
+is not. Codex registration requires Git and installation at the checkout root. Commands resolve
+the active Git root when invoked, including from a subdirectory, and contain no machine path.
+The same registration can travel with a clone or worktree. Git and Node must be on the host's PATH.
+To migrate an older absolute-path registration, rerun the installer with the same accepted
+`--only` list; other hooks remain intact. `--check --only <ids>` detects the old registration
+until migrated. Plain `--check` inventories nonstandard registrations without declaring them portable.
 
 **Registered is not running.** Codex also requires project trust and review of the current hook
 definitions; inspect `/hooks` in the CLI. The installer never grants or bypasses trust. Verify
@@ -532,6 +563,17 @@ Stable cause and incident identifiers connect repeated failures across archives 
 the same incident twice. A missed rule and an ineffective rule require different corrections.
 This is lexical retrieval and an explicit learning workflow; cross-session prevention of repeat
 errors has not yet been established by a controlled behavioral evaluation.
+
+Search indexes both compound identifiers and their hyphen/underscore-separated parts, with accent
+normalization. Of the default six result slots, up to three are reserved for matching current
+claims (context/ADRs/standards); remaining slots follow relevance. This prevents history from
+hiding every current match, but does not establish that a retrieved claim is still true.
+
+Verification also requires the proof process's own exit code and completed output: a successful
+filter or a pending background job is insufficient. The agent must read the result before
+`git commit` in a separate tool call. These are explicit policy gates, not shell-hook enforcement;
+the [consumption scenarios](.claude/skills/pelizzai-verify/evals/proof-before-commit.md) cover the
+observed failure modes without claiming a new live-agent success rate.
 
 ---
 

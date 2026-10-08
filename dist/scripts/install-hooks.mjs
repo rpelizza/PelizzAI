@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, realpathSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const DEFINITIONS = [
   {
@@ -183,17 +184,34 @@ function registrations(settings) {
   return found;
 }
 
-function definitionsFor(platform, project) {
+function definitionsFor(platform) {
   if (platform === 'claude') return DEFINITIONS;
-  // Codex has no CLAUDE_PROJECT_DIR expansion. Register the actual installation root,
-  // quoted for spaces; reject shell interpolation rather than generate an unsafe command.
-  const path = project.replace(/\\/g, '/');
-  if (/["$`%\r\n]/.test(path)) throw new Error('Hook installation path contains shell interpolation characters. Use a plain installation path.');
+  // Codex uses the session cwd, which may be a subdirectory. Resolve the Git root at
+  // dispatch, without interpolating a machine path or using shell-specific syntax.
   return DEFINITIONS.map(definition => ({
     ...definition,
     matcher: definition.matcher === 'Write|Edit|MultiEdit|NotebookEdit' ? 'apply_patch' : definition.matcher,
-    commands: definition.commands.map(command => command.replace('$CLAUDE_PROJECT_DIR', path)),
+    commands: definition.commands.map(command => {
+      const script = `pelizzai-${hookId(command)}.mjs`;
+      const code = "const{spawnSync}=require('node:child_process');" +
+        "const r=spawnSync('git',['rev-parse','--show-toplevel'],{encoding:'utf8',windowsHide:true});" +
+        "if(r.status!==0){console.error('PelizzAI hooks require a Git checkout');process.exit(1);}" +
+        `const p=spawnSync(process.execPath,[require('node:path').join(r.stdout.replace(/\\r?\\n$/,''),'.claude/hooks/${script}')],{stdio:'inherit',windowsHide:true});` +
+        "if(p.error)console.error(p.error.message);process.exit(p.status??1);";
+      return `node -e "${code}"`;
+    }),
   }));
+}
+
+function requireGitRoot(project) {
+  const result = spawnSync('git', ['-C', project, 'rev-parse', '--show-toplevel'], { encoding: 'utf8', windowsHide: true });
+  const physical = path => {
+    const value = realpathSync.native(path);
+    return process.platform === 'win32' ? value.toLowerCase() : value;
+  };
+  if (result.status !== 0 || physical(result.stdout.replace(/\r?\n$/, '')) !== physical(project)) {
+    throw new Error('Codex hooks must be installed at the Git root. Initialize Git or select its root with --project.');
+  }
 }
 
 function writeAtomic(path, settings) {
@@ -209,7 +227,7 @@ try {
   const settingsPath = options.platform === 'codex'
     ? join(project, '.codex', 'hooks.json') : join(project, '.claude', 'settings.json');
   const settings = readSettings(settingsPath);
-  const allDefinitions = definitionsFor(options.platform, project);
+  const allDefinitions = definitionsFor(options.platform);
   const definitions = selectDefinitions(options.only, allDefinitions);
   const escopo = options.only ? ` (--only ${options.only.join(', ')})` : '';
 
@@ -282,6 +300,7 @@ try {
     writeAtomic(settingsPath, removePelizzai(settings, options.only));
     console.log(`PelizzAI hooks removed from ${settingsPath}${escopo}; other settings preserved.`);
   } else {
+    if (options.platform === 'codex') requireGitRoot(project);
     const missing = expectedCommands(definitions)
       .map((command) => command.match(/pelizzai-[\w-]+\.mjs/)?.[0])
       .filter((name) => name && !existsSync(join(project, '.claude', 'hooks', name)));
@@ -290,7 +309,7 @@ try {
     console.log(`PelizzAI hooks registered in ${settingsPath}${escopo}; existing settings preserved.`);
   }
   if (options.platform === 'codex' && !options.remove) {
-    console.log('Registration only: project trust and review of the current hook definitions in Codex are still required. Inspect /hooks in the CLI; this command does not grant trust or prove live dispatch. Reinstall after moving the checkout.');
+    console.log('Registration only: project trust and review of the current hook definitions in Codex are still required. Inspect /hooks in the CLI; this command does not grant trust or prove live dispatch. New registrations resolve the active Git root; reinstall accepted hooks to migrate legacy machine paths.');
   }
 } catch (error) {
   console.error(`FAIL: ${error instanceof Error ? error.message : String(error)}`);

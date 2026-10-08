@@ -126,6 +126,7 @@ function parseArgs(argv) {
     updateManifest: false,
     sourceMode: false,
     exportConsumer: null,
+    preflight: false,
     installHooks: false,
     buildDist: false,
   };
@@ -155,6 +156,10 @@ function parseArgs(argv) {
       case '-installhooks':
         options.installHooks = true;
         break;
+      case '--preflight':
+      case '-preflight':
+        options.preflight = true;
+        break;
       case '--build-dist':
       case '-builddist':
         options.buildDist = true;
@@ -166,6 +171,7 @@ function parseArgs(argv) {
   node scripts/sync-harness.mjs [--check] [--source-mode]
   node scripts/sync-harness.mjs --update-manifest
   node scripts/sync-harness.mjs --export-consumer <target> [--install-hooks]
+  node scripts/sync-harness.mjs --export-consumer <target> --preflight
   node scripts/sync-harness.mjs --build-dist
 
 Equivalent wrappers: scripts/sync-harness.ps1 and scripts/sync-harness.sh.`);
@@ -184,6 +190,9 @@ Equivalent wrappers: scripts/sync-harness.ps1 and scripts/sync-harness.sh.`);
   }
   if (options.installHooks && !options.exportConsumer) {
     throw new Error('--install-hooks is only valid with --export-consumer.');
+  }
+  if (options.preflight && (!options.exportConsumer || options.installHooks)) {
+    throw new Error('--preflight requires --export-consumer and cannot install hooks. It never writes files.');
   }
   if (
     options.buildDist &&
@@ -490,7 +499,20 @@ This is a consumer: there is no \`scripts/pelizzai-source-repo.txt\`. The manife
   return core;
 }
 
-function exportConsumer(destination, installHooks) {
+function consumerIntegration(target, files) {
+  const tooling = [...files].filter(([path]) => path.startsWith('scripts/')).map(([path, source]) => {
+    const destination = join(target, path);
+    return {path, change: !existsSync(destination) ? 'new' : fileHash(destination) === fileHash(source) ? 'unchanged' : 'update'};
+  });
+  // Inventory only: never execute a consumer config or guess its lint/format command.
+  const configs = readdirSync(target, {withFileTypes:true})
+    .filter(entry => entry.isFile() && /^(?:eslint\.config\.|\.eslintrc(?:\.|$)|\.eslintignore$|prettier\.config\.|\.prettierrc(?:\.|$)|\.prettierignore$|biome\.jsonc?$|package\.json$|pyproject\.toml$|\.pre-commit-config\.yaml$)/.test(entry.name))
+    .map(entry => entry.name).sort();
+  return {target, integration:'not-verified', tooling, configs,
+    next:'Review exact tooling paths in consumer lint/format configuration, then run its real lint/format checks without auto-fix before committing. Harness parity does not prove consumer integration.'};
+}
+
+function exportConsumer(destination, installHooks, preflight) {
   if (!existsSync(sourceSentinel)) {
     throw new Error('--export-consumer only runs in the source repo (sentinel missing).');
   }
@@ -499,6 +521,20 @@ function exportConsumer(destination, installHooks) {
   }
   const target = resolve(destination);
   if (target === root) throw new Error('Target cannot be the source repo itself.');
+  if (`${target}${sep}`.startsWith(`${root}${sep}`)) throw new Error('Consumer export target must be outside the source repo.');
+
+  const manifest = readCoreManifest();
+  if (!manifest?.length) throw new Error('Core manifest missing; run --update-manifest.');
+  const files = deliveryFiles(manifest);
+  assertOwnedDestination(target, files);
+  const integration = consumerIntegration(target, files);
+  if (preflight) {
+    console.log(JSON.stringify(integration, null, 2));
+    return;
+  }
+  console.log('Consumer tooling preflight (lint/format scope):');
+  for (const item of integration.tooling) console.log(`  ${item.change}: ${item.path}`);
+  console.log(`Consumer configs found (root inventory): ${integration.configs.join(', ') || 'none; inspect project CI/profile'}`);
 
   const core = copyConsumerPayload(target);
 
@@ -510,6 +546,7 @@ function exportConsumer(destination, installHooks) {
     `Consumer export complete: ${target} (${core.length} core skills; Cursor adapter; domain and ` +
       `pelizzai/ preserved; hooks ${installHooks ? 'registered' : 'copied, registration pending user decision'}).`,
   );
+  console.log(`Consumer integration: NOT VERIFIED. ${integration.next}`);
 }
 
 function buildDist({ quiet = false } = {}) {
@@ -636,7 +673,7 @@ function generate(updateManifest) {
 try {
   const options = parseArgs(process.argv.slice(2));
   if (options.exportConsumer) {
-    exportConsumer(options.exportConsumer, options.installHooks);
+    exportConsumer(options.exportConsumer, options.installHooks, options.preflight);
   } else if (options.buildDist) {
     buildDist();
   } else if (options.check) {

@@ -1,11 +1,49 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,rmSync,readFileSync,writeFileSync,existsSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,rmSync,readFileSync,writeFileSync,existsSync,readdirSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../../',import.meta.url));
+
+test('export preflight is read-only and reports tooling that needs consumer integration checks',t=>{
+ const dir=mkdtempSync(join(tmpdir(),'pelizzai-preflight-'));t.after(()=>rmSync(dir,{recursive:true,force:true}));
+ const config='export default [{ ignores: ["scripts/old-harness.mjs"] }];\n';
+ writeFileSync(join(dir,'eslint.config.js'),config);
+ mkdirSync(join(dir,'package.json'));
+ mkdirSync(join(dir,'.eslintrc.d'));
+ const run=(...args)=>spawnSync(process.execPath,[join(root,'scripts/sync-harness.mjs'),'--export-consumer',dir,...args],{encoding:'utf8'});
+ const preflight=run('--preflight');assert.equal(preflight.status,0,preflight.stderr);
+ const report=JSON.parse(preflight.stdout);
+ assert.equal(report.integration,'not-verified');
+ assert.ok(report.tooling.some(x=>x.path==='scripts/vendor/js-yaml-4.1.1.mjs'&&x.change==='new'));
+ assert.ok(report.tooling.some(x=>x.path==='scripts/project-memory.mjs'&&x.change==='new'));
+ assert.deepEqual(report.configs,['eslint.config.js']);
+ assert.deepEqual(readdirSync(dir).sort(),['.eslintrc.d','eslint.config.js','package.json']);
+ const installed=run();assert.equal(installed.status,0,installed.stderr);
+ assert.match(installed.stdout,/Consumer integration: NOT VERIFIED/);
+ assert.equal(readFileSync(join(dir,'eslint.config.js'),'utf8'),config);
+ const second=JSON.parse(run('--preflight').stdout);
+ assert.ok(second.tooling.every(x=>x.change==='unchanged'));
+ const file=join(dir,'scripts/project-memory.mjs');
+ writeFileSync(file,readFileSync(file,'utf8')+'\nlocal rule');
+ assert.equal(run('--preflight').status,1);
+ assert.match(readFileSync(file,'utf8'),/local rule/);
+ assert.equal(run('--preflight','--install-hooks').status,1);
+});
+
+test('normalized ownership accepts BOM/CRLF only and still rejects semantic edits',t=>{
+ const dir=mkdtempSync(join(tmpdir(),'pelizzai-newlines-'));t.after(()=>rmSync(dir,{recursive:true,force:true}));
+ const run=()=>spawnSync(process.execPath,[join(root,'scripts/sync-harness.mjs'),'--export-consumer',dir],{encoding:'utf8'});
+ assert.equal(run().status,0);
+ const file=join(dir,'.claude/skills/pelizzai-core/SKILL.md');
+ const crlf='\uFEFF'+readFileSync(file,'utf8').replace(/^\uFEFF/,'').replace(/\r?\n/g,'\r\n');
+ writeFileSync(file,crlf);assert.equal(run().status,0);
+ writeFileSync(file,crlf+'\r\nLocal semantic rule\r\n');
+ assert.equal(run().status,1);
+ assert.match(readFileSync(file,'utf8'),/Local semantic rule/);
+});
 test('export records ownership and refuses local changes before any replacement',t=>{
  const dir=mkdtempSync(join(tmpdir(),'pelizzai-export-'));t.after(()=>rmSync(dir,{recursive:true,force:true}));
  const run=()=>spawnSync(process.execPath,[join(root,'scripts/sync-harness.mjs'),'--export-consumer',dir],{encoding:'utf8'});

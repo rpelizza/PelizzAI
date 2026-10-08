@@ -21,6 +21,7 @@ param(
     [switch]$UpdateManifest,
     [switch]$SourceMode,
     [string]$ExportConsumer,
+    [switch]$Preflight,
     [switch]$InstallHooks,
     [switch]$BuildDist
 )
@@ -31,6 +32,7 @@ if ($Check) { $arguments += '--check' }
 if ($UpdateManifest) { $arguments += '--update-manifest' }
 if ($SourceMode) { $arguments += '--source-mode' }
 if ($ExportConsumer) { $arguments += @('--export-consumer', $ExportConsumer) }
+if ($Preflight) { $arguments += '--preflight' }
 if ($InstallHooks) { $arguments += '--install-hooks' }
 if ($BuildDist) { $arguments += '--build-dist' }
 

@@ -301,8 +301,10 @@ form. `--only` is additive (it does not drop a hook the user had already accepte
 is an inventory in which a deliberate partial install is not a failure, and `--check --only <ids>`
 turns into a turnstile that requires exactly those hooks. The installer merges
 `.claude/settings.json` (Claude) or `.codex/hooks.json` (Codex) without overwriting existing
-hooks/permissions and is idempotent. Codex uses a native `apply_patch` matcher and absolute
-installation paths; reinstall after moving the project. Registration is not host trust or proof
+hooks/permissions and is idempotent. Codex uses a native `apply_patch` matcher and resolves scripts
+from the active Git root, including when the session starts in a subdirectory. Install at the Git
+root with Git and Node on PATH; migrate legacy absolute-path commands by reinstalling only the
+previously accepted hooks. Registration is not host trust or proof
 of dispatch: Codex requires project and definition trust in the host. Explain that step without
 granting or bypassing trust, then observe a harmless invocation before claiming the hook works.
 The export flag `--install-hooks` retains Claude as its default; use the platform installer for Codex.
@@ -362,6 +364,9 @@ Before declaring the bootstrap done:
 [ ] commands came from real manifests/scripts;
 [ ] skill roots and parity were verified;
 [ ] ephemerals pass git check-ignore;
+[ ] installed harness scripts/vendor are accounted for in the consumer's lint/format scope;
+    inspect the export preflight/receipt, preserve checks for product scripts, and run the real
+    consumer lint/format commands without auto-fix — mirror parity alone is insufficient;
 [ ] the diff contains only approved artifacts;
 ```
 

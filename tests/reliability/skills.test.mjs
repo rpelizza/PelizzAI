@@ -12,6 +12,15 @@ function fixture(t) {
   t.after(()=>rmSync(dir,{recursive:true,force:true}));
   return dir;
 }
+
+test('an invalid description does not hide an invalid core H1',t=>{
+ const dir=fixture(t);mkdirSync(join(dir,'pelizzai-core'));
+ for(const description of ['true','""','[]']) {
+  writeFileSync(join(dir,'pelizzai-core/SKILL.md'),`---\nname: pelizzai-core\ndescription: ${description}\n---\n# Wrong title\n`);
+  const result=run(dir);assert.equal(result.status,1,result.stderr);
+  assert.deepEqual(JSON.parse(result.stdout).violations.map(x=>x.rule),['description','h1-matches-name']);
+ }
+});
 test('empty skills root reports the skills-root rule',t=>{
   const result=run(fixture(t));assert.equal(result.status,1);
   assert.deepEqual(JSON.parse(result.stdout).violations.map(x=>x.rule),['skills-root']);

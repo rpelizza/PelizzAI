@@ -23,6 +23,7 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 function readStdin() {
   try {
@@ -40,6 +41,12 @@ function main() {
   } catch {
     /* fall back to process.cwd() */
   }
+  // Session cwd may be a package/subdirectory; memory belongs to the checkout root.
+  try {
+    cwd = execFileSync('git', ['rev-parse', '--show-toplevel'], {
+      cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 4000, windowsHide: true,
+    }).replace(/\r?\n$/, '') || cwd;
+  } catch { /* non-Git consumers keep their original cwd */ }
 
   const lines = [
     'PelizzAI: before answering ANYTHING, load the pelizzai-core skill and honor the 1% rule - if a skill applies (even to a trivial tweak), invoke it.',

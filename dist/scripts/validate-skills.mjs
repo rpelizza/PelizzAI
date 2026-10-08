@@ -161,9 +161,8 @@ for (const file of listSkills()) {
   const description = fm.keys.description;
   if (typeof description !== 'string' || !description.trim()) {
     violations.push({ file: name, rule: 'description', detail: 'must be a non-empty string' });
-    continue;
   }
-  if (description.length > spec.descriptionMaxChars) {
+  if (typeof description === 'string' && description.length > spec.descriptionMaxChars) {
     violations.push({
       file: name,
       rule: 'description-length',
@@ -187,7 +186,7 @@ for (const file of listSkills()) {
     });
   }
 
-  if (spec.descriptionForbidsAngleBrackets && /[<>]/.test(description)) {
+  if (typeof description === 'string' && spec.descriptionForbidsAngleBrackets && /[<>]/.test(description)) {
     const found = description.match(/[^\s]*[<>][^\s]*/)?.[0] ?? '';
     violations.push({ file: name, rule: 'description-angle-brackets', detail: found });
   }
